@@ -1,0 +1,6 @@
+.vscode/.ropeproject/**
+.vscode/tags
+**/__pycache__/**
+*.egg-info
+cov.xml
+.coverage

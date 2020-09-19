@@ -1,0 +1,38 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Install package in editable mode",
+            "type": "shell",
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "command": "pip3 install -e .",
+            "problemMatcher": []
+        },
+        {
+            "label": "Install dev and test dependencies",
+            "type": "shell",
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "command": "${config:python.pythonPath} -m pip install --upgrade pip && pip install -r test/requirements.txt",
+            "problemMatcher": []
+        },
+        {
+            "label": "CompileGui",
+            "type": "shell",
+            "command": "${workspaceRoot}/script/CompileGui.sh",
+            "problemMatcher": [],
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+    ]
+}

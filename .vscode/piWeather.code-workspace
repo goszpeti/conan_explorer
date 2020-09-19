@@ -1,0 +1,54 @@
+{
+    "folders": [
+        {
+            "path": ".."
+        }
+    ],
+    "extensions": {
+        "recommendations": [
+            "zhoufeng.pyqt-integration"
+        ]
+    },
+    "settings": {
+        "pyqt-integration.pyuic.compile.filepath": "${ui_name}_ui.py",
+        "python.formatting.provider": "autopep8",
+        "python.formatting.autopep8Args": [
+            "--max-line-length=110"
+        ],
+        "python.testing.unittestArgs": [
+            "-v",
+            "-s",
+            "./test",
+            "-p",
+            "*test*.py"
+        ],
+        "editor.formatOnPaste": true,
+        "git.autofetch": true,
+        "python.linting.pylintEnabled": true,
+        "python.linting.enabled": true,
+        "pyqt-integration.qtdesigner.path": "pyqt5designer",
+        "python.linting.lintOnSave": true,
+        "python.linting.pylintUseMinimalCheckers": false,
+        "python.linting.pylintCategorySeverity.refactor": "Information",
+        "python.testing.pytestEnabled": true,
+        "coverage-gutters.showLineCoverage": true,
+        "coverage-gutters.showRulerCoverage": true,
+        "python.testing.pytestArgs": [
+             "-v",
+             "--cov-report=xml:cov.xml",
+             "--cov-report=html",
+             "--cov-report=term",
+             "--cov=app_grid_conan",
+             "--cov-append",
+             "--cov-branch",
+             "--capture=no", // print output
+             "--junit-xml=${workspaceFolder}/result.xml",
+             //"--no-cov" // no coverage while debugging
+        ],
+        "python.linting.pylintArgs": [
+            "--init-hook",
+            "import sys;sys.path.append('${workspaceFolder}/test/mock/');sys.path.append('${workspaceFolder}/src/')"
+        ],
+        "python.pythonPath": "python3",
+    }
+}

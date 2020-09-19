@@ -1,0 +1,15 @@
+{
+    "tabs": [
+        {
+            "name": "Basics",
+            "apps": [
+                {
+                    "name": "App1",
+                    "package_id": "app1/1.0.0@user/stable",
+                    "executable": "bin/app.exe",
+                    "icon": "None"
+                }
+            ]
+        }
+    ]
+}
