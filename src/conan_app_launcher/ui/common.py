@@ -10,10 +10,10 @@
 
 # from PyQt5 import QtCore, QtGui, QtSvg, QtWidgets
 
-# import app_grid_conan.config as config
-# from app_grid_conan.config import FONT_NAME, PROG_NAME
-# from app_grid_conan.resources import get_rsc_file
-# from app_grid_conan.settings import LANG, LANG_ENGLISH, LANG_GERMAN
+# import conan_app_launcher.config as config
+# from conan_app_launcher.config import FONT_NAME, PROG_NAME
+# from conan_app_launcher.resources import get_rsc_file
+# from conan_app_launcher.settings import LANG, LANG_ENGLISH, LANG_GERMAN
 
 # logger = logging.getLogger(PROG_NAME)
 
@@ -30,7 +30,7 @@
 #     if settings.get(LANG) == LANG_ENGLISH:
 #         if not config.translator:
 #             config.translator = QtCore.QTranslator(qt_app)
-#         english_tr_file = config.base_path / "app_grid_conan/ui/qt/english.qm"
+#         english_tr_file = config.base_path / "conan_app_launcher/ui/qt/english.qm"
 #         if not english_tr_file.exists():
 #             logger.error("Cannot find %s translation file.", str(english_tr_file))
 

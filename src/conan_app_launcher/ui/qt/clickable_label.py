@@ -3,7 +3,7 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 Qt = QtCore.Qt
 from pathlib import Path
-from app_grid_conan.config import ICON_SIZE
+from conan_app_launcher.config import ICON_SIZE
 
 class ClickableLabel(QtWidgets.QLabel, QtWidgets.QPushButton):
     """ Qt label, which can react on a mouse click """

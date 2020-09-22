@@ -7,7 +7,18 @@
                     "name": "App1",
                     "package_id": "app1/1.0.0@user/stable",
                     "executable": "bin/app.exe",
-                    "icon": "None"
+                    "icon": "icon.png"
+                }
+            ]
+        },
+        {
+            "name": "Extra",
+            "apps": [
+                {
+                    "name": "App2",
+                    "package_id": "app1/1.0.0@user/stable",
+                    "executable": "bin/app2.exe",
+                    "icon": "//myicon.png"
                 }
             ]
         }

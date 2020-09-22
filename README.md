@@ -13,3 +13,4 @@ Toolchain
 ---------
 
 This project uses Python with Qt as a frontend using the PyQt integration.
+The IDE integration is done for VsCode and the automation is written for Linux.

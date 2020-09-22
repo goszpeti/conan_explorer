@@ -3,12 +3,13 @@ import time
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from app_grid_conan import config
-from app_grid_conan.logger import Logger
-from app_grid_conan.ui import common
-from app_grid_conan.ui.qt import app_grid
+from conan_app_launcher import config
+from conan_app_launcher.logger import Logger
+from conan_app_launcher.ui import common
+from conan_app_launcher.ui.qt import app_grid
 from .qt.clickable_label import ClickableLabel
-from app_grid_conan import __version__ as version
+from conan_app_launcher.layout_file import parse_layout_file, AppEntry
+from conan_app_launcher import __version__ as version
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -36,37 +37,40 @@ class AboutDialog(QtWidgets.QDialog):
         self.setLayout(self.layout)
 
 
-class AppEntry(QtWidgets.QVBoxLayout):
+class AppUiEntry(QtWidgets.QVBoxLayout):
 
-        def __init__(self, parameter_list):
+        def __init__(self, parent:QtWidgets.QTabWidget, app:AppEntry):
+            super().__init__()
             self.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
-            self.app_button = ClickableLabel(self.gridLayoutWidget)
+            self.app_button = ClickableLabel(parent)
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHorizontalStretch(0)
             sizePolicy.setVerticalStretch(0)
             sizePolicy.setHeightForWidth(self.app_button.sizePolicy().hasHeightForWidth())
             self.app_button.setSizePolicy(sizePolicy)
-            self.app_button.setText("")
             self.app_button.setTextFormat(QtCore.Qt.AutoText)
-            self.app_button.setPixmap(QtGui.QPixmap("./icon.png"))
+            self.app_button.setPixmap(QtGui.QPixmap(str(app.icon)).scaled(64, 64, transformMode=Qt.SmoothTransformation))
             self.app_button.setScaledContents(False)
             self.app_button.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
-            self.app_button.setObjectName("app_button")
+            self.app_button.setToolTip(app.package_id.full_repr())
             self.addWidget(self.app_button)
-            self.app_name = QtWidgets.QLabel(self.gridLayoutWidget)
+            self.app_name = QtWidgets.QLabel(parent)
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHorizontalStretch(0)
             sizePolicy.setVerticalStretch(0)
             sizePolicy.setHeightForWidth(self.app_name.sizePolicy().hasHeightForWidth())
             self.app_name.setSizePolicy(sizePolicy)
             self.app_name.setAlignment(QtCore.Qt.AlignCenter)
-            self.app_name.setObjectName("app_name")
             self.addWidget(self.app_name)
-            self.app_version_cbox = QtWidgets.QComboBox(self.gridLayoutWidget)
-            self.app_version_cbox.setObjectName("app_version_cbox")
-            self.app_version_cbox.addItem("")
+            self.app_name.setText(app.name)
+            self.app_version_cbox = QtWidgets.QComboBox(parent)
+            self.app_version_cbox.addItem(app.package_id.version)
+            #TODO
+            self.app_version_cbox.setDisabled(True)
             self.addWidget(self.app_version_cbox)
 
+class TabUiGrid():
+    pass
 
 class MainUi(QtCore.QObject):
     """ Base class of the main qt ui. Holds all the SubUi elements. """
@@ -85,16 +89,18 @@ class MainUi(QtCore.QObject):
         self._logger.info("Start")
         about_dialog = AboutDialog(self._qt_root_obj)
         self._ui.menu_about_action.triggered.connect(about_dialog.show)
-
-        self._ui.tab1_grid_layout.itemAt(1)
-
-        # initial scaling
-        #common.scale_gui_elements(self._qt_root_obj, self._settings.get(FONT_SCALING))
-       # self._ui.label_2.setPixmap(QtGui.QPixmap(str(config.base_path / "app_grid_conan" /
-        #                                             "icon.png")).scaled(64, 64, transformMode=Qt.SmoothTransformation))
-        #self._ui.label_8.setPixmap(QtGui.QPixmap(str(config.base_path / "app_grid_conan" /
-        #                                             "icon.png")).scaled(64, 64, transformMode=Qt.SmoothTransformation))
-        
+        self._tabs = parse_layout_file(config.config_path)
+        if self._tabs:
+            for tab in self._tabs:
+                self._ui.tabs.addTab()
+                pass
+            row = 0
+            column = 0
+            for app in self._tabs[0].get_app_entries():
+                # add in order of occurence
+                self._ui.tab1_grid_layout.addLayout(AppUiEntry(self._ui.gridLayoutWidget, app), row, column)
+                row += 1
+                column += 1
         # connect buttons
 
         # self._ui.options_button.clicked.connect(self.show_options_window)

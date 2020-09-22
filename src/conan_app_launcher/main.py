@@ -11,12 +11,10 @@ from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from app_grid_conan import __version__ as AGC_VERSION
-from app_grid_conan import config
-from app_grid_conan.logger import Logger
-from app_grid_conan.ui import main_ui, qt
-from app_grid_conan.settings.settings import Settings
-from app_grid_conan.grid_file import GridFile
+from conan_app_launcher import __version__ as AGC_VERSION
+from conan_app_launcher import config
+from conan_app_launcher.logger import Logger
+from conan_app_launcher.ui import main_ui, qt
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -32,7 +30,6 @@ def main(settings_path: Path = config.base_path):
 
     handle_cmd_args()
 
-    settings = Settings(ini_folder=settings_path)
     # Set up global Qt Application instance
 
     # apply Qt attributes (only at init possible)
@@ -43,12 +40,9 @@ def main(settings_path: Path = config.base_path):
     config.qt_app = QtWidgets.QApplication([])
     config.qt_app.setWindowIcon(QtGui.QIcon(str(Path("./icon.png"))))
 
-    gr = GridFile(config.config_path)
-
     # main_ui must be held in this context, otherwise the gc will destroy the gui
     app_main_ui = main_ui.MainUi()
     app_main_ui.qt_root_obj.show()
-
 
     logger = Logger()
     try:
@@ -69,11 +63,12 @@ def handle_cmd_args():
     parser.add_argument("-f", "--file",
                     help='config json')
     args = parser.parse_args()
-    config.config_path = Path(args.file).resolve()
-    if not config.config_path.exists():
-        logger = Logger()
-        logger.error("Cannot find config file %s", config.config_path)
-        quit(-1)
+    if args.file:
+        config.config_path = Path(args.file).resolve()
+        if not config.config_path.exists():
+            logger = Logger()
+            logger.error("Cannot find config file %s", config.config_path)
+            quit(-1)
 
 if __name__ == "__main__":
     main()

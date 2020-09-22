@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/peter/Repos/app_grid_conan/src/app_grid_conan/ui/qt/app_grid.ui'
+# Form implementation generated from reading ui file '/home/peter/Repos/conan_app_launcher/src/conan_app_launcher/ui/qt/app_grid.ui'
 #
 # Created by: PyQt5 UI code generator 5.12.3
 #
@@ -45,7 +45,7 @@ class Ui_MainWindow(object):
         self.tab_scroll_area.setAlignment(QtCore.Qt.AlignCenter)
         self.tab_scroll_area.setObjectName("tab_scroll_area")
         self.tab_scroll_area_widgets = QtWidgets.QWidget()
-        self.tab_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 752, 439))
+        self.tab_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 755, 439))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -65,32 +65,6 @@ class Ui_MainWindow(object):
         self.app_layout = QtWidgets.QVBoxLayout()
         self.app_layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         self.app_layout.setObjectName("app_layout")
-        self.app_button = ClickableLabel(self.gridLayoutWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.app_button.sizePolicy().hasHeightForWidth())
-        self.app_button.setSizePolicy(sizePolicy)
-        self.app_button.setText("")
-        self.app_button.setTextFormat(QtCore.Qt.AutoText)
-        self.app_button.setPixmap(QtGui.QPixmap("../Users/goszp/Downloads/Icon.png"))
-        self.app_button.setScaledContents(False)
-        self.app_button.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
-        self.app_button.setObjectName("app_button")
-        self.app_layout.addWidget(self.app_button)
-        self.app_name = QtWidgets.QLabel(self.gridLayoutWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.app_name.sizePolicy().hasHeightForWidth())
-        self.app_name.setSizePolicy(sizePolicy)
-        self.app_name.setAlignment(QtCore.Qt.AlignCenter)
-        self.app_name.setObjectName("app_name")
-        self.app_layout.addWidget(self.app_name)
-        self.app_version_cbox = QtWidgets.QComboBox(self.gridLayoutWidget)
-        self.app_version_cbox.setObjectName("app_version_cbox")
-        self.app_version_cbox.addItem("")
-        self.app_layout.addWidget(self.app_version_cbox)
         self.tab1_grid_layout.addLayout(self.app_layout, 0, 0, 1, 1)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -118,7 +92,7 @@ class Ui_MainWindow(object):
         self.tabs.addTab(self.tab_1, "")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menu_bar = QtWidgets.QMenuBar(MainWindow)
-        self.menu_bar.setGeometry(QtCore.QRect(0, 0, 798, 22))
+        self.menu_bar.setGeometry(QtCore.QRect(0, 0, 798, 20))
         self.menu_bar.setObjectName("menu_bar")
         self.menu_help = QtWidgets.QMenu(self.menu_bar)
         self.menu_help.setObjectName("menu_help")
@@ -141,11 +115,8 @@ class Ui_MainWindow(object):
         self.console.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
-        self.app_name.setText(_translate("MainWindow", "App Name"))
-        self.app_version_cbox.setItemText(0, _translate("MainWindow", "latest"))
+"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\"><br /></p></body></html>"))
         self.tabs.setTabText(self.tabs.indexOf(self.tab_1), _translate("MainWindow", "Basics"))
         self.menu_help.setTitle(_translate("MainWindow", "Help"))
         self.menu_about_action.setText(_translate("MainWindow", "About"))
-from app_grid_conan.ui.qt.clickable_label import ClickableLabel

@@ -1,8 +1,7 @@
 import logging
-import sys
 
 from PyQt5 import QtCore, QtWidgets
-from app_grid_conan.config import DEBUG_LEVEL, PROG_NAME, base_path
+from conan_app_launcher.config import DEBUG_LEVEL, PROG_NAME, base_path
 
 
 class QtLogHandler(logging.Handler):
@@ -45,18 +44,18 @@ class Logger(logging.Logger):
         if DEBUG_LEVEL > 0:
             log_debug_level = logging.DEBUG
 
-        file_handler = logging.FileHandler(
-            str(base_path / "app_grid_conan.log"))
-        file_handler.setLevel(log_debug_level)
+        #file_handler = logging.FileHandler(
+        #    str(base_path / "conan_app_launcher.log"))
+        #file_handler.setLevel(log_debug_level)
 
         console_handler = logging.StreamHandler()
         console_handler.setLevel(log_debug_level)
 
         console_handler.setFormatter(cls.formatter)
-        file_handler.setFormatter(cls.formatter)
+        #file_handler.setFormatter(cls.formatter)
 
         logger.addHandler(console_handler)
-        logger.addHandler(file_handler)
+        #logger.addHandler(file_handler)
 
         # otherwise messages appear twice
         logger.propagate = False

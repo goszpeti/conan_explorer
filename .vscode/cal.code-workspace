@@ -10,7 +10,7 @@
         ]
     },
     "settings": {
-        "pyqt-integration.pyuic.compile.filepath": "${ui_name}_ui.py",
+        "pyqt-integration.pyuic.compile.filepath": "${ui_name}.py",
         "python.formatting.provider": "autopep8",
         "python.formatting.autopep8Args": [
             "--max-line-length=110"
@@ -26,7 +26,7 @@
         "git.autofetch": true,
         "python.linting.pylintEnabled": true,
         "python.linting.enabled": true,
-        "pyqt-integration.qtdesigner.path": "pyqt5designer",
+        "pyqt-integration.qtdesigner.path": "designer",
         "python.linting.lintOnSave": true,
         "python.linting.pylintUseMinimalCheckers": false,
         "python.linting.pylintCategorySeverity.refactor": "Information",
@@ -38,7 +38,7 @@
              "--cov-report=xml:cov.xml",
              "--cov-report=html",
              "--cov-report=term",
-             "--cov=app_grid_conan",
+             "--cov=conan_app_launcher",
              "--cov-append",
              "--cov-branch",
              "--capture=no", // print output
