@@ -52,7 +52,7 @@ class AppEntry():
             self.icon = Path(icon)
         if not self.icon.is_file():
             Logger().error("Icon %s for %s not found", str(self.icon), name)
-            self.icon = base_path / "conan_app_launcher" / "icon.png"
+            self.icon = base_path / "ui" / "qt" / "default_app_icon.png"
         Logger().debug("Adding entry %s, %s, %s, %s", name, package_id, str(self.executable), str(self.icon))
 
 

@@ -27,7 +27,7 @@ class AboutDialog(QtWidgets.QDialog):
         QBtn = QtWidgets.QDialogButtonBox.Ok
         self._text = QtWidgets.QLabel(self)
         self._text.setText("Conan App Launcher\n" + version + "\n" +
-                          "Copyright (C), 2020, Péter Gosztolya")
+                           "Copyright (C), 2020, Péter Gosztolya")
 
         self._button_box = QtWidgets.QDialogButtonBox(QBtn)
         self._button_box.accepted.connect(self.accept)
@@ -41,7 +41,7 @@ class AboutDialog(QtWidgets.QDialog):
 
 class AppUiEntry(QtWidgets.QVBoxLayout):
 
-    def __init__(self, parent:QtWidgets.QTabWidget, app:AppEntry):
+    def __init__(self, parent: QtWidgets.QTabWidget, app: AppEntry):
         super().__init__()
         self.app = app
         self.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
@@ -52,10 +52,12 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.app_button.sizePolicy().hasHeightForWidth())
         self.app_button.setSizePolicy(sizePolicy)
+        #self.app_button.setMaximumSize(QtCore.QSize(64, 64))
         self.app_button.setTextFormat(QtCore.Qt.AutoText)
-        self.app_button.setPixmap(QtGui.QPixmap(str(app.icon)).scaled(64, 64, transformMode=Qt.SmoothTransformation))
+        self.app_button.setPixmap(QtGui.QPixmap(str(app.icon)).scaled(
+            64, 64, transformMode=Qt.SmoothTransformation))
         self.app_button.setScaledContents(False)
-        self.app_button.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.app_button.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self.app_button.setToolTip(app.package_id.full_repr())
         self.addWidget(self.app_button)
         self.app_name = QtWidgets.QLabel(parent)
@@ -80,17 +82,17 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         [deps_graph, conanfile] = conan_api.ConanAPIV1.info(conan, self.app.package_id.full_repr())
         # TODO: only for conan 1.16 - 1.18
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
-        output = output[0] # can have only one element
+        output = output[0]  # can have only one element
         package_folder = ""
         if output.get("binary") == "Download":
             remotes = cache.registry.load_remotes()
             for [remote, _] in remotes.items():
                 if remote == "conan-center":
-                    continue # no third party packages
+                    continue  # no third party packages
                 try:
                     search_results = conan_api.ConanAPIV1.search_packages(
                         conan, self.app.package_id.full_repr(), remote_name=remote)
-                except: # next
+                except:  # next
                     continue
                 # get options and settings
                 sets = None
@@ -102,12 +104,12 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
                             sets = package.get("settings")
                             if (sets.get("os") == default_settings.get("os") or
                                 default_settings.get("os_build") == sets.get("os_build")
-                                and 
+                                and
                                 sets.get("arch") == default_settings.get("arch") or
                                     sets.get("arch_build") == default_settings.get("arch_build")):
-                                    break
+                                break
                 settings_list = []
-                for name,value in sets.items():
+                for name, value in sets.items():
                     settings_list.append(name + "=" + value)
                 Logger().info("Installing %s", str(self.app.package_id))
                 res = conan_api.ConanAPIV1.install_reference(
@@ -119,21 +121,33 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         # get os specififc extension
         if platform.system == "Windows":
             self.app.executable = self.app.executable + ".exe"
-        full_path=Path(package_folder / self.app.executable)
+        full_path = Path(package_folder / self.app.executable)
         if not full_path.is_file():
             pass
             # TODO log
         else:
             os.system(full_path)
 
+
 class TabUiGrid(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.apps = []  # AppUiEntry
+
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
+        self.setSizePolicy(sizePolicy)
+        self.setGeometry(QtCore.QRect(0, 0, 811, 439))
+        #self.setObjectName("tab_1")
+      
+        #self.verticalLayout_9.setObjectName("verticalLayout_9")
+        self.verticalLayout_8 = QtWidgets.QVBoxLayout(self)
+        self.verticalLayout_8.setContentsMargins(0, 0, 0, 0)
+        #self.verticalLayout_8.setObjectName("verticalLayout_8")
         self.tab_scroll_area = QtWidgets.QScrollArea(self)
-        self.tab_scroll_area.setGeometry(QtCore.QRect(0, 0, 771, 441))
-        self.tab_scroll_area.setGeometry(QtCore.QRect(0, 0, 771, 441))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tab_scroll_area.sizePolicy().hasHeightForWidth())
@@ -142,10 +156,11 @@ class TabUiGrid(QtWidgets.QWidget):
         self.tab_scroll_area.setWidgetResizable(True)
         self.tab_scroll_area.setAlignment(QtCore.Qt.AlignCenter)
         #self.tab_scroll_area.setObjectName("tab_scroll_area")
-        self.tab_scroll_area_widgets = QtWidgets.QWidget()
-        self.tab_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 755, 439))
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.tab_scroll_area_widgets = QtWidgets.QWidget(self.tab_scroll_area)
+        self.tab_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 811, 439))
+        self.verticalLayout_9 = QtWidgets.QVBoxLayout(self.tab_scroll_area_widgets)
+        self.verticalLayout_9.setContentsMargins(0, 0, 0, 0)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tab_scroll_area_widgets.sizePolicy().hasHeightForWidth())
@@ -153,14 +168,16 @@ class TabUiGrid(QtWidgets.QWidget):
         self.tab_scroll_area_widgets.setMinimumSize(QtCore.QSize(752, 359))
         self.tab_scroll_area_widgets.setBaseSize(QtCore.QSize(752, 359))
         self.tab_scroll_area_widgets.setLayoutDirection(QtCore.Qt.LeftToRight)
-        #self.tab_scroll_area_widgets.setObjectName("tab_scroll_area_widgets")
-        self.gridLayoutWidget = QtWidgets.QWidget(self.tab_scroll_area_widgets)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(0, 0, 761, 445))
-        #self.gridLayoutWidget.setObjectName("gridLayoutWidget")
-        self.tab_grid_layout = QtWidgets.QGridLayout(self.gridLayoutWidget)
-        self.tab_grid_layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
-        self.tab_grid_layout.setContentsMargins(0, 0, 0, 0)
-        #self.tab_grid_layout.setObjectName("tab_grid_layout")
+
+        self.tab_grid_layout = QtWidgets.QGridLayout(self)
+        self.tab_grid_layout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
+        self.tab_grid_layout.setColumnMinimumWidth(0, 202)
+        self.tab_grid_layout.setColumnMinimumWidth(1, 202)
+        self.tab_grid_layout.setColumnMinimumWidth(2, 202)
+        self.tab_grid_layout.setColumnMinimumWidth(3, 202)
+        self.tab_grid_layout.setRowMinimumHeight(0, 146)
+        self.tab_grid_layout.setRowMinimumHeight(1, 146)
+        self.tab_grid_layout.setRowMinimumHeight(2, 146)
         self.tab_grid_layout.setColumnStretch(0, 1)
         self.tab_grid_layout.setColumnStretch(1, 1)
         self.tab_grid_layout.setColumnStretch(2, 1)
@@ -168,7 +185,12 @@ class TabUiGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setRowStretch(0, 1)
         self.tab_grid_layout.setRowStretch(1, 1)
         self.tab_grid_layout.setRowStretch(2, 1)
+
+        self.verticalLayout_9.addLayout(self.tab_grid_layout)
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
+        self.verticalLayout_8.addWidget(self.tab_scroll_area)
+        #self.tabs.addTab(self, "")
+
 
 class MainUi(QtCore.QObject):
     """ Instantiates MainWindow and holds all UI objects """
@@ -192,24 +214,33 @@ class MainUi(QtCore.QObject):
             tab = None
             for tab_info in self._tab_info:
                 tab = TabUiGrid()
-                row = 0 # 3
-                column = 0 # 4
+                row = 0  # 3
+                column = 0  # 4
                 for app_info in tab_info.get_app_entries():
 
                     # add in order of occurence
-                    app = AppUiEntry(tab.gridLayoutWidget, app_info)
+                    app = AppUiEntry(tab.tab_scroll_area_widgets, app_info)
                     tab.apps.append(app)
                     tab.tab_grid_layout.addLayout(app, row, column, 1, 1)
-                    #self._ui.tab1_grid_layout.addLayout(AppUiEntry(
-                    #    self._ui.gridLayoutWidget, app_info), row, column)
+                    self._ui.tab1_grid_layout.addLayout(AppUiEntry(
+                        self._ui.tab_scroll_area_widgets, app_info), row, column)
                     column += 1
                     if column == 4:
                         column = 0
                         row += 1
                 self.tabs.append(tab)
                 self._ui.tabs.addTab(tab, tab_info.name)
-        a = self.ui.tabs.widget(1)
         self.init_gui()
+
+    @property
+    def ui(self):
+        """ Contains all gui objects defined in Qt .ui file. Subclasses need access to this. """
+        return self._ui
+
+    @property
+    def qt_root_obj(self):
+        """ The base class of this ui. Is needed to pass as parent ot call show and hide. """
+        return self._qt_root_obj
 
     def init_gui(self):
         """ Start the thread to asynchronously load the gui. """
@@ -220,4 +251,3 @@ class MainUi(QtCore.QObject):
     def _init_gui(self):
         """ Call all conan functions """
         self.ready = True
-

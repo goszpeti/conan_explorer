@@ -2,7 +2,6 @@
 Entry module of Conan App Launcher
 Sets up cmd arguments, config file and starts the gui
 """
-
 import argparse
 import traceback
 import sys
@@ -10,18 +9,27 @@ from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from conan_app_launcher import __version__ as AGC_VERSION
+from conan_app_launcher import __version__ as VERSION
 from conan_app_launcher import config
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui import main_ui
 
+
+try:
+    # this is a workaround for windows, so that on the taskbar the 
+    # correct icon will bes shown (and not the default python icon)
+    from PyQt5.QtWinExtras import QtWin
+    MYAPPID = 'ConanAppLauncher.' + VERSION
+    QtWin.setCurrentProcessExplicitAppUserModelID(MYAPPID)
+except ImportError:
+    pass
+
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
-
 def main(settings_path: Path = config.base_path):
     """
-    Main function, setting up Qt application
+    Start the Qt application
     """
 
     handle_cmd_args()
@@ -32,7 +40,10 @@ def main(settings_path: Path = config.base_path):
 
     # start Qt app and ui
     config.qt_app = QtWidgets.QApplication([])
-    config.qt_app.setWindowIcon(QtGui.QIcon(str(Path("./icon.png"))))
+    icon = QtGui.QIcon()
+    icon.addPixmap(QtGui.QPixmap(str(config.base_path / "icon.png")).scaled(
+        64, 64, transformMode=Qt.SmoothTransformation), QtGui.QIcon.Normal, QtGui.QIcon.On)
+    config.qt_app.setWindowIcon(icon)
 
     # main_ui must be held in this context, otherwise the gc will destroy the gui
     app_main_ui = main_ui.MainUi()
@@ -53,7 +64,7 @@ def handle_cmd_args():
     parser = argparse.ArgumentParser(
         prog="App Grid for Conan", description="App Grid Conan commandline interface")
     parser.add_argument("-v", "--version", action="version",
-                        version=AGC_VERSION)
+                        version=VERSION)
     parser.add_argument("-f", "--file",
                     help='config json')
     args = parser.parse_args()

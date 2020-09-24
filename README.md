@@ -1,4 +1,4 @@
-# <img src="./doc/icon.png" width="128">
+# <img src="./src/conan_app_launcher/icon.png" width="128">
 
 Conan App-Launcher
 =====================

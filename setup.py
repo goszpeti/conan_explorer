@@ -24,7 +24,8 @@ REQUIRES_PYTHON = '>=3.6.0'
 # What packages are required for this module to be executed?
 REQUIRED = [
     "PyQt5>=5.12.3",
-    "conan>=1.16.1"
+    "conan>=1.16.1",
+    "jsonschema>=3.2.0",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

@@ -16,7 +16,7 @@ DEBUG_LEVEL = 0
 ICON_SIZE = 64
 
 # paths to find folders
-base_path: Path = Path(__file__).absolute().parent.parent
+base_path: Path = Path(__file__).absolute().parent
 config_path = Path()
 
 # qt_application instance
