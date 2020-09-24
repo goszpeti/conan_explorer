@@ -6,33 +6,28 @@
         {
             "label": "Install package in editable mode",
             "type": "shell",
+            "windows":{"command": "pip"},
+            "linux": {"command": "pip3 "},
             //"runOptions": {
             //    "runOn": "folderOpen"
             //},
-            "command": "pip3 install -e .",
+            "args": ["install", "-e", "."],
             "problemMatcher": []
         },
         {
             "label": "Install dev and test dependencies",
             "type": "shell",
+            "windows": {
+                "command": "python"
+            },
+            "linux": {
+                "command": "python3 "
+            },
             //"runOptions": {
             //    "runOn": "folderOpen"
             //},
-            "command": "${config:python.pythonPath} -m pip install --upgrade pip && pip install -r test/requirements.txt",
+            "args": ["-m", "pip", "install", "--upgrade", "pip", "&&", "pip", "install", "-r", "test/requirements.txt"],
             "problemMatcher": []
-        },
-        {
-            "label": "CompileGui",
-            "type": "shell",
-            "command": "${workspaceRoot}/script/CompileGui.sh",
-            "problemMatcher": [],
-            //"runOptions": {
-            //    "runOn": "folderOpen"
-            //},
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
         },
     ]
 }

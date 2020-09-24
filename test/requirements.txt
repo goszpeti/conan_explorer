@@ -1,0 +1,7 @@
+# python requirements for the tests for CT
+pylint
+mypy
+rope
+pytest
+pytest-cov
+pytest-mock
