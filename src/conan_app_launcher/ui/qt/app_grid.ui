@@ -11,16 +11,16 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Conan App Launcher</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QScrollArea" name="console_scroll_area">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>480</y>
+      <y>470</y>
       <width>771</width>
-      <height>111</height>
+      <height>121</height>
      </rect>
     </property>
     <property name="widgetResizable">
@@ -32,7 +32,7 @@
        <x>0</x>
        <y>0</y>
        <width>769</width>
-       <height>109</height>
+       <height>119</height>
       </rect>
      </property>
      <widget class="QTextBrowser" name="console">
@@ -41,7 +41,7 @@
         <x>0</x>
         <y>0</y>
         <width>771</width>
-        <height>161</height>
+        <height>121</height>
        </rect>
       </property>
       <property name="readOnly">
@@ -141,7 +141,7 @@ p, li { white-space: pre-wrap; }
           <enum>QLayout::SetMinAndMaxSize</enum>
          </property>
          <item row="0" column="0">
-          <layout class="QVBoxLayout" name="app_layout" stretch="">
+          <layout class="QVBoxLayout" name="app_layout">
            <property name="sizeConstraint">
             <enum>QLayout::SetFixedSize</enum>
            </property>

@@ -5,7 +5,9 @@ Qt = QtCore.Qt
 from pathlib import Path
 from conan_app_launcher.config import ICON_SIZE
 
-class ClickableLabel(QtWidgets.QLabel, QtWidgets.QPushButton):
+class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
+    clicked = QtCore.pyqtSignal() # needs to be a class variable (limitation of Qt)
+
     """ Qt label, which can react on a mouse click """
     # overrides base QT behaviour. Needs to be a class variable.
     def __init__(self, parent, image:Path=None, flags=QtCore.Qt.WindowFlags()):
@@ -30,9 +32,11 @@ class ClickableLabel(QtWidgets.QLabel, QtWidgets.QPushButton):
         # painter.end()
         smaller_size = ICON_SIZE-(ICON_SIZE/32)
         self.setPixmap(self.pixmap().scaled(smaller_size, smaller_size, transformMode=Qt.SmoothTransformation))
+       
+
 
     def mouseReleaseEvent(self, event):
         super().mouseReleaseEvent(event)
         self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
-
+        self.clicked.emit()
 

@@ -5,9 +5,15 @@
             "apps": [
                 {
                     "name": "App1",
-                    "package_id": "app1/1.0.0@user/stable",
-                    "executable": "bin/app.exe",
+                    "package_id": "m4_installer/1.4.18@bincrafters/stable",
+                    "executable": "bin/m4",
                     "icon": "icon.png"
+                },
+                {
+                    "name": "App2",
+                    "package_id": "boost_functional/1.69.0@bincrafters/stable",
+                    "executable": "bin/app2",
+                    "icon": ""
                 }
             ]
         },

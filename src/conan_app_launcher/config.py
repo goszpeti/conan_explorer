@@ -1,6 +1,5 @@
 """
 Contains global constants and basic/ui variables.
-Note: sensors where moved to component handler in base.
 """
 
 from pathlib import Path

@@ -7,13 +7,13 @@ from conan_app_launcher.config import DEBUG_LEVEL, PROG_NAME, base_path
 class QtLogHandler(logging.Handler):
 
     def __init__(self, widget:QtWidgets.QWidget):
-        super().__init__(logging.INFO)
+        super().__init__(logging.DEBUG)
         self._widget = widget
 
     def emit(self, record):
         record = self.format(record)
         if record:
-            self._widget.append('%s\n' % record)
+            self._widget.append(record)
 
 
 class Logger(logging.Logger):
@@ -22,7 +22,8 @@ class Logger(logging.Logger):
     """
     _instance = None
     formatter = logging.Formatter(
-            r"%(asctime)s :: %(levelname)s :: %(message)s")
+        # %(asctime)s ::
+            r"%(levelname)s :: %(message)s")
 
     def __new__(cls):
         if cls._instance is None:
@@ -37,25 +38,18 @@ class Logger(logging.Logger):
         root = logging.getLogger()
         root.setLevel(logging.ERROR)
 
-        # set up file logger - log everything in file and stdio
         logger = logging.getLogger(PROG_NAME)
         logger.setLevel(logging.DEBUG)
         log_debug_level = logging.INFO
         if DEBUG_LEVEL > 0:
             log_debug_level = logging.DEBUG
 
-        #file_handler = logging.FileHandler(
-        #    str(base_path / "conan_app_launcher.log"))
-        #file_handler.setLevel(log_debug_level)
-
         console_handler = logging.StreamHandler()
         console_handler.setLevel(log_debug_level)
 
         console_handler.setFormatter(cls.formatter)
-        #file_handler.setFormatter(cls.formatter)
 
         logger.addHandler(console_handler)
-        #logger.addHandler(file_handler)
 
         # otherwise messages appear twice
         logger.propagate = False

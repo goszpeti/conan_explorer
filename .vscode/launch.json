@@ -10,7 +10,7 @@
             "args": ["-f", "./test/testdata/app_config.json"],
             "console": "internalConsole",
             "subProcess": true,
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "Python: Current File",

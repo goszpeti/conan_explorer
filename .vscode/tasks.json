@@ -6,18 +6,18 @@
         {
             "label": "Install package in editable mode",
             "type": "shell",
-            "runOptions": {
-                "runOn": "folderOpen"
-            },
+            //"runOptions": {
+            //    "runOn": "folderOpen"
+            //},
             "command": "pip3 install -e .",
             "problemMatcher": []
         },
         {
             "label": "Install dev and test dependencies",
             "type": "shell",
-            "runOptions": {
-                "runOn": "folderOpen"
-            },
+            //"runOptions": {
+            //    "runOn": "folderOpen"
+            //},
             "command": "${config:python.pythonPath} -m pip install --upgrade pip && pip install -r test/requirements.txt",
             "problemMatcher": []
         },
@@ -26,9 +26,9 @@
             "type": "shell",
             "command": "${workspaceRoot}/script/CompileGui.sh",
             "problemMatcher": [],
-            "runOptions": {
-                "runOn": "folderOpen"
-            },
+            //"runOptions": {
+            //    "runOn": "folderOpen"
+            //},
             "group": {
                 "kind": "build",
                 "isDefault": true

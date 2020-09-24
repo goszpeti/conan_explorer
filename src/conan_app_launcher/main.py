@@ -1,6 +1,6 @@
 """
-Entry module of PiWheater
-Sets up cmd arguments, settings and starts the gui
+Entry module of Conan App Launcher
+Sets up cmd arguments, config file and starts the gui
 """
 
 import argparse
@@ -22,15 +22,10 @@ Qt = QtCore.Qt
 
 def main(settings_path: Path = config.base_path):
     """
-    Main function, calling setup, loading components and safe shutdown.
-    param settings_path: only used for testing
+    Main function, setting up Qt application
     """
 
-    # System is first, is_target_system is the most basic check
-
     handle_cmd_args()
-
-    # Set up global Qt Application instance
 
     # apply Qt attributes (only at init possible)
     QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)

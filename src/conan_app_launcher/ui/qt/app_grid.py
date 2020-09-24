@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/peter/Repos/conan_app_launcher/src/conan_app_launcher/ui/qt/app_grid.ui'
+# Form implementation generated from reading ui file '/home/peter/Repos/app_grid_conan/src/conan_app_launcher/ui/qt/app_grid.ui'
 #
 # Created by: PyQt5 UI code generator 5.12.3
 #
@@ -17,14 +17,14 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.console_scroll_area = QtWidgets.QScrollArea(self.centralwidget)
-        self.console_scroll_area.setGeometry(QtCore.QRect(10, 480, 771, 111))
+        self.console_scroll_area.setGeometry(QtCore.QRect(10, 470, 771, 121))
         self.console_scroll_area.setWidgetResizable(True)
         self.console_scroll_area.setObjectName("console_scroll_area")
         self.console_scroll_area_widgets = QtWidgets.QWidget()
-        self.console_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 769, 109))
+        self.console_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 769, 119))
         self.console_scroll_area_widgets.setObjectName("console_scroll_area_widgets")
         self.console = QtWidgets.QTextBrowser(self.console_scroll_area_widgets)
-        self.console.setGeometry(QtCore.QRect(0, 0, 771, 161))
+        self.console.setGeometry(QtCore.QRect(0, 0, 771, 121))
         self.console.setReadOnly(True)
         self.console.setObjectName("console")
         self.console_scroll_area.setWidget(self.console_scroll_area_widgets)
