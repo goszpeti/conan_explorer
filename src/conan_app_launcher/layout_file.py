@@ -1,12 +1,14 @@
 import json
-import jsonschema
-from conans.model.ref import ConanFileReference
-from conan_app_launcher.logger import Logger
-from conan_app_launcher.config import config_path
-from conan_app_launcher.config import base_path
 from pathlib import Path
 from typing import List
 
+import jsonschema
+from conans.model.ref import ConanFileReference
+
+from conan_app_launcher.config import base_path, config_path
+from conan_app_launcher.logger import Logger
+
+# format specifier for config file
 json_schema = {
     "type": "object",
     "tabs": [
@@ -26,6 +28,7 @@ json_schema = {
 
 
 class AppEntry():
+    """ Representation of an app entry of the config schema """
 
     def __init__(self, name, package_id:str, executable:Path, icon:str):
         self.conan_info = None
@@ -54,7 +57,7 @@ class AppEntry():
 
 
 class TabEntry():
-
+    """ Representation of a tab entry of the config schema """
     def __init__(self, name):
         self.name = name
         self._app_entries: List[AppEntry] = []

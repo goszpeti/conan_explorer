@@ -4,9 +4,8 @@ Sets up cmd arguments, config file and starts the gui
 """
 
 import argparse
-import sys
-import time
 import traceback
+import sys
 from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -14,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from conan_app_launcher import __version__ as AGC_VERSION
 from conan_app_launcher import config
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.ui import main_ui, qt
+from conan_app_launcher.ui import main_ui
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -63,7 +62,7 @@ def handle_cmd_args():
         if not config.config_path.exists():
             logger = Logger()
             logger.error("Cannot find config file %s", config.config_path)
-            quit(-1)
+            sys.exit(-1)
 
 if __name__ == "__main__":
     main()

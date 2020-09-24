@@ -1,22 +1,19 @@
-import threading
-import time
 import os
 import platform
+import threading
 from pathlib import Path
 
-from PyQt5 import QtCore, QtWidgets, QtGui
-
-from conan_app_launcher import config
-from conan_app_launcher.logger import Logger
-from conan_app_launcher.ui import common
-from conan_app_launcher.ui.qt import app_grid
-from .qt.clickable_label import AppButton
-from conan_app_launcher.layout_file import parse_layout_file, AppEntry
 from conan_app_launcher import __version__ as version
+from conan_app_launcher import config
+from conan_app_launcher.layout_file import AppEntry, parse_layout_file
+from conan_app_launcher.logger import Logger
+
 from conans.client import conan_api
 from conans.client.conan_command_output import CommandOutputer
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-
+from .qt.app_button import AppButton
+from .qt.app_grid import Ui_MainWindow
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
@@ -28,18 +25,17 @@ class AboutDialog(QtWidgets.QDialog):
         self.setModal(True)
 
         QBtn = QtWidgets.QDialogButtonBox.Ok
-        self.text = QtWidgets.QLabel(self)
-        self.text.setText("App Grid for Conan\n" + version + "\n" +
-                          "Copyright (C), 2020, Peter Gosztolya")
+        self._text = QtWidgets.QLabel(self)
+        self._text.setText("Conan App Launcher\n" + version + "\n" +
+                          "Copyright (C), 2020, Péter Gosztolya")
 
-        self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-        #  config.PROG_NAME
+        self._button_box = QtWidgets.QDialogButtonBox(QBtn)
+        self._button_box.accepted.connect(self.accept)
+        self._button_box.rejected.connect(self.reject)
 
         self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self.text)
-        self.layout.addWidget(self.buttonBox)
+        self.layout.addWidget(self._text)
+        self.layout.addWidget(self._button_box)
         self.setLayout(self.layout)
 
 
@@ -73,7 +69,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self.app_name.setText(app.name)
         self.app_version_cbox = QtWidgets.QComboBox(parent)
         self.app_version_cbox.addItem(app.package_id.version)
-        #TODO
+        # TODO unlock when version feature is implemented
         self.app_version_cbox.setDisabled(True)
         self.addWidget(self.app_version_cbox)
         self.app_button.clicked.connect(self.app_clicked)
@@ -82,6 +78,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         # get conan info TODO: cache later
         [conan, cache, user_io] = conan_api.ConanAPIV1.factory()
         [deps_graph, conanfile] = conan_api.ConanAPIV1.info(conan, self.app.package_id.full_repr())
+        # TODO: only for conan 1.16 - 1.18
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
         output = output[0] # can have only one element
         package_folder = ""
@@ -129,8 +126,6 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         else:
             os.system(full_path)
 
-
-
 class TabUiGrid(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -175,27 +170,22 @@ class TabUiGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setRowStretch(2, 1)
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
 
-
-
 class MainUi(QtCore.QObject):
-    """ Base class of the main qt ui. Holds all the SubUi elements. """
-
-    UPDATE_TIME = 1000  # microseconds
+    """ Instantiates MainWindow and holds all UI objects """
 
     def __init__(self):
         super().__init__()
         self._logger = Logger()
         self._qt_root_obj = QtWidgets.QMainWindow()
-        self._ui = app_grid.Ui_MainWindow()
+        self._ui = Ui_MainWindow()
         self._ui.setupUi(self._qt_root_obj)
 
+        # connect logger to console widget
         Logger.init_qt_logger(self._ui.console)
-        # QtLogStream().log_written.connect(self._ui.textBrowser.insertHtml)
-        self._logger.info("Start")
         about_dialog = AboutDialog(self._qt_root_obj)
         self._ui.menu_about_action.triggered.connect(about_dialog.show)
         self._tab_info = parse_layout_file(config.config_path)
-        # TODO unclean
+        # remove default tab TODO unclean in code, but nice preview in qt designer
         self._ui.tabs.removeTab(0)
         self.tabs = []
         if self._tab_info:
@@ -219,34 +209,15 @@ class MainUi(QtCore.QObject):
                 self.tabs.append(tab)
                 self._ui.tabs.addTab(tab, tab_info.name)
         a = self.ui.tabs.widget(1)
-
-        # connect buttons
-
-        # self._ui.options_button.clicked.connect(self.show_options_window)
         self.init_gui()
 
-    @property
-    def ui(self):
-        """ Contains all gui objects defined in Qt .ui file. Subclasses need access to this. """
-        return self._ui
-
-    @property
-    def qt_root_obj(self):
-        """ The base class of this ui. Is needed to pass as parent ot call show and hide. """
-        return self._qt_root_obj
-
     def init_gui(self):
-        """ Start the thread to asynchronly load the gui. """
+        """ Start the thread to asynchronously load the gui. """
         self._init_thread = threading.Thread(
             name="InitMainUI", target=self._init_gui(), daemon=True)
         self._init_thread.start()
 
     def _init_gui(self):
-        """ Retranslates, then loads all SubUi elements. """
-
+        """ Call all conan functions """
         self.ready = True
 
-    def unload_gui(self):
-        """ Deletes all SubUi elements """
-
-        self._init_thread.join()

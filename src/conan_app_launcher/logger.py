@@ -3,22 +3,9 @@ import logging
 from PyQt5 import QtCore, QtWidgets
 from conan_app_launcher.config import DEBUG_LEVEL, PROG_NAME, base_path
 
-
-class QtLogHandler(logging.Handler):
-
-    def __init__(self, widget:QtWidgets.QWidget):
-        super().__init__(logging.DEBUG)
-        self._widget = widget
-
-    def emit(self, record):
-        record = self.format(record)
-        if record:
-            self._widget.append(record)
-
-
 class Logger(logging.Logger):
     """
-    Singleton instance for the global dual logger (file/console)
+    Singleton instance for the global dual logger (Qt Widget/console)
     """
     _instance = None
     formatter = logging.Formatter(
@@ -33,7 +20,7 @@ class Logger(logging.Logger):
 
     @classmethod
     def _init_logger(cls) -> logging.Logger:
-        """ Set up format and a debug level and register loggers. """
+        """ Set up format and a debug level and register console logger. """
         # restrict root logger
         root = logging.getLogger()
         root.setLevel(logging.ERROR)
@@ -56,11 +43,29 @@ class Logger(logging.Logger):
 
         return logger
 
+    class QtLogHandler(logging.Handler):
+        """ This log handler prints to a qt widget """
+
+        def __init__(self, widget: QtWidgets.QWidget):
+            super().__init__(logging.DEBUG)
+            self._widget = widget
+
+        def emit(self, record):
+            record = self.format(record)
+            if record:
+                self._widget.append(record)
+
     @classmethod
     def init_qt_logger(cls, widget):
+        """ 
+        Rdirects the logger to QT widget.
+        Needs to be called when GUI objects are available.
+        """
         logger = cls._instance
-
-        qt_handler = QtLogHandler(widget)
+        qt_handler = Logger.QtLogHandler(widget)
+        log_debug_level = logging.INFO
+        if DEBUG_LEVEL > 0:
+            log_debug_level = logging.DEBUG
         qt_handler.setLevel(logger.level)
         qt_handler.setFormatter(cls.formatter)
         logger.addHandler(qt_handler)
