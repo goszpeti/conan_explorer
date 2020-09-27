@@ -12,7 +12,7 @@
             ],
             "console": "internalConsole",
             "subProcess": false,
-            "justMyCode": false
+            "justMyCode": true
         },
         {
             "name": "Python: Current File",

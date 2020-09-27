@@ -151,12 +151,14 @@ class MainUi(QtCore.QObject):
         self._qt_root_obj = QtWidgets.QMainWindow()
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self._qt_root_obj)
+
+        # connect logger to console widget to log possible errors at init
+        Logger.init_qt_logger(self._ui.console)
+        self._ui.console.setFontPointSize(10)
+
         self._init_thread = threading.Thread(
             name="InitMainUI", target=self._init_gui(), daemon=True)
 
-        # connect logger to console widget
-        Logger.init_qt_logger(self._ui.console)
-        self._ui.console.setFontPointSize(10)
         self._about_dialog = AboutDialog(self._qt_root_obj)
         self._ui.menu_about_action.triggered.connect(self._about_dialog.show)
 

@@ -10,24 +10,6 @@ import conan_app_launcher as this
 
 from .logger import Logger
 
-# format specifier for config file
-json_schema = {
-    "type": "object",
-    "tabs": [
-        {
-            "name": {"type": "string"},
-            "apps": [
-                {
-                    "name": {"type": "string"},
-                    "package_id": {"type": "string"},
-                    "executable": {"type": "string"},
-                    "icon": {"type": "string"}
-                }
-            ]
-        }
-    ]
-}
-
 
 class AppEntry():
     """ Representation of an app entry of the config schema """
@@ -94,7 +76,12 @@ def parse_config_file(grid_file_path) -> List[TabEntry]:
     with open(grid_file_path) as f:
         try:
             app_config = json.load(f)
-            jsonschema.validate(app_config, json_schema)
+            with open(this.base_path / "config_schema.json") as s:
+                json_schema = json.load(s)
+                jsonschema.validate(instance=app_config, schema=json_schema)
+            # TODO
+            assert app_config.get(
+                "version") == "0.1.0", "Unknown schema version '%s'" % app_config.get("version")
         except BaseException as error:
             Logger().error("Config file %s :\n%s", grid_file_path, str(error))
             return []

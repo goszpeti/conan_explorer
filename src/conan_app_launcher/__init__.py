@@ -7,7 +7,7 @@ from pathlib import Path
 from PyQt5 import QtWidgets
 
 # this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from .conan import ConanWorker
 
@@ -26,5 +26,5 @@ base_path: Path = Path(__file__).absolute().parent
 config_path = Path()
 
 # qt_application instance
-qt_app: QtWidgets.QApplication = None
-conan_worker: "ConanWorker" = None
+qt_app: Optional[QtWidgets.QApplication] = None
+conan_worker: Optional["ConanWorker"] = None

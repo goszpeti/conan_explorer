@@ -1,0 +1,63 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "app": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "package_id": {
+                    "type": "string"
+                },
+                "executable": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "package_id",
+                "executable"
+            ]
+        },
+        "tab": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "apps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/app"
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "apps"
+            ]
+        }
+    },
+    "title": "App Config",
+    "description": "Layout for conan app launcher",
+    "type": "object",
+    "properties": {
+        "version": {
+            "type": "string"
+        },
+        "tabs": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/tab"
+            }
+        }
+    },
+    "required": [
+        "version",
+        "tabs"
+    ]
+}
