@@ -124,7 +124,16 @@ class Ui_MainWindow(object):
         self.tabs.addTab(self.tab_1, "")
         self.verticalLayout.addWidget(self.tabs)
         self.console = QtWidgets.QTextBrowser(self.centralwidget)
+        self.console.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.console.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.console.setAutoFormatting(QtWidgets.QTextEdit.AutoNone)
         self.console.setReadOnly(True)
+        self.console.setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>")
+        self.console.setTabStopWidth(200)
         self.console.setObjectName("console")
         self.verticalLayout.addWidget(self.console)
         self.verticalLayout.setStretch(0, 4)
@@ -135,13 +144,19 @@ class Ui_MainWindow(object):
         self.menu_bar.setObjectName("menu_bar")
         self.menu_help = QtWidgets.QMenu(self.menu_bar)
         self.menu_help.setObjectName("menu_help")
+        self.menu_file = QtWidgets.QMenu(self.menu_bar)
+        self.menu_file.setObjectName("menu_file")
         MainWindow.setMenuBar(self.menu_bar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.menu_about_action = QtWidgets.QAction(MainWindow)
         self.menu_about_action.setObjectName("menu_about_action")
+        self.menu_open_config_file_action = QtWidgets.QAction(MainWindow)
+        self.menu_open_config_file_action.setObjectName("menu_open_config_file_action")
         self.menu_help.addAction(self.menu_about_action)
+        self.menu_file.addAction(self.menu_open_config_file_action)
+        self.menu_bar.addAction(self.menu_file.menuAction())
         self.menu_bar.addAction(self.menu_help.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -153,10 +168,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Conan App Launcher"))
         self.app_name.setText(_translate("MainWindow", "TextLabel"))
         self.tabs.setTabText(self.tabs.indexOf(self.tab_1), _translate("MainWindow", "Basics"))
-        self.console.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
         self.menu_help.setTitle(_translate("MainWindow", "Help"))
+        self.menu_file.setTitle(_translate("MainWindow", "File"))
         self.menu_about_action.setText(_translate("MainWindow", "About"))
+        self.menu_open_config_file_action.setText(_translate("MainWindow", "Open Config File"))

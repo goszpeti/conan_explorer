@@ -1,16 +1,16 @@
 import logging
 
-from PyQt5 import QtCore, QtWidgets
-from conan_app_launcher.config import DEBUG_LEVEL, PROG_NAME, base_path
+from PyQt5 import QtWidgets
+
+from . import DEBUG_LEVEL, PROG_NAME
+
 
 class Logger(logging.Logger):
     """
     Singleton instance for the global dual logger (Qt Widget/console)
     """
     _instance = None
-    formatter = logging.Formatter(
-        # %(asctime)s ::
-            r"%(levelname)s :: %(message)s")
+    formatter = logging.Formatter(r"%(levelname)s: %(message)s")
 
     def __new__(cls):
         if cls._instance is None:
@@ -58,7 +58,7 @@ class Logger(logging.Logger):
     @classmethod
     def init_qt_logger(cls, widget):
         """ 
-        Rdirects the logger to QT widget.
+        Redirects the logger to QT widget.
         Needs to be called when GUI objects are available.
         """
         logger = cls._instance
@@ -66,6 +66,6 @@ class Logger(logging.Logger):
         log_debug_level = logging.INFO
         if DEBUG_LEVEL > 0:
             log_debug_level = logging.DEBUG
-        qt_handler.setLevel(logger.level)
+        qt_handler.setLevel(log_debug_level)
         qt_handler.setFormatter(cls.formatter)
         logger.addHandler(qt_handler)

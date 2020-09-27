@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 import conan_app_launcher.logger
-from conan_app_launcher import config
+import conan_app_launcher as app
 
 
 class PathSetup():
@@ -19,7 +19,7 @@ class PathSetup():
 def target_mockup_fixture():
     paths = PathSetup()
 
-    config.resource_path = paths.base_path.parent / "resources"
+    app.resource_path = paths.base_path.parent / "resources"
     mockup_path = paths.test_path / "mock"
     sys.path.append(str(mockup_path))
 
