@@ -16,18 +16,19 @@ class AppEntry():
 
     def __init__(self, name, package_id: str, executable: Path, icon: str):
         # TODO getter/setter
-        self.package_folder = Path()
         self.name = name
+        self.executable = executable
+        self.icon = Path()
+        self.package_folder = Path()
+        # validate package id
         try:
             self.package_id = ConanFileReference.loads(package_id)
-            # TODO conan install?
         except RuntimeError as error:
             # errors happen fairly often, keep going
             Logger().error("Conan ref id invalid %s", str(error))
             return
-        self.executable = executable
 
-        self.icon = Path()  # init with config file path
+        # validate icon path
         if icon.startswith("//"):
             Logger().info("Icon relative to package currently not implemented")
         elif icon and not Path(icon).is_absolute():
@@ -37,12 +38,12 @@ class AppEntry():
         if not self.icon.is_file():
             Logger().error("Icon %s for '%s' not found", str(self.icon), name)
             self.icon = this.base_path / "ui" / "qt" / "default_app_icon.png"
+
         # add this object to the conan worker to get a package info / install the package
         # TODO: not the optimal place to call this
         if this.conan_worker:
             this.conan_worker.app_queue.put(self)
             this.conan_worker.start_working()
-        Logger().debug("Adding entry %s, %s, %s, %s", name, package_id, str(self.executable), str(self.icon))
 
     def on_conan_info_available(self):
         """ Callback when conan operation is done and paths can be validated"""
@@ -73,11 +74,11 @@ class TabEntry():
 def parse_config_file(grid_file_path) -> List[TabEntry]:
     """ Parse the json config file, validate and convert to object structure """
     app_config = None
-    with open(grid_file_path) as f:
+    with open(grid_file_path) as grid_file:
         try:
-            app_config = json.load(f)
-            with open(this.base_path / "config_schema.json") as s:
-                json_schema = json.load(s)
+            app_config = json.load(grid_file)
+            with open(this.base_path / "config_schema.json") as schema_file:
+                json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
             # TODO
             assert app_config.get(
@@ -91,7 +92,7 @@ def parse_config_file(grid_file_path) -> List[TabEntry]:
         tab_entry = TabEntry(tab.get("name"))
         for app in tab.get("apps"):
             tab_entry.add_app_entry(AppEntry(app.get("name"), app.get(
-                "package_id"), Path(app.get("executable")), app.get("icon")))
+                "package_id"), Path(app.get("executable")), app.get("icon", "")))
         tabs.append(tab_entry)
 
     return tabs

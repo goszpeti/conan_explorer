@@ -46,7 +46,7 @@ def main():
         64, 64, transformMode=Qt.SmoothTransformation), QtGui.QIcon.Normal, QtGui.QIcon.On)
     this.qt_app.setWindowIcon(icon)
 
-    # init conan worker before gui
+    # init conan worker global instance before gui
     this.conan_worker = ConanWorker()
     # main_ui must be held in this context, otherwise the gc will destroy the gui
     app_main_ui = main_ui.MainUi()
@@ -57,9 +57,11 @@ def main():
     except:  # pylint:disable=bare-except
         trace_back = traceback.format_exc()
         logger.error("Application crashed: \n%s", trace_back)
+    if this.conan_worker:  # cancel conan worker tasks on exit
+        this.conan_worker.finish_working(2)
 
 
-def handle_cmd_args(logger):
+def handle_cmd_args(logger: Logger):
     """
     All CLI related functions.
     """

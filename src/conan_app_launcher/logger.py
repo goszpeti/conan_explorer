@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from PyQt5 import QtWidgets
 
@@ -9,7 +10,7 @@ class Logger(logging.Logger):
     """
     Singleton instance for the global dual logger (Qt Widget/console)
     """
-    _instance = None
+    _instance: Optional[logging.Logger] = None
     formatter = logging.Formatter(r"%(levelname)s: %(message)s")
 
     def __new__(cls):
@@ -57,7 +58,7 @@ class Logger(logging.Logger):
 
     @classmethod
     def init_qt_logger(cls, widget):
-        """ 
+        """
         Redirects the logger to QT widget.
         Needs to be called when GUI objects are available.
         """

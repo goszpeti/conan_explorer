@@ -34,22 +34,23 @@
         "coverage-gutters.showLineCoverage": true,
         "coverage-gutters.showRulerCoverage": true,
         "python.testing.pytestArgs": [
-             "-v",
-             "--cov-report=xml:cov.xml",
-             //"--cov-report=html",
-             "--cov-report=term",
-             "--cov=conan_app_launcher",
-             "--cov-append",
-             "--cov-branch",
-             "--capture=no", // print output
-             "--junit-xml=${workspaceFolder}/result.xml",
-             "--no-cov" // no coverage while debugging
+            "-v",
+            "--cov-report=xml:cov.xml",
+            //"--cov-report=html",
+            "--cov-report=term",
+            "--cov=conan_app_launcher",
+            "--cov-append",
+            "--cov-branch",
+            "--capture=no", // print output
+            "--junit-xml=${workspaceFolder}/result.xml",
+            "--no-cov" // no coverage while debugging
         ],
         "python.linting.pylintArgs": [
             "--init-hook",
             "import sys;sys.path.append('${workspaceFolder}/test/mock/');sys.path.append('${workspaceFolder}/src/')"
         ],
-        "python.pythonPath": "python3",
+        //"python.pythonPath": "python3",
         "python.linting.mypyEnabled": true,
+        "python.pythonPath": "C:\\sw-dev\\tool\\Python\\3.8.5\\python.exe",
     }
 }
