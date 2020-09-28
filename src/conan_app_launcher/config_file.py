@@ -32,7 +32,7 @@ class AppEntry():
         if icon.startswith("//"):
             Logger().info("Icon relative to package currently not implemented")
         elif icon and not Path(icon).is_absolute():
-            self.icon = this.config_path / icon
+            self.icon = this.config_path.parent / icon
         else:
             self.icon = Path(icon)
         if not self.icon.is_file():
@@ -74,6 +74,8 @@ class TabEntry():
 def parse_config_file(grid_file_path) -> List[TabEntry]:
     """ Parse the json config file, validate and convert to object structure """
     app_config = None
+    if not grid_file_path.is_file():
+        return []
     with open(grid_file_path) as grid_file:
         try:
             app_config = json.load(grid_file)

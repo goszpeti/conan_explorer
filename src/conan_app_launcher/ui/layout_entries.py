@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from conan_app_launcher.config_file import AppEntry
 from conan_app_launcher.logger import Logger
@@ -51,7 +52,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
     def app_clicked(self):
         """ Calback for opening the executable on click """
         if self.app_info.executable.is_file():
-            os.system(str(self.app_info.executable))
+            subprocess.Popen(str(self.app_info.executable))
 
 
 class TabUiGrid(QtWidgets.QWidget):

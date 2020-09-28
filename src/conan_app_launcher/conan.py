@@ -29,7 +29,7 @@ class ConanWorker():
 
     def finish_working(self, timeout_s: int):
         """ Cancel, if worker is still not finished """
-        if self._worker.is_alive():
+        if self._worker and self._worker.is_alive():
             self._worker.join(timeout_s)
         self._worker = None  # reset thread for later instantiation
 
@@ -60,10 +60,12 @@ def get_conan_paths(conan, cache, user_io, conan_ref) -> Tuple[bool, Path]:
         Logger().info("Getting info for '%s'...", str(conan_ref))
         [deps_graph, _] = conan_api.ConanAPIV1.info(conan, conan_ref.full_repr())
         # TODO: only for conan 1.16 - 1.18
-        output = CommandOutputer(user_io.out, cache)._grab_info_data(
-            deps_graph, True)[0]  # can have only one element
-        is_installed = output.get("binary") == "Download"
-        return is_installed, Path(output.get("package_folder"))
+        output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
+        # TODO find in output
+        for package_info in output:
+            if package_info.get("reference") == str(conan_ref):
+                is_installed = (package_info.get("binary") == "Cache")
+                return is_installed, Path(package_info.get("package_folder"))
     except BaseException as error:
         Logger().error(str(error))
         return False, Path()

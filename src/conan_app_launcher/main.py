@@ -32,6 +32,7 @@ def main():
     Start the Qt application
     """
     # init logger first
+    this.base_path = Path(__file__).absolute().parent
     logger = Logger()
     handle_cmd_args(logger)
 
