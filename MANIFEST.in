@@ -1,1 +1,4 @@
 include README.md LICENSE
+include src/conan_app_launcher/config_schema.json
+include src/conan_app_launcher/icon.png
+include src/conan_app_launcher/ui/qt/default_app_icon.png
