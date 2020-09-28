@@ -3,6 +3,7 @@ Entry module of Conan App Launcher
 Sets up cmd arguments, config file and starts the gui
 """
 import argparse
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -31,7 +32,13 @@ def main():
     """
     Start the Qt application
     """
-    # init logger first
+    # Redirect stdout and stderr for usage with pythonw as executor -
+    # otherwise conan will not work
+    if sys.executable.endswith("pythonw.exe"):
+        sys.stdout = open(os.devnull, "w")
+        sys.stderr = open(os.path.join(os.getenv("TEMP"),
+                                       "stderr-"+os.path.basename(sys.argv[0])), "w")
+    # # init logger first
     this.base_path = Path(__file__).absolute().parent
     logger = Logger()
     handle_cmd_args(logger)
@@ -42,9 +49,7 @@ def main():
 
     # start Qt app and ui
     this.qt_app = QtWidgets.QApplication([])
-    icon = QtGui.QIcon()
-    icon.addPixmap(QtGui.QPixmap(str(this.base_path / "icon.png")).scaled(
-        64, 64, transformMode=Qt.SmoothTransformation), QtGui.QIcon.Normal, QtGui.QIcon.On)
+    icon = QtGui.QIcon(str(this.base_path / "icon.ico"))
     this.qt_app.setWindowIcon(icon)
 
     # init conan worker global instance before gui

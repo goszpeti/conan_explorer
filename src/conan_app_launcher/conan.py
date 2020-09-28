@@ -9,7 +9,10 @@ from conans.client.conan_command_output import CommandOutputer
 from conans.model.ref import ConanFileReference
 from conan_app_launcher.config_file import AppEntry
 
-from .logger import Logger
+from conan_app_launcher.logger import Logger
+from contextlib import redirect_stdout
+
+import sys
 
 
 class ConanWorker():
@@ -58,10 +61,10 @@ def get_conan_paths(conan, cache, user_io, conan_ref) -> Tuple[bool, Path]:
                 ref_count_file.unlink()
                 ref_lock_file.unlink()
         Logger().info("Getting info for '%s'...", str(conan_ref))
+        output = []
         [deps_graph, _] = conan_api.ConanAPIV1.info(conan, conan_ref.full_repr())
         # TODO: only for conan 1.16 - 1.18
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
-        # TODO find in output
         for package_info in output:
             if package_info.get("reference") == str(conan_ref):
                 is_installed = (package_info.get("binary") == "Cache")
