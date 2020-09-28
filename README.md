@@ -25,6 +25,9 @@ Features:
 After checkout use the command:
 `pip install .`
 
+Call the executable with: 
+`conan_app_launcher -f <config_file_path>`, if the Python "scripts" folder is on your system path.
+
 ### With pip from Pypi
 Coming soon
 
