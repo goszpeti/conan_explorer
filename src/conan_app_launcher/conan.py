@@ -10,9 +10,6 @@ from conans.model.ref import ConanFileReference
 from conan_app_launcher.config_file import AppEntry
 
 from conan_app_launcher.logger import Logger
-from contextlib import redirect_stdout
-
-import sys
 
 
 class ConanWorker():
