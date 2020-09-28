@@ -19,7 +19,6 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         super().__init__()
         self.app_info = app
         self.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
-        # TODO add icon
         self.app_button = AppButton(parent, app.icon)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)

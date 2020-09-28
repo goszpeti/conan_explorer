@@ -13,7 +13,8 @@
                 {
                     "name": "App2",
                     "package_id": "boost_functional/1.69.0@bincrafters/stable",
-                    "executable": "bin/app2"
+                    "executable": "bin/app2",
+                    "icon": "icon.ico"
                 }
             ]
         },

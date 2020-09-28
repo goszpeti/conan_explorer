@@ -8,7 +8,8 @@ Qt = QtCore.Qt
 
 
 class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
-    clicked = QtCore.pyqtSignal()  # this signal is used to connect to backend functions.
+    # this signal is used to connect to backend functions.
+    clicked = QtCore.pyqtSignal()
     # It needs to be a class variable (limitation of Qt)
 
     """ Qt label, which can react on a mouse click """
@@ -18,8 +19,14 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
         QtWidgets.QLabel.__init__(self, parent=parent, flags=flags)
         QtWidgets.QPushButton.__init__(self, parent=parent)
         self._image = image
-        self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
-            ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
+        if self._image.suffix == ".ico":
+            ic = QtGui.QIcon(str(self._image))
+            sizes = ic.availableSizes()
+            px = ic.pixmap(ic.actualSize(QtCore.QSize(512, 512)))
+            self.setPixmap(px)
+        else:
+            self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
+                ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
 
     def mousePressEvent(self, event):  # pylint: disable=unused-argument, invalid-name
         """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
