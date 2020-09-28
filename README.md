@@ -39,16 +39,16 @@ The config file uses the following exemplary schema:
                 "name": "Basics",
                 "apps": [
                     {
-                        "name": "App1 with spaces",
+                        "name": "App1 with spaces", 
                         "package_id": "app1/0.1.0@user1/stable", // full conan reference
-                        "executable": "bin/app1", // extension (.exe) can be ommited for windows
-                        "icon": "MyIcon.png" // relative to this comfig file
+                        "executable": "bin/app1", // relative to conan "package folder"
+                        "icon": "MyIcon.png" // relative to this config file
                     },
                     {
                         "name": "App2",
                         "package_id": "app2/0.2.0@user2/testing",
                         "executable": "bin/app2", // forward slashes are preferred
-                        "icon": "C:\\CustomIcon.ico" // but also escaped backslashes also work
+                        "icon": "C:\\CustomIcon.ico" // but escaped backslashes also work
                     }
                 ]
             },
@@ -58,7 +58,7 @@ The config file uses the following exemplary schema:
                     {
                         "name": "App3",
                         "package_id": "app3/0.3.0@user3/stable",
-                        "executable": "bin/app3.exe",
+                        "executable": "bin/app3", // extension (.exe) can be ommited for windows
                         // Icon can be ommitted
                     }
                 ]
