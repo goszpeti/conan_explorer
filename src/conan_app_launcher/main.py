@@ -37,7 +37,7 @@ def main():
     if sys.executable.endswith("pythonw.exe"):
         sys.stdout = open(os.devnull, "w")
         sys.stderr = open(os.path.join(os.getenv("TEMP"),
-                                       "stderr-"+os.path.basename(sys.argv[0])), "w")
+                                       "stderr-" + this.PROG_NAME), "w")
     # # init logger first
     this.base_path = Path(__file__).absolute().parent
     logger = Logger()
