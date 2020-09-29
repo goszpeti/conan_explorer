@@ -30,7 +30,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
             64, 64, transformMode=Qt.SmoothTransformation))
         self.app_button.setScaledContents(False)
         self.app_button.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
-        self.app_button.setToolTip(app.package_id.full_repr())
+        self.app_button.setToolTip(str(app.package_id))
         self.addWidget(self.app_button)
         self.app_name = QtWidgets.QLabel(parent)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)

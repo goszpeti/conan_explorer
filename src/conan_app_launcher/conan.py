@@ -4,7 +4,10 @@ from queue import Queue
 from threading import Thread
 from typing import Tuple
 
-from conans.client import conan_api
+from conans.client.conan_api import ConanAPIV1, ClientCache, UserIO
+from conans import __version__ as conan_version
+from packaging.version import Version
+
 from conans.client.conan_command_output import CommandOutputer
 from conans.model.ref import ConanFileReference
 from conan_app_launcher.config_file import AppEntry
@@ -38,12 +41,31 @@ class ConanWorker():
         while not self.app_queue.empty():
             app_entry: AppEntry = self.app_queue.get()
             # TODO use setter
-            set_conan_package_folder(app_entry)
+            app_entry.package_folder = get_conan_package_folder(app_entry.package_id)
             app_entry.on_conan_info_available()
             self.app_queue.task_done()
 
 
-def get_conan_paths(conan, cache, user_io, conan_ref) -> Tuple[bool, Path]:
+def get_conan_package_folder(conan_ref: ConanFileReference):
+    conan, cache, user_io = ConanAPIV1.factory()
+    if Version(conan_version) > Version("1.18"):
+        conan.create_app()
+        user_io = conan.user_io
+        cache = conan.app.cache
+    package_folder = Path()
+    [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
+
+    if not is_installed:
+        Logger().info("Installing '%s'...", str(conan_ref))
+        install_conan_package(conan, cache, conan_ref)
+        # lazy: call info again for path
+        [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
+    else:
+        Logger().info("Found '%s' in %s.", str(conan_ref), str(package_folder))
+    return package_folder
+
+
+def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: UserIO, conan_ref: ConanFileReference) -> Tuple[bool, Path]:
     try:
         conan.remove_locks()
         # Workaround: remove directory, if it created a count.lock, without a conanfile
@@ -59,43 +81,27 @@ def get_conan_paths(conan, cache, user_io, conan_ref) -> Tuple[bool, Path]:
                 ref_lock_file.unlink()
         Logger().info("Getting info for '%s'...", str(conan_ref))
         output = []
-        [deps_graph, _] = conan_api.ConanAPIV1.info(conan, conan_ref.full_repr())
-        # TODO: only for conan 1.16 - 1.18
+        [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref))
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
         for package_info in output:
             if package_info.get("reference") == str(conan_ref):
                 is_installed = (package_info.get("binary") == "Cache")
-                return is_installed, Path(package_info.get("package_folder"))
+                return is_installed, Path(package_info.get(path))
     except BaseException as error:
         Logger().error(str(error))
-        return False, Path()
+    return False, Path()
 
 
-def set_conan_package_folder(app_entry: AppEntry):
-    [conan, cache, user_io] = conan_api.ConanAPIV1.factory()
-    package_folder = Path()
-    [is_installed, package_folder] = get_conan_paths(conan, cache, user_io, app_entry.package_id)
-
-    if not is_installed:
-        Logger().info("Installing '%s'...", str(app_entry.package_id))
-        install_conan_package(conan, cache, app_entry.package_id)
-        # lazy: call info again for path
-        [is_installed, package_folder] = get_conan_paths(conan, cache, user_io, app_entry.package_id)
-    else:
-        Logger().info("Found '%s' in %s.", str(app_entry.package_id), str(package_folder))
-    app_entry.package_folder = package_folder
-
-
-def install_conan_package(conan: conan_api.ConanAPIV1, cache: conan_api.ClientCache,
+def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
                           package_id: ConanFileReference):
     remotes = cache.registry.load_remotes()
     for [remote, _] in remotes.items():
         if remote == "conan-center":
             continue  # no third party packages
         try:
-            search_results = conan_api.ConanAPIV1.search_packages(conan,
-                                                                  str(package_id),
-                                                                  remote_name=remote)
+            search_results = ConanAPIV1.search_packages(conan,
+                                                        str(package_id),
+                                                        remote_name=remote)
         except:  # next
             continue
         # get options and settings
@@ -123,6 +129,6 @@ def install_conan_package(conan: conan_api.ConanAPIV1, cache: conan_api.ClientCa
         for name, value in sets.items():
             settings_list.append(name + "=" + value)
         try:
-            conan_api.ConanAPIV1.install_reference(conan, package_id, update=True, settings=settings_list)
+            ConanAPIV1.install_reference(conan, package_id, update=True, settings=settings_list)
         except BaseException as error:
             Logger().error("Cannot install packge '%s': %s", package_id, str(error))
