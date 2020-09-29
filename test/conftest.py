@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-import conan_app_launcher.logger
+import conan_app_launcher.logger as logger
 import conan_app_launcher as app
 
 
@@ -18,20 +18,21 @@ class PathSetup():
 @pytest.fixture
 def target_mockup_fixture():
     paths = PathSetup()
-
-    app.resource_path = paths.base_path.parent / "resources"
     mockup_path = paths.test_path / "mock"
     sys.path.append(str(mockup_path))
 
 
 @pytest.fixture
 def base_fixture(request):
-    # yield "base_fixture"  # return after setup
     paths = PathSetup()
 
     def teardown():
         # reset singletons
-        conan_app_launcher.logger.Logger._instance = None
+        logger.Logger._instance = None
+        app.base_path = None
+        app.conan_worker = None
+        app.config_file_path = None
+        app.qt_app = None
 
     request.addfinalizer(teardown)
 

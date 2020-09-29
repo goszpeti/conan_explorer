@@ -4,14 +4,13 @@ from queue import Queue
 from threading import Thread
 from typing import Tuple
 
-from conans.client.conan_api import ConanAPIV1, ClientCache, UserIO
 from conans import __version__ as conan_version
-from packaging.version import Version
-
+from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.client.conan_command_output import CommandOutputer
 from conans.model.ref import ConanFileReference
-from conan_app_launcher.config_file import AppEntry
+from packaging.version import Version
 
+from conan_app_launcher.config_file import AppEntry
 from conan_app_launcher.logger import Logger
 
 
@@ -95,9 +94,11 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
 def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
                           package_id: ConanFileReference):
     remotes = cache.registry.load_remotes()
-    for [remote, _] in remotes.items():
-        if remote == "conan-center":
-            continue  # no third party packages
+    for remote in remotes.items():
+        if len(remote) > 0:
+            remote = remote[0]  # for old apis
+        # if remote == "conan-center":
+        #    continue  # no third party packages
         try:
             search_results = ConanAPIV1.search_packages(conan,
                                                         str(package_id),

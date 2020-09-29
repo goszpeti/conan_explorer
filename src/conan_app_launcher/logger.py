@@ -3,7 +3,7 @@ from typing import Optional
 
 from PyQt5 import QtWidgets
 
-from . import DEBUG_LEVEL, PROG_NAME
+from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
 
 
 class Logger(logging.Logger):

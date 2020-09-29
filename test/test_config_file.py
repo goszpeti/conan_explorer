@@ -1,10 +1,11 @@
 import os
 
 from conan_app_launcher.config_file import parse_config_file
+import conan_app_launcher as app
 
 
 def testCorrectFile(base_fixture):
-
+    app.base_path = base_fixture.base_path / "src" / "conan_app_launcher"
     tabs = parse_config_file(base_fixture.testdata_path / "app_config.json")
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].get_app_entries()
@@ -26,9 +27,25 @@ def testCorrectFile(base_fixture):
     assert tab1_entries[0].name == "App2"
 
 
-def testIncorrectFilename(base_fixture):
-    parse_config_file(base_fixture.testdata_path / "nofile.json")
+def testNoneExistantFilename(base_fixture, capsys):
+    tabs = parse_config_file(base_fixture.testdata_path / "nofile.json")
+    assert tabs == []
+    captured = capsys.readouterr()
+    assert "ERROR" in captured.err
+    assert "does not exist" in captured.err
 
 
-def testInvalidContent(base_fixture):
-    pass
+def testInvalidVersion(base_fixture, capsys):
+    tabs = parse_config_file(base_fixture.testdata_path / "config_file" / "wrong_version.json")
+    assert tabs == []
+    captured = capsys.readouterr()
+    assert "ERROR" in captured.err
+    assert "Unknown schema version" in captured.err
+
+
+def testInvalidContent(base_fixture, capsys):
+    tabs = parse_config_file(base_fixture.testdata_path / "config_file" / "invalid_syntax.json")
+    assert tabs == []
+    captured = capsys.readouterr()
+    assert "ERROR" in captured.err
+    assert "Expecting property name" in captured.err

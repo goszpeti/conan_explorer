@@ -83,7 +83,7 @@ def handle_cmd_args(logger: Logger):
         if not config_path.exists():
             logger.error("Cannot find config file %s", config_path)
             sys.exit(-1)
-        this.config_path = config_path
+        this.config_file_path = config_path
 
 
 if __name__ == "__main__":

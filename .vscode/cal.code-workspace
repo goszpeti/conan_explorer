@@ -50,5 +50,6 @@
             "import sys;sys.path.append('${workspaceFolder}/test/mock/');sys.path.append('${workspaceFolder}/src/')"
         ],
         "python.linting.mypyEnabled": true,
+        "githubIssues.issueBranchTitle": "${user}/${issueNumber}-${sanitizedIssueTitle} ",
     }
 }

@@ -49,8 +49,8 @@ class MainUi(QtCore.QObject):
 
     def open_config_file_dialog(self):
         dialog_path = Path.home()
-        if this.config_path.exists():
-            dialog_path = this.config_path.parent
+        if this.config_file_path.exists():
+            dialog_path = this.config_file_path.parent
         dialog = QtWidgets.QFileDialog(caption="Select JSON Config File",
                                        directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
@@ -85,7 +85,7 @@ class MainUi(QtCore.QObject):
 
     def _init_gui(self):
         """ Call all conan functions """
-        self._tab_info = parse_config_file(this.config_path)
+        self._tab_info = parse_config_file(this.config_file_path)
         self.create_layout()
 
     def _re_init(self):
