@@ -5,7 +5,7 @@ from conan_app_launcher.config_file import AppEntry
 from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .qt.app_button import AppButton
+from conan_app_launcher.ui.qt.app_button import AppButton
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt

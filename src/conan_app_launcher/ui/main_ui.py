@@ -4,10 +4,9 @@ from pathlib import Path
 import conan_app_launcher as this
 from conan_app_launcher.config_file import parse_config_file
 from conan_app_launcher.logger import Logger
+from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
+from conan_app_launcher.ui.qt.app_grid import Ui_MainWindow
 from PyQt5 import QtCore, QtWidgets
-
-from .layout_entries import AppUiEntry, TabUiGrid
-from .qt.app_grid import Ui_MainWindow
 
 
 class MainUi(QtCore.QObject):
