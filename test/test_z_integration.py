@@ -10,8 +10,8 @@ import time
 
 
 def testDebugDisabledForRelease(base_fixture):
-    from piweather import config
-    assert config.DEBUG_LEVEL == 0  # debug level should be 0 for release
+    from conan_app_launcher import DEBUG_LEVEL
+    assert DEBUG_LEVEL == 0  # debug level should be 0 for release
 
 
 def testMinimalUseCase(base_fixture):
