@@ -36,7 +36,7 @@ jobs:
         pylint ./src/ --exit-zero
     - name: Test with pytest
       run: |
-        pytest --cov-report=term --cov=piweather --cov-branch --junit-xml=result.xml
+        pytest --cov-report=term --cov=conan_app_launcher --cov-branch --junit-xml=result.xml
 #  --cov-report=html 
 # - uses: actions/upload-artifact@v2
 #   with:
