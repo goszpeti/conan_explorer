@@ -35,7 +35,9 @@ def base_fixture(request):
         logger.Logger._instance = None
         app.base_path = None
         if app.conan_worker:
+            print("delete app worker")
             app.conan_worker.finish_working(5)
+            del(app.conan_worker)
         app.conan_worker = None
         app.config_file_path = None
         print("Teardown finish")
