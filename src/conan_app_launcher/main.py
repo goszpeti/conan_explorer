@@ -69,7 +69,7 @@ def main():
             this.conan_worker.finish_working(5)
 
 
-def handle_cmd_args(logger: Logger):
+def handle_cmd_args():
     """
     All CLI related functions.
     """

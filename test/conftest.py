@@ -29,6 +29,7 @@ def base_fixture(request):
 
     def teardown():
         # reset singletons
+        print("Teardown")
         # if app.qt_app:
         #    app.qt_app = None
         logger.Logger._instance = None
@@ -37,6 +38,7 @@ def base_fixture(request):
             app.conan_worker.finish_working(5)
         app.conan_worker = None
         app.config_file_path = None
+        print("Teardown finish")
 
     request.addfinalizer(teardown)
 

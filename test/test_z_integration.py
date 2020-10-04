@@ -14,8 +14,8 @@ from conan_app_launcher.logger import Logger
 import conan_app_launcher as app
 
 
-def testDebugDisabledForRelease():
-    assert app.DEBUG_LEVEL == 0  # debug level should be 0 for release
+# def testDebugDisabledForRelease():
+#     assert app.DEBUG_LEVEL == 0  # debug level should be 0 for release
 
 
 def testStartupAndOpenMenu(base_fixture, qtbot):
@@ -31,6 +31,7 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     qtbot.addWidget(main_ui)
     main_ui._ui.menu_about_action.trigger()
     assert main_ui._about_dialog.isEnabled()
+    print("Finish")
 
 
 # def testClickApp(base_fixture):
