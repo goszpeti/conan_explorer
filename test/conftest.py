@@ -29,7 +29,6 @@ def base_fixture(request):
     def teardown():
         # reset singletons
         if app.qt_app:
-            app.qt_app.quit()
             app.qt_app = None
         logger.Logger._instance = None
         app.base_path = None
