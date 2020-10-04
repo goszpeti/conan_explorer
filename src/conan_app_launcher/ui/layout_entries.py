@@ -1,4 +1,3 @@
-import os
 import subprocess
 
 from conan_app_launcher.config_file import AppEntry

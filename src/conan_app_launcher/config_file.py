@@ -6,7 +6,7 @@ from typing import List
 import jsonschema
 from conans.model.ref import ConanFileReference
 
-import conan_app_launcher as app
+import conan_app_launcher as this
 from conan_app_launcher.logger import Logger
 
 
@@ -41,9 +41,9 @@ class AppEntry():
 
         # add this object to the conan worker to get a package info / install the package
         # TODO: not the optimal place to call this
-        if app.conan_worker:
-            app.conan_worker.app_queue.put(self)
-            app.conan_worker.start_working()
+        if this.conan_worker:
+            this.conan_worker.app_queue.put(self)
+            this.conan_worker.start_working()
 
     def on_conan_info_available(self):
         """ Callback when conan operation is done and paths can be validated"""
@@ -65,9 +65,11 @@ class TabEntry():
         Logger().debug("Adding tab %s", name)
 
     def add_app_entry(self, app_entry: AppEntry):
+        """ Add an AppEntry object to the tabs layout """
         self._app_entries.append(app_entry)
 
     def get_app_entries(self) -> List[AppEntry]:
+        """ Get all app entries on the tab layout """
         return self._app_entries
 
 

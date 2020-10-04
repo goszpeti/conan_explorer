@@ -64,7 +64,8 @@ def get_conan_package_folder(conan_ref: ConanFileReference):
     return package_folder
 
 
-def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: UserIO, conan_ref: ConanFileReference) -> Tuple[bool, Path]:
+def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: UserIO,
+                   conan_ref: ConanFileReference) -> Tuple[bool, Path]:
     try:
         conan.remove_locks()
         # Workaround: remove directory, if it created a count.lock, without a conanfile
