@@ -60,7 +60,7 @@ def main():
 
     try:
         this.qt_app.exec_()
-        # remove qt logger, soit doesn't log into a non existant objet
+        # remove qt logger, so it doesn't log into a non existant objet
         Logger.remove_qt_logger()
     except:  # pylint:disable=bare-except
         trace_back = traceback.format_exc()

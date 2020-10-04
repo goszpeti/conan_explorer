@@ -12,7 +12,7 @@ on:
 jobs:
   Test:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     env:
       DISPLAY: ':99.0'
     steps:
@@ -36,7 +36,7 @@ jobs:
         pylint ./src/ --exit-zero
     - name: Test with pytest
       run: |
-        pytest -v --capture=no --cov-report=term --cov=conan_app_launcher --cov-branch --junit-xml=result.xml
+        pytest -v --capture=no --cov-report=term --cov=conan_app_launcher --cov-branch
 #  --cov-report=html 
 # - uses: actions/upload-artifact@v2
 #   with:
