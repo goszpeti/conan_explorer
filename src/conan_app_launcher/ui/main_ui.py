@@ -12,15 +12,17 @@ from PyQt5 import QtCore, QtWidgets
 class MainUi(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
     conan_info_acquired = QtCore.pyqtSignal()
+    logging = QtCore.pyqtSignal()
 
     def __init__(self):
         super().__init__()
         self._tab_info = []
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
+        self.text = ""
 
         # connect logger to console widget to log possible errors at init
-        Logger.init_qt_logger(self._ui.console)
+        Logger.init_qt_logger(self)
         Logger().info("Start")
         self._ui.console.setFontPointSize(10)
 
@@ -33,6 +35,7 @@ class MainUi(QtWidgets.QMainWindow):
         # TODO set last Path on dir
         self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
         self.conan_info_acquired.connect(self.create_layout)
+        self.logging.connect(self.write_log)
         # remove default tab TODO unclean in code, but nice preview in qt designer
         self._ui.tabs.removeTab(0)
         self.init_gui()
@@ -40,7 +43,7 @@ class MainUi(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         # remove qt logger, so it doesn't log into a non existant objet
         Logger.remove_qt_logger()
-        super().closeEvent(self, event)
+        super().closeEvent(event)
 
     @property
     def ui(self):
@@ -99,6 +102,9 @@ class MainUi(QtWidgets.QMainWindow):
             self._ui.tabs.removeTab(i)
         this.conan_worker.finish_working(2)
         self._init_gui()
+
+    def write_log(self):
+        self._ui.console.append(self.text)
 
 
 class AboutDialog(QtWidgets.QDialog):

@@ -42,7 +42,7 @@ class ConanWorker():
 
     def _work_on_conan_queue(self):
         """ Call conan operations form queue """
-        while not self.app_queue.empty() or not self._closing:
+        while not self._closing or not self.app_queue.empty():
             app_entry: AppEntry = self.app_queue.get()
             # TODO use setter
             app_entry.package_folder = get_conan_package_folder(app_entry.package_id)
