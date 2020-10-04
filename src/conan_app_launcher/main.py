@@ -63,8 +63,9 @@ def main():
     except:  # pylint:disable=bare-except
         trace_back = traceback.format_exc()
         logger.error("Application crashed: \n%s", trace_back)
-    if this.conan_worker:  # cancel conan worker tasks on exit
-        this.conan_worker.finish_working(2)
+    finally:
+        if this.conan_worker:  # cancel conan worker tasks on exit
+            this.conan_worker.finish_working(2)
 
 
 def handle_cmd_args(logger: Logger):

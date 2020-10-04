@@ -25,13 +25,13 @@ def testMinimalUseCase(base_fixture):
     time.sleep(7)
 
     try:
+        print("Start quit")
         app.qt_app.quit()
-        time.sleep(2)
+        time.sleep(3)
     finally:
         if main_thread:
-            main_thread.join(5)
-        if app.qt_app:
-            app.qt_app.quit()
+            print("Join test thread")
+            main_thread.join()
 
 
 def testOpenMenu(base_fixture):
