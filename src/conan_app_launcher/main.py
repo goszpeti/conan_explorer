@@ -41,7 +41,6 @@ def main():
     # # init logger first
     this.base_path = Path(__file__).absolute().parent
     logger = Logger()
-    handle_cmd_args(logger)
 
     # apply Qt attributes (only at init possible)
     QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
@@ -55,8 +54,8 @@ def main():
     # init conan worker global instance before gui
     this.conan_worker = ConanWorker()
     # main_ui must be held in this context, otherwise the gc will destroy the gui
-    app_main_ui = main_ui.MainUi()
-    app_main_ui.qt_root_obj.show()
+    this.app_main_ui = main_ui.MainUi()
+    this.app_main_ui.qt_root_obj.show()
 
     try:
         this.qt_app.exec_()
@@ -74,6 +73,7 @@ def handle_cmd_args(logger: Logger):
     """
     All CLI related functions.
     """
+    logger = Logger()
     parser = argparse.ArgumentParser(
         prog="App Grid for Conan", description="App Grid Conan commandline interface")
     parser.add_argument("-v", "--version", action="version",
@@ -87,6 +87,7 @@ def handle_cmd_args(logger: Logger):
             logger.error("Cannot find config file %s", config_path)
             sys.exit(-1)
         this.config_file_path = config_path
+    main()
 
 
 if __name__ == "__main__":

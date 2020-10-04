@@ -60,7 +60,7 @@ class MainUi(QtCore.QObject):
     def create_layout(self):
         tab = None
         for tab_info in self._tab_info:
-            tab = TabUiGrid()
+            tab = TabUiGrid(tab_info.name)
             row = 0  # 3
             column = 0  # 4
             for app_info in tab_info.get_app_entries():

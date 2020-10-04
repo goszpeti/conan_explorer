@@ -28,11 +28,13 @@ def base_fixture(request):
 
     def teardown():
         # reset singletons
+        if app.qt_app:
+            app.qt_app.quit()
+            app.qt_app = None
         logger.Logger._instance = None
         app.base_path = None
         app.conan_worker = None
         app.config_file_path = None
-        app.qt_app = None
 
     request.addfinalizer(teardown)
 

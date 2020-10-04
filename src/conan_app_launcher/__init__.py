@@ -27,3 +27,4 @@ config_file_path = Path()
 # qt_application instance
 qt_app: Optional["QtWidgets.QApplication"] = None
 conan_worker: Optional["ConanWorker"] = None
+app_main_ui = None

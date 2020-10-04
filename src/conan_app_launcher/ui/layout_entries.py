@@ -17,6 +17,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
     def __init__(self, parent: QtWidgets.QTabWidget, app: AppEntry):
         super().__init__()
         self.app_info = app
+        self.setObjectName(app.name)  # TODO
         self.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         self.app_button = AppButton(parent, app.icon)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
@@ -54,10 +55,10 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
 
 
 class TabUiGrid(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
         self.apps = []  # AppUiEntry
-
+        self.setObjectName(name)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
