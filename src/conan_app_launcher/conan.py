@@ -94,9 +94,11 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
 
 def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
                           package_id: ConanFileReference):
+    """ Try to isntall a conan package while guessing the mnost suitable package for the current ülatform. """
     remotes = cache.registry.load_remotes()
+    found_pkg = True
     for remote in remotes.items():
-        if len(remote) > 0:
+        if isinstance(remote, list) and len(remote) > 0:
             remote = remote[0]  # for old apis
         # if remote == "conan-center":
         #    continue  # no third party packages
@@ -110,7 +112,6 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
         sets = {}
         default_settings = cache.default_profile.settings
 
-        found_pkg = True
         for result in search_results.get("results"):
             for item in result.get("items"):
                 for package in item.get("packages"):
@@ -125,8 +126,6 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
                     break
             if found_pkg:
                 break
-        if not found_pkg:
-            Logger().warning("Cant find a matching package '%s' for this platform.", str(package_id))
         settings_list = []
         for name, value in sets.items():
             settings_list.append(name + "=" + value)
@@ -134,3 +133,5 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
             ConanAPIV1.install_reference(conan, package_id, update=True, settings=settings_list)
         except BaseException as error:
             Logger().error("Cannot install packge '%s': %s", package_id, str(error))
+    if not found_pkg:
+        Logger().warning("Cant find a matching package '%s' for this platform.", str(package_id))
