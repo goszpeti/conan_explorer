@@ -8,19 +8,35 @@ import sys
 import threading
 import time
 
+import conan_app_launcher as app
+from conan_app_launcher.conan import ConanWorker
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.main import main
 from PyQt5 import QtCore, QtGui, QtWidgets
-from conan_app_launcher.logger import Logger
-import conan_app_launcher as app
 
 
-# def testDebugDisabledForRelease():
-#     assert app.DEBUG_LEVEL == 0  # debug level should be 0 for release
+def testDebugDisabledForRelease():
+    assert app.DEBUG_LEVEL == 0  # debug level should be 0 for release
+
+
+def testAbouDialog(base_fixture, qtbot):
+    from conan_app_launcher.ui import main_ui
+    logger = Logger()  # init logger
+    root_obj = QtWidgets.QWidget()
+    app.config_file_path = base_fixture.testdata_path / "app_config.json"
+    widget = main_ui.AboutDialog(root_obj)
+    widget.show()
+    qtbot.waitForWindowShown(widget)
+    qtbot.addWidget(widget)
+
+    assert "Conan App Launcher" in widget._text.text()
+    qtbot.mouseClick(widget._button_box.buttons()[0], QtCore.Qt.LeftButton)
+    assert widget.isHidden()
 
 
 def testStartupAndOpenMenu(base_fixture, qtbot):
     from conan_app_launcher.ui import main_ui
-    # app.conan_worker = ConanWorker()
+    app.conan_worker = ConanWorker()
     logger = Logger()  # init logger
     app.config_file_path = base_fixture.testdata_path / "app_config.json"
     main_ui = main_ui.MainUi()
@@ -31,8 +47,6 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     qtbot.addWidget(main_ui)
     main_ui._ui.menu_about_action.trigger()
     assert main_ui._about_dialog.isEnabled()
-    print("Finish")
-
 
 # def testClickApp(base_fixture):
 #     pass
