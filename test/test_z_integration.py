@@ -40,13 +40,14 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     logger = Logger()  # init logger
     app.config_file_path = base_fixture.testdata_path / "app_config.json"
     main_ui = main_ui.MainUi()
-    main_ui.qt_root_obj.show()
-    qtbot.waitForWindowShown(main_ui.qt_root_obj)
-    time.sleep(7)
-
+    main_ui.show()
     qtbot.addWidget(main_ui)
+    qtbot.waitExposed(main_ui, 3000)
     main_ui._ui.menu_about_action.trigger()
+    time.sleep(3)
     assert main_ui._about_dialog.isEnabled()
+    if app.conan_worker:
+        app.conan_worker.finish_working()
 
 # def testClickApp(base_fixture):
 #     pass

@@ -55,18 +55,16 @@ def main():
     this.conan_worker = ConanWorker()
     # main_ui must be held in this context, otherwise the gc will destroy the gui
     this.app_main_ui = main_ui.MainUi()
-    this.app_main_ui.qt_root_obj.show()
+    this.app_main_ui.show()
 
     try:
         this.qt_app.exec_()
-        # remove qt logger, so it doesn't log into a non existant objet
-        Logger.remove_qt_logger()
     except:  # pylint:disable=bare-except
         trace_back = traceback.format_exc()
         logger.error("Application crashed: \n%s", trace_back)
     finally:
         if this.conan_worker:  # cancel conan worker tasks on exit
-            this.conan_worker.finish_working(5)
+            this.conan_worker.finish_working()
 
 
 def handle_cmd_args():
@@ -91,4 +89,4 @@ def handle_cmd_args():
 
 
 if __name__ == "__main__":
-    main()
+    handle_cmd_args()

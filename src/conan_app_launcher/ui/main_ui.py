@@ -9,42 +9,48 @@ from conan_app_launcher.ui.qt.app_grid import Ui_MainWindow
 from PyQt5 import QtCore, QtWidgets
 
 
-class MainUi(QtCore.QObject):
+class MainUi(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
+    conan_info_acquired = QtCore.pyqtSignal()
 
     def __init__(self):
         super().__init__()
         self._tab_info = []
-        self._qt_root_obj = QtWidgets.QMainWindow()
         self._ui = Ui_MainWindow()
-        self._ui.setupUi(self._qt_root_obj)
+        self._ui.setupUi(self)
 
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self._ui.console)
+        Logger().info("Start")
         self._ui.console.setFontPointSize(10)
 
         self._init_thread = threading.Thread(
-            name="InitMainUI", target=self._init_gui(), daemon=True)
+            name="InitMainUI", target=self._init_gui, daemon=True)
 
-        self._about_dialog = AboutDialog(self._qt_root_obj)
+        self._about_dialog = AboutDialog(self)
         self._ui.menu_about_action.triggered.connect(self._about_dialog.show)
 
         # TODO set last Path on dir
         self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
-
+        self.conan_info_acquired.connect(self.create_layout)
         # remove default tab TODO unclean in code, but nice preview in qt designer
         self._ui.tabs.removeTab(0)
         self.init_gui()
+
+    def closeEvent(self, event):
+        # remove qt logger, so it doesn't log into a non existant objet
+        Logger.remove_qt_logger()
+        super().closeEvent(self, event)
 
     @property
     def ui(self):
         """ Contains all gui objects defined in Qt .ui file. Subclasses need access to this. """
         return self._ui
 
-    @property
-    def qt_root_obj(self):
-        """ The base class of this ui. Is needed to pass as parent ot call show and hide. """
-        return self._qt_root_obj
+    # @property
+    # def qt_root_obj(self):
+    #    """ The base class of this ui. Is needed to pass as parent ot call show and hide. """
+    #    return self._qt_root_obj
 
     def open_config_file_dialog(self):
         dialog_path = Path.home()
@@ -85,7 +91,7 @@ class MainUi(QtCore.QObject):
     def _init_gui(self):
         """ Call all conan functions """
         self._tab_info = parse_config_file(this.config_file_path)
-        self.create_layout()
+        self.conan_info_acquired.emit()
 
     def _re_init(self):
         # reset gui and objects
@@ -100,7 +106,6 @@ class AboutDialog(QtWidgets.QDialog):
         super().__init__(parent)
         self.setWindowTitle("About")
         self.setModal(True)
-
         QBtn = QtWidgets.QDialogButtonBox.Ok
         self._text = QtWidgets.QLabel(self)
         self._text.setText("Conan App Launcher\n" + this.__version__ + "\n" +

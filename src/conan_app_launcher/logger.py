@@ -1,6 +1,6 @@
 import logging
 from typing import Optional
-
+import time
 from PyQt5 import QtWidgets
 
 from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
@@ -66,11 +66,12 @@ class Logger(logging.Logger):
         logger = cls._instance
         qt_handler = Logger.QtLogHandler(widget)
         qt_handler.set_name(cls.qt_handler_name)
-        log_debug_level = logging.INFO
+        log_debug_level = logging.CRITICAL
         if DEBUG_LEVEL > 0:
             log_debug_level = logging.DEBUG
         qt_handler.setLevel(log_debug_level)
         qt_handler.setFormatter(cls.formatter)
+
         logger.addHandler(qt_handler)
 
     @classmethod

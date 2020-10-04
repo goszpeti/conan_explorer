@@ -21,6 +21,7 @@ class ConanWorker():
         # TODO add setter
         self.app_queue = Queue(maxsize=0)
         self._worker = None
+        self._closing = False
 
     def start_working(self):
         """ Start worker, if it is not already started (can be called multiple times)"""
@@ -29,15 +30,19 @@ class ConanWorker():
             self._worker.setDaemon(True)
             self._worker.start()
 
-    def finish_working(self, timeout_s: int):
+    def finish_working(self, timeout_s: int = None):
         """ Cancel, if worker is still not finished """
         if self._worker and self._worker.is_alive():
+            Logger().info("Closing Worker")
+            self._closing = True
             self._worker.join(timeout_s)
+            Logger().info("Closed Worker")
+            # self.app_queue.task_done()
         self._worker = None  # reset thread for later instantiation
 
     def _work_on_conan_queue(self):
         """ Call conan operations form queue """
-        while not self.app_queue.empty():
+        while not self.app_queue.empty() or not self._closing:
             app_entry: AppEntry = self.app_queue.get()
             # TODO use setter
             app_entry.package_folder = get_conan_package_folder(app_entry.package_id)
