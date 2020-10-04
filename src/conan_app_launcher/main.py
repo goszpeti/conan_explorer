@@ -60,12 +60,14 @@ def main():
 
     try:
         this.qt_app.exec_()
+        # remove qt logger, soit doesn't log into a non existant objet
+        Logger.remove_qt_logger()
     except:  # pylint:disable=bare-except
         trace_back = traceback.format_exc()
         logger.error("Application crashed: \n%s", trace_back)
     finally:
         if this.conan_worker:  # cancel conan worker tasks on exit
-            this.conan_worker.finish_working(2)
+            this.conan_worker.finish_working(5)
 
 
 def handle_cmd_args(logger: Logger):

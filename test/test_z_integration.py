@@ -34,9 +34,9 @@ def testMinimalUseCase(base_fixture):
             main_thread.join()
 
 
-def testOpenMenu(base_fixture):
-    pass
+# def testOpenMenu(base_fixture):
+#     pass
 
 
-def testClickApp(base_fixture):
-    pass
+# def testClickApp(base_fixture):
+#     pass

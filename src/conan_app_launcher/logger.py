@@ -12,6 +12,7 @@ class Logger(logging.Logger):
     """
     _instance: Optional[logging.Logger] = None
     formatter = logging.Formatter(r"%(levelname)s: %(message)s")
+    qt_handler_name = "qt_handler"
 
     def __new__(cls):
         if cls._instance is None:
@@ -64,9 +65,20 @@ class Logger(logging.Logger):
         """
         logger = cls._instance
         qt_handler = Logger.QtLogHandler(widget)
+        qt_handler.set_name(cls.qt_handler_name)
         log_debug_level = logging.INFO
         if DEBUG_LEVEL > 0:
             log_debug_level = logging.DEBUG
         qt_handler.setLevel(log_debug_level)
         qt_handler.setFormatter(cls.formatter)
         logger.addHandler(qt_handler)
+
+    @classmethod
+    def remove_qt_logger(cls) -> bool:
+        logger = cls._instance
+
+        for handler in logger.handlers:
+            if handler.get_name() == cls.qt_handler_name:
+                logger.removeHandler(handler)
+                return True
+        return False
