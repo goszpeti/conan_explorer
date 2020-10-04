@@ -3,6 +3,6 @@ pylint
 mypy
 rope
 pytest
-pytest-cov
-pytest-mock
+#pytest-cov
+#pytest-mock
 pytest-qt
