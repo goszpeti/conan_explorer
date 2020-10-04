@@ -25,7 +25,7 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     app.config_file_path = base_fixture.testdata_path / "app_config.json"
     main_ui = main_ui.MainUi()
     main_ui.qt_root_obj.show()
-    main_ui.waitForWindowShown(main_ui)
+    qtbot.waitForWindowShown(main_ui.qt_root_obj)
     time.sleep(7)
 
     qtbot.addWidget(main_ui)
