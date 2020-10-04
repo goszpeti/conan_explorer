@@ -14,7 +14,7 @@ from conan_app_launcher.logger import Logger
 import conan_app_launcher as app
 
 
-def testDebugDisabledForRelease(base_fixture, qtbot):
+def testDebugDisabledForRelease():
     assert app.DEBUG_LEVEL == 0  # debug level should be 0 for release
 
 
