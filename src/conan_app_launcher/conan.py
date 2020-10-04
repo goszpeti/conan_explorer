@@ -38,6 +38,7 @@ class ConanWorker():
             self._worker.join(timeout_s)
             Logger().info("Closed Worker")
             # self.app_queue.task_done()
+        self.app_queue = Queue(maxsize=0)
         self._worker = None  # reset thread for later instantiation
 
     def _work_on_conan_queue(self):

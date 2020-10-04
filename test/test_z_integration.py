@@ -46,8 +46,8 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     main_ui._ui.menu_about_action.trigger()
     time.sleep(3)
     assert main_ui._about_dialog.isEnabled()
-    if app.conan_worker:
-        app.conan_worker.finish_working()
+
+    # app.conan_worker.finish_working(5)
 
 # def testClickApp(base_fixture):
 #     pass
