@@ -2,26 +2,40 @@
 from pathlib import Path
 from queue import Queue
 from threading import Thread
-from typing import Tuple
 
 from conans import __version__ as conan_version
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.client.conan_command_output import CommandOutputer
 from conans.model.ref import ConanFileReference
 from packaging.version import Version
+from typing import List, Set, Tuple
 
-from conan_app_launcher.config_file import AppEntry
+
+from conan_app_launcher.config_file import AppEntry, TabEntry
 from conan_app_launcher.logger import Logger
+from PyQt5 import QtCore
 
 
 class ConanWorker():
     """ Sequential worker with a queue to execute conan commands """
 
-    def __init__(self):
+    def __init__(self, tabs: List[TabEntry], gui_update_signal: QtCore.pyqtSignal):
         # TODO add setter
-        self.app_queue = Queue(maxsize=0)
+        self.app_queue: "Queue[str]" = Queue(maxsize=0)
         self._worker = None
         self._closing = False
+        self._gui_update_signal = gui_update_signal
+        self._tabs = tabs
+        # self._conan_refs: Set = set()
+
+        conan_refs = []
+        for tab in tabs:
+            for app in tab.get_app_entries():
+                conan_refs.append(str(app.package_id))
+        self._conan_refs = set(conan_refs)
+        for ref in self._conan_refs:
+            self.app_queue.put(ref)
+            self.start_working()
 
     def start_working(self):
         """ Start worker, if it is not already started (can be called multiple times)"""
@@ -37,17 +51,21 @@ class ConanWorker():
             self._closing = True
             self._worker.join(timeout_s)
             Logger().info("Closed Worker")
-            # self.app_queue.task_done()
         self.app_queue = Queue(maxsize=0)
         self._worker = None  # reset thread for later instantiation
 
     def _work_on_conan_queue(self):
         """ Call conan operations form queue """
-        while not self._closing or not self.app_queue.empty():
-            app_entry: AppEntry = self.app_queue.get()
+        while not self._closing and not self.app_queue.empty():
+            conan_ref: str = self.app_queue.get()
             # TODO use setter
-            app_entry.package_folder = get_conan_package_folder(app_entry.package_id)
-            app_entry.on_conan_info_available()
+            # ConanFileReference
+            package_folder = get_conan_package_folder(ConanFileReference.loads(conan_ref))
+            # call update on every entry which has this ref
+            for tab in self._tabs:
+                for app in tab.get_app_entries():
+                    if str(app.package_id) == conan_ref:
+                        app.on_conan_info_available(package_folder)
             self.app_queue.task_done()
 
 

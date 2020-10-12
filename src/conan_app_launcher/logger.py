@@ -58,7 +58,7 @@ class Logger(logging.Logger):
             if record:
                 with lock:
                     self._widget.text = record
-                    self._widget.logging.emit()
+                    self._widget.new_message_logged.emit()
 
     @classmethod
     def init_qt_logger(cls, widget):

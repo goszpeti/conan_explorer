@@ -6,7 +6,6 @@ from typing import List
 import jsonschema
 from conans.model.ref import ConanFileReference
 
-import conan_app_launcher as this
 from conan_app_launcher.logger import Logger
 
 
@@ -39,14 +38,9 @@ class AppEntry():
             Logger().error("Icon %s for '%s' not found", str(self.icon), name)
             self.icon = base_path / "ui" / "qt" / "default_app_icon.png"
 
-        # add this object to the conan worker to get a package info / install the package
-        # TODO: not the optimal place to call this
-        if this.conan_worker:
-            this.conan_worker.app_queue.put(self)
-            this.conan_worker.start_working()
-
-    def on_conan_info_available(self):
+    def on_conan_info_available(self, package_folder: Path):
         """ Callback when conan operation is done and paths can be validated"""
+        self.package_folder = package_folder
         # adjust path on windows, if no file extension is given
         if platform.system() == "Windows" and not self.executable.suffix:
             self.executable = self.executable.with_suffix(".exe")
@@ -73,7 +67,7 @@ class TabEntry():
         return self._app_entries
 
 
-def parse_config_file(config_file_path: Path, ) -> List[TabEntry]:
+def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     """ Parse the json config file, validate and convert to object structure """
     app_config = None
     if not config_file_path.is_file():
@@ -97,9 +91,9 @@ def parse_config_file(config_file_path: Path, ) -> List[TabEntry]:
     for tab in app_config.get("tabs"):
         tab_entry = TabEntry(tab.get("name"))
         for app in tab.get("apps"):
-            tab_entry.add_app_entry(AppEntry(app.get("name"), app.get("package_id"),
-                                             Path(app.get("executable")), app.get("icon", ""),
-                                             config_file_path, base_path))
+            app_entry = AppEntry(app.get("name"), app.get("package_id"),
+                                 Path(app.get("executable")), app.get("icon", ""),
+                                 config_file_path, base_path)
+            tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
-
     return tabs

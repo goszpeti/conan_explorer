@@ -46,8 +46,26 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     main_ui._ui.menu_about_action.trigger()
     time.sleep(3)
     assert main_ui._about_dialog.isEnabled()
+    app.conan_worker.finish_working()
 
-    # app.conan_worker.finish_working(5)
+# def testMainLoop():
+
+#     import conan_app_launcher as app
+#     from conan_app_launcher.main import main
+#     sys.argv = ["main", "-f", str(base_fixture.testdata_path / "app_config.json")]
+#     main_thread = threading.Thread(target=main)
+#     main_thread.start()
+
+#     time.sleep(7)
+
+#     try:
+#         print("Start quit")
+#         app.qt_app.quit()
+#         time.sleep(3)
+#     finally:
+#         if main_thread:
+#             print("Join test thread")
+#             main_thread.join()
 
 # def testClickApp(base_fixture):
 #     pass

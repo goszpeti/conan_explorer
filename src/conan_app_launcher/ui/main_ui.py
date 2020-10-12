@@ -4,6 +4,7 @@ from pathlib import Path
 import conan_app_launcher as this
 from conan_app_launcher.config_file import parse_config_file
 from conan_app_launcher.logger import Logger
+from conan_app_launcher.conan import ConanWorker
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
 from conan_app_launcher.ui.qt.app_grid import Ui_MainWindow
 from PyQt5 import QtCore, QtWidgets
@@ -11,8 +12,8 @@ from PyQt5 import QtCore, QtWidgets
 
 class MainUi(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
-    conan_info_acquired = QtCore.pyqtSignal()
-    logging = QtCore.pyqtSignal()
+    conan_info_updated = QtCore.pyqtSignal()
+    new_message_logged = QtCore.pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -20,22 +21,20 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
         self.text = ""
+        self._init_thread: threading.Thread = None
 
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self)
         Logger().info("Start")
         self._ui.console.setFontPointSize(10)
 
-        self._init_thread = threading.Thread(
-            name="InitMainUI", target=self._init_gui, daemon=True)
-
         self._about_dialog = AboutDialog(self)
         self._ui.menu_about_action.triggered.connect(self._about_dialog.show)
 
         # TODO set last Path on dir
         self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
-        self.conan_info_acquired.connect(self.create_layout)
-        self.logging.connect(self.write_log)
+        self.conan_info_updated.connect(self.update_layout)
+        self.new_message_logged.connect(self.write_log)
         # remove default tab TODO unclean in code, but nice preview in qt designer
         self._ui.tabs.removeTab(0)
         self.init_gui()
@@ -87,21 +86,29 @@ class MainUi(QtWidgets.QMainWindow):
             # self.tabs.append(tab)
             self._ui.tabs.addTab(tab, tab_info.name)
 
+    def update_layout(self):
+        for tab in self._ui.tabs:
+            for app in tab.apps:
+                app.update_entry()
+    # TODO: ungrey entry and set correct icon and add hover text
+    # -> create update fnc for app entry
+
     def init_gui(self):
         """ Start the thread to asynchronously load gui background tasks """
-        self._init_thread.start()
 
-    def _init_gui(self):
-        """ Call all conan functions """
+        # self._init_thread = threading.Thread(
+        #     name="InitMainUI", target=self._init_gui, daemon=True)
+        # self._init_thread.start()
         self._tab_info = parse_config_file(this.config_file_path)
-        self.conan_info_acquired.emit()
+        this.conan_worker = ConanWorker(self._tab_info, self.conan_info_updated)
+        self.create_layout()
 
     def _re_init(self):
         # reset gui and objects
         for i in range(self._ui.tabs.count()):
             self._ui.tabs.removeTab(i)
         this.conan_worker.finish_working(2)
-        self._init_gui()
+        self.init_gui()
 
     def write_log(self):
         self._ui.console.append(self.text)

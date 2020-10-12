@@ -36,7 +36,7 @@ def base_fixture(request):
         app.base_path = None
         if app.conan_worker:
             print("delete app worker")
-            app.conan_worker.finish_working(5)
+            app.conan_worker.finish_working()
             del(app.conan_worker)
         app.conan_worker = None
         app.config_file_path = None

@@ -11,7 +11,6 @@ from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import conan_app_launcher as this
-from conan_app_launcher.conan import ConanWorker
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui import main_ui
 
@@ -51,8 +50,6 @@ def main():
     icon = QtGui.QIcon(str(this.base_path / "icon.ico"))
     this.qt_app.setWindowIcon(icon)
 
-    # init conan worker global instance before gui
-    this.conan_worker = ConanWorker()
     # main_ui must be held in this context, otherwise the gc will destroy the gui
     this.app_main_ui = main_ui.MainUi()
     this.app_main_ui.show()

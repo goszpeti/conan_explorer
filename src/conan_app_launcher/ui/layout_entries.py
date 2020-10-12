@@ -26,8 +26,8 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         sizePolicy.setHeightForWidth(self.app_button.sizePolicy().hasHeightForWidth())
         self.app_button.setSizePolicy(sizePolicy)
         self.app_button.setTextFormat(QtCore.Qt.AutoText)
-        self.app_button.setPixmap(QtGui.QPixmap(str(app.icon)).scaled(
-            64, 64, transformMode=Qt.SmoothTransformation))
+        # self.app_button.setPixmap(QtGui.QPixmap(str(app.icon)).scaled(
+        #    64, 64, transformMode=Qt.SmoothTransformation))
         self.app_button.setScaledContents(False)
         self.app_button.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self.app_button.setToolTip(str(app.package_id))
@@ -48,8 +48,12 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self.addWidget(self.app_version_cbox)
         self.app_button.clicked.connect(self.app_clicked)
 
+    def update_entry(self):
+        # set icon and ungrey
+        self.app_button.set_icon(self.app_info.icon, greyed_out=False)
+
     def app_clicked(self):
-        """ Calback for opening the executable on click """
+        """ Callback for opening the executable on click """
         if self.app_info.executable.is_file():
             subprocess.Popen(str(self.app_info.executable))
 

@@ -2,7 +2,7 @@ import os
 
 from conans.model.ref import ConanFileReference
 
-from conan_app_launcher.conan import get_conan_package_folder
+from conan_app_launcher.conan import get_conan_package_folder, ConanWorker
 
 
 def testConanApi():
@@ -14,3 +14,9 @@ def testConanApi():
     # check again for already installed package
     package_folder = get_conan_package_folder(ConanFileReference.loads(ref))
     assert (package_folder / "bin").is_dir()
+
+
+def testConanWorker(base_fixture):
+    import conan_app_launcher as app
+    app.conan_worker = ConanWorker()
+    self._tab_info = parse_config_file(this.config_file_path)

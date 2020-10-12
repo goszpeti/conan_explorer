@@ -19,13 +19,23 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
         QtWidgets.QLabel.__init__(self, parent=parent, flags=flags)
         QtWidgets.QPushButton.__init__(self, parent=parent)
         self._image = image
+        self.set_icon(image, greyed_out=True)
+
+    def set_icon(self, image, greyed_out=False):
+        self._image = image
         if self._image.suffix == ".ico":
             ic = QtGui.QIcon(str(self._image))
             sizes = ic.availableSizes()
             px = ic.pixmap(ic.actualSize(QtCore.QSize(512, 512)))
-            self.setPixmap(px)
+            im = px.toImage()
+            if greyed_out:
+                im = im.convertToFormat(QtGui.QImage.Format_Grayscale16)
+            self.setPixmap(QtGui.QPixmap.fromImage(im))
         else:
-            self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
+            im = QtGui.QPixmap(str(self._image)).toImage()
+            if greyed_out:
+                im = im.convertToFormat(QtGui.QImage.Format_Grayscale16)
+            self.setPixmap(QtGui.QPixmap.fromImage(im).scaled(
                 ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
 
     def mousePressEvent(self, event):  # pylint: disable=unused-argument, invalid-name
