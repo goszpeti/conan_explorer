@@ -2,7 +2,7 @@
 
 # Conan App-Launcher
 
-TODO : Test Badge 
+![Python tests](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
 
 ## Quick Overview
 
