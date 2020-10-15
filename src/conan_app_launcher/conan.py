@@ -47,10 +47,8 @@ class ConanWorker():
     def finish_working(self, timeout_s: int = None):
         """ Cancel, if worker is still not finished """
         if self._worker and self._worker.is_alive():
-            Logger().info("Closing Worker")
             self._closing = True
             self._worker.join(timeout_s)
-            Logger().info("Closed Worker")
         self.app_queue = Queue(maxsize=0)
         self._worker = None  # reset thread for later instantiation
 

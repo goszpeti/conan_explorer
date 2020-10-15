@@ -35,6 +35,8 @@ def testAbouDialog(base_fixture, qtbot):
 
 
 def testStartupAndOpenMenu(base_fixture, qtbot):
+    # import faulthandler
+    # faulthandler.enable()
     from conan_app_launcher.ui import main_ui
     #app.conan_worker = ConanWorker()
     logger = Logger()  # init logger
@@ -46,8 +48,7 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     main_ui._ui.menu_about_action.trigger()
     time.sleep(3)
     assert main_ui._about_dialog.isEnabled()
-    app.conan_worker.finish_working()
-
+    qtbot.mouseClick(main_ui._about_dialog._button_box.buttons()[0], QtCore.Qt.LeftButton)
 
 # this test causes a segmentation fault on linux - possibly because
 # the gui thread does not run in the main thread...
