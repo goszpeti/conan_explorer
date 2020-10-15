@@ -94,8 +94,6 @@ class MainUi(QtWidgets.QMainWindow):
     # -> create update fnc for app entry
 
     def init_gui(self):
-        """ Start the thread to asynchronously load gui background tasks """
-
         # self._init_thread = threading.Thread(
         #     name="InitMainUI", target=self._init_gui, daemon=True)
         # self._init_thread.start()

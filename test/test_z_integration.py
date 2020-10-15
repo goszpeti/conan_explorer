@@ -36,7 +36,7 @@ def testAbouDialog(base_fixture, qtbot):
 
 def testStartupAndOpenMenu(base_fixture, qtbot):
     from conan_app_launcher.ui import main_ui
-    app.conan_worker = ConanWorker()
+    #app.conan_worker = ConanWorker()
     logger = Logger()  # init logger
     app.config_file_path = base_fixture.testdata_path / "app_config.json"
     main_ui = main_ui.MainUi()
@@ -48,24 +48,26 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     assert main_ui._about_dialog.isEnabled()
     app.conan_worker.finish_working()
 
-# def testMainLoop():
 
-#     import conan_app_launcher as app
-#     from conan_app_launcher.main import main
-#     sys.argv = ["main", "-f", str(base_fixture.testdata_path / "app_config.json")]
-#     main_thread = threading.Thread(target=main)
-#     main_thread.start()
+def testMainLoop(base_fixture):
 
-#     time.sleep(7)
+    import conan_app_launcher as app
+    from conan_app_launcher.main import main
+    sys.argv = ["main", "-f", str(base_fixture.testdata_path / "app_config.json")]
+    main_thread = threading.Thread(target=main)
+    main_thread.start()
 
-#     try:
-#         print("Start quit")
-#         app.qt_app.quit()
-#         time.sleep(3)
-#     finally:
-#         if main_thread:
-#             print("Join test thread")
-#             main_thread.join()
+    time.sleep(7)
 
-# def testClickApp(base_fixture):
-#     pass
+    try:
+        print("Start quit")
+        app.qt_app.quit()
+        time.sleep(3)
+    finally:
+        if main_thread:
+            print("Join test thread")
+            main_thread.join()
+
+
+def testClickApp(base_fixture):
+    pass
