@@ -26,3 +26,4 @@ def testConanWorker(base_fixture, qtbot):
     elements_before = conan_worker.app_queue.qsize()
     time.sleep(5)
     assert conan_worker.app_queue.qsize() < elements_before
+    conan_worker.finish_working()
