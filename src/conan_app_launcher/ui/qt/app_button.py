@@ -29,12 +29,12 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
             px = ic.pixmap(ic.actualSize(QtCore.QSize(512, 512)))
             im = px.toImage()
             if greyed_out:
-                im = im.convertToFormat(QtGui.QImage.Format_Grayscale16)
+                im = im.convertToFormat(QtGui.QImage.Format_Grayscale8)
             self.setPixmap(QtGui.QPixmap.fromImage(im))
         else:
             im = QtGui.QPixmap(str(self._image)).toImage()
             if greyed_out:
-                im = im.convertToFormat(QtGui.QImage.Format_Grayscale16)
+                im = im.convertToFormat(QtGui.QImage.Format_Grayscale8)
             self.setPixmap(QtGui.QPixmap.fromImage(im).scaled(
                 ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
 
