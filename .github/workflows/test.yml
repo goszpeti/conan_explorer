@@ -37,10 +37,6 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v  --junit-xml=./result.xml --cov-report=term --cov=conan_app_launcher --cov-branch || :
+    - name: Evaluate test results
+      run: |
         python3 test/evaluation.py
-        
-# --cov-report=term --cov=conan_app_launcher --cov-branch --cov-report=html 
-# - uses: actions/upload-artifact@v2
-#   with:
-#     name: Test results
-#     path: ./result.xml
