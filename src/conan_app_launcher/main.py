@@ -71,10 +71,8 @@ def handle_cmd_args():
     logger = Logger()
     parser = argparse.ArgumentParser(
         prog="App Grid for Conan", description="App Grid Conan commandline interface")
-    parser.add_argument("-v", "--version", action="version",
-                        version=this.__version__)
-    parser.add_argument("-f", "--file",
-                        help='config json')
+    parser.add_argument("-v", "--version", action="version", version=this.__version__)
+    parser.add_argument("-f", "--file", help='config json')
     args = parser.parse_args()
     if args.file:
         config_path = Path(args.file).resolve()

@@ -79,6 +79,7 @@ class Logger(logging.Logger):
 
     @classmethod
     def remove_qt_logger(cls) -> bool:
+        """ Remove qt logger (to be called before gui closes) """
         logger = cls._instance
 
         for handler in logger.handlers:

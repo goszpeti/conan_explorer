@@ -25,7 +25,6 @@ class MainUi(QtWidgets.QMainWindow):
 
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self)
-        Logger().info("Start")
         self._ui.console.setFontPointSize(10)
 
         self._about_dialog = AboutDialog(self)
@@ -35,12 +34,10 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
         self.conan_info_updated.connect(self.update_layout)
         self.new_message_logged.connect(self.write_log)
-        # remove default tab TODO unclean in code, but nice preview in qt designer
-        self._ui.tabs.removeTab(0)
         self.init_gui()
 
     def closeEvent(self, event):
-        # remove qt logger, so it doesn't log into a non existant objet
+        """ Remove qt logger, so it doesn't log into a non existant object """
         Logger.remove_qt_logger()
         super().closeEvent(event)
 
@@ -49,12 +46,8 @@ class MainUi(QtWidgets.QMainWindow):
         """ Contains all gui objects defined in Qt .ui file. Subclasses need access to this. """
         return self._ui
 
-    # @property
-    # def qt_root_obj(self):
-    #    """ The base class of this ui. Is needed to pass as parent ot call show and hide. """
-    #    return self._qt_root_obj
-
     def open_config_file_dialog(self):
+        """" Open File Dialog and load config file """
         dialog_path = Path.home()
         if this.config_file_path.exists():
             dialog_path = this.config_file_path.parent
@@ -83,28 +76,23 @@ class MainUi(QtWidgets.QMainWindow):
                 if column == 4:
                     column = 0
                     row += 1
-            # self.tabs.append(tab)
             self._ui.tabs.addTab(tab, tab_info.name)
 
     def update_layout(self):
+        # ungrey entry and set correct icon and add hover text
         for tab in self._ui.tabs:
             for app in tab.apps:
                 app.update_entry()
-    # TODO: ungrey entry and set correct icon and add hover text
-    # -> create update fnc for app entry
 
     def init_gui(self):
-        # self._init_thread = threading.Thread(
-        #     name="InitMainUI", target=self._init_gui, daemon=True)
-        # self._init_thread.start()
+        # reset gui and objects
+        for i in range(self._ui.tabs.count()):
+            self._ui.tabs.removeTab(i)
         self._tab_info = parse_config_file(this.config_file_path)
         this.conan_worker = ConanWorker(self._tab_info, self.conan_info_updated)
         self.create_layout()
 
     def _re_init(self):
-        # reset gui and objects
-        for i in range(self._ui.tabs.count()):
-            self._ui.tabs.removeTab(i)
         this.conan_worker.finish_working(2)
         self.init_gui()
 
@@ -113,6 +101,8 @@ class MainUi(QtWidgets.QMainWindow):
 
 
 class AboutDialog(QtWidgets.QDialog):
+    """ Defines Help->About Dialog """
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setWindowTitle("About")
