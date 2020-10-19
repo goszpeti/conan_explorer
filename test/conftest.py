@@ -29,8 +29,9 @@ def base_fixture(request):
 
     def teardown():
         # reset singletons
-        # if app.qt_app:
-        #    app.qt_app = None
+        del(app.qt_app)
+        app.qt_app = None
+        del(logger.Logger._instance)
         logger.Logger._instance = None
         app.base_path = None
         if app.conan_worker:

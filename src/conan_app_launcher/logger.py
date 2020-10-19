@@ -85,5 +85,7 @@ class Logger(logging.Logger):
         for handler in logger.handlers:
             if handler.get_name() == cls.qt_handler_name:
                 logger.removeHandler(handler)
+                if handler:
+                    del(handler)
                 return True
         return False
