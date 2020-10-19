@@ -12,6 +12,7 @@ import conan_app_launcher as app
 from conan_app_launcher.conan import ConanWorker
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.main import main
+from conan_app_launcher.ui.layout_entries import AppUiEntry
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -35,10 +36,7 @@ def testAbouDialog(base_fixture, qtbot):
 
 
 def testStartupAndOpenMenu(base_fixture, qtbot):
-    # import faulthandler
-    # faulthandler.enable()
     from conan_app_launcher.ui import main_ui
-    #app.conan_worker = ConanWorker()
     logger = Logger()  # init logger
     app.config_file_path = base_fixture.testdata_path / "app_config.json"
     main_ui = main_ui.MainUi()
@@ -50,27 +48,40 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     assert main_ui._about_dialog.isEnabled()
     qtbot.mouseClick(main_ui._about_dialog._button_box.buttons()[0], QtCore.Qt.LeftButton)
 
-# this test causes a segmentation fault on linux - possibly because
-# the gui thread does not run in the main thread...
-# def testMainLoop(base_fixture):
 
-#     import conan_app_launcher as app
-#     from conan_app_launcher.main import main
-#     sys.argv = ["main", "-f", str(base_fixture.testdata_path / "app_config.json")]
-#     main_thread = threading.Thread(target=main)
-#     main_thread.start()
-
-#     time.sleep(7)
-
-#     try:
-#         print("Start quit")
-#         app.qt_app.quit()
-#         time.sleep(3)
-#     finally:
-#         if main_thread:
-#             print("Join test thread")
-#             main_thread.join()
+def testOpenApp(base_fixture, qtbot):
+    from conan_app_launcher.ui import main_ui
+    logger = Logger()  # init logger
+    app.config_file_path = base_fixture.testdata_path / "app_config.json"
+    main_ui = main_ui.MainUi()
+    main_ui.show()
+    qtbot.addWidget(main_ui)
+    qtbot.waitExposed(main_ui, 3000)
+    tab_name = "Basics"
+    app_name = "App2"
+    app_ui_obj: AppUiEntry = main_ui._ui.tabs.findChild(
+        QtWidgets.QVBoxLayout, name="tab_widgets_" + tab_name + app_name)
+    qtbot.mouseClick(app_ui_obj._app_button, QtCore.Qt.LeftButton)
+    # TODO need an app which stays open
 
 
-def testClickApp(base_fixture):
-    pass
+def testMainLoop(base_fixture):
+    # this test causes a segmentation fault on linux - possibly because
+    # the gui thread does not run in the main thread...
+
+    import conan_app_launcher as app
+    from conan_app_launcher.main import handle_cmd_args
+    sys.argv = ["main", "-f", str(base_fixture.testdata_path / "app_config.json")]
+    main_thread = threading.Thread(target=handle_cmd_args)
+    main_thread.start()
+
+    time.sleep(7)
+
+    try:
+        print("Start quit")
+        app.qt_app.quit()
+        time.sleep(3)
+    finally:
+        if main_thread:
+            print("Join test thread")
+            main_thread.join(5)
