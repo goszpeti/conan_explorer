@@ -36,7 +36,6 @@
         "python.testing.pytestArgs": [
             "-v",
             "--cov-report=xml:cov.xml",
-            //"--cov-report=html",
             "--cov-report=term",
             "--cov=conan_app_launcher",
             "--cov-append",

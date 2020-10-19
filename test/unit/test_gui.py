@@ -3,17 +3,18 @@ This test starts the application.
 It is called z_integration, so that it launches last.
 """
 
+from PyQt5 import QtCore, QtGui, QtWidgets
+from conan_app_launcher.ui.layout_entries import AppUiEntry
+from conan_app_launcher.main import main
+from conan_app_launcher.logger import Logger
+from conan_app_launcher.conan import ConanWorker
 import os
 import sys
 import threading
 import time
 
 import conan_app_launcher as app
-from conan_app_launcher.conan import ConanWorker
-from conan_app_launcher.logger import Logger
-from conan_app_launcher.main import main
-from conan_app_launcher.ui.layout_entries import AppUiEntry
-from PyQt5 import QtCore, QtGui, QtWidgets
+app.qt_app = QtWidgets.QApplication([])
 
 
 def testDebugDisabledForRelease():
@@ -63,25 +64,3 @@ def testOpenApp(base_fixture, qtbot):
         QtWidgets.QVBoxLayout, name="tab_widgets_" + tab_name + app_name)
     qtbot.mouseClick(app_ui_obj._app_button, QtCore.Qt.LeftButton)
     # TODO need an app which stays open
-
-
-def testMainLoop(base_fixture):
-    # this test causes a segmentation fault on linux - possibly because
-    # the gui thread does not run in the main thread...
-
-    import conan_app_launcher as app
-    from conan_app_launcher.main import handle_cmd_args
-    sys.argv = ["main", "-f", str(base_fixture.testdata_path / "app_config.json")]
-    main_thread = threading.Thread(target=handle_cmd_args)
-    main_thread.start()
-
-    time.sleep(7)
-
-    try:
-        print("Start quit")
-        app.qt_app.quit()
-        time.sleep(3)
-    finally:
-        if main_thread:
-            print("Join test thread")
-            main_thread.join(5)

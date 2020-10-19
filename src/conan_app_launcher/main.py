@@ -46,12 +46,13 @@ def main():
     QtWidgets.QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
     # start Qt app and ui
-    this.qt_app = QtWidgets.QApplication([])
+    if not this.qt_app:
+        this.qt_app = QtWidgets.QApplication([])
     icon = QtGui.QIcon(str(this.base_path / "icon.ico"))
-    this.qt_app.setWindowIcon(icon)
 
     # main_ui must be held in this context, otherwise the gc will destroy the gui
     this.app_main_ui = main_ui.MainUi()
+    this.app_main_ui.setWindowIcon(icon)
     this.app_main_ui.show()
 
     try:

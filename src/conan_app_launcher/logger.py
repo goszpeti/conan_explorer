@@ -80,7 +80,7 @@ class Logger(logging.Logger):
     @classmethod
     def remove_qt_logger(cls) -> bool:
         """ Remove qt logger (to be called before gui closes) """
-        logger = cls._instance
+        logger: logging.Logger = cls._instance
 
         for handler in logger.handlers:
             if handler.get_name() == cls.qt_handler_name:

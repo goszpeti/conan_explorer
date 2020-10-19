@@ -42,7 +42,7 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
         """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
         super().mousePressEvent(event)
         # make the button a little bit smaller to emulate a "clicked" effect
-        smaller_size = ICON_SIZE-(ICON_SIZE/32)
+        smaller_size = int(ICON_SIZE-(ICON_SIZE/32))
         self.setPixmap(self.pixmap().scaled(smaller_size, smaller_size,
                                             transformMode=Qt.SmoothTransformation))
 
