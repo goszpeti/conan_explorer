@@ -19,7 +19,7 @@ def testConanApi():
     assert (package_folder / "bin").is_dir()
 
 
-def testConanWorker(base_fixture, qtbot):
+def testConanWorker(base_fixture):
     conan_info_updated = QtCore.pyqtSignal()
     tab_info = parse_config_file(base_fixture.testdata_path / "app_config.json")
     conan_worker = ConanWorker(tab_info, conan_info_updated)
