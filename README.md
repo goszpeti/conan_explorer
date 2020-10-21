@@ -2,6 +2,8 @@
 
 # Conan App-Launcher
 
+![PyPI last version](https://img.shields.io/pypi/v/conan-app-launcher)
+![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
 ![test](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
 
 
