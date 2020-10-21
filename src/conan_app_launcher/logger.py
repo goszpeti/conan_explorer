@@ -1,9 +1,10 @@
 import logging
 from typing import Optional
-
+import time
 from PyQt5 import QtWidgets
-
-from . import DEBUG_LEVEL, PROG_NAME
+from threading import Lock
+from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
+lock = Lock()
 
 
 class Logger(logging.Logger):
@@ -12,6 +13,7 @@ class Logger(logging.Logger):
     """
     _instance: Optional[logging.Logger] = None
     formatter = logging.Formatter(r"%(levelname)s: %(message)s")
+    qt_handler_name = "qt_handler"
 
     def __new__(cls):
         if cls._instance is None:
@@ -54,7 +56,9 @@ class Logger(logging.Logger):
         def emit(self, record):
             record = self.format(record)
             if record:
-                self._widget.append(record)
+                with lock:
+                    self._widget.text = record
+                    self._widget.new_message_logged.emit()
 
     @classmethod
     def init_qt_logger(cls, widget):
@@ -64,9 +68,24 @@ class Logger(logging.Logger):
         """
         logger = cls._instance
         qt_handler = Logger.QtLogHandler(widget)
+        qt_handler.set_name(cls.qt_handler_name)
         log_debug_level = logging.INFO
         if DEBUG_LEVEL > 0:
             log_debug_level = logging.DEBUG
         qt_handler.setLevel(log_debug_level)
         qt_handler.setFormatter(cls.formatter)
+
         logger.addHandler(qt_handler)
+
+    @classmethod
+    def remove_qt_logger(cls) -> bool:
+        """ Remove qt logger (to be called before gui closes) """
+        logger: logging.Logger = cls._instance
+
+        for handler in logger.handlers:
+            if handler.get_name() == cls.qt_handler_name:
+                logger.removeHandler(handler)
+                if handler:
+                    del(handler)
+                return True
+        return False

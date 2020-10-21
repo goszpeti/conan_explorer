@@ -1,15 +1,16 @@
-# <img src="./src/conan_app_launcher/icon.ico" width="128">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/src/conan_app_launcher/icon.ico" width="128">
 
 # Conan App-Launcher
 
-TODO : Test Badge 
+![test](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
+
 
 ## Quick Overview
 
 The goal of this project is to provide a frontend to start executable contained in packages of the package manager conan. It is intented to be used on Windows and Linux x64 platforms.
 
 
-# <img src="./doc/screenshot.png" width="1024">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="1024">
 
 Features:
 - configurable layout (tabs and applications) with json file

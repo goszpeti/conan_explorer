@@ -4,4 +4,6 @@ mypy
 rope
 pytest
 pytest-cov
-pytest-mock
+#pytest-mock
+pytest-qt
+xunitparser

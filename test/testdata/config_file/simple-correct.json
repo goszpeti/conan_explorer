@@ -1,0 +1,15 @@
+{
+    "version": "0.1.0",
+    "tabs": [
+        {
+            "name": "Basics",
+            "apps": [
+                {
+                    "name": "App1 with spaces",
+                    "package_id": "m4_installer/1.4.18@bincrafters/stable",
+                    "executable": "bin/m4"
+                }
+            ]
+        }
+    ]
+}

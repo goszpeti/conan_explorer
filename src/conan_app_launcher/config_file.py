@@ -6,15 +6,14 @@ from typing import List
 import jsonschema
 from conans.model.ref import ConanFileReference
 
-import conan_app_launcher as this
-
-from .logger import Logger
+from conan_app_launcher.logger import Logger
 
 
 class AppEntry():
     """ Representation of an app entry of the config schema """
 
-    def __init__(self, name, package_id: str, executable: Path, icon: str):
+    def __init__(self, name, package_id: str, executable: Path, icon: str,
+                 config_file_path: Path, base_path: Path):
         # TODO getter/setter
         self.name = name
         self.executable = executable
@@ -32,21 +31,16 @@ class AppEntry():
         if icon.startswith("//"):
             Logger().info("Icon relative to package currently not implemented")
         elif icon and not Path(icon).is_absolute():
-            self.icon = this.config_path.parent / icon
+            self.icon = config_file_path.parent / icon
         else:
             self.icon = Path(icon)
         if not self.icon.is_file():
             Logger().error("Icon %s for '%s' not found", str(self.icon), name)
-            self.icon = this.base_path / "ui" / "qt" / "default_app_icon.png"
+            self.icon = base_path / "ui" / "qt" / "default_app_icon.png"
 
-        # add this object to the conan worker to get a package info / install the package
-        # TODO: not the optimal place to call this
-        if this.conan_worker:
-            this.conan_worker.app_queue.put(self)
-            this.conan_worker.start_working()
-
-    def on_conan_info_available(self):
+    def on_conan_info_available(self, package_folder: Path):
         """ Callback when conan operation is done and paths can be validated"""
+        self.package_folder = package_folder
         # adjust path on windows, if no file extension is given
         if platform.system() == "Windows" and not self.executable.suffix:
             self.executable = self.executable.with_suffix(".exe")
@@ -65,36 +59,41 @@ class TabEntry():
         Logger().debug("Adding tab %s", name)
 
     def add_app_entry(self, app_entry: AppEntry):
+        """ Add an AppEntry object to the tabs layout """
         self._app_entries.append(app_entry)
 
     def get_app_entries(self) -> List[AppEntry]:
+        """ Get all app entries on the tab layout """
         return self._app_entries
 
 
-def parse_config_file(grid_file_path) -> List[TabEntry]:
+def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     """ Parse the json config file, validate and convert to object structure """
     app_config = None
-    if not grid_file_path.is_file():
+    if not config_file_path.is_file():
+        Logger().error("Config file '%s' does not exist.", config_file_path)
         return []
-    with open(grid_file_path) as grid_file:
+    base_path = Path(__file__).parent
+    with open(config_file_path) as grid_file:
         try:
             app_config = json.load(grid_file)
-            with open(this.base_path / "config_schema.json") as schema_file:
+            with open(base_path / "config_schema.json") as schema_file:
                 json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
-            # TODO
             assert app_config.get(
                 "version") == "0.1.0", "Unknown schema version '%s'" % app_config.get("version")
         except BaseException as error:
-            Logger().error("Config file %s :\n%s", grid_file_path, str(error))
+            Logger().error("Config file:\n%s", str(error))
             return []
 
+    # build the object model
     tabs = []
     for tab in app_config.get("tabs"):
         tab_entry = TabEntry(tab.get("name"))
         for app in tab.get("apps"):
-            tab_entry.add_app_entry(AppEntry(app.get("name"), app.get(
-                "package_id"), Path(app.get("executable")), app.get("icon", "")))
+            app_entry = AppEntry(app.get("name"), app.get("package_id"),
+                                 Path(app.get("executable")), app.get("icon", ""),
+                                 config_file_path, base_path)
+            tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
-
     return tabs

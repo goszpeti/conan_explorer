@@ -1,18 +1,17 @@
 """
 Contains global constants and basic/ui variables.
 """
+__version__ = "0.1.0"
 
 from pathlib import Path
-
-from PyQt5 import QtWidgets
 
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from .conan import ConanWorker
+    from PyQt5 import QtWidgets
 
 ### Global constants ###
-__version__ = "0.1.0"
 PROG_NAME = "conan_app_launcher"
 
 ### Global variables ###
@@ -23,8 +22,9 @@ ICON_SIZE = 64
 
 # paths to find folders
 base_path: Path = Path()
-config_path = Path()
+config_file_path = Path()
 
 # qt_application instance
-qt_app: Optional[QtWidgets.QApplication] = None
+qt_app: Optional["QtWidgets.QApplication"] = None
 conan_worker: Optional["ConanWorker"] = None
+app_main_ui = None

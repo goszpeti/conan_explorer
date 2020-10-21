@@ -6,12 +6,20 @@
         {
             "label": "Install package in editable mode",
             "type": "shell",
-            "windows":{"command": "pip"},
-            "linux": {"command": "pip3 "},
+            "windows": {
+                "command": "pip"
+            },
+            "linux": {
+                "command": "pip3"
+            },
             //"runOptions": {
             //    "runOn": "folderOpen"
             //},
-            "args": ["install", "-e", "."],
+            "args": [
+                "install",
+                "-e",
+                "."
+            ],
             "problemMatcher": []
         },
         {
@@ -21,12 +29,23 @@
                 "command": "python"
             },
             "linux": {
-                "command": "python3 "
+                "command": "python3"
             },
             //"runOptions": {
             //    "runOn": "folderOpen"
             //},
-            "args": ["-m", "pip", "install", "--upgrade", "pip", "&&", "pip", "install", "-r", "test/requirements.txt"],
+            "args": [
+                "-m",
+                "pip",
+                "install",
+                "--upgrade",
+                "pip",
+                "&&",
+                "pip",
+                "install",
+                "-r",
+                "test/requirements.txt"
+            ],
             "problemMatcher": []
         },
     ]

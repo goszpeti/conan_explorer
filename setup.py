@@ -6,13 +6,10 @@
 
 import io
 import os
-import sys
-from shutil import rmtree
-from os.path import splitext
 from glob import glob
-from os.path import basename
+from os.path import basename, splitext
 
-from setuptools import find_packages, setup, Command
+from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = 'conan-app-launcher'
@@ -44,7 +41,6 @@ with open(os.path.join(here, "src", "conan_app_launcher", '__init__.py')) as f:
     exec(f.read(), about)
 
 
-
 # Where the magic happens:
 setup(
     name=NAME,
@@ -59,27 +55,29 @@ setup(
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
     install_requires=REQUIRED,
-    #extras_require=EXTRAS,
+    # extras_require=EXTRAS,
     include_package_data=True,
     license='MIT',
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'License :: OSI Approved :: MIT License', #TODO
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: Implementation :: CPython'
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Environment :: X11 Applications :: Qt",
+        "Environment :: Win32(MS Windows)"
     ],
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'gui_scripts': [
-            'conan_app_launcher=conan_app_launcher.main:main',
+            'conan_app_launcher=conan_app_launcher.main:handle_cmd_args',
         ],
         'console_scripts': [
-            'conan_app_launcher_cli=conan_app_launcher.main:main',
+            'conan_app_launcher_cli=conan_app_launcher.main:handle_cmd_args',
         ],
     },
 )
