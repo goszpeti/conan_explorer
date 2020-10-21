@@ -37,7 +37,7 @@ def main():
         sys.stdout = open(os.devnull, "w")
         sys.stderr = open(os.path.join(os.getenv("TEMP"),
                                        "stderr-" + this.PROG_NAME), "w")
-    # # init logger first
+    # init logger first
     this.base_path = Path(__file__).absolute().parent
     logger = Logger()
 
