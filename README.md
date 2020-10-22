@@ -49,6 +49,7 @@ The config file uses the following exemplary schema:
                         "package_id": "app1/0.1.0@user1/stable", // full conan reference
                         "executable": "bin/app1", // relative to conan "package folder"
                         "icon": "MyIcon.png" // relative to this config file,
+                        "console_application": true, // start console application in extra window
                         "args": "--version" // args to start the application with
                     },
                     {
