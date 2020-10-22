@@ -4,7 +4,6 @@ import time
 from PyQt5 import QtWidgets
 from threading import Lock
 from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
-lock = Lock()
 
 
 class Logger(logging.Logger):
@@ -48,6 +47,7 @@ class Logger(logging.Logger):
 
     class QtLogHandler(logging.Handler):
         """ This log handler prints to a qt widget """
+        lock = Lock()
 
         def __init__(self, widget: QtWidgets.QWidget):
             super().__init__(logging.DEBUG)
@@ -56,7 +56,7 @@ class Logger(logging.Logger):
         def emit(self, record):
             record = self.format(record)
             if record:
-                with lock:
+                with self.lock:
                     self._widget.text = record
                     self._widget.new_message_logged.emit()
 

@@ -5,16 +5,25 @@
             "type": "object",
             "properties": {
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Displayed name for application."
                 },
                 "package_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Conan package reference id, like app/1.0.0@usr/stable"
                 },
                 "executable": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Relative path in package to the executable."
+                },
+                "console_application": {
+                    "type": "boolean",
+                    "default": "False",
+                    "description": "CMD style application like bash. Opens in new shell window."
                 },
                 "icon": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Displayed custom icon for application."
                 }
             },
             "required": [
@@ -27,12 +36,14 @@
             "type": "object",
             "properties": {
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Displayed name for tab."
                 },
                 "apps": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/app"
+                        "$ref": "#/definitions/app",
+                        "description": "Array of applications displayed on tab."
                     }
                 }
             },
@@ -47,12 +58,15 @@
     "type": "object",
     "properties": {
         "version": {
-            "type": "string"
+            "type": "string",
+            "const": "0.2.0",
+            "description": "Schema version"
         },
         "tabs": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/tab"
+                "$ref": "#/definitions/tab",
+                "description": "Array of tabs to be displayed."
             }
         }
     },

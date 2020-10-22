@@ -5,6 +5,7 @@ from typing import List
 
 import jsonschema
 from conans.model.ref import ConanFileReference
+import conan_app_launcher as this
 
 from conan_app_launcher.logger import Logger
 
@@ -13,30 +14,32 @@ class AppEntry():
     """ Representation of an app entry of the config schema """
 
     def __init__(self, name, package_id: str, executable: Path, icon: str,
-                 config_file_path: Path, base_path: Path):
+                 console_application: bool, config_file_path: Path):
         # TODO getter/setter
         self.name = name
         self.executable = executable
         self.icon = Path()
         self.package_folder = Path()
+        self.is_console_application = console_application
+        self.update_signal = None
         # validate package id
         try:
             self.package_id = ConanFileReference.loads(package_id)
-        except RuntimeError as error:
+        except Exception as error:
             # errors happen fairly often, keep going
+            self.package_id = ConanFileReference.loads("YouGaveA/0.0.1@Wrong/Reference")
             Logger().error("Conan ref id invalid %s", str(error))
-            return
 
         # validate icon path
         if icon.startswith("//"):
-            Logger().info("Icon relative to package currently not implemented")
+            Logger().warning("Icon relative to package currently not implemented")
         elif icon and not Path(icon).is_absolute():
             self.icon = config_file_path.parent / icon
         else:
             self.icon = Path(icon)
         if not self.icon.is_file():
             Logger().error("Icon %s for '%s' not found", str(self.icon), name)
-            self.icon = base_path / "ui" / "qt" / "default_app_icon.png"
+            self.icon = this.base_path / "ui" / "qt" / "default_app_icon.png"
 
     def on_conan_info_available(self, package_folder: Path):
         """ Callback when conan operation is done and paths can be validated"""
@@ -73,15 +76,12 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     if not config_file_path.is_file():
         Logger().error("Config file '%s' does not exist.", config_file_path)
         return []
-    base_path = Path(__file__).parent
     with open(config_file_path) as grid_file:
         try:
             app_config = json.load(grid_file)
-            with open(base_path / "config_schema.json") as schema_file:
+            with open(this.base_path / "config_schema.json") as schema_file:
                 json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
-            assert app_config.get(
-                "version") == "0.1.0", "Unknown schema version '%s'" % app_config.get("version")
         except BaseException as error:
             Logger().error("Config file:\n%s", str(error))
             return []
@@ -93,7 +93,8 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
         for app in tab.get("apps"):
             app_entry = AppEntry(app.get("name"), app.get("package_id"),
                                  Path(app.get("executable")), app.get("icon", ""),
-                                 config_file_path, base_path)
+                                 app.get("console_application", False),
+                                 config_file_path)
             tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
     return tabs

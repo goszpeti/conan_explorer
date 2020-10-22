@@ -3,17 +3,17 @@ This test starts the application.
 It is called z_integration, so that it launches last.
 """
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from conan_app_launcher.ui.layout_entries import AppUiEntry
-from conan_app_launcher.config_file import AppEntry
-from conan_app_launcher.logger import Logger
-
-from pathlib import Path
-import time
 import platform
+import time
+from pathlib import Path
 from subprocess import check_output
 
 import conan_app_launcher as app
+from conan_app_launcher.config_file import AppEntry
+from conan_app_launcher.logger import Logger
+from conan_app_launcher.ui.layout_entries import AppUiEntry
+from PyQt5 import QtCore, QtWidgets
+
 app.qt_app = QtWidgets.QApplication([])
 
 

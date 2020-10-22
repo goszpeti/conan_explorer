@@ -4,17 +4,9 @@ Because the unit tests use qtbot helper, a QApplication object is already presen
 and it cannot be instatiated anew with the main loop of the program.
 """
 
-import os
-import sys
-import threading
 import time
-
-import conan_app_launcher as app
-from conan_app_launcher.conan import ConanWorker
-from conan_app_launcher.logger import Logger
-from conan_app_launcher.main import main
-from conan_app_launcher.ui.layout_entries import AppUiEntry
-from PyQt5 import QtCore, QtGui, QtWidgets
+import threading
+import sys
 
 
 def testMainLoop(base_fixture):

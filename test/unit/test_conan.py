@@ -5,7 +5,7 @@ from conans.model.ref import ConanFileReference
 from conan_app_launcher.conan import get_conan_package_folder, ConanWorker
 
 from conan_app_launcher.config_file import parse_config_file
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 
 
 def testConanApi():
