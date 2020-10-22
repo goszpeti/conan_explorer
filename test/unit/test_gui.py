@@ -67,13 +67,11 @@ def testOpenApp(base_fixture, qtbot):
     app_ui_obj: AppUiEntry = main_ui._ui.tabs.findChild(
         QtWidgets.QVBoxLayout, name="tab_widgets_" + tab_name + app_name)
     qtbot.mouseClick(app_ui_obj._app_button, QtCore.Qt.LeftButton)
-    # TODO need an app which stays open
     app.conan_worker.finish_working()
     Logger.remove_qt_logger()
 
 
 def testOpenCmdApp(base_fixture):
-    # This test only works in linux...
     if platform.system() == "Linux":
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
                             Path("/usr/bin/sh"), "", True, Path("."))

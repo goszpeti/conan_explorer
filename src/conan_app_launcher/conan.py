@@ -2,18 +2,17 @@
 from pathlib import Path
 from queue import Queue
 from threading import Thread
+from typing import List, Tuple
 
 from conans import __version__ as conan_version
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.client.conan_command_output import CommandOutputer
 from conans.model.ref import ConanFileReference
 from packaging.version import Version
-from typing import List, Set, Tuple
-
-
-from conan_app_launcher.config_file import AppEntry, TabEntry
-from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore
+
+from conan_app_launcher.config_file import TabEntry
+from conan_app_launcher.logger import Logger
 
 
 class ConanWorker():

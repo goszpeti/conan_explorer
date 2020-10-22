@@ -16,6 +16,10 @@
                     "type": "string",
                     "description": "Relative path in package to the executable."
                 },
+                "args": {
+                    "type": "string",
+                    "description": "Optional arguments for the executable."
+                },
                 "console_application": {
                     "type": "boolean",
                     "default": "False",
