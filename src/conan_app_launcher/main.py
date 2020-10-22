@@ -50,10 +50,9 @@ def main():
         this.qt_app = QtWidgets.QApplication([])
     icon = QtGui.QIcon(str(this.base_path / "icon.ico"))
 
-    # main_ui must be held in this context, otherwise the gc will destroy the gui
-    this.app_main_ui = main_ui.MainUi()
-    this.app_main_ui.setWindowIcon(icon)
-    this.app_main_ui.show()
+    app_main_ui = main_ui.MainUi()
+    app_main_ui.setWindowIcon(icon)
+    app_main_ui.show()
 
     try:
         this.qt_app.exec_()
