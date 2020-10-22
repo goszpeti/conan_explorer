@@ -64,7 +64,8 @@ class ConanWorker():
                         app.on_conan_info_available(package_folder)
                         break
             Logger().debug("Finish working on " + conan_ref)
-            self._gui_update_signal.emit()
+            if self._gui_update_signal:
+                self._gui_update_signal.emit()
             self._app_queue.task_done()
 
 

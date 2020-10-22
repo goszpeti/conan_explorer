@@ -5,6 +5,7 @@ It is called z_integration, so that it launches last.
 
 import platform
 import time
+import os
 from pathlib import Path
 from subprocess import check_output
 
@@ -48,6 +49,7 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     time.sleep(3)
     assert main_ui._about_dialog.isEnabled()
     qtbot.mouseClick(main_ui._about_dialog._button_box.buttons()[0], QtCore.Qt.LeftButton)
+    app.conan_worker.finish_working()
     Logger.remove_qt_logger()
 
 
@@ -59,12 +61,14 @@ def testOpenApp(base_fixture, qtbot):
     main_ui.show()
     qtbot.addWidget(main_ui)
     qtbot.waitExposed(main_ui, 3000)
+    time.sleep(2)  # add this so it stays open a little bit
     tab_name = "Basics"
     app_name = "App2"
     app_ui_obj: AppUiEntry = main_ui._ui.tabs.findChild(
         QtWidgets.QVBoxLayout, name="tab_widgets_" + tab_name + app_name)
     qtbot.mouseClick(app_ui_obj._app_button, QtCore.Qt.LeftButton)
     # TODO need an app which stays open
+    app.conan_worker.finish_working()
     Logger.remove_qt_logger()
 
 
@@ -77,9 +81,11 @@ def testOpenCmdApp(base_fixture):
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
         app_ui.app_clicked()
+        time.sleep(5)  # wait for terminal to spawn
         # ckeck pid of created process
-        ret = check_output("xwininfo -root -children")
-        assert "sh" in ret
+        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
+        assert "Terminal" in ret
+        os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         cmd_path = r"C:\Windows\System32\cmd.exe"  # currently hardcoded...
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
@@ -91,3 +97,4 @@ def testOpenCmdApp(base_fixture):
         # check windowname of process - default shell spawns with path as windowname
         ret = check_output('tasklist /fi "WINDOWTITLE eq %s"' % cmd_path)
         assert "cmd.exe" in ret.decode("utf-8")
+        os.system("taskkill /pid " + str(pid))
