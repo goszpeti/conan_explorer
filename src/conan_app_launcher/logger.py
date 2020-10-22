@@ -54,11 +54,13 @@ class Logger(logging.Logger):
             self._widget = widget
 
         def emit(self, record):
+            # don't access the qt object directly, since updates will only work
+            # correctly in main loop, so instead send a PyQt Signal with the text to the Ui
             record = self.format(record)
             if record:
                 with self.lock:
-                    self._widget.text = record
-                    self._widget.new_message_logged.emit()
+                    #self._widget.text = record
+                    self._widget.new_message_logged.emit(record)
 
     @classmethod
     def init_qt_logger(cls, widget):
