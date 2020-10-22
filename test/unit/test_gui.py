@@ -81,7 +81,7 @@ def testOpenCmdApp(base_fixture):
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
         app_ui.app_clicked()
-        time.sleep(2)
+        time.sleep(5)  # wait for terminal to spawn
         # ckeck pid of created process
         ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
         assert "Terminal" in ret
