@@ -5,13 +5,13 @@ It is called z_integration, so that it launches last.
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from conan_app_launcher.ui.layout_entries import AppUiEntry
-from conan_app_launcher.main import main
+from conan_app_launcher.config_file import AppEntry
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.conan import ConanWorker
-import os
-import sys
-import threading
+
+from pathlib import Path
 import time
+import platform
+from subprocess import check_output
 
 import conan_app_launcher as app
 app.qt_app = QtWidgets.QApplication([])
@@ -66,3 +66,28 @@ def testOpenApp(base_fixture, qtbot):
     qtbot.mouseClick(app_ui_obj._app_button, QtCore.Qt.LeftButton)
     # TODO need an app which stays open
     Logger.remove_qt_logger()
+
+
+def testOpenCmdApp(base_fixture):
+    # This test only works in linux...
+    if platform.system() == "Linux":
+        app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
+                            Path("/usr/bin/sh"), "", True, Path("."))
+        parent = QtWidgets.QWidget()
+        parent.setObjectName("parent")
+        app_ui = AppUiEntry(parent, app_info)
+        app_ui.app_clicked()
+        # ckeck pid of created process
+        ret = check_output("xwininfo -root -children")
+        assert "sh" in ret
+    elif platform.system() == "Windows":
+        cmd_path = r"C:\Windows\System32\cmd.exe"  # currently hardcoded...
+        app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
+                            Path(cmd_path), "", True, Path("."))
+        parent = QtWidgets.QWidget()
+        parent.setObjectName("parent")
+        app_ui = AppUiEntry(parent, app_info)
+        app_ui.app_clicked()
+        # check windowname of process - default shell spawns with path as windowname
+        ret = check_output('tasklist /fi "WINDOWTITLE eq %s"' % cmd_path)
+        assert "cmd.exe" in ret.decode("utf-8")

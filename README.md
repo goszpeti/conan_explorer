@@ -39,7 +39,7 @@ Call the executable with:
 The config file uses the following exemplary schema:
 
     {
-        "version": "0.1.0",
+        "version": "0.2.0", // please update the schema manually, no auto update available
         "tabs": [
             {
                 "name": "Basics",
@@ -64,6 +64,7 @@ The config file uses the following exemplary schema:
                     {
                         "name": "App3",
                         "package_id": "app3/0.3.0@user3/stable",
+                        "console_application": true, // starts in a new console window
                         "executable": "bin/app3", // extension (.exe) can be ommited for windows
                         // Icon can be ommitted
                     }

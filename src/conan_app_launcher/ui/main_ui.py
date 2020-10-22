@@ -34,6 +34,7 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
         self.conan_info_updated.connect(self.update_layout)
         self.new_message_logged.connect(self.write_log)
+
         self.init_gui()
 
     def closeEvent(self, event):
@@ -81,7 +82,7 @@ class MainUi(QtWidgets.QMainWindow):
 
     def update_layout(self):
         # ungrey entry and set correct icon and add hover text
-        for tab in self._ui.tabs:
+        for tab in self._ui.tabs.findChildren(TabUiGrid):
             for app in tab.apps:
                 app.update_entry()
 
@@ -98,7 +99,10 @@ class MainUi(QtWidgets.QMainWindow):
         self.init_gui()
 
     def write_log(self):
-        self._ui.console.append(self.text)
+        """ Write the text signalled by the logger """
+        if self.text:
+            self._ui.console.append(self.text)
+        self.text = ""  # reset text to avoid printing the same text twice
 
 
 class AboutDialog(QtWidgets.QDialog):
