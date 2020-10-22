@@ -60,6 +60,7 @@ def testOpenApp(base_fixture, qtbot):
     main_ui.show()
     qtbot.addWidget(main_ui)
     qtbot.waitExposed(main_ui, 3000)
+    time.sleep(2)  # add this so it stays open a little bit
     tab_name = "Basics"
     app_name = "App2"
     app_ui_obj: AppUiEntry = main_ui._ui.tabs.findChild(

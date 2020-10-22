@@ -24,7 +24,6 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self._app_button.sizePolicy().hasHeightForWidth())
         self._app_button.setSizePolicy(size_policy)
         self._app_button.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self._app_button.setToolTip(str(app.package_id))
