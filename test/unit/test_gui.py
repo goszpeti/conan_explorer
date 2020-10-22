@@ -49,6 +49,7 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     time.sleep(3)
     assert main_ui._about_dialog.isEnabled()
     qtbot.mouseClick(main_ui._about_dialog._button_box.buttons()[0], QtCore.Qt.LeftButton)
+    app.conan_worker.finish_working()
     Logger.remove_qt_logger()
 
 
@@ -67,6 +68,7 @@ def testOpenApp(base_fixture, qtbot):
         QtWidgets.QVBoxLayout, name="tab_widgets_" + tab_name + app_name)
     qtbot.mouseClick(app_ui_obj._app_button, QtCore.Qt.LeftButton)
     # TODO need an app which stays open
+    app.conan_worker.finish_working()
     Logger.remove_qt_logger()
 
 

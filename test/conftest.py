@@ -20,15 +20,15 @@ def base_fixture(request):
     app.base_path = paths.base_path / "src" / "conan_app_launcher"
 
     def teardown():
+        if app.conan_worker:
+            app.conan_worker.finish_working()
+            del(app.conan_worker)
         # reset singletons
         del(app.qt_app)
         app.qt_app = None
         del(logger.Logger._instance)
         logger.Logger._instance = None
         app.base_path = None
-        if app.conan_worker:
-            app.conan_worker.finish_working()
-            del(app.conan_worker)
         app.conan_worker = None
         app.config_file_path = None
 
