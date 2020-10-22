@@ -19,6 +19,7 @@ jobs:
 
     env:
       DISPLAY: ':99.0'
+      LC_ALL: 'en_US.UTF-8'
     steps:
     - uses: actions/checkout@v2
     - name: Install qt dependencies - set up a display for gui
@@ -28,6 +29,7 @@ jobs:
     - name: Install xterm for testing
       run: |
         sudo apt install gnome-terminal
+        sudo apt install dbus-x11
     - name: Set up Python  ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
