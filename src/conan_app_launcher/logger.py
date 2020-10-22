@@ -4,7 +4,6 @@ import time
 from PyQt5 import QtWidgets
 from threading import Lock
 from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
-lock = Lock()
 
 
 class Logger(logging.Logger):
@@ -48,17 +47,20 @@ class Logger(logging.Logger):
 
     class QtLogHandler(logging.Handler):
         """ This log handler prints to a qt widget """
+        lock = Lock()
 
         def __init__(self, widget: QtWidgets.QWidget):
             super().__init__(logging.DEBUG)
             self._widget = widget
 
         def emit(self, record):
+            # don't access the qt object directly, since updates will only work
+            # correctly in main loop, so instead send a PyQt Signal with the text to the Ui
             record = self.format(record)
             if record:
-                with lock:
-                    self._widget.text = record
-                    self._widget.new_message_logged.emit()
+                with self.lock:
+                    #self._widget.text = record
+                    self._widget.new_message_logged.emit(record)
 
     @classmethod
     def init_qt_logger(cls, widget):

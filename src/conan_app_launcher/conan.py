@@ -63,6 +63,8 @@ class ConanWorker():
                     if str(app.package_id) == conan_ref:
                         app.on_conan_info_available(package_folder)
                         break
+            Logger().debug("Finish working on " + conan_ref)
+            self._gui_update_signal.emit()
             self._app_queue.task_done()
 
 
@@ -82,7 +84,7 @@ def get_conan_package_folder(conan_ref: ConanFileReference) -> Path:
         # lazy: call info again for path
         [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
     else:
-        Logger().info("Found '%s' in %s.", str(conan_ref), str(package_folder))
+        Logger().debug("Found '%s' in %s.", str(conan_ref), str(package_folder))
     return package_folder
 
 
@@ -102,7 +104,7 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
             if ref_lock_file.exists():
                 ref_count_file.unlink()
                 ref_lock_file.unlink()
-        Logger().info("Getting info for '%s'...", str(conan_ref))
+        Logger().debug("Getting info for '%s'...", str(conan_ref))
         output = []
         [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref))
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)

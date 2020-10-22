@@ -1,6 +1,4 @@
 import os
-import sys
-import time
 from pathlib import Path
 
 import pytest
@@ -17,15 +15,9 @@ class PathSetup():
 
 
 @pytest.fixture
-def target_mockup_fixture():
-    paths = PathSetup()
-    #mockup_path = paths.test_path / "mock"
-    # sys.path.append(str(mockup_path))
-
-
-@pytest.fixture
 def base_fixture(request):
     paths = PathSetup()
+    app.base_path = paths.base_path / "src" / "conan_app_launcher"
 
     def teardown():
         # reset singletons
@@ -42,4 +34,4 @@ def base_fixture(request):
 
     request.addfinalizer(teardown)
 
-    return paths
+    return paths  # ensures that paths can be used in testcases

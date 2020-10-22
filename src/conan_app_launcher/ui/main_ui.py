@@ -13,14 +13,13 @@ from PyQt5 import QtCore, QtWidgets
 class MainUi(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
     conan_info_updated = QtCore.pyqtSignal()
-    new_message_logged = QtCore.pyqtSignal()
+    new_message_logged = QtCore.pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
         self._tab_info = []
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
-        self.text = ""
         self._init_thread: threading.Thread = None
 
         # connect logger to console widget to log possible errors at init
@@ -34,6 +33,7 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
         self.conan_info_updated.connect(self.update_layout)
         self.new_message_logged.connect(self.write_log)
+
         self.init_gui()
 
     def closeEvent(self, event):
@@ -80,8 +80,8 @@ class MainUi(QtWidgets.QMainWindow):
             self._ui.tabs.addTab(tab, tab_info.name)
 
     def update_layout(self):
-        # ungrey entry and set correct icon and add hover text
-        for tab in self._ui.tabs:
+        # ungrey entries and set correct icon and add hover text
+        for tab in self._ui.tabs.findChildren(TabUiGrid):
             for app in tab.apps:
                 app.update_entry()
 
@@ -97,8 +97,9 @@ class MainUi(QtWidgets.QMainWindow):
         this.conan_worker.finish_working(2)
         self.init_gui()
 
-    def write_log(self):
-        self._ui.console.append(self.text)
+    def write_log(self, text):
+        """ Write the text signalled by the logger """
+        self._ui.console.append(text)
 
 
 class AboutDialog(QtWidgets.QDialog):

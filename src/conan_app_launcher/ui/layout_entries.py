@@ -3,7 +3,6 @@ import subprocess
 from conan_app_launcher.config_file import AppEntry
 from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 from conan_app_launcher.ui.qt.app_button import AppButton
 
 # define Qt so we can use it like the namespace in C++
@@ -13,12 +12,11 @@ Qt = QtCore.Qt
 
 
 class AppUiEntry(QtWidgets.QVBoxLayout):
-
     def __init__(self, parent: QtWidgets.QTabWidget, app: AppEntry):
         super().__init__()
         self._app_info = app
         self._app_button = AppButton(parent, app.icon)
-        self._app_name = QtWidgets.QLabel(parent)
+        self._app_name_label = QtWidgets.QLabel(parent)
         self._app_version_cbox = QtWidgets.QComboBox(parent)
         self.setObjectName(parent.objectName() + app.name)
 
@@ -32,10 +30,10 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self._app_button.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self._app_button.setToolTip(str(app.package_id))
         self.addWidget(self._app_button)
-        self._app_name.setSizePolicy(size_policy)
-        self._app_name.setAlignment(QtCore.Qt.AlignCenter)
-        self._app_name.setText(app.name)
-        self.addWidget(self._app_name)
+        self._app_name_label.setSizePolicy(size_policy)
+        self._app_name_label.setAlignment(QtCore.Qt.AlignCenter)
+        self._app_name_label.setText(app.name)
+        self.addWidget(self._app_name_label)
 
         self._app_version_cbox.addItem(app.package_id.version)
         # TODO unlock when version feature is implemented
@@ -46,13 +44,17 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self._app_button.clicked.connect(self.app_clicked)
 
     def update_entry(self):
-        # set icon and ungrey
-        self._app_button.set_icon(self._app_info.icon, greyed_out=False)
+        # set icon and ungrey if package is available
+        if self._app_info.executable.is_file():
+            self._app_button.ungrey_icon()
 
     def app_clicked(self):
         """ Callback for opening the executable on click """
         if self._app_info.executable.is_file():
-            subprocess.Popen(str(self._app_info.executable))
+            creationflags = None
+            if self._app_info.is_console_application:
+                creationflags = subprocess.CREATE_NEW_CONSOLE
+            subprocess.Popen(str(self._app_info.executable), creationflags=creationflags)
 
 
 class TabUiGrid(QtWidgets.QWidget):

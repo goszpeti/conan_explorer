@@ -5,7 +5,7 @@ from conans.model.ref import ConanFileReference
 from conan_app_launcher.conan import get_conan_package_folder, ConanWorker
 
 from conan_app_launcher.config_file import parse_config_file
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 
 
 def testConanApi():
@@ -19,11 +19,18 @@ def testConanApi():
     assert (package_folder / "bin").is_dir()
 
 
+class DummySignal():
+
+    def emit(self):
+        pass
+
+
 def testConanWorker(base_fixture):
-    conan_info_updated = QtCore.pyqtSignal()
+    sig = DummySignal()
     tab_info = parse_config_file(base_fixture.testdata_path / "app_config.json")
-    conan_worker = ConanWorker(tab_info, conan_info_updated)
+    conan_worker = ConanWorker(tab_info, sig)
     elements_before = conan_worker._app_queue.qsize()
-    time.sleep(5)
+    time.sleep(8)
+
     assert conan_worker._app_queue.qsize() < elements_before
     conan_worker.finish_working()

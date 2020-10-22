@@ -1,11 +1,7 @@
-import os
-
 from conan_app_launcher.config_file import parse_config_file
-import conan_app_launcher as app
 
 
 def testCorrectFile(base_fixture):
-    app.base_path = base_fixture.base_path / "src" / "conan_app_launcher"
     tabs = parse_config_file(base_fixture.testdata_path / "app_config.json")
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].get_app_entries()
@@ -13,11 +9,13 @@ def testCorrectFile(base_fixture):
     assert tab0_entries[0].executable.as_posix() == "bin/m4"
     assert tab0_entries[0].icon.name == "default_app_icon.png"
     assert tab0_entries[0].name == "App1 with spaces"
+    assert tab0_entries[0].is_console_application == True
 
     assert str(tab0_entries[1].package_id) == "boost_functional/1.69.0@bincrafters/stable"
     assert tab0_entries[1].executable.as_posix() == "bin/app2"
     assert tab0_entries[1].icon.name == "default_app_icon.png"
     assert tab0_entries[1].name == "App2"
+    assert tab0_entries[1].is_console_application == False  # default
 
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].get_app_entries()
@@ -40,7 +38,8 @@ def testInvalidVersion(base_fixture, capsys):
     assert tabs == []
     captured = capsys.readouterr()
     assert "ERROR" in captured.err
-    assert "Unknown schema version" in captured.err
+    assert "Failed validating" in captured.err
+    assert "version" in captured.err
 
 
 def testInvalidContent(base_fixture, capsys):
