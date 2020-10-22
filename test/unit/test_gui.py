@@ -5,6 +5,7 @@ It is called z_integration, so that it launches last.
 
 import platform
 import time
+import os
 from pathlib import Path
 from subprocess import check_output
 
@@ -77,9 +78,11 @@ def testOpenCmdApp(base_fixture):
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
         app_ui.app_clicked()
+        time.sleep(2)
         # ckeck pid of created process
-        ret = check_output("xwininfo -root -children")
-        assert "sh" in ret
+        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
+        assert "Terminal" in ret
+        os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         cmd_path = r"C:\Windows\System32\cmd.exe"  # currently hardcoded...
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
@@ -91,3 +94,4 @@ def testOpenCmdApp(base_fixture):
         # check windowname of process - default shell spawns with path as windowname
         ret = check_output('tasklist /fi "WINDOWTITLE eq %s"' % cmd_path)
         assert "cmd.exe" in ret.decode("utf-8")
+        os.system("taskkill /pid " + str(pid))
