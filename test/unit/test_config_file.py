@@ -10,14 +10,14 @@ def testCorrectFile(base_fixture):
     assert tab0_entries[0].icon.name == "default_app_icon.png"
     assert tab0_entries[0].name == "App1 with spaces"
     assert tab0_entries[0].is_console_application
-    assert tab0_entries[0].args == ["-n", "name"]
+    assert tab0_entries[0].args == "-n name"
 
     assert str(tab0_entries[1].package_id) == "boost_functional/1.69.0@bincrafters/stable"
     assert tab0_entries[1].executable.as_posix() == "bin/app2"
     assert tab0_entries[1].icon.name == "default_app_icon.png"
     assert tab0_entries[1].name == "App2"
     assert not tab0_entries[1].is_console_application  # default
-    assert tab0_entries[1].args == [""]
+    assert tab0_entries[1].args == ""
 
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].get_app_entries()

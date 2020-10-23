@@ -13,7 +13,7 @@ from conan_app_launcher.logger import Logger
 class AppEntry():
     """ Representation of an app entry of the config schema """
 
-    def __init__(self, name, package_id: str, executable: Path, icon: str, args: str,
+    def __init__(self, name, package_id: str, executable: Path, args: str, icon: str,
                  console_application: bool, config_file_path: Path):
         # TODO getter/setter
         self.name = name
@@ -21,7 +21,7 @@ class AppEntry():
         self.icon = Path()
         self.package_folder = Path()
         self.is_console_application = console_application
-        self.args = args.strip().split(" ")
+        self.args = args
         self.update_signal = None
         # validate package id
         try:
