@@ -9,7 +9,8 @@
                     "package_id": "m4_installer/1.4.18@bincrafters/stable",
                     "executable": "bin/m4",
                     "icon": "NonExistantIcon.png",
-                    "console_application": true
+                    "console_application": true,
+                    "args": "-n name"
                 },
                 {
                     "name": "App2",

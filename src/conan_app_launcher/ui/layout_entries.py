@@ -1,11 +1,8 @@
-import subprocess
-import platform
-
 from conan_app_launcher.config_file import AppEntry
 from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore, QtGui, QtWidgets
 from conan_app_launcher.ui.qt.app_button import AppButton
-
+from conan_app_launcher.app_executor import execute_app
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
@@ -48,20 +45,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
 
     def app_clicked(self):
         """ Callback for opening the executable on click """
-        if self._app_info.executable.is_file():
-            # Linux call errors on creationflags argument, so the calls must be separated
-            if platform.system() == "Windows":
-                creationflags = None
-                if self._app_info.is_console_application:
-                    creationflags = subprocess.CREATE_NEW_CONSOLE
-                subprocess.Popen(str(self._app_info.executable), creationflags=creationflags)
-            elif platform.system() == "Linux":
-                if self._app_info.is_console_application:
-                    # Sadly, there is no default way to do this, because of the miriad terminal emulators available
-                    # Use the dafault distro emulator, with x-terminal-emulator (sudo update-alternatives --config x-terminal-emulator)
-                    # This works only on debian distros.
-                    subprocess.Popen(["x-terminal-emulator", "-e", str(self._app_info.executable)])
-                subprocess.Popen(str(self._app_info.executable))
+        execute_app(self._app_info)
 
 
 class TabUiGrid(QtWidgets.QWidget):

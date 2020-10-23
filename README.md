@@ -4,7 +4,7 @@
 
 ![PyPI last version](https://img.shields.io/pypi/v/conan-app-launcher)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
-![test](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
+![Python tests](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
 
 
 ## Quick Overview
@@ -48,7 +48,9 @@ The config file uses the following exemplary schema:
                         "name": "App1 with spaces", 
                         "package_id": "app1/0.1.0@user1/stable", // full conan reference
                         "executable": "bin/app1", // relative to conan "package folder"
-                        "icon": "MyIcon.png" // relative to this config file
+                        "icon": "MyIcon.png" // relative to this config file,
+                        "console_application": true, // start console application in extra window
+                        "args": "--version" // args to start the application with
                     },
                     {
                         "name": "App2",

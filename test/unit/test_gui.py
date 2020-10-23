@@ -53,43 +53,22 @@ def testStartupAndOpenMenu(base_fixture, qtbot):
     Logger.remove_qt_logger()
 
 
-def testOpenApp(base_fixture, qtbot):
-    from conan_app_launcher.ui import main_ui
-    logger = Logger()  # init logger
-    app.config_file_path = base_fixture.testdata_path / "app_config.json"
-    main_ui = main_ui.MainUi()
-    main_ui.show()
-    qtbot.addWidget(main_ui)
-    qtbot.waitExposed(main_ui, 3000)
-    time.sleep(2)  # add this so it stays open a little bit
-    tab_name = "Basics"
-    app_name = "App2"
-    app_ui_obj: AppUiEntry = main_ui._ui.tabs.findChild(
-        QtWidgets.QVBoxLayout, name="tab_widgets_" + tab_name + app_name)
-    qtbot.mouseClick(app_ui_obj._app_button, QtCore.Qt.LeftButton)
-    # TODO need an app which stays open
-    app.conan_worker.finish_working()
-    Logger.remove_qt_logger()
-
-
-def testOpenCmdApp(base_fixture):
-    # This test only works in linux...
+def testOpenApp(base_fixture):
     if platform.system() == "Linux":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
-                            Path("/usr/bin/sh"), "", True, Path("."))
+        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", Path("/usr/bin/sh"), "", "", True, Path("."))
         parent = QtWidgets.QWidget()
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
         app_ui.app_clicked()
         time.sleep(5)  # wait for terminal to spawn
-        # ckeck pid of created process
+        # check pid of created process
         ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
         assert "Terminal" in ret
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         cmd_path = r"C:\Windows\System32\cmd.exe"  # currently hardcoded...
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
-                            Path(cmd_path), "", True, Path("."))
+                            Path(cmd_path), "", "", True, Path("."))
         parent = QtWidgets.QWidget()
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
@@ -97,4 +76,3 @@ def testOpenCmdApp(base_fixture):
         # check windowname of process - default shell spawns with path as windowname
         ret = check_output('tasklist /fi "WINDOWTITLE eq %s"' % cmd_path)
         assert "cmd.exe" in ret.decode("utf-8")
-        os.system("taskkill /pid " + str(pid))

@@ -13,7 +13,7 @@ from conan_app_launcher.logger import Logger
 class AppEntry():
     """ Representation of an app entry of the config schema """
 
-    def __init__(self, name, package_id: str, executable: Path, icon: str,
+    def __init__(self, name, package_id: str, executable: Path, args: str, icon: str,
                  console_application: bool, config_file_path: Path):
         # TODO getter/setter
         self.name = name
@@ -21,6 +21,7 @@ class AppEntry():
         self.icon = Path()
         self.package_folder = Path()
         self.is_console_application = console_application
+        self.args = args
         self.update_signal = None
         # validate package id
         try:
@@ -91,10 +92,10 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     for tab in app_config.get("tabs"):
         tab_entry = TabEntry(tab.get("name"))
         for app in tab.get("apps"):
-            app_entry = AppEntry(app.get("name"), app.get("package_id"),
-                                 Path(app.get("executable")), app.get("icon", ""),
-                                 app.get("console_application", False),
-                                 config_file_path)
+            app_entry = AppEntry(name=app.get("name"), package_id=app.get("package_id"),
+                                 executable=Path(app.get("executable")), icon=app.get("icon", ""),
+                                 console_application=app.get("console_application", False),
+                                 args=app.get("args", ""), config_file_path=config_file_path)
             tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
     return tabs
