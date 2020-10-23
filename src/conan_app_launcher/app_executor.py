@@ -8,7 +8,7 @@ def execute_app(app_info: AppEntry):
     if app_info.executable.absolute().is_file():
         # Linux call errors on creationflags argument, so the calls must be separated
         if platform.system() == "Windows":
-            creationflags = None
+            creationflags = 0
             if app_info.is_console_application:
                 creationflags = subprocess.CREATE_NEW_CONSOLE
             subprocess.Popen(executable=str(app_info.executable),
