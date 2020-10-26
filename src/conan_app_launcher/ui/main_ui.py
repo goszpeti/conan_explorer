@@ -56,7 +56,7 @@ class MainUi(QtWidgets.QMainWindow):
                                        directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            this.config_path = Path(dialog.selectedFiles()[0])
+            this.config_file_path = Path(dialog.selectedFiles()[0])
             self._re_init()
 
     def create_layout(self):
@@ -87,11 +87,14 @@ class MainUi(QtWidgets.QMainWindow):
 
     def init_gui(self):
         # reset gui and objects
-        for i in range(self._ui.tabs.count()):
-            self._ui.tabs.removeTab(i)
-        self._tab_info = parse_config_file(this.config_file_path)
+        while self._ui.tabs.count() > 0:
+            self._ui.tabs.removeTab(0)
+        if this.config_file_path.is_file():
+            self._tab_info = parse_config_file(this.config_file_path)
         this.conan_worker = ConanWorker(self._tab_info, self.conan_info_updated)
-        self.create_layout()
+        a = 2
+        if a == 2:
+            self.create_layout()
 
     def _re_init(self):
         this.conan_worker.finish_working(2)
