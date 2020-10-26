@@ -18,8 +18,6 @@ from conan_app_launcher.ui import main_ui
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
 from PyQt5 import QtCore, QtWidgets
 
-app.qt_app = QtWidgets.QApplication([])
-
 
 def testDebugDisabledForRelease():
     assert app.DEBUG_LEVEL == 0  # debug level should be 0 for release
@@ -30,8 +28,8 @@ def testAboutDialog(base_fixture, qtbot):
     root_obj = QtWidgets.QWidget()
     widget = main_ui.AboutDialog(root_obj)
     widget.show()
-    qtbot.waitForWindowShown(widget)
     qtbot.addWidget(widget)
+    qtbot.waitForWindowShown(widget)
 
     assert "Conan App Launcher" in widget._text.text()
     qtbot.mouseClick(widget._button_box.buttons()[0], QtCore.Qt.LeftButton)
@@ -62,7 +60,7 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
     Logger.remove_qt_logger()
 
 
-def testMultipleAppsUngreying(base_fixture):
+def testMultipleAppsUngreying(base_fixture, qtbot):
     logger = Logger()  # init logger
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
@@ -73,6 +71,8 @@ def testMultipleAppsUngreying(base_fixture):
 
     main_gui = main_ui.MainUi(settings)
     main_gui.show()
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, 3000)
 
     # wait for all tasks to finish
     app.conan_worker._worker.join()
@@ -100,6 +100,7 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
 
     main_gui = main_ui.MainUi(settings)
     main_gui.show()
+
     tabs_num = 2  # two tabs in this file
     assert main_gui._ui.tabs.count() == tabs_num
 
@@ -120,8 +121,9 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
     main_gui = main_ui.MainUi(settings)
-    main_gui.show()
     qtbot.addWidget(main_gui)
+
+    main_gui.show()
     qtbot.waitExposed(main_gui, 3000)
     main_gui._ui.menu_about_action.trigger()
     time.sleep(3)
@@ -131,12 +133,13 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     Logger.remove_qt_logger()
 
 
-def testOpenApp(base_fixture):
+def testOpenApp(base_fixture, qtbot):
     if platform.system() == "Linux":
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable", Path("/usr/bin/sh"), "", "", True, Path("."))
         parent = QtWidgets.QWidget()
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
+        qtbot.addWidget(app_ui)
         app_ui.app_clicked()
         time.sleep(5)  # wait for terminal to spawn
         # check pid of created process
