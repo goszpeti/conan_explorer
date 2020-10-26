@@ -2,9 +2,10 @@ import threading
 from pathlib import Path
 
 import conan_app_launcher as this
+from conan_app_launcher.conan import ConanWorker
 from conan_app_launcher.config_file import parse_config_file
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.conan import ConanWorker
+from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
 from conan_app_launcher.ui.qt.app_grid import Ui_MainWindow
 from PyQt5 import QtCore, QtWidgets
@@ -15,8 +16,9 @@ class MainUi(QtWidgets.QMainWindow):
     conan_info_updated = QtCore.pyqtSignal()
     new_message_logged = QtCore.pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, settings: Settings):
         super().__init__()
+        self._settings = settings
         self._tab_info = []
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
@@ -50,13 +52,14 @@ class MainUi(QtWidgets.QMainWindow):
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = Path.home()
-        if this.config_file_path.exists():
-            dialog_path = this.config_file_path.parent
+        config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
+        if config_file_path.exists():
+            dialog_path = config_file_path.parent
         dialog = QtWidgets.QFileDialog(caption="Select JSON Config File",
                                        directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            this.config_file_path = Path(dialog.selectedFiles()[0])
+            self._settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
             self._re_init()
 
     def create_layout(self):
@@ -89,12 +92,11 @@ class MainUi(QtWidgets.QMainWindow):
         # reset gui and objects
         while self._ui.tabs.count() > 0:
             self._ui.tabs.removeTab(0)
-        if this.config_file_path.is_file():
-            self._tab_info = parse_config_file(this.config_file_path)
+        config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
+        if config_file_path.is_file():
+            self._tab_info = parse_config_file(config_file_path)
         this.conan_worker = ConanWorker(self._tab_info, self.conan_info_updated)
-        a = 2
-        if a == 2:
-            self.create_layout()
+        self.create_layout()
 
     def _re_init(self):
         this.conan_worker.finish_working(2)
@@ -112,12 +114,12 @@ class AboutDialog(QtWidgets.QDialog):
         super().__init__(parent)
         self.setWindowTitle("About")
         self.setModal(True)
-        QBtn = QtWidgets.QDialogButtonBox.Ok
+        ok_button = QtWidgets.QDialogButtonBox.Ok
         self._text = QtWidgets.QLabel(self)
         self._text.setText("Conan App Launcher\n" + this.__version__ + "\n" +
                            "Copyright (C), 2020, Péter Gosztolya")
 
-        self._button_box = QtWidgets.QDialogButtonBox(QBtn)
+        self._button_box = QtWidgets.QDialogButtonBox(ok_button)
         self._button_box.accepted.connect(self.accept)
         self._button_box.rejected.connect(self.reject)
 

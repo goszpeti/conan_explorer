@@ -74,6 +74,8 @@ class TabEntry():
 def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     """ Parse the json config file, validate and convert to object structure """
     app_config = None
+    Logger().info("Loading file '%s'...", config_file_path)
+
     if not config_file_path.is_file():
         Logger().error("Config file '%s' does not exist.", config_file_path)
         return []

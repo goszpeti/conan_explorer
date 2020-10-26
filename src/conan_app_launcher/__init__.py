@@ -20,10 +20,8 @@ ICON_SIZE = 64
 # 3: wait for remote debugger, multiprocessing off
 DEBUG_LEVEL = 0
 
-
 # paths to find folders
 base_path: Path = Path()
-config_file_path = Path()
 
 # qt_application instance
 qt_app: Optional["QtWidgets.QApplication"] = None
