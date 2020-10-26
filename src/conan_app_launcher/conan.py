@@ -61,7 +61,6 @@ class ConanWorker():
                 for app in tab.get_app_entries():
                     if str(app.package_id) == conan_ref:
                         app.on_conan_info_available(package_folder)
-                        break
             Logger().debug("Finish working on " + conan_ref)
             if self._gui_update_signal:
                 self._gui_update_signal.emit()
