@@ -1,6 +1,6 @@
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/src/conan_app_launcher/icon.ico" width="128">
 
-# Conan App-Launcher
+# Conan App Launcher
 
 ![https://pypi.org/project/conan-app-launcher/](https://img.shields.io/pypi/v/conan-app-launcher)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
@@ -19,20 +19,27 @@ Features:
 - installs all referenced packages automatically
 - automatic settings resolution for your platform
 - integrated console for information an packages and config file
-- installable with pip (soon from pypi)
+- installable with pip
 
 ## How to install?
+
+### Prequisites on Linux
+Qt for Python must be installed with the native package manager, like:
+
+    sudo apt install python3-pyqt5
+
+Ubuntu 16.04 is currently not supported, because of Python 3.5 syntax.
+
+### With pip from Pypi
+`pip install conan-app-launcher`
 
 ### From source
 
 After checkout use the command:
 `pip install .`
 
-Call the executable with: 
-`conan_app_launcher -f <config_file_path>`, if the Python "scripts" folder is on your system path.
-
-### With pip from Pypi
-`pip install conan-app-launcher`
+## Running
+Execute `conan_app_launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder.
 
 ## Config File
 

@@ -77,9 +77,6 @@ setup(
     entry_points={
         'gui_scripts': [
             'conan_app_launcher=conan_app_launcher.main:handle_cmd_args',
-        ],
-        'console_scripts': [
-            'conan_app_launcher_cli=conan_app_launcher.main:handle_cmd_args',
-        ],
+        ]
     },
 )

@@ -2,7 +2,6 @@
 Entry module of Conan App Launcher
 Sets up cmd arguments, config file and starts the gui
 """
-import argparse
 import os
 import sys
 import traceback
@@ -11,6 +10,7 @@ from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import conan_app_launcher as this
+from conan_app_launcher.settings import Settings
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui import main_ui
 
@@ -50,7 +50,10 @@ def main():
         this.qt_app = QtWidgets.QApplication([])
     icon = QtGui.QIcon(str(this.base_path / "icon.ico"))
 
-    app_main_ui = main_ui.MainUi()
+    settings_file_path = Path.home() / ".cal_config"
+    settings = Settings(ini_file=settings_file_path)
+
+    app_main_ui = main_ui.MainUi(settings)
     app_main_ui.setWindowIcon(icon)
     app_main_ui.show()
 
@@ -60,28 +63,10 @@ def main():
         trace_back = traceback.format_exc()
         logger.error("Application crashed: \n%s", trace_back)
     finally:
+        settings.save_to_file()  # save on exit
         if this.conan_worker:  # cancel conan worker tasks on exit
             this.conan_worker.finish_working()
 
 
-def handle_cmd_args():
-    """
-    All CLI related functions.
-    """
-    logger = Logger()
-    parser = argparse.ArgumentParser(
-        prog="App Grid for Conan", description="App Grid Conan commandline interface")
-    parser.add_argument("-v", "--version", action="version", version=this.__version__)
-    parser.add_argument("-f", "--file", help='config json')
-    args = parser.parse_args()
-    if args.file:
-        config_path = Path(args.file).resolve()
-        if not config_path.exists():
-            logger.error("Cannot find config file %s", config_path)
-            sys.exit(-1)
-        this.config_file_path = config_path
-    main()
-
-
 if __name__ == "__main__":
-    handle_cmd_args()
+    main()

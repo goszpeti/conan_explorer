@@ -16,7 +16,7 @@ def execute_app(app_info: AppEntry):
         elif platform.system() == "Linux":
             if app_info.is_console_application:
                 # Sadly, there is no default way to do this, because of the miriad terminal emulators available
-                # Use the dafault distro emulator, with x-terminal-emulator (sudo update-alternatives --config x-terminal-emulator)
+                # Use the default distro emulator, with x-terminal-emulator (sudo update-alternatives --config x-terminal-emulator)
                 # This works only on debian distros.
                 cmd = ["x-terminal-emulator", "-e", str(app_info.executable)]
             else:
