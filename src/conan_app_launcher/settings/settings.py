@@ -42,7 +42,7 @@ class Settings():
         return self._values.get(name, None)  # TODO Name checking Error
 
     def set(self, name: str, value):
-        """ Get a specific setting """
+        """ Set a specific setting """
         self._values[name] = value  # TODO Name and type checking Error
 
     def save_to_file(self):

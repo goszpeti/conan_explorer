@@ -16,9 +16,9 @@ PROG_NAME = "conan_app_launcher"
 ICON_SIZE = 64
 
 ### Global variables ###
-# 0: No debug, 1 = logging on, display IP in options, 2: remote debugging on
+# 0: No debug, 1 = logging on, 2: remote debugging on
 # 3: wait for remote debugger, multiprocessing off
-DEBUG_LEVEL = 0
+DEBUG_LEVEL = 1
 
 # paths to find folders
 base_path: Path = Path()
