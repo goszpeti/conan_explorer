@@ -50,6 +50,8 @@ def main():
         this.qt_app = QtWidgets.QApplication([])
     icon = QtGui.QIcon(str(this.base_path / "icon.ico"))
 
+    settings = Settings(ini_folder=settings_path)
+
     app_main_ui = main_ui.MainUi()
     app_main_ui.setWindowIcon(icon)
     app_main_ui.show()
@@ -64,24 +66,5 @@ def main():
             this.conan_worker.finish_working()
 
 
-def handle_cmd_args():
-    """
-    All CLI related functions.
-    """
-    logger = Logger()
-    parser = argparse.ArgumentParser(
-        prog="App Grid for Conan", description="App Grid Conan commandline interface")
-    parser.add_argument("-v", "--version", action="version", version=this.__version__)
-    parser.add_argument("-f", "--file", help='config json')
-    args = parser.parse_args()
-    if args.file:
-        config_path = Path(args.file).resolve()
-        if not config_path.exists():
-            logger.error("Cannot find config file %s", config_path)
-            sys.exit(-1)
-        this.config_file_path = config_path
-    main()
-
-
 if __name__ == "__main__":
-    handle_cmd_args()
+    main()
