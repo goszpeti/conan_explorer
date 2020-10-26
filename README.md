@@ -25,21 +25,21 @@ Features:
 
 ### Prequisites on Linux
 Qt for Python must be installed with the native package manager, like:
+
     sudo apt install python3-pyqt5
 
-Ubuntu 16.04 is currently not supported, because of Python 3.5 syntax changes.
+Ubuntu 16.04 is currently not supported, because of Python 3.5 syntax.
+
+### With pip from Pypi
+`pip install conan-app-launcher`
 
 ### From source
 
 After checkout use the command:
 `pip install .`
 
-### With pip from Pypi
-`pip install conan-app-launcher`
-
-### Running
-Execute
-`conan_app_launcher`, if the Python "scripts" folder is on your system path, or look it up manually.
+## Running
+Execute `conan_app_launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder.
 
 ## Config File
 
