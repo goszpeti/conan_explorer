@@ -76,7 +76,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'gui_scripts': [
-            'conan_app_launcher=conan_app_launcher.main:handle_cmd_args',
+            'conan_app_launcher=conan_app_launcher.main:main',
         ]
     },
 )
