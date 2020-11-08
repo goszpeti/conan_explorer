@@ -77,17 +77,19 @@ def testOpenFile(base_fixture):
     test_file = Path(tempfile.gettempdir(), "test.txt")
     with open(str(test_file), "w") as f:
         f.write("test")
-    time.sleep(5)  # wait for program to start
-
     open_file(test_file)
-    if platform.system() == "Linux":
-        # Query for textfile
-        # "xdg-mime query default text/plain"
+    time.sleep(3)  # wait for program to start
 
+    if platform.system() == "Linux":
+        # set for textfile
+        ret = check_output(["xdg-mime", "default", "org.gnome.Terminal.desktop",
+                            "text/plain"]).decode("utf-8")
+
+        ret = check_output(["xdg-mime", "query", "default", "text/plain"]).decode("utf-8")
         # check pid of created process
-        ret = check_output(["xwininfo", "-name", "gedit"]).decode("utf-8")
-        assert "gedit" in ret
-        os.system("pkill --newest gedit")
+        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
+        assert "Terminal" in ret
+        os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         # TODO how to check? ftype textfile dow not seem to work
         default_app = "notepad.exe"
