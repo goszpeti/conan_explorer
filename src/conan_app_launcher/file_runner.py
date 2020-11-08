@@ -1,29 +1,38 @@
 import platform
 import subprocess
+import os
+from pathlib import Path
 
-from conan_app_launcher.config_file import AppEntry
 
-
-def execute_app(app_info: AppEntry):
+def execute_app(executable: Path, is_console_app: bool, args: str):
     """ Executes an application with args and optionally spawns a new shell as specified in the app entry."""
-    if app_info.executable.absolute().is_file():
-        cmd = [str(app_info.executable)]
+    if executable.absolute().is_file():
+        cmd = [str(executable)]
         # Linux call errors on creationflags argument, so the calls must be separated
         if platform.system() == "Windows":
             creationflags = 0
-            if app_info.is_console_application:
+            if is_console_app:
                 creationflags = subprocess.CREATE_NEW_CONSOLE
-            if app_info.args:
-                cmd += app_info.args.strip().split(" ")
+            if args:
+                cmd += args.strip().split(" ")
                 # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
             subprocess.Popen(cmd, creationflags=creationflags)
         elif platform.system() == "Linux":
-            if app_info.is_console_application:
+            if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal emulators available
                 # Use the default distro emulator, with x-terminal-emulator
                 # (sudo update-alternatives --config x-terminal-emulator)
                 # This works only on debian distros.
-                cmd = ["x-terminal-emulator", "-e", str(app_info.executable)]
-            if app_info.args:
-                cmd += app_info.args.strip().split(" ")
+                cmd = ["x-terminal-emulator", "-e", str(executable)]
+            if args:
+                cmd += args.strip().split(" ")
             subprocess.Popen(cmd)
+
+
+def open_file(file_path: Path):
+    """ Open files with their assocoiated programs """
+    if file_path.absolute().is_file():
+        if platform.system() == 'Windows':
+            os.startfile(str(file_path))
+        elif platform.system() == "Linux":
+            subprocess.call(('xdg-open', str(file_path)))

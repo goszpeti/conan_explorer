@@ -1,8 +1,7 @@
 from conan_app_launcher.config_file import AppEntry
-from conan_app_launcher.logger import Logger
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from conan_app_launcher.ui.qt.app_button import AppButton
-from conan_app_launcher.app_executor import execute_app
+from conan_app_launcher.file_runner import execute_app, open_file
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
@@ -45,7 +44,11 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
 
     def app_clicked(self):
         """ Callback for opening the executable on click """
-        execute_app(self._app_info)
+        # TODO business logic in gui?
+        if self.app_info.executable:
+            execute_app(self.app_info.executable, self.app_info.is_console_application, self.app_info.args)
+        else:
+            open_file(self.app_info.executable)
 
 
 class TabUiGrid(QtWidgets.QWidget):
