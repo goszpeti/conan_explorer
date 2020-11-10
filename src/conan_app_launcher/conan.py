@@ -125,7 +125,7 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
     remotes = cache.registry.load_remotes()
     found_pkg = False
     for remote in remotes.items():
-        if len(remote) > 0:  # only check for len, can be an object or a list
+        if not isinstance(remote, str) and len(remote) > 0:  # only check for len, can be an object or a list
             remote = remote[0]  # for old apis
         try:
             search_results = ConanAPIV1.search_packages(conan, str(package_id),
