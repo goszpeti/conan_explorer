@@ -51,7 +51,7 @@ jobs:
           - name: "ubuntu-py38-conan1.17"
             python: "3.8"
             os: ubuntu-latest
-            conan: "latest"
+            conan: "1.17"
             use_coverage: true
 
     env:
