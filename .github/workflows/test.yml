@@ -40,7 +40,7 @@ jobs:
         python3 -m pip install --upgrade pip
         pip3 install -r test/requirements.txt
         pip3 install -e .
-        pip3 install conan==${{ conan.python-version }}
+        pip3 install conan==${{ matrix.conan-version }}
     - name: Lint with mypy and pylint
       run: |
         mypy ./src || true
