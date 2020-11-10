@@ -84,12 +84,14 @@ jobs:
       - name: Install own dependencies
         run: |
           pip install .
-      - name: Unit tests with pytest
+      - name: Unit and Integration tests with pytest on Linux
         run: |
           pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
-      - name: Integration tests with pytest
-        run: |
           pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
+      - name: Unit and Integration tests with pytest on Windows
+        run: |
+          pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
       - name: Evaluate test results
         run: |
           python test/evaluation.py
