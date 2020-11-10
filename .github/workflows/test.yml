@@ -15,7 +15,8 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.9]
+        conan-version: [1.17, 1.31]
 
     env:
       DISPLAY: ':99.0'
@@ -39,6 +40,7 @@ jobs:
         python3 -m pip install --upgrade pip
         pip3 install -r test/requirements.txt
         pip3 install -e .
+        pip3 install conan==${{ conan.python-version }}
     - name: Lint with mypy and pylint
       run: |
         mypy ./src || true
