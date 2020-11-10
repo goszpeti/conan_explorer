@@ -5,9 +5,9 @@ name: Python Tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   Test:
@@ -16,16 +16,17 @@ jobs:
 
     strategy:
       matrix:
-        name: [
-          "ubuntu-py36",
-          "ubuntu-py37",
-          "ubuntu-py38",
-          "ubuntu-py39",
-          "windows-py38",
-          "ubuntu-py38-conan1.17",
-        ]
+        name:
+          [
+            "ubuntu-py36",
+            "ubuntu-py37",
+            "ubuntu-py38",
+            "ubuntu-py39",
+            "windows-py38",
+            "ubuntu-py38-conan1.17",
+          ]
         include:
-         - name: "ubuntu-py36"
+          - name: "ubuntu-py36"
             python: "3.6"
             os: ubuntu-latest
           - name: "ubuntu-py37"
@@ -38,45 +39,45 @@ jobs:
             python: "3.9"
             use_coverage: true
             os: ubuntu-latest
-          - name: "ubuntu-py38-conan1.17"
-            python: "3.8"
-            use_coverage: true
-            os: ubuntu-latest
           - name: "windows-py38"
             python: "3.8"
             os: windows-latest
             use_coverage: true
+          - name: "ubuntu-py38-conan1.17"
+            python: "3.8"
+            use_coverage: true
+            os: ubuntu-latest
     env:
-      DISPLAY: ':99.0'
-      LC_ALL: 'en_US.UTF-8'
+      DISPLAY: ":99.0"
+      LC_ALL: "en_US.UTF-8"
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up a display for gui in Linux
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0
-        /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
-    - name: Install xterm for testing in Linux
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt install gnome-terminal
-        sudo apt install dbus-x11
-    - name: Set up Python  ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version:  ${{ matrix.python-version }}
-    - name: Install pip and Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r test/requirements.txt
-        pip install conan==${{ matrix.conan-version }}
-        pip install -e .
-    - name: Unit tests with pytest
-      run: |
-        pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
-    - name: Integration tests with pytest
-      run: |
-        pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
-    - name: Evaluate test results
-      run: |
-        python test/evaluation.py
+      - uses: actions/checkout@v2
+      - name: Set up a display for gui in Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
+      - name: Install xterm for testing in Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt install gnome-terminal
+          sudo apt install dbus-x11
+      - name: Set up Python  ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pip and Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r test/requirements.txt
+          pip install conan==${{ matrix.conan-version }}
+          pip install -e .
+      - name: Unit tests with pytest
+        run: |
+          pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
+      - name: Integration tests with pytest
+        run: |
+          pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
+      - name: Evaluate test results
+        run: |
+          python test/evaluation.py
