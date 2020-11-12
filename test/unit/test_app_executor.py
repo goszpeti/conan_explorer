@@ -1,8 +1,9 @@
 import os
 import platform
+import sys
 import time
 from pathlib import Path
-from subprocess import check_output, Popen, PIPE
+from subprocess import check_output
 import tempfile
 from conan_app_launcher.config_file import AppEntry
 from conan_app_launcher.file_runner import execute_app, open_file
@@ -19,17 +20,15 @@ def testStartCliOptionApp(base_fixture):
         assert "Terminal" in ret
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
-        cmd_path = os.getenv("COMSPEC")
+
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
-                            Path(cmd_path), "/K title MyTest", "", True, Path("."))
-        execute_app(app_info.executable, app_info.is_console_application, app_info.args)
+                            Path(sys.executable), "", "", True, Path("."))
+        pid = execute_app(app_info.executable, app_info.is_console_application, app_info.args)
+        assert pid > 0
         time.sleep(1)
-        ret = check_output('tasklist /fi "WINDOWTITLE eq MyTest"')
-        assert "cmd.exe" in ret.decode("utf-8")
-        lines = ret.decode("utf-8").splitlines()
-        line = lines[3].replace(" ", "")
-        pid = line.split("cmd.exe")[1].split("Console")[0]
-        os.system("taskkill /PID " + pid)
+        ret = check_output(f'tasklist /fi "PID eq {str(pid)}"')
+        assert "python.exe" in ret.decode("utf-8")
+        os.system("taskkill /PID " + str(pid))
 
 
 def testRunAppWithArgsNonCli(base_fixture):
@@ -90,7 +89,6 @@ def testOpenFile(base_fixture):
         assert "Terminal" in ret
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
-        # TODO how to check? ftype textfile dow not seem to work
         default_app = "notepad.exe"
         # this is application specific
         ret = check_output(f'tasklist /fi "IMAGENAME eq {default_app}"')

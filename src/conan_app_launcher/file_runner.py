@@ -2,9 +2,10 @@ import platform
 import subprocess
 import os
 from pathlib import Path
+from conan_app_launcher.logger import Logger
 
 
-def execute_app(executable: Path, is_console_app: bool, args: str):
+def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     """ Executes an application with args and optionally spawns a new shell as specified in the app entry."""
     if executable.absolute().is_file():
         cmd = [str(executable)]
@@ -17,7 +18,6 @@ def execute_app(executable: Path, is_console_app: bool, args: str):
                 cmd += args.strip().split(" ")
                 # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
             proc = subprocess.Popen(cmd, creationflags=creationflags)
-            print(proc.pid)  # TODO REMOVE!
         elif platform.system() == "Linux":
             if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal emulators available
@@ -27,7 +27,11 @@ def execute_app(executable: Path, is_console_app: bool, args: str):
                 cmd = ["x-terminal-emulator", "-e", str(executable)]
             if args:
                 cmd += args.strip().split(" ")
-            subprocess.Popen(cmd)
+            proc = subprocess.Popen(cmd)
+        return proc.pid
+    else:
+        Logger().warning(f"No executable {str(executable)} to start.")
+        return 0
 
 
 def open_file(file_path: Path):
