@@ -138,12 +138,14 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
 
 
 def testOpenApp(base_fixture, qtbot):
+    parent = QtWidgets.QMainWindow()
+
     if platform.system() == "Linux":
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable", Path("/usr/bin/sh"), "", "", True, Path("."))
-        parent = QtWidgets.QWidget()
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
         qtbot.addWidget(app_ui)
+        app_ui.show()
         app_ui.app_clicked()
         time.sleep(5)  # wait for terminal to spawn
         # check pid of created process
@@ -154,10 +156,10 @@ def testOpenApp(base_fixture, qtbot):
         cmd_path = os.getenv("COMSPEC")
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
                             Path(cmd_path), "/K title MyTest", "", True, Path("."))
-        parent = QtWidgets.QWidget()
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
         qtbot.addWidget(app_ui)
+        parent.show()
         app_ui.app_clicked()
         time.sleep(5)  # wait for terminal to spawn
         # print(check_output('tasklist').decode("utf-8"))
