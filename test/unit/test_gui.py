@@ -100,12 +100,16 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
 
     main_gui = main_ui.MainUi(settings)
     main_gui.show()
-
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, 3000)
     tabs_num = 2  # two tabs in this file
     assert main_gui._ui.tabs.count() == tabs_num
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
+
+    app.conan_worker.finish_working()
+
     main_gui._re_init()  # re-init with same file
 
     assert main_gui._ui.tabs.count() == tabs_num
@@ -153,6 +157,7 @@ def testOpenApp(base_fixture, qtbot):
         parent = QtWidgets.QWidget()
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
+        qtbot.addWidget(app_ui)
         app_ui.app_clicked()
         time.sleep(5)  # wait for terminal to spawn
         print(check_output('tasklist').decode("utf-8"))

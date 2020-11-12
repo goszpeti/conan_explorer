@@ -103,7 +103,7 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
             if ref_lock_file.exists():
                 ref_count_file.unlink()
                 ref_lock_file.unlink()
-        Logger().debug("Getting info for '{str(conan_ref)}'...")
+        Logger().debug(f"Getting info for '{str(conan_ref)}'...")
         output = []
         [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref))
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)

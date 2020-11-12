@@ -99,7 +99,7 @@ class MainUi(QtWidgets.QMainWindow):
         self.create_layout()
 
     def _re_init(self):
-        this.conan_worker.finish_working(2)
+        this.conan_worker.finish_working(3)
         self.init_gui()
 
     def write_log(self, text):
