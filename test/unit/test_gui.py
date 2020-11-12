@@ -147,7 +147,7 @@ def testOpenApp(base_fixture, qtbot):
         assert "Terminal" in ret
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
-        cmd_path = r"C:\Windows\System32\cmd.exe"  # currently hardcoded...
+        cmd_path = os.getenv("COMSPEC")
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
                             Path(cmd_path), "", "", True, Path("."))
         parent = QtWidgets.QWidget()
