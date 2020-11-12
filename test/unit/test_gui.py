@@ -155,6 +155,7 @@ def testOpenApp(base_fixture, qtbot):
         app_ui = AppUiEntry(parent, app_info)
         app_ui.app_clicked()
         time.sleep(5)  # wait for terminal to spawn
+        print(check_output('tasklist').decode("utf-8"))
 
         # check windowname of process - default shell spawns with path as windowname
         ret = check_output('tasklist /fi "WINDOWTITLE eq MyTest"')

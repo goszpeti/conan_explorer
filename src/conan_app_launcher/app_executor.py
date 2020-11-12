@@ -16,7 +16,8 @@ def execute_app(app_info: AppEntry):
             if app_info.args:
                 cmd += app_info.args.strip().split(" ")
                 # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
-            subprocess.Popen(cmd, creationflags=creationflags)
+            proc = subprocess.Popen(cmd, creationflags=creationflags)
+            print(proc.pid)  # TODO REMOVE!
         elif platform.system() == "Linux":
             if app_info.is_console_application:
                 # Sadly, there is no default way to do this, because of the miriad terminal emulators available
