@@ -78,12 +78,12 @@ def get_conan_package_folder(conan_ref: ConanFileReference) -> Path:
     [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
 
     if not is_installed:
-        Logger().info("Installing '%s'...", str(conan_ref))
+        Logger().info(f"Installing '{str(conan_ref)}'...")
         install_conan_package(conan, cache, conan_ref)
         # lazy: call info again for path
         [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
     else:
-        Logger().debug("Found '%s' in %s.", str(conan_ref), str(package_folder))
+        Logger().debug(f"Found '{str(conan_ref)}' in {str(package_folder)}.")
     return package_folder
 
 
@@ -103,7 +103,7 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
             if ref_lock_file.exists():
                 ref_count_file.unlink()
                 ref_lock_file.unlink()
-        Logger().debug("Getting info for '%s'...", str(conan_ref))
+        Logger().debug("Getting info for '{str(conan_ref)}'...")
         output = []
         [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref))
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
@@ -158,6 +158,6 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
         try:
             ConanAPIV1.install_reference(conan, package_id, update=True, settings=settings_list)
         except BaseException as error:
-            Logger().error("Cannot install packge '%s': %s", package_id, str(error))
+            Logger().error(f"Cannot install packge '{package_id}': {str(error)}")
     if not found_pkg:
-        Logger().warning("Cant find a matching package '%s' for this platform.", str(package_id))
+        Logger().warning(f"Cant find a matching package '{str(package_id)}' for this platform.")

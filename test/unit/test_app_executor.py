@@ -24,7 +24,7 @@ def testStartCliOptionApp(base_fixture):
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
                             Path(cmd_path), "", "", True, Path("."))
         execute_app(app_info)
-        time.sleep(1)
+        time.sleep(5)
         ret = check_output('tasklist /fi "WINDOWTITLE eq %s"' % cmd_path)
         assert "cmd.exe" in ret.decode("utf-8")
         lines = ret.decode("utf-8").splitlines()
@@ -44,7 +44,7 @@ def testRunAppWithArgsNonCli(base_fixture):
         assert test_file.is_file()
         os.remove(test_file)
     elif platform.system() == "Windows":
-        cmd_path = r"C:\Windows\System32\cmd.exe"  # currently hardcoded...
+        cmd_path = os.getenv("COMSPEC")
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
                             Path(cmd_path), "/c echo test > " + str(test_file), "", False, Path("."))
         execute_app(app_info)
@@ -63,7 +63,7 @@ def testRunAppWithArgsCliOption(base_fixture):
         assert test_file.is_file()
         os.remove(test_file)
     elif platform.system() == "Windows":
-        cmd_path = r"C:\Windows\System32\cmd.exe"  # currently hardcoded...
+        cmd_path = os.getenv("COMSPEC")
         test_file = Path(tempfile.gettempdir(), "test.txt")
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
                             Path(cmd_path), "/c echo test > " + str(test_file), "", True, Path("."))

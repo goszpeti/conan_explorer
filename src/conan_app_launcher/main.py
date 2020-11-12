@@ -61,7 +61,7 @@ def main():
         this.qt_app.exec_()
     except:  # pylint:disable=bare-except
         trace_back = traceback.format_exc()
-        logger.error("Application crashed: \n%s", trace_back)
+        logger.error(f"Application crashed: \n{trace_back}")
     finally:
         settings.save_to_file()  # save on exit
         if this.conan_worker:  # cancel conan worker tasks on exit

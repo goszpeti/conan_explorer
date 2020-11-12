@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 
 def testConanApi():
     ref = "m4_installer/1.4.18@bincrafters/stable"
-    os.system("conan remove %s -f" % ref)
+    os.system(f"conan remove {ref} -f")
     # Gets package path / installs the package
     package_folder = get_conan_package_folder(ConanFileReference.loads(ref))
     assert (package_folder / "bin").is_dir()

@@ -27,7 +27,7 @@ class Settings():
             self._ini_file_path.open('a').close()
             self._logger.debug('Settings: Creating settings ini-file')
         else:
-            self._logger.debug('Settings: Using %s', self._ini_file_path)
+            self._logger.debug(f'Settings: Using {self._ini_file_path}')
 
         ### default setting values ###
         self._values = {
@@ -95,5 +95,5 @@ class Settings():
         """ Helper function to write a setting. """
         section = self._get_section(section_name)
         if not name in section:
-            self._logger.error("Setting %s to write is unkonwn", name)
+            self._logger.error(f"Setting {name} to write is unkonwn")
         section[name] = str(self._values[name])

@@ -154,10 +154,10 @@ def testOpenApp(base_fixture, qtbot):
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
         app_ui.app_clicked()
-        time.sleep(2)  # wait for terminal to spawn
+        time.sleep(5)  # wait for terminal to spawn
 
         # check windowname of process - default shell spawns with path as windowname
-        ret = check_output('tasklist /fi "WINDOWTITLE eq %s"' % cmd_path)
+        ret = check_output('tasklist /fi "WINDOWTITLE eq {cmd_path}"')
         assert "cmd.exe" in ret.decode("utf-8")
         lines = ret.decode("utf-8").splitlines()
         line = lines[3].replace(" ", "")
