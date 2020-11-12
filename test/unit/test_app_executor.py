@@ -93,10 +93,10 @@ def testOpenFile(base_fixture):
         # TODO how to check? ftype textfile dow not seem to work
         default_app = "notepad.exe"
         # this is application specific
-        ret = check_output(f'tasklist /fi "IMAGENAME eq %{default_app}"')
+        ret = check_output(f'tasklist /fi "IMAGENAME eq {default_app}"')
         assert default_app in ret.decode("utf-8")
         lines = ret.decode("utf-8").splitlines()
         line = lines[3].replace(" ", "")
-        pid = line.split(default_app).split("Console")[0]
+        pid = line.split(default_app)[1].split("Console")[0]
         os.system("taskkill /PID " + pid)
     os.remove(test_file)

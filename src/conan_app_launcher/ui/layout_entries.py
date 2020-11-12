@@ -45,10 +45,10 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
     def app_clicked(self):
         """ Callback for opening the executable on click """
         # TODO business logic in gui?
-        if self.app_info.executable:
-            execute_app(self.app_info.executable, self.app_info.is_console_application, self.app_info.args)
+        if self._app_info.executable:
+            execute_app(self._app_info.executable, self._app_info.is_console_application, self._app_info.args)
         else:
-            open_file(self.app_info.executable)
+            open_file(self._app_info.executable)
 
 
 class TabUiGrid(QtWidgets.QWidget):
