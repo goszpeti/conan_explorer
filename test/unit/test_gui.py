@@ -149,7 +149,7 @@ def testOpenApp(base_fixture, qtbot):
     elif platform.system() == "Windows":
         cmd_path = os.getenv("COMSPEC")
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
-                            Path(cmd_path), "", "", True, Path("."))
+                            Path(cmd_path), "/K title MyTest", "", True, Path("."))
         parent = QtWidgets.QWidget()
         parent.setObjectName("parent")
         app_ui = AppUiEntry(parent, app_info)
@@ -157,7 +157,7 @@ def testOpenApp(base_fixture, qtbot):
         time.sleep(5)  # wait for terminal to spawn
 
         # check windowname of process - default shell spawns with path as windowname
-        ret = check_output('tasklist /fi "WINDOWTITLE eq {cmd_path}"')
+        ret = check_output('tasklist /fi "WINDOWTITLE eq MyTest"')
         assert "cmd.exe" in ret.decode("utf-8")
         lines = ret.decode("utf-8").splitlines()
         line = lines[3].replace(" ", "")

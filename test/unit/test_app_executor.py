@@ -2,7 +2,7 @@ import os
 import platform
 import time
 from pathlib import Path
-from subprocess import check_output
+from subprocess import check_output, Popen, PIPE
 import tempfile
 from conan_app_launcher.config_file import AppEntry
 from conan_app_launcher.app_executor import execute_app
@@ -22,10 +22,10 @@ def testStartCliOptionApp(base_fixture):
     elif platform.system() == "Windows":
         cmd_path = os.getenv("COMSPEC")
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
-                            Path(cmd_path), "", "", True, Path("."))
+                            Path(cmd_path), "/K title MyTest", "", True, Path("."))
         execute_app(app_info)
         time.sleep(5)
-        ret = check_output('tasklist /fi "WINDOWTITLE eq %s"' % cmd_path)
+        ret = check_output('tasklist /fi "WINDOWTITLE eq MyTest"')
         assert "cmd.exe" in ret.decode("utf-8")
         lines = ret.decode("utf-8").splitlines()
         line = lines[3].replace(" ", "")
