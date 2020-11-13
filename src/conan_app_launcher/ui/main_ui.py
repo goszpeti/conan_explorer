@@ -65,8 +65,8 @@ class MainUi(QtWidgets.QMainWindow):
     def create_layout(self):
         tab = None
         for tab_info in self._tab_info:
-            # TODO: need to save object locally, otherwise it can be destroyed in th eunderlying C++ layer
-            tab = TabUiGrid(tab_info.name)
+            # TODO: need to save object locally, otherwise it can be destroyed in the underlying C++ layer
+            self._tab = TabUiGrid(tab_info.name)
             row = 0  # 3
             column = 0  # 4
             for app_info in tab_info.get_app_entries():
