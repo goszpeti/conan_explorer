@@ -1,5 +1,5 @@
-from conan_app_launcher.components import AppEntry
-from conan_app_launcher.components import run_file
+from conan_app_launcher.components import AppEntry, run_file
+from conan_app_launcher.settings import Settings, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS
 from conan_app_launcher.ui.qt.app_button import AppButton
 from PyQt5 import QtCore, QtWidgets
 
@@ -14,7 +14,9 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self._app_button = AppButton(parent, app.icon)
         self._app_name_label = QtWidgets.QLabel(parent)
         self._app_version_cbox = QtWidgets.QComboBox(parent)
-        self.setObjectName(parent.objectName() + app.name)
+        self._app_channel_cbox = QtWidgets.QComboBox(parent)
+
+        self.setObjectName(parent.objectName() + app.name)  # to find it for tests
 
         # size policies
         self.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
@@ -33,15 +35,27 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self._app_version_cbox.addItem(app.package_id.version)
         # TODO unlock when version feature is implemented
         self._app_version_cbox.setDisabled(True)
-
         self.addWidget(self._app_version_cbox)
+
+        self._app_channel_cbox.addItem(app.package_id.channel)
+        # TODO unlock when version feature is implemented
+        self._app_channel_cbox.setDisabled(True)
+        self.addWidget(self._app_channel_cbox)
 
         self._app_button.clicked.connect(self.app_clicked)
 
-    def update_entry(self):
+    def update_entry(self, settings: Settings):
         # set icon and ungrey if package is available
         if self._app_info.executable.is_file():
             self._app_button.ungrey_icon()
+        if settings.get(DISPLAY_APP_VERSIONS):
+            self._app_version_cbox.show()
+        else:
+            self._app_version_cbox.hide()
+        if settings.get(DISPLAY_APP_CHANNELS):
+            self._app_channel_cbox.show()
+        else:
+            self._app_channel_cbox.hide()
 
     def app_clicked(self):
         """ Callback for opening the executable on click """

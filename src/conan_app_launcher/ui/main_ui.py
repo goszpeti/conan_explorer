@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtWidgets
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanWorker, parse_config_file
-from conan_app_launcher.settings import LAST_CONFIG_FILE, Settings
+from conan_app_launcher.settings import LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, Settings
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
 from conan_app_launcher.ui.qt.app_grid import Ui_MainWindow
 
@@ -15,7 +15,7 @@ from conan_app_launcher.ui.qt.app_grid import Ui_MainWindow
 class MainUi(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
     conan_info_updated = QtCore.pyqtSignal()
-    new_message_logged = QtCore.pyqtSignal(str)
+    new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
 
     def __init__(self, settings: Settings):
         super().__init__()
@@ -23,17 +23,18 @@ class MainUi(QtWidgets.QMainWindow):
         self._tab_info: List[TabUiGrid] = []
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
+        self._about_dialog = AboutDialog(self)
         self._tab = None
 
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self)
         self._ui.console.setFontPointSize(10)
 
-        self._about_dialog = AboutDialog(self)
         self._ui.menu_about_action.triggered.connect(self._about_dialog.show)
-
-        # TODO set last Path on dir
         self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
+        self._ui.menu_set_display_versions.triggered.connect(self.set_display_versions)
+        self._ui.menu_set_display_channels.triggered.connect(self.set_display_channels)
+
         self.conan_info_updated.connect(self.update_layout)
         self.new_message_logged.connect(self.write_log)
 
@@ -63,6 +64,14 @@ class MainUi(QtWidgets.QMainWindow):
             self._settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
             self._re_init()
 
+    def set_display_versions(self):
+        self._settings.set(DISPLAY_APP_VERSIONS, self._ui.menu_set_display_versions.isChecked())
+        self.update_layout()
+
+    def set_display_channels(self):
+        self._settings.set(DISPLAY_APP_CHANNELS, self._ui.menu_set_display_channels.isChecked())
+        self.update_layout()
+
     def create_layout(self):
         tab = None
         for tab_info in self._tab_info:
@@ -71,7 +80,6 @@ class MainUi(QtWidgets.QMainWindow):
             row = 0  # 3
             column = 0  # 4
             for app_info in tab_info.get_app_entries():
-
                 # add in order of occurence
                 app = AppUiEntry(self._tab.tab_scroll_area_widgets, app_info)
                 self._tab.apps.append(app)
@@ -86,15 +94,14 @@ class MainUi(QtWidgets.QMainWindow):
         # ungrey entries and set correct icon and add hover text
         for tab in self._ui.tabs.findChildren(TabUiGrid):
             for app in tab.apps:
-                app.update_entry()
+                app.update_entry(self._settings)
 
     def init_gui(self):
         # reset gui and objects
         while self._ui.tabs.count() > 0:
             self._ui.tabs.removeTab(0)
         config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
-        if config_file_path.is_file():
-            self._tab_info = parse_config_file(config_file_path)
+        self._tab_info = parse_config_file(config_file_path)
         this.conan_worker = ConanWorker(self._tab_info, self.conan_info_updated)
         self.create_layout()
 
@@ -103,7 +110,7 @@ class MainUi(QtWidgets.QMainWindow):
         self.init_gui()
 
     def write_log(self, text):
-        """ Write the text signalled by the logger """
+        """ Write the text signaled by the logger """
         self._ui.console.append(text)
 
 

@@ -21,7 +21,6 @@ class AppEntry():
         self.package_folder = Path()
         self.is_console_application = console_application
         self.args = args
-        self.update_signal = None
         # validate package id
         try:
             self.package_id = ConanFileReference.loads(package_id)
@@ -41,7 +40,7 @@ class AppEntry():
             Logger().error(f"Icon {str(self.icon)} for '{name}' not found")
             self.icon = this.base_path / "assets" / "default_app_icon.png"
 
-    def on_conan_info_available(self, package_folder: Path):
+    def validate_with_conan_info(self, package_folder: Path):
         """ Callback when conan operation is done and paths can be validated"""
         self.package_folder = package_folder
         # adjust path on windows, if no file extension is given

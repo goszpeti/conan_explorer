@@ -19,3 +19,5 @@ def testAboutDialog(base_fixture, qtbot):
     assert "Conan App Launcher" in widget._text.text()
     qtbot.mouseClick(widget._button_box.buttons()[0], QtCore.Qt.LeftButton)
     assert widget.isHidden()
+
+# TODO TEST show view channel and version
