@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-import conan_app_launcher.logger as logger
+import conan_app_launcher.base as logger
 import conan_app_launcher as app
 
 

@@ -1,13 +1,13 @@
 import json
 import platform
+import jsonschema
+
 from pathlib import Path
 from typing import List
-
-import jsonschema
 from conans.model.ref import ConanFileReference
-import conan_app_launcher as this
 
-from conan_app_launcher.logger import Logger
+import conan_app_launcher as this
+from conan_app_launcher.base import Logger
 
 
 class AppEntry():
@@ -15,21 +15,19 @@ class AppEntry():
 
     def __init__(self, name, package_id: str, executable: Path, args: str, icon: str,
                  console_application: bool, config_file_path: Path):
-        # TODO getter/setter
         self.name = name
         self.executable = executable
         self.icon = Path()
         self.package_folder = Path()
         self.is_console_application = console_application
         self.args = args
-        self.update_signal = None
         # validate package id
         try:
             self.package_id = ConanFileReference.loads(package_id)
         except Exception as error:
             # errors happen fairly often, keep going
             self.package_id = ConanFileReference.loads("YouGaveA/0.0.1@Wrong/Reference")
-            Logger().error("Conan ref id invalid %s", str(error))
+            Logger().error(f"Conan ref id invalid {str(error)}")
 
         # validate icon path
         if icon.startswith("//"):
@@ -39,10 +37,10 @@ class AppEntry():
         else:
             self.icon = Path(icon)
         if not self.icon.is_file():
-            Logger().error("Icon %s for '%s' not found", str(self.icon), name)
-            self.icon = this.base_path / "ui" / "qt" / "default_app_icon.png"
+            Logger().error(f"Icon {str(self.icon)} for '{name}' not found")
+            self.icon = this.base_path / "assets" / "default_app_icon.png"
 
-    def on_conan_info_available(self, package_folder: Path):
+    def validate_with_conan_info(self, package_folder: Path):
         """ Callback when conan operation is done and paths can be validated"""
         self.package_folder = package_folder
         # adjust path on windows, if no file extension is given
@@ -50,7 +48,7 @@ class AppEntry():
             self.executable = self.executable.with_suffix(".exe")
         full_path = Path(self.package_folder / self.executable)
         if not full_path.is_file():
-            Logger().error("Cannot find " + str(self.executable) + " in package " + str(self.package_id))
+            Logger().error(f"Cannot find {str(self.executable)} in package {str(self.package_id)}")
         self.executable = full_path
 
 
@@ -60,7 +58,7 @@ class TabEntry():
     def __init__(self, name):
         self.name = name
         self._app_entries: List[AppEntry] = []
-        Logger().debug("Adding tab %s", name)
+        Logger().debug(f"Adding tab {name}")
 
     def add_app_entry(self, app_entry: AppEntry):
         """ Add an AppEntry object to the tabs layout """
@@ -74,19 +72,19 @@ class TabEntry():
 def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     """ Parse the json config file, validate and convert to object structure """
     app_config = None
-    Logger().info("Loading file '%s'...", config_file_path)
+    Logger().info(f"Loading file '{config_file_path}'...")
 
     if not config_file_path.is_file():
-        Logger().error("Config file '%s' does not exist.", config_file_path)
+        Logger().error(f"Config file '{config_file_path}' does not exist.")
         return []
     with open(config_file_path) as grid_file:
         try:
             app_config = json.load(grid_file)
-            with open(this.base_path / "config_schema.json") as schema_file:
+            with open(this.base_path / "assets" / "config_schema.json") as schema_file:
                 json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
         except BaseException as error:
-            Logger().error("Config file:\n%s", str(error))
+            Logger().error(f"Config file:\n{str(error)}")
             return []
 
     # build the object model

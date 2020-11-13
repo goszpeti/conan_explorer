@@ -1,14 +1,14 @@
 """
 Contains global constants and basic/ui variables.
 """
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 from pathlib import Path
 
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
-    from .conan import ConanWorker
+    from .components.conan import ConanWorker
     from PyQt5 import QtWidgets
 
 ### Global constants ###

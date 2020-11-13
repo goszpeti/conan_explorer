@@ -1,8 +1,8 @@
 import configparser
 from pathlib import Path
 
-from conan_app_launcher.logger import Logger
-from conan_app_launcher.settings import LAST_CONFIG_FILE
+from conan_app_launcher.base import Logger
+from conan_app_launcher.settings import LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS
 
 
 class Settings():
@@ -13,6 +13,7 @@ class Settings():
 
     # internal constants
     _GENERAL_SECTION_NAME = "General"
+    _VIEW_SECTION_NAME = "View"
 
     def __init__(self, ini_file: Path):
         """
@@ -27,12 +28,15 @@ class Settings():
             self._ini_file_path.open('a').close()
             self._logger.debug('Settings: Creating settings ini-file')
         else:
-            self._logger.debug('Settings: Using %s', self._ini_file_path)
+            self._logger.debug(f'Settings: Using {self._ini_file_path}')
 
         ### default setting values ###
         self._values = {
             # general
             LAST_CONFIG_FILE: "",
+            # view
+            DISPLAY_APP_CHANNELS: True,
+            DISPLAY_APP_VERSIONS: True
         }
 
         self._read_ini()
@@ -49,6 +53,8 @@ class Settings():
         """ Save all user modifiable options to file. """
         # All writeable settings must be listed here!
         self._write_setting(LAST_CONFIG_FILE, self._GENERAL_SECTION_NAME)
+        self._write_setting(DISPLAY_APP_CHANNELS, self._VIEW_SECTION_NAME)
+        self._write_setting(DISPLAY_APP_CHANNELS, self._VIEW_SECTION_NAME)
 
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
             self._parser.write(ini_file)
@@ -60,6 +66,10 @@ class Settings():
         # All settings and their sections must be listed here!
         general_section = self._get_section(self._GENERAL_SECTION_NAME)
         self._read_setting(LAST_CONFIG_FILE, general_section)
+        view_section = self._get_section(self._VIEW_SECTION_NAME)
+        self._read_setting(DISPLAY_APP_CHANNELS, view_section)
+        self._read_setting(DISPLAY_APP_VERSIONS, view_section)
+
         # write file - to record defaults, if missing
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
             self._parser.write(ini_file)
@@ -95,5 +105,5 @@ class Settings():
         """ Helper function to write a setting. """
         section = self._get_section(section_name)
         if not name in section:
-            self._logger.error("Setting %s to write is unkonwn", name)
+            self._logger.error(f"Setting {name} to write is unkonwn")
         section[name] = str(self._values[name])

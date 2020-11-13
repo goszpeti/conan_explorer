@@ -1,4 +1,4 @@
-from conan_app_launcher.config_file import parse_config_file
+from conan_app_launcher.components import parse_config_file
 
 
 def testCorrectFile(base_fixture):

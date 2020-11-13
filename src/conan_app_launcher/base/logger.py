@@ -1,16 +1,15 @@
 import logging
-from typing import Optional
-import time
-from PyQt5 import QtWidgets
 from threading import Lock
+
 from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
+from PyQt5 import QtWidgets
 
 
 class Logger(logging.Logger):
     """
     Singleton instance for the global dual logger (Qt Widget/console)
     """
-    _instance: Optional[logging.Logger] = None
+    _instance: logging.Logger = None
     formatter = logging.Formatter(r"%(levelname)s: %(message)s")
     qt_handler_name = "qt_handler"
 
@@ -59,7 +58,6 @@ class Logger(logging.Logger):
             record = self.format(record)
             if record:
                 with self.lock:
-                    #self._widget.text = record
                     self._widget.new_message_logged.emit(record)
 
     @classmethod

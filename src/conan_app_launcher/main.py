@@ -11,12 +11,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 import conan_app_launcher as this
 from conan_app_launcher.settings import Settings
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.base import Logger
 from conan_app_launcher.ui import main_ui
 
 try:
     # this is a workaround for windows, so that on the taskbar the
-    # correct icon will bes shown (and not the default python icon)
+    # correct icon will be shown (and not the default python icon)
     from PyQt5.QtWinExtras import QtWin
     MY_APP_ID = 'ConanAppLauncher.' + this.__version__
     QtWin.setCurrentProcessExplicitAppUserModelID(MY_APP_ID)
@@ -48,7 +48,7 @@ def main():
     # start Qt app and ui
     if not this.qt_app:
         this.qt_app = QtWidgets.QApplication([])
-    icon = QtGui.QIcon(str(this.base_path / "icon.ico"))
+    icon = QtGui.QIcon(str(this.base_path / "assets" / "icon.ico"))
 
     settings_file_path = Path.home() / ".cal_config"
     settings = Settings(ini_file=settings_file_path)
@@ -61,7 +61,7 @@ def main():
         this.qt_app.exec_()
     except:  # pylint:disable=bare-except
         trace_back = traceback.format_exc()
-        logger.error("Application crashed: \n%s", trace_back)
+        logger.error(f"Application crashed: \n{trace_back}")
     finally:
         settings.save_to_file()  # save on exit
         if this.conan_worker:  # cancel conan worker tasks on exit
