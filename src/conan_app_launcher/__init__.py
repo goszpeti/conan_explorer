@@ -1,7 +1,7 @@
 """
 Contains global constants and basic/ui variables.
 """
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 from pathlib import Path
 
@@ -18,7 +18,7 @@ ICON_SIZE = 64
 ### Global variables ###
 # 0: No debug, 1 = logging on, 2: remote debugging on
 # 3: wait for remote debugger, multiprocessing off
-DEBUG_LEVEL = 1
+DEBUG_LEVEL = 0
 
 # paths to find folders
 base_path: Path = Path()
