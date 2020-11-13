@@ -65,6 +65,7 @@ class MainUi(QtWidgets.QMainWindow):
     def create_layout(self):
         tab = None
         for tab_info in self._tab_info:
+            # TODO: need to save object locally, otherwise it can be destroyed in th eunderlying C++ layer
             tab = TabUiGrid(tab_info.name)
             row = 0  # 3
             column = 0  # 4
@@ -74,8 +75,6 @@ class MainUi(QtWidgets.QMainWindow):
                 app = AppUiEntry(tab.tab_scroll_area_widgets, app_info)
                 tab.apps.append(app)
                 tab.tab_grid_layout.addLayout(app, row, column, 1, 1)
-                self._ui.tab1_grid_layout.addLayout(AppUiEntry(
-                    self._ui.tab_scroll_area_widgets, app_info), row, column)
                 column += 1
                 if column == 4:
                     column = 0

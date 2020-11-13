@@ -82,8 +82,8 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
     main_gui = main_ui.MainUi(settings)
-    main_gui.show()
     qtbot.addWidget(main_gui)
+    main_gui.show()
     qtbot.waitExposed(main_gui, 3000)
     tabs_num = 2  # two tabs in this file
     assert main_gui._ui.tabs.count() == tabs_num
@@ -121,7 +121,7 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
 
 
 def testOpenApp(base_fixture, qtbot):
-    parent = QtWidgets.QMainWindow()
+    parent = QtWidgets.QWidget()
     parent.setObjectName("parent")
 
     if platform.system() == "Linux":
