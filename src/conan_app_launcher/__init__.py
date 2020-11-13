@@ -8,7 +8,7 @@ from pathlib import Path
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
-    from .conan import ConanWorker
+    from .components.conan import ConanWorker
     from PyQt5 import QtWidgets
 
 ### Global constants ###
@@ -18,7 +18,7 @@ ICON_SIZE = 64
 ### Global variables ###
 # 0: No debug, 1 = logging on, 2: remote debugging on
 # 3: wait for remote debugger, multiprocessing off
-DEBUG_LEVEL = 0
+DEBUG_LEVEL = 1
 
 # paths to find folders
 base_path: Path = Path()

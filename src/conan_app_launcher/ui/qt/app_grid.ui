@@ -155,7 +155,7 @@
                    <string/>
                   </property>
                   <property name="pixmap">
-                   <pixmap>default_app_icon.png</pixmap>
+                   <pixmap>../../assets/default_app_icon.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>false</bool>

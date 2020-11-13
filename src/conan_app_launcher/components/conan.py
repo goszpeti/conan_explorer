@@ -11,14 +11,18 @@ from conans.model.ref import ConanFileReference
 from packaging.version import Version
 from PyQt5 import QtCore
 
-from conan_app_launcher.config_file import TabEntry
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.base import Logger
+
+# this allows to use forward declarations to avoid circular imports
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from conan_app_launcher.components import TabEntry
 
 
 class ConanWorker():
     """ Sequential worker with a queue to execute conan commands and get info on packages """
 
-    def __init__(self, tabs: List[TabEntry], gui_update_signal: QtCore.pyqtSignal):
+    def __init__(self, tabs: List["TabEntry"], gui_update_signal: QtCore.pyqtSignal):
         # TODO add setter
         self._app_queue: "Queue[str]" = Queue(maxsize=0)
         self._worker = None

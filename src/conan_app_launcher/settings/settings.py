@@ -1,7 +1,7 @@
 import configparser
 from pathlib import Path
 
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.base import Logger
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 
 

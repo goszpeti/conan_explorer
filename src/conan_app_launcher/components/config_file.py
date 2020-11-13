@@ -1,13 +1,13 @@
 import json
 import platform
+import jsonschema
+
 from pathlib import Path
 from typing import List
-
-import jsonschema
 from conans.model.ref import ConanFileReference
-import conan_app_launcher as this
 
-from conan_app_launcher.logger import Logger
+import conan_app_launcher as this
+from conan_app_launcher.base import Logger
 
 
 class AppEntry():
@@ -15,7 +15,6 @@ class AppEntry():
 
     def __init__(self, name, package_id: str, executable: Path, args: str, icon: str,
                  console_application: bool, config_file_path: Path):
-        # TODO getter/setter
         self.name = name
         self.executable = executable
         self.icon = Path()
@@ -40,7 +39,7 @@ class AppEntry():
             self.icon = Path(icon)
         if not self.icon.is_file():
             Logger().error(f"Icon {str(self.icon)} for '{name}' not found")
-            self.icon = this.base_path / "ui" / "qt" / "default_app_icon.png"
+            self.icon = this.base_path / "assets" / "default_app_icon.png"
 
     def on_conan_info_available(self, package_folder: Path):
         """ Callback when conan operation is done and paths can be validated"""
@@ -82,7 +81,7 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     with open(config_file_path) as grid_file:
         try:
             app_config = json.load(grid_file)
-            with open(this.base_path / "config_schema.json") as schema_file:
+            with open(this.base_path / "assets" / "config_schema.json") as schema_file:
                 json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
         except BaseException as error:

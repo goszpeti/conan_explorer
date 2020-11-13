@@ -1,12 +1,25 @@
+import os
 import platform
 import subprocess
-import os
 from pathlib import Path
-from conan_app_launcher.logger import Logger
+
+from conan_app_launcher.base import Logger
+
+
+def run_file(file: Path, is_console_app: bool, args: str):
+    """ Decide, if a file should be opened or executed and call the appropriate method """
+    if file.is_file() and os.access(str(file), os.X_OK):
+        execute_app(file, is_console_app, args)
+    else:
+        open_file(file)
 
 
 def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
-    """ Executes an application with args and optionally spawns a new shell as specified in the app entry."""
+    """
+    Executes an application with args and optionally spawns a new shell 
+    as specified in the app entry.
+    Returns the pid of the new process.
+    """
     if executable.absolute().is_file():
         cmd = [str(executable)]
         # Linux call errors on creationflags argument, so the calls must be separated
@@ -34,10 +47,10 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
         return 0
 
 
-def open_file(file_path: Path):
+def open_file(file: Path):
     """ Open files with their assocoiated programs """
-    if file_path.absolute().is_file():
+    if file.absolute().is_file():
         if platform.system() == 'Windows':
-            os.startfile(str(file_path))
+            os.startfile(str(file))
         elif platform.system() == "Linux":
-            subprocess.call(('xdg-open', str(file_path)))
+            subprocess.call(('xdg-open', str(file)))

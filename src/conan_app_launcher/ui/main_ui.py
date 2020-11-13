@@ -1,14 +1,15 @@
 import threading
 from pathlib import Path
+from typing import List
+
+from PyQt5 import QtCore, QtWidgets
 
 import conan_app_launcher as this
-from conan_app_launcher.conan import ConanWorker
-from conan_app_launcher.config_file import parse_config_file
-from conan_app_launcher.logger import Logger
-from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
+from conan_app_launcher.base import Logger
+from conan_app_launcher.components import ConanWorker, parse_config_file
+from conan_app_launcher.settings import LAST_CONFIG_FILE, Settings
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
 from conan_app_launcher.ui.qt.app_grid import Ui_MainWindow
-from PyQt5 import QtCore, QtWidgets
 
 
 class MainUi(QtWidgets.QMainWindow):
@@ -19,10 +20,9 @@ class MainUi(QtWidgets.QMainWindow):
     def __init__(self, settings: Settings):
         super().__init__()
         self._settings = settings
-        self._tab_info = []
+        self._tab_info: List[TabUiGrid] = []
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
-        self._init_thread: threading.Thread = None
 
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self)

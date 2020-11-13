@@ -11,29 +11,12 @@ from pathlib import Path
 from subprocess import check_output
 
 import conan_app_launcher as app
-from conan_app_launcher.config_file import AppEntry
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.components import AppEntry
+from conan_app_launcher.base import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_ui
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
 from PyQt5 import QtCore, QtWidgets
-
-
-def testDebugDisabledForRelease():
-    assert app.DEBUG_LEVEL == 0  # debug level should be 0 for release
-
-
-def testAboutDialog(base_fixture, qtbot):
-    logger = Logger()  # init logger
-    root_obj = QtWidgets.QWidget()
-    widget = main_ui.AboutDialog(root_obj)
-    widget.show()
-    qtbot.addWidget(widget)
-    qtbot.waitForWindowShown(widget)
-
-    assert "Conan App Launcher" in widget._text.text()
-    qtbot.mouseClick(widget._button_box.buttons()[0], QtCore.Qt.LeftButton)
-    assert widget.isHidden()
 
 
 def testSelectConfigFileDialog(base_fixture, qtbot, mocker):

@@ -79,7 +79,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.app_button.sizePolicy().hasHeightForWidth())
         self.app_button.setSizePolicy(sizePolicy)
         self.app_button.setText("")
-        self.app_button.setPixmap(QtGui.QPixmap("default_app_icon.png"))
+        self.app_button.setPixmap(QtGui.QPixmap("../../assets/default_app_icon.png"))
         self.app_button.setScaledContents(False)
         self.app_button.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.app_button.setObjectName("app_button")
