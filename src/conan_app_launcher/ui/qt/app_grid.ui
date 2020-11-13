@@ -114,7 +114,7 @@
            <property name="layoutDirection">
             <enum>Qt::LeftToRight</enum>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_9">
+           <!-- <layout class="QVBoxLayout" name="verticalLayout_9">
             <property name="leftMargin">
              <number>0</number>
             </property>
@@ -127,7 +127,7 @@
             <property name="bottomMargin">
              <number>0</number>
             </property>
-            <item>
+            <item> -->
              <layout class="QGridLayout" name="tab1_grid_layout" rowstretch="1,1,1" columnstretch="1,1,1,1" rowminimumheight="146,146,146" columnminimumwidth="202,202,202,202">
               <property name="sizeConstraint">
                <enum>QLayout::SetDefaultConstraint</enum>
@@ -193,8 +193,8 @@
                <layout class="QVBoxLayout" name="verticalLayout_6"/>
               </item>
              </layout>
-            </item>
-           </layout>
+            <!-- </item> -->
+           <!-- </layout> -->
           </widget>
          </widget>
         </item>
