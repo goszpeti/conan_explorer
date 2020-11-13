@@ -122,31 +122,26 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
 
 def testOpenApp(base_fixture, qtbot):
     parent = QtWidgets.QMainWindow()
+    parent.setObjectName("parent")
 
     if platform.system() == "Linux":
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable", Path("/usr/bin/sh"), "", "", True, Path("."))
-        parent.setObjectName("parent")
-        app_ui = AppUiEntry(parent, app_info)
-        qtbot.addWidget(app_ui)
-        app_ui.show()
-        app_ui.app_clicked()
-        time.sleep(5)  # wait for terminal to spawn
-        # check pid of created process
-        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
-        assert "Terminal" in ret
-        os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         cmd_path = os.getenv("COMSPEC")
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
                             Path(cmd_path), "/K title MyTest", "", True, Path("."))
-        parent.setObjectName("parent")
-        app_ui = AppUiEntry(parent, app_info)
-        qtbot.addWidget(app_ui)
-        parent.show()
-        app_ui.app_clicked()
-        time.sleep(5)  # wait for terminal to spawn
-        # print(check_output('tasklist').decode("utf-8"))
 
+    app_ui = AppUiEntry(parent, app_info)
+    qtbot.addWidget(parent)
+    parent.show()
+    app_ui.app_clicked()
+    time.sleep(5)  # wait for terminal to spawn
+    # check pid of created process
+    if platform.system() == "Linux":
+        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
+        assert "Terminal" in ret
+        os.system("pkill --newest terminal")
+    elif platform.system() == "Windows":
         # check windowname of process - default shell spawns with path as windowname
         ret = check_output('tasklist /fi "WINDOWTITLE eq MyTest"')
         assert "cmd.exe" in ret.decode("utf-8")
