@@ -4,6 +4,7 @@ It is called z_integration, so that it launches last.
 """
 
 import os
+import sys
 import platform
 import tempfile
 import time
@@ -125,11 +126,10 @@ def testOpenApp(base_fixture, qtbot):
     parent.setObjectName("parent")
 
     if platform.system() == "Linux":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", Path("/usr/bin/sh"), "", "", True, Path("."))
+        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", Path(sys.executable), "", "", True, Path("."))
     elif platform.system() == "Windows":
-        cmd_path = os.getenv("COMSPEC")
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
-                            Path(cmd_path), "/K title MyTest", "", True, Path("."))
+                            Path(sys.executable), "", "", True, Path("."))
 
     app_ui = AppUiEntry(parent, app_info)
     qtbot.addWidget(parent)
@@ -143,9 +143,9 @@ def testOpenApp(base_fixture, qtbot):
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         # check windowname of process - default shell spawns with path as windowname
-        ret = check_output('tasklist /fi "WINDOWTITLE eq MyTest"')
-        assert "cmd.exe" in ret.decode("utf-8")
+        ret = check_output(f'tasklist /fi "WINDOWTITLE eq {str(sys.executable)}"')
+        assert "python.exe" in ret.decode("utf-8")
         lines = ret.decode("utf-8").splitlines()
         line = lines[3].replace(" ", "")
-        pid = line.split("cmd.exe")[1].split("Console")[0]
+        pid = line.split("python.exe")[1].split("Console")[0]
         os.system("taskkill /PID " + pid)
