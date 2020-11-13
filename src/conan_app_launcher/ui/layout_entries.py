@@ -63,7 +63,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
 
 
 class TabUiGrid(QtWidgets.QWidget):
-    def __init__(self, name):
+    def __init__(self, parent: QtWidgets.QTabWidget, name):
         super().__init__()
         self.apps = []  # AppUiEntry
         self.tab_layout = QtWidgets.QVBoxLayout(self)
