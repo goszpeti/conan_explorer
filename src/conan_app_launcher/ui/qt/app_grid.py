@@ -28,7 +28,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName("verticalLayout")
         self.tabs = QtWidgets.QTabWidget(self.centralwidget)
         self.tabs.setObjectName("tabs")
-        self.tab_1 = QtWidgets.QWidget()
+        self.tab_1 = QtWidgets.QWidget(self.tabs)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -50,7 +50,8 @@ class Ui_MainWindow(object):
         self.tab_scroll_area.setObjectName("tab_scroll_area")
         self.tab_scroll_area_widgets = QtWidgets.QWidget()
         self.tab_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 816, 437))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tab_scroll_area_widgets.sizePolicy().hasHeightForWidth())
@@ -78,7 +79,7 @@ class Ui_MainWindow(object):
         self.app_button.setText("")
         self.app_button.setPixmap(QtGui.QPixmap("../../assets/default_app_icon.png"))
         self.app_button.setScaledContents(False)
-        self.app_button.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
+        self.app_button.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self.app_button.setObjectName("app_button")
         self.verticalLayout_7.addWidget(self.app_button)
         self.app_name = QtWidgets.QLabel(self.tab_scroll_area_widgets)
@@ -125,10 +126,10 @@ class Ui_MainWindow(object):
         self.console.setAutoFormatting(QtWidgets.QTextEdit.AutoNone)
         self.console.setReadOnly(True)
         self.console.setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\"><br /></p></body></html>")
+                             "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                             "p, li { white-space: pre-wrap; }\n"
+                             "</style></head><body style=\" font-family:\'Sans Serif\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+                             "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\"><br /></p></body></html>")
         self.console.setTabStopWidth(200)
         self.console.setObjectName("console")
         self.verticalLayout.addWidget(self.console)
