@@ -23,6 +23,7 @@ class MainUi(QtWidgets.QMainWindow):
         self._tab_info: List[TabUiGrid] = []
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
+        self._tab = None
 
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self)
@@ -72,14 +73,14 @@ class MainUi(QtWidgets.QMainWindow):
             for app_info in tab_info.get_app_entries():
 
                 # add in order of occurence
-                app = AppUiEntry(tab.tab_scroll_area_widgets, app_info)
-                tab.apps.append(app)
-                tab.tab_grid_layout.addLayout(app, row, column, 1, 1)
+                app = AppUiEntry(self._tab.tab_scroll_area_widgets, app_info)
+                self._tab.apps.append(app)
+                self._tab.tab_grid_layout.addLayout(app, row, column, 1, 1)
                 column += 1
                 if column == 4:
                     column = 0
                     row += 1
-            self._ui.tabs.addTab(tab, tab_info.name)
+            self._ui.tabs.addTab(self._tab, tab_info.name)
 
     def update_layout(self):
         # ungrey entries and set correct icon and add hover text
