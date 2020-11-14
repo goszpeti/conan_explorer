@@ -16,8 +16,10 @@ The goal of this project is to provide a frontend to start executable contained 
 
 Features:
 - configurable layout (tabs and applications) with json file
+- can also open files with their associated default program
 - installs all referenced packages automatically
 - automatic settings resolution for your platform
+- compatible with a wide range of conan versions (from 1.16 onwards)
 - integrated console for information an packages and config file
 - installable with pip
 
@@ -54,7 +56,7 @@ The config file uses the following exemplary schema:
                     {
                         "name": "App1 with spaces", 
                         "package_id": "app1/0.1.0@user1/stable", // full conan reference
-                        "executable": "bin/app1", // relative to conan "package folder"
+                        "executable": "bin/app1", // relative to conan "package folder" - can also be a file to open
                         "icon": "MyIcon.png" // relative to this config file,
                         "console_application": true, // start console application in extra window
                         "args": "--version" // args to start the application with
