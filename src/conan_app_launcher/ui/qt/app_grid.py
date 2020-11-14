@@ -48,7 +48,7 @@ class Ui_MainWindow(object):
         self.tab_scroll_area.setWidgetResizable(True)
         self.tab_scroll_area.setAlignment(QtCore.Qt.AlignCenter)
         self.tab_scroll_area.setObjectName("tab_scroll_area")
-        self.tab_scroll_area_widgets = QtWidgets.QWidget()
+        self.tab_scroll_area_widgets = QtWidgets.QWidget(self.tab_scroll_area)
         self.tab_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 816, 437))
         sizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
