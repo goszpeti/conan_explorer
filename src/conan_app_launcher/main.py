@@ -5,6 +5,7 @@ Sets up cmd arguments, config file and starts the gui
 import os
 import sys
 import traceback
+import platform
 from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -31,6 +32,10 @@ def main():
     """
     Start the Qt application
     """
+
+    if platform.system() == "Darwin":
+        print("Mac OS is currently not supported.")
+        sys.exit(1)
     # Redirect stdout and stderr for usage with pythonw as executor -
     # otherwise conan will not work
     if sys.executable.endswith("pythonw.exe"):

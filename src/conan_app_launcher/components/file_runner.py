@@ -8,8 +8,17 @@ from conan_app_launcher.base import Logger
 
 def run_file(file: Path, is_console_app: bool, args: str):
     """ Decide, if a file should be opened or executed and call the appropriate method """
-    if file.is_file() and os.access(str(file), os.X_OK):
-        execute_app(file, is_console_app, args)
+    if not file.is_file():
+        return
+    # checking execution mode is ok on linux, but not enough on windows, since every file with an accociated
+    # program has this flag.Use pathext env-var to determine executable file extensions.
+    if platform.system() == "Linux":
+        if os.access(str(file), os.X_OK):
+            execute_app(file, is_console_app, args)
+    elif platform.system() == "Windows":
+        path_exts = os.getenv("PATHEXT").split(";")
+        if file.suffix in path_exts:
+            execute_app(file, is_console_app, args)
     else:
         open_file(file)
 

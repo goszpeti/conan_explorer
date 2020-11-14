@@ -8,7 +8,7 @@ from conan_app_launcher.settings import LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, 
 class Settings():
     """
     Settings mechanism with an ini file to use as a storage.
-    File and entries are automatically created form the defaulkt value of the class.
+    File and entries are automatically created from the default value of the class.
     """
 
     # internal constants

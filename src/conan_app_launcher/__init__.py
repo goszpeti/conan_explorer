@@ -1,7 +1,7 @@
 """
 Contains global constants and basic/ui variables.
 """
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 from pathlib import Path
 
@@ -16,11 +16,10 @@ PROG_NAME = "conan_app_launcher"
 ICON_SIZE = 64
 
 ### Global variables ###
-# 0: No debug, 1 = logging on, 2: remote debugging on
-# 3: wait for remote debugger, multiprocessing off
+# 0: No debug, 1 = debug logging on
 DEBUG_LEVEL = 0
 
-# paths to find folders
+# paths to find folders - points to the folder of this file
 base_path: Path = Path()
 
 # qt_application instance
