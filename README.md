@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/src/conan_app_launcher/icon.ico" width="128">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/src/conan_app_launcher/assets/icon.ico" width="128">
 
 # Conan App Launcher
 
