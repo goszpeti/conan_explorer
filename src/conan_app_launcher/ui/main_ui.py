@@ -32,8 +32,8 @@ class MainUi(QtWidgets.QMainWindow):
 
         self._ui.menu_about_action.triggered.connect(self._about_dialog.show)
         self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
-        self._ui.menu_set_display_versions.triggered.connect(self.set_display_versions)
-        self._ui.menu_set_display_channels.triggered.connect(self.set_display_channels)
+        self._ui.menu_set_display_versions.triggered.connect(self.toggle_display_versions)
+        self._ui.menu_set_display_channels.triggered.connect(self.toogle_display_channels)
 
         self.conan_info_updated.connect(self.update_layout)
         self.new_message_logged.connect(self.write_log)
@@ -64,16 +64,18 @@ class MainUi(QtWidgets.QMainWindow):
             self._settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
             self._re_init()
 
-    def set_display_versions(self):
+    def toggle_display_versions(self):
+        """ Reads the current menu setting, sevaes it and updates the gui """
         self._settings.set(DISPLAY_APP_VERSIONS, self._ui.menu_set_display_versions.isChecked())
         self.update_layout()
 
-    def set_display_channels(self):
+    def toogle_display_channels(self):
+        """ Reads the current menu setting, sevaes it and updates the gui """
         self._settings.set(DISPLAY_APP_CHANNELS, self._ui.menu_set_display_channels.isChecked())
         self.update_layout()
 
     def create_layout(self):
-        tab = None
+        """ Creates the tabs and app icons """
         for tab_info in self._tab_info:
             # TODO: need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             self._tab = TabUiGrid(self, tab_info.name)
@@ -91,13 +93,13 @@ class MainUi(QtWidgets.QMainWindow):
             self._ui.tabs.addTab(self._tab, tab_info.name)
 
     def update_layout(self):
-        # ungrey entries and set correct icon and add hover text
+        """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
         for tab in self._ui.tabs.findChildren(TabUiGrid):
             for app in tab.apps:
                 app.update_entry(self._settings)
 
     def init_gui(self):
-        # reset gui and objects
+        """ Cleans up ui, reads config file and creates new layout """
         while self._ui.tabs.count() > 0:
             self._ui.tabs.removeTab(0)
         config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
@@ -106,6 +108,7 @@ class MainUi(QtWidgets.QMainWindow):
         self.create_layout()
 
     def _re_init(self):
+        """ To be called, when a new config file is loaded """
         this.conan_worker.finish_working(3)
         self.init_gui()
 

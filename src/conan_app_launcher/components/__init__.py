@@ -1,6 +1,6 @@
 """
 This module contains all interfaces and backend functions.
-Settings need to be already set up for usage.
+Settings and base need to be already set up for usage.
 """
 
 from conan_app_launcher.components.conan import ConanWorker
