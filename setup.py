@@ -23,6 +23,7 @@ REQUIRED = [
     "PyQt5>=5.12.3",
     "conan>=1.16.1",
     "jsonschema>=3.2.0",
+    'pywin32 >= 222 ; platform_system=="Windows"'
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
