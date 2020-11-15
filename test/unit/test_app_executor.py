@@ -1,34 +1,78 @@
 import os
+import stat
 import platform
 import sys
 import tempfile
 import time
 from pathlib import Path
 from subprocess import check_output
-
+import conan_app_launcher
 from conan_app_launcher.components.file_runner import (execute_app, open_file,
                                                        run_file)
 
 
-def testRunFile(base_fixture):
+def testChooseRunFile(base_fixture, tmp_path, mocker):
     # Mock away the calls
-    pass
+    mocker.patch('conan_app_launcher.components.file_runner.open_file')
+    test_file = Path(tmp_path) / "test.txt"
+    with open(test_file, "w") as f:
+        f.write("test")
+
+    run_file(test_file, False, "")
+
+    conan_app_launcher.components.file_runner.open_file.assert_called_once_with(test_file)
 
 
-def testRunAppWithArgsNonCli(base_fixture):
+def testChooseRunScript(base_fixture, tmp_path, mocker):
+    if platform.system() != "Windows":
+        return
+    # Mock away the calls
+    mocker.patch('conan_app_launcher.components.file_runner.execute_app')
+
+    test_file = Path(tmp_path) / "test.bat"
+    with open(test_file, "w") as f:
+        f.write("test")
+
+    run_file(test_file, False, "")
+
+    conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
+
+
+def testChooseRunExe(base_fixture, tmp_path, mocker):
+    # Mock away the calls
+    mocker.patch('conan_app_launcher.components.file_runner.execute_app')
+
+    if platform.system() == "Linux":
+        test_file = Path(tmp_path) / "test"
+        with open(test_file, "w") as f:
+            f.write("test")
+        # use chmod to set as executable
+        st = os.stat(str(test_file))
+        os.chmod(str(test_file), st.st_mode | stat.S_IEXEC)
+    elif platform.system() == "Windows":
+        test_file = Path(tmp_path) / "test.exe"
+        with open(test_file, "w") as f:
+            f.write("test")
+
+    run_file(test_file, False, "")
+
+    conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
+
+
+def testStartAppWithArgsNonCli(base_fixture):
     test_file = Path(tempfile.gettempdir(), "test.txt")
-
     executable = Path(sys.executable)
     is_console_app = False
     args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
-    pid = execute_app(executable, is_console_app, args)
-    time.sleep(1)
 
+    pid = execute_app(executable, is_console_app, args)
+
+    time.sleep(1)
     assert test_file.is_file()
     os.remove(test_file)
 
 
-def testRunAppWithArgsCliOption(base_fixture):
+def testStartAppWithArgsCliOption(base_fixture):
     test_file = Path(tempfile.gettempdir(), "test.txt")
 
     executable = Path(sys.executable)
@@ -60,6 +104,22 @@ def testStartCliOptionApp(base_fixture):
         ret = check_output(f'tasklist /fi "PID eq {str(pid)}"')
         assert "python.exe" in ret.decode("utf-8")
         os.system("taskkill /PID " + str(pid))
+
+
+def testStartScript(base_fixture, tmp_path):
+    if platform.system() != "Windows":
+        return
+    res_file = Path(tmp_path) / "res.txt"
+    assert not res_file.is_file()
+    test_file = Path(tmp_path) / "test.bat"
+    with open(test_file, "w") as f:
+        f.write("echo test > " + str(res_file))
+
+    pid = execute_app(test_file, False, "")
+
+    time.sleep(2)  # wait for command to be executed
+
+    assert res_file.is_file()
 
 
 def testOpenFile(base_fixture):
