@@ -21,6 +21,10 @@ from PyQt5 import QtCore, QtWidgets
 
 
 def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
+    """
+    Test, that clicking on on open config file and selecting a file writes it back to settings.
+    Same file as selected expected in settings.
+    """
     logger = Logger()  # init logger
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
@@ -45,6 +49,10 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
 
 
 def testMultipleAppsUngreying(base_fixture, qtbot):
+    """
+    Test, that apps ungrey, after their packages are loaded.
+    Set greyed attribute of the underlying app button expected.
+    """
     logger = Logger()  # init logger
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
@@ -74,6 +82,10 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
 
 
 def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
+    """
+    Test, if the previously loaded tabs are deleted, when a new file is loaded
+    The same tab number ist expected, as before.
+    """
     logger = Logger()  # init logger
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
@@ -102,6 +114,10 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
 
 
 def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
+    """
+    Test, loading a config file and opening the about menu, and clicking on OK
+    The about dialog showing is expected.
+    """
     logger = Logger()  # init logger
     temp_ini_path = os.path.join(tempfile.gettempdir(), "config.ini")
 
@@ -122,6 +138,10 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
 
 
 def testOpenApp(base_fixture, qtbot):
+    """
+    Test, if clicking on an app_button in the gui opens the app.
+    The set process is expected to be running.
+    """
     parent = QtWidgets.QWidget()
     parent.setObjectName("parent")
 

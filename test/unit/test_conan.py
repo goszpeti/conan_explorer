@@ -9,6 +9,10 @@ from PyQt5 import QtCore
 
 
 def testConanApi():
+    """
+    Test, if get_package installs the package and returns the path and checkit again.
+    The bin dir in the package must exist (indicating it was correctly downloaded)
+    """
     ref = "m4_installer/1.4.18@bincrafters/stable"
     os.system(f"conan remove {ref} -f")
     # Gets package path / installs the package
@@ -26,6 +30,10 @@ class DummySignal():
 
 
 def testConanWorker(base_fixture):
+    """
+    Test, if conan worker works on the queue.
+    It is expected,that the queue size decreases over time.
+    """
     sig = DummySignal()
     tab_info = parse_config_file(base_fixture.testdata_path / "app_config.json")
     conan_worker = ConanWorker(tab_info, sig)

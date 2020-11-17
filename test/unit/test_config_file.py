@@ -2,6 +2,10 @@ from conan_app_launcher.components import parse_config_file
 
 
 def testCorrectFile(base_fixture):
+    """
+    Tests reading a correct config json with 2 tabs.
+    Expects the same values as in the file.
+    """
     tabs = parse_config_file(base_fixture.testdata_path / "app_config.json")
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].get_app_entries()
@@ -28,6 +32,10 @@ def testCorrectFile(base_fixture):
 
 
 def testNoneExistantFilename(base_fixture, capsys):
+    """
+    Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
+    Expects the sdterr to contain the error level(ERROR) and the error cause.
+    """
     tabs = parse_config_file(base_fixture.testdata_path / "nofile.json")
     assert tabs == []
     captured = capsys.readouterr()
@@ -36,6 +44,10 @@ def testNoneExistantFilename(base_fixture, capsys):
 
 
 def testInvalidVersion(base_fixture, capsys):
+    """
+    Tests, that reading a config file with the wrong version will print an error.
+    Expects the sdterr to contain the error level(ERROR) and the error cause.
+    """
     tabs = parse_config_file(base_fixture.testdata_path / "config_file" / "wrong_version.json")
     assert tabs == []
     captured = capsys.readouterr()
@@ -45,6 +57,10 @@ def testInvalidVersion(base_fixture, capsys):
 
 
 def testInvalidContent(base_fixture, capsys):
+    """
+    Tests, that reading a config file with invalid syntax will print an error.
+    Expects the sdterr to contain the error level(ERROR) and the error cause.
+    """
     tabs = parse_config_file(base_fixture.testdata_path / "config_file" / "invalid_syntax.json")
     assert tabs == []
     captured = capsys.readouterr()

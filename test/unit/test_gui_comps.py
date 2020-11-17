@@ -9,6 +9,10 @@ from PyQt5 import QtCore, QtWidgets
 
 
 def testAboutDialog(base_fixture, qtbot):
+    """
+    Test the about dialog separately.
+    Check, that the app name is visible and it is hidden after clicking OK:
+    """
     logger = Logger()  # init logger
     root_obj = QtWidgets.QWidget()
     widget = main_ui.AboutDialog(root_obj)

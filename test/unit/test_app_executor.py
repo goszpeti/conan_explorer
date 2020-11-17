@@ -12,6 +12,10 @@ from conan_app_launcher.components.file_runner import (execute_app, open_file,
 
 
 def testChooseRunFile(base_fixture, tmp_path, mocker):
+    """
+    Tests, that the function call is propagated correctly
+    Existant path with a filesize > 0 expected
+    """
     # Mock away the calls
     mocker.patch('conan_app_launcher.components.file_runner.open_file')
     test_file = Path(tmp_path) / "test.txt"
@@ -24,6 +28,10 @@ def testChooseRunFile(base_fixture, tmp_path, mocker):
 
 
 def testChooseRunScript(base_fixture, tmp_path, mocker):
+    """
+    Tests, that the function call is propagated correctly
+    Existant path with a filesize > 0 expected
+    """
     if platform.system() != "Windows":
         return
     # Mock away the calls
@@ -33,7 +41,7 @@ def testChooseRunScript(base_fixture, tmp_path, mocker):
     with open(test_file, "w") as f:
         f.write("test")
 
-    run_file(test_file, False, "")
+    run_file(test_file, True, "")
 
     conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
 

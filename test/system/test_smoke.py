@@ -18,6 +18,10 @@ def testDebugDisabledForRelease():
 
 
 def testMainLoop(base_fixture):
+    """
+    Smoke test, that the application can start.
+    No error expected.
+    """
     # this test causes a segmentation fault on linux - possibly because
     # the gui thread does not run in the main thread...
 
