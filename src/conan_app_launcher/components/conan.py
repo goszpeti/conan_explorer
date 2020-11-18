@@ -72,13 +72,18 @@ class ConanWorker():
             self._conan_queue.task_done()
 
 
-def get_conan_package_folder(conan_ref: ConanFileReference) -> Path:
-    """ Return the package folder of a conan reference, and install it, if it is not available """
+def getConanAPI():
     conan, cache, user_io = ConanAPIV1.factory()
     if Version(conan_version) > Version("1.18"):
         conan.create_app()
         user_io = conan.user_io
         cache = conan.app.cache
+    return conan, cache, user_io
+
+
+def get_conan_package_folder(conan_ref: ConanFileReference) -> Path:
+    """ Return the package folder of a conan reference, and install it, if it is not available """
+    conan, cache, user_io = getConanAPI()
     package_folder = Path()
     [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
 
@@ -111,6 +116,7 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
         Logger().debug(f"Getting info for '{str(conan_ref)}'...")
         output = []
         [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref))
+        # i don't know another way to do this
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
         for package_info in output:
             if package_info.get("reference") == str(conan_ref):
@@ -159,10 +165,12 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
 
         settings_list = []
         for name, value in sets.items():
+            if value.lower() == "any":
+                continue
             settings_list.append(name + "=" + value)
         try:
             ConanAPIV1.install_reference(conan, package_id, update=True, settings=settings_list)
         except BaseException as error:
-            Logger().error(f"Cannot install packge '{package_id}': {str(error)}")
+            Logger().error(f"Cannot install package '{package_id}': {str(error)}")
     if not found_pkg:
         Logger().warning(f"Cant find a matching package '{str(package_id)}' for this platform.")
