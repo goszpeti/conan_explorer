@@ -48,6 +48,27 @@ def testCompilerAnySettings(mocker, capsys):
     assert "Cannot install package" not in captured.err
 
 
+def testCompilerNoSettings(mocker, capsys):
+    # mock the bremote response
+    ref = "m4_installer/1.4.18@bincrafters/stable"
+
+    result = {'error': False,
+              'results':
+              [{'remote': 'conan-center',
+                'items': [
+                    {'recipe': {'id': 'm4_installer/1.4.18@bincrafters/stable'},
+                     'packages':
+                     [{'id': '445cf80f611c1d1eda08bde2ebc5066218ca9701', 'options': {}, 'settings': {}, 'requires': [], 'outdated': False}]}]}]}
+    config = {"return_value": result}
+    mocker.patch("conans.client.conan_api.ConanAPIV1.search_packages", **config)
+
+    conan, cache, user_io = getConanAPI()
+
+    install_conan_package(conan, cache, ConanFileReference.loads(ref))
+    captured = capsys.readouterr()
+    assert "Can't find a matching package" not in captured.err
+
+
 class DummySignal():
 
     def emit(self):
