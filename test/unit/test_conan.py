@@ -20,7 +20,8 @@ def testConanApi():
 
 
 def testCompilerAnySettings(mocker, capsys):
-    # mock the bremote response
+
+    # mock the remote response
     ref = "m4_installer/1.4.18@bincrafters/stable"
 
     result = {'error': False,
@@ -49,7 +50,8 @@ def testCompilerAnySettings(mocker, capsys):
 
 
 def testCompilerNoSettings(mocker, capsys):
-    # mock the bremote response
+
+    # mock the remote response
     ref = "m4_installer/1.4.18@bincrafters/stable"
 
     result = {'error': False,
