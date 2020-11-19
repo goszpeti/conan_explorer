@@ -3,6 +3,7 @@ import platform
 from pathlib import Path
 
 from conan_app_launcher.base import Logger
+from conan_app_launcher.components.file_runner import is_file_executable
 
 if platform.system() == "Windows":
     import win32con
@@ -21,9 +22,9 @@ def extract_icon(file_path: Path, output_dir: Path) -> Path:
     if platform.system() == "Linux":
         Logger().info("Automatic icon extraction is not available on Linux.")
         return Path("NULL")
-    elif platform.system() == "Windows":
+    if platform.system() == "Windows":
         # TODO: Check is executable or not
-        if os.access(str(file_path), os.X_OK):
+        if is_file_executable(file_path):
             return extract_icon_from_win_executable(file_path, output_dir)
         else:
             Logger().info("Automatic icon extraction is not available for non executable files.")
