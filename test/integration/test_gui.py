@@ -139,7 +139,7 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
 
 def testOpenApp(base_fixture, qtbot):
     """
-    Test, if clicking on an app_button in the gui opens the app.
+    Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
     parent = QtWidgets.QWidget()
@@ -151,8 +151,12 @@ def testOpenApp(base_fixture, qtbot):
         app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
                             Path(sys.executable), "", "", True, Path("."))
 
+    assert app_info.icon.is_file()
+    assert app_info.icon.suffix == ".png"
+
     app_ui = AppUiEntry(parent, app_info)
     qtbot.addWidget(parent)
+    parent.setFixedSize(100, 200)
     parent.show()
     app_ui.app_clicked()
     time.sleep(5)  # wait for terminal to spawn

@@ -39,7 +39,7 @@ def extract_icon_from_win_executable(executable_path: Path, output_dir: Path) ->
         for icon_name in icon_names:
             rec = win32api.LoadResource(hlib, win32con.RT_ICON, icon_name)
             if rec.startswith(b"\x89PNG"):  # binary file header for pngs
-                output_path = output_dir / (executable_path.name + "png")
+                output_path = output_dir / (executable_path.name + ".png")
                 with open(output_path, "wb") as extract_file:
                     extract_file.write(bytearray(rec))
                 return output_path
