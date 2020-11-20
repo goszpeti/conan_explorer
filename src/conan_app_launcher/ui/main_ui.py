@@ -2,14 +2,13 @@ import threading
 from pathlib import Path
 from typing import List
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, uic
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanWorker, parse_config_file
 from conan_app_launcher.settings import LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, Settings
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
-from conan_app_launcher.ui.qt.app_grid import Ui_MainWindow
 
 
 class MainUi(QtWidgets.QMainWindow):
@@ -21,8 +20,7 @@ class MainUi(QtWidgets.QMainWindow):
         super().__init__()
         self._settings = settings
         self._tab_info: List[TabUiGrid] = []
-        self._ui = Ui_MainWindow()
-        self._ui.setupUi(self)
+        self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
         self._about_dialog = AboutDialog(self)
         self._tab = None
 

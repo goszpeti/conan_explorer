@@ -12,22 +12,27 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         super().__init__()
         self._app_info = app
         self._app_button = AppButton(parent, app.icon)
+        self._app_button.setFixedHeight(200)
         self._app_name_label = QtWidgets.QLabel(parent)
         self._app_version_cbox = QtWidgets.QComboBox(parent)
         self._app_channel_cbox = QtWidgets.QComboBox(parent)
 
         self.setObjectName(parent.objectName() + app.name)  # to find it for tests
+        self.setSpacing(5)
 
         # size policies
         self.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                            QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
         self._app_button.setSizePolicy(size_policy)
+
         self._app_button.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         self._app_button.setToolTip(str(app.package_id))
+
         self.addWidget(self._app_button)
-        self._app_name_label.setSizePolicy(size_policy)
+        # self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setAlignment(QtCore.Qt.AlignCenter)
         self._app_name_label.setText(app.name)
         self.addWidget(self._app_name_label)
@@ -79,8 +84,8 @@ class TabUiGrid(QtWidgets.QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
-        self.setGeometry(QtCore.QRect(0, 0, 811, 439))
-        self.tab_layout.setContentsMargins(0, 0, 0, 0)
+        self.setGeometry(QtCore.QRect(0, 0, 830, 462))
+        self.tab_layout.setContentsMargins(2, 0, 2, 0)
         self.tab_scroll_area.setSizePolicy(sizePolicy)
         self.tab_scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.tab_scroll_area.setWidgetResizable(True)
@@ -107,6 +112,8 @@ class TabUiGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setRowStretch(0, 1)
         self.tab_grid_layout.setRowStretch(1, 1)
         self.tab_grid_layout.setRowStretch(2, 1)
+        self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
+        self.tab_grid_layout.setSpacing(5)
 
         self.tab_scroll_area_layout.addLayout(self.tab_grid_layout)
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
