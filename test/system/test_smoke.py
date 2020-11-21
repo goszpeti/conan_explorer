@@ -37,7 +37,7 @@ def testMainLoop(base_fixture):
         assert proc.poll() is None
         proc.terminate()
         time.sleep(3)
-        assert proc.poll() == 1  # terminate exits always with 1
+        assert proc.poll() != 0  # terminate exits os dependently, but never with success (0)
     finally:
         # delete config file
         os.remove(str(settings_file_path))
