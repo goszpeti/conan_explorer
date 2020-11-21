@@ -18,9 +18,9 @@ class MainUi(QtWidgets.QMainWindow):
 
     def __init__(self, settings: Settings):
         super().__init__()
+        self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
         self._settings = settings
         self._tab_info: List[TabUiGrid] = []
-        self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
         self._about_dialog = AboutDialog(self)
         self._tab = None
 

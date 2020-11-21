@@ -83,7 +83,7 @@ jobs:
           pip install conan==${{ matrix.conan }}
       - name: Install own dependencies
         run: |
-          pip install pyqt5==5.13.0
+          pip install pyqt5==5.14.2
           pip install .
       - name: Unit and Integration tests with pytest on Linux
         if: matrix.os == 'ubuntu-latest'
