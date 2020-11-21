@@ -38,11 +38,11 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[selection])
 
-#     main_gui._ui.menu_open_config_file_action.trigger()
-#     time.sleep(3)
-#     assert settings.get(LAST_CONFIG_FILE) == selection
-#     app.conan_worker.finish_working()
-#     Logger.remove_qt_logger()
+    main_gui._ui.menu_open_config_file_action.trigger()
+    time.sleep(3)
+    assert settings.get(LAST_CONFIG_FILE) == selection
+    app.conan_worker.finish_working()
+    Logger.remove_qt_logger()
 
 
 def testMultipleAppsUngreying(base_fixture, qtbot):
