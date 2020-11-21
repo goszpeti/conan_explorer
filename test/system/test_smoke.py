@@ -6,7 +6,7 @@ and it cannot be instatiated anew with the main loop of the program.
 import os
 import time
 from pathlib import Path
-from subprocess import Popen, PIPE, STDOUT, CREATE_NEW_PROCESS_GROUP
+from subprocess import Popen
 
 import conan_app_launcher as app
 from conan_app_launcher.settings import *
