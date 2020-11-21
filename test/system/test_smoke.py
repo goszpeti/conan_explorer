@@ -4,10 +4,9 @@ Because the unit tests use qtbot helper, a QApplication object is already presen
 and it cannot be instatiated anew with the main loop of the program.
 """
 import os
-import sys
-import threading
 import time
 from pathlib import Path
+from subprocess import Popen
 
 import conan_app_launcher as app
 from conan_app_launcher.settings import *
@@ -18,6 +17,10 @@ def testDebugDisabledForRelease():
 
 
 def testMainLoop(base_fixture):
+    """
+    Smoke test, that the application can start.
+    No error expected.
+    """
     # this test causes a segmentation fault on linux - possibly because
     # the gui thread does not run in the main thread...
 
@@ -27,21 +30,14 @@ def testMainLoop(base_fixture):
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
     settings.save_to_file()
 
-    from conan_app_launcher.main import main
-    sys.argv = ["main", "-f", str(base_fixture.testdata_path / "app_config.json")]
-    main_thread = threading.Thread(target=main, daemon=True)
-    main_thread.start()
-
+    # conan_app_launcher
+    proc = Popen(["python", str(base_fixture.base_path / "src" / "conan_app_launcher" / "main.py")])
     time.sleep(7)
-
     try:
-        app.qt_app.quit()
-        del(app.qt_app)
-        app.qt_app = None
+        assert proc.poll() is None
+        proc.terminate()
         time.sleep(3)
+        assert proc.poll() != 0  # terminate exits os dependently, but never with success (0)
     finally:
-        if main_thread:
-            print("Join test thread")
-            main_thread.join(5)
         # delete config file
         os.remove(str(settings_file_path))

@@ -7,11 +7,19 @@ from conan_app_launcher.settings import *
 
 
 def testReadFromFile(base_fixture):
+    """
+    Tests, that the settings file is read by using a string setting.
+    Correct setting value expected.
+    """
     sets = Settings(ini_file=base_fixture.testdata_path / "settings/read/config.ini")
     assert sets.get(LAST_CONFIG_FILE) == "C:/work/app_config.json"
 
 
 def testSaveToFile(base_fixture):
+    """
+    Tests, that writing a value works and untouched entries remain.
+    Correctly read back setting value expected.
+    """
     # copy testdata to temp
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")

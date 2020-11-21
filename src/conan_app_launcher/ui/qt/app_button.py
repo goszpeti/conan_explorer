@@ -8,16 +8,15 @@ Qt = QtCore.Qt
 
 
 class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
-    # this signal is used to connect to backend functions.
-    clicked = QtCore.pyqtSignal()
-    # It needs to be a class variable (limitation of Qt)
 
     """ Qt label, which can react on a mouse click """
-    # overrides base QT behaviour. Needs to be a class variable.
+    # this signal is used to connect to backend functions.
+    # It needs to be a class variable (limitation of Qt)
+    clicked = QtCore.pyqtSignal()
 
     def __init__(self, parent, image: Path = None, flags=QtCore.Qt.WindowFlags()):
-        QtWidgets.QLabel.__init__(self, parent=parent, flags=flags)
-        QtWidgets.QPushButton.__init__(self, parent=parent)
+        super().__init__(parent=parent)
+        self.setWindowFlags(flags)
         self._image = image
         self._greyed_out = True  # Must be ungreyed, when available
         self.set_icon(image)

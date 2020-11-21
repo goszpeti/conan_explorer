@@ -83,21 +83,23 @@ jobs:
           pip install conan==${{ matrix.conan }}
       - name: Install own dependencies
         run: |
-          pip install pyqt5==5.12.3
+          pip install pyqt5==5.14.2
           pip install .
-      - name: Unit and Integration tests with pytest on Linux
-        if: matrix.os == 'ubuntu-latest'
+      - name: Test with pytest
         run: |
-          pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
-          pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
-          pytest -v test/system --junit-xml=./result_system.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
-      - name: Unit and Integration tests with pytest on Windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || echo Finished
-          pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || echo Finished
-          pytest -v test/system --junit-xml=./result_system.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || echo Finished
-
-      - name: Evaluate test results
-        run: |
-          python test/evaluation.py
+          pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/system --junit-xml=./result_system.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+      # - name: Integration tests with pytest on Linux
+      #   if: matrix.os == 'ubuntu-latest'
+      #   run: |
+      #     pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
+      #     pytest -v test/system --junit-xml=./result_system.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || :
+      # - name: Integration tests with pytest on Windows
+      #   if: matrix.os == 'windows-latest'
+      #   run: |
+      #     pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || echo Finished
+      #     pytest -v test/system --junit-xml=./result_system.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append || echo Finished
+      # - name: Evaluate test results
+      #   run: |
+      #     python test/evaluation.py
