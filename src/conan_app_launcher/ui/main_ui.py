@@ -2,14 +2,13 @@ import threading
 from pathlib import Path
 from typing import List
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, uic
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanWorker, parse_config_file
 from conan_app_launcher.settings import LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, Settings
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
-from conan_app_launcher.ui.qt.app_grid import Ui_MainWindow
 
 
 class MainUi(QtWidgets.QMainWindow):
@@ -19,10 +18,9 @@ class MainUi(QtWidgets.QMainWindow):
 
     def __init__(self, settings: Settings):
         super().__init__()
+        self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
         self._settings = settings
         self._tab_info: List[TabUiGrid] = []
-        self._ui = Ui_MainWindow()
-        self._ui.setupUi(self)
         self._about_dialog = AboutDialog(self)
         self._tab = None
 
@@ -42,9 +40,13 @@ class MainUi(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         """ Remove qt logger, so it doesn't log into a non existant object """
-        self.new_message_logged.disconnect(self.write_log)
-        Logger.remove_qt_logger()
         super().closeEvent(event)
+        try:
+            self.new_message_logged.disconnect(self.write_log)
+        except:
+            # Sometimes the closeEvent is called twice and disconnect errors.
+            pass
+        Logger.remove_qt_logger()
 
     @property
     def ui(self):

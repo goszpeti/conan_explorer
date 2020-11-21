@@ -1,6 +1,7 @@
 import json
 import platform
 import jsonschema
+import tempfile
 
 from pathlib import Path
 from typing import List
@@ -8,6 +9,7 @@ from conans.model.ref import ConanFileReference
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
+from conan_app_launcher.components.icon import extract_icon
 
 
 class AppEntry():
@@ -33,9 +35,14 @@ class AppEntry():
         if icon.startswith("//"):
             Logger().warning("Icon relative to package currently not implemented")
         elif icon and not Path(icon).is_absolute():
+            # relative path is calculated from config file path
             self.icon = config_file_path.parent / icon
+        elif not icon:
+            # try to extract icon, put it into temp dir
+            self.icon = extract_icon(executable, Path(tempfile.gettempdir()))
         else:
             self.icon = Path(icon)
+
         if not self.icon.is_file():
             Logger().error(f"Icon {str(self.icon)} for '{name}' not found")
             self.icon = this.base_path / "assets" / "default_app_icon.png"
