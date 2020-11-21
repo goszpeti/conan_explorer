@@ -41,7 +41,7 @@ def testChooseRunScript(base_fixture, tmp_path, mocker):
     with open(test_file, "w") as f:
         f.write("test")
 
-    run_file(test_file, True, "")
+    run_file(test_file, False, "")
 
     conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
 

@@ -40,9 +40,13 @@ class MainUi(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         """ Remove qt logger, so it doesn't log into a non existant object """
-        self.new_message_logged.disconnect(self.write_log)
-        Logger.remove_qt_logger()
         super().closeEvent(event)
+        try:
+            self.new_message_logged.disconnect(self.write_log)
+        except:
+            # Sometimes the closeEvent is called twice and disconnect errors.
+            pass
+        Logger.remove_qt_logger()
 
     @property
     def ui(self):

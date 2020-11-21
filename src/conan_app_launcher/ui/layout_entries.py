@@ -9,7 +9,7 @@ Qt = QtCore.Qt
 
 class AppUiEntry(QtWidgets.QVBoxLayout):
     def __init__(self, parent: QtWidgets.QTabWidget, app: AppEntry):
-        super().__init__()
+        super().__init__(parent)
         self._app_info = app
         self._app_button = AppButton(parent, app.icon)
         self._app_button.setFixedHeight(200)
@@ -69,7 +69,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
 
 class TabUiGrid(QtWidgets.QWidget):
     def __init__(self, parent: QtWidgets.QTabWidget, name):
-        super().__init__()
+        super().__init__(parent)
         self.apps = []  # AppUiEntry
         self.tab_layout = QtWidgets.QVBoxLayout(self)
         self.tab_scroll_area = QtWidgets.QScrollArea(self)

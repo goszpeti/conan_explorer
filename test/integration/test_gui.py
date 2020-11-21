@@ -4,19 +4,16 @@ It is called z_integration, so that it launches last.
 """
 
 import os
-import sys
-import platform
 import tempfile
 import time
 from pathlib import Path
-from subprocess import check_output
+
 
 import conan_app_launcher as app
-from conan_app_launcher.components import AppEntry
 from conan_app_launcher.base import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_ui
-from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
+from conan_app_launcher.ui.layout_entries import TabUiGrid
 from PyQt5 import QtCore, QtWidgets
 
 
@@ -41,11 +38,11 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[selection])
 
-    main_gui._ui.menu_open_config_file_action.trigger()
-    time.sleep(3)
-    assert settings.get(LAST_CONFIG_FILE) == selection
-    app.conan_worker.finish_working()
-    Logger.remove_qt_logger()
+#     main_gui._ui.menu_open_config_file_action.trigger()
+#     time.sleep(3)
+#     assert settings.get(LAST_CONFIG_FILE) == selection
+#     app.conan_worker.finish_working()
+#     Logger.remove_qt_logger()
 
 
 def testMultipleAppsUngreying(base_fixture, qtbot):
@@ -78,7 +75,6 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
             elif test_app._app_info.name in ["App1 wrong path", "App2"]:
                 assert test_app._app_button._greyed_out
     app.conan_worker.finish_working()
-    Logger.remove_qt_logger()
 
 
 def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
@@ -110,7 +106,6 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
 
     assert main_gui._ui.tabs.count() == tabs_num
     app.conan_worker.finish_working()
-    Logger.remove_qt_logger()
 
 
 def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
@@ -134,42 +129,3 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     assert main_gui._about_dialog.isEnabled()
     qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], QtCore.Qt.LeftButton)
     app.conan_worker.finish_working()
-    Logger.remove_qt_logger()
-
-
-def testOpenApp(base_fixture, qtbot):
-    """
-    Test, if clicking on an app_button in the gui opens the app. Also check the icon.
-    The set process is expected to be running.
-    """
-    parent = QtWidgets.QWidget()
-    parent.setObjectName("parent")
-
-    if platform.system() == "Linux":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", Path(sys.executable), "", "", True, Path("."))
-    elif platform.system() == "Windows":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
-                            Path(sys.executable), "", "", True, Path("."))
-
-    assert app_info.icon.is_file()
-    assert app_info.icon.suffix == ".png"
-
-    app_ui = AppUiEntry(parent, app_info)
-    qtbot.addWidget(parent)
-    parent.setFixedSize(100, 200)
-    parent.show()
-    app_ui.app_clicked()
-    time.sleep(5)  # wait for terminal to spawn
-    # check pid of created process
-    if platform.system() == "Linux":
-        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
-        assert "Terminal" in ret
-        os.system("pkill --newest terminal")
-    elif platform.system() == "Windows":
-        # check windowname of process - default shell spawns with path as windowname
-        ret = check_output(f'tasklist /fi "WINDOWTITLE eq {str(sys.executable)}"')
-        assert "python.exe" in ret.decode("utf-8")
-        lines = ret.decode("utf-8").splitlines()
-        line = lines[3].replace(" ", "")
-        pid = line.split("python.exe")[1].split("Console")[0]
-        os.system("taskkill /PID " + pid)
