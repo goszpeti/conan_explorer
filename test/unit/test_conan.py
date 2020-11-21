@@ -24,7 +24,10 @@ def testConanApi():
 
 
 def testCompilerAnySettings(mocker, capsys):
-
+    """
+    Test, if a package with <setting>=Any flags can install
+    The actual installaton must not return an error.
+    """
     # mock the remote response
     ref = "m4_installer/1.4.18@bincrafters/stable"
 
@@ -54,7 +57,10 @@ def testCompilerAnySettings(mocker, capsys):
 
 
 def testCompilerNoSettings(mocker, capsys):
-
+    """
+    Test, if a package with no settings at all can install
+    The actual installaton must not return an error.
+    """
     # mock the remote response
     ref = "m4_installer/1.4.18@bincrafters/stable"
 
