@@ -9,3 +9,5 @@ result*.xml
 cov.xml
 .coverage
 htmlcov/*
+
+src/conan_app_launcher/ui/qt/app_grid.py

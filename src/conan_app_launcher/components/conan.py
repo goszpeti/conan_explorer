@@ -152,6 +152,9 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
             for item in result.get("items"):
                 for package in item.get("packages"):
                     sets = package.get("settings")
+                    if not sets:  # no settings, package should fit
+                        found_pkg = True
+                        break
                     if ((sets.get("os") == default_settings.get("os") or
                          sets.get("os_build") == default_settings.get("os_build"))
                         and (sets.get("arch") == default_settings.get("arch") or
@@ -172,5 +175,6 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
             ConanAPIV1.install_reference(conan, package_id, update=True, settings=settings_list)
         except BaseException as error:
             Logger().error(f"Cannot install package '{package_id}': {str(error)}")
+    # check after all remotes are checked
     if not found_pkg:
-        Logger().warning(f"Cant find a matching package '{str(package_id)}' for this platform.")
+        Logger().warning(f"Can't find a matching package '{str(package_id)}' for this platform.")
