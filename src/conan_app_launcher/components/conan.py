@@ -34,7 +34,7 @@ class ConanWorker():
         conan_refs = []
         for tab in tabs:
             for app in tab.get_app_entries():
-                conan_refs.append(str(app.package_id))
+                conan_refs.append(str(app.conan_ref))
         # make them unique
         self._conan_refs = set(conan_refs)
         # fill up queue
@@ -64,7 +64,7 @@ class ConanWorker():
             # call update on every entry which has this ref
             for tab in self._tabs:
                 for app in tab.get_app_entries():
-                    if str(app.package_id) == conan_ref:
+                    if str(app.conan_ref) == conan_ref:
                         app.validate_with_conan_info(package_folder)
             Logger().debug("Finish working on " + conan_ref)
             if self._gui_update_signal:
@@ -81,20 +81,38 @@ def getConanAPI():
     return conan, cache, user_io
 
 
+def create_key_value_pair_list(input_dict: dict) -> List[str]:
+    res_list = []
+    for name, value in input_dict.items():
+        if value.lower() == "any":
+            continue
+        res_list.append(name + "=" + value)
+    return res_list
+
+
 def get_conan_package_folder(conan_ref: ConanFileReference) -> Path:
     """ Return the package folder of a conan reference, and install it, if it is not available """
     conan, cache, user_io = getConanAPI()
-    package_folder = Path()
+    package_folder = Path("Inconlusive")
     [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
 
     if not is_installed:
         Logger().info(f"Installing '{str(conan_ref)}'...")
-        install_conan_package(conan, cache, conan_ref)
-        # lazy: call info again for path
+        res = install_conan_package(conan, cache, conan_ref)
+        if not res:  # Logger gave error msg
+            return package_folder
+        # needed: call info again for path, install info does not have it
         [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
     else:
         Logger().debug(f"Found '{str(conan_ref)}' in {str(package_folder)}.")
     return package_folder
+
+
+def get_install_status_and_path_from_output(output: dict, conan_ref: str, path: str) -> Tuple[bool, Path]:
+    for package_info in output:
+        if package_info.get("reference") == str(conan_ref):
+            is_installed = (package_info.get("binary") == "Cache")
+            return is_installed, Path(package_info.get(path))
 
 
 def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: UserIO,
@@ -115,66 +133,61 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
                 ref_lock_file.unlink()
         Logger().debug(f"Getting info for '{str(conan_ref)}'...")
         output = []
-        [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref))
-        # i don't know another way to do this
+        options = []
+        [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref), options)
+        # I don't know another way to do this
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
-        for package_info in output:
-            if package_info.get("reference") == str(conan_ref):
-                is_installed = (package_info.get("binary") == "Cache")
-                return is_installed, Path(package_info.get(path))
+        return get_install_status_and_path_from_output(output, conan_ref, path)
     except BaseException as error:
         Logger().error(str(error))
     return False, Path()
 
 
 def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
-                          package_id: ConanFileReference):
+                          conan_ref: ConanFileReference) -> bool:
     """
     Try to install a conan package while guessing the mnost suitable package
     for the current platform.
     """
     remotes = cache.registry.load_remotes()
-    found_pkg = False
+    found_pkgs = []
     for remote in remotes.items():
         if not isinstance(remote, str) and len(remote) > 0:  # only check for len, can be an object or a list
             remote = remote[0]  # for old apis
         try:
-            search_results = ConanAPIV1.search_packages(conan, str(package_id),
+            search_results = ConanAPIV1.search_packages(conan, str(conan_ref),
                                                         remote_name=remote)
         except:  # next
             continue
         # get options and settings
-        sets = {}
+        settings = {}
         default_settings = cache.default_profile.settings
 
         # try to find a suitable package with matching settings
         for result in search_results.get("results"):
             for item in result.get("items"):
                 for package in item.get("packages"):
-                    sets = package.get("settings")
-                    if not sets:  # no settings, package should fit
-                        found_pkg = True
-                        break
-                    if ((sets.get("os") == default_settings.get("os") or
-                         sets.get("os_build") == default_settings.get("os_build"))
-                        and (sets.get("arch") == default_settings.get("arch") or
-                             sets.get("arch_build") == default_settings.get("arch_build"))):
-                        found_pkg = True
-                        break
-                if found_pkg:
-                    break
-            if found_pkg:
-                break
-
-        settings_list = []
-        for name, value in sets.items():
-            if value.lower() == "any":
-                continue
-            settings_list.append(name + "=" + value)
+                    settings = package.get("settings")
+                    if not settings:  # no settings, package should fit
+                        found_pkgs.append(package)
+                    if ((settings.get("os") == default_settings.get("os") or
+                         settings.get("os_build") == default_settings.get("os_build"))
+                        and (settings.get("arch") == default_settings.get("arch") or
+                             settings.get("arch_build") == default_settings.get("arch_build"))):
+                        found_pkgs.append(package)
+        if len(found_pkgs) > 1:
+            Logger().error("There are multiple matching packages!")
+            return False  # TODO will be a feature, don't deal with it here
+        options_list = create_key_value_pair_list(found_pkgs[0].get("options"))
+        settings_list = create_key_value_pair_list(found_pkgs[0].get("settings"))
         try:
-            ConanAPIV1.install_reference(conan, package_id, update=True, settings=settings_list)
+            info = ConanAPIV1.install_reference(conan, conan_ref, update=True,
+                                                settings=settings_list, options=options_list)
+            return True
         except BaseException as error:
-            Logger().error(f"Cannot install package '{package_id}': {str(error)}")
+            Logger().error(f"Cannot install package '{conan_ref}': {str(error)}")
+            return False
     # check after all remotes are checked
-    if not found_pkg:
-        Logger().warning(f"Can't find a matching package '{str(package_id)}' for this platform.")
+    if not found_pkgs:
+        Logger().warning(f"Can't find a matching package '{str(conan_ref)}' for this platform.")
+        return False

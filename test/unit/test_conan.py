@@ -2,13 +2,14 @@ import os
 import time
 from conans.model.ref import ConanFileReference
 
-from conan_app_launcher.components.conan import get_conan_package_folder, getConanAPI, ConanWorker, install_conan_package
+from conan_app_launcher.components.conan import (get_conan_package_folder, getConanAPI, ConanWorker,
+                                                 install_conan_package, create_key_value_pair_list)
 from conan_app_launcher.components import parse_config_file
 
 from PyQt5 import QtCore
 
 
-def testConanApi():
+def testInstallAndGetPath():
     """
     Test, if get_package installs the package and returns the path and checkit again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
@@ -21,6 +22,17 @@ def testConanApi():
     # check again for already installed package
     package_folder = get_conan_package_folder(ConanFileReference.loads(ref))
     assert (package_folder / "bin").is_dir()
+
+
+def testInstallAndGetPathWithOptions():
+    """
+    Test, if a package with an option can be found. TODO: currently don't care about multiple matching packages
+    The lib dir in the package must NOT exist (for now)
+    """
+    ref = "Azure-C-Shared-Utility/1.0.46@bincrafters/stable"
+    os.system(f"conan remove {ref} -f")
+    package_folder = get_conan_package_folder(ConanFileReference.loads(ref))
+    assert not package_folder.is_dir()  # (package_folder / "lib").is_dir()
 
 
 def testCompilerAnySettings(mocker, capsys):
@@ -79,6 +91,35 @@ def testCompilerNoSettings(mocker, capsys):
     install_conan_package(conan, cache, ConanFileReference.loads(ref))
     captured = capsys.readouterr()
     assert "Can't find a matching package" not in captured.err
+
+
+def testCreateKeyValueList():
+    """
+    Test, that key value pairs can be extracted as strings. No arrays or other tpyes supported.
+    The return value must be a list of strings in the format ["key1=value1", "key2=value2]
+    "Any" values are ignored. (case insensitive)
+    """
+    inp = {"Key1": "Value1"}
+    res = create_key_value_pair_list(inp)
+    assert res == ["Key1=Value1"]
+    inp = {"Key1": "Value1", "Key2": "Value2"}
+    res = create_key_value_pair_list(inp)
+    assert res == ["Key1=Value1", "Key2=Value2"]
+    inp = {"Key1": "Value1", "Key2": "Any"}
+    res = create_key_value_pair_list(inp)
+    assert res == ["Key1=Value1"]
+
+
+def testOptionsInstall(mocker, capsys):
+    """
+    Test, if a package with options can install.
+    The actual installaton must not return an error.
+    """
+    # This package has an option "shared" and is fairly small.
+    ref = "Azure-C-Shared-Utility/1.0.46@bincrafters/stable"
+    conan, cache, user_io = getConanAPI()
+
+    install_conan_package(conan, cache, ConanFileReference.loads(ref))
 
 
 class DummySignal():
