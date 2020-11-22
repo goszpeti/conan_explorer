@@ -469,7 +469,10 @@
       <svg class="octicon octicon-x" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg>
     </button>
     
-      <div>{{ message }}</div>
+      <div>{
+  { message
+  }
+}</div>
 
   </div>
 </div>
@@ -959,7 +962,7 @@
 
 * Fix CT test calls and improve fixtures
 
-* Evaluate both unit and int.-tests with junit xml" class="link-gray" href="/goszpeti/conan_app_launcher/commit/61b201934dffc79a98aa7f9d70205daf4ff5c102">Add further tests and GitHub workflow (</a><a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="711518284" data-permission-text="Title is private" data-url="https://github.com/goszpeti/conan_app_launcher/issues/14" data-hovercard-type="pull_request" data-hovercard-url="/goszpeti/conan_app_launcher/pull/14/hovercard" href="https://github.com/goszpeti/conan_app_launcher/pull/14">#14</a><a data-pjax="true" title="Add further tests and GitHub workflow (#14)
+* Evaluate both unit and int.-tests with junit xml" class="link-gray" href="/goszpeti/conan_app_launcher/commit/61b201934dffc79a98aa7f9d70205daf4ff5c102">Add further tests and GitHub workflow (</a><a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="711518284" data-permission-text="Title is private" data-url="https: //github.com/goszpeti/conan_app_launcher/issues/14" data-hovercard-type="pull_request" data-hovercard-url="/goszpeti/conan_app_launcher/pull/14/hovercard" href="https://github.com/goszpeti/conan_app_launcher/pull/14">#14</a><a data-pjax="true" title="Add further tests and GitHub workflow (#14)
 
 * Add further tests and GitHub workflow
 
@@ -1067,7 +1070,8 @@
           <span class="d-none d-md-inline">
             <span>Latest commit</span>
             <a class="text-small text-mono link-gray" href="/goszpeti/conan_app_launcher/commit/61b201934dffc79a98aa7f9d70205daf4ff5c102" data-pjax>61b2019</a>
-            <span itemprop="dateModified"><relative-time datetime="2020-10-21T09:17:58Z" class="no-wrap">Oct 21, 2020</relative-time></span>
+            <span itemprop="dateModified"><relative-time datetime="2020-10-21T09:17:58Z" class="no-wrap">Oct 21,
+2020</relative-time></span>
           </span>
 
           <a data-pjax href="/goszpeti/conan_app_launcher/commits/feature/add_file_opener/doc/demo.json" class="ml-3 no-wrap link-gray-dark no-underline">
@@ -1284,7 +1288,7 @@
       </tr>
       <tr>
         <td id="L9" class="blob-num js-line-number" data-line-number="9"></td>
-        <td id="LC9" class="blob-code blob-code-inner js-file-line">                    <span class="pl-s"><span class="pl-pds">&quot;</span>package_id<span class="pl-pds">&quot;</span></span>: <span class="pl-s"><span class="pl-pds">&quot;</span>app1/0.1.0@user1/stable<span class="pl-pds">&quot;</span></span>,</td>
+        <td id="LC9" class="blob-code blob-code-inner js-file-line">                    <span class="pl-s"><span class="pl-pds">&quot;</span>conan_ref<span class="pl-pds">&quot;</span></span>: <span class="pl-s"><span class="pl-pds">&quot;</span>app1/0.1.0@user1/stable<span class="pl-pds">&quot;</span></span>,</td>
       </tr>
       <tr>
         <td id="L10" class="blob-num js-line-number" data-line-number="10"></td>
@@ -1296,7 +1300,8 @@
       </tr>
       <tr>
         <td id="L12" class="blob-num js-line-number" data-line-number="12"></td>
-        <td id="LC12" class="blob-code blob-code-inner js-file-line">                },</td>
+        <td id="LC12" class="blob-code blob-code-inner js-file-line">
+        },</td>
       </tr>
       <tr>
         <td id="L13" class="blob-num js-line-number" data-line-number="13"></td>
@@ -1308,7 +1313,7 @@
       </tr>
       <tr>
         <td id="L15" class="blob-num js-line-number" data-line-number="15"></td>
-        <td id="LC15" class="blob-code blob-code-inner js-file-line">                    <span class="pl-s"><span class="pl-pds">&quot;</span>package_id<span class="pl-pds">&quot;</span></span>: <span class="pl-s"><span class="pl-pds">&quot;</span>app2/0.2.0@user2/testing<span class="pl-pds">&quot;</span></span>,</td>
+        <td id="LC15" class="blob-code blob-code-inner js-file-line">                    <span class="pl-s"><span class="pl-pds">&quot;</span>conan_ref<span class="pl-pds">&quot;</span></span>: <span class="pl-s"><span class="pl-pds">&quot;</span>app2/0.2.0@user2/testing<span class="pl-pds">&quot;</span></span>,</td>
       </tr>
       <tr>
         <td id="L16" class="blob-num js-line-number" data-line-number="16"></td>
@@ -1320,15 +1325,18 @@
       </tr>
       <tr>
         <td id="L18" class="blob-num js-line-number" data-line-number="18"></td>
-        <td id="LC18" class="blob-code blob-code-inner js-file-line">                }</td>
+        <td id="LC18" class="blob-code blob-code-inner js-file-line">
+        }</td>
       </tr>
       <tr>
         <td id="L19" class="blob-num js-line-number" data-line-number="19"></td>
-        <td id="LC19" class="blob-code blob-code-inner js-file-line">            ]</td>
+        <td id="LC19" class="blob-code blob-code-inner js-file-line">
+      ]</td>
       </tr>
       <tr>
         <td id="L20" class="blob-num js-line-number" data-line-number="20"></td>
-        <td id="LC20" class="blob-code blob-code-inner js-file-line">        },</td>
+        <td id="LC20" class="blob-code blob-code-inner js-file-line">
+    },</td>
       </tr>
       <tr>
         <td id="L21" class="blob-num js-line-number" data-line-number="21"></td>
@@ -1352,7 +1360,7 @@
       </tr>
       <tr>
         <td id="L26" class="blob-num js-line-number" data-line-number="26"></td>
-        <td id="LC26" class="blob-code blob-code-inner js-file-line">                    <span class="pl-s"><span class="pl-pds">&quot;</span>package_id<span class="pl-pds">&quot;</span></span>: <span class="pl-s"><span class="pl-pds">&quot;</span>app3/0.3.0@user3/stable<span class="pl-pds">&quot;</span></span>,</td>
+        <td id="LC26" class="blob-code blob-code-inner js-file-line">                    <span class="pl-s"><span class="pl-pds">&quot;</span>conan_ref<span class="pl-pds">&quot;</span></span>: <span class="pl-s"><span class="pl-pds">&quot;</span>app3/0.3.0@user3/stable<span class="pl-pds">&quot;</span></span>,</td>
       </tr>
       <tr>
         <td id="L27" class="blob-num js-line-number" data-line-number="27"></td>
@@ -1360,23 +1368,28 @@
       </tr>
       <tr>
         <td id="L28" class="blob-num js-line-number" data-line-number="28"></td>
-        <td id="LC28" class="blob-code blob-code-inner js-file-line">                }</td>
+        <td id="LC28" class="blob-code blob-code-inner js-file-line">
+        }</td>
       </tr>
       <tr>
         <td id="L29" class="blob-num js-line-number" data-line-number="29"></td>
-        <td id="LC29" class="blob-code blob-code-inner js-file-line">            ]</td>
+        <td id="LC29" class="blob-code blob-code-inner js-file-line">
+      ]</td>
       </tr>
       <tr>
         <td id="L30" class="blob-num js-line-number" data-line-number="30"></td>
-        <td id="LC30" class="blob-code blob-code-inner js-file-line">        }</td>
+        <td id="LC30" class="blob-code blob-code-inner js-file-line">
+    }</td>
       </tr>
       <tr>
         <td id="L31" class="blob-num js-line-number" data-line-number="31"></td>
-        <td id="LC31" class="blob-code blob-code-inner js-file-line">    ]</td>
+        <td id="LC31" class="blob-code blob-code-inner js-file-line">
+  ]</td>
       </tr>
       <tr>
         <td id="L32" class="blob-num js-line-number" data-line-number="32"></td>
-        <td id="LC32" class="blob-code blob-code-inner js-file-line">}</td>
+        <td id="LC32" class="blob-code blob-code-inner js-file-line">
+}</td>
       </tr>
 </table>
 

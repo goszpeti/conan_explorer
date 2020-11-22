@@ -29,7 +29,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self._app_button.setSizePolicy(size_policy)
 
         self._app_button.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
-        self._app_button.setToolTip(str(app.package_id))
+        self._app_button.setToolTip(str(app.conan_ref))
 
         self.addWidget(self._app_button)
         # self._app_name_label.setSizePolicy(size_policy)
@@ -37,12 +37,12 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self._app_name_label.setText(app.name)
         self.addWidget(self._app_name_label)
 
-        self._app_version_cbox.addItem(app.package_id.version)
+        self._app_version_cbox.addItem(app.conan_ref.version)
         # TODO unlock when version feature is implemented
         self._app_version_cbox.setDisabled(True)
         self.addWidget(self._app_version_cbox)
 
-        self._app_channel_cbox.addItem(app.package_id.channel)
+        self._app_channel_cbox.addItem(app.conan_ref.channel)
         # TODO unlock when version feature is implemented
         self._app_channel_cbox.setDisabled(True)
         self.addWidget(self._app_channel_cbox)

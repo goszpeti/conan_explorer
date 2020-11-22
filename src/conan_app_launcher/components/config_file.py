@@ -15,7 +15,7 @@ from conan_app_launcher.components.icon import extract_icon
 class AppEntry():
     """ Representation of an app entry of the config schema """
 
-    def __init__(self, name, package_id: str, executable: Path, args: str, icon: str,
+    def __init__(self, name, conan_ref: str, executable: Path, args: str, icon: str,
                  console_application: bool, config_file_path: Path):
         self.name = name
         self.executable = executable
@@ -25,10 +25,10 @@ class AppEntry():
         self.args = args
         # validate package id
         try:
-            self.package_id = ConanFileReference.loads(package_id)
+            self.conan_ref = ConanFileReference.loads(conan_ref)
         except Exception as error:
             # errors happen fairly often, keep going
-            self.package_id = ConanFileReference.loads("YouGaveA/0.0.1@Wrong/Reference")
+            self.conan_ref = ConanFileReference.loads("YouGaveA/0.0.1@Wrong/Reference")
             Logger().error(f"Conan ref id invalid {str(error)}")
 
         # validate icon path
@@ -55,7 +55,7 @@ class AppEntry():
             self.executable = self.executable.with_suffix(".exe")
         full_path = Path(self.package_folder / self.executable)
         if not full_path.is_file():
-            Logger().error(f"Cannot find {str(self.executable)} in package {str(self.package_id)}")
+            Logger().error(f"Cannot find {str(self.executable)} in package {str(self.conan_ref)}")
         self.executable = full_path
 
 
@@ -76,6 +76,13 @@ class TabEntry():
         return self._app_entries
 
 
+def update_app_info(app: dict):
+    # chaneg from 0.2.0 to 0.3.0
+    if app.get("package_id"):
+        value = app.pop("package_id")
+        app["conan_ref"] = value
+
+
 def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     """ Parse the json config file, validate and convert to object structure """
     app_config = None
@@ -84,9 +91,9 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     if not config_file_path.is_file():
         Logger().error(f"Config file '{config_file_path}' does not exist.")
         return []
-    with open(config_file_path) as grid_file:
+    with open(config_file_path) as config_file:
         try:
-            app_config = json.load(grid_file)
+            app_config: dict = json.load(config_file)
             with open(this.base_path / "assets" / "config_schema.json") as schema_file:
                 json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
@@ -94,15 +101,21 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
             Logger().error(f"Config file:\n{str(error)}")
             return []
 
-    # build the object model
+    # build the object model and update TODO: not very robust, but enough for small changes
     tabs = []
     for tab in app_config.get("tabs"):
         tab_entry = TabEntry(tab.get("name"))
         for app in tab.get("apps"):
-            app_entry = AppEntry(name=app.get("name"), package_id=app.get("package_id"),
+            update_app_info(app)
+            app_entry = AppEntry(name=app.get("name"), conan_ref=app.get("conan_ref"),
                                  executable=Path(app.get("executable")), icon=app.get("icon", ""),
                                  console_application=app.get("console_application", False),
                                  args=app.get("args", ""), config_file_path=config_file_path)
             tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
+    # auto Update version to next version:
+    app_config["version"] = json_schema.get("properties").get("version").get("enum")[-1]
+    # write it back with updates
+    with open(config_file_path, "w") as config_file:
+        json.dump(app_config, config_file, indent=4)
     return tabs

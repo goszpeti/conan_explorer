@@ -48,14 +48,15 @@ Execute `conan_app_launcher`, if the Python "scripts" folder is on your system p
 The config file uses the following exemplary schema:
 
     {
-        "version": "0.2.0", // please update the schema manually, no auto update available
+        "version": "0.3.0", // please update the schema manually, no auto update available
         "tabs": [
             {
                 "name": "Basics",
                 "apps": [
                     {
                         "name": "App1 with spaces", 
-                        "package_id": "app1/0.1.0@user1/stable", // full conan reference
+                        "conan_ref": "app1/0.1.0@user1/stable", // full conan reference
+                        "package_id": "app1/0.1.0@user1/stable" // DEPRECATED - will converted to conan_ref automatically
                         "executable": "bin/app1", // relative to conan "package folder" - can also be a file to open
                         "icon": "MyIcon.png" // relative to this config file,
                         "console_application": true, // start console application in extra window
@@ -63,7 +64,7 @@ The config file uses the following exemplary schema:
                     },
                     {
                         "name": "App2",
-                        "package_id": "app2/0.2.0@user2/testing",
+                        "conan_ref": "app2/0.2.0@user2/testing",
                         "executable": "bin/app2", // forward slashes are preferred
                         "icon": "C:\\CustomIcon.ico" // but escaped backslashes also work
                     }
@@ -74,7 +75,7 @@ The config file uses the following exemplary schema:
                 "apps": [
                     {
                         "name": "App3",
-                        "package_id": "app3/0.3.0@user3/stable",
+                        "conan_ref": "app3/0.3.0@user3/stable",
                         "console_application": true, // starts in a new console window
                         "executable": "bin/app3", // extension (.exe) can be ommited for windows
                         // Icon can be ommitted

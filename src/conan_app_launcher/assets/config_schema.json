@@ -1,5 +1,29 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "App Config",
+    "description": "Layout for conan app launcher",
+    "type": "object",
+    "properties": {
+        "version": {
+            "type": "string",
+            "enum": [
+                "0.2.0",
+                "0.3.0"
+            ],
+            "description": "Schema version"
+        },
+        "tabs": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/tab",
+                "description": "Array of tabs to be displayed."
+            }
+        }
+    },
+    "required": [
+        "version",
+        "tabs"
+    ],
     "definitions": {
         "app": {
             "type": "object",
@@ -9,6 +33,10 @@
                     "description": "Displayed name for application."
                 },
                 "package_id": {
+                    "type": "string",
+                    "description": "DEPRECATED - Conan package reference id, like app/1.0.0@usr/stable"
+                },
+                "conan_ref": {
                     "type": "string",
                     "description": "Conan package reference id, like app/1.0.0@usr/stable"
                 },
@@ -32,8 +60,19 @@
             },
             "required": [
                 "name",
-                "package_id",
                 "executable"
+            ],
+            "anyOf": [
+                {
+                    "required": [
+                        "package_id"
+                    ]
+                },
+                {
+                    "required": [
+                        "conan_ref"
+                    ]
+                }
             ]
         },
         "tab": {
@@ -56,26 +95,5 @@
                 "apps"
             ]
         }
-    },
-    "title": "App Config",
-    "description": "Layout for conan app launcher",
-    "type": "object",
-    "properties": {
-        "version": {
-            "type": "string",
-            "const": "0.2.0",
-            "description": "Schema version"
-        },
-        "tabs": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/tab",
-                "description": "Array of tabs to be displayed."
-            }
-        }
-    },
-    "required": [
-        "version",
-        "tabs"
-    ]
+    }
 }
