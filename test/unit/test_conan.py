@@ -54,7 +54,7 @@ def testManualOptionsInstall(capsys):
     if platform.system() == "Windows":
         assert (package_folder / "lib" / "zlib.lib").is_file()
     elif platform.system() == "Linux":
-        assert (package_folder / "lib" / "zlib.a").is_file()
+        assert (package_folder / "lib" / "libz.a").is_file()
 
 
 def testCompilerAnySettings(mocker, capsys):

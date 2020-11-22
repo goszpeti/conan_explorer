@@ -32,7 +32,7 @@ def get_conan_package_folder(conan_ref: ConanFileReference, input_options={}) ->
 
 
 def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: UserIO,
-                   conan_ref: ConanFileReference, input_options: Dict[str, str]) -> Tuple[bool, Path]:
+                   conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Tuple[bool, Path]:
     """ Get a conan path and return is_installed, path """
     try:
         conan.remove_locks()
@@ -50,8 +50,14 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
         Logger().debug(f"Getting info for '{str(conan_ref)}'...")
         output = []
         options: List[dict] = []
-        [deps_graph, _] = ConanAPIV1.info(conan, str(
-            conan_ref), options=_create_key_value_pair_list(input_options))
+        if not input_options:
+            default_options = conan.inspect(str(conan_ref), attributes=[
+                "default_options"]).get("default_options")
+            input_options = default_options
+        # TODO this only gets the default settings path, which can mean, that a compatible
+        # preinstalled package will not be discovered. Fix this later with file based discovery.
+        [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref),
+                                          options=_create_key_value_pair_list(input_options))
         # I don't know another way to do this
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
         return get_install_status_and_path_from_output(output, conan_ref, path)
@@ -93,9 +99,14 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
 
         # Check for settings, like there is a debug and release package
         # -> release is preferred
+        found_pkg = None
         if len(found_pkgs) > 1:
             filtered_pkgs = []
             for pkg in found_pkgs:
+                # early break, if this is a subset of default settings
+                if pkg.get("settings").items() <= dict(default_settings).items():
+                    found_pkg = pkg
+                    break
                 if pkg.get("settings").get("build_type", "").lower() == "debug":
                     continue
                 filtered_pkgs.append(pkg)
@@ -104,7 +115,8 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
 
         # the only difference must be in settings.compiler - take the first one (not elegant)
         # TODO take highest compiler version
-        found_pkg = filtered_pkgs[0]
+        if not found_pkg:
+            found_pkg = filtered_pkgs[0]
         settings_list = _create_key_value_pair_list(found_pkg.get("settings"))
         options_list = []
         if found_pkg.get("options"):
@@ -144,6 +156,8 @@ def _getConanAPI():
 def _create_key_value_pair_list(input_dict: dict) -> List[str]:
     """ helper to create name=value string list from dict"""
     res_list = []
+    if not input_dict:
+        return res_list
     for name, value in input_dict.items():
         value = str(value)
         if value.lower() == "any":
