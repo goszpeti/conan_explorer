@@ -23,7 +23,7 @@ jobs:
             "ubuntu-py38",
             "ubuntu-py39",
             "windows-py38",
-            "ubuntu-py38-conan1.17",
+            "ubuntu-py38-conan1.19.4",
           ]
         include:
           - name: "ubuntu-py36"
