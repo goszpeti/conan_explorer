@@ -1,5 +1,6 @@
 import os
 import time
+import platform
 from conans.model.ref import ConanFileReference
 
 from conan_app_launcher.components.conan import (get_conan_package_folder, _getConanAPI,
@@ -12,7 +13,7 @@ from PyQt5 import QtCore
 
 def testInstallAndGetPath():
     """
-    Test, if get_package installs the package and returns the path and checkit again.
+    Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
     ref = "m4_installer/1.4.18@bincrafters/stable"
@@ -25,7 +26,7 @@ def testInstallAndGetPath():
     assert (package_folder / "bin").is_dir()
 
 
-def testInstallAndGetPathWithDefaultOptions():
+def testInstallAndGetPathWithDefaultOptions(capsys):
     """
     Test, if a package with an option can be found. TODO: currently don't care about multiple matching packages
     The lib dir in the package must NOT exist (for now)
@@ -35,6 +36,9 @@ def testInstallAndGetPathWithDefaultOptions():
     package_folder = get_conan_package_folder(ConanFileReference.loads(ref))
     assert (package_folder / "lib").is_dir()
 
+    captured = capsys.readouterr()
+    assert "Using default options" in captured.err
+
 
 def testManualOptionsInstall(capsys):
     """
@@ -42,13 +46,15 @@ def testManualOptionsInstall(capsys):
     The actual installaton must not return an error and non given options be merged with default options.
     """
     # This package has an option "shared" and is fairly small.
-    ref = "gtest/1.7.0@bincrafters/stable"
-    conan, cache, user_io = _getConanAPI()
-
-    # assert not install_conan_package(conan, cache, ConanFileReference.loads(ref))
-
-    # captured = capsys.readouterr()
-    # assert "multiple" not in captured.err
+    ref = "zlib/1.2.11@conan/stable"
+    os.system(f"conan remove {ref} -f")
+    conan, cache, _ = _getConanAPI()
+    assert install_conan_package(conan, cache, ConanFileReference.loads(ref), {"shared": "True"})
+    package_folder = get_conan_package_folder(ConanFileReference.loads(ref))
+    if platform.system() == "Windows":
+        assert (package_folder / "lib" / "zlib.lib").is_file()
+    elif platform.system() == "Linux":
+        assert (package_folder / "lib" / "zlib.a").is_file()
 
 
 def testCompilerAnySettings(mocker, capsys):
@@ -76,7 +82,7 @@ def testCompilerAnySettings(mocker, capsys):
 
     conan, cache, user_io = _getConanAPI()
 
-    install_conan_package(conan, cache, ConanFileReference.loads(ref))
+    install_conan_package(conan, cache, ConanFileReference.loads(ref), {})
     captured = capsys.readouterr()
     assert "ERROR" not in captured.err
     assert "Cannot install package" not in captured.err
@@ -102,7 +108,7 @@ def testCompilerNoSettings(mocker, capsys):
 
     conan, cache, user_io = _getConanAPI()
 
-    install_conan_package(conan, cache, ConanFileReference.loads(ref))
+    install_conan_package(conan, cache, ConanFileReference.loads(ref), {})
     captured = capsys.readouterr()
     assert "Can't find a matching package" not in captured.err
 
@@ -124,32 +130,15 @@ def testCreateKeyValueList():
     assert res == ["Key1=Value1"]
 
 
-def testAutoOptionsInstallDefaultSettings(capsys):
-    """
-    Test, if a package with options can install.
-    The actual installaton must not return an error.
-    """
-    # This package has an option "shared" and is fairly small.
-    ref = "zlib/1.2.11@conan/stable"
-    conan, cache, user_io = _getConanAPI()
-
-    assert install_conan_package(conan, cache, ConanFileReference.loads(ref))
-
-    captured = capsys.readouterr()
-    assert "multiple" not in captured.err
-
-
-class DummySignal():
-
-    def emit(self):
-        pass
-
-
 def testConanWorker(base_fixture):
     """
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
+    class DummySignal():
+
+        def emit(self):
+            pass
     sig = DummySignal()
     tab_info = parse_config_file(base_fixture.testdata_path / "app_config.json")
     conan_worker = ConanWorker(tab_info, sig)

@@ -19,7 +19,7 @@
                     "conan_options": [
                         {
                             "name": "shared",
-                            "value": "true"
+                            "value": "True"
                         }
                     ],
                     "icon": "icon.ico"
@@ -31,7 +31,7 @@
                     "conan_options": [
                         {
                             "name": "shared",
-                            "value": "false"
+                            "value": "False"
                         }
                     ],
                     "icon": "icon.ico"
@@ -43,7 +43,11 @@
                     "conan_options": [
                         {
                             "name": "shared",
-                            "value": "true"
+                            "value": "True"
+                        },
+                        {
+                            "name": "minizip",
+                            "value": "False"
                         }
                     ],
                     "icon": "icon.ico"

@@ -58,5 +58,4 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
             self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
                 ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
         # emit the click signal now, so the click effect plays before
-        # TODO: emit or not emit?
         self.clicked.emit()

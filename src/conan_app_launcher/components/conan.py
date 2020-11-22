@@ -15,7 +15,8 @@ def get_conan_package_folder(conan_ref: ConanFileReference, input_options={}) ->
     """ Return the package folder of a conan reference, and install it, if it is not available """
     conan, cache, user_io = _getConanAPI()
     package_folder = Path("Inconclusive")
-    [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
+    [is_installed, package_folder] = get_conan_path(
+        "package_folder", conan, cache, user_io, conan_ref, input_options)
 
     if not is_installed:
         Logger().info(f"Installing '{str(conan_ref)}'...")
@@ -23,14 +24,15 @@ def get_conan_package_folder(conan_ref: ConanFileReference, input_options={}) ->
         if not res:  # Logger gave error msg
             return package_folder
         # needed: call info again for path, install info does not have it
-        [is_installed, package_folder] = get_conan_path("package_folder", conan, cache, user_io, conan_ref)
+        [is_installed, package_folder] = get_conan_path(
+            "package_folder", conan, cache, user_io, conan_ref, input_options)
     else:
         Logger().debug(f"Found '{str(conan_ref)}' in {str(package_folder)}.")
     return package_folder
 
 
 def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: UserIO,
-                   conan_ref: ConanFileReference) -> Tuple[bool, Path]:
+                   conan_ref: ConanFileReference, input_options: Dict[str, str]) -> Tuple[bool, Path]:
     """ Get a conan path and return is_installed, path """
     try:
         conan.remove_locks()
@@ -48,7 +50,8 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
         Logger().debug(f"Getting info for '{str(conan_ref)}'...")
         output = []
         options: List[dict] = []
-        [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref), options)
+        [deps_graph, _] = ConanAPIV1.info(conan, str(
+            conan_ref), options=_create_key_value_pair_list(input_options))
         # I don't know another way to do this
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
         return get_install_status_and_path_from_output(output, conan_ref, path)
@@ -111,7 +114,8 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
                 default_options = conan.inspect(str(conan_ref), attributes=[
                                                 "default_options"]).get("default_options")
                 options_list = []  # default options are used automatically and corrected with config options
-                Logger().info("Multiple packages found. Using default options: " + ", ".join(str(default_options)))
+                Logger().info("Multiple packages found. Using default options:\n" +
+                              (str(_create_key_value_pair_list(default_options))))
 
         try:
             info = ConanAPIV1.install_reference(conan, conan_ref, update=True,

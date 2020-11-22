@@ -56,7 +56,8 @@ class AppEntry():
             self.executable = self.executable.with_suffix(".exe")
         full_path = Path(self.package_folder / self.executable)
         if not full_path.is_file():
-            Logger().error(f"Cannot find {str(self.executable)} in package {str(self.conan_ref)}")
+            Logger().error(
+                f"Cannot find file in package {str(self.conan_ref)}:\n{str(full_path)}")
         self.executable = full_path
 
 

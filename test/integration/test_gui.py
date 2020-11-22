@@ -132,6 +132,7 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
 
 
 def testViewMenuOptions():
+    # TODO
     """
     Test the view menu entries.
     Check, that activating the entry set the hide flag is set on the widget.

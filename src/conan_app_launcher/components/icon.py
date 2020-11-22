@@ -23,7 +23,6 @@ def extract_icon(file_path: Path, output_dir: Path) -> Path:
         Logger().info("Automatic icon extraction is not available on Linux.")
         return Path("NULL")
     if platform.system() == "Windows":
-        # TODO: Check is executable or not
         if is_file_executable(file_path):
             return extract_icon_from_win_executable(file_path, output_dir)
         else:

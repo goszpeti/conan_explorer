@@ -28,7 +28,7 @@ def testCorrectFile(base_fixture):
     assert tab0_entries[1].name == "App2"
     assert not tab0_entries[1].is_console_application  # default
     assert tab0_entries[1].args == ""
-    assert tab0_entries[1].conan_options == {"shared": "true"}
+    assert tab0_entries[1].conan_options == {"shared": "True"}
 
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].get_app_entries()
@@ -51,7 +51,7 @@ def testUpdate(base_fixture):
     tab1_entries = tabs[1].get_app_entries()
     assert str(tab1_entries[0].conan_ref) == "app2/1.0.0@user/stable"
 
-    # TODO : now check the file, don't trust the own parser
+    # now check the file, don't trust the own parser
     read_obj = {}
     with open(temp_file) as config_file:
         read_obj = json.load(config_file)

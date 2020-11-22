@@ -43,11 +43,11 @@ class Settings():
 
     def get(self, name: str):
         """ Get a specific setting """
-        return self._values.get(name, None)  # TODO Name checking Error
+        return self._values.get(name, None)
 
     def set(self, name: str, value):
         """ Set a specific setting """
-        self._values[name] = value  # TODO Name and type checking Error
+        self._values[name] = value
         # autosave
         self.save_to_file()
 

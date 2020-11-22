@@ -40,9 +40,9 @@ def testOpenApp(base_fixture, qtbot):
     """
     app_info = None
     if platform.system() == "Linux":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", Path(sys.executable), "", "", True, Path("."))
+        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", {},Path(sys.executable), "", "", True, Path("."))
     elif platform.system() == "Windows":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
+        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", {},
                             Path(sys.executable), "", "", True, Path("."))
 
     assert app_info.icon.is_file()

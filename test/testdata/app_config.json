@@ -19,7 +19,7 @@
                     "conan_options": [
                         {
                             "name": "shared",
-                            "value": "true"
+                            "value": "True"
                         }
                     ],
                     "icon": "icon.ico"
