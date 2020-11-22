@@ -129,3 +129,11 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     assert main_gui._about_dialog.isEnabled()
     qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], QtCore.Qt.LeftButton)
     app.conan_worker.finish_working()
+
+
+def testViewMenuOptions():
+    """
+    Test the view menu entries.
+    Check, that activating the entry set the hide flag is set on the widget.
+    """
+    pass

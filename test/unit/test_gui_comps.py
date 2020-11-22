@@ -71,11 +71,3 @@ def testOpenApp(base_fixture, qtbot):
         line = lines[3].replace(" ", "")
         pid = line.split("python.exe")[1].split("Console")[0]
         os.system("taskkill /PID " + pid)
-
-
-def testViewMenuOptions():
-    """
-    Test the view menu entries.
-    Check, that activating the entry set the hide flag is set on the widget.
-    """
-    pass

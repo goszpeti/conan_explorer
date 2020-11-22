@@ -2,8 +2,9 @@ import os
 import time
 from conans.model.ref import ConanFileReference
 
-from conan_app_launcher.components.conan import (get_conan_package_folder, getConanAPI, ConanWorker,
-                                                 install_conan_package, create_key_value_pair_list)
+from conan_app_launcher.components.conan import (get_conan_package_folder, _getConanAPI,
+                                                 install_conan_package, _create_key_value_pair_list)
+from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
 
 from PyQt5 import QtCore
@@ -24,15 +25,30 @@ def testInstallAndGetPath():
     assert (package_folder / "bin").is_dir()
 
 
-def testInstallAndGetPathWithOptions():
+def testInstallAndGetPathWithDefaultOptions():
     """
     Test, if a package with an option can be found. TODO: currently don't care about multiple matching packages
     The lib dir in the package must NOT exist (for now)
     """
-    ref = "Azure-C-Shared-Utility/1.0.46@bincrafters/stable"
+    ref = "zlib/1.2.11@conan/stable"
     os.system(f"conan remove {ref} -f")
     package_folder = get_conan_package_folder(ConanFileReference.loads(ref))
-    assert not package_folder.is_dir()  # (package_folder / "lib").is_dir()
+    assert (package_folder / "lib").is_dir()
+
+
+def testManualOptionsInstall(capsys):
+    """
+    Test, if a package with options can install.
+    The actual installaton must not return an error and non given options be merged with default options.
+    """
+    # This package has an option "shared" and is fairly small.
+    ref = "gtest/1.7.0@bincrafters/stable"
+    conan, cache, user_io = _getConanAPI()
+
+    # assert not install_conan_package(conan, cache, ConanFileReference.loads(ref))
+
+    # captured = capsys.readouterr()
+    # assert "multiple" not in captured.err
 
 
 def testCompilerAnySettings(mocker, capsys):
@@ -49,18 +65,16 @@ def testCompilerAnySettings(mocker, capsys):
                 'items': [
                     {'recipe': {'id': 'm4_installer/1.4.18@bincrafters/stable'},
                      'packages':
-                     [{'id': '445cf80f611c1d1eda08bde2ebc5066218ca9701', 'options': {}, 'settings': {'arch_build': 'x86', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},
-                      {'id': '44fcf6b9a7fb86b2586303e3db40189d3b511830', 'options': {}, 'settings': {
-                          'arch_build': 'x86_64', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},
-                      {'id': '456f15897172eef340fcbac8a70811f2beb26a93', 'options': {}, 'settings': {
-                          'arch_build': 'x86_64', 'os_build': 'Windows', "build_type": "ANY"}, 'requires': [], 'outdated': False},
-                      {'id': '743cf0321be3152777da4d05247a66d1552e70a2', 'options': {}, 'settings': {
-                          'arch_build': 'x86_64', 'os_build': 'Macos'}, 'requires': [], 'outdated': False},
-                      {'id': 'b2fcbc60b3bee75023a4f7934cadb723eec550bd', 'options': {}, 'settings': {'arch_build': 'x86', 'os_build': 'Windows', "build_type": "ANY"}, 'requires': [], 'outdated': False}]}]}]}
+                     [
+                        {'id': '44fcf6b9a7fb86b2586303e3db40189d3b511830', 'options': {}, 'settings': {
+                          'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},
+                        {'id': '456f15897172eef340fcbac8a70811f2beb26a93', 'options': {}, 'settings': {
+                            'arch_build': 'anY', 'os_build': 'Windows', "build_type": "ANY"}, 'requires': [], 'outdated': False},
+                    ]}]}]}
     config = {"return_value": result}
     mocker.patch("conans.client.conan_api.ConanAPIV1.search_packages", **config)
 
-    conan, cache, user_io = getConanAPI()
+    conan, cache, user_io = _getConanAPI()
 
     install_conan_package(conan, cache, ConanFileReference.loads(ref))
     captured = capsys.readouterr()
@@ -86,7 +100,7 @@ def testCompilerNoSettings(mocker, capsys):
     config = {"return_value": result}
     mocker.patch("conans.client.conan_api.ConanAPIV1.search_packages", **config)
 
-    conan, cache, user_io = getConanAPI()
+    conan, cache, user_io = _getConanAPI()
 
     install_conan_package(conan, cache, ConanFileReference.loads(ref))
     captured = capsys.readouterr()
@@ -100,26 +114,29 @@ def testCreateKeyValueList():
     "Any" values are ignored. (case insensitive)
     """
     inp = {"Key1": "Value1"}
-    res = create_key_value_pair_list(inp)
+    res = _create_key_value_pair_list(inp)
     assert res == ["Key1=Value1"]
     inp = {"Key1": "Value1", "Key2": "Value2"}
-    res = create_key_value_pair_list(inp)
+    res = _create_key_value_pair_list(inp)
     assert res == ["Key1=Value1", "Key2=Value2"]
     inp = {"Key1": "Value1", "Key2": "Any"}
-    res = create_key_value_pair_list(inp)
+    res = _create_key_value_pair_list(inp)
     assert res == ["Key1=Value1"]
 
 
-def testOptionsInstall(mocker, capsys):
+def testAutoOptionsInstallDefaultSettings(capsys):
     """
     Test, if a package with options can install.
     The actual installaton must not return an error.
     """
     # This package has an option "shared" and is fairly small.
-    ref = "Azure-C-Shared-Utility/1.0.46@bincrafters/stable"
-    conan, cache, user_io = getConanAPI()
+    ref = "zlib/1.2.11@conan/stable"
+    conan, cache, user_io = _getConanAPI()
 
-    install_conan_package(conan, cache, ConanFileReference.loads(ref))
+    assert install_conan_package(conan, cache, ConanFileReference.loads(ref))
+
+    captured = capsys.readouterr()
+    assert "multiple" not in captured.err
 
 
 class DummySignal():
