@@ -30,7 +30,7 @@ Qt for Python must be installed with the native package manager, like:
 
     sudo apt install python3-pyqt5
 
-Ubuntu 16.04 is currently not supported, because of Python 3.5 syntax.
+Ubuntu 16.04 is not supported with its native Python 3.5.
 
 ### With pip from Pypi
 `pip install conan-app-launcher`
@@ -42,6 +42,11 @@ After checkout use the command:
 
 ## Running
 Execute `conan_app_launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder.
+
+### Main dependencies
+
+* PyQt5 >= 5.13.0 
+* conan >= 1.19.4
 
 ## Config File
 

@@ -48,10 +48,10 @@ jobs:
             os: windows-latest
             use_coverage: true
             conan: "latest"
-          - name: "ubuntu-py38-conan1.17"
+          - name: "ubuntu-py38-conan1.19.4"
             python: "3.8"
             os: ubuntu-latest
-            conan: "1.17"
+            conan: "1.19.4"
             use_coverage: true
 
     env:

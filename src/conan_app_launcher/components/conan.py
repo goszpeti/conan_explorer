@@ -49,11 +49,6 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
                 ref_lock_file.unlink()
         Logger().debug(f"Getting info for '{str(conan_ref)}'...")
         output = []
-        options: List[dict] = []
-        if not input_options:
-            default_options = conan.inspect(str(conan_ref), attributes=[
-                "default_options"]).get("default_options")
-            input_options = default_options
         # TODO this only gets the default settings path, which can mean, that a compatible
         # preinstalled package will not be discovered. Fix this later with file based discovery.
         [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref),
@@ -146,7 +141,7 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
 def _getConanAPI():
     """ Helper function to get conan API objects"""
     conan, cache, user_io = ConanAPIV1.factory()
-    if Version(conan_version) > Version("1.18"):
+    if Version(conan_version) >= Version("1.18"):
         conan.create_app()
         user_io = conan.user_io
         cache = conan.app.cache

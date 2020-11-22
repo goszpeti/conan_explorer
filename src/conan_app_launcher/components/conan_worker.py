@@ -23,7 +23,7 @@ class ConanWorker():
         self._gui_update_signal = gui_update_signal
         self._tabs = tabs
 
-        # get all conan refs and  make them unique
+        # get all conan refs and  make them unique # TODO separate this from worker
         conan_refs = []
         for tab in tabs:
             for app in tab.get_app_entries():
