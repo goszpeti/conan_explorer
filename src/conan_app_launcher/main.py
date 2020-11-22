@@ -68,7 +68,6 @@ def main():
         trace_back = traceback.format_exc()
         logger.error(f"Application crashed: \n{trace_back}")
     finally:
-        settings.save_to_file()  # save on exit
         if this.conan_worker:  # cancel conan worker tasks on exit
             this.conan_worker.finish_working()
 

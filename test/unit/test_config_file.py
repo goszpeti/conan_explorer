@@ -22,12 +22,13 @@ def testCorrectFile(base_fixture):
     assert tab0_entries[0].is_console_application
     assert tab0_entries[0].args == "-n name"
 
-    assert str(tab0_entries[1].conan_ref) == "boost_functional/1.69.0@bincrafters/stable"
+    assert str(tab0_entries[1].conan_ref) == "zlib/1.2.11@conan/stable"
     assert tab0_entries[1].executable.as_posix() == "bin/app2"
     assert tab0_entries[1].icon.name == "default_app_icon.png"
     assert tab0_entries[1].name == "App2"
     assert not tab0_entries[1].is_console_application  # default
     assert tab0_entries[1].args == ""
+    assert tab0_entries[1].conan_options == {"shared": "true"}
 
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].get_app_entries()

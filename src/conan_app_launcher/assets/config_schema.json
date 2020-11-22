@@ -25,6 +25,26 @@
         "tabs"
     ],
     "definitions": {
+        "tab": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Displayed name for tab."
+                },
+                "apps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/app",
+                        "description": "Array of applications displayed on tab."
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "apps"
+            ]
+        },
         "app": {
             "type": "object",
             "properties": {
@@ -39,6 +59,13 @@
                 "conan_ref": {
                     "type": "string",
                     "description": "Conan package reference id, like app/1.0.0@usr/stable"
+                },
+                "conan_options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/conan_option",
+                        "description": "Array of conan option key-value pairs"
+                    }
                 },
                 "executable": {
                     "type": "string",
@@ -75,25 +102,18 @@
                 }
             ]
         },
-        "tab": {
+        "conan_option": {
             "type": "object",
             "properties": {
                 "name": {
                     "type": "string",
-                    "description": "Displayed name for tab."
+                    "description": "Name of conan option"
                 },
-                "apps": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/app",
-                        "description": "Array of applications displayed on tab."
-                    }
+                "value": {
+                    "type": "string",
+                    "description": "Value of conan option (Bools and ints are represented as strings too)"
                 }
-            },
-            "required": [
-                "name",
-                "apps"
-            ]
+            }
         }
     }
 }

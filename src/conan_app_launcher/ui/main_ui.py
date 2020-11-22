@@ -48,11 +48,6 @@ class MainUi(QtWidgets.QMainWindow):
             pass
         Logger.remove_qt_logger()
 
-    @property
-    def ui(self):
-        """ Contains all gui objects defined in Qt .ui file. Subclasses need access to this. """
-        return self._ui
-
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = Path.home()
@@ -105,7 +100,8 @@ class MainUi(QtWidgets.QMainWindow):
         while self._ui.tabs.count() > 0:
             self._ui.tabs.removeTab(0)
         config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
-        self._tab_info = parse_config_file(config_file_path)
+        if config_file_path.is_file():  # escape error log on first opening
+            self._tab_info = parse_config_file(config_file_path)
         this.conan_worker = ConanWorker(self._tab_info, self.conan_info_updated)
         self.create_layout()
 

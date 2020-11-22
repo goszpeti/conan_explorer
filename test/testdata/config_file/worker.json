@@ -23,6 +23,30 @@
                         }
                     ],
                     "icon": "icon.ico"
+                },
+                {
+                    "name": "App3",
+                    "conan_ref": "zlib/1.2.11@conan/stable",
+                    "executable": "bin/app3",
+                    "conan_options": [
+                        {
+                            "name": "shared",
+                            "value": "false"
+                        }
+                    ],
+                    "icon": "icon.ico"
+                },
+                {
+                    "name": "App4",
+                    "conan_ref": "zlib/1.2.11@conan/stable",
+                    "executable": "bin/app4",
+                    "conan_options": [
+                        {
+                            "name": "shared",
+                            "value": "true"
+                        }
+                    ],
+                    "icon": "icon.ico"
                 }
             ]
         },
@@ -30,7 +54,7 @@
             "name": "Extra",
             "apps": [
                 {
-                    "name": "App2",
+                    "name": "AppExtra",
                     "conan_ref": "app2/1.0.0@user/stable",
                     "executable": "bin/app2.exe",
                     "icon": "//myicon.png"

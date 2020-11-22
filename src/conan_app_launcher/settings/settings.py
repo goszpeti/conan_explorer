@@ -48,6 +48,8 @@ class Settings():
     def set(self, name: str, value):
         """ Set a specific setting """
         self._values[name] = value  # TODO Name and type checking Error
+        # autosave
+        self.save_to_file()
 
     def save_to_file(self):
         """ Save all user modifiable options to file. """

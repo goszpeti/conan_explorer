@@ -4,7 +4,7 @@ import jsonschema
 import tempfile
 
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 from conans.model.ref import ConanFileReference
 
 import conan_app_launcher as this
@@ -15,7 +15,7 @@ from conan_app_launcher.components.icon import extract_icon
 class AppEntry():
     """ Representation of an app entry of the config schema """
 
-    def __init__(self, name, conan_ref: str, executable: Path, args: str, icon: str,
+    def __init__(self, name, conan_ref: str, conan_options: Dict[str, str], executable: Path, args: str, icon: str,
                  console_application: bool, config_file_path: Path):
         self.name = name
         self.executable = executable
@@ -23,6 +23,7 @@ class AppEntry():
         self.package_folder = Path()
         self.is_console_application = console_application
         self.args = args
+        self.conan_options = conan_options  # user specified, can differ from the actual installation
         # validate package id
         try:
             self.conan_ref = ConanFileReference.loads(conan_ref)
@@ -93,7 +94,7 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
         return []
     with open(config_file_path) as config_file:
         try:
-            app_config: dict = json.load(config_file)
+            app_config = json.load(config_file)
             with open(this.base_path / "assets" / "config_schema.json") as schema_file:
                 json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
@@ -107,10 +108,17 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
         tab_entry = TabEntry(tab.get("name"))
         for app in tab.get("apps"):
             update_app_info(app)
+            # convert key-value pairs from options to list of dicts
+            conan_opts = app.get("conan_options", [])
+            conan_options = {}
+            for opt in conan_opts:
+                conan_options[opt.get("name", "")] = opt.get("value", "")
+
             app_entry = AppEntry(name=app.get("name"), conan_ref=app.get("conan_ref"),
                                  executable=Path(app.get("executable")), icon=app.get("icon", ""),
                                  console_application=app.get("console_application", False),
-                                 args=app.get("args", ""), config_file_path=config_file_path)
+                                 args=app.get("args", ""), config_file_path=config_file_path,
+                                 conan_options=conan_options)
             tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
     # auto Update version to next version:

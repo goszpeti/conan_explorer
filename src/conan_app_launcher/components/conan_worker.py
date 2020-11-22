@@ -23,16 +23,17 @@ class ConanWorker():
         self._gui_update_signal = gui_update_signal
         self._tabs = tabs
 
-        # get all conan refs
+        # get all conan refs and  make them unique
         conan_refs = []
         for tab in tabs:
             for app in tab.get_app_entries():
-                conan_refs.append(str(app.conan_ref))
-        # make them unique
-        self._conan_refs = set(conan_refs)
+                ref_dict = {"name": str(app.conan_ref), "options": app.conan_options}
+                if not ref_dict in conan_refs:
+                    conan_refs.append(ref_dict)
+
         # fill up queue
-        for ref in self._conan_refs:
-            self._conan_queue.put(ref)
+        for ref in conan_refs:
+            self._conan_queue.put([ref.get("name"), ref.get("options")])
             self.start_working()
 
     def start_working(self):
@@ -52,8 +53,8 @@ class ConanWorker():
     def _work_on_conan_queue(self):
         """ Call conan operations from queue """
         while not self._closing and not self._conan_queue.empty():
-            conan_ref = self._conan_queue.get()
-            package_folder = get_conan_package_folder(ConanFileReference.loads(conan_ref))
+            conan_ref, conan_options = self._conan_queue.get()
+            package_folder = get_conan_package_folder(ConanFileReference.loads(conan_ref), conan_options)
             # call update on every entry which has this ref
             for tab in self._tabs:
                 for app in tab.get_app_entries():

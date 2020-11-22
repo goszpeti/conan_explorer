@@ -1,16 +1,17 @@
 
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
-from conan_app_launcher.base import Logger
 from conans import __version__ as conan_version
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.client.conan_command_output import CommandOutputer
 from conans.model.ref import ConanFileReference
 from packaging.version import Version
 
+from conan_app_launcher.base import Logger
 
-def get_conan_package_folder(conan_ref: ConanFileReference) -> Path:
+
+def get_conan_package_folder(conan_ref: ConanFileReference, input_options={}) -> Path:
     """ Return the package folder of a conan reference, and install it, if it is not available """
     conan, cache, user_io = _getConanAPI()
     package_folder = Path("Inconclusive")
@@ -18,7 +19,7 @@ def get_conan_package_folder(conan_ref: ConanFileReference) -> Path:
 
     if not is_installed:
         Logger().info(f"Installing '{str(conan_ref)}'...")
-        res = install_conan_package(conan, cache, conan_ref, {})
+        res = install_conan_package(conan, cache, conan_ref, input_options)
         if not res:  # Logger gave error msg
             return package_folder
         # needed: call info again for path, install info does not have it
@@ -46,7 +47,7 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
                 ref_lock_file.unlink()
         Logger().debug(f"Getting info for '{str(conan_ref)}'...")
         output = []
-        options: Tuple[dict] = []
+        options: List[dict] = []
         [deps_graph, _] = ConanAPIV1.info(conan, str(conan_ref), options)
         # I don't know another way to do this
         output = CommandOutputer(user_io.out, cache)._grab_info_data(deps_graph, True)
@@ -57,7 +58,7 @@ def get_conan_path(path: str, conan: ConanAPIV1, cache: ClientCache, user_io: Us
 
 
 def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
-                          conan_ref: ConanFileReference, input_options={}) -> bool:
+                          conan_ref: ConanFileReference, input_options: Dict[str, str]) -> bool:
     """
     Try to install a conan package while guessing the mnost suitable package
     for the current platform.
@@ -110,7 +111,7 @@ def install_conan_package(conan: ConanAPIV1, cache: ClientCache,
                 default_options = conan.inspect(str(conan_ref), attributes=[
                                                 "default_options"]).get("default_options")
                 options_list = []  # default options are used automatically and corrected with config options
-                Logger().info("Multiple packages found. Using default options: " + ", ".join(default_options))
+                Logger().info("Multiple packages found. Using default options: " + ", ".join(str(default_options)))
 
         try:
             info = ConanAPIV1.install_reference(conan, conan_ref, update=True,
@@ -147,10 +148,10 @@ def _create_key_value_pair_list(input_dict: dict) -> List[str]:
     return res_list
 
 
-def get_install_status_and_path_from_output(output: Tuple[dict], conan_ref: str, path: str) -> Tuple[bool, Path]:
+def get_install_status_and_path_from_output(output: List[dict], conan_ref: str, path: str) -> Tuple[bool, Path]:
     """ Helper for getting the own ref from the conan output parser"""
     for package_info in output:
         if package_info.get("reference") == str(conan_ref):
             is_installed = (package_info.get("binary") == "Cache")
             return is_installed, Path(package_info.get(path))
-    return[False, Path("Wrong")]
+    return False, Path("Wrong")
