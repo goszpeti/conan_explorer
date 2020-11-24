@@ -28,13 +28,6 @@ def testConanFindRemotePkg():
         if setting in pkg["settings"].keys():
             assert default_settings[setting] in pkg["settings"][setting]
 
-    # for pkg in pkgs:
-    #     assert {"shared": "True"}.items() <= pkg["options"].items()
-    #     #assert pkg["settings"].items() <= default_settings.items()
-    #     for setting in default_settings:
-    #         if setting in pkg["settings"].keys():
-    #             assert default_settings[setting] in pkg["settings"][setting]
-
 
 def testConanNotFindRemotePkgWrongOpts(capsys):
     """
@@ -91,7 +84,7 @@ def testGetPathOrInstallManualOptions(capsys):
     if platform.system() == "Windows":
         assert (package_folder / "lib" / "zlib.lib").is_file()
     elif platform.system() == "Linux":
-        assert (package_folder / "lib" / "libz.a").is_file()
+        assert (package_folder / "lib" / "libz.so").is_file()
 
 
 def testInstallWithAnySettings(mocker, capsys):
