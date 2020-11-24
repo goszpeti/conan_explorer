@@ -1,7 +1,10 @@
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TypedDict
-
+from typing import Any, Dict, List, Optional
+try:
+    from typing import TypedDict
+except ModuleNotFoundError:
+    from typing_extensions import TypedDict
 from conan_app_launcher.base import Logger
 from conans import __version__ as conan_version
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
