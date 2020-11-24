@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 try:
     from typing import TypedDict
-except ModuleNotFoundError:
+except ImportError:
     from typing_extensions import TypedDict
 from conan_app_launcher.base import Logger
 from conans import __version__ as conan_version
