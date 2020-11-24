@@ -19,12 +19,12 @@ class AppEntry():
                  console_application: bool, config_file_path: Path):
         self.name = name
         self.executable = executable
-        self.icon = Path()
+        self.icon = Path("NULL")
         self.package_folder = Path()
         self.is_console_application = console_application
         self.args = args
         self.conan_options = conan_options  # user specified, can differ from the actual installation
-        # validate package id
+        # validate package id early
         try:
             self.conan_ref = ConanFileReference.loads(conan_ref)
         except Exception as error:
@@ -45,7 +45,7 @@ class AppEntry():
             self.icon = Path(icon)
 
         if not self.icon.is_file():
-            Logger().error(f"Icon {str(self.icon)} for '{name}' not found")
+            Logger().error(f"Can't find icon {str(self.icon)} for '{name}")
             self.icon = this.base_path / "assets" / "default_app_icon.png"
 
     def validate_with_conan_info(self, package_folder: Path):
@@ -55,9 +55,9 @@ class AppEntry():
         if platform.system() == "Windows" and not self.executable.suffix:
             self.executable = self.executable.with_suffix(".exe")
         full_path = Path(self.package_folder / self.executable)
-        if not full_path.is_file():
+        if self.package_folder.is_dir() and not full_path.is_file():
             Logger().error(
-                f"Cannot find file in package {str(self.conan_ref)}:\n{str(full_path)}")
+                f"Can't find file in package {str(self.conan_ref)}:\n    {str(full_path)}")
         self.executable = full_path
 
 
@@ -79,7 +79,7 @@ class TabEntry():
 
 
 def update_app_info(app: dict):
-    # chaneg from 0.2.0 to 0.3.0
+    # change from 0.2.0 to 0.3.0
     if app.get("package_id"):
         value = app.pop("package_id")
         app["conan_ref"] = value
@@ -103,11 +103,12 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
             Logger().error(f"Config file:\n{str(error)}")
             return []
 
-    # build the object model and update TODO: not very robust, but enough for small changes
+    # build the object model and update
     tabs = []
     for tab in app_config.get("tabs"):
         tab_entry = TabEntry(tab.get("name"))
         for app in tab.get("apps"):
+            # TODO: not very robust, but enough for small changes
             update_app_info(app)
             # convert key-value pairs from options to list of dicts
             conan_opts = app.get("conan_options", [])

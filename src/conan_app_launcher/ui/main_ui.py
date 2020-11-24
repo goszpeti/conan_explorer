@@ -1,4 +1,3 @@
-import threading
 from pathlib import Path
 from typing import List
 
@@ -38,12 +37,12 @@ class MainUi(QtWidgets.QMainWindow):
 
         self.init_gui()
 
-    def closeEvent(self, event):
+    def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
         super().closeEvent(event)
         try:
             self.new_message_logged.disconnect(self.write_log)
-        except:
+        except Exception:
             # Sometimes the closeEvent is called twice and disconnect errors.
             pass
         Logger.remove_qt_logger()
@@ -74,7 +73,7 @@ class MainUi(QtWidgets.QMainWindow):
     def create_layout(self):
         """ Creates the tabs and app icons """
         for tab_info in self._tab_info:
-            # TODO: need to save object locally, otherwise it can be destroyed in the underlying C++ layer
+            # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             self._tab = TabUiGrid(self, tab_info.name)
             row = 0  # 3
             column = 0  # 4

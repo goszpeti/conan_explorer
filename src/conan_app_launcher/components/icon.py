@@ -1,4 +1,3 @@
-import os
 import platform
 from pathlib import Path
 
@@ -11,23 +10,21 @@ if platform.system() == "Windows":
 
 
 def extract_icon(file_path: Path, output_dir: Path) -> Path:
-    """ 
+    """
     Extract icons from a file and save them to specified dir.
     Since we don't know the format (png or ico), the function returns the generated filepath.
     """
-    if not file_path.is_file():
-        Logger().debug("File for icon extraction does not exist.")
-        return Path("NULL")
-    # Check platform
+
     if platform.system() == "Linux":
         Logger().info("Automatic icon extraction is not available on Linux.")
-        return Path("NULL")
     if platform.system() == "Windows":
-        if is_file_executable(file_path):
-            return extract_icon_from_win_executable(file_path, output_dir)
-        else:
+        if file_path.is_file():
+            if is_file_executable(file_path):
+                return extract_icon_from_win_executable(file_path, output_dir)
             Logger().info("Automatic icon extraction is not available for non executable files.")
-            return Path("NULL")
+        else:
+            Logger().debug("File for icon extraction does not exist.")
+    return Path("NULL")
 
 
 def extract_icon_from_win_executable(executable_path: Path, output_dir: Path) -> Path:
@@ -42,6 +39,6 @@ def extract_icon_from_win_executable(executable_path: Path, output_dir: Path) ->
                 with open(output_path, "wb") as extract_file:
                     extract_file.write(bytearray(rec))
                 return output_path
-
     except Exception as error:
         Logger().error(str(error))
+    return Path("NULL")

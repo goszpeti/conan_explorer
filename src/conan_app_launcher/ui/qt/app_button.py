@@ -1,7 +1,8 @@
 """ Contains the class for a clickable Qt label"""
 
-from conan_app_launcher import ICON_SIZE
 from pathlib import Path
+
+from conan_app_launcher import ICON_SIZE
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
@@ -11,10 +12,9 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
 
     """ Qt label, which can react on a mouse click """
     # this signal is used to connect to backend functions.
-    # It needs to be a class variable (limitation of Qt)
     clicked = QtCore.pyqtSignal()
 
-    def __init__(self, parent, image: Path = None, flags=QtCore.Qt.WindowFlags()):
+    def __init__(self, parent, image: Path = None, flags=Qt.WindowFlags()):
         super().__init__(parent=parent)
         self.setWindowFlags(flags)
         self._image = image
@@ -41,7 +41,7 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
             self.setPixmap(QtGui.QPixmap.fromImage(image).scaled(
                 ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
 
-    def mousePressEvent(self, event):  # pylint: disable=unused-argument, invalid-name
+    def mousePressEvent(self, event):  # override QPushButton
         """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
         super().mousePressEvent(event)
         # make the button a little bit smaller to emulate a "clicked" effect - only if ungreyed:
@@ -50,7 +50,7 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
             self.setPixmap(self.pixmap().scaled(smaller_size, smaller_size,
                                                 transformMode=Qt.SmoothTransformation))
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event):  # override QPushButton
         """ reset size of icon form mousePressEvent """
         super().mouseReleaseEvent(event)
         # need to use the original image here, otherwise the quality degrades over multiple clicks
