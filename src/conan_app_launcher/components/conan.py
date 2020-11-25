@@ -31,9 +31,7 @@ class ConanApi():
 
     def init_api(self):
         """ Instantiate the api. In some cases it needs to be instatiated anew. """
-        self.conan, self.cache, self.user_io = ConanAPIV1.factory()
-        #self.conan, self.cache, self.user_io = ConanAPIV1.factory()
-
+        self.conan, _, _ = ConanAPIV1.factory()
         self.conan.create_app()
         self.user_io = self.conan.user_io
         self.cache = self.conan.app.cache

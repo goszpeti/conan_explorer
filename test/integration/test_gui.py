@@ -136,3 +136,11 @@ def testViewMenuOptions():
     Check, that activating the entry set the hide flag is set on the widget.
     """
     pass
+
+
+def testIconUpdateFromExecutable():
+    # TODO
+    """
+    Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
+    Check, that the icon has the temp path.
+    """
