@@ -30,11 +30,9 @@ def testSaveToFile(base_fixture):
 
     sets.set(LAST_CONFIG_FILE, last_config_file)
 
-    sets.save_to_file()
-
     # read file
     parser = configparser.ConfigParser()
-    parser.read(temp_ini_path, encoding="UTF-8")
+    parser.read(temp_ini_path, encoding="utf-8")
 
     # assert set settings
     assert parser.get(sets._GENERAL_SECTION_NAME, LAST_CONFIG_FILE) == last_config_file

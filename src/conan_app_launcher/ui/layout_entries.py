@@ -1,5 +1,8 @@
+from typing import List
+
 from conan_app_launcher.components import AppEntry, run_file
-from conan_app_launcher.settings import Settings, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS
+from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
+                                         DISPLAY_APP_VERSIONS, Settings)
 from conan_app_launcher.ui.qt.app_button import AppButton
 from PyQt5 import QtCore, QtWidgets
 
@@ -28,21 +31,21 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         size_policy.setVerticalStretch(0)
         self._app_button.setSizePolicy(size_policy)
 
-        self._app_button.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
-        self._app_button.setToolTip(str(app.package_id))
+        self._app_button.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        self._app_button.setToolTip(str(app.conan_ref))
 
         self.addWidget(self._app_button)
         # self._app_name_label.setSizePolicy(size_policy)
-        self._app_name_label.setAlignment(QtCore.Qt.AlignCenter)
+        self._app_name_label.setAlignment(Qt.AlignCenter)
         self._app_name_label.setText(app.name)
         self.addWidget(self._app_name_label)
 
-        self._app_version_cbox.addItem(app.package_id.version)
+        self._app_version_cbox.addItem(app.conan_ref.version)
         # TODO unlock when version feature is implemented
         self._app_version_cbox.setDisabled(True)
         self.addWidget(self._app_version_cbox)
 
-        self._app_channel_cbox.addItem(app.package_id.channel)
+        self._app_channel_cbox.addItem(app.conan_ref.channel)
         # TODO unlock when version feature is implemented
         self._app_channel_cbox.setDisabled(True)
         self.addWidget(self._app_channel_cbox)
@@ -70,7 +73,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
 class TabUiGrid(QtWidgets.QWidget):
     def __init__(self, parent: QtWidgets.QTabWidget, name):
         super().__init__(parent)
-        self.apps = []  # AppUiEntry
+        self.apps: List[AppUiEntry] = []
         self.tab_layout = QtWidgets.QVBoxLayout(self)
         self.tab_scroll_area = QtWidgets.QScrollArea(self)
         self.tab_grid_layout = QtWidgets.QGridLayout(self)
@@ -87,15 +90,15 @@ class TabUiGrid(QtWidgets.QWidget):
         self.setGeometry(QtCore.QRect(0, 0, 830, 462))
         self.tab_layout.setContentsMargins(2, 0, 2, 0)
         self.tab_scroll_area.setSizePolicy(sizePolicy)
-        self.tab_scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.tab_scroll_area.setWidgetResizable(True)
-        self.tab_scroll_area.setAlignment(QtCore.Qt.AlignCenter)
+        self.tab_scroll_area.setAlignment(Qt.AlignCenter)
         self.tab_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 811, 439))
         self.tab_scroll_area_layout.setContentsMargins(0, 0, 0, 0)
         self.tab_scroll_area_widgets.setSizePolicy(sizePolicy)
         self.tab_scroll_area_widgets.setMinimumSize(QtCore.QSize(752, 359))
         self.tab_scroll_area_widgets.setBaseSize(QtCore.QSize(752, 359))
-        self.tab_scroll_area_widgets.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.tab_scroll_area_widgets.setLayoutDirection(Qt.LeftToRight)
 
         self.tab_grid_layout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
         self.tab_grid_layout.setColumnMinimumWidth(0, 202)

@@ -25,7 +25,7 @@ def is_file_executable(file_path: Path) -> bool:
         if os.access(str(file_path), os.X_OK):
             is_executable = True
     elif platform.system() == "Windows":
-        path_exts = os.getenv("PATHEXT").split(";")
+        path_exts = os.getenv("PATHEXT", "").split(";")
         path_exts = [item.lower() for item in path_exts]
         if file_path.suffix in path_exts:
             is_executable = True
@@ -34,7 +34,7 @@ def is_file_executable(file_path: Path) -> bool:
 
 def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     """
-    Executes an application with args and optionally spawns a new shell 
+    Executes an application with args and optionally spawns a new shell
     as specified in the app entry.
     Returns the pid of the new process.
     """
@@ -60,9 +60,8 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
                 cmd += args.strip().split(" ")
             proc = subprocess.Popen(cmd)
         return proc.pid
-    else:
-        Logger().warning(f"No executable {str(executable)} to start.")
-        return 0
+    Logger().warning(f"No executable {str(executable)} to start.")
+    return 0
 
 
 def open_file(file: Path):

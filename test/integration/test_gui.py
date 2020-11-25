@@ -16,13 +16,14 @@ from conan_app_launcher.ui import main_ui
 from conan_app_launcher.ui.layout_entries import TabUiGrid
 from PyQt5 import QtCore, QtWidgets
 
+Qt = QtCore.Qt
+
 
 def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
     """
     Test, that clicking on on open config file and selecting a file writes it back to settings.
     Same file as selected expected in settings.
     """
-    logger = Logger()  # init logger
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
 
@@ -50,7 +51,6 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     Test, that apps ungrey, after their packages are loaded.
     Set greyed attribute of the underlying app button expected.
     """
-    logger = Logger()  # init logger
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
 
@@ -82,7 +82,6 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
     Test, if the previously loaded tabs are deleted, when a new file is loaded
     The same tab number ist expected, as before.
     """
-    logger = Logger()  # init logger
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
 
@@ -113,7 +112,6 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     Test, loading a config file and opening the about menu, and clicking on OK
     The about dialog showing is expected.
     """
-    logger = Logger()  # init logger
     temp_ini_path = os.path.join(tempfile.gettempdir(), "config.ini")
 
     settings = Settings(ini_file=Path(temp_ini_path))
@@ -127,5 +125,14 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     main_gui._ui.menu_about_action.trigger()
     time.sleep(3)
     assert main_gui._about_dialog.isEnabled()
-    qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], QtCore.Qt.LeftButton)
+    qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], Qt.LeftButton)
     app.conan_worker.finish_working()
+
+
+def testViewMenuOptions():
+    # TODO
+    """
+    Test the view menu entries.
+    Check, that activating the entry set the hide flag is set on the widget.
+    """
+    pass

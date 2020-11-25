@@ -8,7 +8,11 @@ import time
 from pathlib import Path
 from subprocess import Popen
 
+from PyQt5 import QtWidgets
+import conan_app_launcher
 import conan_app_launcher as app
+from conan_app_launcher import main
+from conan_app_launcher.ui import main_ui
 from conan_app_launcher.settings import *
 
 
@@ -16,13 +20,26 @@ def testDebugDisabledForRelease():
     assert app.DEBUG_LEVEL == 0  # debug level should be 0 for release
 
 
+def testMainLoopMock(base_fixture, mocker):
+    """
+    Smoke test, that the application runs through.
+    No error expected.
+    """
+
+    mocker.patch("conan_app_launcher.ui.main_ui.MainUi")
+    mocker.patch.object(QtWidgets.QApplication, "exec_")
+
+    main.main()
+
+    conan_app_launcher.ui.main_ui.MainUi.assert_called_once()
+    QtWidgets.QApplication.exec_.assert_called_once()
+
+
 def testMainLoop(base_fixture):
     """
     Smoke test, that the application can start.
     No error expected.
     """
-    # this test causes a segmentation fault on linux - possibly because
-    # the gui thread does not run in the main thread...
 
     settings_file_path = Path.home() / ".cal_config"
     settings = Settings(ini_file=settings_file_path)

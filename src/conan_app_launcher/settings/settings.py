@@ -1,5 +1,6 @@
 import configparser
 from pathlib import Path
+from typing import Any
 
 from conan_app_launcher.base import Logger
 from conan_app_launcher.settings import LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS
@@ -41,13 +42,15 @@ class Settings():
 
         self._read_ini()
 
-    def get(self, name: str):
+    def get(self, name: str) -> Any:
         """ Get a specific setting """
-        return self._values.get(name, None)  # TODO Name checking Error
+        return self._values.get(name, None)
 
     def set(self, name: str, value):
         """ Set a specific setting """
-        self._values[name] = value  # TODO Name and type checking Error
+        self._values[name] = value
+        # autosave
+        self.save_to_file()
 
     def save_to_file(self):
         """ Save all user modifiable options to file. """
@@ -74,7 +77,7 @@ class Settings():
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
             self._parser.write(ini_file)
 
-    def _get_section(self, section_name):
+    def _get_section(self, section_name) -> configparser.SectionProxy:
         """ Helper function to get a section from ini, or create it, if it does not exist."""
         if section_name not in self._parser:
             self._parser.add_section(section_name)

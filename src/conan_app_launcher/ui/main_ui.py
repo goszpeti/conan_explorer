@@ -1,4 +1,3 @@
-import threading
 from pathlib import Path
 from typing import List
 
@@ -38,20 +37,15 @@ class MainUi(QtWidgets.QMainWindow):
 
         self.init_gui()
 
-    def closeEvent(self, event):
+    def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
         super().closeEvent(event)
         try:
             self.new_message_logged.disconnect(self.write_log)
-        except:
+        except Exception:
             # Sometimes the closeEvent is called twice and disconnect errors.
             pass
         Logger.remove_qt_logger()
-
-    @property
-    def ui(self):
-        """ Contains all gui objects defined in Qt .ui file. Subclasses need access to this. """
-        return self._ui
 
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
@@ -79,7 +73,7 @@ class MainUi(QtWidgets.QMainWindow):
     def create_layout(self):
         """ Creates the tabs and app icons """
         for tab_info in self._tab_info:
-            # TODO: need to save object locally, otherwise it can be destroyed in the underlying C++ layer
+            # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             self._tab = TabUiGrid(self, tab_info.name)
             row = 0  # 3
             column = 0  # 4
@@ -105,7 +99,8 @@ class MainUi(QtWidgets.QMainWindow):
         while self._ui.tabs.count() > 0:
             self._ui.tabs.removeTab(0)
         config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
-        self._tab_info = parse_config_file(config_file_path)
+        if config_file_path.is_file():  # escape error log on first opening
+            self._tab_info = parse_config_file(config_file_path)
         this.conan_worker = ConanWorker(self._tab_info, self.conan_info_updated)
         self.create_layout()
 

@@ -14,6 +14,7 @@ from conan_app_launcher.ui import main_ui
 from conan_app_launcher.ui.layout_entries import AppUiEntry
 
 from PyQt5 import QtCore, QtWidgets
+Qt = QtCore.Qt
 
 
 def testAboutDialog(base_fixture, qtbot):
@@ -21,7 +22,6 @@ def testAboutDialog(base_fixture, qtbot):
     Test the about dialog separately.
     Check, that the app name is visible and it is hidden after clicking OK:
     """
-    logger = Logger()  # init logger
     root_obj = QtWidgets.QWidget()
     widget = main_ui.AboutDialog(root_obj)
     qtbot.addWidget(widget)
@@ -29,7 +29,7 @@ def testAboutDialog(base_fixture, qtbot):
     qtbot.waitForWindowShown(widget)
 
     assert "Conan App Launcher" in widget._text.text()
-    qtbot.mouseClick(widget._button_box.buttons()[0], QtCore.Qt.LeftButton)
+    qtbot.mouseClick(widget._button_box.buttons()[0], Qt.LeftButton)
     assert widget.isHidden()
 
 
@@ -40,9 +40,10 @@ def testOpenApp(base_fixture, qtbot):
     """
     app_info = None
     if platform.system() == "Linux":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", Path(sys.executable), "", "", True, Path("."))
+        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", {},
+                            Path(sys.executable), "", "", True, Path("."))
     elif platform.system() == "Windows":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable",
+        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", {},
                             Path(sys.executable), "", "", True, Path("."))
 
     assert app_info.icon.is_file()
@@ -56,7 +57,7 @@ def testOpenApp(base_fixture, qtbot):
     root_obj.show()
 
     qtbot.waitForWindowShown(root_obj)
-    qtbot.mouseClick(app_ui._app_button, QtCore.Qt.LeftButton)
+    qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
     sleep(5)  # wait for terminal to spawn
     # check pid of created process
     if platform.system() == "Linux":
@@ -71,11 +72,3 @@ def testOpenApp(base_fixture, qtbot):
         line = lines[3].replace(" ", "")
         pid = line.split("python.exe")[1].split("Console")[0]
         os.system("taskkill /PID " + pid)
-
-
-def testViewMenuOptions():
-    """
-    Test the view menu entries.
-    Check, that activating the entry set the hide flag is set on the widget.
-    """
-    pass
