@@ -120,6 +120,22 @@ def testCompilerNoSettings(capsys):
     assert "Can't find a matching package" not in captured.err
 
 
+def testResolveDefaultOptions():
+    conan = ConanApi()
+
+    str_val = "option=value"
+    ret = conan._resolve_default_options(str_val)
+    assert ret.items()
+
+    tup_val = ("option=value", "options2=value2")
+    ret = conan._resolve_default_options(tup_val)
+    assert ret.items()
+
+    list_val = ["option=value", "options2=value2"]
+    ret = conan._resolve_default_options(list_val)
+    assert ret.items()
+
+
 def testCreateKeyValueList():
     """
     Test, that key value pairs can be extracted as strings. No arrays or other tpyes supported.
