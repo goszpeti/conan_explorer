@@ -121,6 +121,10 @@ def testCompilerNoSettings(capsys):
 
 
 def testResolveDefaultOptions():
+    """
+    Test, if different kind of types of default options can be converted to a dict
+    Dict is expected.
+    """
     conan = ConanApi()
 
     str_val = "option=value"
