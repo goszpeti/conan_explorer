@@ -29,16 +29,20 @@ def extract_icon(file_path: Path, output_dir: Path) -> Path:
 
 def extract_icon_from_win_executable(executable_path: Path, output_dir: Path) -> Path:
     # Currently only pngs supported
+    # cache files
+    output_path = output_dir / (executable_path.name + ".png")
+    if output_path.is_file():
+        return output_path
     try:
         hlib = win32api.LoadLibrary(str(executable_path))
         icon_names = win32api.EnumResourceNames(hlib, win32con.RT_ICON)
         for icon_name in icon_names:
             rec = win32api.LoadResource(hlib, win32con.RT_ICON, icon_name)
             if rec.startswith(b"\x89PNG"):  # binary file header for pngs
-                output_path = output_dir / (executable_path.name + ".png")
                 with open(output_path, "wb") as extract_file:
                     extract_file.write(bytearray(rec))
                 return output_path
     except Exception as error:
-        Logger().error(str(error))
+        # user needs not know this
+        Logger().debug(str(error))
     return Path("NULL")

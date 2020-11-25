@@ -55,6 +55,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
     def update_entry(self, settings: Settings):
         # set icon and ungrey if package is available
         if self._app_info.executable.is_file():
+            self._app_button.set_icon(self._app_info.icon)
             self._app_button.ungrey_icon()
         if settings.get(DISPLAY_APP_VERSIONS):
             self._app_version_cbox.show()
@@ -76,11 +77,13 @@ class TabUiGrid(QtWidgets.QWidget):
         self.apps: List[AppUiEntry] = []
         self.tab_layout = QtWidgets.QVBoxLayout(self)
         self.tab_scroll_area = QtWidgets.QScrollArea(self)
-        self.tab_grid_layout = QtWidgets.QGridLayout(self)
+        self.tab_grid_layout = QtWidgets.QGridLayout()  # self.tab_scroll_area
         self.tab_scroll_area_widgets = QtWidgets.QWidget(self.tab_scroll_area)
         self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + name)
         self.tab_scroll_area_layout = QtWidgets.QVBoxLayout(self.tab_scroll_area_widgets)
         self.setObjectName("tab_" + name)
+
+        self.tab_scroll_area_layout.setContentsMargins(0, 0, 0, 0)
 
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -94,7 +97,6 @@ class TabUiGrid(QtWidgets.QWidget):
         self.tab_scroll_area.setWidgetResizable(True)
         self.tab_scroll_area.setAlignment(Qt.AlignCenter)
         self.tab_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 811, 439))
-        self.tab_scroll_area_layout.setContentsMargins(0, 0, 0, 0)
         self.tab_scroll_area_widgets.setSizePolicy(sizePolicy)
         self.tab_scroll_area_widgets.setMinimumSize(QtCore.QSize(752, 359))
         self.tab_scroll_area_widgets.setBaseSize(QtCore.QSize(752, 359))

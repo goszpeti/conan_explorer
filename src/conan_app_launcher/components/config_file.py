@@ -38,14 +38,14 @@ class AppEntry():
         elif icon and not Path(icon).is_absolute():
             # relative path is calculated from config file path
             self.icon = config_file_path.parent / icon
+            if not self.icon.is_file():
+                Logger().error(f"Can't find icon {str(self.icon)} for '{name}")
         elif not icon:
-            # try to extract icon, put it into temp dir
+            # try to find icon in temp
             self.icon = extract_icon(executable, Path(tempfile.gettempdir()))
         else:
             self.icon = Path(icon)
-
         if not self.icon.is_file():
-            Logger().error(f"Can't find icon {str(self.icon)} for '{name}")
             self.icon = this.base_path / "assets" / "default_app_icon.png"
 
     def validate_with_conan_info(self, package_folder: Path):
@@ -58,7 +58,13 @@ class AppEntry():
         if self.package_folder.is_dir() and not full_path.is_file():
             Logger().error(
                 f"Can't find file in package {str(self.conan_ref)}:\n    {str(full_path)}")
+
         self.executable = full_path
+        # try to extract, if it is still the default
+        if self.icon == this.base_path / "assets" / "default_app_icon.png":
+            icon = extract_icon(self.executable, Path(tempfile.gettempdir()))
+            if icon.is_file():
+                self.icon = icon
 
 
 class TabEntry():

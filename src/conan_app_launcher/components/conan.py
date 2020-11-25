@@ -31,7 +31,9 @@ class ConanApi():
 
     def init_api(self):
         """ Instantiate the api. In some cases it needs to be instatiated anew. """
-        self.conan, _, _ = ConanAPIV1.factory()
+        self.conan, self.cache, self.user_io = ConanAPIV1.factory()
+        #self.conan, self.cache, self.user_io = ConanAPIV1.factory()
+
         self.conan.create_app()
         self.user_io = self.conan.user_io
         self.cache = self.conan.app.cache
@@ -147,8 +149,9 @@ class ConanApi():
         if min_opts_set:
             min_opts_list = min_opts_set.pop()
 
-        default_options: Dict[str, Any] = self.conan.inspect(str(conan_ref), attributes=[
-            "default_options"]).get("default_options", {})
+        default_options = self._resolve_default_options(
+            self.conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
+
         if default_options:
             default_options = dict(filter(lambda opt: opt[0] in min_opts_list, default_options.items()))
             # patch user input into default options to combine the two
@@ -173,6 +176,21 @@ class ConanApi():
             if same_comp_version_pkgs:
                 found_pkgs = same_comp_version_pkgs
         return found_pkgs
+
+    @staticmethod
+    def _resolve_default_options(default_options_ret: Any) -> Dict[str, Any]:
+        """ Default options can be a a dict or name=value as string, or a tuple of it """
+        default_options: Dict[str, Any] = {}
+        if default_options_ret and isinstance(default_options_ret, str):
+            default_option_str = default_options_ret.split("=")
+            default_options.update({default_option_str[0]: default_option_str[1]})
+        elif default_options_ret and isinstance(default_options_ret, (list, tuple)):
+            for default_option in default_options_ret:
+                default_option_str = default_option.split("=")
+                default_options.update({default_option_str[0]: default_option_str[1]})
+        else:
+            default_options = default_options_ret
+        return default_options
 
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
