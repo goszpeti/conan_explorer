@@ -3,8 +3,13 @@ import tempfile
 from distutils.file_util import copy_file
 from pathlib import Path
 
+try:
+    from typing import TypedDict
+except ImportError:
+    from typing_extensions import TypedDict
+
 import pytest
-from conan_app_launcher.components import parse_config_file
+from conan_app_launcher.components import parse_config_file, write_config_file
 
 
 def testCorrectFile(base_fixture):
@@ -95,3 +100,8 @@ def testInvalidContent(base_fixture, capsys):
     captured = capsys.readouterr()
     assert "ERROR" in captured.err
     assert "Expecting property name" in captured.err
+
+
+def testWriteConfigFile(base_fixture):
+    tabs = parse_config_file(base_fixture.testdata_path / "app_config.json")
+    write_config_file(base_fixture.testdata_path / "app_config_1.json", tabs)

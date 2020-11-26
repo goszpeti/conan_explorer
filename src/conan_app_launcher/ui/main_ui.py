@@ -5,7 +5,7 @@ from PyQt5 import QtCore, QtWidgets, uic
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import ConanWorker, parse_config_file
+from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file
 from conan_app_launcher.settings import LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, Settings
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
 
