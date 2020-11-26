@@ -102,6 +102,17 @@ def testInvalidContent(base_fixture, capsys):
     assert "Expecting property name" in captured.err
 
 
-def testWriteConfigFile(base_fixture):
+def testWriteConfigFile(base_fixture, tmp_path):
+    """
+    Tests, that writing a config file from internal state is correct.
+    Expects the same content, as the original file.
+    """
+    test_file = Path(tmp_path) / "test.json"
+
     tabs = parse_config_file(base_fixture.testdata_path / "app_config.json")
-    write_config_file(base_fixture.testdata_path / "app_config_1.json", tabs)
+    write_config_file(base_fixture.testdata_path / test_file, tabs)
+    with open(str(base_fixture.testdata_path / "app_config.json")) as config:
+        ref_dict = json.load(config)
+    with open(str(test_file)) as config:
+        test_dict = json.load(config)
+    assert test_dict == ref_dict
