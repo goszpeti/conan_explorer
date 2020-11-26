@@ -10,25 +10,29 @@
                     "executable": "bin/m4",
                     "icon": "NonExistantIcon.png",
                     "console_application": true,
-                    "args": "-n name"
+                    "args": "-n name",
+                    "conan_options": []
                 },
                 {
                     "name": "App1 new",
                     "conan_ref": "m4_installer/1.4.18@bincrafters/stable",
                     "executable": "bin/m4",
-                    "icon": "NonExistantIcon.png"
+                    "icon": "NonExistantIcon.png",
+                    "conan_options": []
                 },
                 {
                     "name": "App1 wrong path",
                     "conan_ref": "m4_installer/1.4.18@bincrafters/stable",
                     "executable": "bin/m5",
-                    "icon": "NonExistantIcon.png"
+                    "icon": "NonExistantIcon.png",
+                    "conan_options": []
                 },
                 {
                     "name": "App2",
                     "conan_ref": "boost_functional/1.69.0@bincrafters/stable",
                     "executable": "bin/app2",
-                    "icon": "icon.ico"
+                    "icon": "icon.ico",
+                    "conan_options": []
                 }
             ]
         },
@@ -39,7 +43,8 @@
                     "name": "App2",
                     "conan_ref": "app2/1.0.0@user/stable",
                     "executable": "bin/app2.exe",
-                    "icon": "//myicon.png"
+                    "icon": "//myicon.png",
+                    "conan_options": []
                 }
             ]
         }

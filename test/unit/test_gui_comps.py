@@ -9,7 +9,7 @@ from time import sleep
 from pathlib import Path
 
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import AppEntry
+from conan_app_launcher.components.config_file import AppEntry, AppType
 from conan_app_launcher.ui import main_ui
 from conan_app_launcher.ui.layout_entries import AppUiEntry
 
@@ -38,16 +38,14 @@ def testOpenApp(base_fixture, qtbot):
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
-    app_info = None
-    if platform.system() == "Linux":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", {},
-                            Path(sys.executable), "", "", True, Path("."))
-    elif platform.system() == "Windows":
-        app_info = AppEntry("test", "abcd/1.0.0@usr/stable", {},
-                            Path(sys.executable), "", "", True, Path("."))
+    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
+                         "executable": "", "console_application": True}
+    app_info = AppEntry(app_data, Path())
+    app_info._executable = Path(sys.executable)
 
-    assert app_info.icon.is_file()
-    assert app_info.icon.suffix == ".png"
+    if platform.system() == "Windows":
+        assert app_info.icon.is_file()
+        assert app_info.icon.suffix == ".png"
 
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)

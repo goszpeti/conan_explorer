@@ -55,6 +55,10 @@ class AppEntry():
     def name(self):
         return self.app_data["name"]
 
+    @name.setter
+    def name(self, new_value: str):
+        self.app_data["name"] = new_value
+
     @property
     def conan_ref(self):
         return self._conan_ref
@@ -73,70 +77,96 @@ class AppEntry():
     def executable(self):
         return self._executable
 
+    @executable.setter
+    def executable(self, new_value: str):
+        # adjust path on windows, if no file extension is given
+        path = Path(new_value)
+        if platform.system() == "Windows" and not path.suffix:
+            path = path.with_suffix(".exe")
+
+        full_path = Path(self.package_folder / path)
+        if self.package_folder.is_dir() and not full_path.is_file():
+            Logger().error(
+                f"Can't find file in package {str(self.conan_ref)}:\n    {str(full_path)}")
+        self.app_data["executable"] = new_value
+        self._executable = full_path
+
     @property
     def icon(self):
         return self._icon
 
     @icon.setter
-    def icon(self, new_value):
-        icon = self.app_data.get("icon", "")
+    def icon(self, new_value: str):
         # validate icon path
-        if icon and not Path(icon).is_absolute():
+        if new_value.startswith("//"):  # relative to package
+            self._icon = self.package_folder / new_value
+            Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
+        elif new_value and not Path(new_value).is_absolute():
             # relative path is calculated from config file path
-            self._icon = self._config_file_path.parent / icon
+            self._icon = self._config_file_path.parent / new_value
             if not self._icon.is_file():
-                Logger().error(f"Can't find icon {str(self.icon)} for '{self.name}")
-        elif not icon:  # try to find icon in temp
-            self._icon = extract_icon(self._executable, Path(tempfile.gettempdir()))
+                Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
+        elif not new_value:  # try to find icon in temp
+            self._icon = extract_icon(self.executable, Path(tempfile.gettempdir()))
         else:  # absolute path
-            self._icon = Path(icon)
+            self._icon = Path(new_value)
+
         # default icon, until package path is updated
         if not self._icon.is_file():
             self._icon = this.base_path / "assets" / "default_app_icon.png"
+        else:
+            self.app_data["icon"] = new_value
 
     @property
     def is_console_application(self):
-        return self.app_data.get("is_console_application")
+        return self.app_data.get("console_application")
+
+    @is_console_application.setter
+    def is_console_application(self, new_value):
+        self.app_data["console_application"] = new_value
 
     @property
     def args(self):
         return self.app_data.get("args", "")
 
+    @args.setter
+    def args(self, new_value):
+        self.app_data["args"] = new_value
+
     @property
     def conan_options(self):  # user specified, can differ from the actual installation
-        return self.app_data.get("conan_options", {})
+        return self._conan_options
+
+    @conan_options.setter
+    def conan_options(self, new_value: List[OptionType]):
+        # convert key-value pairs from options to list of dicts
+        conan_options = {}
+        for opt in new_value:
+            conan_options[opt.get("name", "")] = opt.get("value", "")
+        self._conan_options = conan_options
+        self.app_data["conan_options"] = new_value
 
     def __init__(self, app_data: AppType, config_file_path: Path):
         self.app_data: AppType = app_data
         self._config_file_path = config_file_path  # TODO will be removed later, when no relative icon paths allowed
         self.package_folder = Path("NULL")
         # internal repr for vars which have other types or need to be manipulated
-        self._icon = Path("NULL")
         self._conan_ref = None
-        self.conan_ref = app_data["conan_ref"]
+        self._conan_options = {}
         self._executable = Path("NULL")
+        self._icon = Path("NULL")
+        # Init values with validation, which can be preloaded
+        self.conan_ref = app_data.get("conan_ref", "")
+        self.icon = self.app_data.get("icon", "")
+        self.conan_options = self.app_data.get("conan_options", [])
 
     def validate_with_conan_info(self, package_folder: Path):
         """ Callback when conan operation is done and paths can be validated"""
         self.package_folder = package_folder
-        # adjust path on windows, if no file extension is given
-        if platform.system() == "Windows" and not self._executable.suffix:
-            self._executable = self._executable.with_suffix(".exe")
-        full_path = Path(self.package_folder / self.executable)
-        if self.package_folder.is_dir() and not full_path.is_file():
-            Logger().error(
-                f"Can't find file in package {str(self.conan_ref)}:\n    {str(full_path)}")
 
-        self._executable = full_path
-        # try to extract, if it is still the default
-        if self._icon == this.base_path / "assets" / "default_app_icon.png":
-            if self._icon.startswith("//"):  # relative to package
-                icon = self.package_folder / self.icon
-                Logger().error(f"Can't find icon {str(self.icon)} for '{self.name}")
-            else:
-                icon = extract_icon(self.executable, Path(tempfile.gettempdir()))
-            if icon.is_file():
-                self._icon = icon
+        # use setter to reevaluate
+        self.icon = self.app_data.get("icon", "")
+        self.executable = self.app_data.get("executable", "")
 
 
 class TabEntry():
@@ -188,11 +218,6 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
         for app in tab.get("apps"):
             # TODO: not very robust, but enough for small changes
             update_app_info(app)
-            # convert key-value pairs from options to list of dicts
-            conan_opts = app.get("conan_options", [])
-            conan_options = {}
-            for opt in conan_opts:
-                conan_options[opt.get("name", "")] = opt.get("value", "")
             app_entry = AppEntry(app, config_file_path)
             tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
