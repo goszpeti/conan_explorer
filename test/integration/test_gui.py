@@ -129,17 +129,51 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     app.conan_worker.finish_working()
 
 
-def testViewMenuOptions():
-    # TODO
+def testViewMenuOptions(base_fixture, qtbot):
     """
     Test the view menu entries.
     Check, that activating the entry set the hide flag is set on the widget.
     """
-    pass
+    temp_dir = tempfile.gettempdir()
+    temp_ini_path = os.path.join(temp_dir, "config.ini")
+
+    settings = Settings(ini_file=Path(temp_ini_path))
+    config_file_path = base_fixture.testdata_path / "app_config.json"
+    settings.set(LAST_CONFIG_FILE, str(config_file_path))
+
+    main_gui = main_ui.MainUi(settings)
+    qtbot.addWidget(main_gui)
+    main_gui.show()
+    qtbot.waitExposed(main_gui, 3000)
+
+    # assert default state
+    for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
+        for test_app in tab.apps:
+            assert not test_app._app_version_cbox.isHidden()
+            assert not test_app._app_channel_cbox.isHidden()
+
+    # click and assert
+    main_gui._ui.menu_set_display_versions.trigger()
+    for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
+        for test_app in tab.apps:
+            assert test_app._app_version_cbox.isHidden()
+            assert not test_app._app_channel_cbox.isHidden()
+    main_gui._ui.menu_set_display_channels.trigger()
+    for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
+        for test_app in tab.apps:
+            assert test_app._app_version_cbox.isHidden()
+            assert test_app._app_channel_cbox.isHidden()
+    # click again
+    main_gui._ui.menu_set_display_versions.trigger()
+    main_gui._ui.menu_set_display_channels.trigger()
+    for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
+        for test_app in tab.apps:
+            assert not test_app._app_version_cbox.isHidden()
+            assert not test_app._app_channel_cbox.isHidden()
 
 
 def testIconUpdateFromExecutable():
-    # TODO
+    # TODO find a package with an icon...
     """
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path.
