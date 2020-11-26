@@ -4,8 +4,13 @@ import jsonschema
 import tempfile
 
 from pathlib import Path
-from typing import List, Dict, TypedDict
+from typing import List, Dict
 from conans.model.ref import ConanFileReference
+
+try:
+    from typing import TypedDict
+except ImportError:
+    from typing_extensions import TypedDict
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
