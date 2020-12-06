@@ -43,7 +43,6 @@ def main():
         sys.stderr = open(os.path.join(os.getenv("TEMP"),
                                        "stderr-" + this.PROG_NAME), "w")
     # init logger first
-    this.base_path = Path(__file__).absolute().parent
     logger = Logger()
 
     # apply Qt attributes (only at init possible)

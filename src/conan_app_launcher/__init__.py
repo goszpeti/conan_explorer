@@ -1,7 +1,7 @@
 """
 Contains global constants and basic/ui variables.
 """
-__version__ = "0.5.1"
+__version__ = "0.6"
 
 from pathlib import Path
 
@@ -20,7 +20,8 @@ ICON_SIZE = 64
 DEBUG_LEVEL = 0
 
 # paths to find folders - points to the folder of this file
-base_path: Path = Path()
+base_path: Path = Path(__file__).absolute().parent
+default_icon: Path = base_path / "assets" / "default_app_icon.png"
 
 # qt_application instance
 qt_app: Optional["QtWidgets.QApplication"] = None
