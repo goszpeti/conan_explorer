@@ -61,18 +61,18 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
             self._app_button.set_icon(self._app_info.icon)
             self._app_button.ungrey_icon()
 
-        self._app_version_cbox.clear()
-        self._app_channel_cbox.clear()
-        self._app_version_cbox.addItems(self._app_info.versions)
-        self._app_channel_cbox.addItems(self._app_info.channels)
-        # TODO set current index
-        try:
-            self._app_version_cbox.setCurrentIndex(self._app_info.versions.index(self._app_info.version))
-            self._app_channel_cbox.setCurrentIndex(self._app_info.channels.index(self._app_info.channel))
-        except Exception:
-            pass
-        self._app_version_cbox.setDisabled(False)
-        self._app_channel_cbox.setDisabled(False)
+        if len(self._app_info.versions) > 0 and self._app_version_cbox.count() != len(self._app_info.versions):  # on nums changed
+            self._app_version_cbox.clear()
+            self._app_channel_cbox.clear()
+            self._app_version_cbox.addItems(self._app_info.versions)
+            self._app_channel_cbox.addItems(self._app_info.channels)
+            try:  # TODO
+                self._app_version_cbox.setCurrentIndex(self._app_info.versions.index(self._app_info.version))
+                self._app_channel_cbox.setCurrentIndex(self._app_info.channels.index(self._app_info.channel))
+            except Exception:
+                pass
+            self._app_version_cbox.setDisabled(False)
+            self._app_channel_cbox.setDisabled(False)
 
         if settings.get(DISPLAY_APP_VERSIONS):
             self._app_version_cbox.show()
@@ -88,20 +88,22 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         run_file(self._app_info.executable, self._app_info.is_console_application, self._app_info.args)
 
     def version_selected(self, index):
-        if index == -1:
+        if not self._app_version_cbox.isEnabled():
             return
-        if self._app_info.version == self._app_version_cbox.currentText():
+        if index == -1:  # on clear
             return
-        # TODO: grey icon or show loading
+        if self._app_info.version == self._app_version_cbox.currentText():  # no change
+            return
         self._app_button.grey_icon()
         self._app_info.version = self._app_version_cbox.currentText()
 
     def channel_selected(self, index):
+        if not self._app_channel_cbox.isEnabled():
+            return
         if index == -1:
             return
         if self._app_info.channel == self._app_channel_cbox.currentText():
             return
-        # TODO: grey icon or show loading
         self._app_button.grey_icon()
         self._app_info.channel = self._app_channel_cbox.currentText()
 
