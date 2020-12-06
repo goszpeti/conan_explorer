@@ -15,7 +15,7 @@
                 },
                 {
                     "name": "App2",
-                    "conan_ref": "zlib/1.2.8@conan/stable",
+                    "conan_ref": "zlib/1.2.11@conan/stable",
                     "executable": "bin/app2",
                     "conan_options": [
                         {
