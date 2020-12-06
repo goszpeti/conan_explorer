@@ -43,6 +43,8 @@ def main():
         sys.stderr = open(os.path.join(os.getenv("TEMP"),
                                        "stderr-" + this.PROG_NAME), "w")
     # init logger first
+    this.base_path = Path(__file__).absolute().parent
+    this.default_icon: Path = this.base_path / "assets" / "default_app_icon.png"
     logger = Logger()
 
     # apply Qt attributes (only at init possible)
