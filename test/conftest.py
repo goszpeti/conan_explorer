@@ -18,6 +18,7 @@ class PathSetup():
 def base_fixture(request):
     paths = PathSetup()
     app.base_path = paths.base_path / "src" / "conan_app_launcher"
+    app.default_icon: Path = app.base_path / "assets" / "default_app_icon.png"
     yield paths
 
     # teardown

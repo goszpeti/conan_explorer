@@ -10,7 +10,8 @@
                     "executable": "bin/m4",
                     "icon": "NonExistantIcon.png",
                     "console_application": true,
-                    "args": "-n name"
+                    "args": "-n name",
+                    "conan_options": []
                 },
                 {
                     "name": "App2",
@@ -33,7 +34,8 @@
                     "name": "App2",
                     "conan_ref": "app2/1.0.0@user/stable",
                     "executable": "bin/app2.exe",
-                    "icon": "//myicon.png"
+                    "icon": "//myicon.png",
+                    "conan_options": []
                 }
             ]
         }
