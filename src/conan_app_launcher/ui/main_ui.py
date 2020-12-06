@@ -37,6 +37,9 @@ class MainUi(QtWidgets.QMainWindow):
 
         self.init_gui()
 
+    def save_all_configs(self):
+        write_config_file(self._settings.get(LAST_CONFIG_FILE), self._tab_info)
+
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
         super().closeEvent(event)
@@ -79,7 +82,7 @@ class MainUi(QtWidgets.QMainWindow):
             column = 0  # 4
             for app_info in tab_info.get_app_entries():
                 # add in order of occurence
-                app = AppUiEntry(self._tab.tab_scroll_area_widgets, app_info)
+                app = AppUiEntry(self._tab.tab_scroll_area_widgets, app_info, self.conan_info_updated)
                 self._tab.apps.append(app)
                 self._tab.tab_grid_layout.addLayout(app, row, column, 1, 1)
                 column += 1
@@ -93,6 +96,7 @@ class MainUi(QtWidgets.QMainWindow):
         for tab in self._ui.tabs.findChildren(TabUiGrid):
             for app in tab.apps:
                 app.update_entry(self._settings)
+        self.save_all_configs()
 
     def init_gui(self):
         """ Cleans up ui, reads config file and creates new layout """

@@ -6,10 +6,6 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/src/conan_app_launcher/main.py",
-            "args": [
-                //"-f",
-                //"./test/testdata/app_config.json"
-            ],
             "console": "internalConsole",
             "subProcess": false,
             "justMyCode": true

@@ -35,11 +35,15 @@ class ConanWorker():
         # fill up queue
         for ref in conan_refs:
             self._conan_queue.put([ref["name"], ref["options"]])
-            self.start_working()
+        self.start_working()
+
+    def put_ref_in_queue(self, conan_ref: str, conan_options: {}):
+        self._conan_queue.put([conan_ref, conan_options])
+        self.start_working()
 
     def start_working(self):
         """ Start worker, if it is not already started (can be called multiple times)"""
-        if not self._worker:
+        if not self._worker or not self._worker.is_alive():
             self._worker = Thread(target=self._work_on_conan_queue, name="ConanWorker")
             self._worker.start()
 
@@ -58,10 +62,12 @@ class ConanWorker():
             package_folder = self._conan.get_path_or_install(
                 ConanFileReference.loads(conan_ref), conan_options)
             # call update on every entry which has this ref
+            # TODO should be a second worker?
+            available_refs = self._conan.search_for_all_recipes(ConanFileReference.loads(conan_ref))
             for tab in self._tabs:
                 for app in tab.get_app_entries():
                     if str(app.conan_ref) == conan_ref:
-                        app.validate_with_conan_info(package_folder)
+                        app.validate_with_conan_info(package_folder, available_refs)
             Logger().debug("Finish working on " + conan_ref)
             if self._gui_update_signal:
                 self._gui_update_signal.emit()

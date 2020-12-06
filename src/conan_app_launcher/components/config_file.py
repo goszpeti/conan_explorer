@@ -67,11 +67,44 @@ class AppEntry():
     def conan_ref(self, new_value: str):
         try:
             self._conan_ref = ConanFileReference.loads(new_value)
+            if self.app_data["conan_ref"] != new_value:  # don't pu it for init
+                this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
             self.app_data["conan_ref"] = new_value
         except Exception as error:
             # errors happen fairly often, keep going
             self._conan_ref = ConanFileReference.loads("YouGaveA/0.0.1@Wrong/Reference")
             Logger().error(f"Conan ref id invalid {str(error)}")
+
+    @property
+    def version(self):
+        return self.conan_ref.version
+
+    @version.setter
+    def version(self, new_value: str):
+        self.conan_ref = f"{self.conan_ref.name}/{new_value}@{self.conan_ref.user}/{self.conan_ref.channel}"
+
+    @property
+    def channel(self):
+        return self.conan_ref.channel
+
+    @channel.setter
+    def channel(self, new_value: str):
+        self.conan_ref = f"{self.conan_ref.name}/{self.conan_ref.version}@{self.conan_ref.user}/{new_value}"
+
+    @property
+    def versions(self):
+        versions = []
+        for ref in self._available_refs:
+            versions.append(ref.version)
+        return versions
+
+    @property
+    def channels(self):  # for the current version only
+        channels = []
+        for ref in self._available_refs:
+            if ref.version == self.version:
+                channels.append(ref.channel)
+        return channels
 
     @property
     def executable(self):
@@ -159,18 +192,22 @@ class AppEntry():
         self._conan_options = {}
         self._executable = Path("NULL")
         self._icon = Path("NULL")
+
         # Init values with validation, which can be preloaded
-        self.conan_ref = app_data.get("conan_ref", "")
         self.icon = self.app_data.get("icon", "")
         self.conan_options = self.app_data.get("conan_options", [])
+        self.conan_ref = app_data.get("conan_ref", "")
 
-    def validate_with_conan_info(self, package_folder: Path):
+        self._available_refs: List[str] = [self.conan_ref]
+
+    def validate_with_conan_info(self, package_folder: Path, available_refs: List[ConanFileReference]):
         """ Callback when conan operation is done and paths can be validated"""
         self.package_folder = package_folder
 
         # use setter to reevaluate
         self.icon = self.app_data.get("icon", "")
         self.executable = self.app_data.get("executable", "")
+        self._available_refs = available_refs
 
 
 class TabEntry():

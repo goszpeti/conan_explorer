@@ -25,6 +25,10 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
         self._greyed_out = False
         self.set_icon(self._image)
 
+    def grey_icon(self):
+        self._greyed_out = True
+        self.set_icon(self._image)
+
     def set_icon(self, image):
         self._image = image
         if self._image.suffix == ".ico":

@@ -173,8 +173,9 @@ def testViewMenuOptions(base_fixture, qtbot):
 
 
 def testIconUpdateFromExecutable():
-    # TODO find a package with an icon...
     """
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path.
     """
+
+    
