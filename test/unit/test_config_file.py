@@ -1,15 +1,17 @@
 import json
+import sys
 import tempfile
+import platform
 from distutils.file_util import copy_file
 from pathlib import Path
+
 
 try:
     from typing import TypedDict
 except ImportError:
     from typing_extensions import TypedDict
 
-import pytest
-from conan_app_launcher.components import parse_config_file, write_config_file
+from conan_app_launcher.components import parse_config_file, write_config_file, AppEntry
 
 
 def testCorrectFile(base_fixture):
@@ -116,3 +118,90 @@ def testWriteConfigFile(base_fixture, tmp_path):
     with open(str(test_file)) as config:
         test_dict = json.load(config)
     assert test_dict == ref_dict
+
+
+def testExecutableEval(base_fixture, capsys):
+    """
+    Tests, that the executable setter works on all cases.
+    Expects correct file, error messoge on wrong file an error message on no file.
+    """
+    app_data = {"name": "AppName", "executable": "python"}
+    exe = Path(sys.executable)
+    app = AppEntry(app_data, base_fixture.testdata_path / "app_config.json")
+
+    app.validate_with_conan_info(exe.parent)  # trigger set
+    assert app.executable == exe
+
+    app.executable = "nonexistant"
+    captured = capsys.readouterr()
+    assert "ERROR" in captured.err
+    assert "Can't find file" in captured.err
+
+    app.executable = ""
+    captured = capsys.readouterr()
+    assert "ERROR" in captured.err
+    assert "No file" in captured.err
+
+
+def testIconEval(base_fixture, capsys, tmp_path):
+    """
+    Tests, that the icon setter works on all cases.
+    Expects package relative file, config-file rel. file, automaticaly extracted file,
+    and error message and default icon on no file.
+    """
+    import conan_app_launcher as this
+
+    # copy icons to tmp_path to fake package path
+    copy_file(this.base_path / "assets" / "icon.ico", tmp_path)
+    copy_file(this.default_icon, tmp_path)
+
+    # relative to package with // notation
+    app_data = {"name": "AppName", "icon": "//icon.ico", "executable": sys.executable}
+    app = AppEntry(app_data, base_fixture.testdata_path / "app_config.json")
+
+    app.validate_with_conan_info(tmp_path)  # trigger set
+    assert app.icon == tmp_path / "icon.ico"
+    assert app.app_data["icon"] == "//icon.ico"
+
+    # relative to config file
+    app.icon = "../../src/conan_app_launcher/assets/icon.ico"
+    assert app.icon == this.base_path / "assets" / "icon.ico"
+
+    # absolute path
+    app.icon = str(tmp_path / "icon.ico")
+    assert app.icon == tmp_path / "icon.ico"
+
+    # wrong path
+    app.icon = "nonexistant.png"
+    captured = capsys.readouterr()
+    assert "ERROR" in captured.err
+    assert "Can't find icon" in captured.err
+    assert app.icon == this.default_icon
+
+    # extract icon
+    app.icon = ""
+    if platform.system() == "Windows":
+        assert app.icon == Path(tempfile.gettempdir()) / (str(Path(sys.executable).name) + ".png")
+    elif platform.system() == "Linux":
+        assert app.icon == this.default_icon
+
+
+def testOptionsEval(base_fixture):
+    """
+    Test, if extraction of option works correctly.
+    Expects the same option name and value as given to the constructor.
+    """
+    app_data = {"name": "AppName", "executable": "python",
+                "conan_options": [{"name": "myopt", "value": "myvalue"}]}
+    app = AppEntry(app_data, base_fixture.testdata_path / "app_config.json")
+
+    # one value
+    assert app.conan_options == {"myopt": "myvalue"}
+
+    # multi value
+    app.conan_options = [{"name": "myopt1", "value": "myvalue1"}, {"name": "myopt2", "value": "myvalue2"}]
+    assert app.conan_options == {"myopt1": "myvalue1", "myopt2": "myvalue2"}
+
+    # empty value
+    app.conan_options = []
+    assert app.conan_options == {}

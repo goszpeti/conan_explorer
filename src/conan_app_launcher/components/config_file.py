@@ -79,6 +79,10 @@ class AppEntry():
 
     @executable.setter
     def executable(self, new_value: str):
+        if not new_value:
+            Logger().error(f"No file/executable specified for {str(self.name)}")
+            return
+
         # adjust path on windows, if no file extension is given
         path = Path(new_value)
         if platform.system() == "Windows" and not path.suffix:
@@ -99,13 +103,10 @@ class AppEntry():
     def icon(self, new_value: str):
         # validate icon path
         if new_value.startswith("//"):  # relative to package
-            self._icon = self.package_folder / new_value
-            Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
+            self._icon = self.package_folder / new_value.replace("//", "")
         elif new_value and not Path(new_value).is_absolute():
             # relative path is calculated from config file path
             self._icon = self._config_file_path.parent / new_value
-            if not self._icon.is_file():
-                Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
         elif not new_value:  # try to find icon in temp
             self._icon = extract_icon(self.executable, Path(tempfile.gettempdir()))
         else:  # absolute path
@@ -113,8 +114,11 @@ class AppEntry():
 
         # default icon, until package path is updated
         if not self._icon.is_file():
-            self._icon = this.base_path / "assets" / "default_app_icon.png"
+            self._icon = this.default_icon
+            if new_value:  # user input given -> warning
+                Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
         else:
+            self._icon = self._icon.resolve()
             self.app_data["icon"] = new_value
 
     @property
