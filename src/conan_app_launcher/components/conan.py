@@ -1,5 +1,7 @@
-
+import platform
 from pathlib import Path
+from shutil import rmtree
+
 from typing import Any, Dict, List, Optional
 try:
     from typing import TypedDict
@@ -9,6 +11,10 @@ from conan_app_launcher.base import Logger
 from conans import __version__ as conan_version
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.model.ref import ConanFileReference, PackageReference
+try:
+    from conans.util.windows import CONAN_LINK, CONAN_REAL_PATH, rm_conandir, path_shortener
+except:
+    pass
 
 
 class ConanPkg(TypedDict):
@@ -36,6 +42,32 @@ class ConanApi():
         self.user_io = self.conan.user_io
         self.cache = self.conan.app.cache
 
+    def cleanup_cache(self):
+        # Blessed are the users Microsoft products!
+        if not platform.system() == "Windows":
+            return
+        # search for orphaned refs
+        for ref in self.cache.all_refs():
+            ref_cache = self.cache.package_layout(ref)
+            for pkg_id in ref_cache.packages_ids():
+                short_path_dir = self.get_package_folder(ref, {"id": pkg_id})
+                pkg_id_dir = Path(ref_cache.packages()) / pkg_id
+                if not short_path_dir.exists():
+                    Logger().warning(f"Can't find {str(short_path_dir)} for {str(ref)}")
+                    rmtree(str(pkg_id_dir), ignore_errors=True)
+
+        # reverse search for orphaned packages on windows short paths
+        short_path = Path(path_shortener("C:/temp", True)).parent.parent
+        short_path_folders = [f for f in Path(short_path).iterdir() if f.is_dir()]
+        for short_path in short_path_folders:
+            rp_file = short_path / CONAN_REAL_PATH
+            if rp_file.is_file():
+                with open(str(rp_file)) as fp:
+                    real_path = fp.read()
+                if not Path(real_path).is_dir():
+                    Logger().warning(f"Can't find {real_path} for {str(short_path)}")
+                    rmtree(str(short_path), ignore_errors=True)
+
     def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Path:
         """ Return the package folder of a conan reference, and install it, if it is not available """
 
@@ -54,7 +86,7 @@ class ConanApi():
         return Path("NULL")
 
     def search_for_all_recipes(self, conan_ref: ConanFileReference) -> List[ConanFileReference]:
-        #conan_ref_gen = ConanFileReference.loads(f"{conan_ref.name}/*@{conan_ref.user}/*")
+        # conan_ref_gen = ConanFileReference.loads(f"{conan_ref.name}/*@{conan_ref.user}/*")
         res_list = []
         try:
             # no query possible with pattern

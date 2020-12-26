@@ -8,6 +8,11 @@ from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
 
 
+def testCleanupCache():
+    conan = ConanApi()
+    conan.cleanup_cache()
+
+
 def testConanFindRemotePkg():
     """
     Test, if search_in_remotes finds a package for the current system and the specified options.
