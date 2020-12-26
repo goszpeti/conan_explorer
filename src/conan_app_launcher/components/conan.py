@@ -67,6 +67,8 @@ class ConanApi():
         for res in search_results:
             for item in res.get("items", []):
                 res_list.append(ConanFileReference.loads(item.get("recipe", {}).get("id", "")))
+        res_list = list(set(res_list))  # make unique
+        res_list.sort()
         return res_list
 
     def search_in_remotes(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> List[ConanPkg]:

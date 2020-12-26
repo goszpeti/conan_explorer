@@ -96,7 +96,7 @@ class AppEntry():
         versions = []
         for ref in self._available_refs:
             versions.append(ref.version)
-        return versions
+        return list(set(versions))
 
     @property
     def channels(self):  # for the current version only
@@ -104,7 +104,7 @@ class AppEntry():
         for ref in self._available_refs:
             if ref.version == self.version:
                 channels.append(ref.channel)
-        return channels
+        return list(set(channels))
 
     @property
     def executable(self):
@@ -200,13 +200,16 @@ class AppEntry():
 
         self._available_refs: List[str] = [self.conan_ref]
 
-    def validate_with_conan_info(self, package_folder: Path, available_refs: List[ConanFileReference]):
+    def set_package_info(self, package_folder: Path):
         """ Callback when conan operation is done and paths can be validated"""
         self.package_folder = package_folder
 
         # use setter to reevaluate
         self.icon = self.app_data.get("icon", "")
         self.executable = self.app_data.get("executable", "")
+
+    def set_available_packages(self, available_refs: List[ConanFileReference]):
+        """ Callback when conan operation is done and paths can be validated"""
         self._available_refs = available_refs
 
 
