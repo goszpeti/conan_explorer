@@ -47,6 +47,21 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
+      <widget class="QWidget" name="package_viewer">
+       <attribute name="title">
+        <string>Packages</string>
+       </attribute>
+       <widget class="QTreeView" name="treeView">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>831</width>
+          <height>421</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
       <widget class="QWidget" name="tab_1">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">

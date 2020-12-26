@@ -100,8 +100,8 @@ class MainUi(QtWidgets.QMainWindow):
 
     def init_gui(self):
         """ Cleans up ui, reads config file and creates new layout """
-        while self._ui.tabs.count() > 0:
-            self._ui.tabs.removeTab(0)
+        # while self._ui.tabs.count() > 0:
+        #    self._ui.tabs.removeTab(0)
         config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
         if config_file_path.is_file():  # escape error log on first opening
             self._tab_info = parse_config_file(config_file_path)
