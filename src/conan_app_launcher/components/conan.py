@@ -210,7 +210,7 @@ class ConanApi():
 
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
-    """ 
+    """
     Helper to create name=value string list from dict
     Filters "ANY" options.
     """

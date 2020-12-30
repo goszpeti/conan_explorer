@@ -4,6 +4,7 @@ from pathlib import Path
 
 from conan_app_launcher import ICON_SIZE
 from PyQt5 import QtCore, QtGui, QtWidgets
+from . import app_edit
 
 Qt = QtCore.Qt
 
@@ -20,6 +21,17 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
         self._image = image
         self._greyed_out = True  # Must be ungreyed, when available
         self.set_icon(image)
+        self.setContextMenuPolicy(Qt.ActionsContextMenu)
+        quitAction = QtWidgets.QAction("Edit", self)
+        quitAction.triggered.connect(self.disp_edit_dialog)
+        self.addAction(quitAction)
+
+    def disp_edit_dialog(self):
+        self.dialog = QtWidgets.QDialog()
+        self.dialog.setModal(True)
+        edit = app_edit.Ui_Dialog()
+        edit.setupUi(self.dialog)
+        self.dialog.show()
 
     def ungrey_icon(self):
         self._greyed_out = False
@@ -44,6 +56,13 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
                 image = image.convertToFormat(QtGui.QImage.Format_Grayscale8)
             self.setPixmap(QtGui.QPixmap.fromImage(image).scaled(
                 ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
+
+    # def contextMenuEvent(self, event):  # override QPushButton
+    #     menu = QtWidgets.QMenu(self)
+    #     quitAction = menu.addAction("Quit")
+    #     action = menu.exec_(self.mapToGlobal(event.pos()))
+    #     if action == quitAction:
+    #         print("Quit")
 
     def mousePressEvent(self, event):  # override QPushButton
         """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
