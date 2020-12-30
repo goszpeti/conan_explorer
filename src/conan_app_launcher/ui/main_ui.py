@@ -10,6 +10,45 @@ from conan_app_launcher.settings import LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, 
 from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
 
 
+class CustomProxyModel(QtCore.QSortFilterProxyModel):
+    def __init__(self):
+        super().__init__()
+        # self.setDynamicSortFilter(True)
+
+    def rowCount(self, index):
+        model_index = self.mapToSource(index)
+        if not model_index.isValid():
+            return 0
+        new_rc = self.sourceModel().rowCount(model_index) + 1
+        # self.insertRows(0)
+        return new_rc
+
+    def insertRows(self, position, rows=1, parent=QtCore.QModelIndex()):
+        self.beginInsertRows(parent, position, position + rows - 1)
+        for row in range(rows):
+            self.insertRows(position, row, parent)
+            self.setData(parent, "AWESOME")
+            print('AWESOME VIRTUAL ROW')
+        self.endInsertRows()
+        return True
+
+
+class TodoModel(QtWidgets.QFileSystemModel):
+    def __init__(self, *args, todos=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setRootPath(r"C:\Users\goszp\.conan\data")
+
+    # def data(self, index, role):
+    #     if role == Qt.DisplayRole:
+    #         _, text = self.todos[index.row()]
+    #         return text
+
+    #     if role == Qt.DecorationRole:
+    #         status, _ = self.todos[index.row()]
+    #         if status:
+    #             return tick
+
+
 class MainUi(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
     conan_info_updated = QtCore.pyqtSignal()
@@ -36,6 +75,12 @@ class MainUi(QtWidgets.QMainWindow):
         self.new_message_logged.connect(self.write_log)
 
         self.init_gui()
+
+    # @QtCore.pyqtSlot()
+#    def on_click(self, index):
+        # path = self.model.fileInfo(index).absoluteFilePath()
+        # self._ui.listView.setRootIndex(self.fileModel.setRootPath(path))
+        # self.todos = todos or []
 
     def save_all_configs(self):
         write_config_file(self._settings.get(LAST_CONFIG_FILE), self._tab_info)
@@ -106,7 +151,41 @@ class MainUi(QtWidgets.QMainWindow):
         if config_file_path.is_file():  # escape error log on first opening
             self._tab_info = parse_config_file(config_file_path)
         this.conan_worker = ConanWorker(self._tab_info, self.conan_info_updated)
+        self.model = TodoModel()
+        # dirModel -> setFilter(QDir: : NoDotAndDotDot |
+        #                       QDir:: AllDirs);
+        self.proxy = CustomProxyModel()
+        self.proxy.setSourceModel(self.model)
+        self.model_index = self.model.index(self.model.rootDirectory().absolutePath())
+        print(self.model.rootDirectory().absolutePath())
+        self.proxy_index = self.proxy.mapFromSource(self.model_index)
+        self._ui.treeView.setModel(self.proxy)
+
+        self._ui.treeView.setRootIndex(self.proxy_index)
+        self.fileModel = QtWidgets.QFileSystemModel(self)
+        self.fileModel.setFilter(QtCore.QDir.NoDotAndDotDot |
+                                 QtCore.QDir.Files)
+        self.fileModel.setRootPath(self.model.rootDirectory().absolutePath())
+        self._ui.listView.setModel(self.fileModel)
+
+        # self._ui.treeView.clicked.connect(self.on_click)
+        self._ui.treeView.setColumnHidden(1, True)
+        self._ui.treeView.setColumnHidden(2, True)
+        self._ui.treeView.setColumnWidth(0, 310)
+        # self._ui.treeView.setRootIsDecorated(False)
+        # self._ui.treeView.setItemsExpandable(False)
+        self._ui.treeView.selectionModel().selectionChanged.connect(
+            self.on_selection_change)
+
         self.create_layout()
+
+    def on_selection_change(self, index):
+        view_index = self._ui.treeView.selectionModel().selectedIndexes()[0]
+        proxy_index = self.proxy.mapToSource(view_index)
+        item_name = self.model.fileName(proxy_index)
+        path = self.model.fileInfo(view_index).dir().absolutePath()
+        self._ui.listView.setRootIndex(self.fileModel.setRootPath(path))
+        print(item_name)
 
     def _re_init(self):
         """ To be called, when a new config file is loaded """
