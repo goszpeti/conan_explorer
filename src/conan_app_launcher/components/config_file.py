@@ -43,12 +43,12 @@ class TabType(TypedDict):
     apps: List[AppType]
 
 
-class AppConfigType(TypedDict):
+class ConfigFileType(TypedDict):
     version: str
     tabs: List[TabType]
 
 
-class AppEntry():
+class AppConfigEntry():
     """ Representation of an app entry of the config schema """
 
     @property
@@ -60,7 +60,7 @@ class AppEntry():
         self.app_data["name"] = new_value
 
     @property
-    def conan_ref(self):
+    def conan_ref(self) -> ConanFileReference:
         return self._conan_ref
 
     @conan_ref.setter
@@ -156,7 +156,7 @@ class AppEntry():
 
     @property
     def is_console_application(self):
-        return self.app_data.get("console_application")
+        return bool(self.app_data.get("console_application"))
 
     @is_console_application.setter
     def is_console_application(self, new_value):
@@ -171,7 +171,7 @@ class AppEntry():
         self.app_data["args"] = new_value
 
     @property
-    def conan_options(self):  # user specified, can differ from the actual installation
+    def conan_options(self) -> Dict[str, str]:  # user specified, can differ from the actual installation
         return self._conan_options
 
     @conan_options.setter
@@ -213,19 +213,19 @@ class AppEntry():
         self._available_refs = available_refs
 
 
-class TabEntry():
+class TabConfigEntry():
     """ Representation of a tab entry of the config schema """
 
     def __init__(self, name):
         self.name = name
-        self._app_entries: List[AppEntry] = []
+        self._app_entries: List[AppConfigEntry] = []
         Logger().debug(f"Adding tab {name}")
 
-    def add_app_entry(self, app_entry: AppEntry):
-        """ Add an AppEntry object to the tabs layout """
+    def add_app_entry(self, app_entry: AppConfigEntry):
+        """ Add an AppConfigEntry object to the tabs layout """
         self._app_entries.append(app_entry)
 
-    def get_app_entries(self) -> List[AppEntry]:
+    def get_app_entries(self) -> List[AppConfigEntry]:
         """ Get all app entries on the tab layout """
         return self._app_entries
 
@@ -237,7 +237,7 @@ def update_app_info(app: dict):
         app["conan_ref"] = value
 
 
-def parse_config_file(config_file_path: Path) -> List[TabEntry]:
+def parse_config_file(config_file_path: Path) -> List[TabConfigEntry]:
     """ Parse the json config file, validate and convert to object structure """
     app_config = None
     Logger().info(f"Loading file '{config_file_path}'...")
@@ -258,11 +258,11 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     # build the object model and update
     tabs = []
     for tab in app_config.get("tabs"):
-        tab_entry = TabEntry(tab.get("name"))
+        tab_entry = TabConfigEntry(tab.get("name"))
         for app in tab.get("apps"):
             # TODO: not very robust, but enough for small changes
             update_app_info(app)
-            app_entry = AppEntry(app, config_file_path)
+            app_entry = AppConfigEntry(app, config_file_path)
             tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
     # auto Update version to next version:
@@ -273,7 +273,7 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     return tabs
 
 
-def write_config_file(config_file_path: Path, tab_entries: List[TabEntry]):
+def write_config_file(config_file_path: Path, tab_entries: List[TabConfigEntry]):
     # create json dict from model
     tabs_data: List[TabType] = []
     for tab in tab_entries:
@@ -287,7 +287,7 @@ def write_config_file(config_file_path: Path, tab_entries: List[TabEntry]):
     with open(this.base_path / "assets" / "config_schema.json") as schema_file:
         json_schema = json.load(schema_file)
     version = json_schema.get("properties").get("version").get("enum")[-1]
-    app_config: AppConfigType = {"version": version, "tabs": tabs_data}
+    app_config: ConfigFileType = {"version": version, "tabs": tabs_data}
 
     with open(config_file_path, "w") as config_file:
         json.dump(app_config, config_file, indent=4)

@@ -11,7 +11,7 @@ try:
 except ImportError:
     from typing_extensions import TypedDict
 
-from conan_app_launcher.components import parse_config_file, write_config_file, AppEntry
+from conan_app_launcher.components import parse_config_file, write_config_file, AppConfigEntry
 
 
 def testCorrectFile(base_fixture):
@@ -127,7 +127,7 @@ def testExecutableEval(base_fixture, capsys):
     """
     app_data = {"name": "AppName", "executable": "python"}
     exe = Path(sys.executable)
-    app = AppEntry(app_data, base_fixture.testdata_path / "app_config.json")
+    app = AppConfigEntry(app_data, base_fixture.testdata_path / "app_config.json")
 
     app.set_package_info(exe.parent)  # trigger set
     assert app.executable == exe
@@ -157,7 +157,7 @@ def testIconEval(base_fixture, capsys, tmp_path):
 
     # relative to package with // notation
     app_data = {"name": "AppName", "icon": "//icon.ico", "executable": sys.executable}
-    app = AppEntry(app_data, base_fixture.testdata_path / "app_config.json")
+    app = AppConfigEntry(app_data, base_fixture.testdata_path / "app_config.json")
 
     app.set_package_info(tmp_path)  # trigger set
     assert app.icon == tmp_path / "icon.ico"
@@ -193,7 +193,7 @@ def testOptionsEval(base_fixture):
     """
     app_data = {"name": "AppName", "executable": "python",
                 "conan_options": [{"name": "myopt", "value": "myvalue"}]}
-    app = AppEntry(app_data, base_fixture.testdata_path / "app_config.json")
+    app = AppConfigEntry(app_data, base_fixture.testdata_path / "app_config.json")
 
     # one value
     assert app.conan_options == {"myopt": "myvalue"}

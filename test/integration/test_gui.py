@@ -13,7 +13,7 @@ import conan_app_launcher as app
 from conan_app_launcher.base import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_ui
-from conan_app_launcher.ui.layout_entries import TabUiGrid
+from conan_app_launcher.ui.layout_entries import TabAppGrid
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -39,7 +39,7 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[selection])
 
-    main_gui._ui.menu_open_config_file_action.trigger()
+    main_gui._ui.menu_open_config_file.trigger()
     time.sleep(3)
     assert settings.get(LAST_CONFIG_FILE) == selection
     app.conan_worker.finish_working()
@@ -68,7 +68,7 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     main_gui.update_layout()  # TODO: signal does not emit in test, must call manually
 
     # check app icons first two should be ungreyed, third is invalid->not ungreying
-    for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
+    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
         for test_app in tab.apps:
             if test_app._app_info.name in ["App1 with spaces", "App1 new"]:
                 assert not test_app._app_button._greyed_out
@@ -147,26 +147,26 @@ def testViewMenuOptions(base_fixture, qtbot):
     qtbot.waitExposed(main_gui, 3000)
 
     # assert default state
-    for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
+    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
         for test_app in tab.apps:
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
     # click and assert
     main_gui._ui.menu_set_display_versions.trigger()
-    for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
+    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
         for test_app in tab.apps:
             assert test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
     main_gui._ui.menu_set_display_channels.trigger()
-    for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
+    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
         for test_app in tab.apps:
             assert test_app._app_version_cbox.isHidden()
             assert test_app._app_channel_cbox.isHidden()
     # click again
     main_gui._ui.menu_set_display_versions.trigger()
     main_gui._ui.menu_set_display_channels.trigger()
-    for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
+    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
         for test_app in tab.apps:
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
@@ -177,5 +177,3 @@ def testIconUpdateFromExecutable():
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path.
     """
-
-    

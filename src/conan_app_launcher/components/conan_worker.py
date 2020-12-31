@@ -11,13 +11,13 @@ from conan_app_launcher.base import Logger
 from conan_app_launcher.components.conan import ConanApi
 
 if TYPE_CHECKING:
-    from conan_app_launcher.components import TabEntry
+    from conan_app_launcher.components import TabConfigEntry
 
 
 class ConanWorker():
     """ Sequential worker with a queue to execute conan commands and get info on packages """
 
-    def __init__(self, tabs: List["TabEntry"], gui_update_signal: QtCore.pyqtSignal):
+    def __init__(self, tabs: List["TabConfigEntry"], gui_update_signal: QtCore.pyqtSignal):
         self._conan = ConanApi()
         self._conan_queue: "Queue[Tuple[str, Dict[str, str]]]" = Queue(maxsize=0)
         self._worker = None

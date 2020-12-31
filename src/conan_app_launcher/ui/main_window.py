@@ -5,9 +5,12 @@ from PyQt5 import QtCore, QtWidgets, uic
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file
+from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file, AppConfigEntry
 from conan_app_launcher.settings import LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, Settings
-from conan_app_launcher.ui.layout_entries import AppUiEntry, TabUiGrid
+from conan_app_launcher.ui.app_link import AppLink
+from conan_app_launcher.ui.tab_app_grid import TabAppGrid
+
+Qt = QtCore.Qt
 
 
 class CustomProxyModel(QtCore.QSortFilterProxyModel):
@@ -31,6 +34,25 @@ class CustomProxyModel(QtCore.QSortFilterProxyModel):
             print('AWESOME VIRTUAL ROW')
         self.endInsertRows()
         return True
+
+
+class AppsListModel(QtCore.QAbstractListModel):
+    def __init__(self, apps=List[AppConfigEntry]):
+        super().__init__()
+        self.apps = apps.get_app_entries()
+
+    def data(self, index, role):
+        if role == Qt.DisplayRole:
+            text = self.apps[index.row()].name
+            return text
+
+        # if role == Qt.DecorationRole:
+         #   status, _ = self.apps[index.row()]
+            # if status:
+            #     return tick
+
+    def rowCount(self, index):
+        return len(self.apps)
 
 
 class TodoModel(QtWidgets.QFileSystemModel):
@@ -58,7 +80,7 @@ class MainUi(QtWidgets.QMainWindow):
         super().__init__()
         self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
         self._settings = settings
-        self._tab_info: List[TabUiGrid] = []
+        self._tab_info: List[TabAppGrid] = []
         self._about_dialog = AboutDialog(self)
         self._tab = None
 
@@ -67,20 +89,32 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.console.setFontPointSize(10)
 
         self._ui.menu_about_action.triggered.connect(self._about_dialog.show)
-        self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
+        self._ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
         self._ui.menu_set_display_versions.triggered.connect(self.toggle_display_versions)
         self._ui.menu_set_display_channels.triggered.connect(self.toogle_display_channels)
+        self._ui.menu_add_remove_conan_link.triggered.connect(self.open_add_remove_apps_dialog)
 
         self.conan_info_updated.connect(self.update_layout)
         self.new_message_logged.connect(self.write_log)
 
         self.init_gui()
 
-    # @QtCore.pyqtSlot()
-#    def on_click(self, index):
-        # path = self.model.fileInfo(index).absoluteFilePath()
-        # self._ui.listView.setRootIndex(self.fileModel.setRootPath(path))
-        # self.todos = todos or []
+    def open_add_remove_apps_dialog(self):
+        # save dialog, otherwise it will close
+        self.dialog = QtWidgets.QDialog()
+        self.dialog.setModal(True)
+        self._add_dialog = add_remove_apps.Ui_Dialog()
+        self._add_dialog.setupUi(self.dialog)
+        # self.addButton.pressed.connect(self.add)
+        # self.deleteButton.pressed.connect(self.delete)
+        self.model = AppsListModel(self._tab_info[0])
+        self._add_dialog.app_list_view.setModel(self.model)
+        self._add_dialog.app_list_view.doubleClicked.connect(self.double_click_item)
+        self.dialog.show()
+
+    def double_click_item(self):
+        app = self.model[self._add_dialog.app_list_view.selectionModel().currentIndex()
+                         ]
 
     def save_all_configs(self):
         write_config_file(self._settings.get(LAST_CONFIG_FILE), self._tab_info)
@@ -122,12 +156,12 @@ class MainUi(QtWidgets.QMainWindow):
         """ Creates the tabs and app icons """
         for tab_info in self._tab_info:
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            self._tab = TabUiGrid(self, tab_info.name)
+            self._tab = TabAppGrid(self, tab_info.name)
             row = 0  # 3
             column = 0  # 4
             for app_info in tab_info.get_app_entries():
                 # add in order of occurence
-                app = AppUiEntry(self._tab.tab_scroll_area_widgets, app_info, self.conan_info_updated)
+                app = AppLink(self._tab.tab_scroll_area_widgets, app_info, self.conan_info_updated)
                 self._tab.apps.append(app)
                 self._tab.tab_grid_layout.addLayout(app, row, column, 1, 1)
                 column += 1
@@ -138,15 +172,15 @@ class MainUi(QtWidgets.QMainWindow):
 
     def update_layout(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
-        for tab in self._ui.tabs.findChildren(TabUiGrid):
+        for tab in self._ui.tabs.findChildren(TabAppGrid):
             for app in tab.apps:
                 app.update_entry(self._settings)
         self.save_all_configs()
 
     def init_gui(self):
         """ Cleans up ui, reads config file and creates new layout """
-        # while self._ui.tabs.count() > 0:
-        #    self._ui.tabs.removeTab(0)
+        while self._ui.tabs.count() > 0:
+            self._ui.tabs.removeTab(0)
         config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
         if config_file_path.is_file():  # escape error log on first opening
             self._tab_info = parse_config_file(config_file_path)

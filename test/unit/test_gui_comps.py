@@ -9,9 +9,9 @@ from time import sleep
 from pathlib import Path
 
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components.config_file import AppEntry, AppType
+from conan_app_launcher.components.config_file import AppConfigEntry, AppType
 from conan_app_launcher.ui import main_ui
-from conan_app_launcher.ui.layout_entries import AppUiEntry
+from conan_app_launcher.ui.layout_entries import AppLink
 
 from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
@@ -40,7 +40,7 @@ def testOpenApp(base_fixture, qtbot):
     """
     app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
                          "executable": "", "console_application": True}
-    app_info = AppEntry(app_data, Path())
+    app_info = AppConfigEntry(app_data, Path())
     app_info._executable = Path(sys.executable)
 
     if platform.system() == "Windows":
@@ -50,7 +50,7 @@ def testOpenApp(base_fixture, qtbot):
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    app_ui = AppUiEntry(root_obj, app_info)
+    app_ui = AppLink(root_obj, app_info)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 

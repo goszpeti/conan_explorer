@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import conan_app_launcher as this
 from conan_app_launcher.settings import Settings
 from conan_app_launcher.base import Logger
-from conan_app_launcher.ui import main_ui
+from conan_app_launcher.ui.main_window import MainUi
 
 try:
     # this is a workaround for windows, so that on the taskbar the
@@ -59,7 +59,7 @@ def main():
     settings_file_path = Path.home() / ".cal_config"
     settings = Settings(ini_file=settings_file_path)
 
-    app_main_ui = main_ui.MainUi(settings)
+    app_main_ui = MainUi(settings)
     app_main_ui.setWindowIcon(icon)
     app_main_ui.show()
 

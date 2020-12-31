@@ -1,17 +1,17 @@
-from typing import List
 
-from conan_app_launcher.components import AppEntry, run_file
+from conan_app_launcher.components import AppConfigEntry, run_file
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS, Settings)
 from conan_app_launcher.ui.qt.app_button import AppButton
 from PyQt5 import QtCore, QtWidgets
+from .qt import app_edit
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
 
-class AppUiEntry(QtWidgets.QVBoxLayout):
-    def __init__(self, parent: QtWidgets.QTabWidget, app: AppEntry, gui_update_signal: QtCore.pyqtSignal):
+class AppLink(QtWidgets.QVBoxLayout):
+    def __init__(self, parent: QtWidgets.QTabWidget, app: AppConfigEntry, gui_update_signal: QtCore.pyqtSignal):
         super().__init__(parent)
         self._app_info = app
         self._app_button = AppButton(parent, app.icon)
@@ -54,6 +54,38 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self._app_button.clicked.connect(self.app_clicked)
         self._app_version_cbox.currentIndexChanged.connect(self.version_selected)
         self._app_channel_cbox.currentIndexChanged.connect(self.channel_selected)
+
+        # add right click context menu actions
+        self._app_button.setContextMenuPolicy(Qt.ActionsContextMenu)
+        edit_action = QtWidgets.QAction("Edit", self)
+        edit_action.triggered.connect(self.disp_edit_dialog)
+        self._app_button.addAction(edit_action)
+
+    def disp_edit_dialog(self):
+        # save dialog, otherwise it will close
+        self.dialog = QtWidgets.QDialog()
+        self.dialog.setModal(True)
+        self._edit_dialog = app_edit.Ui_Dialog()
+        self._edit_dialog.setupUi(self.dialog)
+
+        # fill up current info
+        self._edit_dialog.name_line_edit.setText(self._app_info.name)
+        self._edit_dialog.conan_ref_line_edit.setText(str(self._app_info.conan_ref))
+        self._edit_dialog.exec_path_line_edit.setText(self._app_info.app_data["executable"])
+        self._edit_dialog.is_console_app_checkbox.setChecked(self._app_info.is_console_application)
+        self._edit_dialog.icon_line_edit.setText(self._app_info.app_data["icon"])
+        self._edit_dialog.args_line_edit.setText(self._app_info.args)
+
+        conan_options_text = ""
+        for option in self._app_info.conan_options:
+            conan_options_text += f"{option}={self._app_info.conan_options.get(option)}\n"
+        self._edit_dialog.conan_opts_text_edit.setText(conan_options_text)
+
+        self._edit_dialog.button_box.accepted.connect(self.save_edited_dialog)
+        self.dialog.show()
+
+    def save_edited_dialog(self):
+        self._edit_dialog
 
     def update_entry(self, settings: Settings):
         # set icon and ungrey if package is available
@@ -106,57 +138,3 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
             return
         self._app_button.grey_icon()
         self._app_info.channel = self._app_channel_cbox.currentText()
-
-
-class TabUiGrid(QtWidgets.QWidget):
-    def __init__(self, parent: QtWidgets.QTabWidget, name):
-        super().__init__(parent)
-        self.apps: List[AppUiEntry] = []
-        self.tab_layout = QtWidgets.QVBoxLayout(self)
-        self.tab_scroll_area = QtWidgets.QScrollArea(self)
-        self.tab_grid_layout = QtWidgets.QGridLayout()  # self.tab_scroll_area
-        self.tab_scroll_area_widgets = QtWidgets.QWidget(self.tab_scroll_area)
-        self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + name)
-        self.tab_scroll_area_layout = QtWidgets.QVBoxLayout(self.tab_scroll_area_widgets)
-        self.setObjectName("tab_" + name)
-
-        self.tab_scroll_area_layout.setContentsMargins(0, 0, 0, 0)
-
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
-        self.setSizePolicy(sizePolicy)
-        self.setGeometry(QtCore.QRect(0, 0, 830, 462))
-        self.tab_layout.setContentsMargins(2, 0, 2, 0)
-        self.tab_scroll_area.setSizePolicy(sizePolicy)
-        self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.tab_scroll_area.setWidgetResizable(True)
-        self.tab_scroll_area.setAlignment(Qt.AlignCenter)
-        self.tab_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 811, 439))
-        self.tab_scroll_area_widgets.setSizePolicy(sizePolicy)
-        self.tab_scroll_area_widgets.setMinimumSize(QtCore.QSize(752, 359))
-        self.tab_scroll_area_widgets.setBaseSize(QtCore.QSize(752, 359))
-        self.tab_scroll_area_widgets.setLayoutDirection(Qt.LeftToRight)
-
-        self.tab_grid_layout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
-        self.tab_grid_layout.setColumnMinimumWidth(0, 202)
-        self.tab_grid_layout.setColumnMinimumWidth(1, 202)
-        self.tab_grid_layout.setColumnMinimumWidth(2, 202)
-        self.tab_grid_layout.setColumnMinimumWidth(3, 202)
-        self.tab_grid_layout.setRowMinimumHeight(0, 146)
-        self.tab_grid_layout.setRowMinimumHeight(1, 146)
-        self.tab_grid_layout.setRowMinimumHeight(2, 146)
-        self.tab_grid_layout.setColumnStretch(0, 1)
-        self.tab_grid_layout.setColumnStretch(1, 1)
-        self.tab_grid_layout.setColumnStretch(2, 1)
-        self.tab_grid_layout.setColumnStretch(3, 1)
-        self.tab_grid_layout.setRowStretch(0, 1)
-        self.tab_grid_layout.setRowStretch(1, 1)
-        self.tab_grid_layout.setRowStretch(2, 1)
-        self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
-        self.tab_grid_layout.setSpacing(5)
-
-        self.tab_scroll_area_layout.addLayout(self.tab_grid_layout)
-        self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
-        self.tab_layout.addWidget(self.tab_scroll_area)
