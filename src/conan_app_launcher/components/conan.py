@@ -1,6 +1,5 @@
 import platform
 from pathlib import Path
-from shutil import rmtree
 
 from typing import Any, Dict, List, Optional
 try:
@@ -42,10 +41,11 @@ class ConanApi():
         self.user_io = self.conan.user_io
         self.cache = self.conan.app.cache
 
-    def cleanup_cache(self):
+    def get_cleanup_cache_paths(self) -> List[str]:
         # Blessed are the users Microsoft products!
         if not platform.system() == "Windows":
             return
+        del_list = []
         # search for orphaned refs
         for ref in self.cache.all_refs():
             ref_cache = self.cache.package_layout(ref)
@@ -53,8 +53,8 @@ class ConanApi():
                 short_path_dir = self.get_package_folder(ref, {"id": pkg_id})
                 pkg_id_dir = Path(ref_cache.packages()) / pkg_id
                 if not short_path_dir.exists():
-                    Logger().warning(f"Can't find {str(short_path_dir)} for {str(ref)}")
-                    rmtree(str(pkg_id_dir), ignore_errors=True)
+                    Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}")
+                    del_list.append(str(pkg_id_dir))
 
         # reverse search for orphaned packages on windows short paths
         short_path = Path(path_shortener("C:/temp", True)).parent.parent
@@ -65,8 +65,9 @@ class ConanApi():
                 with open(str(rp_file)) as fp:
                     real_path = fp.read()
                 if not Path(real_path).is_dir():
-                    Logger().warning(f"Can't find {real_path} for {str(short_path)}")
-                    rmtree(str(short_path), ignore_errors=True)
+                    Logger().debug(f"Can't find {real_path} for {str(short_path)}")
+                    del_list.append(str(short_path))
+        return del_list
 
     def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Path:
         """ Return the package folder of a conan reference, and install it, if it is not available """
