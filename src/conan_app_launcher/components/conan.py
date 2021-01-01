@@ -53,6 +53,24 @@ class ConanApi():
             return self.get_package_folder(conan_ref, package)
         return Path("NULL")
 
+    def search_for_all_recipes(self, conan_ref: ConanFileReference) -> List[ConanFileReference]:
+        #conan_ref_gen = ConanFileReference.loads(f"{conan_ref.name}/*@{conan_ref.user}/*")
+        res_list = []
+        try:
+            # no query possible with pattern
+            search_results = self.conan.search_recipes(f"{conan_ref.name}/*@{conan_ref.user}/*",
+                                                       remote_name="all").get("results", None)  # .get("items", [])
+
+        except Exception:
+            # TODO warning
+            return []
+        for res in search_results:
+            for item in res.get("items", []):
+                res_list.append(ConanFileReference.loads(item.get("recipe", {}).get("id", "")))
+        res_list = list(set(res_list))  # make unique
+        res_list.sort()
+        return res_list
+
     def search_in_remotes(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> List[ConanPkg]:
         """ Find a package with options in the remotes """
         remotes = self.cache.registry.load_remotes()

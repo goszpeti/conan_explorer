@@ -129,7 +129,7 @@ def testExecutableEval(base_fixture, capsys):
     exe = Path(sys.executable)
     app = AppEntry(app_data, base_fixture.testdata_path / "app_config.json")
 
-    app.validate_with_conan_info(exe.parent)  # trigger set
+    app.set_package_info(exe.parent)  # trigger set
     assert app.executable == exe
 
     app.executable = "nonexistant"
@@ -159,7 +159,7 @@ def testIconEval(base_fixture, capsys, tmp_path):
     app_data = {"name": "AppName", "icon": "//icon.ico", "executable": sys.executable}
     app = AppEntry(app_data, base_fixture.testdata_path / "app_config.json")
 
-    app.validate_with_conan_info(tmp_path)  # trigger set
+    app.set_package_info(tmp_path)  # trigger set
     assert app.icon == tmp_path / "icon.ico"
     assert app.app_data["icon"] == "//icon.ico"
 

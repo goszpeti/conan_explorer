@@ -157,6 +157,14 @@ def testCreateKeyValueList():
     assert res == ["Key1=Value1"]
 
 
+def testSearchForAllPackages():
+    ref = "zlib/1.2.8@conan/stable"
+    #os.system(f"conan remove {ref} -f")
+    conan = ConanApi()
+    res = conan.search_for_all_recipes(ConanFileReference.loads(ref))
+    assert "zlib/1.2.8@conan/stable" in str(res)
+
+
 def testConanWorker(base_fixture):
     """
     Test, if conan worker works on the queue.
@@ -174,3 +182,10 @@ def testConanWorker(base_fixture):
 
     assert conan_worker._conan_queue.qsize() < elements_before
     conan_worker.finish_working()
+
+    # conan_server
+    # conan remote add private http://localhost:9300/
+    # conan upload example/1.0.0@myself/testing -r private
+    # .conan_server
+    # [write_permissions]
+    # */*@*/*: *

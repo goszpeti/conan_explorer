@@ -11,7 +11,7 @@ Qt = QtCore.Qt
 
 
 class AppUiEntry(QtWidgets.QVBoxLayout):
-    def __init__(self, parent: QtWidgets.QTabWidget, app: AppEntry):
+    def __init__(self, parent: QtWidgets.QTabWidget, app: AppEntry, gui_update_signal: QtCore.pyqtSignal):
         super().__init__(parent)
         self._app_info = app
         self._app_button = AppButton(parent, app.icon)
@@ -19,6 +19,7 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self._app_name_label = QtWidgets.QLabel(parent)
         self._app_version_cbox = QtWidgets.QComboBox(parent)
         self._app_channel_cbox = QtWidgets.QComboBox(parent)
+        self._gui_update_signal = gui_update_signal
 
         self.setObjectName(parent.objectName() + app.name)  # to find it for tests
         self.setSpacing(5)
@@ -41,22 +42,38 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self.addWidget(self._app_name_label)
 
         self._app_version_cbox.addItem(app.conan_ref.version)
-        # TODO unlock when version feature is implemented
         self._app_version_cbox.setDisabled(True)
+        self._app_version_cbox.setDuplicatesEnabled(False)
         self.addWidget(self._app_version_cbox)
 
         self._app_channel_cbox.addItem(app.conan_ref.channel)
-        # TODO unlock when version feature is implemented
         self._app_channel_cbox.setDisabled(True)
+        self._app_channel_cbox.setDuplicatesEnabled(False)
         self.addWidget(self._app_channel_cbox)
 
         self._app_button.clicked.connect(self.app_clicked)
+        self._app_version_cbox.currentIndexChanged.connect(self.version_selected)
+        self._app_channel_cbox.currentIndexChanged.connect(self.channel_selected)
 
     def update_entry(self, settings: Settings):
         # set icon and ungrey if package is available
         if self._app_info.executable.is_file():
             self._app_button.set_icon(self._app_info.icon)
             self._app_button.ungrey_icon()
+
+        if len(self._app_info.versions) > 0 and self._app_version_cbox.count() != len(self._app_info.versions):  # on nums changed
+            self._app_version_cbox.clear()
+            self._app_channel_cbox.clear()
+            self._app_version_cbox.addItems(self._app_info.versions)
+            self._app_channel_cbox.addItems(self._app_info.channels)
+            try:  # TODO
+                self._app_version_cbox.setCurrentIndex(self._app_info.versions.index(self._app_info.version))
+                self._app_channel_cbox.setCurrentIndex(self._app_info.channels.index(self._app_info.channel))
+            except Exception:
+                pass
+            self._app_version_cbox.setDisabled(False)
+            self._app_channel_cbox.setDisabled(False)
+
         if settings.get(DISPLAY_APP_VERSIONS):
             self._app_version_cbox.show()
         else:
@@ -69,6 +86,26 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
     def app_clicked(self):
         """ Callback for opening the executable on click """
         run_file(self._app_info.executable, self._app_info.is_console_application, self._app_info.args)
+
+    def version_selected(self, index):
+        if not self._app_version_cbox.isEnabled():
+            return
+        if index == -1:  # on clear
+            return
+        if self._app_info.version == self._app_version_cbox.currentText():  # no change
+            return
+        self._app_button.grey_icon()
+        self._app_info.version = self._app_version_cbox.currentText()
+
+    def channel_selected(self, index):
+        if not self._app_channel_cbox.isEnabled():
+            return
+        if index == -1:
+            return
+        if self._app_info.channel == self._app_channel_cbox.currentText():
+            return
+        self._app_button.grey_icon()
+        self._app_info.channel = self._app_channel_cbox.currentText()
 
 
 class TabUiGrid(QtWidgets.QWidget):

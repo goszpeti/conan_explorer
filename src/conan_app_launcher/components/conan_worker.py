@@ -4,10 +4,11 @@ from threading import Thread
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, List, Tuple
 
+from PyQt5 import QtCore
+from conans.model.ref import ConanFileReference
+
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components.conan import ConanApi
-from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore
 
 if TYPE_CHECKING:
     from conan_app_launcher.components import TabEntry
@@ -35,11 +36,18 @@ class ConanWorker():
         # fill up queue
         for ref in conan_refs:
             self._conan_queue.put([ref["name"], ref["options"]])
-            self.start_working()
+            # start getting versions info in a separate thread
+            version_getter = Thread(target=self._get_packages_versions, args=[ref["name"], ])
+            version_getter.start()
+        self.start_working()
+
+    def put_ref_in_queue(self, conan_ref: str, conan_options: {}):
+        self._conan_queue.put([conan_ref, conan_options])
+        self.start_working()
 
     def start_working(self):
         """ Start worker, if it is not already started (can be called multiple times)"""
-        if not self._worker:
+        if not self._worker or not self._worker.is_alive():
             self._worker = Thread(target=self._work_on_conan_queue, name="ConanWorker")
             self._worker.start()
 
@@ -61,8 +69,19 @@ class ConanWorker():
             for tab in self._tabs:
                 for app in tab.get_app_entries():
                     if str(app.conan_ref) == conan_ref:
-                        app.validate_with_conan_info(package_folder)
+                        app.set_package_info(package_folder)
             Logger().debug("Finish working on " + conan_ref)
             if self._gui_update_signal:
                 self._gui_update_signal.emit()
             self._conan_queue.task_done()
+
+    def _get_packages_versions(self, conan_ref):
+        available_refs = self._conan.search_for_all_recipes(ConanFileReference.loads(conan_ref))
+        if not available_refs:
+            return
+        for tab in self._tabs:
+            for app in tab.get_app_entries():
+                if str(app.conan_ref) == conan_ref:
+                    app.set_available_packages(available_refs)
+        if self._gui_update_signal:
+            self._gui_update_signal.emit()
