@@ -117,9 +117,9 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     settings = Settings(ini_file=Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
+
     main_gui = main_ui.MainUi(settings)
     qtbot.addWidget(main_gui)
-
     main_gui.show()
     qtbot.waitExposed(main_gui, 3000)
     main_gui._ui.menu_about_action.trigger()
@@ -134,8 +134,7 @@ def testViewMenuOptions(base_fixture, qtbot):
     Test the view menu entries.
     Check, that activating the entry set the hide flag is set on the widget.
     """
-    temp_dir = tempfile.gettempdir()
-    temp_ini_path = os.path.join(temp_dir, "config.ini")
+    temp_ini_path = os.path.join(tempfile.gettempdir(), "config.ini")
 
     settings = Settings(ini_file=Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "app_config.json"
@@ -170,6 +169,9 @@ def testViewMenuOptions(base_fixture, qtbot):
         for test_app in tab.apps:
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
+
+    time.sleep(3)
+    app.conan_worker.finish_working()
 
 
 def testIconUpdateFromExecutable():

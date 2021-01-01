@@ -87,7 +87,6 @@ class ConanApi():
         return Path("NULL")
 
     def search_for_all_recipes(self, conan_ref: ConanFileReference) -> List[ConanFileReference]:
-        # conan_ref_gen = ConanFileReference.loads(f"{conan_ref.name}/*@{conan_ref.user}/*")
         res_list = []
         try:
             # no query possible with pattern
