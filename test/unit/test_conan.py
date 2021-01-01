@@ -162,7 +162,7 @@ def testSearchForAllPackages():
     #os.system(f"conan remove {ref} -f")
     conan = ConanApi()
     res = conan.search_for_all_recipes(ConanFileReference.loads(ref))
-    assert "zlib/1.2.8@conan/stable" in res
+    assert "zlib/1.2.8@conan/stable" in str(res)
 
 
 def testConanWorker(base_fixture):
