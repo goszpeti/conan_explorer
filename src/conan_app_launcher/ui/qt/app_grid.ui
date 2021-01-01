@@ -49,7 +49,7 @@
       </property>
       <widget class="QWidget" name="package_viewer">
        <attribute name="title">
-        <string>Packages</string>
+        <string>Local Packages</string>
        </attribute>
        <widget class="QTreeView" name="treeView">
         <property name="geometry">
@@ -346,8 +346,6 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="menu_add_remove_conan_link"/>
-    <addaction name="separator"/>
     <addaction name="menu_clean_cache"/>
    </widget>
    <addaction name="menu_file"/>
@@ -467,12 +465,12 @@ p, li { white-space: pre-wrap; }
     <string>Display channels</string>
    </property>
   </action>
-  <action name="actionSettings">
+  <action name="menu_settings">
    <property name="text">
     <string>Settings</string>
    </property>
   </action>
-  <action name="actionAuto_Install">
+  <action name="menu_auto_install">
    <property name="text">
     <string>Auto Install</string>
    </property>

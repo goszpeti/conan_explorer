@@ -11,7 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Edit App Link</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
   </property>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">

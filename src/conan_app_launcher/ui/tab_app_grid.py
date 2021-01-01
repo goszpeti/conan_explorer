@@ -1,24 +1,31 @@
 from typing import List
 
-from PyQt5 import QtCore, QtWidgets
 
-from .app_link import AppLink
+from PyQt5 import QtCore, QtWidgets
+import conan_app_launcher as this
+from conan_app_launcher.components import AppConfigEntry
+from conan_app_launcher.ui.app_link import AppLink
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
 
 class TabAppGrid(QtWidgets.QWidget):
-    def __init__(self, parent: QtWidgets.QTabWidget, name):
+
+    def __init__(self, tab_info, parent: QtWidgets.QTabWidget, rows: int, coloumns: int, update_signal):
         super().__init__(parent)
+        self.tab_info = tab_info
         self.apps: List[AppLink] = []
+        self.rows = rows
+        self.coloumns = coloumns
+        self.update_signal = update_signal
         self.tab_layout = QtWidgets.QVBoxLayout(self)
         self.tab_scroll_area = QtWidgets.QScrollArea(self)
         self.tab_grid_layout = QtWidgets.QGridLayout()  # self.tab_scroll_area
         self.tab_scroll_area_widgets = QtWidgets.QWidget(self.tab_scroll_area)
-        self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + name)
+        self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.tab_info.name)
         self.tab_scroll_area_layout = QtWidgets.QVBoxLayout(self.tab_scroll_area_widgets)
-        self.setObjectName("tab_" + name)
+        self.setObjectName("tab_" + self.tab_info.name)
 
         self.tab_scroll_area_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -60,3 +67,29 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_scroll_area_layout.addLayout(self.tab_grid_layout)
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.tab_layout.addWidget(self.tab_scroll_area)
+        self.add_app_links()
+
+    def add_app_links(self):
+        row = 0
+        column = 0
+        for app_info in self.tab_info.get_app_entries():
+            # add in order of occurence
+            app = AppLink(app_info, self.update_signal, parent=self.tab_scroll_area_widgets)
+            self.apps.append(app)
+            self.tab_grid_layout.addLayout(app, row, column, 1, 1)
+            column += 1
+            if column == self.coloumns + 1:
+                column = 0
+                row += 1
+        if row < self.rows:  # only add + button, if max rows is not reached
+            self.add_new_app_link(self, row, column)
+
+    def add_new_app_link(self, tab, row, column):
+        app_info = AppConfigEntry()
+        app_info.name = "Add new Link"
+        app_info.icon = str(this.base_path / "assets" / "new_app_icon.png")
+        app_link = AppLink(app_info, self.update_signal,
+                           parent=tab.tab_scroll_area_widgets, is_new_link=True)
+        app_link._app_button.ungrey_icon()
+
+        tab.tab_grid_layout.addLayout(app_link, row, column, 1, 1)

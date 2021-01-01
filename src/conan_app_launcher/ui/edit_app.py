@@ -1,4 +1,3 @@
-from typing import List
 
 from conan_app_launcher.components import AppConfigEntry, run_file
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
@@ -12,11 +11,12 @@ Qt = QtCore.Qt
 
 class EditAppDialog(QtWidgets.QDialog):
 
-    def __init__(self, parent=None, flags=Qt.WindowFlags()):
+    def __init__(self,  app_info: AppConfigEntry, parent=None, flags=Qt.WindowFlags(), callback_fcn=None):
         super().__init__(parent=parent, flags=flags)
-        self.setModal(True)
+        self._app_info = app_info
+        self.callback_fcn = callback_fcn
         self._ui = app_edit.Ui_Dialog()
-        self._ui.setupUi(self.dialog)
+        self._ui.setupUi(self)
 
         # fill up current info
         self._ui.name_line_edit.setText(self._app_info.name)
@@ -32,7 +32,10 @@ class EditAppDialog(QtWidgets.QDialog):
         self._ui.conan_opts_text_edit.setText(conan_options_text)
 
         self._ui.button_box.accepted.connect(self.save_edited_dialog)
-        self.dialog.show()
+        self.show()
 
     def save_edited_dialog(self):
         self._ui
+        if self.callback_fcn:
+            self.callback_fcn()
+        return None
