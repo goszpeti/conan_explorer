@@ -82,6 +82,7 @@ jobs:
         if: matrix.conan != 'latest'
         run: |
           pip install conan==${{ matrix.conan }}
+          conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
       - name: Install own dependencies
         run: |
           pip install pyqt5==5.14.2

@@ -9,7 +9,7 @@
 
 ## Quick Overview
 
-The goal of this project is to provide a frontend to start executable contained in packages of the package manager conan. It is intented to be used on Windows and Linux x64 platforms.
+The goal of this project is to provide a frontend to start executables contained in packages of the package manager conan. It is intented to be used on Windows and Linux x64 platforms.
 
 
 <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="1024">

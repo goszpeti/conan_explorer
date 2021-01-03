@@ -239,6 +239,7 @@
      <string>File</string>
     </property>
     <addaction name="menu_open_config_file_action"/>
+    <addaction name="menu_cleanup_cache"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -372,6 +373,11 @@ p, li { white-space: pre-wrap; }
   <action name="actionAuto_Install">
    <property name="text">
     <string>Auto Install</string>
+   </property>
+  </action>
+  <action name="menu_cleanup_cache">
+   <property name="text">
+    <string>Cleanup Local Conan Cache</string>
    </property>
   </action>
  </widget>
