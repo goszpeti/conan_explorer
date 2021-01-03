@@ -8,9 +8,13 @@ from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
 
 
-def testCleanupCache():
+def testEmptyCleanupCache():
+    """
+    Test, if a clean cache returns no dirs. Actual functionality is tested with gui.
+    """
     conan = ConanApi()
-    conan.cleanup_cache()
+    paths = conan.get_cleanup_cache_paths()
+    assert not paths
 
 
 def testConanFindRemotePkg():

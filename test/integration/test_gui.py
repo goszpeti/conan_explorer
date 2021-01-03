@@ -6,11 +6,16 @@ It is called z_integration, so that it launches last.
 import os
 import tempfile
 import time
+import platform
 from pathlib import Path
+from shutil import rmtree
 
+
+from conans.model.ref import ConanFileReference
 
 import conan_app_launcher as app
 from conan_app_launcher.base import Logger
+from conan_app_launcher.components import ConanApi
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_ui
 from conan_app_launcher.ui.layout_entries import TabUiGrid
@@ -42,6 +47,73 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
     main_gui._ui.menu_open_config_file_action.trigger()
     time.sleep(3)
     assert settings.get(LAST_CONFIG_FILE) == selection
+    app.conan_worker.finish_working()
+    Logger.remove_qt_logger()
+
+
+def testConanCacheWithDialog(base_fixture, qtbot, mocker):
+    """
+    Test, that clicking on on open config file and selecting a file writes it back to settings.
+    Same file as selected expected in settings.
+    """
+    if not platform.system() == "Windows":
+        return
+    from conans.util.windows import CONAN_REAL_PATH
+    conan = ConanApi()
+
+    # Set up broken packages to have something to cleanup
+    # in short path - edit .real_path
+    ref = "boost_base/1.69.0@bincrafters/stable"
+    try:
+        conan.conan.remove(ref, force=True)  # clean up for multiple runs
+    except:
+        pass
+    os.system(f"conan install {ref}")
+    pkg = conan.get_local_package(ConanFileReference.loads(ref))
+    pkg_dir_to_delete = conan.get_package_folder(ConanFileReference.loads(ref), pkg)
+
+    real_path_file = pkg_dir_to_delete / ".." / CONAN_REAL_PATH
+    with open(str(real_path_file), "r+") as fp:
+        line = fp.readline()
+        line = line + "3"  # add bogus number to path
+        fp.seek(0)
+        fp.write(line)
+
+    # in cache - delete Short path, so that cache folder is oprhaned
+    ref = "boost_config/1.69.0@bincrafters/stable"
+    try:
+        conan.conan.remove(ref, force=True)  # clean up for multiple runs
+    except:
+        pass
+    os.system(f"conan install {ref}")
+
+    exp_folder = conan.get_export_folder(ConanFileReference.loads(ref))
+    conan = ConanApi()
+    pkg = conan.get_local_package(ConanFileReference.loads(ref))
+    pkg_cache_folder = os.path.abspath(os.path.join(exp_folder, "..", "package", pkg["id"]))
+    pkg_dir = conan.get_package_folder(ConanFileReference.loads(ref), pkg)
+    rmtree(pkg_dir)
+
+    paths_to_delete = conan.get_cleanup_cache_paths()
+    assert pkg_cache_folder in paths_to_delete
+    assert str(pkg_dir_to_delete.parent) in paths_to_delete
+
+    temp_dir = tempfile.gettempdir()
+    temp_ini_path = os.path.join(temp_dir, "config.ini")
+
+    settings = Settings(ini_file=Path(temp_ini_path))
+
+    main_gui = main_ui.MainUi(settings)
+    main_gui.show()
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, 3000)
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+                        return_value=QtWidgets.QMessageBox.Yes)
+
+    main_gui._ui.menu_cleanup_cache.trigger()
+    time.sleep(3)
+    assert not os.path.exists(pkg_cache_folder)
+    assert not pkg_dir_to_delete.parent.exists()
     app.conan_worker.finish_working()
     Logger.remove_qt_logger()
 
@@ -179,5 +251,3 @@ def testIconUpdateFromExecutable():
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path.
     """
-
-    

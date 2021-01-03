@@ -32,7 +32,7 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.menu_open_config_file_action.triggered.connect(self.open_config_file_dialog)
         self._ui.menu_set_display_versions.triggered.connect(self.toggle_display_versions)
         self._ui.menu_set_display_channels.triggered.connect(self.toogle_display_channels)
-        self._ui.menu_cleanup_cache.triggered.connect(self.cleanup_cache)
+        self._ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
 
         self.conan_info_updated.connect(self.update_layout)
         self.new_message_logged.connect(self.write_log)
@@ -52,7 +52,8 @@ class MainUi(QtWidgets.QMainWindow):
             pass
         Logger.remove_qt_logger()
 
-    def cleanup_cache(self):
+    def open_cleanup_cache_dialog(self):
+        """ Open the message box to confirm deletion of invalid cache folders """
         conan = ConanApi()
         paths = conan.get_cleanup_cache_paths()
         if not paths:
@@ -63,10 +64,12 @@ class MainUi(QtWidgets.QMainWindow):
         else:
             path_list = paths[0]
 
-        text = "Are you sure, you want to delete the following folders:\n" + path_list
-        msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question, "Delete folders", text, parent=self)
+        msg = QtWidgets.QMessageBox(parent=self)
+        msg.setWindowTitle("Delete folders")
+        msg.setText("Are you sure, you want to delete the found folders?\t")
+        msg.setDetailedText(path_list)
         msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
-
+        msg.setIcon(QtWidgets.QMessageBox.Question)
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
             for path in paths:

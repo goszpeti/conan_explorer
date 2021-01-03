@@ -27,6 +27,7 @@ class ConanPkg(TypedDict):
 
 
 class ConanApi():
+    """ Wrapper around ConanAPIV1 """
 
     def __init__(self):
         self.conan: ConanAPIV1 = None
@@ -42,9 +43,10 @@ class ConanApi():
         self.cache = self.conan.app.cache
 
     def get_cleanup_cache_paths(self) -> List[str]:
+        """ Get a list of orphaned short path and cache folders """
         # Blessed are the users Microsoft products!
         if not platform.system() == "Windows":
-            return
+            return []
         del_list = []
         # search for orphaned refs
         for ref in self.cache.all_refs():
@@ -64,13 +66,17 @@ class ConanApi():
             if rp_file.is_file():
                 with open(str(rp_file)) as fp:
                     real_path = fp.read()
-                if not Path(real_path).is_dir():
-                    Logger().debug(f"Can't find {real_path} for {str(short_path)}")
-                    del_list.append(str(short_path))
+                try:
+                    if not Path(real_path).is_dir():
+                        Logger().debug(f"Can't find {real_path} for {str(short_path)}")
+                        del_list.append(str(short_path))
+                except:
+                    Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")
+
         return del_list
 
     def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Path:
-        """ Return the package folder of a conan reference, and install it, if it is not available """
+        """ Return the package folder of a conan reference and install it, if it is not available """
 
         package = self.get_local_package(conan_ref, input_options)
         if package:
@@ -87,14 +93,14 @@ class ConanApi():
         return Path("NULL")
 
     def search_for_all_recipes(self, conan_ref: ConanFileReference) -> List[ConanFileReference]:
+        """ Sreach in all remotes for all versions of a conan ref """
         res_list = []
         try:
             # no query possible with pattern
             search_results = self.conan.search_recipes(f"{conan_ref.name}/*@{conan_ref.user}/*",
-                                                       remote_name="all").get("results", None)  # .get("items", [])
+                                                       remote_name="all").get("results", None)
 
         except Exception:
-            # TODO warning
             return []
         for res in search_results:
             for item in res.get("items", []):
@@ -123,7 +129,7 @@ class ConanApi():
             return packages[0]
         return None
 
-    def get_package_folder(self, conan_ref, package: Optional[ConanPkg]) -> Path:
+    def get_package_folder(self, conan_ref: ConanFileReference, package: Optional[ConanPkg]) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """
         try:
             layout = self.cache.package_layout(conan_ref)
@@ -131,14 +137,14 @@ class ConanApi():
         except Exception:  # gotta catch 'em all!
             return Path("NULL")
 
-    def get_export_folder(self, conan_ref) -> Path:
+    def get_export_folder(self, conan_ref: ConanFileReference) -> Path:
         """ Get the export folder form a reference """
         layout = self.cache.package_layout(conan_ref)
         if layout:
             return Path(layout.export())
         return Path("NULL")
 
-    def install_package(self, conan_ref: str, package: ConanPkg) -> bool:
+    def install_package(self, conan_ref: ConanFileReference, package: ConanPkg) -> bool:
         """
         Try to install a conan package while guessing the mnost suitable package
         for the current platform.
@@ -153,7 +159,7 @@ class ConanApi():
                                          settings=settings_list, options=options_list)
             return True
         except BaseException as error:
-            Logger().error(f"Can't install package '{conan_ref}': {str(error)}")
+            Logger().error(f"Can't install package '{str(conan_ref)}': {str(error)}")
             return False
 
     def find_best_matching_packages(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {},
@@ -242,7 +248,7 @@ class ConanApi():
 
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
-    """ 
+    """
     Helper to create name=value string list from dict
     Filters "ANY" options.
     """
