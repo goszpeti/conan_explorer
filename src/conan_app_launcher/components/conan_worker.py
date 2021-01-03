@@ -2,7 +2,7 @@
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List
 
 from PyQt5 import QtCore
 from conans.model.ref import ConanFileReference

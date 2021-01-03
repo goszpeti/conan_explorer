@@ -24,6 +24,26 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
+def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
+    """
+    Test, loading a config file and opening the about menu, and clicking on OK
+    The about dialog showing is expected.
+    """
+    settings = Settings(ini_file=Path("NULL"))
+    config_file_path = base_fixture.testdata_path / "app_config.json"
+    settings.set(LAST_CONFIG_FILE, str(config_file_path))
+
+    main_gui = main_ui.MainUi(settings)
+    qtbot.addWidget(main_gui)
+    main_gui.show()
+    qtbot.waitExposed(main_gui, 3000)
+    main_gui._ui.menu_about_action.trigger()
+    time.sleep(3)
+    assert main_gui._about_dialog.isEnabled()
+    qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], Qt.LeftButton)
+    app.conan_worker.finish_working()
+
+
 def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
     """
     Test, that clicking on on open config file and selecting a file writes it back to settings.
@@ -38,7 +58,7 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
-    selection = "C:/new_config.json"
+    selection = str(Path.home() / "new_config.json")
     mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
@@ -176,28 +196,6 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
     main_gui._re_init()  # re-init with same file
 
     assert main_gui._ui.tabs.count() == tabs_num
-    app.conan_worker.finish_working()
-
-
-def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
-    """
-    Test, loading a config file and opening the about menu, and clicking on OK
-    The about dialog showing is expected.
-    """
-    temp_ini_path = os.path.join(tempfile.gettempdir(), "config.ini")
-
-    settings = Settings(ini_file=Path(temp_ini_path))
-    config_file_path = base_fixture.testdata_path / "app_config.json"
-    settings.set(LAST_CONFIG_FILE, str(config_file_path))
-
-    main_gui = main_ui.MainUi(settings)
-    qtbot.addWidget(main_gui)
-    main_gui.show()
-    qtbot.waitExposed(main_gui, 3000)
-    main_gui._ui.menu_about_action.trigger()
-    time.sleep(3)
-    assert main_gui._about_dialog.isEnabled()
-    qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], Qt.LeftButton)
     app.conan_worker.finish_working()
 
 
