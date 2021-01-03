@@ -41,7 +41,8 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     time.sleep(3)
     assert main_gui._about_dialog.isEnabled()
     qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], Qt.LeftButton)
-    app.conan_worker.finish_working()
+    app.conan_worker.finish_working(3)
+    Logger.remove_qt_logger()
 
 
 def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
@@ -67,7 +68,7 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
     main_gui._ui.menu_open_config_file_action.trigger()
     time.sleep(3)
     assert settings.get(LAST_CONFIG_FILE) == selection
-    app.conan_worker.finish_working()
+    app.conan_worker.finish_working(3)
     Logger.remove_qt_logger()
 
 
@@ -166,7 +167,8 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
                 assert not test_app._app_button._greyed_out
             elif test_app._app_info.name in ["App1 wrong path", "App2"]:
                 assert test_app._app_button._greyed_out
-    app.conan_worker.finish_working()
+
+    app.conan_worker.finish_working(3)
 
 
 def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
@@ -182,21 +184,21 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
     main_gui = main_ui.MainUi(settings)
-    qtbot.addWidget(main_gui)
     main_gui.show()
+    qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
+
     tabs_num = 2  # two tabs in this file
     assert main_gui._ui.tabs.count() == tabs_num
+    time.sleep(3)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, 3000)
-
-    app.conan_worker.finish_working()
+    app.conan_worker.finish_working(3)
 
     main_gui._re_init()  # re-init with same file
+    time.sleep(3)
 
     assert main_gui._ui.tabs.count() == tabs_num
-    app.conan_worker.finish_working()
+    app.conan_worker.finish_working(3)
 
 
 def testViewMenuOptions(base_fixture, qtbot):
@@ -211,11 +213,12 @@ def testViewMenuOptions(base_fixture, qtbot):
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
     main_gui = main_ui.MainUi(settings)
-    qtbot.addWidget(main_gui)
     main_gui.show()
+    qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
 
-    # assert default state
+    time.sleep(3)
+   # assert default state
     for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
         for test_app in tab.apps:
             assert not test_app._app_version_cbox.isHidden()
@@ -240,8 +243,8 @@ def testViewMenuOptions(base_fixture, qtbot):
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
-    time.sleep(3)
-    app.conan_worker.finish_working()
+    app.conan_worker.finish_working(3)
+    Logger.remove_qt_logger()
 
 
 def testIconUpdateFromExecutable():
@@ -249,3 +252,4 @@ def testIconUpdateFromExecutable():
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path.
     """
+    # TODO

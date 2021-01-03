@@ -81,7 +81,7 @@ class MainUi(QtWidgets.QMainWindow):
         config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
         if config_file_path.exists():
             dialog_path = config_file_path.parent
-        dialog = QtWidgets.QFileDialog(caption="Select JSON Config File",
+        dialog = QtWidgets.QFileDialog(parent=self, caption="Select JSON Config File",
                                        directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
