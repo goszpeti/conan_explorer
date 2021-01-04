@@ -15,7 +15,6 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         super().__init__(parent)
         self._app_info = app
         self._app_button = AppButton(parent, app.icon)
-        self._app_button.setFixedHeight(200)
         self._app_name_label = QtWidgets.QLabel(parent)
         self._app_version_cbox = QtWidgets.QComboBox(parent)
         self._app_channel_cbox = QtWidgets.QComboBox(parent)
