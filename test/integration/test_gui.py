@@ -155,9 +155,10 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
+    # time.sleep(5)
 
     # wait for all tasks to finish
-    app.conan_worker._worker.join()
+    app.conan_worker._worker.join(10)
     main_gui.update_layout()  # TODO: signal does not emit in test, must call manually
 
     # check app icons first two should be ungreyed, third is invalid->not ungreying
@@ -190,15 +191,15 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
 
     tabs_num = 2  # two tabs in this file
     assert main_gui._ui.tabs.count() == tabs_num
-    time.sleep(3)
+    time.sleep(5)
 
-    app.conan_worker.finish_working(3)
+    app.conan_worker.finish_working(10)
 
     main_gui._re_init()  # re-init with same file
-    time.sleep(3)
+    time.sleep(5)
 
     assert main_gui._ui.tabs.count() == tabs_num
-    app.conan_worker.finish_working(3)
+    app.conan_worker.finish_working(10)
 
 
 def testViewMenuOptions(base_fixture, qtbot):
@@ -217,7 +218,7 @@ def testViewMenuOptions(base_fixture, qtbot):
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
 
-    time.sleep(3)
+    time.sleep(5)
    # assert default state
     for tab in main_gui._ui.tabs.findChildren(TabUiGrid):
         for test_app in tab.apps:
@@ -243,7 +244,7 @@ def testViewMenuOptions(base_fixture, qtbot):
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
-    app.conan_worker.finish_working(3)
+    app.conan_worker.finish_working(10)
     Logger.remove_qt_logger()
 
 

@@ -54,8 +54,8 @@ class ConanWorker():
 
     def finish_working(self, timeout_s: int = None):
         """ Cancel, if worker is still not finished """
+        self._closing = True
         if self._worker and self._worker.is_alive():
-            self._closing = True
             self._worker.join(timeout_s)
         if self._version_getter and self._version_getter.is_alive():
             self._version_getter.join(timeout_s)
@@ -82,11 +82,9 @@ class ConanWorker():
         available_refs = self._conan.search_for_all_recipes(ConanFileReference.loads(conan_ref))
         if not available_refs:
             return
-        while not self._closing:
-            for tab in self._tabs:
-                for app in tab.get_app_entries():
-                    if str(app.conan_ref) == conan_ref:
-                        app.set_available_packages(available_refs)
-            if self._gui_update_signal:
-                self._gui_update_signal.emit()
-            break
+        for tab in self._tabs:
+            for app in tab.get_app_entries():
+                if not self._closing and str(app.conan_ref) == conan_ref:
+                    app.set_available_packages(available_refs)
+        if not self._closing and self._gui_update_signal:
+            self._gui_update_signal.emit()
