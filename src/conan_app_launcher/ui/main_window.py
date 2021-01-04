@@ -24,7 +24,7 @@ class MainUi(QtWidgets.QMainWindow):
 
     def __init__(self, settings: Settings):
         super().__init__()
-        self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui")  # , baseinstance=self)
+        self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
         self._settings = settings
         self._tabs_info: List[TabAppGrid] = []
         self._tabs = []
@@ -70,6 +70,10 @@ class MainUi(QtWidgets.QMainWindow):
             self._settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
             self._re_init()
 
+    def open_new_tab_dialog(self):
+        self._new_tab_dialog = QtWidgets.QInputDialog(self)
+        pass
+
     def toggle_display_versions(self):
         """ Reads the current menu setting, sevaes it and updates the gui """
         self._settings.set(DISPLAY_APP_VERSIONS, self._ui.menu_set_display_versions.isChecked())
@@ -88,6 +92,8 @@ class MainUi(QtWidgets.QMainWindow):
                 GRID_COLOUMNS), rows=self._settings.get(GRID_ROWS))
             self._tabs.append(tab)
             self._ui.tabs.addTab(tab, tab_info.name)
+        self._ui.tabs.addTab(QtWidgets.QTabWidget(), "+")
+        self._ui.tabs.tabBarClicked.connect(self.open_new_tab_dialog)
 
     def update_layouts(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
