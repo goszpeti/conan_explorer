@@ -274,8 +274,6 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
 
 
 def write_config_file(config_file_path: Path, tab_entries: List[TabEntry]):
-    if not config_file_path.exists():
-        return
     # create json dict from model
     tabs_data: List[TabType] = []
     for tab in tab_entries:
