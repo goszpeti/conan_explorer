@@ -155,7 +155,7 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
-    # time.sleep(5)
+    time.sleep(5)
 
     # wait for all tasks to finish
     app.conan_worker._worker.join(10)
