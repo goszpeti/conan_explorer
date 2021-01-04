@@ -29,7 +29,10 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     Test, loading a config file and opening the about menu, and clicking on OK
     The about dialog showing is expected.
     """
-    settings = Settings(ini_file=Path("NULL"))
+    temp_dir = tempfile.gettempdir()
+    temp_ini_path = os.path.join(temp_dir, "config.ini")
+
+    settings = Settings(ini_file=Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
@@ -155,10 +158,9 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
-    time.sleep(5)
 
     # wait for all tasks to finish
-    app.conan_worker._worker.join(10)
+    app.conan_worker.finish_working(10)
     main_gui.update_layout()  # TODO: signal does not emit in test, must call manually
 
     # check app icons first two should be ungreyed, third is invalid->not ungreying
@@ -168,8 +170,6 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
                 assert not test_app._app_button._greyed_out
             elif test_app._app_info.name in ["App1 wrong path", "App2"]:
                 assert test_app._app_button._greyed_out
-
-    app.conan_worker.finish_working(3)
 
 
 def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):

@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List
 from shutil import rmtree
+from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets, uic
 
@@ -40,7 +41,7 @@ class MainUi(QtWidgets.QMainWindow):
         self.init_gui()
 
     def save_all_configs(self):
-        write_config_file(self._settings.get(LAST_CONFIG_FILE), self._tab_info)
+        write_config_file(Path(self._settings.get(LAST_CONFIG_FILE)), self._tab_info)
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
