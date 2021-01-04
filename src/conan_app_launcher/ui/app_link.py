@@ -28,7 +28,6 @@ class AppLink(QtWidgets.QVBoxLayout):
     def init(self, parent):
         app = self._app_info
         self._app_button = AppButton(parent, app.icon)
-        self._app_button.setFixedHeight(200)
 
         self.setObjectName(parent.objectName() + app.name)  # to find it for tests
         self.setSpacing(5)

@@ -8,6 +8,15 @@ from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
 
 
+def testEmptyCleanupCache():
+    """
+    Test, if a clean cache returns no dirs. Actual functionality is tested with gui.
+    """
+    conan = ConanApi()
+    paths = conan.get_cleanup_cache_paths()
+    assert not paths
+
+
 def testConanFindRemotePkg():
     """
     Test, if search_in_remotes finds a package for the current system and the specified options.
@@ -162,7 +171,7 @@ def testSearchForAllPackages():
     #os.system(f"conan remove {ref} -f")
     conan = ConanApi()
     res = conan.search_for_all_recipes(ConanFileReference.loads(ref))
-    assert "zlib/1.2.8@conan/stable" in res
+    assert "zlib/1.2.8@conan/stable" in str(res)
 
 
 def testConanWorker(base_fixture):

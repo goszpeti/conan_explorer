@@ -1,11 +1,13 @@
 from pathlib import Path
 from typing import List
+from shutil import rmtree
+from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file, AppConfigEntry
+from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file, AppConfigEntry, ConanApi
 from conan_app_launcher.settings import (
     LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLOUMNS, GRID_ROWS, Settings)
 from conan_app_launcher.ui.app_link import AppLink
@@ -38,6 +40,7 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
         self._ui.menu_set_display_versions.triggered.connect(self.toggle_display_versions)
         self._ui.menu_set_display_channels.triggered.connect(self.toogle_display_channels)
+        self._ui.menu_clean_cache.triggered.connect(self.open_cleanup_cache_dialog)
 
         self.conan_info_updated.connect(self.update_layouts)
         self.new_message_logged.connect(self.write_log)
@@ -45,7 +48,7 @@ class MainUi(QtWidgets.QMainWindow):
         self.init_gui()
 
     def save_all_configs(self):
-        write_config_file(self._settings.get(LAST_CONFIG_FILE), self._tabs_info)
+        write_config_file(Path(self._settings.get(LAST_CONFIG_FILE)), self._tabs_info)
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
@@ -57,13 +60,36 @@ class MainUi(QtWidgets.QMainWindow):
             pass
         Logger.remove_qt_logger()
 
+    def open_cleanup_cache_dialog(self):
+        """ Open the message box to confirm deletion of invalid cache folders """
+        conan = ConanApi()
+        paths = conan.get_cleanup_cache_paths()
+        if not paths:
+            self.write_log("INFO: Nothing found in cache to clean up.")
+            return
+        if len(paths) > 1:
+            path_list = "\n".join(paths)
+        else:
+            path_list = paths[0]
+
+        msg = QtWidgets.QMessageBox(parent=self)
+        msg.setWindowTitle("Delete folders")
+        msg.setText("Are you sure, you want to delete the found folders?\t")
+        msg.setDetailedText(path_list)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
+        msg.setIcon(QtWidgets.QMessageBox.Question)
+        reply = msg.exec_()
+        if reply == QtWidgets.QMessageBox.Yes:
+            for path in paths:
+                rmtree(str(path), ignore_errors=True)
+
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = Path.home()
         config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
         if config_file_path.exists():
             dialog_path = config_file_path.parent
-        dialog = QtWidgets.QFileDialog(caption="Select JSON Config File",
+        dialog = QtWidgets.QFileDialog(parent=self, caption="Select JSON Config File",
                                        directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         if dialog.exec_() == QtWidgets.QDialog.Accepted:

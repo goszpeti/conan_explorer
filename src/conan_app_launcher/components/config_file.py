@@ -54,7 +54,7 @@ class AppConfigEntry():
 
     def __init__(self, app_data: AppType = None):  # , config_file_path: Path = None):
         if app_data is None:
-            app_data = {"name": "", "conan_ref": "", "executable": "", "icon": "",
+            app_data = {"name": "", "conan_ref": self.INVALID_REF, "executable": "", "icon": "",
                         "console_application": False, "args": "", "conan_options": []}
         self.app_data: AppType = app_data
         # self._config_file_path = config_file_path  # TODO will be removed later, when no relative icon paths allowed
@@ -260,9 +260,9 @@ def parse_config_file(config_file_path: Path) -> List[TabConfigEntry]:
     if not config_file_path.is_file():
         Logger().error(f"Config file '{config_file_path}' does not exist.")
         return []
-    with open(config_file_path) as config_file:
+    with open(str(config_file_path)) as fp:
         try:
-            app_config = json.load(config_file)
+            app_config = json.load(fp)
             with open(this.base_path / "assets" / "config_schema.json") as schema_file:
                 json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
@@ -283,7 +283,7 @@ def parse_config_file(config_file_path: Path) -> List[TabConfigEntry]:
     # auto Update version to next version:
     app_config["version"] = json_schema.get("properties").get("version").get("enum")[-1]
     # write it back with updates
-    with open(config_file_path, "w") as config_file:
+    with open(str(config_file_path), "w") as config_file:
         json.dump(app_config, config_file, indent=4)
     return tabs
 
@@ -304,5 +304,5 @@ def write_config_file(config_file_path: Path, tab_entries: List[TabConfigEntry])
     version = json_schema.get("properties").get("version").get("enum")[-1]
     app_config: AppConfigType = {"version": version, "tabs": tabs_data}
 
-    with open(config_file_path, "w") as config_file:
+    with open(str(config_file_path), "w") as config_file:
         json.dump(app_config, config_file, indent=4)

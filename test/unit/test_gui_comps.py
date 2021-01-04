@@ -50,7 +50,7 @@ def testOpenApp(base_fixture, qtbot):
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    app_ui = AppLink(root_obj, app_info)
+    app_ui = AppUiLink(root_obj, app_info, None)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
