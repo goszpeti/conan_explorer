@@ -4,7 +4,7 @@ from typing import Any
 
 from conan_app_launcher.base import Logger
 from conan_app_launcher.settings import (
-    LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLOUMNS, GRID_ROWS)
+    LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS)
 
 
 class Settings():
@@ -40,7 +40,7 @@ class Settings():
             DISPLAY_APP_CHANNELS: True,
             DISPLAY_APP_VERSIONS: True,
             GRID_ROWS: 20,
-            GRID_COLOUMNS: 4,
+            GRID_COLUMNS: 4,
         }
 
         self._read_ini()
@@ -61,7 +61,7 @@ class Settings():
         self._write_setting(LAST_CONFIG_FILE, self._GENERAL_SECTION_NAME)
         self._write_setting(DISPLAY_APP_CHANNELS, self._VIEW_SECTION_NAME)
         self._write_setting(DISPLAY_APP_VERSIONS, self._VIEW_SECTION_NAME)
-        self._write_setting(GRID_COLOUMNS, self._VIEW_SECTION_NAME)
+        self._write_setting(GRID_COLUMNS, self._VIEW_SECTION_NAME)
         self._write_setting(GRID_ROWS, self._VIEW_SECTION_NAME)
 
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
@@ -77,7 +77,7 @@ class Settings():
         view_section = self._get_section(self._VIEW_SECTION_NAME)
         self._read_setting(DISPLAY_APP_CHANNELS, view_section)
         self._read_setting(DISPLAY_APP_VERSIONS, view_section)
-        self._read_setting(GRID_COLOUMNS, view_section)
+        self._read_setting(GRID_COLUMNS, view_section)
         self._read_setting(GRID_ROWS, view_section)
 
         # write file - to record defaults, if missing

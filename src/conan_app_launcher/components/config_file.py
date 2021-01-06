@@ -50,6 +50,7 @@ class AppConfigType(TypedDict):
 
 class AppConfigEntry():
     """ Representation of an app entry of the config schema """
+    INVALID_DESCR = "NA"
     INVALID_REF = "Invalid/NA@NA/NA"
 
     def __init__(self, app_data: AppType = None):  # , config_file_path: Path = None):
@@ -88,7 +89,11 @@ class AppConfigEntry():
     def conan_ref(self, new_value: str):
         try:
             self._conan_ref = ConanFileReference.loads(new_value)
-            if self.app_data["conan_ref"] != new_value and new_value != self.INVALID_REF:  # don't put it for init
+
+            # add conan ref to worker
+            if (self.app_data["conan_ref"] != new_value and new_value != self.INVALID_REF
+                    and self._conan_ref.version != self.INVALID_DESCR
+                    and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
                 this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
             self.app_data["conan_ref"] = new_value
         except Exception as error:

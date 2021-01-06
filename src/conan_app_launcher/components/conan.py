@@ -257,7 +257,7 @@ def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
         return res_list
     for name, value in input_dict.items():
         value = str(value)
-        if value.lower() == "any":
+        if "any" == value.lower() or "anycompiler" == value.lower():
             continue
         res_list.append(name + "=" + value)
     return res_list

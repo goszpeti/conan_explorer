@@ -1,7 +1,7 @@
 """
 Contains global constants and basic/ui variables.
 """
-__version__ = "0.6.0"
+__version__ = "1.0.0b0"
 
 from pathlib import Path
 
@@ -26,4 +26,5 @@ default_icon: Path = Path("NULL")
 
 # qt_application instance
 qt_app: Optional["QtWidgets.QApplication"] = None
+main_window: Optional["QtWidgets.QMainWindow"] = None
 conan_worker: Optional["ConanWorker"] = None

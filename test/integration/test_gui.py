@@ -17,8 +17,8 @@ import conan_app_launcher as app
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanApi
 from conan_app_launcher.settings import *
-from conan_app_launcher.ui import main_ui
-from conan_app_launcher.ui.layout_entries import TabAppGrid
+from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.tab_app_grid import TabAppGrid
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -36,7 +36,7 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
-    main_gui = main_ui.MainUi(settings)
+    main_gui = main_window.MainUi(settings)
     qtbot.addWidget(main_gui)
     main_gui.show()
     qtbot.waitExposed(main_gui, 3000)
@@ -58,7 +58,7 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
 
     settings = Settings(ini_file=Path(temp_ini_path))
 
-    main_gui = main_ui.MainUi(settings)
+    main_gui = main_window.MainUi(settings)
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
@@ -127,7 +127,7 @@ def testConanCacheWithDialog(base_fixture, qtbot, mocker):
 
     settings = Settings(ini_file=Path(temp_ini_path))
 
-    main_gui = main_ui.MainUi(settings)
+    main_gui = main_window.MainUi(settings)
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
@@ -154,7 +154,7 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
-    main_gui = main_ui.MainUi(settings)
+    main_gui = main_window.MainUi(settings)
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
@@ -184,7 +184,7 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
-    main_gui = main_ui.MainUi(settings)
+    main_gui = main_window.MainUi(settings)
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
@@ -213,7 +213,7 @@ def testViewMenuOptions(base_fixture, qtbot):
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
-    main_gui = main_ui.MainUi(settings)
+    main_gui = main_window.MainUi(settings)
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)

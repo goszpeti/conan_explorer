@@ -59,9 +59,10 @@ def main():
     settings_file_path = Path.home() / ".cal_config"
     settings = Settings(ini_file=settings_file_path)
 
-    app_main_ui = MainUi(settings)
-    app_main_ui.setWindowIcon(icon)
-    app_main_ui.show()
+    this.main_window = MainUi(settings)
+    this.main_window.init_gui()
+    this.main_window.setWindowIcon(icon)
+    this.main_window.show()
 
     try:
         this.qt_app.exec_()

@@ -184,8 +184,8 @@ def testConanWorker(base_fixture):
         def emit(self):
             pass
     sig = DummySignal()
-    tab_info = parse_config_file(base_fixture.testdata_path / "app_config.json")
-    conan_worker = ConanWorker(tab_info, sig)
+    config_data = parse_config_file(base_fixture.testdata_path / "app_config.json")
+    conan_worker = ConanWorker(config_data, sig)
     elements_before = conan_worker._conan_queue.qsize()
     time.sleep(10)
 

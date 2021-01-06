@@ -4,15 +4,16 @@ from shutil import rmtree
 from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
+from PyQt5.QtCore import pyqtSlot
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file, AppConfigEntry, ConanApi
 from conan_app_launcher.settings import (
-    LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLOUMNS, GRID_ROWS, Settings)
+    LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS, Settings)
 from conan_app_launcher.ui.app_link import AppLink
 from conan_app_launcher.ui.tab_app_grid import TabAppGrid
-from conan_app_launcher.ui.add_remove_apps import AddRemoveAppsDialog
+#from conan_app_launcher.ui.add_remove_apps import AddRemoveAppsDialog
 from conan_app_launcher.ui.edit_app import EditAppDialog
 
 
@@ -22,6 +23,9 @@ Qt = QtCore.Qt
 class MainUi(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
     conan_info_updated = QtCore.pyqtSignal()
+    config_changed = QtCore.pyqtSignal()
+    display_versions_updated = QtCore.pyqtSignal(bool)
+    display_channels_updated = QtCore.pyqtSignal(bool)
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
 
     def __init__(self, settings: Settings):
@@ -29,8 +33,8 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
         self._settings = settings
         self._tabs_info: List[TabAppGrid] = []
-        self._tabs = []
         self._about_dialog = AboutDialog(self)
+        self._new_tab = QtWidgets.QTabWidget()
 
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self)
@@ -42,24 +46,60 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.menu_set_display_channels.triggered.connect(self.toogle_display_channels)
         self._ui.menu_clean_cache.triggered.connect(self.open_cleanup_cache_dialog)
 
-        self.conan_info_updated.connect(self.update_layouts)
+        self.config_changed.connect(self.on_config_change)
         self.new_message_logged.connect(self.write_log)
 
-        self.init_gui()
-
-    def save_all_configs(self):
-        write_config_file(Path(self._settings.get(LAST_CONFIG_FILE)), self._tabs_info)
+        self._ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
+        self._ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
-        super().closeEvent(event)
         try:
             self.new_message_logged.disconnect(self.write_log)
         except Exception:
             # Sometimes the closeEvent is called twice and disconnect errors.
             pass
         Logger.remove_qt_logger()
+        super().closeEvent(event)
 
+    def on_tab_context_menu_requested(self, position):
+        index = self._ui.tab_bar.tabBar().tabAt(position)
+        menu = QtWidgets.QMenu()
+        rename_action = QtWidgets.QAction("Rename", self)
+        menu.addAction(rename_action)
+        rename_action.triggered.connect(lambda: self.on_tab_rename(index))
+
+        remove_action = QtWidgets.QAction("Remove", self)
+        menu.addAction(remove_action)
+        remove_action.triggered.connect(self.on_tab_remove)
+
+        new_tab_action = QtWidgets.QAction("Add new tab", self)
+        menu.addAction(new_tab_action)
+        new_tab_action.triggered.connect(self.open_new_tab_dialog)
+        menu.exec_(self.tab_bar.tabBar().mapToGlobal(position))
+
+    @pyqtSlot()
+    def open_new_tab_dialog(self):
+        self._new_tab_dialog = QtWidgets.QInputDialog(self)
+        pass
+
+    @pyqtSlot(int)
+    def on_tab_rename(self, index):
+        tab: TabAppGrid = self._ui.tab_bar.widget(index)
+        rename_tab_dialog = QtWidgets.QInputDialog(self)
+        text, accepted = rename_tab_dialog.getText(self, 'Rename tab',
+                                                   'Enter new name:', text=tab.config_data.name)
+        if accepted:
+            tab.config_data.name = text
+            self._ui.tab_bar.setTabText(index, text)
+            self.config_changed.emit()
+
+    @pyqtSlot()
+    def on_tab_remove(self):
+        pass
+        #rename_tab_dialog = QtWidgets.QInputDialog(self)
+
+    @pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         conan = ConanApi()
@@ -83,6 +123,7 @@ class MainUi(QtWidgets.QMainWindow):
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
+    @pyqtSlot()
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = Path.home()
@@ -96,42 +137,49 @@ class MainUi(QtWidgets.QMainWindow):
             self._settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
             self._re_init()
 
-    def open_new_tab_dialog(self):
-        self._new_tab_dialog = QtWidgets.QInputDialog(self)
-        pass
-
+    @pyqtSlot()
     def toggle_display_versions(self):
         """ Reads the current menu setting, sevaes it and updates the gui """
-        self._settings.set(DISPLAY_APP_VERSIONS, self._ui.menu_set_display_versions.isChecked())
-        self.update_layouts()
+        version_status = self._ui.menu_set_display_versions.isChecked()
+        self._settings.set(DISPLAY_APP_VERSIONS, version_status)
+        self.display_versions_updated.emit(version_status)
 
+    @pyqtSlot()
     def toogle_display_channels(self):
         """ Reads the current menu setting, sevaes it and updates the gui """
-        self._settings.set(DISPLAY_APP_CHANNELS, self._ui.menu_set_display_channels.isChecked())
-        self.update_layouts()
+        channel_status = self._ui.menu_set_display_channels.isChecked()
+        self._settings.set(DISPLAY_APP_CHANNELS, channel_status)
+        self.display_channels_updated.emit(channel_status)
 
     def create_layout(self):
         """ Creates the tabs and app icons """
-        for tab_info in self._tabs_info:
-            # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabAppGrid(tab_info, parent=self, update_signal=self.conan_info_updated, coloumns=self._settings.get(
-                GRID_COLOUMNS), rows=self._settings.get(GRID_ROWS))
-            self._tabs.append(tab)
-            self._ui.tabs.addTab(tab, tab_info.name)
-        self._ui.tabs.addTab(QtWidgets.QTabWidget(), "+")
-        self._ui.tabs.tabBarClicked.connect(self.open_new_tab_dialog)
+        self._ui.tab_bar.setMovable(True)
 
-    def update_layouts(self):
+        for config_data in self._tabs_info:
+            # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
+            tab = TabAppGrid(parent=self, config_data=config_data,
+                             max_columns=self._settings.get(GRID_COLUMNS), max_rows=self._settings.get(GRID_ROWS))
+            # self._tabs.append(tab)
+            self._ui.tab_bar.addTab(tab, config_data.name)
+        #self._ui.tab_bar.addTab(self._new_tab, "+")
+        # self._ui.tab_bar.tabBarClicked.connect(self.open_new_tab_dialog)
+        # add right click context menu actions
+        # "New tab after this tab"
+
+    @pyqtSlot()
+    def on_config_change(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
-        for tab in self._tabs:
-            for app in tab.apps:
-                app.update_entry(self._settings)
-        self.save_all_configs()
+        write_config_file(Path(self._settings.get(LAST_CONFIG_FILE)), self._tabs_info)
+
+        # for tab in self._tabs:
+        #     for app in tab.apps:
+        #         app.update_entry(self._settings)
+        # self.save_all_configs()
 
     def init_gui(self):
         """ Cleans up ui, reads config file and creates new layout """
-        if self._ui.tabs.count() > 1:  # remove the default tab
-            self._ui.tabs.removeTab(1)
+        if self._ui.tab_bar.count() > 0:  # remove the default tab
+            self._ui.tab_bar.removeTab(0)
         config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
         if config_file_path.is_file():  # escape error log on first opening
             self._tabs_info = parse_config_file(config_file_path)
@@ -139,10 +187,11 @@ class MainUi(QtWidgets.QMainWindow):
         this.conan_worker = ConanWorker(self._tabs_info, self.conan_info_updated)
         self.create_layout()
 
-        if self._ui.tabs.count() > 1:  # set the default tab to the first user defined tab
-            self._ui.tabs.setCurrentIndex(1)
+        if self._ui.tab_bar.count() > 1:  # set the default tab to the first user defined tab
+            self._ui.tab_bar.setCurrentIndex(1)
 
-    def on_selection_change(self, index):
+    @pyqtSlot(int)
+    def on_selection_change(self, index: int):
         view_index = self._ui.treeView.selectionModel().selectedIndexes()[0]
         proxy_index = self.proxy.mapToSource(view_index)
         item_name = self.model.fileName(proxy_index)
@@ -155,6 +204,7 @@ class MainUi(QtWidgets.QMainWindow):
         this.conan_worker.finish_working(3)
         self.init_gui()
 
+    @pyqtSlot(str)
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self._ui.console.append(text)
@@ -167,16 +217,16 @@ class AboutDialog(QtWidgets.QDialog):
     <html><head><meta name="qrichtext" content="1" /><style type="text/css">
     p, li { white-space: pre-wrap; }
     </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
-    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:11pt;">Conan App Launcher ${version}</span></p>
-    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:11pt;">Copyright (C), 2021, Péter Gosztolya and contributors.</span></p>
-    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><a href="https://github.com/goszpeti/conan_app_launcher"><span style=" font-size:11pt; text-decoration: underline; color:#0000ff;">https://github.com/goszpeti/conan_app_launcher</span></a></p></body></html>
+    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:10pt;">Conan App Launcher ${version}</span></p>
+    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:10pt;">Copyright (C), 2021, Péter Gosztolya and contributors.</span></p>
+    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><a href="https://github.com/goszpeti/conan_app_launcher"><span style=" font-size:10pt; text-decoration: underline; color:#0000ff;">https://github.com/goszpeti/conan_app_launcher</span></a></p></body></html>
     """
 
     def __init__(self, parent):
         super().__init__(parent)
         self.setWindowTitle("About")
         self.setModal(True)
-        self.resize(450, 300)
+        self.resize(430, 280)
         ok_button = QtWidgets.QDialogButtonBox.Ok
 
         icon = QtGui.QIcon(str(this.base_path / "assets" / "icon.ico"))

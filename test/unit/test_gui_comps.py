@@ -10,8 +10,8 @@ from pathlib import Path
 
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components.config_file import AppConfigEntry, AppType
-from conan_app_launcher.ui import main_ui
-from conan_app_launcher.ui.layout_entries import AppLink
+from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.app_link import AppLink
 
 from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
@@ -23,7 +23,7 @@ def testAboutDialog(base_fixture, qtbot):
     Check, that the app name is visible and it is hidden after clicking OK:
     """
     root_obj = QtWidgets.QWidget()
-    widget = main_ui.AboutDialog(root_obj)
+    widget = main_window.AboutDialog(root_obj)
     qtbot.addWidget(widget)
     widget.show()
     qtbot.waitForWindowShown(widget)
@@ -40,7 +40,7 @@ def testOpenApp(base_fixture, qtbot):
     """
     app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
                          "executable": "", "console_application": True}
-    app_info = AppConfigEntry(app_data, Path())
+    app_info = AppConfigEntry(app_data)
     app_info._executable = Path(sys.executable)
 
     if platform.system() == "Windows":
@@ -50,7 +50,7 @@ def testOpenApp(base_fixture, qtbot):
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    app_ui = AppUiLink(root_obj, app_info, None)
+    app_ui = AppLink(root_obj, app_info, None)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 

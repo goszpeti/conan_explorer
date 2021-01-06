@@ -12,7 +12,7 @@ from PyQt5 import QtWidgets
 import conan_app_launcher
 import conan_app_launcher as app
 from conan_app_launcher import main
-from conan_app_launcher.ui import main_ui
+from conan_app_launcher.ui import main_window
 from conan_app_launcher.settings import *
 
 
@@ -26,12 +26,12 @@ def testMainLoopMock(base_fixture, mocker):
     No error expected.
     """
 
-    mocker.patch("conan_app_launcher.ui.main_ui.MainUi")
+    mocker.patch("conan_app_launcher.ui.main_window.MainUi")
     mocker.patch.object(QtWidgets.QApplication, "exec_")
 
     main.main()
 
-    conan_app_launcher.ui.main_ui.MainUi.assert_called_once()
+    conan_app_launcher.ui.main_window.MainUi.assert_called_once()
     QtWidgets.QApplication.exec_.assert_called_once()
 
 
