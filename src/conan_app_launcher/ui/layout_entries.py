@@ -94,6 +94,12 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         if self._app_info.version == self._app_version_cbox.currentText():  # no change
             return
         self._app_button.grey_icon()
+        # update channels to match version
+        self._app_channel_cbox.clear()  # reset cbox
+        self._app_channel_cbox.addItems([self._app_info.INVALID_DESCR] + self._app_info.channels)
+        self._app_channel_cbox.setCurrentIndex(0)
+
+        self._app_info.channel = self._app_info.INVALID_DESCR
         self._app_info.version = self._app_version_cbox.currentText()
 
     def channel_selected(self, index):

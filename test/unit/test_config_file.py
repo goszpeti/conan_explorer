@@ -181,7 +181,8 @@ def testIconEval(base_fixture, capsys, tmp_path):
     # extract icon
     app.icon = ""
     if platform.system() == "Windows":
-        assert app.icon == Path(tempfile.gettempdir()) / (str(Path(sys.executable).name) + ".png")
+        icon_path = Path(tempfile.gettempdir()) / (str(Path(sys.executable).name) + ".png")
+        assert app.icon == icon_path.resolve()
     elif platform.system() == "Linux":
         assert app.icon == this.default_icon
 
