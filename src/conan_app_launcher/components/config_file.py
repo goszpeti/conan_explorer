@@ -155,7 +155,7 @@ class AppEntry():
         self._executable = full_path
 
     @property
-    def icon(self):
+    def icon(self) -> Path:
         return self._icon
 
     @icon.setter
@@ -181,7 +181,7 @@ class AppEntry():
             self.app_data["icon"] = new_value
 
     @property
-    def is_console_application(self):
+    def is_console_application(self) -> bool:
         return bool(self.app_data.get("console_application"))
 
     @is_console_application.setter
