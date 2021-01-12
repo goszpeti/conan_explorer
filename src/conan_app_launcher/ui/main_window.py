@@ -8,7 +8,7 @@ from PyQt5.QtCore import pyqtSlot
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file, AppConfigEntry, ConanApi
+from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file, TabConfigEntry, AppConfigEntry, ConanApi
 from conan_app_launcher.settings import (
     LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS, Settings)
 from conan_app_launcher.ui.app_link import AppLink
@@ -38,7 +38,7 @@ class MainUi(QtWidgets.QMainWindow):
 
         self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
         self._settings = settings
-        self._tabs_info: List[TabAppGrid] = []
+        self._tabs_info: List[TabConfigEntry] = []
         self._about_dialog = AboutDialog(self)
         self._new_tab = QtWidgets.QTabWidget()
 
@@ -51,6 +51,7 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.add_tab_button.setGeometry(802, 50, 28, 28)
         self._ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
         self._ui.tab_bar.setMovable(True)
+        self._ui.tab_bar.tabBar().tabMoved.connect(self.reorder_tabs)
 
         self.load_icons()
 
@@ -61,6 +62,8 @@ class MainUi(QtWidgets.QMainWindow):
         self.config_changed.connect(self.on_config_change)
         self.new_message_logged.connect(self.write_log)
 
+        self._ui.add_app_link_button.clicked.connect(self.open_new_app_link_dialog)
+        self._ui.add_tab_button.clicked.connect(self.open_new_tab_dialog)
         self._ui.menu_about_action.triggered.connect(self._about_dialog.show)
         self._ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
         self._ui.menu_set_display_versions.triggered.connect(self.toggle_display_versions)
@@ -90,16 +93,6 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.menu_clean_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
         self._ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))
 
-    def on_toolbox_changed(self):
-        if self._ui.main_toolbox.currentIndex() == 1:  # package view
-            # hide floating grid buttons
-            self._ui.add_app_link_button.hide()
-            self._ui.add_tab_button.hide()
-        elif self._ui.main_toolbox.currentIndex() == 0:  # grid view
-            # show floating buttons
-            self._ui.add_app_link_button.show()
-            self._ui.add_tab_button.show()
-
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
         try:
@@ -110,43 +103,93 @@ class MainUi(QtWidgets.QMainWindow):
         Logger.remove_qt_logger()
         super().closeEvent(event)
 
+    def reorder_tabs(self):
+        new_list = []
+        for i in range(self._ui.tab_bar.count()):
+            new_list.append(self._ui.tab_bar.widget(i).config_data)
+        self._tabs_info = new_list
+        self.on_config_change()
+
+    def on_toolbox_changed(self):
+        if self._ui.main_toolbox.currentIndex() == 1:  # package view
+            # hide floating grid buttons
+            self._ui.add_app_link_button.hide()
+            self._ui.add_tab_button.hide()
+        elif self._ui.main_toolbox.currentIndex() == 0:  # grid view
+            # show floating buttons
+            self._ui.add_app_link_button.show()
+            self._ui.add_tab_button.show()
+
     def on_tab_context_menu_requested(self, position):
         index = self._ui.tab_bar.tabBar().tabAt(position)
         menu = QtWidgets.QMenu()
+
         rename_action = QtWidgets.QAction("Rename", self)
-        rename_action.setIcon()
+        rename_action.setIcon(QtGui.QIcon(str(self._icons_path / "rename.png")))
         menu.addAction(rename_action)
-        rename_action.triggered.connect(lambda: self.on_tab_rename(index))
+        rename_action.triggered.connect(lambda: self.open_tab_rename_dialog(index))
 
         remove_action = QtWidgets.QAction("Remove", self)
+        remove_action.setIcon(QtGui.QIcon(str(self._icons_path / "delete.png")))
         menu.addAction(remove_action)
-        remove_action.triggered.connect(self.on_tab_remove)
+        remove_action.triggered.connect(lambda: self.on_tab_remove(index))
 
         new_tab_action = QtWidgets.QAction("Add new tab", self)
+        new_tab_action.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
         menu.addAction(new_tab_action)
         new_tab_action.triggered.connect(self.open_new_tab_dialog)
+
         menu.exec_(self.tab_bar.tabBar().mapToGlobal(position))
 
-    @ pyqtSlot()
-    def open_new_tab_dialog(self):
-        self._new_tab_dialog = QtWidgets.QInputDialog(self)
-        pass
+    def open_new_app_link_dialog(self):
+        # call tab on_app_link_add
+        current_tab = self._ui.tab_bar.widget(self._ui.tab_bar.currentIndex())
+        current_tab.open_app_link_add_dialog()
 
-    @ pyqtSlot(int)
-    def on_tab_rename(self, index):
+    @pyqtSlot()
+    def open_new_tab_dialog(self):
+        # call tab on_app_link_add
+        new_tab_dialog = QtWidgets.QInputDialog(self)
+        text, accepted = new_tab_dialog.getText(self, 'Add tab',
+                                                'Enter name:')
+        if accepted:
+            # do nothing on empty text
+            if not text:
+                return
+            # add tab
+            tab_config = TabConfigEntry(text)
+            self._tabs_info.append(tab_config)
+
+            tab = TabAppGrid(self, tab_config, max_columns=self._settings.get(
+                GRID_COLUMNS), max_rows=self._settings.get(GRID_ROWS))
+            self._ui.tab_bar.addTab(tab, text)
+            self.on_config_change()
+
+    @pyqtSlot(int)
+    def open_tab_rename_dialog(self, index):
         tab: TabAppGrid = self._ui.tab_bar.widget(index)
+
         rename_tab_dialog = QtWidgets.QInputDialog(self)
         text, accepted = rename_tab_dialog.getText(self, 'Rename tab',
                                                    'Enter new name:', text=tab.config_data.name)
         if accepted:
             tab.config_data.name = text
             self._ui.tab_bar.setTabText(index, text)
-            self.config_changed.emit()
+            self.on_config_change()
 
-    @ pyqtSlot()
-    def on_tab_remove(self):
-        pass
-        # rename_tab_dialog = QtWidgets.QInputDialog(self)
+    @ pyqtSlot(int)
+    def on_tab_remove(self, index):
+        tab: TabAppGrid = self._ui.tab_bar.widget(index)
+
+        msg = QtWidgets.QMessageBox(parent=self)
+        msg.setWindowTitle("Delete tab")
+        msg.setText("Are you sure, you want to delete this tab\t")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
+        msg.setIcon(QtWidgets.QMessageBox.Question)
+        reply = msg.exec_()
+        if reply == QtWidgets.QMessageBox.Yes:
+            self._tabs_info.remove(tab.config_data)
+            self._ui.tab_bar.removeTab(index)
 
     @ pyqtSlot()
     def open_cleanup_cache_dialog(self):
@@ -200,16 +243,6 @@ class MainUi(QtWidgets.QMainWindow):
         self._settings.set(DISPLAY_APP_CHANNELS, channel_status)
         self.display_channels_updated.emit(channel_status)
 
-    def create_layout(self):
-        """ Creates the tabs and app icons """
-
-        for config_data in self._tabs_info:
-            # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabAppGrid(parent=self, config_data=config_data,
-                             max_columns=self._settings.get(GRID_COLUMNS), max_rows=self._settings.get(GRID_ROWS))
-            # self._tabs.append(tab)
-            self._ui.tab_bar.addTab(tab, config_data.name)
-
     @ pyqtSlot()
     def on_config_change(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
@@ -219,6 +252,11 @@ class MainUi(QtWidgets.QMainWindow):
         #     for app in tab.apps:
         #         app.update_entry(self._settings)
         # self.save_all_configs()
+
+    @ pyqtSlot(str)
+    def write_log(self, text):
+        """ Write the text signaled by the logger """
+        self._ui.console.append(text)
 
     def init_gui(self):
         """ Cleans up ui, reads config file and creates new layout """
@@ -242,14 +280,18 @@ class MainUi(QtWidgets.QMainWindow):
     #     self._ui.listView.setRootIndex(self.fileModel.setRootPath(path))
     #     print(item_name)
 
+    def create_layout(self):
+        """ Creates the tabs and app icons """
+
+        for config_data in self._tabs_info:
+            # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
+            tab = TabAppGrid(parent=self, config_data=config_data,
+                             max_columns=self._settings.get(GRID_COLUMNS), max_rows=self._settings.get(GRID_ROWS))
+            self._ui.tab_bar.addTab(tab, config_data.name)
+
     def _re_init(self):
         """ To be called, when a new config file is loaded """
         for i in range(self._ui.tab_bar.count()):  # delete all tabs
             self._ui.tab_bar.removeTab(i)
         this.conan_worker.finish_working(3)
         self.init_gui()
-
-    @ pyqtSlot(str)
-    def write_log(self, text):
-        """ Write the text signaled by the logger """
-        self._ui.console.append(text)

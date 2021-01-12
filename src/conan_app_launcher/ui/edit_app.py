@@ -5,7 +5,7 @@ from conan_app_launcher.components import AppConfigEntry, run_file
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS, Settings)
 from conan_app_launcher.ui.qt import app_edit
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -19,6 +19,10 @@ class EditAppDialog(QtWidgets.QDialog):
         self._app_link_edited = app_link_edited
         self._ui = app_edit.Ui_Dialog()
         self._ui.setupUi(self)
+
+        self.setModal(True)
+        self.setWindowTitle("Edit App Link")
+        self.setWindowIcon(QtGui.QIcon(str(this.asset_path / "icons" / "edit.png")))
 
         # fill up current info
         self._ui.name_line_edit.setText(self._app_config_data.name)
@@ -37,7 +41,7 @@ class EditAppDialog(QtWidgets.QDialog):
         self.show()
 
     def save_edited_dialog(self):
-        # TODO: write back app info
+        # write back app info
         self._app_config_data.name = self._ui.name_line_edit.text()
         self._app_config_data.conan_ref = self._ui.conan_ref_line_edit.text()
         self._app_config_data.executable = self._ui.exec_path_line_edit.text()

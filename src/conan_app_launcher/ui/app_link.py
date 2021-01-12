@@ -18,10 +18,9 @@ Qt = QtCore.Qt
 class AppLink(QtWidgets.QVBoxLayout):
     app_link_edited = QtCore.pyqtSignal(AppConfigEntry)
 
-    def __init__(self, parent: QtWidgets.QWidget, app: AppConfigEntry, app_link_added, app_link_removed, is_new_link=False):
+    def __init__(self, parent: QtWidgets.QWidget, app: AppConfigEntry, app_link_added, app_link_removed):
         super().__init__(parent)
         self.config_data = app
-        self.is_new_link = is_new_link
         self.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         self._app_name_label = QtWidgets.QLabel(parent)
@@ -30,12 +29,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button = AppButton(parent)
         self._app_link_added = app_link_added
         self._app_link_removed = app_link_removed
-
-        #     self.init(parent)
-
-    # def init(self, parent):
-    #     app = self.config_data
-        # self.setObjectName(parent.objectName() + app.name)  # to find it for tests
 
         # size policies
         self.setSpacing(3)
@@ -69,6 +62,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.addWidget(self._app_channel_cbox)
 
         # connect signals
+        self.app_link_edited.connect(self.on_accept_edit_dialog)
         this.main_window.conan_info_updated.connect(self.update_with_conan_info)
         this.main_window.display_versions_updated.connect(self.update_versions_cbox)
         this.main_window.display_channels_updated.connect(self.update_channels_cbox)
@@ -76,21 +70,12 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_version_cbox.currentIndexChanged.connect(self.version_selected)
         self._app_channel_cbox.currentIndexChanged.connect(self.channel_selected)
 
-        # add right click context menu actions
-        if not self.is_new_link:
-            self._app_button.setContextMenuPolicy(Qt.ActionsContextMenu)
-            add_action = QtWidgets.QAction("Add new app", self)
-            self._app_button.addAction(add_action)
-            add_action.triggered.connect(self.open_edit_dialog)
-            add_action.setIcon(QtGui.QIcon(str(this.asset_path / "icons" / "new_app_icon.png")))
-            edit_action = QtWidgets.QAction("Edit", self)
-            self._app_button.addAction(edit_action)
-            edit_action.triggered.connect(self.open_edit_dialog)
-            remove_action = QtWidgets.QAction("Remove", self)
-            self._app_button.addAction(remove_action)
-            remove_action.triggered.connect(self.remove)
-        else:
-            self._app_button.ungrey_icon()
+        # self._app_button.add_action.triggered.connect(self.open_edit_dialog)
+
+        self._app_button.edit_action.triggered.connect(self.open_edit_dialog)
+
+        self._app_button.remove_action.triggered.connect(self.remove)
+
         # move_r = QtWidgets.QAction("Move Right", self)
         # self._app_button.addAction(move_r)
         # move_l = QtWidgets.QAction("Move Left", self)
@@ -115,15 +100,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         # this.main_window.config_changed.emit()
 
     def on_accept_edit_dialog(self):
-        if self.is_new_link:  # new app link
-            self.is_new_link = False
-            self._app_button.grey_icon()
-            self._app_link_added.emit(self.config_data)
-            # self._tab.config_data.add_app_entry(self.config_data)
-            # self._tab.display_new_app_link()
-        else:
-            self._apply_config()
-        # this.main_window.config_changed.emit()
+        self._app_button.grey_icon()
+        self._app_link_added.emit(self)
+        self._apply_config()
 
     def update_with_conan_info(self):
         # set icon and ungrey if package is available
@@ -160,10 +139,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def on_click(self):
         """ Callback for opening the executable on click """
-        if self.is_new_link:
-            self.open_edit_dialog()
-        else:
-            run_file(self.config_data.executable, self.config_data.is_console_application, self.config_data.args)
+        run_file(self.config_data.executable, self.config_data.is_console_application, self.config_data.args)
 
     def version_selected(self, index):
         if not self._app_version_cbox.isEnabled():

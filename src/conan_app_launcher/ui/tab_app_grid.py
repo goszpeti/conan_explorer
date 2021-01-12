@@ -1,7 +1,5 @@
-from typing import List
-
-
 from PyQt5 import QtCore, QtWidgets
+
 import conan_app_launcher as this
 from conan_app_launcher.components import AppConfigEntry, TabConfigEntry
 from conan_app_launcher.ui.app_link import AppLink
@@ -68,7 +66,7 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
         self.tab_grid_layout.setSpacing(4)
 
-        self.app_link_added.connect(self.on_app_link_remove)
+        self.app_link_added.connect(self.on_app_link_add)
         self.app_link_removed.connect(self.on_app_link_remove)
 
         # self.tab_scroll_area_layout.addLayout(self.tab_grid_layout)
@@ -109,16 +107,21 @@ class TabAppGrid(QtWidgets.QWidget):
     #             current_row += 1
     #     self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
 
-    def on_app_link_add(self):
-        self.is_new_link = False
-        self._app_button.grey_icon()
-        self._tab.config_data.add_app_entry(self._app_info)
-        self._tab.display_new_app_link()
+    def open_app_link_add_dialog(self):
+        app_info = AppConfigEntry()
+        app_link = AppLink(self, app_info, self.app_link_added, self.app_link_removed)
+        app_link.open_edit_dialog()
+
+    def on_app_link_add(self, app_link):
+        current_row = int(len(self.config_data.get_app_entries()) / self.max_columns)  # count from 0
+        current_column = len(self.config_data.get_app_entries()) % self.max_columns  # count from 0 to 3
+
+        self.config_data.add_app_entry(app_link.config_data)
+        self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
         this.main_window.config_changed.emit()
-        # TODO call tab update
 
     def on_app_link_remove(self, app_link: AppLink):
-        self.config_data.remove_app_entry(app_link._app_info)
+        self.config_data.remove_app_entry(app_link.config_data)
         # for i in reversed(range(self.tab_grid_layout.count())):
         #    self.tab_grid_layout.itemAt(i).widget().deleteLater()
         for child in self.tab_scroll_area_widgets.children():
