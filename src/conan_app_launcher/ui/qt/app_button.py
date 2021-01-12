@@ -9,7 +9,7 @@ from . import app_edit
 Qt = QtCore.Qt
 
 
-class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
+class AppButton(QtWidgets.QPushButton):
 
     """ Qt label, which can react on a mouse click """
     # this signal is used to connect to backend functions.
@@ -21,6 +21,8 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
         self._image = image
         self._greyed_out = True  # Must be ungreyed, when available
         self.set_icon(image)
+        self.setFlat(True)
+        self.setIconSize(QtCore.QSize(ICON_SIZE, ICON_SIZE))
 
     def ungrey_icon(self):
         self._greyed_out = False
@@ -45,26 +47,29 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
             image = QtGui.QPixmap(str(self._image)).toImage()
             if self._greyed_out:
                 image = image.convertToFormat(QtGui.QImage.Format_Grayscale8)
-            self.setPixmap(QtGui.QPixmap.fromImage(image).scaled(
-                ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
+            icon = QtGui.QPixmap.fromImage(image).scaled(
+                ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation)
+            # QtGui.QIcon(icon))
+            self._ic = QtGui.QIcon(icon)
+            self.setIcon(self._ic)
 
-    def mousePressEvent(self, event):  # override QPushButton
-        """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
-        if event.button() == Qt.LeftButton:
-            super().mousePressEvent(event)
-            # make the button a little bit smaller to emulate a "clicked" effect - only if ungreyed:
-            if not self._greyed_out:
-                smaller_size = int(ICON_SIZE-(ICON_SIZE/32))
-                self.setPixmap(self.pixmap().scaled(smaller_size, smaller_size,
-                                                    transformMode=Qt.SmoothTransformation))
+    # def mousePressEvent(self, event):  # override QPushButton
+    #     """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
+    #     if event.button() == Qt.LeftButton:
+    #         super().mousePressEvent(event)
+    #         # make the button a little bit smaller to emulate a "clicked" effect - only if ungreyed:
+    #         if not self._greyed_out:
+    #             smaller_size = int(ICON_SIZE-(ICON_SIZE/32))
+    #             self.setPixmap(self.pixmap().scaled(smaller_size, smaller_size,
+    #                                                 transformMode=Qt.SmoothTransformation))
 
-    def mouseReleaseEvent(self, event):  # override QPushButton
-        """ reset size of icon form mousePressEvent """
-        if event.button() == Qt.LeftButton:
-            super().mouseReleaseEvent(event)
-            # need to use the original image here, otherwise the quality degrades over multiple clicks
-            if not self._greyed_out:
-                self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
-                    ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
-            # emit the click signal now, so the click effect plays before
-            self.clicked.emit()
+    # def mouseReleaseEvent(self, event):  # override QPushButton
+    #     """ reset size of icon form mousePressEvent """
+    #     if event.button() == Qt.LeftButton:
+    #         super().mouseReleaseEvent(event)
+    #         # need to use the original image here, otherwise the quality degrades over multiple clicks
+    #         if not self._greyed_out:
+    #             self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
+    #                 ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
+    #         # emit the click signal now, so the click effect plays before
+    #         self.clicked.emit()

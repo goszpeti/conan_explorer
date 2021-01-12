@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 ### Global constants ###
 PROG_NAME = "conan_app_launcher"
-ICON_SIZE = 64
+ICON_SIZE = 60
 
 ### Global variables ###
 # 0: No debug, 1 = debug logging on
@@ -22,7 +22,7 @@ DEBUG_LEVEL = 0
 # paths to find folders - points to the folder of this file
 # must be initialized later, otherwise setup.py can't parse this file
 base_path: Path = Path("NULL")
-default_icon: Path = Path("NULL")
+asset_path: Path = Path("NULL")
 
 # qt_application instance
 qt_app: Optional["QtWidgets.QApplication"] = None

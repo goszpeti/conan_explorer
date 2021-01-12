@@ -39,6 +39,7 @@ class TabAppGrid(QtWidgets.QWidget):
         self.setSizePolicy(sizePolicy)
         self.setGeometry(QtCore.QRect(0, 0, 830, 462))
         self.tab_layout.setContentsMargins(2, 0, 2, 0)
+        self.tab_layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         self.tab_scroll_area.setSizePolicy(sizePolicy)
         self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.tab_scroll_area.setWidgetResizable(True)
@@ -49,23 +50,23 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_scroll_area_widgets.setBaseSize(QtCore.QSize(752, 359))
         self.tab_scroll_area_widgets.setLayoutDirection(Qt.LeftToRight)
 
-        self.tab_grid_layout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
-        self.tab_grid_layout.setColumnMinimumWidth(0, 202)
-        self.tab_grid_layout.setColumnMinimumWidth(1, 202)
-        self.tab_grid_layout.setColumnMinimumWidth(2, 202)
-        self.tab_grid_layout.setColumnMinimumWidth(3, 202)
-        self.tab_grid_layout.setRowMinimumHeight(0, 146)
-        self.tab_grid_layout.setRowMinimumHeight(1, 146)
-        self.tab_grid_layout.setRowMinimumHeight(2, 146)
-        self.tab_grid_layout.setColumnStretch(0, 1)
-        self.tab_grid_layout.setColumnStretch(1, 1)
-        self.tab_grid_layout.setColumnStretch(2, 1)
-        self.tab_grid_layout.setColumnStretch(3, 1)
-        self.tab_grid_layout.setRowStretch(0, 1)
-        self.tab_grid_layout.setRowStretch(1, 1)
-        self.tab_grid_layout.setRowStretch(2, 1)
+        self.tab_grid_layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        self.tab_grid_layout.setColumnMinimumWidth(0, 193)
+        self.tab_grid_layout.setColumnMinimumWidth(1, 193)
+        self.tab_grid_layout.setColumnMinimumWidth(2, 193)
+        self.tab_grid_layout.setColumnMinimumWidth(3, 193)
+        self.tab_grid_layout.setRowMinimumHeight(0, 120)
+        self.tab_grid_layout.setRowMinimumHeight(1, 120)
+        self.tab_grid_layout.setRowMinimumHeight(2, 120)
+        # self.tab_grid_layout.setColumnStretch(0, 1)
+        # self.tab_grid_layout.setColumnStretch(1, 1)
+        # self.tab_grid_layout.setColumnStretch(2, 1)
+        # self.tab_grid_layout.setColumnStretch(3, 1)
+        # self.tab_grid_layout.setRowStretch(0, 1)
+        # self.tab_grid_layout.setRowStretch(1, 1)
+        # self.tab_grid_layout.setRowStretch(2, 1)
         self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
-        self.tab_grid_layout.setSpacing(5)
+        self.tab_grid_layout.setSpacing(4)
 
         self.app_link_added.connect(self.on_app_link_remove)
         self.app_link_removed.connect(self.on_app_link_remove)
@@ -90,23 +91,23 @@ class TabAppGrid(QtWidgets.QWidget):
             if column == self.max_columns:
                 column = 0
                 row += 1
-        self.display_new_app_link(False)
+        # self.display_new_app_link(False)
 
-    def display_new_app_link(self, is_initialized=True):
-        current_row = int(len(self.config_data.get_app_entries()) / self.max_columns)  # count from 0
-        current_column = len(self.config_data.get_app_entries()) % self.max_columns  # count from 1 to 0
+    # def display_new_app_link(self, is_initialized=True):
+    #     current_row = int(len(self.config_data.get_app_entries()) / self.max_columns)  # count from 0
+    #     current_column = len(self.config_data.get_app_entries()) % self.max_columns  # count from 1 to 0
 
-        # only add + button, if max rows is not reached
-        if current_row > self.max_rows:
-            return
-        app_info = AppConfigEntry()
-        app_info.name = "Add new Link"
-        app_info.icon = str(this.base_path / "assets" / "new_app_icon.png")
-        app_link = AppLink(self, app_info, self.app_link_added, self.app_link_removed, is_new_link=True)
-        if not is_initialized:
-            if current_column == 0:
-                current_row += 1
-        self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
+    #     # only add + button, if max rows is not reached
+    #     if current_row > self.max_rows:
+    #         return
+    #     app_info = AppConfigEntry()
+    #     app_info.name = "Add new Link"
+    #     app_info.icon = str(this.base_path / "assets" / "new_app_icon.png")
+    #     app_link = AppLink(self, app_info, self.app_link_added, self.app_link_removed, is_new_link=True)
+    #     if not is_initialized:
+    #         if current_column == 0:
+    #             current_row += 1
+    #     self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
 
     def on_app_link_add(self):
         self.is_new_link = False

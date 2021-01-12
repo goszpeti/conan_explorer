@@ -173,7 +173,7 @@ class AppConfigEntry():
 
         # default icon, until package path is updated
         if not self._icon.is_file():
-            self._icon = this.default_icon
+            self._icon = this.asset_path / "icons" / "default_app_icon.png"
             if new_value:  # user input given -> warning
                 Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
         else:
@@ -268,7 +268,7 @@ def parse_config_file(config_file_path: Path) -> List[TabConfigEntry]:
     with open(str(config_file_path)) as fp:
         try:
             app_config = json.load(fp)
-            with open(this.base_path / "assets" / "config_schema.json") as schema_file:
+            with open(this.asset_path / "config_schema.json") as schema_file:
                 json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
         except BaseException as error:
@@ -304,7 +304,7 @@ def write_config_file(config_file_path: Path, tab_entries: List[TabConfigEntry])
         tabs_data.append(tab_data)
 
     # get last version
-    with open(this.base_path / "assets" / "config_schema.json") as schema_file:
+    with open(this.asset_path / "config_schema.json") as schema_file:
         json_schema = json.load(schema_file)
     version = json_schema.get("properties").get("version").get("enum")[-1]
     app_config: AppConfigType = {"version": version, "tabs": tabs_data}

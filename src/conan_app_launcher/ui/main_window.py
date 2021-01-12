@@ -13,44 +13,90 @@ from conan_app_launcher.settings import (
     LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS, Settings)
 from conan_app_launcher.ui.app_link import AppLink
 from conan_app_launcher.ui.tab_app_grid import TabAppGrid
-#from conan_app_launcher.ui.add_remove_apps import AddRemoveAppsDialog
+# from conan_app_launcher.ui.add_remove_apps import AddRemoveAppsDialog
 from conan_app_launcher.ui.edit_app import EditAppDialog
-
+from conan_app_launcher.ui.about import AboutDialog
 
 Qt = QtCore.Qt
 
 
 class MainUi(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
+    TOOLBOX_GRID_ITEM = 0
+    TOOLBOX_PACKAGES_ITEM = 1
+
     conan_info_updated = QtCore.pyqtSignal()
     config_changed = QtCore.pyqtSignal()
     display_versions_updated = QtCore.pyqtSignal(bool)
     display_channels_updated = QtCore.pyqtSignal(bool)
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
+    _icons_path = None
 
     def __init__(self, settings: Settings):
         super().__init__()
+        self._icons_path = this.asset_path / "icons"
+
         self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
         self._settings = settings
         self._tabs_info: List[TabAppGrid] = []
         self._about_dialog = AboutDialog(self)
         self._new_tab = QtWidgets.QTabWidget()
 
+        # add own widgets
+        self._ui.add_app_link_button = QtWidgets.QPushButton(self)
+        self._ui.add_app_link_button.setGeometry(765, 452, 44, 44)
+        self._ui.add_app_link_button.setIconSize(QtCore.QSize(44, 44))
+
+        self._ui.add_tab_button = QtWidgets.QPushButton(self)
+        self._ui.add_tab_button.setGeometry(802, 50, 28, 28)
+        self._ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
+
+        self.load_icons()
+
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self)
         self._ui.console.setFontPointSize(10)
+
+        self.config_changed.connect(self.on_config_change)
+        self.new_message_logged.connect(self.write_log)
 
         self._ui.menu_about_action.triggered.connect(self._about_dialog.show)
         self._ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
         self._ui.menu_set_display_versions.triggered.connect(self.toggle_display_versions)
         self._ui.menu_set_display_channels.triggered.connect(self.toogle_display_channels)
         self._ui.menu_clean_cache.triggered.connect(self.open_cleanup_cache_dialog)
-
-        self.config_changed.connect(self.on_config_change)
-        self.new_message_logged.connect(self.write_log)
-
         self._ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
+        self._ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
+
+    # def resizeEvent(self, event: "QResizeEvent"):  # override QMainWindow
+        # TODO implement moving non layout buttons
+    #    super().resizeEvent(event)
+
+    def load_icons(self):
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(str(self._icons_path / "grid.png")),
+                       QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self._ui.main_toolbox.setItemIcon(self.TOOLBOX_GRID_ITEM, icon)
+
+        icon.addPixmap(QtGui.QPixmap(str(self._icons_path / "search_packages.png")),
+                       QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self._ui.main_toolbox.setItemIcon(self.TOOLBOX_PACKAGES_ITEM, icon)
+
+        self._ui.add_app_link_button.setIcon(QtGui.QIcon(str(self._icons_path / "add_link.png")))
+        self._ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
+        # menu
+        self._ui.menu_clean_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
+
+    def on_toolbox_changed(self):
+        if self._ui.main_toolbox.currentIndex() == 1:  # package view
+            # hide floating grid buttons
+            self._ui.add_app_link_button.hide()
+            self._ui.add_tab_button.hide()
+        elif self._ui.main_toolbox.currentIndex() == 0:  # grid view
+            # show floating buttons
+            self._ui.add_app_link_button.show()
+            self._ui.add_tab_button.show()
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
@@ -66,6 +112,7 @@ class MainUi(QtWidgets.QMainWindow):
         index = self._ui.tab_bar.tabBar().tabAt(position)
         menu = QtWidgets.QMenu()
         rename_action = QtWidgets.QAction("Rename", self)
+        rename_action.setIcon()
         menu.addAction(rename_action)
         rename_action.triggered.connect(lambda: self.on_tab_rename(index))
 
@@ -78,12 +125,12 @@ class MainUi(QtWidgets.QMainWindow):
         new_tab_action.triggered.connect(self.open_new_tab_dialog)
         menu.exec_(self.tab_bar.tabBar().mapToGlobal(position))
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def open_new_tab_dialog(self):
         self._new_tab_dialog = QtWidgets.QInputDialog(self)
         pass
 
-    @pyqtSlot(int)
+    @ pyqtSlot(int)
     def on_tab_rename(self, index):
         tab: TabAppGrid = self._ui.tab_bar.widget(index)
         rename_tab_dialog = QtWidgets.QInputDialog(self)
@@ -94,12 +141,12 @@ class MainUi(QtWidgets.QMainWindow):
             self._ui.tab_bar.setTabText(index, text)
             self.config_changed.emit()
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def on_tab_remove(self):
         pass
-        #rename_tab_dialog = QtWidgets.QInputDialog(self)
+        # rename_tab_dialog = QtWidgets.QInputDialog(self)
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         conan = ConanApi()
@@ -123,7 +170,7 @@ class MainUi(QtWidgets.QMainWindow):
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = Path.home()
@@ -137,14 +184,14 @@ class MainUi(QtWidgets.QMainWindow):
             self._settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
             self._re_init()
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def toggle_display_versions(self):
         """ Reads the current menu setting, sevaes it and updates the gui """
         version_status = self._ui.menu_set_display_versions.isChecked()
         self._settings.set(DISPLAY_APP_VERSIONS, version_status)
         self.display_versions_updated.emit(version_status)
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def toogle_display_channels(self):
         """ Reads the current menu setting, sevaes it and updates the gui """
         channel_status = self._ui.menu_set_display_channels.isChecked()
@@ -161,12 +208,12 @@ class MainUi(QtWidgets.QMainWindow):
                              max_columns=self._settings.get(GRID_COLUMNS), max_rows=self._settings.get(GRID_ROWS))
             # self._tabs.append(tab)
             self._ui.tab_bar.addTab(tab, config_data.name)
-        #self._ui.tab_bar.addTab(self._new_tab, "+")
+        # self._ui.tab_bar.addTab(self._new_tab, "+")
         # self._ui.tab_bar.tabBarClicked.connect(self.open_new_tab_dialog)
         # add right click context menu actions
         # "New tab after this tab"
 
-    @pyqtSlot()
+    @ pyqtSlot()
     def on_config_change(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
         write_config_file(Path(self._settings.get(LAST_CONFIG_FILE)), self._tabs_info)
@@ -186,11 +233,10 @@ class MainUi(QtWidgets.QMainWindow):
 
         this.conan_worker = ConanWorker(self._tabs_info, self.conan_info_updated)
         self.create_layout()
+        # always show the first tab first
+        self._ui.tab_bar.setCurrentIndex(0)
 
-        if self._ui.tab_bar.count() > 1:  # set the default tab to the first user defined tab
-            self._ui.tab_bar.setCurrentIndex(1)
-
-    @pyqtSlot(int)
+    @ pyqtSlot(int)
     def on_selection_change(self, index: int):
         view_index = self._ui.treeView.selectionModel().selectedIndexes()[0]
         proxy_index = self.proxy.mapToSource(view_index)
@@ -204,45 +250,7 @@ class MainUi(QtWidgets.QMainWindow):
         this.conan_worker.finish_working(3)
         self.init_gui()
 
-    @pyqtSlot(str)
+    @ pyqtSlot(str)
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self._ui.console.append(text)
-
-
-class AboutDialog(QtWidgets.QDialog):
-    """ Defines Help->About Dialog """
-    html_content = """
-    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-    <html><head><meta name="qrichtext" content="1" /><style type="text/css">
-    p, li { white-space: pre-wrap; }
-    </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
-    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:10pt;">Conan App Launcher ${version}</span></p>
-    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:10pt;">Copyright (C), 2021, Péter Gosztolya and contributors.</span></p>
-    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><a href="https://github.com/goszpeti/conan_app_launcher"><span style=" font-size:10pt; text-decoration: underline; color:#0000ff;">https://github.com/goszpeti/conan_app_launcher</span></a></p></body></html>
-    """
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.setWindowTitle("About")
-        self.setModal(True)
-        self.resize(430, 280)
-        ok_button = QtWidgets.QDialogButtonBox.Ok
-
-        icon = QtGui.QIcon(str(this.base_path / "assets" / "icon.ico"))
-        self._logo_label = QtWidgets.QLabel(self)
-        self._logo_label.setPixmap(icon.pixmap(100, 100))
-        self._text = QtWidgets.QTextBrowser(self)
-        self._text.setStyleSheet("background-color: #F0F0F0;")
-        self._text.setHtml(self.html_content.replace("${version}", this.__version__))
-        self._text.setFrameShape(QtWidgets.QFrame.NoFrame)
-
-        self._button_box = QtWidgets.QDialogButtonBox(ok_button)
-        self._button_box.accepted.connect(self.accept)
-        self._button_box.rejected.connect(self.reject)
-
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self._logo_label)
-        self.layout.addWidget(self._text)
-        self.layout.addWidget(self._button_box)
-        self.setLayout(self.layout)

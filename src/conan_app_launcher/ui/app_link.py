@@ -8,7 +8,7 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
 from conan_app_launcher.ui.qt.app_button import AppButton
 # from conan_app_launcher.ui.tab_app_grid import TabAppGrid
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from conan_app_launcher.ui.edit_app import EditAppDialog
 
 # define Qt so we can use it like the namespace in C++
@@ -22,6 +22,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         super().__init__(parent)
         self.config_data = app
         self.is_new_link = is_new_link
+        self.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         self._app_name_label = QtWidgets.QLabel(parent)
         self._app_version_cbox = QtWidgets.QComboBox(parent)
@@ -37,30 +38,34 @@ class AppLink(QtWidgets.QVBoxLayout):
         # self.setObjectName(parent.objectName() + app.name)  # to find it for tests
 
         # size policies
-        self.setSpacing(5)
-        self.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self.setSpacing(3)
+        self.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
                                             QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
         self._app_button.setSizePolicy(size_policy)
-        self._app_button.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        #self._app_button.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
 
         # add sub widgets
         self.addWidget(self._app_button)
         # self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setAlignment(Qt.AlignCenter)
+        self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setText(app.name)
+
         self.addWidget(self._app_name_label)
 
         # self._app_version_cbox.addItem(app.conan_ref.version)
         self._app_version_cbox.setDisabled(True)
         self._app_version_cbox.setDuplicatesEnabled(False)
+        self._app_version_cbox.setSizePolicy(size_policy)
         self.addWidget(self._app_version_cbox)
 
         # self._app_channel_cbox.addItem(app.conan_ref.channel)
         self._app_channel_cbox.setDisabled(True)
         self._app_channel_cbox.setDuplicatesEnabled(False)
+        self._app_channel_cbox.setSizePolicy(size_policy)
         self.addWidget(self._app_channel_cbox)
 
         # connect signals
@@ -74,6 +79,10 @@ class AppLink(QtWidgets.QVBoxLayout):
         # add right click context menu actions
         if not self.is_new_link:
             self._app_button.setContextMenuPolicy(Qt.ActionsContextMenu)
+            add_action = QtWidgets.QAction("Add new app", self)
+            self._app_button.addAction(add_action)
+            add_action.triggered.connect(self.open_edit_dialog)
+            add_action.setIcon(QtGui.QIcon(str(this.asset_path / "icons" / "new_app_icon.png")))
             edit_action = QtWidgets.QAction("Edit", self)
             self._app_button.addAction(edit_action)
             edit_action.triggered.connect(self.open_edit_dialog)

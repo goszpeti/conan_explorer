@@ -152,8 +152,8 @@ def testIconEval(base_fixture, capsys, tmp_path):
     import conan_app_launcher as this
 
     # copy icons to tmp_path to fake package path
-    copy_file(this.base_path / "assets" / "icon.ico", tmp_path)
-    copy_file(this.default_icon, tmp_path)
+    copy_file(this.asset_path / "icon.ico", tmp_path)
+    copy_file(this.asset_path / "default_app_icon.png", tmp_path)
 
     # relative to package with // notation
     app_data = {"name": "AppName", "icon": "//icon.ico", "executable": sys.executable}
@@ -176,14 +176,14 @@ def testIconEval(base_fixture, capsys, tmp_path):
     captured = capsys.readouterr()
     assert "ERROR" in captured.err
     assert "Can't find icon" in captured.err
-    assert app.icon == this.default_icon
+    assert app.icon == this.asset_path / "default_app_icon.png"
 
     # extract icon
     app.icon = ""
     if platform.system() == "Windows":
         assert app.icon == Path(tempfile.gettempdir()) / (str(Path(sys.executable).name) + ".png")
     elif platform.system() == "Linux":
-        assert app.icon == this.default_icon
+        assert app.icon == this.asset_path / "default_app_icon.png"
 
 
 def testOptionsEval(base_fixture):

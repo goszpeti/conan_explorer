@@ -44,7 +44,7 @@ def main():
                                        "stderr-" + this.PROG_NAME), "w")
     # init logger first
     this.base_path = Path(__file__).absolute().parent
-    this.default_icon: Path = this.base_path / "assets" / "default_app_icon.png"
+    this.asset_path: Path = this.base_path / "assets"
     logger = Logger()
 
     # apply Qt attributes (only at init possible)
@@ -54,7 +54,17 @@ def main():
     # start Qt app and ui
     if not this.qt_app:
         this.qt_app = QtWidgets.QApplication([])
-    icon = QtGui.QIcon(str(this.base_path / "assets" / "icon.ico"))
+    icon = QtGui.QIcon(str(this.asset_path / "icons" / "icon.ico"))
+
+    # font_file = r"C:\sw-dev\159687-interface-icon-assets\font\Flaticon.ttf"
+    # font_id = QtGui.QFontDatabase.addApplicationFont(str(font_file))
+    # if font_id != -1:
+    #     font_db = QtGui.QFontDatabase()
+    #     font_styles = font_db.styles("Flaticon")
+    #     font_families = QtGui.QFontDatabase.applicationFontFamilies(font_id)
+    #     for font_family in font_families:
+    #         font = font_db.font(font_family, font_styles[0], 10)
+    #     this.qt_app.setFont(font)
 
     settings_file_path = Path.home() / ".cal_config"
     settings = Settings(ini_file=settings_file_path)
