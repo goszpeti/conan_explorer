@@ -50,6 +50,7 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.add_tab_button = QtWidgets.QPushButton(self)
         self._ui.add_tab_button.setGeometry(802, 50, 28, 28)
         self._ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
+        self._ui.tab_bar.setMovable(True)
 
         self.load_icons()
 
@@ -87,6 +88,7 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
         # menu
         self._ui.menu_clean_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
+        self._ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))
 
     def on_toolbox_changed(self):
         if self._ui.main_toolbox.currentIndex() == 1:  # package view
@@ -200,7 +202,6 @@ class MainUi(QtWidgets.QMainWindow):
 
     def create_layout(self):
         """ Creates the tabs and app icons """
-        self._ui.tab_bar.setMovable(True)
 
         for config_data in self._tabs_info:
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
@@ -208,10 +209,6 @@ class MainUi(QtWidgets.QMainWindow):
                              max_columns=self._settings.get(GRID_COLUMNS), max_rows=self._settings.get(GRID_ROWS))
             # self._tabs.append(tab)
             self._ui.tab_bar.addTab(tab, config_data.name)
-        # self._ui.tab_bar.addTab(self._new_tab, "+")
-        # self._ui.tab_bar.tabBarClicked.connect(self.open_new_tab_dialog)
-        # add right click context menu actions
-        # "New tab after this tab"
 
     @ pyqtSlot()
     def on_config_change(self):
@@ -236,17 +233,19 @@ class MainUi(QtWidgets.QMainWindow):
         # always show the first tab first
         self._ui.tab_bar.setCurrentIndex(0)
 
-    @ pyqtSlot(int)
-    def on_selection_change(self, index: int):
-        view_index = self._ui.treeView.selectionModel().selectedIndexes()[0]
-        proxy_index = self.proxy.mapToSource(view_index)
-        item_name = self.model.fileName(proxy_index)
-        path = self.model.fileInfo(view_index).dir().absolutePath()
-        self._ui.listView.setRootIndex(self.fileModel.setRootPath(path))
-        print(item_name)
+    # @ pyqtSlot(int)
+    # def on_selection_change(self, index: int):
+    #     view_index = self._ui.treeView.selectionModel().selectedIndexes()[0]
+    #     proxy_index = self.proxy.mapToSource(view_index)
+    #     item_name = self.model.fileName(proxy_index)
+    #     path = self.model.fileInfo(view_index).dir().absolutePath()
+    #     self._ui.listView.setRootIndex(self.fileModel.setRootPath(path))
+    #     print(item_name)
 
     def _re_init(self):
         """ To be called, when a new config file is loaded """
+        for i in range(self._ui.tab_bar.count()):  # delete all tabs
+            self._ui.tab_bar.removeTab(i)
         this.conan_worker.finish_working(3)
         self.init_gui()
 

@@ -12,7 +12,7 @@ class AboutDialog(QtWidgets.QDialog):
     <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:10pt;">Conan App Launcher ${version}</span></p>
     <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:10pt;">Copyright (C), 2021, Péter Gosztolya and contributors.</span></p>
     <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><a href="https://github.com/goszpeti/conan_app_launcher"><span style=" font-size:10pt; text-decoration: underline; color:#0000ff;">https://github.com/goszpeti/conan_app_launcher</span></a></p>
-    <p style=" margin-top:8px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Icons by <a href="https://icons8.de"><span style=" text-decoration: underline; color:#0000ff;">https://icons8.de</span></a>.</p></body></html>
+    <p style=" margin-top:8px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Icons by <a href="https://icons8.com"><span style=" text-decoration: underline; color:#0000ff;">https://icons8.com</span></a>.</p></body></html>
     """
 
     def __init__(self, parent):
