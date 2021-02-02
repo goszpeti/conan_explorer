@@ -19,16 +19,12 @@ class TabAppGrid(QtWidgets.QWidget):
         self.config_data = config_data
         self.max_rows = max_rows
         self.max_columns = max_columns
-        #self.conan_info_updated = conan_info_updated
         self.tab_layout = QtWidgets.QVBoxLayout(self)
         self.tab_scroll_area = QtWidgets.QScrollArea(self)
         self.tab_scroll_area_widgets = QtWidgets.QWidget(self.tab_scroll_area)
         self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.config_data.name)
         self.tab_grid_layout = QtWidgets.QGridLayout(self.tab_scroll_area_widgets)  # self.tab_scroll_area
-        #self.tab_scroll_area_layout = QtWidgets.QVBoxLayout(self.tab_scroll_area_widgets)
         self.setObjectName("tab_" + self.config_data.name)
-
-        #self.tab_scroll_area_layout.setContentsMargins(0, 0, 0, 0)
 
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -56,26 +52,15 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setRowMinimumHeight(0, 120)
         self.tab_grid_layout.setRowMinimumHeight(1, 120)
         self.tab_grid_layout.setRowMinimumHeight(2, 120)
-        # self.tab_grid_layout.setColumnStretch(0, 1)
-        # self.tab_grid_layout.setColumnStretch(1, 1)
-        # self.tab_grid_layout.setColumnStretch(2, 1)
-        # self.tab_grid_layout.setColumnStretch(3, 1)
-        # self.tab_grid_layout.setRowStretch(0, 1)
-        # self.tab_grid_layout.setRowStretch(1, 1)
-        # self.tab_grid_layout.setRowStretch(2, 1)
         self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
         self.tab_grid_layout.setSpacing(4)
 
         self.app_link_added.connect(self.on_app_link_add)
         self.app_link_removed.connect(self.on_app_link_remove)
 
-        # self.tab_scroll_area_layout.addLayout(self.tab_grid_layout)
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.tab_layout.addWidget(self.tab_scroll_area)
         self.add_all_app_links()
-
-        # this.main_window.config_changed.connect(self.display_new_app_link)
-        # self.conan_info_updated.connect(self.update)
 
     def add_all_app_links(self):
         row = 0
@@ -89,23 +74,6 @@ class TabAppGrid(QtWidgets.QWidget):
             if column == self.max_columns:
                 column = 0
                 row += 1
-        # self.display_new_app_link(False)
-
-    # def display_new_app_link(self, is_initialized=True):
-    #     current_row = int(len(self.config_data.get_app_entries()) / self.max_columns)  # count from 0
-    #     current_column = len(self.config_data.get_app_entries()) % self.max_columns  # count from 1 to 0
-
-    #     # only add + button, if max rows is not reached
-    #     if current_row > self.max_rows:
-    #         return
-    #     app_info = AppConfigEntry()
-    #     app_info.name = "Add new Link"
-    #     app_info.icon = str(this.base_path / "assets" / "new_app_icon.png")
-    #     app_link = AppLink(self, app_info, self.app_link_added, self.app_link_removed, is_new_link=True)
-    #     if not is_initialized:
-    #         if current_column == 0:
-    #             current_row += 1
-    #     self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
 
     def open_app_link_add_dialog(self):
         app_info = AppConfigEntry()

@@ -17,10 +17,12 @@ Qt = QtCore.Qt
 
 class AppLink(QtWidgets.QVBoxLayout):
     app_link_edited = QtCore.pyqtSignal(AppConfigEntry)
+    conan_info_updated = QtCore.pyqtSignal()
 
     def __init__(self, parent: QtWidgets.QWidget, app: AppConfigEntry, app_link_added, app_link_removed):
         super().__init__(parent)
         self.config_data = app
+        self.config_data.gui_update_signal = self.conan_info_updated
         self.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         self._app_name_label = QtWidgets.QLabel(parent)
@@ -38,11 +40,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
         self._app_button.setSizePolicy(size_policy)
-        #self._app_button.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
 
         # add sub widgets
         self.addWidget(self._app_button)
-        # self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setAlignment(Qt.AlignCenter)
         self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setText(app.name)
@@ -63,12 +63,13 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         # connect signals
         self.app_link_edited.connect(self.on_accept_edit_dialog)
-        this.main_window.conan_info_updated.connect(self.update_with_conan_info)
-        this.main_window.display_versions_updated.connect(self.update_versions_cbox)
-        this.main_window.display_channels_updated.connect(self.update_channels_cbox)
+        # TODO
+        self.conan_info_updated.connect(self.update_with_conan_info)
+        # this.main_window.display_versions_updated.connect(self.update_versions_cbox)
+        # this.main_window.display_channels_updated.connect(self.update_channels_cbox)
         self._app_button.clicked.connect(self.on_click)
-        self._app_version_cbox.currentIndexChanged.connect(self.version_selected)
-        self._app_channel_cbox.currentIndexChanged.connect(self.channel_selected)
+        self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
+        self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
 
         # self._app_button.add_action.triggered.connect(self.open_edit_dialog)
 
@@ -141,7 +142,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         """ Callback for opening the executable on click """
         run_file(self.config_data.executable, self.config_data.is_console_application, self.config_data.args)
 
-    def version_selected(self, index):
+    def on_version_selected(self, index):
         if not self._app_version_cbox.isEnabled():
             return
         if index == -1:  # on clear
@@ -157,7 +158,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.config_data.channel = self.config_data.INVALID_DESCR
         self.config_data.version = self._app_version_cbox.currentText()
 
-    def channel_selected(self, index):
+    def on_channel_selected(self, index):
         if not self._app_channel_cbox.isEnabled():
             return
         if index == -1:

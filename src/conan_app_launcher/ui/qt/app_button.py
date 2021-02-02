@@ -41,7 +41,7 @@ class AppButton(QtWidgets.QPushButton):
         self.remove_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.menu.addAction(self.remove_action)
 
-        self.installEventFilter(self)
+        # self.installEventFilter(self)
         self.setWindowFlags(flags)
 
     def ungrey_icon(self):
@@ -68,10 +68,33 @@ class AppButton(QtWidgets.QPushButton):
             self._ic = QtGui.QIcon(icon)
             self.setIcon(self._ic)
 
-    def eventFilter(self, source, event):  # pylint: disable=invalid-name
+    def mouseReleaseEvent(self, event):  # pylint: disable=invalid-name
         """ Right click context menu for disabled button """
-        if event.type() == QtCore.QEvent.MouseButtonPress:
-            # works currently with overriding the motion sensor
-            if event.button() == Qt.RightButton:
-                self.menu.exec_(event.globalPos())
-        return super().eventFilter(source, event)
+        # if event.type() == QtCore.QEvent.MouseButtonPress:
+        # works currently with overriding the motion sensor
+        if event.button() == Qt.RightButton:
+            self.menu.exec_(event.globalPos())
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit()
+        return super().mouseReleaseEvent(event)
+
+    # def mousePressEvent(self, event):  # override QPushButton
+    #     """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
+    #     if event.button() == Qt.LeftButton:
+    #         super().mousePressEvent(event)
+    #         # make the button a little bit smaller to emulate a "clicked" effect - only if ungreyed:
+    #         if not self._greyed_out:
+    #             smaller_size = int(ICON_SIZE-(ICON_SIZE/32))
+    #             self.setPixmap(self.pixmap().scaled(smaller_size, smaller_size,
+    #                                                 transformMode=Qt.SmoothTransformation))
+
+    # def mouseReleaseEvent(self, event):  # override QPushButton
+    #     """ reset size of icon form mousePressEvent """
+    #     if event.button() == Qt.LeftButton:
+    #         super().mouseReleaseEvent(event)
+    #         # need to use the original image here, otherwise the quality degrades over multiple clicks
+    #         if not self._greyed_out:
+    #             self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
+    #                 ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
+    #         # emit the click signal now, so the click effect plays before
+    #         self.clicked.emit()

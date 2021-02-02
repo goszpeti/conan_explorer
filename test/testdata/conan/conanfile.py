@@ -1,4 +1,6 @@
 from conans import ConanFile
+import platform
+import os
 
 
 class Example(ConanFile):
@@ -8,7 +10,15 @@ class Example(ConanFile):
     default_channel = "stable"
 
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
+    short_paths = True
+
+    def package(self):
+        # repackage some executable
+        if platform.system() == "Windows":
+            self.copy("procexp.exe", dst="bin")  # "notepad.exe", src=os.getenv("WINDIR"), dst="bin")
 
     def package_id(self):
         self.info.settings.build_type = "Any"
+        self.info.settings.compiler = "ANYCOMPILER"
         self.info.settings.compiler.runtime = "ANY"

@@ -70,7 +70,7 @@ def main():
     settings = Settings(ini_file=settings_file_path)
 
     this.main_window = MainUi(settings)
-    this.main_window.init_gui()
+    this.main_window.load_tabs()
     this.main_window.setWindowIcon(icon)
     this.main_window.show()
 

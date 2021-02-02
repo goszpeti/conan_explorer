@@ -3,6 +3,7 @@ import platform
 import jsonschema
 import tempfile
 
+from PyQt5 import QtCore
 from pathlib import Path
 from typing import List, Dict, Optional
 from conans.model.ref import ConanFileReference
@@ -53,7 +54,8 @@ class AppConfigEntry():
     INVALID_DESCR = "NA"
     INVALID_REF = "Invalid/NA@NA/NA"
 
-    def __init__(self, app_data: AppType = None):  # , config_file_path: Path = None):
+    # , config_file_path: Path = None):
+    def __init__(self, app_data: AppType = None):
         if app_data is None:
             app_data = {"name": "", "conan_ref": self.INVALID_REF, "executable": "", "icon": "",
                         "console_application": False, "args": "", "conan_options": []}
@@ -65,6 +67,7 @@ class AppConfigEntry():
         self._conan_options = {}
         self._executable = Path("NULL")
         self._icon = Path("NULL")
+        self.gui_update_signal = None
 
         # Init values with validation, which can be preloaded
         self.icon = self.app_data.get("icon", "")
@@ -214,12 +217,19 @@ class AppConfigEntry():
         self.package_folder = package_folder
 
         # use setter to reevaluate
-        self.icon = self.app_data.get("icon", "")
         self.executable = self.app_data.get("executable", "")
+        # icon needs executable
+        self.icon = self.app_data.get("icon", "")
+
+        # TODO call gui update
+        if self.gui_update_signal:
+            self.gui_update_signal.emit()
 
     def set_available_packages(self, available_refs: List[ConanFileReference]):
         """ Callback when conan operation is done and paths can be validated"""
         self._available_refs = available_refs
+        if self.gui_update_signal:
+            self.gui_update_signal.emit()
 
 
 class TabConfigEntry():
@@ -235,6 +245,7 @@ class TabConfigEntry():
         self._app_entries.append(app_entry)
 
     def remove_app_entry(self, app_entry: AppConfigEntry):
+        """ Remove an AppConfigEntry object from the tabs layout """
         self._app_entries.remove(app_entry)
 
     def get_app_entries(self) -> List[AppConfigEntry]:

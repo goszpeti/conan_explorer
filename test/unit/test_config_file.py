@@ -5,12 +5,6 @@ import platform
 from distutils.file_util import copy_file
 from pathlib import Path
 
-
-try:
-    from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
-
 from conan_app_launcher.components import parse_config_file, write_config_file, AppConfigEntry
 
 

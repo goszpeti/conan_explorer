@@ -13,6 +13,7 @@ from conan_app_launcher.settings import (
     LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS, Settings)
 from conan_app_launcher.ui.app_link import AppLink
 from conan_app_launcher.ui.tab_app_grid import TabAppGrid
+from conan_app_launcher.ui.local_packages import CustomProxyModel
 # from conan_app_launcher.ui.add_remove_apps import AddRemoveAppsDialog
 from conan_app_launcher.ui.edit_app import EditAppDialog
 from conan_app_launcher.ui.about import AboutDialog
@@ -72,10 +73,36 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
         self._ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
+        self.load_tabs()
 
     # def resizeEvent(self, event: "QResizeEvent"):  # override QMainWindow
         # TODO implement moving non layout buttons
     #    super().resizeEvent(event)
+
+        # TODO display conaninfo.txt on the right
+        #self.model = QtWidgets.QFileSystemModel()
+        # self.model.setRootPath(r"C:\Users\goszp\.conan\data")
+
+        # dirModel -> setFilter(QDir: : NoDotAndDotDot |
+        #                       QDir:: AllDirs);
+        self.proxy = CustomProxyModel()
+        self.proxy.setRootPath(r"C:\Users\goszp\.conan\data")
+
+        # self.proxy.setSourceModel(self.model)
+        # self.model_index = self.model.index(self.model.rootDirectory().absolutePath())
+        # print(self.model.rootDirectory().absolutePath())
+        # self.proxy_index = self.proxy.mapFromSource(self.model_index)
+        self._ui.package_view.setModel(self.proxy)
+        self._ui.package_view.setRootIndex(self.proxy.index(self.proxy.rootDirectory().absolutePath()))
+
+        # self._ui.package_view.clicked.connect(self.on_click)
+        self._ui.package_view.setColumnHidden(1, True)
+        self._ui.package_view.setColumnHidden(2, True)
+        self._ui.package_view.setColumnWidth(0, 310)
+        # self._ui.package_view.setRootIsDecorated(False)
+        # self._ui.package_view.setItemsExpandable(False)
+        self._ui.package_view.selectionModel().selectionChanged.connect(
+            self.on_selection_change)
 
     def load_icons(self):
         icon = QtGui.QIcon()
@@ -258,7 +285,7 @@ class MainUi(QtWidgets.QMainWindow):
         """ Write the text signaled by the logger """
         self._ui.console.append(text)
 
-    def init_gui(self):
+    def load_tabs(self):
         """ Cleans up ui, reads config file and creates new layout """
         if self._ui.tab_bar.count() > 0:  # remove the default tab
             self._ui.tab_bar.removeTab(0)
@@ -266,22 +293,7 @@ class MainUi(QtWidgets.QMainWindow):
         if config_file_path.is_file():  # escape error log on first opening
             self._tabs_info = parse_config_file(config_file_path)
 
-        this.conan_worker = ConanWorker(self._tabs_info, self.conan_info_updated)
-        self.create_layout()
-        # always show the first tab first
-        self._ui.tab_bar.setCurrentIndex(0)
-
-    # @ pyqtSlot(int)
-    # def on_selection_change(self, index: int):
-    #     view_index = self._ui.treeView.selectionModel().selectedIndexes()[0]
-    #     proxy_index = self.proxy.mapToSource(view_index)
-    #     item_name = self.model.fileName(proxy_index)
-    #     path = self.model.fileInfo(view_index).dir().absolutePath()
-    #     self._ui.listView.setRootIndex(self.fileModel.setRootPath(path))
-    #     print(item_name)
-
-    def create_layout(self):
-        """ Creates the tabs and app icons """
+        this.conan_worker = ConanWorker(self._tabs_info)
 
         for config_data in self._tabs_info:
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
@@ -289,9 +301,27 @@ class MainUi(QtWidgets.QMainWindow):
                              max_columns=self._settings.get(GRID_COLUMNS), max_rows=self._settings.get(GRID_ROWS))
             self._ui.tab_bar.addTab(tab, config_data.name)
 
+        # always show the first tab first
+        self._ui.tab_bar.setCurrentIndex(0)
+
+    # @pyqtSlot(int)
+    def on_selection_change(self):  # , index: int):
+        # change folder in file view
+        view_index = self._ui.package_view.selectionModel().selectedIndexes()[0]
+        proxy_index = self.proxy.mapToSource(view_index)
+        item_name = self.model.fileName(proxy_index)
+        # TODO discover upstream, if in package
+        path = self.model.fileInfo(proxy_index).absoluteFilePath()
+        c_p = Path(path) / "conaninfo.txt"
+        if c_p.is_file():
+            text = ""
+            with open(c_p, "r") as fp:
+                text = fp.read()
+            self.package_info.setText(text)
+
     def _re_init(self):
         """ To be called, when a new config file is loaded """
         for i in range(self._ui.tab_bar.count()):  # delete all tabs
             self._ui.tab_bar.removeTab(i)
         this.conan_worker.finish_working(3)
-        self.init_gui()
+        self.load_tabs()

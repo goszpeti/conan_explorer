@@ -4,8 +4,7 @@ import conan_app_launcher as this
 from conan_app_launcher.components import AppConfigEntry, run_file
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS, Settings)
-from conan_app_launcher.ui.qt import app_edit
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui, uic
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -17,8 +16,7 @@ class EditAppDialog(QtWidgets.QDialog):
         super().__init__(parent=parent, flags=flags)
         self._app_config_data = app_config_data
         self._app_link_edited = app_link_edited
-        self._ui = app_edit.Ui_Dialog()
-        self._ui.setupUi(self)
+        self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_edit.ui", baseinstance=self)
 
         self.setModal(True)
         self.setWindowTitle("Edit App Link")

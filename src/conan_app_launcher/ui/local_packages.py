@@ -1,53 +1,87 @@
 from PyQt5 import QtCore, QtWidgets, QtGui, uic
+from pathlib import Path
 
 
-class CustomProxyModel(QtCore.QSortFilterProxyModel):
+class CustomProxyModel(QtWidgets.QFileSystemModel):  # QtCore.QSortFilterProxyModel):
+    FILTERED_ITEMS = [".lock", ".count", "metadata.json",
+                      "conaninfo.txt", "conanmanifest.txt"  # TODO ??
+                      ]
+
     def __init__(self):
-        super().__init__()
         # self.setDynamicSortFilter(True)
+        # self.setRecursiveFilteringEnabled(True)
+        # self.setFilterKeyColumn(0)
+        #self = QtWidgets.QFileSystemModel(self.sourceModel())
+        super().__init__()
+        self.base_path = r"C:\Users\goszp\.conan\data"
+        self.short_path = r"C:\.conan"
+        self.short_path_model = QtWidgets.QFileSystemModel()
+        self.short_path_model.setRootPath(self.short_path)
 
-    def rowCount(self, index):
-        model_index = self.mapToSource(index)
-        if not model_index.isValid():
-            return 0
-        new_rc = self.sourceModel().rowCount(model_index) + 1
-        # self.insertRows(0)
-        return new_rc
+    def is_short_path_package_dir(self, model_index):
+        path = self.fileInfo(model_index).absoluteFilePath()
+        c_p = Path(path) / ".conan_link"
 
-    def insertRows(self, position, rows=1, parent=QtCore.QModelIndex()):
-        self.beginInsertRows(parent, position, position + rows - 1)
-        for row in range(rows):
-            self.insertRows(position, row, parent)
-            self.setData(parent, "AWESOME")
-            print('AWESOME VIRTUAL ROW')
-        self.endInsertRows()
+        if c_p.is_file():
+            with c_p.open("r") as fp:
+                return fp.read()
+        return ""
+
+    # def index(self, row, column, parent):
+    #     index = super().index(row, column, parent)
+    #     # if self.short_path_model.checkIndex(index):
+    #     #     return self.short_path_model.fileName(index)
+    #     if column == 0:
+    #         model_index = index  # self.mapToSource(index)
+    #         short_path_dir = self.is_short_path_package_dir(model_index)
+    #         path = self.fileInfo(model_index).absoluteFilePath()
+    #         if short_path_dir:
+    #             new_index = self.short_path_model.index(short_path_dir, column)
+    #             path = self.short_path_model.fileInfo(new_index).absoluteFilePath()
+    #             print("index: " + path + " " + short_path_dir)
+    #             return new_index
+    #     return index
+
+    # def index(self, path, column=0):
+    #     return super().index(path, column)
+
+    # def data(self, index, role):
+    #     data = super().data(index, role)
+    #     if role == QtCore.Qt.DisplayRole:
+    #         if self.short_path_model.checkIndex(index):
+    #             return self.short_path_model.fileName(index)
+    #         #     model_index = self.mapToSource(index)
+    #         #     short_path_dir = self.is_short_path_package_dir(model_index)
+    #         #     path = self.fileInfo(model_index).absoluteFilePath()
+    #         #     if short_path_dir:
+    #         #         #new_index = self.short_path_model.index(short_path_dir, 0)
+    #         #         return Path(short_path_dir).name  # self.short_path_model.fileName(new_index)
+    #         #     return data
+    #     return data
+
+    # def rowCount(self, index):
+    #     model_index = index  # self.mapToSource(index)
+    #     path = self.fileInfo(model_index).absoluteFilePath()
+    #     short_path_dir = self.is_short_path_package_dir(model_index)
+
+    #     if self.short_path in path or short_path_dir:
+    #         return len(sorted(Path(short_path_dir).glob("*")))
+    #     if self.short_path_model.checkIndex(index):
+    #         path = self.short_path_model.fileInfo(index).absoluteFilePath()
+    #         print(path + " " + str(self.short_path_model.rowCount(index)))
+    #         return self.short_path_model.rowCount(index)
+    #     print(path + " " + str(super().rowCount(index)))
+    #     return super().rowCount(index)
+
+    def filterAcceptsRow(self, source_row, source_parent) -> bool:
+        # filter out internal files
+        index = self.index(source_row, 0, source_parent)
+        # model_index = self.mapToSource(index)
+        name = self.fileName(index)
+        if self.fileInfo(index).isDir():
+            return True
+
+        for item in self.FILTERED_ITEMS:
+            if item in name:
+                return False
         return True
-
-
-self.model = QtWidgets.QFileSystemModel()
-self.model.setRootPath(r"C:\Users\goszp\.conan\data")
-
-# dirModel -> setFilter(QDir: : NoDotAndDotDot |
-#                       QDir:: AllDirs);
-self.proxy = CustomProxyModel()
-self.proxy.setSourceModel(self.model)
-self.model_index = self.model.index(self.model.rootDirectory().absolutePath())
-print(self.model.rootDirectory().absolutePath())
-self.proxy_index = self.proxy.mapFromSource(self.model_index)
-self._ui.treeView.setModel(self.proxy)
-
-self._ui.treeView.setRootIndex(self.proxy_index)
-self.fileModel = QtWidgets.QFileSystemModel(self)
-self.fileModel.setFilter(QtCore.QDir.NoDotAndDotDot |
-                         QtCore.QDir.Files)
-self.fileModel.setRootPath(self.model.rootDirectory().absolutePath())
-self._ui.listView.setModel(self.fileModel)
-
-# self._ui.treeView.clicked.connect(self.on_click)
-self._ui.treeView.setColumnHidden(1, True)
-self._ui.treeView.setColumnHidden(2, True)
-self._ui.treeView.setColumnWidth(0, 310)
-# self._ui.treeView.setRootIsDecorated(False)
-# self._ui.treeView.setItemsExpandable(False)
-self._ui.treeView.selectionModel().selectionChanged.connect(
-    self.on_selection_change)
