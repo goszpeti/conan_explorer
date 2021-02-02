@@ -302,7 +302,7 @@
         </rect>
        </property>
        <attribute name="label">
-        <string>Local Packages</string>
+        <string>Local Packages - DEMO PREVIEW ONLY</string>
        </attribute>
        <widget class="QLabel" name="package_filter_label">
         <property name="geometry">

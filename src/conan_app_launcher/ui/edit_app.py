@@ -1,4 +1,5 @@
 
+from conan_app_launcher.ui.qt import app_edit
 import conan_app_launcher as this
 
 from conan_app_launcher.components import AppConfigEntry, run_file
@@ -16,6 +17,8 @@ class EditAppDialog(QtWidgets.QDialog):
         super().__init__(parent=parent, flags=flags)
         self._app_config_data = app_config_data
         self._app_link_edited = app_link_edited
+        #self._ui = app_edit.Ui_Dialog()
+        # self._ui.setupUi(self)
         self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_edit.ui", baseinstance=self)
 
         self.setModal(True)
@@ -35,10 +38,21 @@ class EditAppDialog(QtWidgets.QDialog):
             conan_options_text += f"{option}={self._app_config_data.conan_options.get(option)}\n"
         self._ui.conan_opts_text_edit.setText(conan_options_text)
 
+        # add validators TODO
+
+        # lineEdit with validation
+        # self._ui.conan_ref_line_edit.setValidator(objValidator)
+        # self._ui.conan_ref_line_edit.textChanged.connect(self._ui.conan_ref_line_edit.validate_text)
+
         self._ui.button_box.accepted.connect(self.save_edited_dialog)
         self.show()
 
     def save_edited_dialog(self):
+        # check all input validations
+        if not self._ui.conan_ref_line_edit.hasAcceptableInput():
+            # TODO handle invalid input
+            pass
+
         # write back app info
         self._app_config_data.name = self._ui.name_line_edit.text()
         self._app_config_data.conan_ref = self._ui.conan_ref_line_edit.text()
@@ -57,3 +71,4 @@ class EditAppDialog(QtWidgets.QDialog):
                 pass  # TODO warning
         self._app_config_data.conan_options = conan_options
         self._app_link_edited.emit(self._app_config_data)
+        self.accept()
