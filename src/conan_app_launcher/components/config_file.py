@@ -158,7 +158,7 @@ class AppConfigEntry():
         self._executable = full_path
 
     @property
-    def icon(self):
+    def icon(self) -> Path:
         return self._icon
 
     @icon.setter
