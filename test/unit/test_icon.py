@@ -17,7 +17,7 @@ def testExtractIconFromExeOnWindows(tmp_path):
     """
     if platform.system() == "Windows":
         ret_path = extract_icon_from_win_executable(Path(sys.executable), tmp_path)
-        assert ret_path.suffix == ".png"
+        assert ret_path.suffix == ".img"
         assert ret_path.is_file()
     elif platform.system() == "Linux":
         pass
@@ -45,5 +45,3 @@ def testExtractIconWrapper(tmp_path):
         assert not ret_path.is_file()
     if platform.system() == "Windows":
         assert ret_path.is_file()
-
-

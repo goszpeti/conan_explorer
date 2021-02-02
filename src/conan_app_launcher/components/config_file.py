@@ -213,9 +213,9 @@ class AppEntry():
         """ Callback when conan operation is done and paths can be validated"""
         self.package_folder = package_folder
 
-        # use setter to reevaluate
-        self.icon = self.app_data.get("icon", "")
+        # use setter to reevaluate - executable must go first, because icon depends on it
         self.executable = self.app_data.get("executable", "")
+        self.icon = self.app_data.get("icon", "")
 
     def set_available_packages(self, available_refs: List[ConanFileReference]):
         """ Callback when conan operation is done and paths can be validated"""
