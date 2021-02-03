@@ -1,26 +1,5 @@
 """
 Using modified ExtractIcon class from https://github.com/firodj/extract-icon-py
-The MIT License(MIT)
-
-Copyright(c) 2015-2016 Fadhil Mandaga
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files(the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.!
 """
 
 import platform
@@ -183,7 +162,7 @@ def extract_icon(file_path: Path, output_dir: Path) -> Path:
         Logger().info("Automatic icon extraction is not available on Linux.")
     if platform.system() == "Windows":
         if file_path.is_file():
-            if is_file_executable(file_path):
+            if file_path.suffix.lower() == ".exe":  # only works for .exe
                 return extract_icon_from_win_executable(file_path, output_dir)
             Logger().info("Automatic icon extraction is not available for non executable files.")
         else:

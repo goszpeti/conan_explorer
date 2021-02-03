@@ -1,3 +1,7 @@
+
+
+import platform
+import os
 from typing import List
 
 from conan_app_launcher.components import AppEntry, run_file
@@ -53,6 +57,13 @@ class AppUiEntry(QtWidgets.QVBoxLayout):
         self._app_button.clicked.connect(self.app_clicked)
         self._app_version_cbox.currentIndexChanged.connect(self.version_selected)
         self._app_channel_cbox.currentIndexChanged.connect(self.channel_selected)
+        self._app_button.open_fm_action.triggered.connect(self.open_in_file_manager)
+
+    def open_in_file_manager(self):
+        if platform.system() == "Linux":
+            os.system("xdg-open " + str(self._app_info.executable.parent))
+        elif platform.system() == "Windows":
+            os.system("explorer " + str(self._app_info.executable.parent))
 
     def update_entry(self, settings: Settings):
         # set icon and ungrey if package is available

@@ -94,3 +94,8 @@ The config file uses the following exemplary schema:
 
 This project uses Python with Qt as a frontend using the PyQt integration.
 The IDE integration is done for VsCode.
+
+
+## Licenses of used libraries and code
+
+* Using source code of modified ExtractIcon class from https://github.com/firodj/extract-icon-py, Copyright(c) 2015-2016 Fadhil Mandaga, MIT license
