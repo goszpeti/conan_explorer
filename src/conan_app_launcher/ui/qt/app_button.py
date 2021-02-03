@@ -20,6 +20,9 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
         self._image = image
         self._greyed_out = True  # Must be ungreyed, when available
         self.set_icon(image)
+        self.menu = QtWidgets.QMenu()
+        self.open_fm_action = QtWidgets.QAction("Open in file manager", self)
+        self.menu.addAction(self.open_fm_action)
 
     def ungrey_icon(self):
         self._greyed_out = False
@@ -61,5 +64,7 @@ class AppButton(QtWidgets.QLabel, QtWidgets.QPushButton):
         if not self._greyed_out:
             self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
                 ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
-        # emit the click signal now, so the click effect plays before
-        self.clicked.emit()
+        if event.button() == Qt.RightButton:
+            self.menu.exec_(event.globalPos())
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit()
