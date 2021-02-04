@@ -83,7 +83,7 @@ The config file uses the following exemplary schema:
                         "conan_ref": "app3/0.3.0@user3/stable",
                         "console_application": true, // starts in a new console window
                         "executable": "bin/app3", // extension (.exe) can be ommited for windows
-                        // Icon can be ommitted
+                        // Icon can be ommitted, then it will try on Windows to use the applications own icon
                     }
                 ]
             }
