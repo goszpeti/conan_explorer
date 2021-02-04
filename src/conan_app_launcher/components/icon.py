@@ -164,7 +164,7 @@ def extract_icon(file_path: Path, output_dir: Path) -> Path:
         if file_path.is_file():
             if file_path.suffix.lower() == ".exe":  # only works for .exe
                 return extract_icon_from_win_executable(file_path, output_dir)
-            Logger().info("Automatic icon extraction is not available for non executable files.")
+            Logger().debug("Automatic icon extraction is not available for non executable files.")
         else:
             Logger().debug("File for icon extraction does not exist.")
     return Path("NULL")
