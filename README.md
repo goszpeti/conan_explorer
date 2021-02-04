@@ -18,8 +18,8 @@ Features:
 - configurable layout (tabs and applications) with json file
 - can also open files with their associated default program
 - installs all referenced packages automatically
-- automatic settings resolution for your platform
-- compatible with a wide range of conan versions (from 1.16 onwards)
+- automatic conan settings resolution for your platform
+- compatible with a wide range of conan versions (from 1.19 onwards)
 - integrated console for information an packages and config file
 - installable with pip
 
@@ -53,7 +53,7 @@ Execute `conan_app_launcher`, if the Python "scripts" folder is on your system p
 The config file uses the following exemplary schema:
 
     {
-        "version": "0.3.0", // please update the schema manually, no auto update available
+        "version": "0.3.0",
         "tabs": [
             {
                 "name": "Basics",
