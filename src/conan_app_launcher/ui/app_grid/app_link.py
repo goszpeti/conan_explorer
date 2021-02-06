@@ -1,5 +1,4 @@
 
-import time
 import os
 import platform
 import conan_app_launcher as this
@@ -7,11 +6,11 @@ import conan_app_launcher as this
 from conan_app_launcher.components import AppConfigEntry, run_file
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS, Settings)
-from conan_app_launcher.ui.qt.app_button import AppButton
+from conan_app_launcher.ui.app_grid.app_button import AppButton
 # from conan_app_launcher.ui.tab_app_grid import TabAppGrid
 
 from PyQt5 import QtCore, QtWidgets, QtGui
-from conan_app_launcher.ui.edit_app import EditAppDialog
+from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -42,6 +41,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
         self._app_button.setSizePolicy(size_policy)
+        self._app_button.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
 
         # add sub widgets
         self.addWidget(self._app_button)
@@ -71,19 +72,41 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.clicked.connect(self.on_click)
         self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
         self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
-
-        # self._app_button.add_action.triggered.connect(self.open_edit_dialog)
-
-        self._app_button.edit_action.triggered.connect(self.open_edit_dialog)
-
-        self._app_button.remove_action.triggered.connect(self.remove)
-
         # move_r = QtWidgets.QAction("Move Right", self)
         # self._app_button.addAction(move_r)
         # move_l = QtWidgets.QAction("Move Left", self)
         # self._app_button.addAction(move_l)
+
+        self.menu = QtWidgets.QMenu()
+        icons_path = this.asset_path / "icons"
+
+        self.open_fm_action = QtWidgets.QAction("Open in file manager", self)
+        self.open_fm_action.setIcon(QtGui.QIcon(str(icons_path / "file-explorer.png")))
+        self.menu.addAction(self.open_fm_action)
+
+        self.menu.addSeparator()
+
+        self.add_action = QtWidgets.QAction("Add new app", self)
+        self.add_action.setIcon(QtGui.QIcon(str(icons_path / "add_link.png")))
+        self.menu.addAction(self.add_action)
+
+        self.edit_action = QtWidgets.QAction("Edit", self)
+        self.edit_action.setIcon(QtGui.QIcon(str(icons_path / "edit.png")))
+        self.menu.addAction(self.edit_action)
+
+        self.remove_action = QtWidgets.QAction("Remove", self)
+        self.remove_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
+        self.menu.addAction(self.remove_action)
+
+        self.add_action.triggered.connect(self.open_edit_dialog)
+        self.open_fm_action.triggered.connect(self.open_in_file_manager)
+        self.edit_action.triggered.connect(self.open_edit_dialog)
+        self.remove_action.triggered.connect(self.remove)
+
         self._apply_config()
-        self._app_button.open_fm_action.triggered.connect(self.open_in_file_manager)
+
+    def on_context_menu_requested(self, position):
+        self.menu.exec_(self._app_button.mapToGlobal(position))
 
     def open_in_file_manager(self):
         if platform.system() == "Linux":
@@ -97,16 +120,23 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_channel_cbox.clear()
         self._app_channel_cbox.addItem(self.config_data.conan_ref.channel)
         self._app_version_cbox.clear()
-        self._app_channel_cbox.addItem(self.config_data.conan_ref.version)
+        self._app_version_cbox.addItem(self.config_data.conan_ref.version)
 
     def open_edit_dialog(self):
         self._edit_app_dialog = EditAppDialog(
             self.config_data, parent=self.parentWidget(), app_link_edited=self.app_link_edited)
 
     def remove(self):
-        # self._tab.remove_app_link(self)
-        self._app_link_removed.emit(self)
-        # this.main_window.config_changed.emit()
+        # confirmation dialog
+        msg = QtWidgets.QMessageBox(parent=this.main_window)
+        msg.setWindowTitle("Delete app link")
+        msg.setText(f"Are you sure, you want to delete the link \"{self.config_data.name}?\"")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        msg.setIcon(QtWidgets.QMessageBox.Question)
+        reply = msg.exec_()
+        if reply == QtWidgets.QMessageBox.Yes:
+            self._app_link_removed.emit(self)
+            this.main_window.config_changed.emit()
 
     def on_accept_edit_dialog(self):
         self._app_button.grey_icon()
@@ -115,6 +145,8 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def update_with_conan_info(self):
         # set icon and ungrey if package is available
+        self._apply_config()
+
         if self.config_data.executable.is_file():
             self._app_button.set_icon(self.config_data.icon)
             self._app_button.ungrey_icon()

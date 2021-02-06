@@ -56,16 +56,6 @@ def main():
         this.qt_app = QtWidgets.QApplication([])
     icon = QtGui.QIcon(str(this.asset_path / "icons" / "icon.ico"))
 
-    # font_file = r"C:\sw-dev\159687-interface-icon-assets\font\Flaticon.ttf"
-    # font_id = QtGui.QFontDatabase.addApplicationFont(str(font_file))
-    # if font_id != -1:
-    #     font_db = QtGui.QFontDatabase()
-    #     font_styles = font_db.styles("Flaticon")
-    #     font_families = QtGui.QFontDatabase.applicationFontFamilies(font_id)
-    #     for font_family in font_families:
-    #         font = font_db.font(font_family, font_styles[0], 10)
-    #     this.qt_app.setFont(font)
-
     settings_file_path = Path.home() / ".cal_config"
     settings = Settings(ini_file=settings_file_path)
 

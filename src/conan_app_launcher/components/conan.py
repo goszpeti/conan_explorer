@@ -6,14 +6,18 @@ try:
     from typing import TypedDict
 except ImportError:
     from typing_extensions import TypedDict
-from conan_app_launcher.base import Logger
+
 from conans import __version__ as conan_version
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.model.ref import ConanFileReference, PackageReference
+
 try:
     from conans.util.windows import CONAN_LINK, CONAN_REAL_PATH, rm_conandir, path_shortener
 except:
     pass
+
+from conan_app_launcher.base import Logger
+import conan_app_launcher as this
 
 
 class ConanPkg(TypedDict):
@@ -168,6 +172,10 @@ class ConanApi():
         This method tries to find the best matching packages either locally or in a remote, 
         based on the users machine and the supplied options.
         """
+        # skip search on default invalid recipe
+        if str(conan_ref) == this.INVALID_CONAN_REF:
+            return []
+
         found_pkgs: List[ConanPkg] = []
         default_settings: Dict[str, str] = dict(self.cache.default_profile.settings)
         try:

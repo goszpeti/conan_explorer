@@ -1,11 +1,12 @@
 """ Contains the class for a clickable Qt label"""
 
 from pathlib import Path
+from typing import Optional
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from conan_app_launcher import ICON_SIZE
-import conan_app_launcher as this
+from conan_app_launcher.base import Logger
 
 
 Qt = QtCore.Qt
@@ -19,7 +20,6 @@ class AppButton(QtWidgets.QPushButton):
 
     def __init__(self, parent, image: Path = None, flags=Qt.WindowFlags()):
         super().__init__(parent=parent)
-        icons_path = this.asset_path / "icons"
 
         self._image = image
         self._greyed_out = True  # Must be ungreyed, when available
@@ -27,27 +27,6 @@ class AppButton(QtWidgets.QPushButton):
         self.setFlat(True)
         self.setIconSize(QtCore.QSize(ICON_SIZE, ICON_SIZE))
         self.grey_icon()
-        self.menu = QtWidgets.QMenu()
-
-        self.open_fm_action = QtWidgets.QAction("Open in file manager", self)
-        self.open_fm_action.setIcon(QtGui.QIcon(str(icons_path / "file-explorer.png")))
-        self.menu.addAction(self.open_fm_action)
-
-        self.menu.addSeparator()
-
-        self.add_action = QtWidgets.QAction("Add new app", self)
-        self.add_action.setIcon(QtGui.QIcon(str(icons_path / "add_link.png")))
-        self.menu.addAction(self.add_action)
-
-        self.edit_action = QtWidgets.QAction("Edit", self)
-        self.edit_action.setIcon(QtGui.QIcon(str(icons_path / "edit.png")))
-        self.menu.addAction(self.edit_action)
-
-        self.remove_action = QtWidgets.QAction("Remove", self)
-        self.remove_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
-        self.menu.addAction(self.remove_action)
-
-        # self.installEventFilter(self)
         self.setWindowFlags(flags)
 
     def ungrey_icon(self):
@@ -55,10 +34,11 @@ class AppButton(QtWidgets.QPushButton):
         self.setDisabled(False)
 
     def grey_icon(self):
-        self._greyed_out = True
-        self.setDisabled(True)
+        self._greyed_out = True  # TODO solve this
+        # self.setDisabled(True)
 
-    def set_icon(self, image: Path):
+    def set_icon(self, image: Optional[Path]):
+        Logger().debug("Setting icon to " + str(image))
         if not image or not image.exists():
             return
         self._image = image
@@ -90,8 +70,9 @@ class AppButton(QtWidgets.QPushButton):
         # if not self._greyed_out:
         #    self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
         #        ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
-        if event.button() == Qt.RightButton:
-            self.menu.exec_(event.globalPos())
+
+        # if event.button() == Qt.RightButton:
+        #    self.menu.exec_(event.globalPos())
         if event.button() == Qt.LeftButton:
             self.clicked.emit()
         return super().mouseReleaseEvent(event)

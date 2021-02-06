@@ -16,7 +16,7 @@ from conan_app_launcher import main
 
 
 def testDebugDisabledForRelease():
-    assert app.DEBUG_LEVEL == 0  # debug level should be 0 for release
+    assert conan_app_launcher.DEBUG_LEVEL == 0  # debug level should be 0 for release
 
 
 def testMainLoopMock(base_fixture, mocker):

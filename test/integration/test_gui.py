@@ -18,7 +18,7 @@ from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanApi
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.tab_app_grid import TabAppGrid
+from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -272,4 +272,29 @@ def testRenameTabDialog(base_fixture, qtbot):
 
 
 def testAddTabDialog(base_fixture, qtbot):
+    pass
+
+
+def testRemoveTabDialog(base_fixture, qtbot):
+    pass
+
+
+def testAddAppLink():
+    pass
+
+
+def testEditAppLink():
+    pass
+
+
+def testRemoveAppLink():
+    pass
+
+
+def testOpenFileExplorerOnAppLink(base_fixture, qtbot):
+    # TODO Negative test
+    pass
+
+
+def testCreateNewConfigFileOnFirstOpen():
     pass

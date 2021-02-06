@@ -11,12 +11,12 @@ from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file, TabConfigEntry, AppConfigEntry, ConanApi
 from conan_app_launcher.settings import (
     LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS, Settings)
-from conan_app_launcher.ui.app_link import AppLink
-from conan_app_launcher.ui.tab_app_grid import TabAppGrid
-from conan_app_launcher.ui.local_packages import CustomProxyModel
+from conan_app_launcher.ui.app_grid.app_link import AppLink
+from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
+from conan_app_launcher.ui.package_explorer.local_packages import CustomProxyModel
 # from conan_app_launcher.ui.add_remove_apps import AddRemoveAppsDialog
-from conan_app_launcher.ui.edit_app import EditAppDialog
-from conan_app_launcher.ui.about import AboutDialog
+#from conan_app_launcher.ui.edit_app import EditAppDialog
+from conan_app_launcher.ui.about_dialog import AboutDialog
 
 Qt = QtCore.Qt
 
@@ -37,7 +37,7 @@ class MainUi(QtWidgets.QMainWindow):
         super().__init__()
         self._icons_path = this.asset_path / "icons"
 
-        self._ui = uic.loadUi(this.base_path / "ui" / "qt" / "app_grid.ui", baseinstance=self)
+        self._ui = uic.loadUi(this.base_path / "ui" / "main.ui", baseinstance=self)
         self._settings = settings
         self._tabs_info: List[TabConfigEntry] = []
         self._about_dialog = AboutDialog(self)
@@ -289,7 +289,16 @@ class MainUi(QtWidgets.QMainWindow):
         """ Cleans up ui, reads config file and creates new layout """
         if self._ui.tab_bar.count() > 0:  # remove the default tab
             self._ui.tab_bar.removeTab(0)
-        config_file_path = Path(self._settings.get(LAST_CONFIG_FILE))
+        config_file_setting = self._settings.get(LAST_CONFIG_FILE)
+        if not config_file_setting:  # empty config, create it in home path
+            config_file_path = Path.home() / "cal_ui.json"
+            Logger().info("Creating empty ui config file " + str(config_file_path))
+            write_config_file(config_file_path, [])
+            self._settings.set(LAST_CONFIG_FILE, str(config_file_path))
+
+        else:
+            config_file_path = Path(config_file_setting)
+
         if config_file_path.is_file():  # escape error log on first opening
             self._tabs_info = parse_config_file(config_file_path)
 
@@ -308,16 +317,16 @@ class MainUi(QtWidgets.QMainWindow):
     def on_selection_change(self):  # , index: int):
         # change folder in file view
         view_index = self._ui.package_view.selectionModel().selectedIndexes()[0]
-        proxy_index = self.proxy.mapToSource(view_index)
-        item_name = self.model.fileName(proxy_index)
-        # TODO discover upstream, if in package
-        path = self.model.fileInfo(proxy_index).absoluteFilePath()
-        c_p = Path(path) / "conaninfo.txt"
-        if c_p.is_file():
-            text = ""
-            with open(c_p, "r") as fp:
-                text = fp.read()
-            self.package_info.setText(text)
+        # proxy_index = self.proxy.mapToSource(view_index)
+        # item_name = self.model.fileName(proxy_index)
+        # # TODO discover upstream, if in package
+        # path = self.model.fileInfo(proxy_index).absoluteFilePath()
+        # c_p = Path(path) / "conaninfo.txt"
+        # if c_p.is_file():
+        #     text = ""
+        #     with open(c_p, "r") as fp:
+        #         text = fp.read()
+        #     self.package_info.setText(text)
 
     def _re_init(self):
         """ To be called, when a new config file is loaded """

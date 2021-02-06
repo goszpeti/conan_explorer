@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtWidgets
 
 import conan_app_launcher as this
 from conan_app_launcher.components import AppConfigEntry, TabConfigEntry
-from conan_app_launcher.ui.app_link import AppLink
+from conan_app_launcher.ui.app_grid.app_link import AppLink
 
 
 # define Qt so we can use it like the namespace in C++

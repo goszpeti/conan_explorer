@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 ### Global constants ###
 PROG_NAME = "conan_app_launcher"
 ICON_SIZE = 60
+INVALID_CONAN_REF = "Invalid/NA@NA/NA"
+
 
 ### Global variables ###
 # 0: No debug, 1 = debug logging on

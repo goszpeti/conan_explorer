@@ -52,12 +52,11 @@ class AppConfigType(TypedDict):
 class AppConfigEntry():
     """ Representation of an app entry of the config schema """
     INVALID_DESCR = "NA"
-    INVALID_REF = "Invalid/NA@NA/NA"
 
     # , config_file_path: Path = None):
     def __init__(self, app_data: AppType = None):
         if app_data is None:
-            app_data = {"name": "", "conan_ref": self.INVALID_REF, "executable": "", "icon": "",
+            app_data = {"name": "", "conan_ref": this.INVALID_CONAN_REF, "executable": "", "icon": "",
                         "console_application": False, "args": "", "conan_options": []}
         self.app_data: AppType = app_data
         # self._config_file_path = config_file_path  # TODO will be removed later, when no relative icon paths allowed
@@ -67,7 +66,7 @@ class AppConfigEntry():
         self._conan_options = {}
         self._executable = Path("NULL")
         self._icon = Path("NULL")
-        self.gui_update_signal = None
+        self.gui_update_signal: QtCore.pyqtSignal = None
 
         # Init values with validation, which can be preloaded
         self.icon = self.app_data.get("icon", "")
@@ -94,14 +93,14 @@ class AppConfigEntry():
             self._conan_ref = ConanFileReference.loads(new_value)
 
             # add conan ref to worker
-            if (self.app_data["conan_ref"] != new_value and new_value != self.INVALID_REF
+            if (self.app_data["conan_ref"] != new_value and new_value != this.INVALID_CONAN_REF
                     and self._conan_ref.version != self.INVALID_DESCR
                     and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
                 this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
             self.app_data["conan_ref"] = new_value
         except Exception as error:
             # errors happen fairly often, keep going
-            self._conan_ref = ConanFileReference.loads(self.INVALID_REF)
+            self._conan_ref = ConanFileReference.loads(this.INVALID_CONAN_REF)
             Logger().error(f"Conan ref id invalid {str(error)}")
 
     @property
@@ -221,7 +220,7 @@ class AppConfigEntry():
         # icon needs executable
         self.icon = self.app_data.get("icon", "")
 
-        # TODO call gui update
+        # call gui update
         if self.gui_update_signal:
             self.gui_update_signal.emit()
 

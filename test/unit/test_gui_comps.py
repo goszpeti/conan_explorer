@@ -2,16 +2,13 @@
 These tests test the self written qt gui components.
 """
 import platform
-import os
 import sys
-from subprocess import check_output
-from time import sleep
 from pathlib import Path
 
-from conan_app_launcher.base import Logger
 from conan_app_launcher.components.config_file import AppConfigEntry, AppType
-from conan_app_launcher.ui import main_window, edit_app
-from conan_app_launcher.ui.app_link import AppLink
+from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.app_grid.app_link import AppLink
+from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
 
 from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
@@ -28,7 +25,7 @@ def testAboutDialog(base_fixture, qtbot):
     widget.show()
     qtbot.waitForWindowShown(widget)
 
-    assert "Conan App Launcher" in widget._text.text()
+    assert "Conan App Launcher" in widget._text.toPlainText()
     qtbot.mouseClick(widget._button_box.buttons()[0], Qt.LeftButton)
     assert widget.isHidden()
 
