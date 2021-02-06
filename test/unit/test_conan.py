@@ -179,13 +179,13 @@ def testConanWorker(base_fixture):
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
-    class DummySignal():
+    # class DummySignal():
 
-        def emit(self):
-            pass
-    sig = DummySignal()
+    #     def emit(self):
+    #         pass
+    # sig = DummySignal()
     config_data = parse_config_file(base_fixture.testdata_path / "app_config.json")
-    conan_worker = ConanWorker(config_data, sig)
+    conan_worker = ConanWorker(config_data)
     elements_before = conan_worker._conan_queue.qsize()
     time.sleep(10)
 

@@ -10,10 +10,9 @@ from subprocess import Popen
 
 from PyQt5 import QtWidgets
 import conan_app_launcher
-import conan_app_launcher as app
 from conan_app_launcher import main
-from conan_app_launcher.ui import main_window
-from conan_app_launcher.settings import *
+#from conan_app_launcher.ui import main_window
+#from conan_app_launcher.settings import *
 
 
 def testDebugDisabledForRelease():
@@ -30,6 +29,7 @@ def testMainLoopMock(base_fixture, mocker):
     mocker.patch.object(QtWidgets.QApplication, "exec_")
 
     main.main()
+    time.sleep(2)
 
     conan_app_launcher.ui.main_window.MainUi.assert_called_once()
     QtWidgets.QApplication.exec_.assert_called_once()

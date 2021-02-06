@@ -28,7 +28,7 @@ def testExtractIconFromGenericFile(tmp_path):
     Generic files have no icon embedded.
     Nonexistant path expected.
     """
-    test_file = Path(tmp_path) / "test.txt"
+    test_file = Path(tmp_path) / "test.cmd"
     with open(test_file, "w") as f:
         f.write("test")
     wrong_path = extract_icon(test_file, tmp_path)

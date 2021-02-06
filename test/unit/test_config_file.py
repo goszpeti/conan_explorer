@@ -18,14 +18,14 @@ def testCorrectFile(base_fixture):
     tab0_entries = tabs[0].get_app_entries()
     assert str(tab0_entries[0].conan_ref) == "m4_installer/1.4.18@bincrafters/stable"
     assert tab0_entries[0].app_data.get("executable") == "bin/m4"
-    assert tab0_entries[0].icon.name == "default_app_icon.png"
+    assert tab0_entries[0].icon.name == "app.png"
     assert tab0_entries[0].name == "App1 with spaces"
     assert tab0_entries[0].is_console_application
     assert tab0_entries[0].args == "-n name"
 
     assert str(tab0_entries[1].conan_ref) == "zlib/1.2.11@conan/stable"
     assert tab0_entries[1].app_data.get("executable") == "bin/app2"
-    assert tab0_entries[1].icon.name == "default_app_icon.png"
+    assert tab0_entries[1].icon.name == "app.png"
     assert tab0_entries[1].name == "App2"
     assert not tab0_entries[1].is_console_application  # default
     assert tab0_entries[1].args == ""
@@ -35,7 +35,7 @@ def testCorrectFile(base_fixture):
     tab1_entries = tabs[1].get_app_entries()
     assert str(tab1_entries[0].conan_ref) == "app2/1.0.0@user/stable"
     assert tab1_entries[0].app_data["executable"] == "bin/app2.exe"
-    assert tab1_entries[0].icon.name == "default_app_icon.png"
+    assert tab1_entries[0].icon.name == "app.png"
     assert tab1_entries[0].name == "App2"
 
 
@@ -121,7 +121,7 @@ def testExecutableEval(base_fixture, capsys):
     """
     app_data = {"name": "AppName", "executable": "python"}
     exe = Path(sys.executable)
-    app = AppConfigEntry(app_data, base_fixture.testdata_path / "app_config.json")
+    app = AppConfigEntry(app_data)
 
     app.set_package_info(exe.parent)  # trigger set
     assert app.executable == exe
@@ -146,20 +146,19 @@ def testIconEval(base_fixture, capsys, tmp_path):
     import conan_app_launcher as this
 
     # copy icons to tmp_path to fake package path
-    copy_file(this.asset_path / "icon.ico", tmp_path)
-    copy_file(this.asset_path / "default_app_icon.png", tmp_path)
+    copy_file(this.asset_path / "icons" / "icon.ico", tmp_path)
+    copy_file(this.asset_path / "icons" / "app.png", tmp_path)
 
     # relative to package with // notation
     app_data = {"name": "AppName", "icon": "//icon.ico", "executable": sys.executable}
-    app = AppConfigEntry(app_data, base_fixture.testdata_path / "app_config.json")
-
+    app = AppConfigEntry(app_data)
     app.set_package_info(tmp_path)  # trigger set
     assert app.icon == tmp_path / "icon.ico"
     assert app.app_data["icon"] == "//icon.ico"
 
-    # relative to config file
-    app.icon = "../../src/conan_app_launcher/assets/icon.ico"
-    assert app.icon == this.base_path / "assets" / "icon.ico"
+    # relative to config file - feature currently disabled
+    # app.icon = "../../src/conan_app_launcher/assets/icons/icon.ico"
+    # assert app.icon == this.base_path / "assets" / "icons" / "icon.ico"
 
     # absolute path
     app.icon = str(tmp_path / "icon.ico")
@@ -170,15 +169,15 @@ def testIconEval(base_fixture, capsys, tmp_path):
     captured = capsys.readouterr()
     assert "ERROR" in captured.err
     assert "Can't find icon" in captured.err
-    assert app.icon == this.asset_path / "default_app_icon.png"
+    assert app.icon == this.asset_path / "icons" / "app.png"
 
     # extract icon
     app.icon = ""
     if platform.system() == "Windows":
-        icon_path = Path(tempfile.gettempdir()) / (str(Path(sys.executable).name) + ".png")
+        icon_path = Path(tempfile.gettempdir()) / (str(Path(sys.executable).name) + ".img")
         assert app.icon == icon_path.resolve()
     elif platform.system() == "Linux":
-        assert app.icon == this.asset_path / "default_app_icon.png"
+        assert app.icon == this.asset_path / "icons" / "app.png"
 
 
 def testOptionsEval(base_fixture):
@@ -188,7 +187,7 @@ def testOptionsEval(base_fixture):
     """
     app_data = {"name": "AppName", "executable": "python",
                 "conan_options": [{"name": "myopt", "value": "myvalue"}]}
-    app = AppConfigEntry(app_data, base_fixture.testdata_path / "app_config.json")
+    app = AppConfigEntry(app_data)
 
     # one value
     assert app.conan_options == {"myopt": "myvalue"}

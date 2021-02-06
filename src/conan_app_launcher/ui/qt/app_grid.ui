@@ -297,8 +297,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>836</width>
-         <height>446</height>
+         <width>98</width>
+         <height>28</height>
         </rect>
        </property>
        <attribute name="label">
@@ -388,7 +388,7 @@ p, li { white-space: pre-wrap; }
      <string>File</string>
     </property>
     <addaction name="menu_open_config_file"/>
-    <addaction name="menu_clean_cache"/>
+    <addaction name="menu_cleanup_cache"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -525,7 +525,7 @@ p, li { white-space: pre-wrap; }
     <string>Auto Install</string>
    </property>
   </action>
-  <action name="menu_clean_cache">
+  <action name="menu_cleanup_cache">
    <property name="text">
     <string>Clean Local Cache</string>
    </property>
@@ -536,8 +536,6 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
  </widget>
- <resources>
-  <include location="../../assets/res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

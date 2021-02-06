@@ -1,5 +1,7 @@
 
 import time
+import os
+import platform
 import conan_app_launcher as this
 
 from conan_app_launcher.components import AppConfigEntry, run_file
@@ -63,10 +65,9 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         # connect signals
         self.app_link_edited.connect(self.on_accept_edit_dialog)
-        # TODO
         self.conan_info_updated.connect(self.update_with_conan_info)
-        # this.main_window.display_versions_updated.connect(self.update_versions_cbox)
-        # this.main_window.display_channels_updated.connect(self.update_channels_cbox)
+        this.main_window.display_versions_updated.connect(self.update_versions_cbox)
+        this.main_window.display_channels_updated.connect(self.update_channels_cbox)
         self._app_button.clicked.connect(self.on_click)
         self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
         self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
@@ -82,6 +83,13 @@ class AppLink(QtWidgets.QVBoxLayout):
         # move_l = QtWidgets.QAction("Move Left", self)
         # self._app_button.addAction(move_l)
         self._apply_config()
+        self._app_button.open_fm_action.triggered.connect(self.open_in_file_manager)
+
+    def open_in_file_manager(self):
+        if platform.system() == "Linux":
+            os.system("xdg-open " + str(self.config_data.executable.parent))
+        elif platform.system() == "Windows":
+            os.system("explorer " + str(self.config_data.executable.parent))
 
     def _apply_config(self):
         self._app_button.setToolTip(str(self.config_data.conan_ref))

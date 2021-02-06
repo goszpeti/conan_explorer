@@ -18,8 +18,8 @@ Features:
 - configurable layout (tabs and applications) with json file
 - can also open files with their associated default program
 - installs all referenced packages automatically
-- automatic settings resolution for your platform
-- compatible with a wide range of conan versions (from 1.16 onwards)
+- automatic conan settings resolution for your platform
+- compatible with a wide range of conan versions (from 1.19 onwards)
 - integrated console for information an packages and config file
 - installable with pip
 
@@ -53,7 +53,7 @@ Execute `conan_app_launcher`, if the Python "scripts" folder is on your system p
 The config file uses the following exemplary schema:
 
     {
-        "version": "0.3.0", // please update the schema manually, no auto update available
+        "version": "0.3.0",
         "tabs": [
             {
                 "name": "Basics",
@@ -83,7 +83,7 @@ The config file uses the following exemplary schema:
                         "conan_ref": "app3/0.3.0@user3/stable",
                         "console_application": true, // starts in a new console window
                         "executable": "bin/app3", // extension (.exe) can be ommited for windows
-                        // Icon can be ommitted
+                        // Icon can be ommitted, then it will try on Windows to use the applications own icon
                     }
                 ]
             }
@@ -94,3 +94,11 @@ The config file uses the following exemplary schema:
 
 This project uses Python with Qt as a frontend using the PyQt integration.
 The IDE integration is done for VsCode.
+
+
+## Licenses of used libraries and code
+
+* Using source code of modified ExtractIcon class from https://github.com/firodj/extract-icon-py, Copyright(c) 2015-2016 Fadhil Mandaga, MIT license
+* Using icons by https://icons8.com, Universal Multimedia Licensing
+Agreement for Icons8, https://icons8.com/vue-static/landings/pricing/icons8-license.pdf
+

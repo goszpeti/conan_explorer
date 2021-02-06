@@ -38,6 +38,8 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
 
     main_gui = main_window.MainUi(settings)
     qtbot.addWidget(main_gui)
+    main_gui.load_tabs()
+
     main_gui.show()
     qtbot.waitExposed(main_gui, 3000)
     main_gui._ui.menu_about_action.trigger()
@@ -60,6 +62,8 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
 
     main_gui = main_window.MainUi(settings)
     main_gui.show()
+    main_gui.load_tabs()
+
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
     selection = str(Path.home() / "new_config.json")
@@ -138,7 +142,6 @@ def testConanCacheWithDialog(base_fixture, qtbot, mocker):
     time.sleep(3)
     assert not os.path.exists(pkg_cache_folder)
     assert not pkg_dir_to_delete.parent.exists()
-    app.conan_worker.finish_working()
     Logger.remove_qt_logger()
 
 
@@ -156,19 +159,22 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
 
     main_gui = main_window.MainUi(settings)
     main_gui.show()
+    main_gui.load_tabs()
+
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
 
     # wait for all tasks to finish
     app.conan_worker.finish_working(10)
-    main_gui.update_layout()  # TODO: signal does not emit in test, must call manually
 
     # check app icons first two should be ungreyed, third is invalid->not ungreying
-    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
-        for test_app in tab.apps:
-            if test_app._app_info.name in ["App1 with spaces", "App1 new"]:
+    for tab in main_gui._ui.tab_bar.findChildren(TabAppGrid):
+        for test_app in tab.app_links:
+            test_app.update_with_conan_info()  # signal is not emmited with qt bot, must call manually
+
+            if test_app.config_data.name in ["App1 with spaces", "App1 new"]:
                 assert not test_app._app_button._greyed_out
-            elif test_app._app_info.name in ["App1 wrong path", "App2"]:
+            elif test_app.config_data.name in ["App1 wrong path", "App2"]:
                 assert test_app._app_button._greyed_out
 
 
@@ -186,11 +192,13 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
 
     main_gui = main_window.MainUi(settings)
     main_gui.show()
+    main_gui.load_tabs()
+
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
 
     tabs_num = 2  # two tabs in this file
-    assert main_gui._ui.tabs.count() == tabs_num
+    assert main_gui._ui.tab_bar.count() == tabs_num
     time.sleep(5)
 
     app.conan_worker.finish_working(10)
@@ -198,7 +206,7 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
     main_gui._re_init()  # re-init with same file
     time.sleep(5)
 
-    assert main_gui._ui.tabs.count() == tabs_num
+    assert main_gui._ui.tab_bar.count() == tabs_num
     app.conan_worker.finish_working(10)
 
 
@@ -214,33 +222,36 @@ def testViewMenuOptions(base_fixture, qtbot):
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
     main_gui = main_window.MainUi(settings)
+    app.main_window = main_gui  # needed for signal access
     main_gui.show()
+    main_gui.load_tabs()
+
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
 
     time.sleep(5)
    # assert default state
-    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
-        for test_app in tab.apps:
+    for tab in main_gui._ui.tab_bar.findChildren(TabAppGrid):
+        for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
     # click and assert
     main_gui._ui.menu_set_display_versions.trigger()
-    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
-        for test_app in tab.apps:
+    for tab in main_gui._ui.tab_bar.findChildren(TabAppGrid):
+        for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
     main_gui._ui.menu_set_display_channels.trigger()
-    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
-        for test_app in tab.apps:
+    for tab in main_gui._ui.tab_bar.findChildren(TabAppGrid):
+        for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert test_app._app_channel_cbox.isHidden()
     # click again
     main_gui._ui.menu_set_display_versions.trigger()
     main_gui._ui.menu_set_display_channels.trigger()
-    for tab in main_gui._ui.tabs.findChildren(TabAppGrid):
-        for test_app in tab.apps:
+    for tab in main_gui._ui.tab_bar.findChildren(TabAppGrid):
+        for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
@@ -254,3 +265,11 @@ def testIconUpdateFromExecutable():
     Check, that the icon has the temp path.
     """
     # TODO
+
+
+def testRenameTabDialog(base_fixture, qtbot):
+    pass
+
+
+def testAddTabDialog(base_fixture, qtbot):
+    pass

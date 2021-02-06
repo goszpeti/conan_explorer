@@ -69,11 +69,11 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
         self._ui.menu_set_display_versions.triggered.connect(self.toggle_display_versions)
         self._ui.menu_set_display_channels.triggered.connect(self.toogle_display_channels)
-        self._ui.menu_clean_cache.triggered.connect(self.open_cleanup_cache_dialog)
+        self._ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
         self._ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
         self._ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
-        self.load_tabs()
+        # self.load_tabs()
 
     # def resizeEvent(self, event: "QResizeEvent"):  # override QMainWindow
         # TODO implement moving non layout buttons
@@ -117,7 +117,7 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.add_app_link_button.setIcon(QtGui.QIcon(str(self._icons_path / "add_link.png")))
         self._ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
         # menu
-        self._ui.menu_clean_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
+        self._ui.menu_cleanup_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
         self._ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))
 
     def closeEvent(self, event):  # override QMainWindow
