@@ -1,6 +1,8 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 Qt = QtCore.Qt
 
+# TODO How to split this?
+
 
 class LineEdit(QtWidgets.QLineEdit):
 

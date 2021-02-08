@@ -26,6 +26,7 @@ class AboutDialog(QtWidgets.QDialog):
         self._logo_label = QtWidgets.QLabel(self)
         self._logo_label.setPixmap(icon.pixmap(100, 100))
         self._text = QtWidgets.QTextBrowser(self)
+        self._text.setOpenExternalLinks(True)
         self._text.setStyleSheet("background-color: #F0F0F0;")
         self._text.setHtml(self.html_content.replace("${version}", this.__version__))
         self._text.setFrameShape(QtWidgets.QFrame.NoFrame)
