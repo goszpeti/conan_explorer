@@ -300,6 +300,7 @@ class MainUi(QtWidgets.QMainWindow):
             config_file_path = Path(config_file_setting)
 
         if config_file_path.is_file():  # escape error log on first opening
+            this.current_config_file_path = config_file_path
             self._tabs_info = parse_config_file(config_file_path)
 
         this.conan_worker = ConanWorker(self._tabs_info)

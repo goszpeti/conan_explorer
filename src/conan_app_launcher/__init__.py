@@ -30,3 +30,4 @@ asset_path: Path = Path("NULL")
 qt_app: Optional["QtWidgets.QApplication"] = None
 main_window: Optional["QtWidgets.QMainWindow"] = None
 conan_worker: Optional["ConanWorker"] = None
+current_config_file_path = Path("NULL")

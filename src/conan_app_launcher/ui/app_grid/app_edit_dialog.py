@@ -25,9 +25,9 @@ class EditAppDialog(QtWidgets.QDialog):
         # fill up current info
         self._ui.name_line_edit.setText(self._app_config_data.name)
         self._ui.conan_ref_line_edit.setText(str(self._app_config_data.conan_ref))
-        self._ui.exec_path_line_edit.setText(self._app_config_data.app_data["executable"])
+        self._ui.exec_path_line_edit.setText(self._app_config_data.app_data.get("executable", ""))
         self._ui.is_console_app_checkbox.setChecked(self._app_config_data.is_console_application)
-        self._ui.icon_line_edit.setText(self._app_config_data.app_data["icon"])
+        self._ui.icon_line_edit.setText(self._app_config_data.app_data.get("icon", ""))
         self._ui.args_line_edit.setText(self._app_config_data.args)
 
         conan_options_text = ""
