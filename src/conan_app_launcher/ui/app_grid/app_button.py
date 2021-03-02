@@ -44,7 +44,7 @@ class AppButton(QtWidgets.QPushButton):
         self._image = image
         if self._image.suffix == ".ico":
             icon = QtGui.QIcon(str(self._image))
-            self.setPixmap(icon)
+            self.SetIcon(icon)
         else:
             image = QtGui.QPixmap(str(self._image)).toImage()
             icon = QtGui.QPixmap.fromImage(image).scaled(

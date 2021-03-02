@@ -3,6 +3,7 @@ import os
 import platform
 import conan_app_launcher as this
 
+from conan_app_launcher.base import Logger
 from conan_app_launcher.components import AppConfigEntry, run_file
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS, Settings)
@@ -56,19 +57,24 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_version_cbox.setDisabled(True)
         self._app_version_cbox.setDuplicatesEnabled(False)
         self._app_version_cbox.setSizePolicy(size_policy)
+        self._app_version_cbox.setMaximumWidth(193)  # TODO should be used from a const
+
         self.addWidget(self._app_version_cbox)
 
         # self._app_channel_cbox.addItem(app.conan_ref.channel)
         self._app_channel_cbox.setDisabled(True)
         self._app_channel_cbox.setDuplicatesEnabled(False)
         self._app_channel_cbox.setSizePolicy(size_policy)
+        self._app_channel_cbox.setMaximumWidth(193)  # TODO should be used from a const
+
         self.addWidget(self._app_channel_cbox)
 
         # connect signals
         self.app_link_edited.connect(self.on_accept_edit_dialog)
         self.conan_info_updated.connect(self.update_with_conan_info)
-        this.main_window.display_versions_updated.connect(self.update_versions_cbox)
-        this.main_window.display_channels_updated.connect(self.update_channels_cbox)
+        if this.main_window:
+            this.main_window.display_versions_updated.connect(self.update_versions_cbox)
+            this.main_window.display_channels_updated.connect(self.update_channels_cbox)
         self._app_button.clicked.connect(self.on_click)
         self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
         self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
@@ -103,7 +109,13 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.edit_action.triggered.connect(self.open_edit_dialog)
         self.remove_action.triggered.connect(self.remove)
 
-        self._apply_config()
+        self._apply_new_config()
+
+    def __del__(self):
+        self._app_name_label.deleteLater()
+        self._app_version_cbox.deleteLater()
+        self._app_channel_cbox.deleteLater()
+        self._app_button.deleteLater()
 
     def on_context_menu_requested(self, position):
         self.menu.exec_(self._app_button.mapToGlobal(position))
@@ -114,9 +126,10 @@ class AppLink(QtWidgets.QVBoxLayout):
         elif platform.system() == "Windows":
             os.system("explorer " + str(self.config_data.executable.parent))
 
-    def _apply_config(self):
+    def _apply_new_config(self):
         self._app_button.setToolTip(str(self.config_data.conan_ref))
         self._app_button.set_icon(self.config_data.icon)
+
         self._app_channel_cbox.clear()
         self._app_channel_cbox.addItem(self.config_data.conan_ref.channel)
         self._app_version_cbox.clear()
@@ -141,17 +154,13 @@ class AppLink(QtWidgets.QVBoxLayout):
     def on_accept_edit_dialog(self):
         self._app_button.grey_icon()
         self._app_link_added.emit(self)
-        self._apply_config()
+        self._apply_new_config()
+        this.main_window.config_changed.emit()
 
     def update_with_conan_info(self):
-        # set icon and ungrey if package is available
-        self._apply_config()
-
-        if self.config_data.executable.is_file():
-            self._app_button.set_icon(self.config_data.icon)
-            self._app_button.ungrey_icon()
-
-        if len(self.config_data.versions) > 0 and self._app_version_cbox.count() != len(self.config_data.versions):  # on nums changed
+        # on changed values
+        if len(self.config_data.versions) > 1 and self._app_version_cbox.count() != len(self.config_data.versions) or \
+                len(self.config_data.channels) > 1 and self._app_channel_cbox.count() != len(self.config_data.channels):
             self._app_version_cbox.clear()
             self._app_channel_cbox.clear()
             self._app_version_cbox.addItems(self.config_data.versions)
@@ -165,6 +174,15 @@ class AppLink(QtWidgets.QVBoxLayout):
                 pass
             self._app_version_cbox.setDisabled(False)
             self._app_channel_cbox.setDisabled(False)
+        else:
+            self._app_channel_cbox.clear()
+            self._app_channel_cbox.addItem(self.config_data.conan_ref.channel)
+            self._app_version_cbox.clear()
+            self._app_version_cbox.addItem(self.config_data.conan_ref.version)
+
+        if self.config_data.executable.is_file():
+            self._app_button.set_icon(self.config_data.icon)
+            self._app_button.ungrey_icon()
 
     def update_versions_cbox(self, show: bool):
         if show:
@@ -197,6 +215,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self.config_data.channel = self.config_data.INVALID_DESCR
         self.config_data.version = self._app_version_cbox.currentText()
+        this.main_window.config_changed.emit()
 
     def on_channel_selected(self, index):
         if not self._app_channel_cbox.isEnabled():
@@ -207,3 +226,4 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         self._app_button.grey_icon()
         self.config_data.channel = self._app_channel_cbox.currentText()
+        this.main_window.config_changed.emit()

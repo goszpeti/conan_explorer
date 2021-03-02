@@ -22,7 +22,6 @@ class ConanWorker():
         self._version_getter = None
         self._worker = None
         self._closing = False
-        # self._gui_update_signal = gui_update_signal
         self._tabs = tabs
 
         # get all conan refs and  make them unique # TODO separate this from worker
@@ -73,8 +72,6 @@ class ConanWorker():
                     if str(app.conan_ref) == conan_ref:
                         app.set_package_info(package_folder)
             Logger().debug("Finish working on " + conan_ref)
-            # if self._gui_update_signal:
-            #     self._gui_update_signal.emit()
             self._conan_queue.task_done()
 
     def _get_packages_versions(self, conan_ref):
@@ -85,5 +82,3 @@ class ConanWorker():
             for app in tab.get_app_entries():
                 if not self._closing and str(app.conan_ref) == conan_ref:
                     app.set_available_packages(available_refs)
-        # if not self._closing and self._gui_update_signal:
-        #     self._gui_update_signal.emit()

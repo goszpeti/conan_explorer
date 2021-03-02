@@ -103,9 +103,12 @@ class ConanApi():
             # no query possible with pattern
             search_results = self.conan.search_recipes(f"{conan_ref.name}/*@{conan_ref.user}/*",
                                                        remote_name="all").get("results", None)
-
+            if this.SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
+                local_results = self.conan.search_recipes(f"{conan_ref.name}/*@{conan_ref.user}/*",
+                                                          remote_name=None).get("results", None)
         except Exception:
             return []
+        search_results = search_results + local_results
         for res in search_results:
             for item in res.get("items", []):
                 res_list.append(ConanFileReference.loads(item.get("recipe", {}).get("id", "")))
@@ -211,6 +214,7 @@ class ConanApi():
         if min_opts_set:
             min_opts_list = min_opts_set.pop()
 
+        # TODO this calls external code of the recipe - try catch?
         default_options = self._resolve_default_options(
             self.conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
 
@@ -265,7 +269,8 @@ def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
         return res_list
     for name, value in input_dict.items():
         value = str(value)
-        if "any" == value.lower() or "anycompiler" == value.lower():
+        # TODO is this safe?
+        if "any" in value.lower():
             continue
         res_list.append(name + "=" + value)
     return res_list

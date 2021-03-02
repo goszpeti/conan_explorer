@@ -21,6 +21,11 @@ INVALID_CONAN_REF = "Invalid/NA@NA/NA"
 # 0: No debug, 1 = debug logging on
 DEBUG_LEVEL = 0
 
+# Feature toggles
+ADD_TAB_BUTTON = False
+ADD_APP_LINK_BUTTON = False
+SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True
+
 # paths to find folders - points to the folder of this file
 # must be initialized later, otherwise setup.py can't parse this file
 base_path: Path = Path("NULL")

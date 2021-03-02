@@ -50,6 +50,7 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setColumnMinimumWidth(1, 193)
         self.tab_grid_layout.setColumnMinimumWidth(2, 193)
         self.tab_grid_layout.setColumnMinimumWidth(3, 193)
+
         self.tab_grid_layout.setRowMinimumHeight(0, 120)
         self.tab_grid_layout.setRowMinimumHeight(1, 120)
         self.tab_grid_layout.setRowMinimumHeight(2, 120)
@@ -88,17 +89,25 @@ class TabAppGrid(QtWidgets.QWidget):
         self.app_links.append(app_link)
         self.config_data.add_app_entry(app_link.config_data)
         self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
-        this.main_window.config_changed.emit()
 
     def on_app_link_remove(self, app_link: AppLink):
         self.config_data.remove_app_entry(app_link.config_data)
-        # for i in reversed(range(self.tab_grid_layout.count())):
-        #    self.tab_grid_layout.itemAt(i).widget().deleteLater()
-        for child in self.tab_scroll_area_widgets.children():
-            if isinstance(child, QtWidgets.QWidget):
-                print("deleting" + str(child))
-                child.deleteLater()
+        self.app_links.remove(app_link)
+
+        # for child in self.tab_scroll_area_widgets.children():
+        #     if isinstance(child, QtWidgets.QWidget):
+        #         print("deleting" + str(child))
+        #         child.deleteLater()
         for child in self.tab_grid_layout.children():
             self.tab_grid_layout.removeItem(child)
-            child.deleteLater()
-        self.add_all_app_links()
+        # self.tab_grid_layout.removeItem(app_link)
+        del app_link
+        row = 0
+        column = 0
+        for app in self.app_links:
+            # add in order of occurence
+            self.tab_grid_layout.addLayout(app, row, column, 1, 1)
+            column += 1
+            if column == self.max_columns:
+                column = 0
+                row += 1

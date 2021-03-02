@@ -15,7 +15,7 @@ from conan_app_launcher.ui.app_grid.app_link import AppLink
 from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
 from conan_app_launcher.ui.package_explorer.local_packages import CustomProxyModel
 # from conan_app_launcher.ui.add_remove_apps import AddRemoveAppsDialog
-#from conan_app_launcher.ui.edit_app import EditAppDialog
+# from conan_app_launcher.ui.edit_app import EditAppDialog
 from conan_app_launcher.ui.about_dialog import AboutDialog
 
 Qt = QtCore.Qt
@@ -43,14 +43,17 @@ class MainUi(QtWidgets.QMainWindow):
         self._about_dialog = AboutDialog(self)
         self._new_tab = QtWidgets.QTabWidget()
 
-        # add own widgets
-        self._ui.add_app_link_button = QtWidgets.QPushButton(self)
-        self._ui.add_app_link_button.setGeometry(765, 452, 44, 44)
-        self._ui.add_app_link_button.setIconSize(QtCore.QSize(44, 44))
+        if this.ADD_APP_LINK_BUTTON:
+            self._ui.add_app_link_button = QtWidgets.QPushButton(self)
+            self._ui.add_app_link_button.setGeometry(765, 452, 44, 44)
+            self._ui.add_app_link_button.setIconSize(QtCore.QSize(44, 44))
+            self._ui.add_app_link_button.clicked.connect(self.open_new_app_link_dialog)
+        if this.ADD_TAB_BUTTON:
+            self._ui.add_tab_button = QtWidgets.QPushButton(self)
+            self._ui.add_tab_button.setGeometry(802, 50, 28, 28)
+            self._ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
+            self._ui.add_tab_button.clicked.connect(self.open_new_tab_dialog)
 
-        self._ui.add_tab_button = QtWidgets.QPushButton(self)
-        self._ui.add_tab_button.setGeometry(802, 50, 28, 28)
-        self._ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
         self._ui.tab_bar.setMovable(True)
         self._ui.tab_bar.tabBar().tabMoved.connect(self.reorder_tabs)
 
@@ -63,8 +66,6 @@ class MainUi(QtWidgets.QMainWindow):
         self.config_changed.connect(self.on_config_change)
         self.new_message_logged.connect(self.write_log)
 
-        self._ui.add_app_link_button.clicked.connect(self.open_new_app_link_dialog)
-        self._ui.add_tab_button.clicked.connect(self.open_new_tab_dialog)
         self._ui.menu_about_action.triggered.connect(self._about_dialog.show)
         self._ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
         self._ui.menu_set_display_versions.triggered.connect(self.toggle_display_versions)
@@ -80,13 +81,15 @@ class MainUi(QtWidgets.QMainWindow):
     #    super().resizeEvent(event)
 
         # TODO display conaninfo.txt on the right
-        #self.model = QtWidgets.QFileSystemModel()
+        # self.model = QtWidgets.QFileSystemModel()
         # self.model.setRootPath(r"C:\Users\goszp\.conan\data")
 
         # dirModel -> setFilter(QDir: : NoDotAndDotDot |
         #                       QDir:: AllDirs);
         self.proxy = CustomProxyModel()
-        self.proxy.setRootPath(r"C:\Users\goszp\.conan\data")
+        storage_path = Path(ConanApi().conan.config_get("storage.path"))
+
+        self.proxy.setRootPath(str(storage_path))
 
         # self.proxy.setSourceModel(self.model)
         # self.model_index = self.model.index(self.model.rootDirectory().absolutePath())
@@ -113,9 +116,10 @@ class MainUi(QtWidgets.QMainWindow):
         icon.addPixmap(QtGui.QPixmap(str(self._icons_path / "search_packages.png")),
                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self._ui.main_toolbox.setItemIcon(self.TOOLBOX_PACKAGES_ITEM, icon)
-
-        self._ui.add_app_link_button.setIcon(QtGui.QIcon(str(self._icons_path / "add_link.png")))
-        self._ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
+        if this.ADD_APP_LINK_BUTTON:
+            self._ui.add_app_link_button.setIcon(QtGui.QIcon(str(self._icons_path / "add_link.png")))
+        if this.ADD_TAB_BUTTON:
+            self._ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
         # menu
         self._ui.menu_cleanup_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
         self._ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))
@@ -140,12 +144,16 @@ class MainUi(QtWidgets.QMainWindow):
     def on_toolbox_changed(self):
         if self._ui.main_toolbox.currentIndex() == 1:  # package view
             # hide floating grid buttons
-            self._ui.add_app_link_button.hide()
-            self._ui.add_tab_button.hide()
+            if this.ADD_APP_LINK_BUTTON:
+                self._ui.add_app_link_button.hide()
+            if this.ADD_TAB_BUTTON:
+                self._ui.add_tab_button.hide()
         elif self._ui.main_toolbox.currentIndex() == 0:  # grid view
             # show floating buttons
-            self._ui.add_app_link_button.show()
-            self._ui.add_tab_button.show()
+            if this.ADD_APP_LINK_BUTTON:
+                self._ui.add_app_link_button.show()
+            if this.ADD_TAB_BUTTON:
+                self._ui.add_tab_button.show()
 
     def on_tab_context_menu_requested(self, position):
         index = self._ui.tab_bar.tabBar().tabAt(position)
@@ -274,11 +282,6 @@ class MainUi(QtWidgets.QMainWindow):
     def on_config_change(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
         write_config_file(Path(self._settings.get(LAST_CONFIG_FILE)), self._tabs_info)
-
-        # for tab in self._tabs:
-        #     for app in tab.apps:
-        #         app.update_entry(self._settings)
-        # self.save_all_configs()
 
     @ pyqtSlot(str)
     def write_log(self, text):

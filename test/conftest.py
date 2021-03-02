@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 
 import pytest
+from PyQt5 import QtCore, QtWidgets
+
 
 import conan_app_launcher.base as logger
 import conan_app_launcher as app
@@ -16,6 +18,7 @@ class PathSetup():
 
 @pytest.fixture
 def base_fixture(request):
+
     paths = PathSetup()
     app.base_path = paths.base_path / "src" / "conan_app_launcher"
     app.asset_path: Path = app.base_path / "assets"

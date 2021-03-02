@@ -58,6 +58,7 @@ class AppConfigEntry():
         if app_data is None:
             app_data = {"name": "", "conan_ref": this.INVALID_CONAN_REF, "executable": "", "icon": "",
                         "console_application": False, "args": "", "conan_options": []}
+        #self.update_callback_func = None
         self.app_data: AppType = app_data
         # self._config_file_path = config_file_path  # TODO will be removed later, when no relative icon paths allowed
         self.package_folder = Path("NULL")
