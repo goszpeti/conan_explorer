@@ -7,7 +7,7 @@ class Example(ConanFile):
     name = "example"
     version = "1.0.0"
     default_user = "user"
-    default_channel = "stable"
+    default_channel = "very_long_channel_name_you_should_not_do_this"
 
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True

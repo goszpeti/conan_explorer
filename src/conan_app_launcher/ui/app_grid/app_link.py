@@ -78,10 +78,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.clicked.connect(self.on_click)
         self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
         self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
-        # move_r = QtWidgets.QAction("Move Right", self)
-        # self._app_button.addAction(move_r)
-        # move_l = QtWidgets.QAction("Move Left", self)
-        # self._app_button.addAction(move_l)
 
         self.menu = QtWidgets.QMenu()
         icons_path = this.asset_path / "icons"
@@ -92,7 +88,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self.menu.addSeparator()
 
-        self.add_action = QtWidgets.QAction("Add new app", self)
+        self.add_action = QtWidgets.QAction("Add new app link", self)
         self.add_action.setIcon(QtGui.QIcon(str(icons_path / "add_link.png")))
         self.menu.addAction(self.add_action)
 
@@ -100,9 +96,19 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.edit_action.setIcon(QtGui.QIcon(str(icons_path / "edit.png")))
         self.menu.addAction(self.edit_action)
 
-        self.remove_action = QtWidgets.QAction("Remove", self)
+        self.remove_action = QtWidgets.QAction("Remove app link", self)
         self.remove_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.menu.addAction(self.remove_action)
+
+        self.menu.addSeparator()
+
+        self.move_r = QtWidgets.QAction("Move Right", self)
+        self.move_r.setDisabled(True)  # TODO upcomng feature
+        self.menu.addAction(self.move_r)
+
+        self.move_l = QtWidgets.QAction("Move Left", self)
+        self.move_l.setDisabled(True)  # TODO upcoming feature
+        self.menu.addAction(self.move_l)
 
         self.add_action.triggered.connect(self.open_edit_dialog)
         self.open_fm_action.triggered.connect(self.open_in_file_manager)
@@ -110,6 +116,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.remove_action.triggered.connect(self.remove)
 
         self._apply_new_config()
+        self.update_with_conan_info()
 
     def __del__(self):
         self._app_name_label.deleteLater()
@@ -211,6 +218,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         # update channels to match version
         self._app_channel_cbox.clear()  # reset cbox
         self._app_channel_cbox.addItems([self.config_data.INVALID_DESCR] + self.config_data.channels)
+        # add tooltip for channels, in case it is too long
+        for i in range(0, len(self.config_data.channels)):
+            self._app_channel_cbox.setItemData(i+1, self.config_data.channels[i], Qt.ToolTipRole)
         self._app_channel_cbox.setCurrentIndex(0)
 
         self.config_data.channel = self.config_data.INVALID_DESCR

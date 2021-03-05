@@ -19,7 +19,7 @@ def testEmptyCleanupCache():
 
 def testConanFindRemotePkg():
     """
-    Test, if search_in_remotes finds a package for the current system and the specified options.
+    Test, if search_package_in_remotes finds a package for the current system and the specified options.
     The function must find exactly one pacakge, which uses the spec. options and corresponds to the
     default settings.
     """
@@ -28,7 +28,7 @@ def testConanFindRemotePkg():
     conan = ConanApi()
     default_settings = dict(conan.cache.default_profile.settings)
 
-    pkgs = conan.search_in_remotes(ConanFileReference.loads(ref),  {"shared": "True"})
+    pkgs = conan.search_package_in_remotes(ConanFileReference.loads(ref),  {"shared": "True"})
     assert len(pkgs) == 1
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
@@ -46,7 +46,7 @@ def testConanNotFindRemotePkgWrongOpts(capsys):
     ref = "zlib/1.2.11@conan/stable"
     os.system(f"conan remove {ref} -f")
     conan = ConanApi()
-    pkg = conan.search_in_remotes(ConanFileReference.loads(ref),  {"BogusOption": "True"})
+    pkg = conan.search_package_in_remotes(ConanFileReference.loads(ref),  {"BogusOption": "True"})
     captured = capsys.readouterr()
     assert not pkg
     assert "Can't find a matching package" in captured.err
@@ -170,7 +170,7 @@ def testSearchForAllPackages():
     ref = "zlib/1.2.8@conan/stable"
     #os.system(f"conan remove {ref} -f")
     conan = ConanApi()
-    res = conan.search_for_all_recipes(ConanFileReference.loads(ref))
+    res = conan.search_recipe_in_remotes(ConanFileReference.loads(ref))
     assert "zlib/1.2.8@conan/stable" in str(res)
 
 

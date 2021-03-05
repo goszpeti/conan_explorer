@@ -16,6 +16,8 @@ except ImportError:
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components.icon import extract_icon
+from conan_app_launcher.components.cache import InfoCache
+
 
 # TODO: remove json validation, when user edit will be removed.
 # maybe remove versioning, but keep parsing for all versions?
@@ -62,12 +64,12 @@ class AppConfigEntry():
         self.app_data: AppType = app_data
         # self._config_file_path = config_file_path  # TODO will be removed later, when no relative icon paths allowed
         self.package_folder = Path("NULL")
+
         # internal repr for vars which have other types or need to be manipulated
-        self._conan_ref = None
-        self._conan_options = {}
+        self._conan_ref: ConanFileReference = None
+        self._conan_options = Dict[str, str]
         self._executable = Path("NULL")
         self._icon = Path("NULL")
-        self.gui_update_signal: QtCore.pyqtSignal = None
 
         # Init values with validation, which can be preloaded
         self.icon = self.app_data.get("icon", "")
@@ -75,6 +77,11 @@ class AppConfigEntry():
         self.conan_ref = app_data.get("conan_ref", "")
 
         self._available_refs: List[str] = [self.conan_ref]
+        if this.cache:
+            if this.USE_LOCAL_INTERNAL_CACHE:
+                self.set_package_info(this.cache.get_local_package_path(str(self._conan_ref)))
+            self.set_available_packages(this.cache.get_remote_pkg_refs(
+                self._conan_ref.name, self._conan_ref.user))
 
     @property
     def name(self):
@@ -213,7 +220,10 @@ class AppConfigEntry():
         self.app_data["conan_options"] = new_value
 
     def set_package_info(self, package_folder: Path):
-        """ Callback when conan operation is done and paths can be validated"""
+        """ Callback when conan operation is done and paths can be validated """
+        if this.USE_LOCAL_INTERNAL_CACHE:
+            if self.package_folder != package_folder and this.cache:
+                this.cache.update_local_package_path(str(self.conan_ref), package_folder)
         self.package_folder = package_folder
 
         # use setter to reevaluate
@@ -221,15 +231,11 @@ class AppConfigEntry():
         # icon needs executable
         self.icon = self.app_data.get("icon", "")
 
-        # call gui update
-        if self.gui_update_signal:
-            self.gui_update_signal.emit()
-
     def set_available_packages(self, available_refs: List[ConanFileReference]):
-        """ Callback when conan operation is done and paths can be validated"""
+        """ Callback when conan operation is done and paths can be validated """
+        if self._available_refs != available_refs and this.cache:
+            this.cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
-        if self.gui_update_signal:
-            self.gui_update_signal.emit()
 
 
 class TabConfigEntry():

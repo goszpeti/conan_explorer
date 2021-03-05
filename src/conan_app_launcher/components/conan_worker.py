@@ -72,10 +72,10 @@ class ConanWorker():
                     if str(app.conan_ref) == conan_ref:
                         app.set_package_info(package_folder)
             Logger().debug("Finish working on " + conan_ref)
-            self._conan_queue.task_done()
+            self._conan_queue.task_done()  # TODO
 
     def _get_packages_versions(self, conan_ref):
-        available_refs = self._conan.search_for_all_recipes(ConanFileReference.loads(conan_ref))
+        available_refs = self._conan.search_recipe_in_remotes(ConanFileReference.loads(conan_ref))
         if not available_refs:
             return
         for tab in self._tabs:

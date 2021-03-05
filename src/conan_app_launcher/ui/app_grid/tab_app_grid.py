@@ -51,9 +51,9 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setColumnMinimumWidth(2, 193)
         self.tab_grid_layout.setColumnMinimumWidth(3, 193)
 
-        self.tab_grid_layout.setRowMinimumHeight(0, 120)
-        self.tab_grid_layout.setRowMinimumHeight(1, 120)
-        self.tab_grid_layout.setRowMinimumHeight(2, 120)
+        self.tab_grid_layout.setRowMinimumHeight(0, 100)
+        self.tab_grid_layout.setRowMinimumHeight(1, 100)
+        self.tab_grid_layout.setRowMinimumHeight(2, 100)
         self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
         self.tab_grid_layout.setSpacing(4)
 

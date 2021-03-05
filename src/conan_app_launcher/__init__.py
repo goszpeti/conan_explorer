@@ -1,7 +1,7 @@
 """
 Contains global constants and basic/ui variables.
 """
-__version__ = "1.0.0b0"
+__version__ = "1.0.0b1"
 
 from pathlib import Path
 
@@ -19,12 +19,14 @@ INVALID_CONAN_REF = "Invalid/NA@NA/NA"
 
 ### Global variables ###
 # 0: No debug, 1 = debug logging on
-DEBUG_LEVEL = 0
+DEBUG_LEVEL = 1
 
 # Feature toggles
 ADD_TAB_BUTTON = False
 ADD_APP_LINK_BUTTON = False
 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True
+USE_LOCAL_INTERNAL_CACHE = False
+
 
 # paths to find folders - points to the folder of this file
 # must be initialized later, otherwise setup.py can't parse this file
@@ -35,4 +37,5 @@ asset_path: Path = Path("NULL")
 qt_app: Optional["QtWidgets.QApplication"] = None
 main_window: Optional["QtWidgets.QMainWindow"] = None
 conan_worker: Optional["ConanWorker"] = None
+cache: Optional["InfoCache"] = None
 current_config_file_path = Path("NULL")

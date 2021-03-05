@@ -15,7 +15,7 @@
                 },
                 {
                     "name": "App2",
-                    "conan_ref": "zlib/1.2.11@conan/NA",
+                    "conan_ref": "zlib/1.2.11@conan/stable",
                     "executable": "bin/app2",
                     "conan_options": [
                         {
@@ -24,6 +24,13 @@
                         }
                     ],
                     "icon": "icon.ico"
+                },
+                {
+                    "name": "WorkingApp",
+                    "conan_ref": "example/1.0.0@user/stable",
+                    "executable": "bin/procexp",
+                    "conan_options": [],
+                    "icon": ""
                 }
             ]
         },

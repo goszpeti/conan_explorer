@@ -1,0 +1,55 @@
+{
+    "version": "0.3.0",
+    "tabs": [
+        {
+            "name": "Basics",
+            "apps": [
+                {
+                    "name": "WorkingApp1",
+                    "conan_ref": "example/1.0.0@user/stable",
+                    "executable": "bin/procexp",
+                    "conan_options": [],
+                    "icon": ""
+                },
+                {
+                    "name": "WorkingApp3",
+                    "conan_ref": "example/1.0.0@user/very_long_channel_name_you_should_not_do_this",
+                    "executable": "bin/procexp",
+                    "conan_options": [],
+                    "icon": ""
+                },
+                {
+                    "name": "WorkingApp3",
+                    "conan_ref": "example/1.0.0@user/very_long_channel_name_you_should_not_do_this",
+                    "executable": "bin/procexp",
+                    "conan_options": [],
+                    "icon": "",
+                    "console_application": false,
+                    "args": ""
+                },
+                {
+                    "name": "WorkingApp3",
+                    "conan_ref": "example/1.0.0@user/very_long_channel_name_you_should_not_do_this",
+                    "executable": "bin/procexp",
+                    "conan_options": [],
+                    "icon": "",
+                    "console_application": false,
+                    "args": ""
+                },
+                {
+                    "name": "WorkingApp3",
+                    "conan_ref": "example/1.0.0@user/very_long_channel_name_you_should_not_do_this",
+                    "executable": "bin/procexp",
+                    "conan_options": [],
+                    "icon": "",
+                    "console_application": false,
+                    "args": ""
+                }
+            ]
+        },
+        {
+            "name": "abc",
+            "apps": []
+        }
+    ]
+}

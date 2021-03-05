@@ -13,6 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import conan_app_launcher as this
 from conan_app_launcher.settings import Settings
 from conan_app_launcher.base import Logger
+from conan_app_launcher.components.cache import InfoCache
 from conan_app_launcher.ui.main_window import MainUi
 
 try:
@@ -58,6 +59,8 @@ def main():
 
     settings_file_path = Path.home() / ".cal_config"
     settings = Settings(ini_file=settings_file_path)
+
+    this.cache = InfoCache(this.base_path / "cache.json")
 
     this.main_window = MainUi(settings)
     this.main_window.load_tabs()
