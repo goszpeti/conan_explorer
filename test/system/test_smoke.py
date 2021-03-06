@@ -10,9 +10,7 @@ from subprocess import Popen
 
 from PyQt5 import QtWidgets
 import conan_app_launcher
-from conan_app_launcher import main
-#from conan_app_launcher.ui import main_window
-#from conan_app_launcher.settings import *
+from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
 
 
 def testDebugDisabledForRelease():
@@ -25,14 +23,16 @@ def testMainLoopMock(base_fixture, mocker):
     No error expected.
     """
 
-    mocker.patch("conan_app_launcher.ui.main_window.MainUi")
-    mocker.patch.object(QtWidgets.QApplication, "exec_")
+    main_ui_mock = mocker.patch("conan_app_launcher.ui.main_window.MainUi")
+    qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec_")
+    # delayed import necessary, so the mocker can patch the object before
+    from conan_app_launcher import main
 
     main.main()
     time.sleep(2)
 
-    conan_app_launcher.ui.main_window.MainUi.assert_called_once()
-    QtWidgets.QApplication.exec_.assert_called_once()
+    main_ui_mock.assert_called_once()
+    qapp_mock.assert_called_once()
 
 
 def testMainLoop(base_fixture):
@@ -41,7 +41,7 @@ def testMainLoop(base_fixture):
     No error expected.
     """
 
-    settings_file_path = Path.home() / this.SETTINGS_FILE_NAME
+    settings_file_path = Path.home() / conan_app_launcher.SETTINGS_FILE_NAME
     settings = Settings(ini_file=settings_file_path)
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
