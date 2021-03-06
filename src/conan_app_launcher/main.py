@@ -11,10 +11,10 @@ from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import conan_app_launcher as this
-from conan_app_launcher.settings import Settings
+from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components.cache import InfoCache
 from conan_app_launcher.ui.main_window import MainUi
+from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file, ConanInfoCache
 
 try:
     # this is a workaround for windows, so that on the taskbar the
@@ -29,9 +29,31 @@ except ImportError:
 Qt = QtCore.Qt
 
 
+def load_base_components():
+    """ Load all default components. """
+    this.cache = ConanInfoCache(this.base_path / this.CACHE_FILE_NAME)
+
+    # create or read config file
+    config_file_setting = this.settings.get(LAST_CONFIG_FILE)
+    if not config_file_setting:  # empty config, create it in home path
+        config_file_path = Path.home() / this.DEFAULT_GRID_CONFIG_FILE_NAME
+        Logger().info("Creating empty ui config file " + str(config_file_path))
+        write_config_file(config_file_path, [])
+        this.settings.set(LAST_CONFIG_FILE, str(config_file_path))
+
+    else:
+        config_file_path = Path(config_file_setting)
+
+    if config_file_path.is_file():  # escape error log on first opening
+        this.tab_configs = parse_config_file(config_file_path)
+
+    # start Conan Worker
+    this.conan_worker = ConanWorker()
+
+
 def main():
     """
-    Start the Qt application
+    Start the Qt application and an all main components
     """
 
     if platform.system() == "Darwin":
@@ -57,12 +79,13 @@ def main():
         this.qt_app = QtWidgets.QApplication([])
     icon = QtGui.QIcon(str(this.asset_path / "icons" / "icon.ico"))
 
-    settings_file_path = Path.home() / ".cal_config"
-    settings = Settings(ini_file=settings_file_path)
+    settings_file_path = Path.home() / this.SETTINGS_FILE_NAME
+    this.settings = Settings(ini_file=settings_file_path)
 
-    this.cache = InfoCache(this.base_path / "cache.json")
+    load_base_components()
 
-    this.main_window = MainUi(settings)
+    this.main_window = MainUi()
+    # load tabs needs the pyqt signals - constructor has to be finished
     this.main_window.load_tabs()
     this.main_window.setWindowIcon(icon)
     this.main_window.show()

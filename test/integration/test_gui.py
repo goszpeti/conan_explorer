@@ -1,6 +1,6 @@
 """
-This test starts the application.
-It is called z_integration, so that it launches last.
+These test starts the application but not with the main function,
+so the qtbot is usable to inspect gui objects.
 """
 
 import os
@@ -13,6 +13,7 @@ from shutil import rmtree
 
 from conans.model.ref import ConanFileReference
 
+from conan_app_launcher.main import load_base_components
 import conan_app_launcher as app
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanApi
@@ -24,19 +25,12 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
+def testStartupWithExistingConfigAndOpenMenu(base_fixture, settings_fixture, qtbot):
     """
     Test, loading a config file and opening the about menu, and clicking on OK
     The about dialog showing is expected.
     """
-    temp_dir = tempfile.gettempdir()
-    temp_ini_path = os.path.join(temp_dir, "config.ini")
-
-    settings = Settings(ini_file=Path(temp_ini_path))
-    config_file_path = base_fixture.testdata_path / "app_config.json"
-    settings.set(LAST_CONFIG_FILE, str(config_file_path))
-
-    main_gui = main_window.MainUi(settings)
+    main_gui = main_window.MainUi()
     qtbot.addWidget(main_gui)
     main_gui.load_tabs()
 
@@ -46,21 +40,18 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, qtbot):
     time.sleep(3)
     assert main_gui._about_dialog.isEnabled()
     qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], Qt.LeftButton)
-    app.conan_worker.finish_working(3)
     Logger.remove_qt_logger()
 
 
-def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
+def testSelectConfigFileDialog(base_fixture, settings_fixture, qtbot, mocker):
     """
     Test, that clicking on on open config file and selecting a file writes it back to settings.
     Same file as selected expected in settings.
     """
-    temp_dir = tempfile.gettempdir()
-    temp_ini_path = os.path.join(temp_dir, "config.ini")
 
-    settings = Settings(ini_file=Path(temp_ini_path))
+    load_base_components()
 
-    main_gui = main_window.MainUi(settings)
+    main_gui = main_window.MainUi()
     main_gui.show()
     main_gui.load_tabs()
 
@@ -74,12 +65,12 @@ def testSelectConfigFileDialog(base_fixture, qtbot, mocker):
 
     main_gui._ui.menu_open_config_file.trigger()
     time.sleep(3)
-    assert settings.get(LAST_CONFIG_FILE) == selection
+    assert app.settings.get(LAST_CONFIG_FILE) == selection
     app.conan_worker.finish_working(3)
     Logger.remove_qt_logger()
 
 
-def testConanCacheWithDialog(base_fixture, qtbot, mocker):
+def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     """
     Test, that clicking on on open config file and selecting a file writes it back to settings.
     Same file as selected expected in settings.
@@ -126,12 +117,7 @@ def testConanCacheWithDialog(base_fixture, qtbot, mocker):
     assert pkg_cache_folder in paths_to_delete
     assert str(pkg_dir_to_delete.parent) in paths_to_delete
 
-    temp_dir = tempfile.gettempdir()
-    temp_ini_path = os.path.join(temp_dir, "config.ini")
-
-    settings = Settings(ini_file=Path(temp_ini_path))
-
-    main_gui = main_window.MainUi(settings)
+    main_gui = main_window.MainUi()
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, 3000)
@@ -153,11 +139,13 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
 
-    settings = Settings(ini_file=Path(temp_ini_path))
+    app.settings = Settings(ini_file=Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
-    settings.set(LAST_CONFIG_FILE, str(config_file_path))
+    app.settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
-    main_gui = main_window.MainUi(settings)
+    load_base_components()
+
+    main_gui = main_window.MainUi()
     main_gui.show()
     main_gui.load_tabs()
 
@@ -178,19 +166,14 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
                 assert test_app._app_button._greyed_out
 
 
-def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
+def testTabsCleanupOnLoadConfigFile(base_fixture, settings_fixture, qtbot):
     """
     Test, if the previously loaded tabs are deleted, when a new file is loaded
     The same tab number ist expected, as before.
     """
-    temp_dir = tempfile.gettempdir()
-    temp_ini_path = os.path.join(temp_dir, "config.ini")
+    load_base_components()
 
-    settings = Settings(ini_file=Path(temp_ini_path))
-    config_file_path = base_fixture.testdata_path / "app_config.json"
-    settings.set(LAST_CONFIG_FILE, str(config_file_path))
-
-    main_gui = main_window.MainUi(settings)
+    main_gui = main_window.MainUi()
     main_gui.show()
     main_gui.load_tabs()
 
@@ -210,18 +193,13 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, qtbot):
     app.conan_worker.finish_working(10)
 
 
-def testViewMenuOptions(base_fixture, qtbot):
+def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
     """
     Test the view menu entries.
     Check, that activating the entry set the hide flag is set on the widget.
     """
-    temp_ini_path = os.path.join(tempfile.gettempdir(), "config.ini")
-
-    settings = Settings(ini_file=Path(temp_ini_path))
-    config_file_path = base_fixture.testdata_path / "app_config.json"
-    settings.set(LAST_CONFIG_FILE, str(config_file_path))
-
-    main_gui = main_window.MainUi(settings)
+    load_base_components()
+    main_gui = main_window.MainUi()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
     main_gui.load_tabs()

@@ -90,7 +90,6 @@ class ConanApi():
         if not packages:
             return Path("NULL")
 
-        # TODO which one to install?
         if self.install_package(conan_ref, packages[0]):
             package = self.get_local_package(conan_ref, input_options)
             return self.get_package_folder(conan_ref, package)
@@ -104,7 +103,7 @@ class ConanApi():
             search_results = self.conan.search_recipes(query, remote_name="all").get("results", None)
         except Exception:
             return []
-        search_results = search_results
+
         for res in search_results:
             for item in res.get("items", []):
                 res_list.append(ConanFileReference.loads(item.get("recipe", {}).get("id", "")))
@@ -285,7 +284,7 @@ def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
         return res_list
     for name, value in input_dict.items():
         value = str(value)
-        # TODO is this safe?
+        # this is not really safe, but there can be wild values...
         if "any" in value.lower():
             continue
         res_list.append(name + "=" + value)

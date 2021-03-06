@@ -41,7 +41,7 @@ def testMainLoop(base_fixture):
     No error expected.
     """
 
-    settings_file_path = Path.home() / ".cal_config"
+    settings_file_path = Path.home() / this.SETTINGS_FILE_NAME
     settings = Settings(ini_file=settings_file_path)
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))

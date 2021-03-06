@@ -18,8 +18,8 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
 
 
 def is_file_executable(file_path: Path) -> bool:
-    # Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
-    # program has this flag. Use pathext env-var to determine executable file extensions.
+    """ Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
+     program has this flag. Use pathext env-var to determine executable file extensions. """
     is_executable = False
     if platform.system() == "Linux":
         if os.access(str(file_path), os.X_OK):

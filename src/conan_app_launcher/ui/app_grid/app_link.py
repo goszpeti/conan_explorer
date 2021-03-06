@@ -186,7 +186,9 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_channel_cbox.addItem(self.config_data.conan_ref.channel)
             self._app_version_cbox.clear()
             self._app_version_cbox.addItem(self.config_data.conan_ref.version)
-
+        # add tooltip for channels, in case it is too long
+        for i in range(0, len(self.config_data.channels)):
+            self._app_channel_cbox.setItemData(i, self.config_data.channels[i], Qt.ToolTipRole)
         if self.config_data.executable.is_file():
             self._app_button.set_icon(self.config_data.icon)
             self._app_button.ungrey_icon()

@@ -1,8 +1,7 @@
 import json
 import os
-import conan_app_launcher as this
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 from conan_app_launcher.base import Logger
 from conans.model.ref import ConanFileReference
@@ -13,10 +12,14 @@ except ImportError:
     from typing_extensions import TypedDict
 
 
-class InfoCache():
+class ConanInfoCache():
+    """
+    This is a cache to accelerate calls which need Remote access.
+    It also has an option to store the local package path.
+    """
 
     def __init__(self, cache_file: Path):
-        self._cache_file = cache_file  # this.base_path / "cache.json"
+        self._cache_file = cache_file
         self._local_packages: Dict[str, str] = {}
         self._remote_packages: Dict[str, List[str]] = {}
         self._read_only = False  # for testing purposes
@@ -30,6 +33,7 @@ class InfoCache():
         self._read()
 
     def get_local_package_path(self, conan_ref: ConanFileReference) -> Path:
+        """ Return cached package path of a locally installed package. """
         conan_ref_str = str(conan_ref)
         pkg_path_str = self._local_packages.get(conan_ref_str, "")
         if not pkg_path_str:
@@ -43,6 +47,7 @@ class InfoCache():
         return pkg_path
 
     def get_remote_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
+        """ Return cached info on available conan refs from  the same ref name and user. """
         refs: List[ConanFileReference] = []
         version_channels = self._remote_packages.get(f"{name}@{user}", [])
         for version_channel in version_channels:
@@ -51,6 +56,7 @@ class InfoCache():
         return refs
 
     def search_in_remote_refs(self, query: str) -> List[ConanFileReference]:
+        """ Return cached info on available conan refs from a query """
         refs: List[ConanFileReference] = []
         for key in self._remote_packages.keys():
             if query in key:
@@ -59,10 +65,15 @@ class InfoCache():
         return list(set(refs))
 
     def update_local_package_path(self, conan_ref: ConanFileReference, folder: Path):
+        """ Update the cache with the path of a local package path. """
         self._local_packages.update({str(conan_ref): str(folder)})
         self._write()
 
     def update_remote_package_list(self, remote_packages=List[ConanFileReference], invalidate=False):
+        """ 
+        Update the cache with the info of several remote packages. 
+        Invalidate option clears the cache.
+        """
         if invalidate:  # clear cache
             self._remote_packages.clear()
             self._write()
@@ -78,6 +89,7 @@ class InfoCache():
         self._write()
 
     def _read(self):
+        """ Laod the cache. """
         json_data = {}
         try:
             with open(self._cache_file, "r") as json_file:
@@ -93,6 +105,7 @@ class InfoCache():
         self._read_only = json_data.get("read_only", False)
 
     def _write(self):
+        """ Write the cache to file. """
         if self._read_only:
             return
         json_data = {}

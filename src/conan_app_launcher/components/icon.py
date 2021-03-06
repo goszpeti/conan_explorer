@@ -7,9 +7,7 @@ from pathlib import Path
 
 import struct
 import pefile
-from builtins import range
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components.file_runner import is_file_executable
 
 
 class ExtractIcon(object):

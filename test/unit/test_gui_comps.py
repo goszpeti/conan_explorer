@@ -8,6 +8,8 @@ from subprocess import check_output
 from time import sleep
 from pathlib import Path
 
+
+from conan_app_launcher.main import load_base_components
 from conan_app_launcher.components.config_file import AppConfigEntry, AppType
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.app_grid.app_link import AppLink
@@ -43,7 +45,7 @@ def testAboutDialog(base_fixture, qtbot):
 
 def testEditAppDialog(base_fixture, qtbot):
     """
-
+    TODO Finish
     """
     app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
                          "executable": "", "console_application": True, "icon": ""}
@@ -109,7 +111,7 @@ def testAppLinkOpen(base_fixture, qtbot):
 
 def testAppLinkVersionAndChannelSwitch(base_fixture, qtbot):
     """
-
+    TODO Implmement
     """
     app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
                          "executable": "", "console_application": True, "icon": ""}

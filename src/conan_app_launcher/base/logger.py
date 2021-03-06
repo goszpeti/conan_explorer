@@ -1,8 +1,9 @@
 import logging
 from threading import Lock
 
-from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
 from PyQt5 import QtWidgets
+
+from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
 
 
 class Logger(logging.Logger):

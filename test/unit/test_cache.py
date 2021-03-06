@@ -5,7 +5,7 @@ from distutils.file_util import copy_file
 
 from pathlib import Path
 
-from conan_app_launcher.components.cache import InfoCache
+from conan_app_launcher.components.cache import ConanInfoCache
 from conans.model.ref import ConanFileReference as CFR
 
 
@@ -17,7 +17,7 @@ def testNewCache():
     temp_cache_path = temp_dir / "cache.json"
     if temp_cache_path.exists():
         os.remove(str(temp_cache_path))
-    cache = InfoCache(temp_cache_path)
+    cache = ConanInfoCache(temp_cache_path)
     assert temp_cache_path.exists()
 
 
@@ -28,7 +28,7 @@ def testReadCache(base_fixture):
     temp_cache_path = Path(tempfile.gettempdir()) / "cache.json"
     copy_file(str(base_fixture.testdata_path / "cache" / "cache_read.json"), str(temp_cache_path))
 
-    cache = InfoCache(temp_cache_path)
+    cache = ConanInfoCache(temp_cache_path)
     assert cache._local_packages == {"my_package/1.0.0@myself/stable": "",
                                      "my_package/2.0.0@myself/stable": "C:\\.conan\\pkg"}
     assert cache._remote_packages == {
@@ -59,7 +59,7 @@ def testReadAndDeleteCorruptCache(base_fixture):
     temp_cache_path = Path(tempfile.gettempdir()) / "cache.json"
     copy_file(str(base_fixture.testdata_path / "cache" / "cache_read_corrupt.json"), str(temp_cache_path))
 
-    cache = InfoCache(temp_cache_path)
+    cache = ConanInfoCache(temp_cache_path)
     info = ""
     with open(temp_cache_path) as tcf:
         info = tcf.read()
@@ -73,7 +73,7 @@ def testUpdateCache(base_fixture):
     temp_cache_path = Path(tempfile.gettempdir()) / "cache.json"
     copy_file(str(base_fixture.testdata_path / "cache" / "cache_write.json"), str(temp_cache_path))
 
-    cache = InfoCache(temp_cache_path)
+    cache = ConanInfoCache(temp_cache_path)
     pkg = CFR.loads("new_pkg/1.0.0@me/stable")
     path = Path(r"C:\temp")
     cache.update_local_package_path(pkg, path)

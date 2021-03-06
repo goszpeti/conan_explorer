@@ -3,6 +3,7 @@ import time
 import platform
 from conans.model.ref import ConanFileReference
 
+import conan_app_launcher as app
 from conan_app_launcher.components.conan import _create_key_value_pair_list, ConanApi
 from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
@@ -174,7 +175,7 @@ def testSearchForAllPackages():
     assert "zlib/1.2.8@conan/stable" in str(res)
 
 
-def testConanWorker(base_fixture):
+def testConanWorker(base_fixture, settings_fixture):
     """
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
@@ -184,8 +185,8 @@ def testConanWorker(base_fixture):
     #     def emit(self):
     #         pass
     # sig = DummySignal()
-    config_data = parse_config_file(base_fixture.testdata_path / "app_config.json")
-    conan_worker = ConanWorker(config_data)
+    app.tab_configs = parse_config_file(settings_fixture)
+    conan_worker = ConanWorker()
     elements_before = conan_worker._conan_queue.qsize()
     time.sleep(10)
 

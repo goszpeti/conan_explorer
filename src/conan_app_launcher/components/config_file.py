@@ -15,8 +15,10 @@ except ImportError:
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
+from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.components.icon import extract_icon
-from conan_app_launcher.components.cache import InfoCache
+from conan_app_launcher.components.cache import ConanInfoCache
+from conan_app_launcher.components.conan import ConanApi
 
 
 # TODO: remove json validation, when user edit will be removed.
@@ -78,10 +80,14 @@ class AppConfigEntry():
 
         self._available_refs: List[str] = [self.conan_ref]
         if this.cache:
-            if this.USE_LOCAL_INTERNAL_CACHE:
-                self.set_package_info(this.cache.get_local_package_path(str(self._conan_ref)))
             self.set_available_packages(this.cache.get_remote_pkg_refs(
                 self._conan_ref.name, self._conan_ref.user))
+            if this.USE_LOCAL_INTERNAL_CACHE:
+                self.set_package_info(this.cache.get_local_package_path(str(self._conan_ref)))
+            elif not this.USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:  # last chance to get path
+                conan = ConanApi()
+                package_folder = conan.get_path_or_install(self.conan_ref, self.conan_options)
+                self.set_package_info(package_folder)
 
     @property
     def name(self):
@@ -175,7 +181,7 @@ class AppConfigEntry():
             self._icon = self.package_folder / new_value.replace("//", "")
         elif new_value and not Path(new_value).is_absolute():
             # relative path is calculated from config file path
-            self._icon = this.current_config_file_path.parent / new_value
+            self._icon = Path(this.settings.get(LAST_CONFIG_FILE)).parent / new_value
         elif not new_value:  # try to find icon in temp
             self._icon = extract_icon(self.executable, Path(tempfile.gettempdir()))
         else:  # absolute path
