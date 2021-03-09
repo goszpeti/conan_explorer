@@ -19,14 +19,14 @@ def testCorrectFile(base_fixture, settings_fixture):
     tab0_entries = tabs[0].get_app_entries()
     assert str(tab0_entries[0].conan_ref) == "m4_installer/1.4.18@bincrafters/stable"
     assert tab0_entries[0].app_data.get("executable") == "bin/m4"
-    assert tab0_entries[0].icon.name == "app_link.png"
+    assert tab0_entries[0].app_data.get("icon") == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
     assert tab0_entries[0].is_console_application
     assert tab0_entries[0].args == "-n name"
 
     assert str(tab0_entries[1].conan_ref) == "zlib/1.2.11@conan/stable"
     assert tab0_entries[1].app_data.get("executable") == "bin/app2"
-    assert tab0_entries[1].icon.name == "app_link.png"
+    assert tab0_entries[1].app_data.get("icon") == "icon.ico"
     assert tab0_entries[1].name == "App2"
     assert not tab0_entries[1].is_console_application  # default
     assert tab0_entries[1].args == ""
@@ -36,7 +36,7 @@ def testCorrectFile(base_fixture, settings_fixture):
     tab1_entries = tabs[1].get_app_entries()
     assert str(tab1_entries[0].conan_ref) == "app2/1.0.0@user/stable"
     assert tab1_entries[0].app_data["executable"] == "bin/app2.exe"
-    assert tab1_entries[0].icon.name == "app_link.png"
+    assert tab1_entries[0].app_data.get("icon") == "//myicon.png"
     assert tab1_entries[0].name == "App2"
 
 
