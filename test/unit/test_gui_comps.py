@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 from conan_app_launcher.main import load_base_components
-from conan_app_launcher.components.config_file import AppConfigEntry, AppType
+from conan_app_launcher.components.config_file import AppConfigEntry, AppType, OptionType
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.app_grid.app_link import AppLink
 from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
@@ -43,9 +43,57 @@ def testAboutDialog(base_fixture, qtbot):
     assert widget.isHidden()
 
 
-def testEditAppDialog(base_fixture, qtbot):
+def testEditAppDialogNeeAppLink(base_fixture, qtbot):
+    """ Test, if a new dialog on empty AppData will ..."""
+
+
+def testEditAppDialogFillValues(base_fixture, qtbot):
     """
-    TODO Finish
+    Test, if the already existant app data is displayed correctly in the dialog.
+    """
+    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
+                         "executable": "bin/myexec",
+                         "console_application": True, "icon": "//myicon.ico"}
+    app_info = AppConfigEntry(app_data)
+    app_info.conan_options = {"a": "b", "c": "True", "d": "10"}
+
+    if platform.system() == "Windows":
+        assert app_info.icon.is_file()
+        assert app_info.icon.suffix == ".png"
+
+    root_obj = QtWidgets.QWidget()
+    qtbot.addWidget(root_obj)
+    sig = QtCore.pyqtSignal()
+    root_obj.setObjectName("parent")
+    diag = EditAppDialog(app_info, sig, root_obj)
+    root_obj.setFixedSize(100, 200)
+    root_obj.show()
+
+    qtbot.waitForWindowShown(root_obj)
+
+    # assert values
+    assert diag._ui.name_line_edit.text() == app_info.name
+    assert diag._ui.conan_ref_line_edit.text() == str(app_info.conan_ref)
+    assert diag._ui.exec_path_line_edit.text() == app_data.get("executable")
+    assert diag._ui.is_console_app_checkbox.isChecked() == app_info.is_console_application
+    assert diag._ui.icon_line_edit.text() == app_data.get("icon")
+    assert diag._ui.args_line_edit.text() == app_info.args
+    conan_options_text = diag._ui.conan_opts_text_edit.toPlainText()
+    for opt in app_info.conan_options:
+        assert f"{opt}={app_info.conan_options[opt]}" in conan_options_text
+
+    # modify smth
+    diag._ui.name_line_edit.setText("NewName")
+
+    # press cancel - no values should be saved
+    qtbot.mouseClick(diag.button_box.buttons()[1], Qt.LeftButton)
+
+    assert app_info.name == "test"
+
+
+def testEditAppDialogReadValues(base_fixture, qtbot):
+    """
+    Test, if the entered/modified/untouched data is written correctly after pressing OK.
     """
     app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
                          "executable": "", "console_application": True, "icon": ""}
@@ -60,11 +108,12 @@ def testEditAppDialog(base_fixture, qtbot):
     qtbot.addWidget(root_obj)
     sig = QtCore.pyqtSignal()
     root_obj.setObjectName("parent")
-    edit_app.EditAppDialog(app_info, sig, root_obj)
+    EditAppDialog(app_info, sig, root_obj)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
-    # qtbot.waitForWindowShown(root_obj)
+    qtbot.waitForWindowShown(root_obj)
+
     # qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
     # sleep(5)  # wait for terminal to spawn
 
