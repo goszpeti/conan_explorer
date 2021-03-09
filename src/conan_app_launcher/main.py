@@ -14,7 +14,8 @@ import conan_app_launcher as this
 from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
 from conan_app_launcher.base import Logger
 from conan_app_launcher.ui.main_window import MainUi
-from conan_app_launcher.components import ConanWorker, parse_config_file, write_config_file, ConanInfoCache
+from conan_app_launcher.components import (
+    ConanWorker, parse_config_file, write_config_file, ConanInfoCache, TabConfigEntry, AppConfigEntry)
 
 try:
     # this is a workaround for windows, so that on the taskbar the
@@ -35,11 +36,16 @@ def load_base_components():
 
     # create or read config file
     config_file_setting = this.settings.get(LAST_CONFIG_FILE)
-    if not config_file_setting:  # empty config, create it in home path
-        config_file_path = Path.home() / this.DEFAULT_GRID_CONFIG_FILE_NAME
-        Logger().info("Creating empty ui config file " + str(config_file_path))
-        write_config_file(config_file_path, [])
-        this.settings.set(LAST_CONFIG_FILE, str(config_file_path))
+    default_config_file_path = Path.home() / this.DEFAULT_GRID_CONFIG_FILE_NAME
+
+    # empty config, create it in home path
+    if not config_file_setting or not os.path.exists(default_config_file_path):
+        config_file_path = default_config_file_path
+        Logger().info("Creating empty ui config file " + str(default_config_file_path))
+        tab = TabConfigEntry("New Tab")
+        tab.add_app_entry(AppConfigEntry({"name": "My App Link"}))
+        write_config_file(default_config_file_path, [tab])
+        this.settings.set(LAST_CONFIG_FILE, str(default_config_file_path))
 
     else:
         config_file_path = Path(config_file_setting)

@@ -64,7 +64,6 @@ class AppConfigEntry():
                         "console_application": False, "args": "", "conan_options": []}
         #self.update_callback_func = None
         self.app_data: AppType = app_data
-        # self._config_file_path = config_file_path  # TODO will be removed later, when no relative icon paths allowed
         self.package_folder = Path("NULL")
 
         # internal repr for vars which have other types or need to be manipulated
@@ -74,7 +73,7 @@ class AppConfigEntry():
 
         # Init values with validation, which can be preloaded
         self.icon = self.app_data.get("icon", "")
-        self.conan_ref = app_data.get("conan_ref", "")
+        self.conan_ref = app_data.get("conan_ref",  this.INVALID_CONAN_REF)
 
         self._available_refs: List[str] = [self.conan_ref]
         if this.cache:
@@ -113,7 +112,7 @@ class AppConfigEntry():
         except Exception as error:
             # errors happen fairly often, keep going
             self._conan_ref = ConanFileReference.loads(this.INVALID_CONAN_REF)
-            Logger().error(f"Conan ref id invalid {str(error)}")
+            Logger().warning(f"Conan ref id invalid {str(error)}")
 
     @property
     def version(self):
@@ -213,7 +212,7 @@ class AppConfigEntry():
     @property
     def conan_options(self) -> Dict[str, str]:  # user specified, can differ from the actual installation
         conan_options: Dict[str, str] = {}
-        for option_entry in self.app_data["conan_options"]:
+        for option_entry in self.app_data.get("conan_options", {}):
             conan_options[option_entry["name"]] = option_entry.get("value", "")
         return conan_options
 

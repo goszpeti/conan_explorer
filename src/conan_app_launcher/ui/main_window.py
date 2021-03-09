@@ -36,7 +36,6 @@ class MainUi(QtWidgets.QMainWindow):
 
         self._ui = uic.loadUi(this.base_path / "ui" / "main.ui", baseinstance=self)
         self._about_dialog = AboutDialog(self)
-        # self._new_tab = QtWidgets.QTabWidget() TODO do i need this?
 
         if this.ADD_APP_LINK_BUTTON:
             self._ui.add_app_link_button = QtWidgets.QPushButton(self)
@@ -69,7 +68,6 @@ class MainUi(QtWidgets.QMainWindow):
         self._ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
         self._ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
-        # self.load_tabs()
 
         # TODO display conaninfo.txt on the right
         # self.model = QtWidgets.QFileSystemModel()
@@ -225,7 +223,7 @@ class MainUi(QtWidgets.QMainWindow):
         this.tab_configs = new_list
         self.on_config_change()
 
-    @pyqtSlot()
+    @pyqtSlot(QtCore.QPoint)
     def on_tab_context_menu_requested(self, position):
         index = self._ui.tab_bar.tabBar().tabAt(position)
         menu = QtWidgets.QMenu()

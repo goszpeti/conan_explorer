@@ -35,12 +35,6 @@ class EditAppDialog(QtWidgets.QDialog):
             conan_options_text += f"{option}={self._app_config_data.conan_options.get(option)}\n"
         self._ui.conan_opts_text_edit.setText(conan_options_text)
 
-        # add validators TODO
-
-        # lineEdit with validation
-        # self._ui.conan_ref_line_edit.setValidator(objValidator)
-        # self._ui.conan_ref_line_edit.textChanged.connect(self._ui.conan_ref_line_edit.validate_text)
-
         self._ui.button_box.accepted.connect(self.save_edited_dialog)
         self.show()
 

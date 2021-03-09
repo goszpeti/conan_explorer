@@ -1,0 +1,222 @@
+{
+    "version": "0.3.0",
+    "tabs": [
+        {
+            "name": "Basics",
+            "apps": [
+                {
+                    "name": "App1 with spaces",
+                    "conan_ref": "YouGaveA/1.4.18@Wrong/stable",
+                    "executable": "bin/m4",
+                    "icon": "NonExistantIcon.png",
+                    "console_application": true,
+                    "args": "-n name",
+                    "conan_options": [
+                        {
+                            "name": "a",
+                            "value": "b"
+                        },
+                        {
+                            "name": "b",
+                            "value": "c"
+                        }
+                    ]
+                },
+                {
+                    "name": "App2",
+                    "conan_ref": "zlib/1.2.8@conan/stable",
+                    "executable": "bin/app2",
+                    "conan_options": [
+                        {
+                            "name": "shared",
+                            "value": "True"
+                        }
+                    ],
+                    "icon": "icon.ico"
+                },
+                {
+                    "name": "App3",
+                    "conan_ref": "zlib/1.2.11@conan/stable",
+                    "executable": "bin/app2",
+                    "conan_options": [
+                        {
+                            "name": "shared",
+                            "value": "True"
+                        }
+                    ],
+                    "icon": "icon.ico"
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "example/1.0.0@user/stable",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "Add new Link",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "C:\\sw-dev\\product\\app_grid_conan\\src\\conan_app_launcher\\assets\\new_app_icon.png",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                }
+            ]
+        },
+        {
+            "name": "Extra",
+            "apps": [
+                {
+                    "name": "App2",
+                    "conan_ref": "YouGaveA/1.0.0@Wrong/stable",
+                    "executable": "bin/app2.exe",
+                    "icon": "//myicon.png",
+                    "conan_options": []
+                }
+            ]
+        },
+        {
+            "name": "abc",
+            "apps": [
+                {
+                    "name": "a",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "b",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "c",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "d",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                },
+                {
+                    "name": "e",
+                    "conan_ref": "Invalid/NA@NA/NA",
+                    "executable": "",
+                    "icon": "",
+                    "console_application": false,
+                    "args": "",
+                    "conan_options": []
+                }
+            ]
+        }
+    ]
+}
