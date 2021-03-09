@@ -199,8 +199,9 @@ def testOptionsEval(base_fixture):
     assert app_link.conan_options == {"myopt": "myvalue"}
 
     # multi value
-    app_link.conan_options = [{"name": "myopt1", "value": "myvalue1"},
-                              {"name": "myopt2", "value": "myvalue2"}]
+    app_link.conan_options = {"myopt1": "myvalue1", "myopt2": "myvalue2"}
+    assert app_link.app_data["conan_options"] == [{"name": "myopt1", "value": "myvalue1"},
+                                                  {"name": "myopt2", "value": "myvalue2"}]
     assert app_link.conan_options == {"myopt1": "myvalue1", "myopt2": "myvalue2"}
 
     # empty value
