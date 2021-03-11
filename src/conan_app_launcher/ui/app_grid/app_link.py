@@ -168,6 +168,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         # on changed values
         if len(self.config_data.versions) > 1 and self._app_version_cbox.count() != len(self.config_data.versions) or \
                 len(self.config_data.channels) > 1 and self._app_channel_cbox.count() != len(self.config_data.channels):
+            # signals the cbox callback that we do not sen new user values
+            self._app_version_cbox.setEnabled(False)
+            self._app_channel_cbox.setEnabled(False)
             self._app_version_cbox.clear()
             self._app_channel_cbox.clear()
             self._app_version_cbox.addItems(self.config_data.versions)
@@ -230,6 +233,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         this.main_window.config_changed.emit()
 
     def on_channel_selected(self, index):
+        """ This is callback is also called on cbox_add_items, so a workaround is needed"""
         if not self._app_channel_cbox.isEnabled():
             return
         if index == -1:
@@ -238,4 +242,5 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         self._app_button.grey_icon()
         self.config_data.channel = self._app_channel_cbox.currentText()
+        self._app_button.setToolTip(str(self.config_data.conan_ref))
         this.main_window.config_changed.emit()

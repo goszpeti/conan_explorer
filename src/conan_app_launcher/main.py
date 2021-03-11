@@ -92,7 +92,7 @@ def main():
 
     this.main_window = MainUi()
     # load tabs needs the pyqt signals - constructor has to be finished
-    this.main_window.load_tabs()
+    this.main_window.start_app_grid()
     this.main_window.setWindowIcon(icon)
     this.main_window.show()
 

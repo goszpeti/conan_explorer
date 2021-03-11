@@ -1,5 +1,12 @@
-from PyQt5 import QtCore, QtWidgets, QtGui, uic
+from PyQt5 import QtCore, QtWidgets, QtGui
 from pathlib import Path
+from conan_app_launcher.components import parse_config_file, write_config_file, TabConfigEntry, ConanApi
+from typing import TYPE_CHECKING, List, Optional
+
+Qt = QtCore.Qt
+
+if TYPE_CHECKING:
+    from conan_app_launcher.ui.main_window import MainUi
 
 
 class CustomProxyModel(QtWidgets.QFileSystemModel):  # QtCore.QSortFilterProxyModel):
@@ -85,3 +92,51 @@ class CustomProxyModel(QtWidgets.QFileSystemModel):  # QtCore.QSortFilterProxyMo
             if item in name:
                 return False
         return True
+
+
+class LocalConanPackageExplorer():
+    def __init__(self, main_window: "MainUi"):
+        self._main_window = main_window
+        # TODO display conaninfo.txt on the right
+        # self.model = QtWidgets.QFileSystemModel()
+        # self.model.setRootPath(r"C:\Users\goszp\.conan\data")
+
+        # dirModel -> setFilter(QDir: : NoDotAndDotDot |
+        #                       QDir:: AllDirs);
+        self.proxy = CustomProxyModel()
+        storage_path = Path(ConanApi().conan.config_get("storage.path"))
+
+        self.proxy.setRootPath(str(storage_path))
+
+        # self.proxy.setSourceModel(self.model)
+        # self.model_index = self.model.index(self.model.rootDirectory().absolutePath())
+        # print(self.model.rootDirectory().absolutePath())
+        # self.proxy_index = self.proxy.mapFromSource(self.model_index)
+        self._main_window.ui.package_view.setModel(self.proxy)
+        self.proxy.sort(0, Qt.AscendingOrder)
+        self._main_window.ui.package_view.setRootIndex(
+            self.proxy.index(self.proxy.rootDirectory().absolutePath()))
+
+        # self._main_window.ui.package_view.clicked.connect(self.on_click)
+        self._main_window.ui.package_view.setColumnHidden(1, True)
+        self._main_window.ui.package_view.setColumnHidden(2, True)
+        self._main_window.ui.package_view.setColumnWidth(0, 310)
+        # self._main_window.ui.package_view.setRootIsDecorated(False)
+        # self._main_window.ui.package_view.setItemsExpandable(False)
+        self._main_window.ui.package_view.selectionModel().selectionChanged.connect(
+            self.on_selection_change)
+
+    # @pyqtSlot(int)
+    def on_selection_change(self):  # , index: int):
+        # change folder in file view
+        view_index = self._main_window.ui.package_view.selectionModel().selectedIndexes()[0]
+        # proxy_index = self.proxy.mapToSource(view_index)
+        # item_name = self.model.fileName(proxy_index)
+        # # TODO discover upstream, if in package
+        # path = self.model.fileInfo(proxy_index).absoluteFilePath()
+        # c_p = Path(path) / "conaninfo.txt"
+        # if c_p.is_file():
+        #     text = ""
+        #     with open(c_p, "r") as fp:
+        #         text = fp.read()
+        #     self.package_info.setText(text)

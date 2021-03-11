@@ -186,7 +186,7 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, settings_fixture, qtbot):
 
     app.conan_worker.finish_working(10)
 
-    main_gui._re_init()  # re-init with same file
+    main_gui.re_init()  # re-init with same file
     time.sleep(5)
 
     assert main_gui._ui.tab_bar.count() == tabs_num

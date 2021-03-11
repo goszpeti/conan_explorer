@@ -65,6 +65,7 @@ class AppConfigEntry():
         #self.update_callback_func = None
         self.app_data: AppType = app_data
         self.package_folder = Path("NULL")
+        self.gui_update_signal: QtCore.pyqtSignal = None
 
         # internal repr for vars which have other types or need to be manipulated
         self._conan_ref: ConanFileReference = None
@@ -235,11 +236,19 @@ class AppConfigEntry():
         # icon needs executable
         self.icon = self.app_data.get("icon", "")
 
+        # call gui update
+        if self.gui_update_signal:
+            self.gui_update_signal.emit()
+
     def set_available_packages(self, available_refs: List[ConanFileReference]):
         """ Callback when conan operation is done and paths can be validated """
         if self._available_refs != available_refs and this.cache:
             this.cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
+
+        # call gui update
+        if self.gui_update_signal:
+            self.gui_update_signal.emit()
 
 
 class TabConfigEntry():
@@ -331,4 +340,4 @@ def write_config_file(config_file_path: Path, tab_entries: List[TabConfigEntry])
     app_config: AppConfigType = {"version": version, "tabs": tabs_data}
 
     with open(str(config_file_path), "w") as config_file:
-        json.dump(app_config, config_file, indent=4)
+        json.dump(app_config, config_file, indent=2)
