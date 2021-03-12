@@ -57,7 +57,7 @@ def testUpdate(base_fixture, settings_fixture):
     read_obj = {}
     with open(temp_file) as config_file:
         read_obj = json.load(config_file)
-    assert read_obj.get("version") == "0.3.0"  # last version
+    assert read_obj.get("version") == "0.3.1"  # last version
     assert read_obj.get("tabs")[0].get("apps")[0].get("conan_ref") == "m4_installer/1.4.18@bincrafters/stable"
     assert read_obj.get("tabs")[0].get("apps")[0].get("package_id") is None
 
