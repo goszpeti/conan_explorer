@@ -171,6 +171,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             # signals the cbox callback that we do not sen new user values
             self._app_version_cbox.setEnabled(False)
             self._app_channel_cbox.setEnabled(False)
+            # TODO callback from changing channel zeroes selection
             self._app_version_cbox.clear()
             self._app_channel_cbox.clear()
             self._app_version_cbox.addItems(self.config_data.versions)
@@ -184,11 +185,7 @@ class AppLink(QtWidgets.QVBoxLayout):
                 pass
             self._app_version_cbox.setDisabled(False)
             self._app_channel_cbox.setDisabled(False)
-        else:
-            self._app_channel_cbox.clear()
-            self._app_channel_cbox.addItem(self.config_data.conan_ref.channel)
-            self._app_version_cbox.clear()
-            self._app_version_cbox.addItem(self.config_data.conan_ref.version)
+
         # add tooltip for channels, in case it is too long
         for i in range(0, len(self.config_data.channels)):
             self._app_channel_cbox.setItemData(i, self.config_data.channels[i], Qt.ToolTipRole)
@@ -240,7 +237,8 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         if self.config_data.channel == self._app_channel_cbox.currentText():
             return
-        self._app_button.grey_icon()
+
         self.config_data.channel = self._app_channel_cbox.currentText()
         self._app_button.setToolTip(str(self.config_data.conan_ref))
+        self._app_button.set_icon(self.config_data.icon)
         this.main_window.config_changed.emit()

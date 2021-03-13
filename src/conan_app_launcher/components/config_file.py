@@ -74,7 +74,7 @@ class AppConfigEntry():
 
         # Init values with validation, which can be preloaded
         self.icon = self.app_data.get("icon", "")
-        self.conan_ref = app_data.get("conan_ref",  this.INVALID_CONAN_REF)
+        self.conan_ref = app_data.get("conan_ref", this.INVALID_CONAN_REF)
 
         self._available_refs: List[str] = [self.conan_ref]
         if this.cache:
@@ -103,13 +103,17 @@ class AppConfigEntry():
     def conan_ref(self, new_value: str):
         try:
             self._conan_ref = ConanFileReference.loads(new_value)
-            self.app_data["conan_ref"] = new_value
 
             # add conan ref to worker
             if (self.app_data["conan_ref"] != new_value and new_value != this.INVALID_CONAN_REF
                     and self._conan_ref.version != self.INVALID_DESCR
                     and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
                 this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
+            # invalidate old entries
+            self.app_data["conan_ref"] = new_value
+            self._executable = Path("NULL")
+            self.icon = self.app_data.get("icon", "")
+
         except Exception as error:
             # errors happen fairly often, keep going
             self._conan_ref = ConanFileReference.loads(this.INVALID_CONAN_REF)

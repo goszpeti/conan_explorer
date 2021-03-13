@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import MainUi
 
 
-class CustomProxyModel(QtWidgets.QFileSystemModel):  # QtCore.QSortFilterProxyModel):
+class ConanFileSystemModel(QtWidgets.QFileSystemModel):  # QtCore.QSortFilterProxyModel):
     FILTERED_ITEMS = [".lock", ".count", "metadata.json",
                       "conaninfo.txt", "conanmanifest.txt"  # TODO ??
                       ]
@@ -103,7 +103,7 @@ class LocalConanPackageExplorer():
 
         # dirModel -> setFilter(QDir: : NoDotAndDotDot |
         #                       QDir:: AllDirs);
-        self.proxy = CustomProxyModel()
+        self.proxy = ConanFileSystemModel()
         storage_path = Path(ConanApi().conan.config_get("storage.path"))
 
         self.proxy.setRootPath(str(storage_path))
