@@ -34,35 +34,43 @@ class Settings():
 
         ### default setting values ###
         self._values = {
-            # general
-            LAST_CONFIG_FILE: "",
-            # view
-            DISPLAY_APP_CHANNELS: True,
-            DISPLAY_APP_VERSIONS: True,
-            GRID_ROWS: 20,
-            GRID_COLUMNS: 4,
+            self._GENERAL_SECTION_NAME: {
+                    LAST_CONFIG_FILE: "",
+                },
+            self._VIEW_SECTION_NAME: {
+                    DISPLAY_APP_CHANNELS: True,
+                    DISPLAY_APP_VERSIONS: True,
+                    GRID_ROWS: 20,
+                    GRID_COLUMNS: 4,
+            }
         }
 
         self._read_ini()
 
-    def get(self, name: str) -> Any:
-        """ Get a specific setting """
-        return self._values.get(name, None)
 
-    def set(self, name: str, value):
-        """ Set a specific setting """
-        self._values[name] = value
-        # autosave
-        self.save_to_file()
+    def get(self, setting_name: str):
+        """ Get a specific setting """
+        value = None
+        for section in self._values.keys():
+            if setting_name in self._values[section]:
+                value = self._values[section].get(setting_name, None)
+                break
+        return value
+
+    def set(self, setting_name: str, value):
+        """ Get a specific setting """
+        for section in self._values.keys():
+            if setting_name in self._values[section]:
+                self._values[section][setting_name] = value
+                # autosave
+                self.save_to_file()
+                return
 
     def save_to_file(self):
-        """ Save all user modifiable options to file. """
-        # All writeable settings must be listed here!
-        self._write_setting(LAST_CONFIG_FILE, self._GENERAL_SECTION_NAME)
-        self._write_setting(DISPLAY_APP_CHANNELS, self._VIEW_SECTION_NAME)
-        self._write_setting(DISPLAY_APP_VERSIONS, self._VIEW_SECTION_NAME)
-        self._write_setting(GRID_COLUMNS, self._VIEW_SECTION_NAME)
-        self._write_setting(GRID_ROWS, self._VIEW_SECTION_NAME)
+        """ Save all user modifiable settings to file. """
+        for section in self._values.keys():
+            for setting in self._values[section]:
+                self._write_setting(setting, section)
 
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
             self._parser.write(ini_file)
@@ -71,14 +79,9 @@ class Settings():
         """ Read settings ini with configparser. """
         self._parser.read(self._ini_file_path, encoding="UTF-8")
 
-        # All settings and their sections must be listed here!
-        general_section = self._get_section(self._GENERAL_SECTION_NAME)
-        self._read_setting(LAST_CONFIG_FILE, general_section)
-        view_section = self._get_section(self._VIEW_SECTION_NAME)
-        self._read_setting(DISPLAY_APP_CHANNELS, view_section)
-        self._read_setting(DISPLAY_APP_VERSIONS, view_section)
-        self._read_setting(GRID_COLUMNS, view_section)
-        self._read_setting(GRID_ROWS, view_section)
+        for section in self._values.keys():
+            for setting in self._values[section]:
+                self._read_setting(setting, section)
 
         # write file - to record defaults, if missing
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
@@ -90,30 +93,38 @@ class Settings():
             self._parser.add_section(section_name)
         return self._parser[section_name]
 
-    def _read_setting(self, name, section):
+    def _read_setting(self, setting_name, section_name):
         """ Helper function to get a setting, which uses the init value to determine the type. """
-        default_value = self._values[name]
-        if not name in section:
-            section[name] = str(default_value)
+        section = self._get_section(section_name)
+        default_value = self.get(setting_name)
+        if isinstance(default_value, dict):  # no dicts upported directly
+            return
+
+        if not setting_name in section:  # write out
+            section[setting_name] = str(default_value)
             return
 
         value = None
         if isinstance(default_value, bool):
-            value = section.getboolean(name)
+            value = section.getboolean(setting_name)
         elif isinstance(default_value, str):
-            value = section.get(name)
+            value = section.get(setting_name)
         elif isinstance(default_value, float):
-            value = float(section.get(name))
+            value = float(section.get(setting_name))
         elif isinstance(default_value, int):
-            value = int(section.get(name))
+            value = int(section.get(setting_name))
         if value is None:
             raise Exception("Unsupported type " +
-                            str(type(default_value)) + " of setting " + name)
-        self._values[name] = value
+                            str(type(default_value)) + " of setting " + setting_name)
+        self.set(setting_name, value)
 
-    def _write_setting(self, name, section_name):
+    def _write_setting(self, setting_name, section_name):
         """ Helper function to write a setting. """
+        value = self.get(setting_name)
+        if isinstance(value, dict):
+            return  # dicts are read only currently
+
         section = self._get_section(section_name)
-        if not name in section:
-            self._logger.error(f"Setting {name} to write is unkonwn")
-        section[name] = str(self._values[name])
+        if not setting_name in section:
+            self._logger.error("Setting %s to write is unkonwn", setting_name)
+        section[setting_name] = str(value)
