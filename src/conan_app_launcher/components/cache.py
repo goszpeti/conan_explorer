@@ -93,15 +93,17 @@ class ConanInfoCache():
         json_data = {}
         try:
             with open(self._cache_file, "r") as json_file:
-                json_data = json.load(json_file)
+                content = json_file.read()
+                if len(content) > 0:
+                    json_data = json.loads(content)
         except:  # possibly corrupt, delete cache file
             Logger().debug("Can't read speedup-cache file, deleting it.")
             os.remove(self._cache_file)
             # create file anew
             self._cache_file.open('a').close()
             return
-        self._local_packages = json_data.get("local_packages", [])
-        self._remote_packages = json_data.get("remote_packages", [])
+        self._local_packages = json_data.get("local_packages", {})
+        self._remote_packages = json_data.get("remote_packages", {})
         self._read_only = json_data.get("read_only", False)
 
     def _write(self):
