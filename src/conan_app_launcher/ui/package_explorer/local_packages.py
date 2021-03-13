@@ -20,10 +20,10 @@ class ConanFileSystemModel(QtWidgets.QFileSystemModel):  # QtCore.QSortFilterPro
         # self.setFilterKeyColumn(0)
         #self = QtWidgets.QFileSystemModel(self.sourceModel())
         super().__init__()
-        self.base_path = r"C:\Users\goszp\.conan\data"
-        self.short_path = r"C:\.conan"
-        self.short_path_model = QtWidgets.QFileSystemModel()
-        self.short_path_model.setRootPath(self.short_path)
+        #self.base_path = r"C:\Users\goszp\.conan\data"
+        #self.short_path = r"C:\.conan"
+        #self.short_path_model = QtWidgets.QFileSystemModel()
+        #self.short_path_model.setRootPath(self.short_path)
 
     def is_short_path_package_dir(self, model_index):
         path = self.fileInfo(model_index).absoluteFilePath()

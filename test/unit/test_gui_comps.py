@@ -43,7 +43,7 @@ def testAboutDialog(base_fixture, qtbot):
     assert widget.isHidden()
 
 
-def testEditAppDialogNeeAppLink(base_fixture, qtbot):
+def testEditAppDialogNewAppLink(base_fixture, qtbot):
     """ Test, if a new dialog on empty AppData will ..."""
 
 

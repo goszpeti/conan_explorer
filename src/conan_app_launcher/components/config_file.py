@@ -105,7 +105,7 @@ class AppConfigEntry():
             self._conan_ref = ConanFileReference.loads(new_value)
 
             # add conan ref to worker
-            if (self.app_data["conan_ref"] != new_value and new_value != this.INVALID_CONAN_REF
+            if (self.app_data.get("conan_ref", "") != new_value and new_value != this.INVALID_CONAN_REF
                     and self._conan_ref.version != self.INVALID_DESCR
                     and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
                 this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)

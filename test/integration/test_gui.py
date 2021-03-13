@@ -25,6 +25,28 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
+def testStartupNoExistingConfig(base_fixture, settings_fixture, qtbot):
+    # no settings entry
+    app.settings.set(LAST_CONFIG_FILE, "")
+    # delete default file, in case it exists and has content
+    default_config_file_path = Path.home() / app.DEFAULT_GRID_CONFIG_FILE_NAME
+    if default_config_file_path.exists():
+        os.remove(default_config_file_path)
+    # init config file and parse
+    load_base_components()
+
+    main_gui = main_window.MainUi()
+    qtbot.addWidget(main_gui)
+    main_gui.start_app_grid()
+
+    main_gui.show()
+    qtbot.waitExposed(main_gui, 3000)
+    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
+        assert tab.config_data.name == "New Tab"
+        for test_app in tab.app_links:
+            assert test_app.config_data.name == "My App Link"
+    Logger.remove_qt_logger()
+
 def testStartupWithExistingConfigAndOpenMenu(base_fixture, settings_fixture, qtbot):
     """
     Test, loading a config file and opening the about menu, and clicking on OK
@@ -185,7 +207,7 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, settings_fixture, qtbot):
 
     app.conan_worker.finish_working(10)
 
-    main_gui.re_init()  # re-init with same file
+    main_gui._app_grid.re_init() # re-init with same file
     time.sleep(5)
 
     assert main_gui.ui.tab_bar.count() == tabs_num

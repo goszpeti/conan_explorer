@@ -12,6 +12,7 @@ from conan_app_launcher.components import parse_config_file
 def testEmptyCleanupCache():
     """
     Test, if a clean cache returns no dirs. Actual functionality is tested with gui.
+    It is assumed, that the cash is clean, like it would be on the CI.
     """
     conan = ConanApi()
     paths = conan.get_cleanup_cache_paths()
