@@ -13,6 +13,8 @@ def testReadFromFile(base_fixture):
     """
     sets = Settings(ini_file=base_fixture.testdata_path / "settings/read/config.ini")
     assert sets.get(LAST_CONFIG_FILE) == "C:/work/app_config.json"
+    assert sets.get(CONAN_USER_ALIASES) == {"myuser" : "user1",
+                                            "myuser2" : "user2"}
 
 
 def testSaveToFile(base_fixture):

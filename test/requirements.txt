@@ -7,3 +7,4 @@ pytest-cov
 pytest-mock
 pytest-qt
 xunitparser
+PyQt5-stubs

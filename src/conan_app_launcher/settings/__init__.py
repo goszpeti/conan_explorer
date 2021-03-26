@@ -9,6 +9,7 @@ DISPLAY_APP_VERSIONS = "disp_app_versions"
 DISPLAY_APP_CHANNELS = "disp_app_channels"
 GRID_ROWS = "grid_rows"
 GRID_COLUMNS = "grid_columns"
+CONAN_USER_ALIASES = "Conan_User_Aliases" # section name
 
 # import at the end, to avoid circular imports
 from conan_app_launcher.settings.settings import Settings

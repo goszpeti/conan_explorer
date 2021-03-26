@@ -1,0 +1,3 @@
+* On changing the Reference in Edit Dialog the app is opied and a new one appears the next start
+* Set versions and channels does not always work, and initial download with cache is very slow
+* option for conan user alias: fep -aev25

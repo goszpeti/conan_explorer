@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any
 
 from conan_app_launcher.base import Logger
-from conan_app_launcher.settings import (
+from conan_app_launcher.settings import ( CONAN_USER_ALIASES,
     LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS)
 
 
@@ -16,6 +16,7 @@ class Settings():
     # internal constants
     _GENERAL_SECTION_NAME = "General"
     _VIEW_SECTION_NAME = "View"
+    _CONAN_USER_ALIASES_SECTION_NAME = CONAN_USER_ALIASES
 
     def __init__(self, ini_file: Path):
         """
@@ -42,7 +43,8 @@ class Settings():
                     DISPLAY_APP_VERSIONS: True,
                     GRID_ROWS: 20,
                     GRID_COLUMNS: 4,
-            }
+            },
+            self._CONAN_USER_ALIASES_SECTION_NAME: {} # fills dynamically
         }
 
         self._read_ini()
@@ -51,20 +53,29 @@ class Settings():
     def get(self, setting_name: str):
         """ Get a specific setting """
         value = None
-        for section in self._values.keys():
-            if setting_name in self._values[section]:
-                value = self._values[section].get(setting_name, None)
-                break
+        # if section is the option name, then this is a dict type setting with user generated content
+        if setting_name in self._values.keys():
+            value = {}
+            for entry in self._values[setting_name]:
+                value.update({entry: self._values[setting_name].get(entry)})
+        else: # plain type
+            for section in self._values.keys():
+                if setting_name in self._values[section]:
+                    value = self._values[section].get(setting_name, None)
+                    break
         return value
 
     def set(self, setting_name: str, value):
-        """ Get a specific setting """
-        for section in self._values.keys():
-            if setting_name in self._values[section]:
-                self._values[section][setting_name] = value
-                # autosave
-                self.save_to_file()
-                return
+        """ Set the value of a specific setting """
+        if setting_name in self._values.keys() and isinstance(value, dict): # dict type setting
+            self._values[setting_name].update(value)
+        else:
+            for section in self._values.keys():
+                if setting_name in self._values[section]:
+                    self._values[section][setting_name] = value
+                    break
+        # autosave
+        self.save_to_file()
 
     def save_to_file(self):
         """ Save all user modifiable settings to file. """
@@ -80,6 +91,8 @@ class Settings():
         self._parser.read(self._ini_file_path, encoding="UTF-8")
 
         for section in self._values.keys():
+            if not self._values[section]: # empty section - this is a user filled dict
+                self._read_dict_setting(section)
             for setting in self._values[section]:
                 self._read_setting(setting, section)
 
@@ -93,12 +106,22 @@ class Settings():
             self._parser.add_section(section_name)
         return self._parser[section_name]
 
+    def _read_dict_setting(self, section_name):
+        """ 
+        Helper function to get a dict style setting.
+        Dict settings are section itself and are read dynamically.
+        """
+        section = self._get_section(section_name)
+
+        for setting_name in section.keys():
+            self._read_setting(setting_name, section_name)
+
     def _read_setting(self, setting_name, section_name):
         """ Helper function to get a setting, which uses the init value to determine the type. """
         section = self._get_section(section_name)
         default_value = self.get(setting_name)
-        if isinstance(default_value, dict):  # no dicts upported directly
-            return
+        if isinstance(default_value, dict):  # no dicts supported directly
+           return
 
         if not setting_name in section:  # write out
             section[setting_name] = str(default_value)
@@ -113,9 +136,11 @@ class Settings():
             value = float(section.get(setting_name))
         elif isinstance(default_value, int):
             value = int(section.get(setting_name))
-        if value is None:
-            raise Exception("Unsupported type " +
-                            str(type(default_value)) + " of setting " + setting_name)
+        if value is None: # dict type, value will be taken as a string
+            value = section.get(setting_name)
+            self.set(section_name, {setting_name: value})
+            return
+
         self.set(setting_name, value)
 
     def _write_setting(self, setting_name, section_name):
