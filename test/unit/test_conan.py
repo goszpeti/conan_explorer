@@ -8,6 +8,7 @@ from conan_app_launcher.components.conan import _create_key_value_pair_list, Con
 from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
 
+TEST_REF = "zlib/1.2.11@_/_"
 
 def testEmptyCleanupCache(base_fixture):
     """
@@ -25,13 +26,12 @@ def testConanFindRemotePkg(base_fixture):
     The function must find exactly one pacakge, which uses the spec. options and corresponds to the
     default settings.
     """
-    ref = "zlib/1.2.11@conan/stable"
-    os.system(f"conan remove {ref} -f")
+    os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
     default_settings = dict(conan.cache.default_profile.settings)
 
-    pkgs = conan.search_package_in_remotes(ConanFileReference.loads(ref),  {"shared": "True"})
-    assert len(pkgs) == 1
+    pkgs = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
+    assert len(pkgs) == 2
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
 
@@ -45,10 +45,9 @@ def testConanNotFindRemotePkgWrongOpts(base_fixture, capsys):
     Test, if a wrong Option return causes an error.
     Empty list must be returned and the error be logged.
     """
-    ref = "zlib/1.2.11@conan/stable"
-    os.system(f"conan remove {ref} -f")
+    os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
-    pkg = conan.search_package_in_remotes(ConanFileReference.loads(ref),  {"BogusOption": "True"})
+    pkg = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"BogusOption": "True"})
     captured = capsys.readouterr()
     assert not pkg
     assert "Can't find a matching package" in captured.err
@@ -59,10 +58,9 @@ def testConanFindLocalPkg(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    ref = "zlib/1.2.11@conan/stable"
-    os.system(f"conan install {ref}")
+    os.system(f"conan install {TEST_REF}")
     conan = ConanApi()
-    pkgs = conan.find_best_matching_packages(ConanFileReference.loads(ref))
+    pkgs = conan.find_best_matching_packages(ConanFileReference.loads(TEST_REF))
     assert len(pkgs) == 1
 
 
@@ -71,15 +69,14 @@ def testGetPathOrInstall(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    ref = "m4_installer/1.4.18@bincrafters/stable"
-    os.system(f"conan remove {ref} -f")
+    os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
     # Gets package path / installs the package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(ref))
-    assert (package_folder / "bin").is_dir()
+    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF))
+    assert (package_folder / "lib").is_dir()
     # check again for already installed package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(ref))
-    assert (package_folder / "bin").is_dir()
+    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF))
+    assert (package_folder / "lib").is_dir()
 
 
 def testGetPathOrInstallManualOptions(capsys):
@@ -88,10 +85,9 @@ def testGetPathOrInstallManualOptions(capsys):
     The actual installaton must not return an error and non given options be merged with default options.
     """
     # This package has an option "shared" and is fairly small.
-    ref = "zlib/1.2.11@conan/stable"
-    os.system(f"conan remove {ref} -f")
+    os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(ref), {"shared": "True"})
+    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF), {"shared": "True"})
     if platform.system() == "Windows":
         assert (package_folder / "lib" / "zlib.lib").is_file()
     elif platform.system() == "Linux":
@@ -120,8 +116,7 @@ def testCompilerNoSettings(base_fixture, capsys):
     Test, if a package with no settings at all can install
     The actual installaton must not return an error.
     """
-    # mock the remote response
-    ref = "CLI11/1.9.1@cliutils/stable"  # header only
+    ref = "jpcre2/10.32.01"  # header only
     os.system(f"conan remove {ref} -f")
     conan = ConanApi()
     package_folder = conan.get_path_or_install(ConanFileReference.loads(ref))
@@ -181,11 +176,7 @@ def testConanWorker(base_fixture, settings_fixture):
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
-    # class DummySignal():
 
-    #     def emit(self):
-    #         pass
-    # sig = DummySignal()
     app.tab_configs = parse_config_file(settings_fixture)
     conan_worker = ConanWorker()
     elements_before = conan_worker._conan_queue.qsize()
