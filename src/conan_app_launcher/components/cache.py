@@ -1,15 +1,10 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from conan_app_launcher.base import Logger
 from conans.model.ref import ConanFileReference
-
-try:
-    from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
 
 
 class ConanInfoCache():

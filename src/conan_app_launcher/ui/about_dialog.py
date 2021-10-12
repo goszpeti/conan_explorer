@@ -35,8 +35,8 @@ class AboutDialog(QtWidgets.QDialog):
         self._button_box.accepted.connect(self.accept)
         self._button_box.rejected.connect(self.reject)
 
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self._logo_label)
-        self.layout.addWidget(self._text)
-        self.layout.addWidget(self._button_box)
-        self.setLayout(self.layout)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self._logo_label)
+        layout.addWidget(self._text)
+        layout.addWidget(self._button_box)
+        self.setLayout(layout)

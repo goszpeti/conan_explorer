@@ -20,6 +20,9 @@ class Logger(logging.Logger):
             cls._instance = cls._init_logger()
         return cls._instance
 
+    def __init__(self) -> None:
+        return None
+
     @classmethod
     def _init_logger(cls) -> logging.Logger:
         """ Set up format and a debug level and register console logger. """

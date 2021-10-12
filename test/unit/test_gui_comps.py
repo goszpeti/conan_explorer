@@ -9,7 +9,6 @@ from time import sleep
 from pathlib import Path
 
 
-from conan_app_launcher.main import load_base_components
 from conan_app_launcher.components.config_file import AppConfigEntry, AppType, OptionType
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.app_grid.app_link import AppLink

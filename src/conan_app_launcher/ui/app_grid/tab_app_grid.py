@@ -81,6 +81,7 @@ class TabAppGrid(QtWidgets.QWidget):
         app_info = AppConfigEntry()
         app_link = AppLink(self, app_info, self.app_link_added, self.app_link_removed)
         app_link.open_edit_dialog()
+        return app_link
 
     def on_app_link_add(self, app_link):
         current_row = int(len(self.config_data.get_app_entries()) / self.max_columns)  # count from 0

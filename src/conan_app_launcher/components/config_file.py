@@ -20,7 +20,6 @@ from conan_app_launcher.components.icon import extract_icon
 from conan_app_launcher.components.cache import ConanInfoCache
 from conan_app_launcher.components.conan import ConanApi
 
-
 # TODO: remove json validation, when user edit will be removed.
 # maybe remove versioning, but keep parsing for all versions?
 # Create it like a database, where evrything is synchronized?

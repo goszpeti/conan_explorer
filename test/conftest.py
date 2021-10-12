@@ -3,8 +3,7 @@ from pathlib import Path
 
 import pytest
 import tempfile
-from PyQt5 import QtCore, QtWidgets
-
+from shutil import copy
 from conan_app_launcher.settings import *
 import conan_app_launcher.base as logger
 import conan_app_launcher as app
@@ -53,5 +52,6 @@ def settings_fixture(base_fixture):
 
     app.settings = Settings(ini_file=Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "app_config.json"
-    app.settings.set(LAST_CONFIG_FILE, str(config_file_path))
-    yield config_file_path
+    temp_config_file_path = copy(config_file_path, temp_dir)
+    app.settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
+    yield Path(temp_config_file_path)

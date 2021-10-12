@@ -30,12 +30,12 @@ except ImportError:
 Qt = QtCore.Qt
 
 
-def load_base_components():
+def load_base_components(settings):
     """ Load all default components. """
     this.cache = ConanInfoCache(this.base_path / this.CACHE_FILE_NAME)
 
     # create or read config file
-    config_file_setting = this.settings.get(LAST_CONFIG_FILE)
+    config_file_setting = settings.get_string(LAST_CONFIG_FILE)
     default_config_file_path = Path.home() / this.DEFAULT_GRID_CONFIG_FILE_NAME
 
     # empty config, create it in home path
@@ -45,7 +45,7 @@ def load_base_components():
         tab = TabConfigEntry("New Tab")
         tab.add_app_entry(AppConfigEntry({"name": "My App Link"}))
         write_config_file(default_config_file_path, [tab])
-        this.settings.set(LAST_CONFIG_FILE, str(default_config_file_path))
+        settings.set(LAST_CONFIG_FILE, str(default_config_file_path))
 
     else:
         config_file_path = Path(config_file_setting)
@@ -69,11 +69,10 @@ def main():
     # otherwise conan will not work
     if sys.executable.endswith("pythonw.exe"):
         sys.stdout = open(os.devnull, "w")
-        sys.stderr = open(os.path.join(os.getenv("TEMP"),
-                                       "stderr-" + this.PROG_NAME), "w")
+        sys.stderr = open(os.path.join(os.getenv("TEMP"), "stderr-" + this.PROG_NAME), "w")
     # init logger first
     this.base_path = Path(__file__).absolute().parent
-    this.asset_path: Path = this.base_path / "assets"
+    this.asset_path = this.base_path / "assets"
     logger = Logger()
 
     # apply Qt attributes (only at init possible)
@@ -88,7 +87,7 @@ def main():
     settings_file_path = Path.home() / this.SETTINGS_FILE_NAME
     this.settings = Settings(ini_file=settings_file_path)
 
-    load_base_components()
+    load_base_components(this.settings)
 
     this.main_window = MainUi()
     # load tabs needs the pyqt signals - constructor has to be finished

@@ -26,7 +26,6 @@ class MainUi(QtWidgets.QMainWindow):
     display_versions_updated = QtCore.pyqtSignal(bool)
     display_channels_updated = QtCore.pyqtSignal(bool)
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
-    _icons_path = None
 
     def __init__(self):
         super().__init__()
@@ -125,7 +124,7 @@ class MainUi(QtWidgets.QMainWindow):
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = Path.home()
-        config_file_path = Path(this.settings.get(LAST_CONFIG_FILE))
+        config_file_path = Path(this.settings.get_string(LAST_CONFIG_FILE))
         if config_file_path.exists():
             dialog_path = config_file_path.parent
         dialog = QtWidgets.QFileDialog(parent=self, caption="Select JSON Config File",
@@ -155,10 +154,10 @@ class MainUi(QtWidgets.QMainWindow):
         current_tab = self.ui.tab_bar.widget(self.ui.tab_bar.currentIndex())
         current_tab.open_app_link_add_dialog()
 
-    @ pyqtSlot()
+    @pyqtSlot()
     def on_config_change(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
-        write_config_file(Path(this.settings.get(LAST_CONFIG_FILE)), this.tab_configs)
+        write_config_file(Path(this.settings.get_string(LAST_CONFIG_FILE)), this.tab_configs)
 
     @ pyqtSlot(str)
     def write_log(self, text):

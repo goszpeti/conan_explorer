@@ -65,14 +65,14 @@ class Settings():
     #                 break
     #     return value
 
-    def get(self, name: str) -> Union[str, int, float, bool, Dict[str,str]]:
-            """ Get a specific setting """
-            value = None
-            for section in self._values:
-                if name in self._values[section]:
-                    value = self._values[section].get(name)
-                    break
-            return value
+    def get(self, name: str) -> Union[str, int, float, bool]:
+        """ Get a specific setting """
+        value = None
+        for section in self._values:
+            if name in self._values[section]:
+                value = self._values[section].get(name)
+                break
+        return value
 
     def get_string(self, name: str) -> str:
         return str(self.get(name))
@@ -85,9 +85,6 @@ class Settings():
 
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
-
-    def get_dict(self, name: str) -> Dict[str, str]:
-        return self.get(name)
 
     def set(self, setting_name: str, value):
         """ Set the value of a specific setting """

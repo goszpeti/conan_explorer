@@ -36,7 +36,7 @@ class AppGrid():
             self._main_window.ui.tab_bar.removeTab(i-1)
         this.conan_worker.finish_working(3)
 
-        config_file_path = Path(this.settings.get(LAST_CONFIG_FILE))
+        config_file_path = Path(this.settings.get_string(LAST_CONFIG_FILE))
 
         if config_file_path.is_file():  # escape error log on first opening
             this.tab_configs = parse_config_file(config_file_path)
@@ -61,29 +61,31 @@ class AppGrid():
     def on_tab_context_menu_requested(self, position):
         index = self._main_window.ui.tab_bar.tabBar().tabAt(position)
         menu = QtWidgets.QMenu()
+        self.menu = menu
 
-        rename_action = QtWidgets.QAction("Rename", self)
+        rename_action = QtWidgets.QAction("Rename", self._main_window)
         rename_action.setIcon(QtGui.QIcon(str(self._icons_path / "rename.png")))
         menu.addAction(rename_action)
-        rename_action.triggered.connect(lambda: self.open_tab_rename_dialog(index))
+        rename_action.triggered.connect(lambda: self.on_tab_rename(index))
 
-        remove_action = QtWidgets.QAction("Remove", self)
+        remove_action = QtWidgets.QAction("Remove", self._main_window)
         remove_action.setIcon(QtGui.QIcon(str(self._icons_path / "delete.png")))
         menu.addAction(remove_action)
         remove_action.triggered.connect(lambda: self.on_tab_remove(index))
 
-        new_tab_action = QtWidgets.QAction("Add new tab", self)
+        new_tab_action = QtWidgets.QAction("Add new tab", self._main_window)
         new_tab_action.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
         menu.addAction(new_tab_action)
-        new_tab_action.triggered.connect(self.open_new_tab_dialog)
+        new_tab_action.triggered.connect(self.on_new_tab)
 
         menu.exec_(self._main_window.ui.tab_bar.tabBar().mapToGlobal(position))
+        self.menu = None
 
     # @pyqtSlot()
-    def open_new_tab_dialog(self):
+    def on_new_tab(self):
         # call tab on_app_link_add
-        new_tab_dialog = QtWidgets.QInputDialog(self)
-        text, accepted = new_tab_dialog.getText(self, 'Add tab',
+        new_tab_dialog = QtWidgets.QInputDialog(self._main_window)
+        text, accepted = new_tab_dialog.getText(self._main_window, 'Add tab',
                                                 'Enter name:')
         if accepted:
             # do nothing on empty text
@@ -93,17 +95,18 @@ class AppGrid():
             tab_config = TabConfigEntry(text)
             this.tab_configs.append(tab_config)
 
-            tab = TabAppGrid(self, tab_config, max_columns=this.settings.get(
-                GRID_COLUMNS), max_rows=this.settings.get(GRID_ROWS))
+            tab = TabAppGrid(self._main_window.ui.tab_bar, tab_config, 
+                max_columns=this.settings.get_int(GRID_COLUMNS), 
+                max_rows=this.settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, text)
             self._main_window.ui.on_config_change()
 
     # @pyqtSlot(int)
-    def open_tab_rename_dialog(self, index):
+    def on_tab_rename(self, index):
         tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
 
-        rename_tab_dialog = QtWidgets.QInputDialog(self)
-        text, accepted = rename_tab_dialog.getText(self, 'Rename tab',
+        rename_tab_dialog = QtWidgets.QInputDialog(self._main_window)
+        text, accepted = rename_tab_dialog.getText(self._main_window, 'Rename tab',
                                                    'Enter new name:', text=tab.config_data.name)
         if accepted:
             tab.config_data.name = text
@@ -114,7 +117,7 @@ class AppGrid():
     def on_tab_remove(self, index):
         tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
 
-        msg = QtWidgets.QMessageBox(parent=self)
+        msg = QtWidgets.QMessageBox(parent=self._main_window)
         msg.setWindowTitle("Delete tab")
         msg.setText("Are you sure, you want to delete this tab\t")
         msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
@@ -123,13 +126,14 @@ class AppGrid():
         if reply == QtWidgets.QMessageBox.Yes:
             this.tab_configs.remove(tab.config_data)
             self._main_window.ui.tab_bar.removeTab(index)
+            self._main_window.on_config_change()
 
     def load_tabs(self):
         """ Creates new layout """
         for config_data in this.tab_configs:
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabAppGrid(parent=self._main_window, config_data=config_data,
-                             max_columns=this.settings.get(GRID_COLUMNS), max_rows=this.settings.get(GRID_ROWS))
+            tab = TabAppGrid(parent=self._main_window.ui.tab_bar, config_data=config_data,
+                             max_columns=this.settings.get_int(GRID_COLUMNS), max_rows=this.settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, config_data.name)
 
         # always show the first tab first

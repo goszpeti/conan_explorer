@@ -16,7 +16,7 @@ from conans.model.ref import ConanFileReference
 from conan_app_launcher.main import load_base_components
 import conan_app_launcher as app
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import ConanApi
+from conan_app_launcher.components import ConanApi, config_file
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
@@ -33,7 +33,7 @@ def testStartupNoExistingConfig(base_fixture, settings_fixture, qtbot):
     if default_config_file_path.exists():
         os.remove(default_config_file_path)
     # init config file and parse
-    load_base_components()
+    load_base_components(app.settings)
 
     main_gui = main_window.MainUi()
     qtbot.addWidget(main_gui)
@@ -71,7 +71,7 @@ def testSelectConfigFileDialog(base_fixture, settings_fixture, qtbot, mocker):
     Same file as selected expected in settings.
     """
 
-    load_base_components()
+    load_base_components(app.settings)
 
     main_gui = main_window.MainUi()
     main_gui.show()
@@ -165,7 +165,7 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
     app.settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
-    load_base_components()
+    load_base_components(app.settings)
 
     main_gui = main_window.MainUi()
     main_gui.show()
@@ -193,7 +193,7 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, settings_fixture, qtbot):
     Test, if the previously loaded tabs are deleted, when a new file is loaded
     The same tab number ist expected, as before.
     """
-    load_base_components()
+    load_base_components(app.settings)
 
     main_gui = main_window.MainUi()
     main_gui.show()
@@ -220,7 +220,7 @@ def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
     Test the view menu entries.
     Check, that activating the entry set the hide flag is set on the widget.
     """
-    load_base_components()
+    load_base_components(app.settings)
     main_gui = main_window.MainUi()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
@@ -230,7 +230,7 @@ def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
     qtbot.waitExposed(main_gui, timeout=3000)
 
     time.sleep(5)
-   # assert default state
+    # assert default state
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
@@ -267,20 +267,128 @@ def testIconUpdateFromExecutable():
     # TODO
 
 
-def testRenameTabDialog(base_fixture, qtbot):
-    pass
+def testRenameTabDialog(base_fixture, settings_fixture, qtbot, mocker):
+    load_base_components(app.settings)
+    from pytestqt.plugin import _qapp_instance
+    app.qt_app = _qapp_instance
+    main_gui = main_window.MainUi()
+    app.main_window = main_gui  # needed for signal access
+    main_gui.show()
+    main_gui.start_app_grid()
+
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    # call right click
+    # tab.customContextMenuRequested.emit(QtCore.QPoint(120, 41))
+    #tab = main_gui.ui.tab_bar.tabBar()
+    # assert main_gui.ui.tab_bar
+    
+    new_text = "My Text"
+
+    mocker.patch.object(QtWidgets.QInputDialog, 'getText',
+                        return_value=[new_text, True])
+    main_gui._app_grid.on_tab_rename(0)
+    assert main_gui.ui.tab_bar.tabBar().tabText(0) == new_text
+
+    mocker.patch.object(QtWidgets.QInputDialog, 'getText',
+                        return_value=["OtherText", False])
+    main_gui._app_grid.on_tab_rename(0)
+    # text must be the same
+    assert main_gui.ui.tab_bar.tabBar().tabText(0) == new_text
+
+    # for debug
+    # while True:
+    #    _qapp_instance.processEvents()
 
 
-def testAddTabDialog(base_fixture, qtbot):
-    pass
+def testAddTabDialog(base_fixture, settings_fixture, qtbot, mocker):
+    load_base_components(app.settings)
+    from pytestqt.plugin import _qapp_instance
+    app.qt_app = _qapp_instance
+    main_gui = main_window.MainUi()
+    app.main_window = main_gui  # needed for signal access
+    main_gui.show()
+    main_gui.start_app_grid()
+
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    new_text = "My New Tab"
+    prev_count = main_gui.ui.tab_bar.tabBar().count()
+    mocker.patch.object(QtWidgets.QInputDialog, 'getText',
+                        return_value=[new_text, True])
+    main_gui._app_grid.on_new_tab()
+    assert main_gui.ui.tab_bar.tabBar().count() == prev_count + 1
+    assert main_gui.ui.tab_bar.tabBar().tabText(prev_count) == new_text
+    config_tabs = config_file.parse_config_file(settings_fixture)
+    assert len(config_tabs) == prev_count + 1
+
+    # press cancel
+    mocker.patch.object(QtWidgets.QInputDialog, 'getText',
+                        return_value=["OtherText", False])
+    main_gui._app_grid.on_tab_rename(0)
+    assert main_gui.ui.tab_bar.tabBar().count() == prev_count + 1
+    config_tabs = config_file.parse_config_file(settings_fixture)
+    assert len(config_tabs) == prev_count + 1
+
+def testRemoveTabDialog(base_fixture, settings_fixture, qtbot, mocker):
+    load_base_components(app.settings)
+    from pytestqt.plugin import _qapp_instance
+    app.qt_app = _qapp_instance
+    main_gui = main_window.MainUi()
+    app.main_window = main_gui  # needed for signal access
+    main_gui.show()
+    main_gui.start_app_grid()
+
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    id_to_delete = 0
+    text = main_gui.ui.tab_bar.tabBar().tabText(id_to_delete)
+    prev_count = main_gui.ui.tab_bar.tabBar().count()
+    assert prev_count > 1, "Test won't work with one tab"
 
 
-def testRemoveTabDialog(base_fixture, qtbot):
-    pass
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+                        return_value=QtWidgets.QMessageBox.Yes)
+    main_gui._app_grid.on_tab_remove(id_to_delete)
 
+    assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
+    assert main_gui.ui.tab_bar.tabBar().tabText(id_to_delete) != text
+    config_tabs = config_file.parse_config_file(settings_fixture)
+    assert len(config_tabs) == prev_count - 1
 
-def testAddAppLink():
-    pass
+    # press no
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+                        return_value=QtWidgets.QMessageBox.No)
+    main_gui._app_grid.on_tab_remove(0)
+    assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
+    config_tabs = config_file.parse_config_file(settings_fixture)
+    assert len(config_tabs) == prev_count - 1
+
+def testAddAppLink(base_fixture, settings_fixture, qtbot, mocker):
+    load_base_components(app.settings)
+    from pytestqt.plugin import _qapp_instance
+    app.qt_app = _qapp_instance
+    main_gui = main_window.MainUi()
+    app.main_window = main_gui  # needed for signal access
+    main_gui.show()
+    main_gui.start_app_grid()
+
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    tabs = main_gui.ui.tab_bar.findChildren(TabAppGrid)
+    cd = tabs[1].config_data
+    apps = cd.get_app_entries()
+    prev_count = len(apps)
+
+    app_link = tabs[1].open_app_link_add_dialog()
+    assert app_link._edit_app_dialog._ui.name_line_edit.text()
+
+    config_tabs = config_file.parse_config_file(settings_fixture)
+    assert len(config_tabs) == prev_count - 1
 
 
 def testEditAppLink():
