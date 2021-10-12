@@ -9,7 +9,7 @@ from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
 
 
-def testEmptyCleanupCache():
+def testEmptyCleanupCache(base_fixture):
     """
     Test, if a clean cache returns no dirs. Actual functionality is tested with gui.
     It is assumed, that the cash is clean, like it would be on the CI.
@@ -19,7 +19,7 @@ def testEmptyCleanupCache():
     assert not paths
 
 
-def testConanFindRemotePkg():
+def testConanFindRemotePkg(base_fixture):
     """
     Test, if search_package_in_remotes finds a package for the current system and the specified options.
     The function must find exactly one pacakge, which uses the spec. options and corresponds to the
@@ -40,7 +40,7 @@ def testConanFindRemotePkg():
             assert default_settings[setting] in pkg["settings"][setting]
 
 
-def testConanNotFindRemotePkgWrongOpts(capsys):
+def testConanNotFindRemotePkgWrongOpts(base_fixture, capsys):
     """
     Test, if a wrong Option return causes an error.
     Empty list must be returned and the error be logged.
@@ -54,7 +54,7 @@ def testConanNotFindRemotePkgWrongOpts(capsys):
     assert "Can't find a matching package" in captured.err
 
 
-def testConanFindLocalPkg():
+def testConanFindLocalPkg(base_fixture):
     """
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
@@ -66,7 +66,7 @@ def testConanFindLocalPkg():
     assert len(pkgs) == 1
 
 
-def testGetPathOrInstall():
+def testGetPathOrInstall(base_fixture):
     """
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
@@ -115,7 +115,7 @@ def testInstallWithAnySettings(mocker, capsys):
     assert "Cannot install package" not in captured.err
 
 
-def testCompilerNoSettings(capsys):
+def testCompilerNoSettings(base_fixture, capsys):
     """
     Test, if a package with no settings at all can install
     The actual installaton must not return an error.
@@ -131,7 +131,7 @@ def testCompilerNoSettings(capsys):
     assert "Can't find a matching package" not in captured.err
 
 
-def testResolveDefaultOptions():
+def testResolveDefaultOptions(base_fixture):
     """
     Test, if different kind of types of default options can be converted to a dict
     Dict is expected.
@@ -151,7 +151,7 @@ def testResolveDefaultOptions():
     assert ret.items()
 
 
-def testCreateKeyValueList():
+def testCreateKeyValueList(base_fixture):
     """
     Test, that key value pairs can be extracted as strings. No arrays or other tpyes supported.
     The return value must be a list of strings in the format ["key1=value1", "key2=value2]
@@ -168,7 +168,7 @@ def testCreateKeyValueList():
     assert res == ["Key1=Value1"]
 
 
-def testSearchForAllPackages():
+def testSearchForAllPackages(base_fixture):
     ref = "zlib/1.2.8@conan/stable"
     #os.system(f"conan remove {ref} -f")
     conan = ConanApi()

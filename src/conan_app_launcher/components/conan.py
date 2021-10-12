@@ -56,7 +56,7 @@ class ConanApi():
         # search for orphaned refs
         for ref in self.cache.all_refs():
             ref_cache = self.cache.package_layout(ref)
-            for pkg_id in ref_cache.packages_ids():
+            for pkg_id in ref_cache.package_ids():
                 short_path_dir = self.get_package_folder(ref, {"id": pkg_id})
                 pkg_id_dir = Path(ref_cache.packages()) / pkg_id
                 if not short_path_dir.exists():
@@ -115,24 +115,24 @@ class ConanApi():
     def search_recipe_in_remotes(self, conan_ref: ConanFileReference) -> List[ConanFileReference]:
         """ Search in all remotes for all versions of a conan ref """
         res_list = []
-        users_to_search: set = set([conan_ref.user])
-        user_aliases: Dict[str, [str]] = this.settings.get(CONAN_USER_ALIASES)
-        for aliases in user_aliases.values():
-            alias_list = aliases.split(",")
-            if conan_ref.user in alias_list:
-                for alias in alias_list:
-                    users_to_search.add(alias)
-                break # take the first entry
-        for user in users_to_search:
-            try:
-                # no query possible with pattern
-                search_results = self.conan.search_recipes(f"{conan_ref.name}/*@{user}/*",
-                                                        remote_name="all").get("results", None)
-                if this.SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
-                    local_results = self.conan.search_recipes(f"{conan_ref.name}/*@{user}/*",
-                                                            remote_name=None).get("results", None)
-            except Exception:
-                return []
+        # users_to_search: set = set([conan_ref.user])
+        # user_aliases: Dict[str, [str]] = this.settings.get(CONAN_USER_ALIASES)
+        # for aliases in user_aliases.values():
+        #     alias_list = aliases.split(",")
+        #     if conan_ref.user in alias_list:
+        #         for alias in alias_list:
+        #             users_to_search.add(alias)
+        #         break # take the first entry
+        # for user in users_to_search:
+        try:
+            # no query possible with pattern
+            search_results = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
+                                                    remote_name="all").get("results", None)
+            if this.SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
+                local_results = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
+                                                        remote_name=None).get("results", None)
+        except Exception:
+            return []
         search_results = search_results + local_results
         for res in search_results:
             for item in res.get("items", []):

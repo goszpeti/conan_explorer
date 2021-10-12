@@ -40,7 +40,7 @@ def testStartupNoExistingConfig(base_fixture, settings_fixture, qtbot):
     main_gui.start_app_grid()
 
     main_gui.show()
-    qtbot.waitExposed(main_gui, 3000)
+    qtbot.waitExposed(main_gui, timeout=3000)
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         assert tab.config_data.name == "New Tab"
         for test_app in tab.app_links:
@@ -57,7 +57,7 @@ def testStartupWithExistingConfigAndOpenMenu(base_fixture, settings_fixture, qtb
     main_gui.start_app_grid()
 
     main_gui.show()
-    qtbot.waitExposed(main_gui, 3000)
+    qtbot.waitExposed(main_gui, timeout=3000)
     main_gui.ui.menu_about_action.trigger()
     time.sleep(3)
     assert main_gui._about_dialog.isEnabled()
@@ -77,7 +77,7 @@ def testSelectConfigFileDialog(base_fixture, settings_fixture, qtbot, mocker):
     main_gui.show()
 
     qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, 3000)
+    qtbot.waitExposed(main_gui, timeout=3000)
     selection = str(Path.home() / "new_config.json")
     mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
@@ -103,12 +103,13 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
 
     # Set up broken packages to have something to cleanup
     # in short path - edit .real_path
-    ref = "boost_base/1.69.0@bincrafters/stable"
+    ref = "example/1.0.0@user/testing"
     try:
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
     except:
         pass
-    os.system(f"conan install {ref}")
+    conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
+    os.system(f"conan create {conanfile} user/testing")
     pkg = conan.get_local_package(ConanFileReference.loads(ref))
     pkg_dir_to_delete = conan.get_package_folder(ConanFileReference.loads(ref), pkg)
 
@@ -119,13 +120,13 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
         fp.seek(0)
         fp.write(line)
 
-    # in cache - delete Short path, so that cache folder is oprhaned
-    ref = "boost_config/1.69.0@bincrafters/stable"
+    # in cache - delete Short path, so that cache folder is orphaned
+    ref = "example/1.0.0@user/orphan"
     try:
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
     except:
         pass
-    os.system(f"conan install {ref}")
+    os.system(f"conan create {conanfile} user/orphan")
 
     exp_folder = conan.get_export_folder(ConanFileReference.loads(ref))
     conan = ConanApi()
@@ -141,7 +142,7 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     main_gui = main_window.MainUi()
     main_gui.show()
     qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, 3000)
+    qtbot.waitExposed(main_gui, timeout=3000)
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
 
@@ -171,7 +172,7 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     main_gui.start_app_grid()
 
     qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, 3000)
+    qtbot.waitExposed(main_gui, timeout=3000)
 
     # wait for all tasks to finish
     app.conan_worker.finish_working(10)
@@ -199,7 +200,7 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, settings_fixture, qtbot):
     main_gui.start_app_grid()
 
     qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, 3000)
+    qtbot.waitExposed(main_gui, timeout=3000)
 
     tabs_num = 2  # two tabs in this file
     assert main_gui.ui.tab_bar.count() == tabs_num
@@ -226,7 +227,7 @@ def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
     main_gui.start_app_grid()
 
     qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, 3000)
+    qtbot.waitExposed(main_gui, timeout=3000)
 
     time.sleep(5)
    # assert default state
