@@ -1,12 +1,14 @@
 import json
+import os
+import platform
 import sys
 import tempfile
-import platform
 from distutils.file_util import copy_file
 from pathlib import Path
 
 import conan_app_launcher as app
-from conan_app_launcher.components import parse_config_file, write_config_file, AppConfigEntry
+from conan_app_launcher.components import (AppConfigEntry, parse_config_file,
+                                           write_config_file)
 
 
 def testCorrectFile(base_fixture, settings_fixture):
@@ -157,8 +159,12 @@ def testIconEval(base_fixture, settings_fixture, tmp_path):
     assert app_link.app_data["icon"] == "//icon.ico"
 
     # relative to config file
-    app_link.icon = "../../src/conan_app_launcher/assets/icons/icon.ico"
-    assert app_link.icon == app.base_path / "assets" / "icons" / "icon.ico"
+    rel_path = "icons/../icons"
+    new_ico_path = settings_fixture.parent / rel_path
+    os.makedirs(str(new_ico_path), exist_ok=True)
+    copy_file(app.asset_path / "icons" / "icon.ico", new_ico_path)
+    app_link.icon = rel_path + "/icon.ico"
+    assert app_link.icon == (new_ico_path / "icon.ico").resolve()
 
     # absolute path
     app_link.icon = str(tmp_path / "icon.ico")
