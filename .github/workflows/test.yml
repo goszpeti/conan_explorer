@@ -83,13 +83,11 @@ jobs:
         if: matrix.conan != 'latest'
         run: |
           pip install conan==${{ matrix.conan }}
-          conan remote add conancenter https://center.conan.io false
       - name: Install own dependencies
         run: |
           pip install pyqt5==5.14.2
           pip install .
       - name: Update remote
-        if: matrix.conan == 'latest'
         run: |
           conan remote update conancenter https://center.conan.io false
       - name: Test with pytest
