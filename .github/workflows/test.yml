@@ -89,7 +89,8 @@ jobs:
           pip install .
       - name: Update remote
         run: |
-          conan remote update conancenter https://center.conan.io false
+          conan remote clean
+          conan remote add conancenter https://center.conan.io false
       - name: Test with pytest
         run: |
           pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
