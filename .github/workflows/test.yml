@@ -86,13 +86,17 @@ jobs:
       - name: Install own dependencies
         run: |
           pip install pyqt5==5.14.2
-          pip install .
+          pip install . -e
       - name: Update remote
         run: |
           conan remote clean
           conan remote add conancenter https://center.conan.io false
-      - name: Test with pytest
+      - name: Execute unitests with pytest
         run: |
           pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+      - name: Execute integration with pytest
+        run: |
           pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+      - name: Execute system with pytest
+        run: |
           pytest -v test/system --junit-xml=./result_system.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
