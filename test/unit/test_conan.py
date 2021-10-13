@@ -100,11 +100,11 @@ def testInstallWithAnySettings(mocker, capsys):
     The actual installaton must not return an error.
     """
     # mock the remote response
-    ref = "m4_installer/1.4.18@bincrafters/stable"
-    os.system(f"conan remove {ref} -f")
+    os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
 
-    assert conan.install_package(ConanFileReference.loads(ref), {'id': '44fcf6b9a7fb86b2586303e3db40189d3b511830', 'options': {}, 'settings': {
+    assert conan.install_package(ConanFileReference.loads(TEST_REF), 
+        {'id': '6cc50b139b9c3d27b3e9042d5f5372d327b3a9f7', 'options': {}, 'settings': {
         'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
     captured = capsys.readouterr()
     assert "ERROR" not in captured.err
@@ -164,11 +164,10 @@ def testCreateKeyValueList(base_fixture):
 
 
 def testSearchForAllPackages(base_fixture):
-    ref = "zlib/1.2.8@conan/stable"
-    #os.system(f"conan remove {ref} -f")
     conan = ConanApi()
-    res = conan.search_recipe_in_remotes(ConanFileReference.loads(ref))
-    assert "zlib/1.2.8@conan/stable" in str(res)
+    res = conan.search_recipe_in_remotes(ConanFileReference.loads(TEST_REF))
+    ref = ConanFileReference.loads(TEST_REF) # need to convert @_/_
+    assert str(ref) in str(res)
 
 
 def testConanWorker(base_fixture, settings_fixture):

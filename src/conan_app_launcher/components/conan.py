@@ -211,10 +211,10 @@ class ConanApi():
                     f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"\
                     f" AND (os_build=None OR os_build={default_settings.get('os_build')})"
-
             search_results = self.conan.search_packages(str(conan_ref), query=query,
                                                         remote_name=remote).get("results", None)
             found_pkgs = search_results[0].get("items")[0].get("packages")
+            Logger().debug(str(found_pkgs))
         except Exception:  # no problem, next
             return []
 
@@ -251,10 +251,13 @@ class ConanApi():
             default_str_options: Dict[str, str] = dict([key, str(value)]
                                                        for key, value in default_options.items())
             if len(found_pkgs) > 1:
-                found_pkgs = list(filter(lambda pkg: default_str_options.items() <=
+                comb_opts_pkgs = list(filter(lambda pkg: default_str_options.items() <=
                                          pkg["options"].items(), found_pkgs))
+                if comb_opts_pkgs:
+                    found_pkgs = comb_opts_pkgs
 
-        # now we have all mathcing packages, but with potentially different compilers
+
+        # now we have all matching packages, but with potentially different compilers
         # reduce with default settings
         if len(found_pkgs) > 1:
             same_comp_pkgs = list(filter(lambda pkg: default_settings.get("compiler", "") ==
