@@ -56,7 +56,11 @@ class ConanApi():
         # search for orphaned refs
         for ref in self.cache.all_refs():
             ref_cache = self.cache.package_layout(ref)
-            for pkg_id in ref_cache.package_ids():
+            try:
+                package_ids = ref_cache.package_ids()
+            except:
+                package_ids = ref_cache.packages_ids() # old api
+            for pkg_id in package_ids:
                 short_path_dir = self.get_package_folder(ref, {"id": pkg_id})
                 pkg_id_dir = Path(ref_cache.packages()) / pkg_id
                 if not short_path_dir.exists():

@@ -116,7 +116,7 @@ def testCompilerNoSettings(base_fixture, capsys):
     Test, if a package with no settings at all can install
     The actual installaton must not return an error.
     """
-    ref = "jpcre2/10.32.01"  # header only
+    ref = "hedley/15"  # header only
     os.system(f"conan remove {ref} -f")
     conan = ConanApi()
     package_folder = conan.get_path_or_install(ConanFileReference.loads(ref))

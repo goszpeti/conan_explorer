@@ -21,7 +21,7 @@ REQUIRES_PYTHON = '>=3.6.0'
 # What packages are required for this module to be executed?
 REQUIRED = [
     "PyQt5>=5.13.0",
-    "conan>=1.19.4",
+    "conan>=1.24",
     "jsonschema>=3.2.0",
     "pefile",
     "typing-extensions ; python_version<'3.8'",
