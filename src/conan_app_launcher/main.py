@@ -6,6 +6,7 @@ import os
 import sys
 import traceback
 import platform
+import tempfile
 from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -18,7 +19,7 @@ from conan_app_launcher.components import (
     ConanWorker, parse_config_file, write_config_file, ConanInfoCache, TabConfigEntry, AppConfigEntry)
 
 try:
-    # this is a workaround for windows, so that on the taskbar the
+    # this is a workaround for Windows, so that on the taskbar the
     # correct icon will be shown (and not the default python icon)
     from PyQt5.QtWinExtras import QtWin
     MY_APP_ID = 'ConanAppLauncher.' + this.__version__
@@ -69,7 +70,7 @@ def main():
     # otherwise conan will not work
     if sys.executable.endswith("pythonw.exe"):
         sys.stdout = open(os.devnull, "w")
-        sys.stderr = open(os.path.join(os.getenv("TEMP"), "stderr-" + this.PROG_NAME), "w")
+        sys.stderr = open(os.path.join(tempfile.gettempdir(), "stderr-" + this.PROG_NAME), "w")
     # init logger first
     this.base_path = Path(__file__).absolute().parent
     this.asset_path = this.base_path / "assets"

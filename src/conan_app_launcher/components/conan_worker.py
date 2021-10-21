@@ -2,7 +2,7 @@
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING, Optional
+from typing import Tuple, Dict, Optional
 
 from conans.model.ref import ConanFileReference
 
@@ -10,16 +10,13 @@ import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components.conan import ConanApi
 
-if TYPE_CHECKING:
-    from conan_app_launcher.components import TabConfigEntry
-
 
 class ConanWorker():
     """ Sequential worker with a queue to execute conan commands and get info on packages """
 
     def __init__(self):
         self._conan = ConanApi()
-        self._conan_queue: "Queue[Tuple[str, Dict[str, str]]]" = Queue(maxsize=0)
+        self._conan_queue: Queue[Tuple[str, Dict[str, str]]] = Queue(maxsize=0)
         self._version_getter: Optional[Thread] = None
         self._worker: Optional[Thread] = None
         self._closing = False

@@ -12,12 +12,11 @@ from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.model.ref import ConanFileReference, PackageReference
 
 try:
-    from conans.util.windows import CONAN_LINK, CONAN_REAL_PATH, rm_conandir, path_shortener
+    from conans.util.windows import CONAN_REAL_PATH, rm_conandir, path_shortener
 except:
     pass
 
 from conan_app_launcher.base import Logger
-from conan_app_launcher.settings import CONAN_USER_ALIASES
 import conan_app_launcher as this
 
 
@@ -119,15 +118,6 @@ class ConanApi():
     def search_recipe_in_remotes(self, conan_ref: ConanFileReference) -> List[ConanFileReference]:
         """ Search in all remotes for all versions of a conan ref """
         res_list = []
-        # users_to_search: set = set([conan_ref.user])
-        # user_aliases: Dict[str, [str]] = this.settings.get(CONAN_USER_ALIASES)
-        # for aliases in user_aliases.values():
-        #     alias_list = aliases.split(",")
-        #     if conan_ref.user in alias_list:
-        #         for alias in alias_list:
-        #             users_to_search.add(alias)
-        #         break # take the first entry
-        # for user in users_to_search:
         try:
             # no query possible with pattern
             search_results = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",

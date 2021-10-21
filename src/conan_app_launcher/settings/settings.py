@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Union, Dict
 
 from conan_app_launcher.base import Logger
-from conan_app_launcher.settings import ( CONAN_USER_ALIASES,
+from conan_app_launcher.settings import (
     LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS)
 
 
@@ -16,7 +16,6 @@ class Settings():
     # internal constants
     _GENERAL_SECTION_NAME = "General"
     _VIEW_SECTION_NAME = "View"
-    _CONAN_USER_ALIASES_SECTION_NAME = CONAN_USER_ALIASES
 
     def __init__(self, ini_file: Path):
         """
@@ -44,26 +43,9 @@ class Settings():
                     GRID_ROWS: 20,
                     GRID_COLUMNS: 4,
             },
-            #self._CONAN_USER_ALIASES_SECTION_NAME: {} # fills dynamically
         }
 
         self._read_ini()
-
-
-    # def get(self, setting_name: str):
-    #     """ Get a specific setting """
-    #     value = None
-    #     # if section is the option name, then this is a dict type setting with user generated content
-    #     if setting_name in self._values.keys():
-    #         value = {}
-    #         for entry in self._values[setting_name]:
-    #             value.update({entry: self._values[setting_name].get(entry)})
-    #     else: # plain type
-    #         for section in self._values.keys():
-    #             if setting_name in self._values[section]:
-    #                 value = self._values[section].get(setting_name, None)
-    #                 break
-    #     return value
 
     def get(self, name: str) -> Union[str, int, float, bool]:
         """ Get a specific setting """

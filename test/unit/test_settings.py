@@ -18,10 +18,6 @@ def testReadFromFile(base_fixture):
     assert sets.get_int(GRID_COLUMNS) == 4
     assert sets.get_int(GRID_ROWS) == 20
 
-    #assert sets.get(CONAN_USER_ALIASES) == {"myuser" : "user1",
-    #                                        "myuser2" : "user2"}
-
-
 def testSaveToFile(base_fixture):
     """
     Tests, that writing a value works and untouched entries remain.

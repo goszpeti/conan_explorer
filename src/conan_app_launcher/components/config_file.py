@@ -59,7 +59,7 @@ class AppConfigEntry():
     INVALID_DESCR = "NA"
 
     # , config_file_path: Path = None):
-    def __init__(self, app_data: AppType = None):
+    def __init__(self, app_data: Optional[AppType] = None):
         if app_data is None:
             app_data = {"name": "", "conan_ref": this.INVALID_CONAN_REF, "executable": "", "icon": "",
                         "console_application": False, "args": "", "conan_options": []}
