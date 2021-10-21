@@ -86,7 +86,7 @@ jobs:
       - name: Install own dependencies
         run: |
           pip install pyqt5==5.14.2
-          pip install . -e
+          pip install -e .
       - name: Update remote
         run: |
           conan remote clean
