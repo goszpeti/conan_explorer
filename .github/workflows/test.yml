@@ -15,6 +15,7 @@ jobs:
     timeout-minutes: 10
 
     strategy:
+      fail-fast: false
       matrix:
         name:
           [
@@ -23,7 +24,7 @@ jobs:
             "ubuntu-py38",
             "ubuntu-py39",
             "windows-py38",
-            "ubuntu-py38-conan1.19.4",
+            "ubuntu-py38-conan1.24.0",
           ]
         include:
           - name: "ubuntu-py36"
@@ -48,10 +49,10 @@ jobs:
             os: windows-latest
             use_coverage: true
             conan: "latest"
-          - name: "ubuntu-py38-conan1.19.4"
+          - name: "ubuntu-py38-conan1.24.0"
             python: "3.8"
             os: ubuntu-latest
-            conan: "1.19.4"
+            conan: "1.24.0"
             use_coverage: true
 
     env:
@@ -82,13 +83,20 @@ jobs:
         if: matrix.conan != 'latest'
         run: |
           pip install conan==${{ matrix.conan }}
-          conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
       - name: Install own dependencies
         run: |
           pip install pyqt5==5.14.2
-          pip install .
-      - name: Test with pytest
+          pip install -e .
+      - name: Update remote
+        run: |
+          conan remote clean
+          conan remote add conancenter https://center.conan.io false
+      - name: Execute unitests with pytest
         run: |
           pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+      - name: Execute integration with pytest
+        run: |
           pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+      - name: Execute system with pytest
+        run: |
           pytest -v test/system --junit-xml=./result_system.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append

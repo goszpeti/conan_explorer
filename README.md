@@ -99,3 +99,6 @@ The IDE integration is done for VsCode.
 ## Licenses of used libraries and code
 
 * Using source code of modified ExtractIcon class from https://github.com/firodj/extract-icon-py, Copyright(c) 2015-2016 Fadhil Mandaga, MIT license
+* Using icons by https://icons8.com, Universal Multimedia Licensing
+Agreement for Icons8, https://icons8.com/vue-static/landings/pricing/icons8-license.pdf
+

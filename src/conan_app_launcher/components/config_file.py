@@ -3,18 +3,24 @@ import platform
 import jsonschema
 import tempfile
 
+from PyQt5 import QtCore
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, TYPE_CHECKING
 from conans.model.ref import ConanFileReference
 
-try:
+if TYPE_CHECKING:
     from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
+else:
+    try:
+        from typing import TypedDict
+    except ImportError:
+        from typing_extensions import TypedDict
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
+from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.components.icon import extract_icon
+from conan_app_launcher.components.conan import ConanApi
 
 # TODO: remove json validation, when user edit will be removed.
 # maybe remove versioning, but keep parsing for all versions?
@@ -48,30 +54,39 @@ class AppConfigType(TypedDict):
     tabs: List[TabType]
 
 
-class AppEntry():
+class AppConfigEntry():
     """ Representation of an app entry of the config schema """
     INVALID_DESCR = "NA"
-    INVALID_REF = "Invalid/NA@NA/NA"
 
-    def __init__(self, app_data: AppType = None, config_file_path: Path = None):
+    # , config_file_path: Path = None):
+    def __init__(self, app_data: Optional[AppType] = None):
         if app_data is None:
-            app_data = {"name": "", "conan_ref": self.INVALID_REF, "executable": "", "icon": "",
+            app_data = {"name": "", "conan_ref": this.INVALID_CONAN_REF, "executable": "", "icon": "",
                         "console_application": False, "args": "", "conan_options": []}
+        #self.update_callback_func = None
         self.app_data: AppType = app_data
-        self._config_file_path = config_file_path  # TODO will be removed later, when no relative icon paths allowed
         self.package_folder = Path("NULL")
+        self.gui_update_signal: QtCore.pyqtSignal = None
+
         # internal repr for vars which have other types or need to be manipulated
-        self._conan_ref = None
-        self._conan_options = {}
+        self._conan_ref: ConanFileReference = None
         self._executable = Path("NULL")
         self._icon = Path("NULL")
 
         # Init values with validation, which can be preloaded
         self.icon = self.app_data.get("icon", "")
-        self.conan_options = self.app_data.get("conan_options", [])
-        self.conan_ref = app_data.get("conan_ref", "")
+        self.conan_ref = app_data.get("conan_ref", this.INVALID_CONAN_REF)
 
         self._available_refs: List[str] = [self.conan_ref]
+        if this.cache:
+            self.set_available_packages(this.cache.get_remote_pkg_refs(
+                self._conan_ref.name, self._conan_ref.user))
+            if this.USE_LOCAL_INTERNAL_CACHE:
+                self.set_package_info(this.cache.get_local_package_path(str(self._conan_ref)))
+            elif not this.USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:  # last chance to get path
+                conan = ConanApi()
+                package_folder = conan.get_path_or_install(self.conan_ref, self.conan_options)
+                self.set_package_info(package_folder)
 
     @property
     def name(self):
@@ -91,15 +106,19 @@ class AppEntry():
             self._conan_ref = ConanFileReference.loads(new_value)
 
             # add conan ref to worker
-            if (self.app_data["conan_ref"] != new_value and new_value != self.INVALID_REF
+            if (self.app_data.get("conan_ref", "") != new_value and new_value != this.INVALID_CONAN_REF
                     and self._conan_ref.version != self.INVALID_DESCR
                     and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
                 this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
+            # invalidate old entries
             self.app_data["conan_ref"] = new_value
+            self._executable = Path("NULL")
+            self.icon = self.app_data.get("icon", "")
+
         except Exception as error:
             # errors happen fairly often, keep going
-            self._conan_ref = ConanFileReference.loads(self.INVALID_REF)
-            Logger().error(f"Conan ref id invalid {str(error)}")
+            self._conan_ref = ConanFileReference.loads(this.INVALID_CONAN_REF)
+            Logger().warning(f"Conan ref id invalid {str(error)}")
 
     @property
     def version(self):
@@ -165,7 +184,7 @@ class AppEntry():
             self._icon = self.package_folder / new_value.replace("//", "")
         elif new_value and not Path(new_value).is_absolute():
             # relative path is calculated from config file path
-            self._icon = self._config_file_path.parent / new_value
+            self._icon = Path(this.settings.get_string(LAST_CONFIG_FILE)).parent / new_value
         elif not new_value:  # try to find icon in temp
             self._icon = extract_icon(self.executable, Path(tempfile.gettempdir()))
         else:  # absolute path
@@ -173,7 +192,7 @@ class AppEntry():
 
         # default icon, until package path is updated
         if not self._icon.is_file():
-            self._icon = this.default_icon
+            self._icon = this.asset_path / "icons" / "app.png"
             if new_value:  # user input given -> warning
                 Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
         else:
@@ -181,7 +200,7 @@ class AppEntry():
             self.app_data["icon"] = new_value
 
     @property
-    def is_console_application(self) -> bool:
+    def is_console_application(self):
         return bool(self.app_data.get("console_application"))
 
     @is_console_application.setter
@@ -198,50 +217,66 @@ class AppEntry():
 
     @property
     def conan_options(self) -> Dict[str, str]:  # user specified, can differ from the actual installation
-        return self._conan_options
+        conan_options: Dict[str, str] = {}
+        for option_entry in self.app_data.get("conan_options", {}):
+            conan_options[option_entry["name"]] = option_entry.get("value", "")
+        return conan_options
 
     @conan_options.setter
-    def conan_options(self, new_value: List[OptionType]):
-        # convert key-value pairs from options to list of dicts
-        conan_options = {}
+    def conan_options(self, new_value: Dict[str, str]):
+        conan_options: List[OptionType] = []
         for opt in new_value:
-            conan_options[opt.get("name", "")] = opt.get("value", "")
-        self._conan_options = conan_options
-        self.app_data["conan_options"] = new_value
+            conan_options.append({"name": opt, "value": new_value[opt]})
+        self.app_data["conan_options"] = conan_options
 
     def set_package_info(self, package_folder: Path):
-        """ Callback when conan operation is done and paths can be validated"""
+        """ Callback when conan operation is done and paths can be validated """
+        if this.USE_LOCAL_INTERNAL_CACHE:
+            if self.package_folder != package_folder and this.cache:
+                this.cache.update_local_package_path(str(self.conan_ref), package_folder)
         self.package_folder = package_folder
 
-        # use setter to reevaluate - executable must go first, because icon depends on it
+        # use setter to reevaluate
         self.executable = self.app_data.get("executable", "")
+        # icon needs executable
         self.icon = self.app_data.get("icon", "")
 
+        # call gui update
+        if self.gui_update_signal:
+            self.gui_update_signal.emit()
+
     def set_available_packages(self, available_refs: List[ConanFileReference]):
-        """ Callback when conan operation is done and paths can be validated"""
+        """ Callback when conan operation is done and paths can be validated """
+        if self._available_refs != available_refs and this.cache:
+            this.cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
 
+        # call gui update
+        if self.gui_update_signal:
+            self.gui_update_signal.emit()
 
-class TabEntry():
+
+class TabConfigEntry():
     """ Representation of a tab entry of the config schema """
 
     def __init__(self, name):
         self.name = name
-        self._app_entries: List[AppEntry] = []
+        self._app_entries: List[AppConfigEntry] = []
         Logger().debug(f"Adding tab {name}")
 
-    def add_app_entry(self, app_entry: AppEntry):
+    def add_app_entry(self, app_entry: AppConfigEntry):
         """ Add an AppConfigEntry object to the tabs layout """
         self._app_entries.append(app_entry)
 
-    def remove_app_entry(self, app_entry: AppEntry):
+    def remove_app_entry(self, app_entry: AppConfigEntry):
+        """ Remove an AppConfigEntry object from the tabs layout """
         self._app_entries.remove(app_entry)
 
-    def get_app_entries(self) -> List[AppEntry]:
+    def get_app_entries(self) -> List[AppConfigEntry]:
         """ Get all app entries on the tab layout """
         return self._app_entries
 
-    def get_app_entry(self, name: str) -> Optional[AppEntry]:
+    def get_app_entry(self, name: str) -> Optional[AppConfigEntry]:
         """ Get one app entry of the tab layout based on it's name"""
         app = None
         for app in self.tab.get_app_entries():
@@ -257,7 +292,7 @@ def update_app_info(app: dict):
         app["conan_ref"] = value
 
 
-def parse_config_file(config_file_path: Path) -> List[TabEntry]:
+def parse_config_file(config_file_path: Path) -> List[TabConfigEntry]:
     """ Parse the json config file, validate and convert to object structure """
     app_config = None
     Logger().info(f"Loading file '{config_file_path}'...")
@@ -268,7 +303,7 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     with open(str(config_file_path)) as fp:
         try:
             app_config = json.load(fp)
-            with open(this.base_path / "assets" / "config_schema.json") as schema_file:
+            with open(this.asset_path / "config_schema.json") as schema_file:
                 json_schema = json.load(schema_file)
                 jsonschema.validate(instance=app_config, schema=json_schema)
         except BaseException as error:
@@ -278,11 +313,11 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     # build the object model and update
     tabs = []
     for tab in app_config.get("tabs"):
-        tab_entry = TabEntry(tab.get("name"))
+        tab_entry = TabConfigEntry(tab.get("name"))
         for app in tab.get("apps"):
             # TODO: not very robust, but enough for small changes
             update_app_info(app)
-            app_entry = AppEntry(app, config_file_path)
+            app_entry = AppConfigEntry(app)  # config_file_path
             tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
     # auto Update version to next version:
@@ -293,7 +328,7 @@ def parse_config_file(config_file_path: Path) -> List[TabEntry]:
     return tabs
 
 
-def write_config_file(config_file_path: Path, tab_entries: List[TabEntry]):
+def write_config_file(config_file_path: Path, tab_entries: List[TabConfigEntry]):
     # create json dict from model
     tabs_data: List[TabType] = []
     for tab in tab_entries:
@@ -304,10 +339,10 @@ def write_config_file(config_file_path: Path, tab_entries: List[TabEntry]):
         tabs_data.append(tab_data)
 
     # get last version
-    with open(this.base_path / "assets" / "config_schema.json") as schema_file:
+    with open(this.asset_path / "config_schema.json") as schema_file:
         json_schema = json.load(schema_file)
     version = json_schema.get("properties").get("version").get("enum")[-1]
     app_config: AppConfigType = {"version": version, "tabs": tabs_data}
 
     with open(str(config_file_path), "w") as config_file:
-        json.dump(app_config, config_file, indent=4)
+        json.dump(app_config, config_file, indent=2)

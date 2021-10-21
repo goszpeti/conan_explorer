@@ -1,8 +1,9 @@
 import logging
 from threading import Lock
 
-from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
 from PyQt5 import QtWidgets
+
+from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
 
 
 class Logger(logging.Logger):
@@ -18,6 +19,9 @@ class Logger(logging.Logger):
             # the user excepts a logger
             cls._instance = cls._init_logger()
         return cls._instance
+
+    def __init__(self) -> None:
+        return None
 
     @classmethod
     def _init_logger(cls) -> logging.Logger:

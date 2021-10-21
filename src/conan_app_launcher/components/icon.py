@@ -7,9 +7,7 @@ from pathlib import Path
 
 import struct
 import pefile
-from builtins import range
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components.file_runner import is_file_executable
 
 
 class ExtractIcon(object):
@@ -37,7 +35,8 @@ class ExtractIcon(object):
 
     def find_resource(self, type, res_index):
         rt_base_dir = self.find_resource_base(type)
-
+        if not rt_base_dir:
+            return None
         if res_index < 0:
             try:
                 idx = [entry.id for entry in rt_base_dir.directory.entries].index(-res_index)
@@ -63,6 +62,8 @@ class ExtractIcon(object):
 
     def get_group_icons(self):
         rt_base_dir = self.find_resource_base('RT_GROUP_ICON')
+        if not rt_base_dir:
+            return None
         groups = list()
         for res_index in range(0, len(rt_base_dir.directory.entries)):
             grp_icon_dir_entry = self.find_resource('RT_GROUP_ICON', res_index)

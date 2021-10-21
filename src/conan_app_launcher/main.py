@@ -6,17 +6,20 @@ import os
 import sys
 import traceback
 import platform
+import tempfile
 from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import conan_app_launcher as this
-from conan_app_launcher.settings import Settings
+from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
 from conan_app_launcher.base import Logger
-from conan_app_launcher.ui import main_ui
+from conan_app_launcher.ui.main_window import MainUi
+from conan_app_launcher.components import (
+    ConanWorker, parse_config_file, write_config_file, ConanInfoCache, TabConfigEntry, AppConfigEntry)
 
 try:
-    # this is a workaround for windows, so that on the taskbar the
+    # this is a workaround for Windows, so that on the taskbar the
     # correct icon will be shown (and not the default python icon)
     from PyQt5.QtWinExtras import QtWin
     MY_APP_ID = 'ConanAppLauncher.' + this.__version__
@@ -28,9 +31,36 @@ except ImportError:
 Qt = QtCore.Qt
 
 
+def load_base_components(settings):
+    """ Load all default components. """
+    this.cache = ConanInfoCache(this.base_path / this.CACHE_FILE_NAME)
+
+    # create or read config file
+    config_file_setting = settings.get_string(LAST_CONFIG_FILE)
+    default_config_file_path = Path.home() / this.DEFAULT_GRID_CONFIG_FILE_NAME
+
+    # empty config, create it in home path
+    if not config_file_setting or not os.path.exists(default_config_file_path):
+        config_file_path = default_config_file_path
+        Logger().info("Creating empty ui config file " + str(default_config_file_path))
+        tab = TabConfigEntry("New Tab")
+        tab.add_app_entry(AppConfigEntry({"name": "My App Link"}))
+        write_config_file(default_config_file_path, [tab])
+        settings.set(LAST_CONFIG_FILE, str(default_config_file_path))
+
+    else:
+        config_file_path = Path(config_file_setting)
+
+    if config_file_path.is_file():  # escape error log on first opening
+        this.tab_configs = parse_config_file(config_file_path)
+
+    # start Conan Worker
+    this.conan_worker = ConanWorker()
+
+
 def main():
     """
-    Start the Qt application
+    Start the Qt application and an all main components
     """
 
     if platform.system() == "Darwin":
@@ -40,11 +70,10 @@ def main():
     # otherwise conan will not work
     if sys.executable.endswith("pythonw.exe"):
         sys.stdout = open(os.devnull, "w")
-        sys.stderr = open(os.path.join(os.getenv("TEMP"),
-                                       "stderr-" + this.PROG_NAME), "w")
+        sys.stderr = open(os.path.join(tempfile.gettempdir(), "stderr-" + this.PROG_NAME), "w")
     # init logger first
     this.base_path = Path(__file__).absolute().parent
-    this.default_icon: Path = this.base_path / "assets" / "default_app_icon.png"
+    this.asset_path = this.base_path / "assets"
     logger = Logger()
 
     # apply Qt attributes (only at init possible)
@@ -54,14 +83,18 @@ def main():
     # start Qt app and ui
     if not this.qt_app:
         this.qt_app = QtWidgets.QApplication([])
-    icon = QtGui.QIcon(str(this.base_path / "assets" / "icon.ico"))
+    icon = QtGui.QIcon(str(this.asset_path / "icons" / "icon.ico"))
 
-    settings_file_path = Path.home() / ".cal_config"
-    settings = Settings(ini_file=settings_file_path)
+    settings_file_path = Path.home() / this.SETTINGS_FILE_NAME
+    this.settings = Settings(ini_file=settings_file_path)
 
-    app_main_ui = main_ui.MainUi(settings)
-    app_main_ui.setWindowIcon(icon)
-    app_main_ui.show()
+    load_base_components(this.settings)
+
+    this.main_window = MainUi()
+    # load tabs needs the pyqt signals - constructor has to be finished
+    this.main_window.start_app_grid()
+    this.main_window.setWindowIcon(icon)
+    this.main_window.show()
 
     try:
         this.qt_app.exec_()

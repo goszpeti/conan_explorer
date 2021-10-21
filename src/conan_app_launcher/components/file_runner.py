@@ -18,8 +18,8 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
 
 
 def is_file_executable(file_path: Path) -> bool:
-    # Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
-    # program has this flag. Use pathext env-var to determine executable file extensions.
+    """ Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
+     program has this flag. Use pathext env-var to determine executable file extensions. """
     is_executable = False
     if platform.system() == "Linux":
         if os.access(str(file_path), os.X_OK):
@@ -49,6 +49,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
                 cmd += args.strip().split(" ")
                 # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
             proc = subprocess.Popen(cmd, creationflags=creationflags)
+            return proc.pid
         elif platform.system() == "Linux":
             if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal emulators available
@@ -59,7 +60,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
             if args:
                 cmd += args.strip().split(" ")
             proc = subprocess.Popen(cmd)
-        return proc.pid
+            return proc.pid
     Logger().warning(f"No executable {str(executable)} to start.")
     return 0
 

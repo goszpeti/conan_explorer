@@ -2,42 +2,42 @@
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING, List
+from typing import Tuple, Dict, Optional
 
-from PyQt5 import QtCore
 from conans.model.ref import ConanFileReference
 
+import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components.conan import ConanApi
-
-if TYPE_CHECKING:
-    from conan_app_launcher.components import TabEntry
 
 
 class ConanWorker():
     """ Sequential worker with a queue to execute conan commands and get info on packages """
 
-    def __init__(self, tabs: List["TabEntry"], gui_update_signal: QtCore.pyqtSignal):
+    def __init__(self):
         self._conan = ConanApi()
-        self._conan_queue: "Queue[Tuple[str, Dict[str, str]]]" = Queue(maxsize=0)
-        self._version_getter = None
-        self._worker = None
+        self._conan_queue: Queue[Tuple[str, Dict[str, str]]] = Queue(maxsize=0)
+        self._version_getter: Optional[Thread] = None
+        self._worker: Optional[Thread] = None
         self._closing = False
-        self._gui_update_signal = gui_update_signal
-        self._tabs = tabs
 
+        self.update_all_info()
+
+    def update_all_info(self):
+        """ Starts the worker on using the current tabs info global var """
         # get all conan refs and  make them unique # TODO separate this from worker
         conan_refs = []
-        for tab in tabs:
+        for tab in this.tab_configs:
             for app in tab.get_app_entries():
                 ref_dict = {"name": str(app.conan_ref), "options": app.conan_options}
-                if not ref_dict in conan_refs:
+                if ref_dict not in conan_refs:
                     conan_refs.append(ref_dict)
 
         # fill up queue
         for ref in conan_refs:
-            self._conan_queue.put([ref["name"], ref["options"]])
-            # start getting versions info in a separate thread
+            if this.USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:
+                self._conan_queue.put([ref["name"], ref["options"]])
+            # start getting versions info in a separate thread in a bundled way to get better performance
             self._version_getter = Thread(target=self._get_packages_versions, args=[ref["name"], ])
             self._version_getter.start()
         self.start_working()
@@ -69,22 +69,21 @@ class ConanWorker():
             package_folder = self._conan.get_path_or_install(
                 ConanFileReference.loads(conan_ref), conan_options)
             # call update on every entry which has this ref
-            for tab in self._tabs:
+            for tab in this.tab_configs:
                 for app in tab.get_app_entries():
                     if str(app.conan_ref) == conan_ref:
                         app.set_package_info(package_folder)
             Logger().debug("Finish working on " + conan_ref)
-            if self._gui_update_signal:
-                self._gui_update_signal.emit()
             self._conan_queue.task_done()
 
     def _get_packages_versions(self, conan_ref):
-        available_refs = self._conan.search_for_all_recipes(ConanFileReference.loads(conan_ref))
+        """ Get all version and channel combination of a package from all remotes. """
+        available_refs = self._conan.search_recipe_in_remotes(ConanFileReference.loads(conan_ref))
         if not available_refs:
             return
-        for tab in self._tabs:
+        for tab in this.tab_configs:
             for app in tab.get_app_entries():
                 if not self._closing and str(app.conan_ref) == conan_ref:
                     app.set_available_packages(available_refs)
-        if not self._closing and self._gui_update_signal:
-            self._gui_update_signal.emit()
+
+    # TODO New feature: add a job to query all remote packages periodically

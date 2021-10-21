@@ -1,0 +1,8 @@
+{
+    "read_only": false,
+    "local_packages": {
+        "my_package/1.0.0@myself/stable": "",
+        "my_package/2.0.0@myself/stable": "C:\\.conan\\pkg",
+    },
+    "remote_packages": {}
+}
