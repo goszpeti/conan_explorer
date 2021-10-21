@@ -62,9 +62,8 @@ def testEditAppDialogFillValues(base_fixture, qtbot):
 
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
-    sig = QtCore.pyqtSignal()
     root_obj.setObjectName("parent")
-    diag = EditAppDialog(app_info, sig, root_obj)
+    diag = EditAppDialog(app_info, root_obj)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
@@ -105,9 +104,8 @@ def testEditAppDialogReadValues(base_fixture, qtbot):
 
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
-    sig = QtCore.pyqtSignal()
     root_obj.setObjectName("parent")
-    EditAppDialog(app_info, sig, root_obj)
+    EditAppDialog(app_info, root_obj)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
@@ -134,8 +132,7 @@ def testAppLinkOpen(base_fixture, qtbot):
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    sig = pyqtSignal()
-    app_ui = AppLink(root_obj, app_info, sig, sig)
+    app_ui = AppLink(root_obj, app_info)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
@@ -173,8 +170,7 @@ def testAppLinkVersionAndChannelSwitch(base_fixture, qtbot):
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    sig = pyqtSignal()
-    app_ui = AppLink(root_obj, app_info, sig, sig)
+    app_ui = AppLink(root_obj, app_info)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
