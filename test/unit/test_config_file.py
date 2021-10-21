@@ -19,7 +19,7 @@ def testCorrectFile(base_fixture, settings_fixture):
     tabs = parse_config_file(settings_fixture)
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].get_app_entries()
-    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19@_/_"
+    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19"
     assert tab0_entries[0].app_data.get("executable") == "bin/m4"
     assert tab0_entries[0].app_data.get("icon") == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
