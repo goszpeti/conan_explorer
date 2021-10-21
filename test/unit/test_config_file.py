@@ -19,7 +19,7 @@ def testCorrectFile(base_fixture, settings_fixture):
     tabs = parse_config_file(settings_fixture)
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].get_app_entries()
-    assert str(tab0_entries[0].conan_ref) == "m4_installer/1.4.18@bincrafters/stable"
+    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19@_/_"
     assert tab0_entries[0].app_data.get("executable") == "bin/m4"
     assert tab0_entries[0].app_data.get("icon") == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
@@ -49,7 +49,7 @@ def testUpdate(base_fixture, settings_fixture):
     tabs = parse_config_file(temp_file)
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].get_app_entries()
-    assert str(tab0_entries[0].conan_ref) == "m4_installer/1.4.18@bincrafters/stable"
+    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19"
     assert str(tab0_entries[1].conan_ref) == "boost_functional/1.69.0@bincrafters/stable"
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].get_app_entries()
@@ -60,7 +60,7 @@ def testUpdate(base_fixture, settings_fixture):
     with open(temp_file) as config_file:
         read_obj = json.load(config_file)
     assert read_obj.get("version") == "0.3.1"  # last version
-    assert read_obj.get("tabs")[0].get("apps")[0].get("conan_ref") == "m4_installer/1.4.18@bincrafters/stable"
+    assert read_obj.get("tabs")[0].get("apps")[0].get("conan_ref") == "m4/1.4.19@_/_"
     assert read_obj.get("tabs")[0].get("apps")[0].get("package_id") is None
 
 

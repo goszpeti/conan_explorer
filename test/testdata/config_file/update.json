@@ -6,7 +6,7 @@
             "apps": [
                 {
                     "name": "App1 with spaces",
-                    "package_id": "m4_installer/1.4.18@bincrafters/stable",
+                    "package_id": "m4/1.4.19@_/_",
                     "executable": "bin/m4",
                     "icon": "NonExistantIcon.png",
                     "console_application": true,

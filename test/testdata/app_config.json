@@ -6,7 +6,7 @@
             "apps": [
                 {
                     "name": "App1 with spaces",
-                    "conan_ref": "m4_installer/1.4.18@bincrafters/stable",
+                    "conan_ref": "m4/1.4.19@_/_",
                     "executable": "bin/m4",
                     "icon": "NonExistantIcon.png",
                     "console_application": true,
