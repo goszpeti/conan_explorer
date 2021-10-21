@@ -19,7 +19,11 @@ from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanApi, config_file
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.app_grid.app_link import AppLink
 from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
+from conan_app_launcher.components import AppConfigEntry
+from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
+
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -349,7 +353,6 @@ def testRemoveTabDialog(base_fixture, settings_fixture, qtbot, mocker):
     prev_count = main_gui.ui.tab_bar.tabBar().count()
     assert prev_count > 1, "Test won't work with one tab"
 
-
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
     main_gui._app_grid.on_tab_remove(id_to_delete)
@@ -367,6 +370,7 @@ def testRemoveTabDialog(base_fixture, settings_fixture, qtbot, mocker):
     config_tabs = config_file.parse_config_file(settings_fixture)
     assert len(config_tabs) == prev_count - 1
 
+
 def testAddAppLink(base_fixture, settings_fixture, qtbot, mocker):
     load_base_components(app.settings)
     from pytestqt.plugin import _qapp_instance
@@ -383,20 +387,81 @@ def testAddAppLink(base_fixture, settings_fixture, qtbot, mocker):
     cd = tabs[1].config_data
     apps = cd.get_app_entries()
     prev_count = len(apps)
+    app_link: AppLink = tabs[1].app_links[0] 
+    app_info = AppConfigEntry(
+        app_data={"name": "NewApp", "conan_ref": "zlib/1.2.11@_/_", "executable": "bin/exe"})
 
-    app_link = tabs[1].open_app_link_add_dialog()
+    mocker.patch.object(EditAppDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Accepted)
+    app_link.open_app_link_add_dialog(app_info)
     assert app_link._edit_app_dialog._ui.name_line_edit.text()
 
+    app_link._edit_app_dialog._ui.button_box.accepted.emit()
     config_tabs = config_file.parse_config_file(settings_fixture)
-    assert len(config_tabs) == prev_count - 1
+    assert config_tabs[0].name == cd.name == "Basics" # just safety that it is the same tab
+    assert len(config_tabs[0].get_app_entries()) == prev_count + 1
 
 
-def testEditAppLink():
-    pass
+def testEditAppLink(base_fixture, settings_fixture, qtbot, mocker):
+    load_base_components(app.settings)
+    from pytestqt.plugin import _qapp_instance
+    app.qt_app = _qapp_instance
+    main_gui = main_window.MainUi()
+    app.main_window = main_gui  # needed for signal access
+    main_gui.show()
+    main_gui.start_app_grid()
 
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
 
-def testRemoveAppLink():
-    pass
+    tabs = main_gui.ui.tab_bar.findChildren(TabAppGrid)
+    cd = tabs[1].config_data
+    apps = cd.get_app_entries()
+    prev_count = len(apps)
+    app_link = tabs[1].app_links[0]
+
+    ### check that no changes happens on cancel
+    mocker.patch.object(EditAppDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Rejected)
+    app_link.open_edit_dialog()
+    config_tabs = config_file.parse_config_file(settings_fixture)
+    assert config_tabs[0].name == cd.name == "Basics"  # just safety that it is the same tab
+    assert len(config_tabs[0].get_app_entries()) == prev_count
+
+    ### check, that changing something hast the change in the saved config and we the same number of elements
+    app_info = AppConfigEntry(
+        app_data={"name": "NewApp", "conan_ref": "zlib/1.2.11@_/_", "executable": "bin/exe"})
+    mocker.patch.object(EditAppDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Accepted)
+    app_link.open_edit_dialog(app_info)
+    config_tabs = config_file.parse_config_file(settings_fixture)
+    assert config_tabs[0].name == cd.name == "Basics" # just safety that it is the same tab
+    assert len(config_tabs[0].get_app_entries()) == prev_count
+
+def testRemoveAppLink(base_fixture, settings_fixture, qtbot, mocker):
+    load_base_components(app.settings)
+    from pytestqt.plugin import _qapp_instance
+    app.qt_app = _qapp_instance
+    main_gui = main_window.MainUi()
+    app.main_window = main_gui  # needed for signal access
+    main_gui.show()
+    main_gui.start_app_grid()
+
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    tabs = main_gui.ui.tab_bar.findChildren(TabAppGrid)
+    cd = tabs[1].config_data
+    apps = cd.get_app_entries()
+    prev_count = len(apps)
+
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+                        return_value=QtWidgets.QMessageBox.Yes)
+    app_link = tabs[1].app_links[0]
+    app_link.remove()
+
+    config_tabs = config_file.parse_config_file(settings_fixture)
+    assert len(config_tabs[0].get_app_entries()) == prev_count - 1
 
 
 def testOpenFileExplorerOnAppLink(base_fixture, qtbot):

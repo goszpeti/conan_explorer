@@ -43,6 +43,8 @@ class ConanInfoCache():
 
     def get_remote_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
         """ Return cached info on available conan refs from  the same ref name and user. """
+        if not user: # official pkgs have no user, substituted by _
+            user = "_"
         refs: List[ConanFileReference] = []
         version_channels = self._remote_packages.get(f"{name}@{user}", [])
         for version_channel in version_channels:

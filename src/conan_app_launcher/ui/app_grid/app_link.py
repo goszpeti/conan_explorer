@@ -3,10 +3,7 @@ import os
 import platform
 import conan_app_launcher as this
 
-from conan_app_launcher.base import Logger
 from conan_app_launcher.components import AppConfigEntry, run_file
-from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
-                                         DISPLAY_APP_VERSIONS, Settings)
 from conan_app_launcher.ui.app_grid.app_button import AppButton
 # from conan_app_launcher.ui.tab_app_grid import TabAppGrid
 
@@ -18,11 +15,11 @@ Qt = QtCore.Qt
 
 
 class AppLink(QtWidgets.QVBoxLayout):
-    app_link_edited = QtCore.pyqtSignal(AppConfigEntry)
     conan_info_updated = QtCore.pyqtSignal()
 
-    def __init__(self, parent: QtWidgets.QWidget, app: AppConfigEntry, app_link_added, app_link_removed):
+    def __init__(self, parent: QtWidgets.QWidget, app: AppConfigEntry):
         super().__init__(parent)
+        self.parent_tab = parent # save parent - don't use qt signals ands solts
         self.config_data = app
         self.config_data.gui_update_signal = self.conan_info_updated
         self.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
@@ -31,8 +28,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_version_cbox = QtWidgets.QComboBox(parent)
         self._app_channel_cbox = QtWidgets.QComboBox(parent)
         self._app_button = AppButton(parent)
-        self._app_link_added = app_link_added
-        self._app_link_removed = app_link_removed
 
         # size policies
         self.setSpacing(3)
@@ -70,7 +65,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.addWidget(self._app_channel_cbox)
 
         # connect signals
-        self.app_link_edited.connect(self.on_accept_edit_dialog)
         self.conan_info_updated.connect(self.update_with_conan_info)
         if this.main_window:
             this.main_window.display_versions_updated.connect(self.update_versions_cbox)
@@ -142,27 +136,39 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_version_cbox.clear()
         self._app_version_cbox.addItem(self.config_data.conan_ref.version)
 
-    def open_edit_dialog(self):
+    def open_edit_dialog(self, config_data: AppConfigEntry = None):
+        if not config_data:
+            config_data = self.config_data
+        edit_app_dialog = EditAppDialog(config_data, parent=self.parentWidget())
+        reply = edit_app_dialog.exec_()
+        if reply == EditAppDialog.Accepted:
+            edit_app_dialog.save_edited_dialog()
+            self._apply_new_config()
+            self._app_button.grey_icon()
+            this.main_window.save_config()
+
+    def open_app_link_add_dialog(self, config_data=AppConfigEntry()):
+        app_link = AppLink(self.parent_tab, config_data)
+        # TODO save for testing
         self._edit_app_dialog = EditAppDialog(
-            self.config_data, parent=self.parentWidget(), app_link_edited=self.app_link_edited)
+            app_link.config_data, parent=self.parentWidget())
+        reply = self._edit_app_dialog.exec_()
+        if reply == EditAppDialog.Accepted:
+            self.parent_tab.add_app_link_to_tab(app_link)
+            this.main_window.save_config()
+        return app_link  # for testing
 
     def remove(self):
         # confirmation dialog
-        msg = QtWidgets.QMessageBox(parent=this.main_window)
-        msg.setWindowTitle("Delete app link")
-        msg.setText(f"Are you sure, you want to delete the link \"{self.config_data.name}?\"")
-        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-        msg.setIcon(QtWidgets.QMessageBox.Question)
-        reply = msg.exec_()
+        message_box = QtWidgets.QMessageBox(parent=this.main_window)
+        message_box.setWindowTitle("Delete app link")
+        message_box.setText(f"Are you sure, you want to delete the link \"{self.config_data.name}?\"")
+        message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        message_box.setIcon(QtWidgets.QMessageBox.Question)
+        reply = message_box.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            self._app_link_removed.emit(self)
-            this.main_window.config_changed.emit()
-
-    def on_accept_edit_dialog(self):
-        self._app_button.grey_icon()
-        self._app_link_added.emit(self)
-        self._apply_new_config()
-        this.main_window.config_changed.emit()
+            self.parent_tab.remove_app_link_from_tab(self)
+            this.main_window.save_config()
 
     def update_with_conan_info(self):
         # on changed values
@@ -227,7 +233,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self.config_data.channel = self.config_data.INVALID_DESCR
         self.config_data.version = self._app_version_cbox.currentText()
-        this.main_window.config_changed.emit()
+        this.main_window.save_config()
 
     def on_channel_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
@@ -241,4 +247,4 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.config_data.channel = self._app_channel_cbox.currentText()
         self._app_button.setToolTip(str(self.config_data.conan_ref))
         self._app_button.set_icon(self.config_data.icon)
-        this.main_window.config_changed.emit()
+        this.main_window.save_config()

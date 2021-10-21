@@ -48,16 +48,14 @@ class AppGrid():
 
         self.load_tabs()
 
-    # @pyqtSlot()
     def on_tab_move(self):
         """ Refresh backend info when tabs are reordered"""
         new_list = []
         for i in range(self._main_window.ui.tab_bar.count()):
             new_list.append(self._main_window.ui.tab_bar.widget(i).config_data)
         this.tab_configs = new_list
-        self._main_window.on_config_change()
+        self._main_window.save_config()
 
-    # @pyqtSlot(QtCore.QPoint)
     def on_tab_context_menu_requested(self, position):
         index = self._main_window.ui.tab_bar.tabBar().tabAt(position)
         menu = QtWidgets.QMenu()
@@ -99,7 +97,7 @@ class AppGrid():
                 max_columns=this.settings.get_int(GRID_COLUMNS), 
                 max_rows=this.settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, text)
-            self._main_window.ui.on_config_change()
+            self._main_window.ui.save_config()
 
     # @pyqtSlot(int)
     def on_tab_rename(self, index):
@@ -111,7 +109,7 @@ class AppGrid():
         if accepted:
             tab.config_data.name = text
             self._main_window.ui.tab_bar.setTabText(index, text)
-            self._main_window.on_config_change()
+            self._main_window.save_config()
 
     # @pyqtSlot(int)
     def on_tab_remove(self, index):
@@ -126,7 +124,7 @@ class AppGrid():
         if reply == QtWidgets.QMessageBox.Yes:
             this.tab_configs.remove(tab.config_data)
             self._main_window.ui.tab_bar.removeTab(index)
-            self._main_window.on_config_change()
+            self._main_window.save_config()
 
     def load_tabs(self):
         """ Creates new layout """

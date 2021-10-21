@@ -22,7 +22,6 @@ class MainUi(QtWidgets.QMainWindow):
     TOOLBOX_PACKAGES_ITEM = 1
 
     conan_info_updated = QtCore.pyqtSignal()
-    config_changed = QtCore.pyqtSignal()
     display_versions_updated = QtCore.pyqtSignal(bool)
     display_channels_updated = QtCore.pyqtSignal(bool)
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
@@ -51,7 +50,7 @@ class MainUi(QtWidgets.QMainWindow):
         Logger.init_qt_logger(self)
         self.ui.console.setFontPointSize(10)
 
-        self.config_changed.connect(self.on_config_change)
+        #self.config_changed.connect(self.save_config)
         self.new_message_logged.connect(self.write_log)
 
         # load app grid
@@ -154,15 +153,14 @@ class MainUi(QtWidgets.QMainWindow):
         current_tab = self.ui.tab_bar.widget(self.ui.tab_bar.currentIndex())
         current_tab.open_app_link_add_dialog()
 
-    @pyqtSlot()
-    def on_config_change(self):
-        """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
-        write_config_file(Path(this.settings.get_string(LAST_CONFIG_FILE)), this.tab_configs)
-
     @ pyqtSlot(str)
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self.ui.console.append(text)
+
+    def save_config(self):
+        """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
+        write_config_file(Path(this.settings.get_string(LAST_CONFIG_FILE)), this.tab_configs)
 
     def load_icons(self):
         icon = QtGui.QIcon()

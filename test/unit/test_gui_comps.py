@@ -44,7 +44,7 @@ def testAboutDialog(base_fixture, qtbot):
 
 def testEditAppDialogNewAppLink(base_fixture, qtbot):
     """ Test, if a new dialog on empty AppData will ..."""
-
+    pass
 
 def testEditAppDialogFillValues(base_fixture, qtbot):
     """

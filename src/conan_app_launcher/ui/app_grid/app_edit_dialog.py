@@ -2,9 +2,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 import conan_app_launcher as this
-from conan_app_launcher.components import AppConfigEntry, run_file
-from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
-                                         DISPLAY_APP_VERSIONS, Settings)
+from conan_app_launcher.components import AppConfigEntry
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -12,10 +10,9 @@ Qt = QtCore.Qt
 
 class EditAppDialog(QtWidgets.QDialog):
 
-    def __init__(self,  app_config_data: AppConfigEntry, app_link_edited:  QtCore.pyqtSignal, parent: QtWidgets.QTabWidget, flags=Qt.WindowFlags()):
+    def __init__(self,  app_config_data: AppConfigEntry, parent: QtWidgets.QWidget, flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
         self._app_config_data = app_config_data
-        self._app_link_edited = app_link_edited
         self._ui = uic.loadUi(this.base_path / "ui" / "app_grid" / "app_edit.ui", baseinstance=self)
 
         self.setModal(True)
@@ -34,9 +31,8 @@ class EditAppDialog(QtWidgets.QDialog):
         for option in self._app_config_data.conan_options:
             conan_options_text += f"{option}={self._app_config_data.conan_options.get(option)}\n"
         self._ui.conan_opts_text_edit.setText(conan_options_text)
-
-        self._ui.button_box.accepted.connect(self.save_edited_dialog)
-        self.show()
+        # for some reason OK is not connected at default
+        self._ui.button_box.accepted.connect(self.accept)
 
     def save_edited_dialog(self):
         # check all input validations
@@ -61,5 +57,3 @@ class EditAppDialog(QtWidgets.QDialog):
             else:
                 pass  # TODO warning
         self._app_config_data.conan_options = conan_options
-        self._app_link_edited.emit(self._app_config_data)
-        self.accept()

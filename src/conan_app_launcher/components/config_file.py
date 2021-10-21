@@ -5,19 +5,21 @@ import tempfile
 
 from PyQt5 import QtCore
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, TYPE_CHECKING
 from conans.model.ref import ConanFileReference
 
-try:
+if TYPE_CHECKING:
     from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
+else:
+    try:
+        from typing import TypedDict
+    except ImportError:
+        from typing_extensions import TypedDict
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.components.icon import extract_icon
-from conan_app_launcher.components.cache import ConanInfoCache
 from conan_app_launcher.components.conan import ConanApi
 
 # TODO: remove json validation, when user edit will be removed.

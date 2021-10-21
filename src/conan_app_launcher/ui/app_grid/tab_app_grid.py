@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 
 import conan_app_launcher as this
-from conan_app_launcher.components import AppConfigEntry, TabConfigEntry
+from conan_app_launcher.components import TabConfigEntry
 from conan_app_launcher.ui.app_grid.app_link import AppLink
 
 
@@ -10,8 +10,6 @@ Qt = QtCore.Qt
 
 
 class TabAppGrid(QtWidgets.QWidget):
-    app_link_added = QtCore.pyqtSignal(AppLink)
-    app_link_removed = QtCore.pyqtSignal(AppLink)
 
     def __init__(self, parent: QtWidgets.QTabWidget, config_data: TabConfigEntry,
                  max_rows: int, max_columns: int):
@@ -57,9 +55,6 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
         self.tab_grid_layout.setSpacing(4)
 
-        self.app_link_added.connect(self.on_app_link_add)
-        self.app_link_removed.connect(self.on_app_link_remove)
-
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.tab_layout.addWidget(self.tab_scroll_area)
         self.add_all_app_links()
@@ -69,7 +64,7 @@ class TabAppGrid(QtWidgets.QWidget):
         column = 0
         for app_info in self.config_data.get_app_entries():
             # add in order of occurence
-            app_link = AppLink(self, app_info, self.app_link_added, self.app_link_removed)
+            app_link = AppLink(self, app_info)
             self.app_links.append(app_link)
             self.tab_grid_layout.addLayout(app_link, row, column, 1, 1)
             column += 1
@@ -77,13 +72,8 @@ class TabAppGrid(QtWidgets.QWidget):
                 column = 0
                 row += 1
 
-    def open_app_link_add_dialog(self):
-        app_info = AppConfigEntry()
-        app_link = AppLink(self, app_info, self.app_link_added, self.app_link_removed)
-        app_link.open_edit_dialog()
-        return app_link
-
-    def on_app_link_add(self, app_link):
+    def add_app_link_to_tab(self, app_link):
+        """ To be called from a child AppLink """
         current_row = int(len(self.config_data.get_app_entries()) / self.max_columns)  # count from 0
         current_column = len(self.config_data.get_app_entries()) % self.max_columns  # count from 0 to 3
 
@@ -91,7 +81,8 @@ class TabAppGrid(QtWidgets.QWidget):
         self.config_data.add_app_entry(app_link.config_data)
         self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
 
-    def on_app_link_remove(self, app_link: AppLink):
+    def remove_app_link_from_tab(self, app_link: AppLink):
+        """ To be called from a child AppLink """
         self.config_data.remove_app_entry(app_link.config_data)
         self.app_links.remove(app_link)
 
