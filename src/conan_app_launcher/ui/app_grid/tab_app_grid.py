@@ -9,7 +9,7 @@ Qt = QtCore.Qt
 
 
 class TabAppGrid(QtWidgets.QWidget):
-
+    
     def __init__(self, parent: QtWidgets.QTabWidget, config_data: TabConfigEntry,
                  max_rows: int, max_columns: int):
         super().__init__(parent)
@@ -54,6 +54,7 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
         self.tab_grid_layout.setSpacing(4)
 
+        self.app_link_removed.connect(self.remove_app_link_from_tab)
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.tab_layout.addWidget(self.tab_scroll_area)
         self.add_all_app_links()
@@ -84,21 +85,6 @@ class TabAppGrid(QtWidgets.QWidget):
         """ To be called from a child AppLink """
         self.config_data.remove_app_entry(app_link.config_data)
         self.app_links.remove(app_link)
-
-        # for child in self.tab_scroll_area_widgets.children():
-        #     if isinstance(child, QtWidgets.QWidget):
-        #         print("deleting" + str(child))
-        #         child.deleteLater()
-        for child in self.tab_grid_layout.children():
-            self.tab_grid_layout.removeItem(child)
-        # self.tab_grid_layout.removeItem(app_link)
+        self.tab_grid_layout.removeItem(app_link)
+        app_link.setParent(None)
         del app_link
-        row = 0
-        column = 0
-        for app in self.app_links:
-            # add in order of occurence
-            self.tab_grid_layout.addLayout(app, row, column, 1, 1)
-            column += 1
-            if column == self.max_columns:
-                column = 0
-                row += 1

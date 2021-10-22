@@ -5,7 +5,7 @@ import tempfile
 
 from PyQt5 import QtCore
 from pathlib import Path
-from typing import List, Dict, Optional, TYPE_CHECKING
+from typing import Callable, List, Dict, Optional, TYPE_CHECKING
 from conans.model.ref import ConanFileReference
 
 if TYPE_CHECKING:
@@ -66,10 +66,11 @@ class AppConfigEntry():
         #self.update_callback_func = None
         self.app_data: AppType = app_data
         self.package_folder = Path("NULL")
-        self.gui_update_signal: QtCore.pyqtSignal = None
+        #self.gui_update_signal: QtCore.pyqtSignal = None
+
+        self.update_func: Optional[Callable] = None
 
         # internal repr for vars which have other types or need to be manipulated
-        self._conan_ref: ConanFileReference = None
         self._executable = Path("NULL")
         self._icon = Path("NULL")
 
@@ -77,8 +78,9 @@ class AppConfigEntry():
         self.icon = self.app_data.get("icon", "")
         self.conan_ref = app_data.get("conan_ref", this.INVALID_CONAN_REF)
 
-        self._available_refs: List[str] = [self.conan_ref]
-        if this.cache:
+        self._available_refs: List[str] = [self.conan_ref] # holds all conan refs for name/user
+
+        if this.cache: # get all infor from cache
             self.set_available_packages(this.cache.get_remote_pkg_refs(
                 self._conan_ref.name, self._conan_ref.user))
             if this.USE_LOCAL_INTERNAL_CACHE:
@@ -87,6 +89,9 @@ class AppConfigEntry():
                 conan = ConanApi()
                 package_folder = conan.get_path_or_install(self.conan_ref, self.conan_options)
                 self.set_package_info(package_folder)
+
+    def register_update_callback(self, update_func: Callable):
+        self.update_func = update_func
 
     @property
     def name(self):
@@ -230,7 +235,10 @@ class AppConfigEntry():
         self.app_data["conan_options"] = conan_options
 
     def set_package_info(self, package_folder: Path):
-        """ Callback when conan operation is done and paths can be validated """
+        """
+        Sets package path and all dependent paths.
+        Use, when conan operation is done and paths can be validated.
+        """
         if this.USE_LOCAL_INTERNAL_CACHE:
             if self.package_folder != package_folder and this.cache:
                 this.cache.update_local_package_path(str(self.conan_ref), package_folder)
@@ -242,18 +250,24 @@ class AppConfigEntry():
         self.icon = self.app_data.get("icon", "")
 
         # call gui update
-        if self.gui_update_signal:
-            self.gui_update_signal.emit()
+        if self.update_func:
+            self.update_func()
+        # if self.gui_update_signal:
+        #     self.gui_update_signal.emit()
 
     def set_available_packages(self, available_refs: List[ConanFileReference]):
-        """ Callback when conan operation is done and paths can be validated """
+        """
+        Set all other available packages.
+        """
         if self._available_refs != available_refs and this.cache:
             this.cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
 
         # call gui update
-        if self.gui_update_signal:
-            self.gui_update_signal.emit()
+        if self.update_func:
+            self.update_func()
+        # if self.gui_update_signal:
+        #     self.gui_update_signal.emit()
 
 
 class TabConfigEntry():
