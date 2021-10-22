@@ -169,6 +169,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
             self._edit_app_dialog.save_data()
+            config_data.update_from_cache() # instantly use local paths and pkgs
             app_link = AppLink(self.parent_tab, config_data)
             self.parent_tab.add_app_link_to_tab(app_link)
             this.main_window.save_config()

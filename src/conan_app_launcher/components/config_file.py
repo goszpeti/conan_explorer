@@ -81,7 +81,9 @@ class AppConfigEntry():
         self.conan_ref = app_data.get("conan_ref", this.INVALID_CONAN_REF)
 
         self._available_refs: List[str] = [self.conan_ref] # holds all conan refs for name/user
+        self.update_from_cache()
 
+    def update_from_cache(self):
         if this.cache: # get all info from cache
             self.set_available_packages(this.cache.get_similar_pkg_refs(
                 self._conan_ref.name, self._conan_ref.user))

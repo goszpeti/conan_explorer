@@ -8,11 +8,11 @@ Qt = QtCore.Qt
 
 
 class LineEdit(QtWidgets.QLineEdit):
+    completion_finished = QtCore.pyqtSignal(list)
 
     def __init__(self, parent):
         super().__init__(parent)
-        conan_list = ["Loading from remotes..."]
-        completer = QtWidgets.QCompleter(conan_list, self)
+        completer = QtWidgets.QCompleter([], self)
         completer.setCaseSensitivity(Qt.CaseInsensitive)
         self._validator = QtGui.QRegExpValidator(self)
         self._validator_thread = None
@@ -29,17 +29,18 @@ class LineEdit(QtWidgets.QLineEdit):
         else:
             self.setStyleSheet("background: PaleGreen;")
             return
-
-        cache_results = this.cache.search(text)
+        
+        cache_results = this.cache.get_similar_local_pkg_refssearch(text)
         self.completer().model().setStringList(cache_results)
         if not any([entry.startswith(text) for entry in cache_results]):
-            # add label with spinner
+            # add label with spinner?
+            if self._validator_thread and self._validator_thread.is_alive(): # one query at a time
+                return
             self._validator_thread = Thread(target=self.load_completion, args=[text, ])
             self._validator_thread.start()
 
     def load_completion(self, text):
         conan = ConanApi()
         recipes = conan.search_query_in_remotes(f"{text}*")
-        recipes_str = [str(entry) for entry in recipes]
-        self.completer().model().setStringList(recipes_str)
         this.cache.update_remote_package_list(recipes)  # add to cache
+
