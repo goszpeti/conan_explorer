@@ -16,6 +16,7 @@ Qt = QtCore.Qt
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"
 
+
 class AppLink(QtWidgets.QVBoxLayout):
     conan_info_updated = QtCore.pyqtSignal()
 
@@ -25,6 +26,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.config_data = app
         #self.config_data.gui_update_signal = self.conan_info_updated
         self.config_data.register_update_callback(self.update_with_conan_info)
+
         self.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         self._app_name_label = QtWidgets.QLabel(parent)

@@ -20,6 +20,7 @@ from conan_app_launcher.components import ConanApi, config_file
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.app_grid.app_link import AppLink, OFFICIAL_RELEASE_DISP_NAME
+
 from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
 from conan_app_launcher.components import AppConfigEntry
 from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
@@ -484,6 +485,7 @@ def testRemoveAppLink(base_fixture, settings_fixture, qtbot, mocker):
     assert len(apps) == prev_count - 1
 
     # check, that the config file has updated
+
     config_tabs = config_file.parse_config_file(settings_fixture)
     assert len(config_tabs[0].get_app_entries()) == prev_count - 1
 

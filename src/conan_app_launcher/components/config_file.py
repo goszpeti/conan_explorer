@@ -6,6 +6,7 @@ import tempfile
 from PyQt5 import QtCore
 from pathlib import Path
 from typing import Callable, List, Dict, Optional, TYPE_CHECKING
+
 from conans.model.ref import ConanFileReference
 
 if TYPE_CHECKING:
@@ -52,7 +53,6 @@ class TabType(TypedDict):
 class AppConfigType(TypedDict):
     version: str
     tabs: List[TabType]
-
 
 
 class AppConfigEntry():
@@ -223,6 +223,12 @@ class AppConfigEntry():
             self._icon = this.asset_path / "icons" / "app.png"
             if new_value and emit_warning:  # user input given -> warning
                 Logger().error(f"Can't find icon {str(new_value)} for '{self.name}'")
+
+        # default icon, until package path is updated
+        if not self._icon.is_file():
+            self._icon = this.asset_path / "icons" / "app.png"
+            if new_value:  # user input given -> warning
+                Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
         else:
             self._icon = self._icon.resolve()
             self.app_data["icon"] = new_value
@@ -262,6 +268,7 @@ class AppConfigEntry():
         Sets package path and all dependent paths.
         Use, when conan operation is done and paths can be validated.
         """
+
         if this.USE_LOCAL_INTERNAL_CACHE:
             if self.package_folder != package_folder and this.cache:
                 this.cache.update_local_package_path(str(self.conan_ref), package_folder)
@@ -291,6 +298,7 @@ class AppConfigEntry():
             self.update_func()
         # if self.gui_update_signal:
         #     self.gui_update_signal.emit()
+
 
 
 class TabConfigEntry():

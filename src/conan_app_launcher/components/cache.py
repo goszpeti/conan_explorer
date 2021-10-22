@@ -43,7 +43,6 @@ class ConanInfoCache():
             self._local_packages.pop(conan_ref_str)
         return pkg_path
 
-
     def get_similar_pkg_refs(self, name, user):
         return self.get_similar_remote_pkg_refs(name, user) + self.get_similar_local_pkg_refs(name, user)
 

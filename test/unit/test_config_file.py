@@ -235,3 +235,4 @@ def testOfficialRelease(base_fixture):
     app_link.version = "1.0.0"
     assert app_link.channel == AppConfigEntry.OFFICIAL_RELEASE
     assert app_link.conan_ref.user is None
+
