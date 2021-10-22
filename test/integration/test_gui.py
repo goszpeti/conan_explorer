@@ -19,7 +19,7 @@ from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanApi, config_file
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.app_grid.app_link import AppLink
+from conan_app_launcher.ui.app_grid.app_link import AppLink, OFFICIAL_RELEASE_DISP_NAME
 from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
 from conan_app_launcher.components import AppConfigEntry
 from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
@@ -397,6 +397,15 @@ def testAddAppLink(base_fixture, settings_fixture, qtbot, mocker):
     assert app_link._edit_app_dialog._ui.name_line_edit.text()
 
     app_link._edit_app_dialog._ui.button_box.accepted.emit()
+
+    # check that the gui has updated
+    apps = cd.get_app_entries()
+    assert len(apps) == prev_count + 1
+    assert apps[-1].name == "NewApp"
+    tabs.app_links
+    assert tabs[1].app_links[-1]._app_name_label.text() == "NewApp"
+
+    # check, that the config file has updated
     config_tabs = config_file.parse_config_file(settings_fixture)
     assert config_tabs[0].name == cd.name == "Basics" # just safety that it is the same tab
     assert len(config_tabs[0].get_app_entries()) == prev_count + 1
@@ -418,7 +427,7 @@ def testEditAppLink(base_fixture, settings_fixture, qtbot, mocker):
     cd = tabs[1].config_data
     apps = cd.get_app_entries()
     prev_count = len(apps)
-    app_link = tabs[1].app_links[0]
+    app_link: AppLink = tabs[1].app_links[0]
 
     ### check that no changes happens on cancel
     mocker.patch.object(EditAppDialog, 'exec_',
@@ -428,12 +437,22 @@ def testEditAppLink(base_fixture, settings_fixture, qtbot, mocker):
     assert config_tabs[0].name == cd.name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].get_app_entries()) == prev_count
 
-    ### check, that changing something hast the change in the saved config and we the same number of elements
+    ### check, that changing something has the change in the saved config and we the same number of elements
     app_info = AppConfigEntry(
         app_data={"name": "NewApp", "conan_ref": "zlib/1.2.11@_/_", "executable": "bin/exe"})
     mocker.patch.object(EditAppDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
     app_link.open_edit_dialog(app_info)
+
+    # check that the gui has updated
+    apps = cd.get_app_entries()
+    assert len(apps) == prev_count
+    assert app_link.config_data.name == "NewApp"
+    assert app_link._app_name_label.text() == "NewApp"
+    assert app_link._app_version_cbox.currentText() == "1.2.11"
+    assert app_link._app_channel_cbox.currentText() == AppConfigEntry.OFFICIAL_RELEASE
+
+    # check, that the config file has updated
     config_tabs = config_file.parse_config_file(settings_fixture)
     assert config_tabs[0].name == cd.name == "Basics" # just safety that it is the same tab
     assert len(config_tabs[0].get_app_entries()) == prev_count
@@ -460,6 +479,11 @@ def testRemoveAppLink(base_fixture, settings_fixture, qtbot, mocker):
     app_link = tabs[1].app_links[0]
     app_link.remove()
 
+    # check that the gui has updated
+    apps = cd.get_app_entries()
+    assert len(apps) == prev_count - 1
+
+    # check, that the config file has updated
     config_tabs = config_file.parse_config_file(settings_fixture)
     assert len(config_tabs[0].get_app_entries()) == prev_count - 1
 

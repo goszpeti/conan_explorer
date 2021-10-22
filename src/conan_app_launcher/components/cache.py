@@ -43,8 +43,12 @@ class ConanInfoCache():
             self._local_packages.pop(conan_ref_str)
         return pkg_path
 
-    def get_remote_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
-        """ Return cached info on available conan refs from  the same ref name and user. """
+
+    def get_similar_pkg_refs(self, name, user):
+        return self.get_similar_remote_pkg_refs(name, user) + self.get_similar_local_pkg_refs(name, user)
+
+    def get_similar_remote_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
+        """ Return cached info on available conan refs from the same ref name and user. """
         if not user: # official pkgs have no user, substituted by _
             user = "_"
         refs: List[ConanFileReference] = []
@@ -54,6 +58,14 @@ class ConanInfoCache():
             refs.append(ConanFileReference(name, version, user, channel))
         return refs
 
+    def get_similar_local_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
+        refs: List[ConanFileReference] = []
+        all_local_refs = self._conan.get_all_local_refs()
+        for ref in all_local_refs:
+            if ref.name == name and ref.user == user: # filter local packages by both to avoid conflicts
+                refs.append(ref)
+        return refs
+
     def search(self, query: str) -> Set[str]:
         """ Return cached info on available conan refs from a query """
         refs = set()
@@ -61,7 +73,7 @@ class ConanInfoCache():
         for ref_str in self._remote_packages.keys():
             if query in ref_str:
                 name, user = ref_str.split("@")
-                for ref in self.get_remote_pkg_refs(name, user):
+                for ref in self.get_similar_remote_pkg_refs(name, user):
                     refs.add(str(ref))
         for ref in self._conan.get_all_local_refs():
             if query in str(ref):

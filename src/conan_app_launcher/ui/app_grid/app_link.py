@@ -13,6 +13,8 @@ from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
+OFFICIAL_RELEASE_DISP_NAME = "<official release>"
+OFFICIAL_USER_DISP_NAME = "<official user>"
 
 class AppLink(QtWidgets.QVBoxLayout):
     conan_info_updated = QtCore.pyqtSignal()
@@ -74,6 +76,11 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
         self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
 
+        self._init_menu()
+        self._apply_new_config()
+        self.update_with_conan_info()
+
+    def _init_menu(self):
         self.menu = QtWidgets.QMenu()
         icons_path = this.asset_path / "icons"
 
@@ -110,8 +117,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.edit_action.triggered.connect(self.open_edit_dialog)
         self.remove_action.triggered.connect(self.remove)
 
-        self._apply_new_config()
-        self.update_with_conan_info()
 
     def delete(self):
         self._app_name_label.hide()
@@ -133,21 +138,25 @@ class AppLink(QtWidgets.QVBoxLayout):
             os.system("explorer " + str(self.config_data.executable.parent))
 
     def _apply_new_config(self):
+        self._app_name_label.setText(self.config_data.name)
         self._app_button.setToolTip(str(self.config_data.conan_ref))
         self._app_button.set_icon(self.config_data.icon)
 
         self._app_channel_cbox.clear()
-        self._app_channel_cbox.addItem(self.config_data.conan_ref.channel)
+        channel = self.config_data.conan_ref.channel
+        if not channel:
+            channel = AppConfigEntry.OFFICIAL_RELEASE
+        self._app_channel_cbox.addItem(channel)
         self._app_version_cbox.clear()
         self._app_version_cbox.addItem(self.config_data.conan_ref.version)
 
     def open_edit_dialog(self, config_data: AppConfigEntry = None):
-        if not config_data:
-            config_data = self.config_data
-        self._edit_app_dialog = EditAppDialog(config_data, parent=self.parentWidget())
+        if config_data:
+            self.config_data = config_data
+        self._edit_app_dialog = EditAppDialog(self.config_data, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
-            self._edit_app_dialog.save_edited_dialog()
+            self._edit_app_dialog.save_data()
             self._apply_new_config()
             self._app_button.grey_icon()
             this.main_window.save_config()
@@ -155,13 +164,12 @@ class AppLink(QtWidgets.QVBoxLayout):
     def open_app_link_add_dialog(self, config_data=None):
         if not config_data:
             config_data = AppConfigEntry()
-        app_link = AppLink(self.parent_tab, config_data)
         # TODO save for testing
-        self._edit_app_dialog = EditAppDialog(
-            app_link.config_data, parent=self.parentWidget())
+        self._edit_app_dialog = EditAppDialog(config_data, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
-            self._edit_app_dialog.save_edited_dialog()
+            self._edit_app_dialog.save_data()
+            app_link = AppLink(self.parent_tab, config_data)
             self.parent_tab.add_app_link_to_tab(app_link)
             this.main_window.save_config()
         return app_link  # for testing
@@ -234,17 +242,19 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.grey_icon()
         # update channels to match version
         self._app_channel_cbox.clear()  # reset cbox
-        # TODO use cache for ilinitial fill, then call update with later filling up
-        #self.config_data.set_available_packages(this.cache.get_remote_pkg_refs(
-        #    self._conan_ref.name, self._conan_ref.user))
-        self._app_channel_cbox.addItems([self.config_data.INVALID_DESCR] + self.config_data.channels)
-        # add tooltip for channels, in case it is too long
-        # for i in range(0, len(self.config_data.channels)):
-        #     self._app_channel_cbox.setItemData(i+1, self.config_data.channels[i], Qt.ToolTipRole)
+        if len(self.config_data.channels) == 1:
+            self._app_channel_cbox.addItems(self.config_data.channels)
+        else:
+            self._app_channel_cbox.addItems([self.config_data.INVALID_DESCR] + self.config_data.channels)
+            self.config_data.channel = self.config_data.INVALID_DESCR
+            # add tooltip for channels, in case it is too long
+            for i in range(0, len(self.config_data.channels)):
+                self._app_channel_cbox.setItemData(i+1, self.config_data.channels[i], Qt.ToolTipRole)
+                self._app_channel_cbox.setDisabled(True)
+
         self._app_channel_cbox.setCurrentIndex(0)
-        self._app_channel_cbox.setDisabled(True)
-        self.config_data.channel = self.config_data.INVALID_DESCR
         self.config_data.version = self._app_version_cbox.currentText()
+        self._app_button.setToolTip(str(self.config_data.conan_ref))
         this.main_window.save_config()
 
     def on_channel_selected(self, index):

@@ -54,7 +54,7 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
         self.tab_grid_layout.setSpacing(4)
 
-        self.app_link_removed.connect(self.remove_app_link_from_tab)
+        #self.app_link_removed.connect(self.remove_app_link_from_tab)
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.tab_layout.addWidget(self.tab_scroll_area)
         self.add_all_app_links()

@@ -54,11 +54,13 @@ class AppConfigType(TypedDict):
     tabs: List[TabType]
 
 
+
 class AppConfigEntry():
     """ Representation of an app entry of the config schema """
     INVALID_DESCR = "NA"
+    OFFICIAL_RELEASE = "<official release>"
+    OFFICIAL_USER = "<official user>"
 
-    # , config_file_path: Path = None):
     def __init__(self, app_data: Optional[AppType] = None):
         if app_data is None:
             app_data = {"name": "", "conan_ref": this.INVALID_CONAN_REF, "executable": "", "icon": "",
@@ -80,8 +82,8 @@ class AppConfigEntry():
 
         self._available_refs: List[str] = [self.conan_ref] # holds all conan refs for name/user
 
-        if this.cache: # get all infor from cache
-            self.set_available_packages(this.cache.get_remote_pkg_refs(
+        if this.cache: # get all info from cache
+            self.set_available_packages(this.cache.get_similar_pkg_refs(
                 self._conan_ref.name, self._conan_ref.user))
             if this.USE_LOCAL_INTERNAL_CACHE:
                 self.set_package_info(this.cache.get_local_package_path(str(self._conan_ref)))
@@ -114,7 +116,8 @@ class AppConfigEntry():
             if (self.app_data.get("conan_ref", "") != new_value and new_value != this.INVALID_CONAN_REF
                     and self._conan_ref.version != self.INVALID_DESCR
                     and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
-                this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
+                if this.conan_worker:
+                    this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
             # invalidate old entries
             self.app_data["conan_ref"] = new_value
             self._executable = Path("NULL")
@@ -131,30 +134,46 @@ class AppConfigEntry():
 
     @version.setter
     def version(self, new_value: str):
-        self.conan_ref = f"{self.conan_ref.name}/{new_value}@{self.conan_ref.user}/{self.conan_ref.channel}"
+        user = self.conan_ref.user
+        channel = self.conan_ref.channel
+        if not self.conan_ref.user or not self.conan_ref.channel:
+            user = "_"
+            channel = "_"
+        self.conan_ref = f"{self.conan_ref.name}/{new_value}@{user}/{channel}"
+
+    @classmethod
+    def convert_to_disp_channel(cls, channel):
+        if not channel:
+            return cls.OFFICIAL_RELEASE
+        else:
+            return channel
 
     @property
     def channel(self):
-        return self.conan_ref.channel
+        return self.convert_to_disp_channel(self.conan_ref.channel)
 
     @channel.setter
     def channel(self, new_value: str):
-        self.conan_ref = f"{self.conan_ref.name}/{self.conan_ref.version}@{self.conan_ref.user}/{new_value}"
+        user = self.conan_ref.user
+        if new_value == self.OFFICIAL_RELEASE or not new_value:
+            new_value = "_"
+            user = "_" # both must be unset if channel is official
+        self.conan_ref = f"{self.conan_ref.name}/{self.conan_ref.version}@{user}/{new_value}"
 
     @property
     def versions(self):
-        versions = []
+        versions = set()
         for ref in self._available_refs:
-            versions.append(ref.version)
-        return list(set(versions))
+            versions.add(ref.version)
+        return list(versions)
 
     @property
     def channels(self):  # for the current version only
-        channels = []
+        channels = set()
         for ref in self._available_refs:
             if ref.version == self.version:
-                channels.append(ref.channel)
-        return list(set(channels))
+                channels.add(self.convert_to_disp_channel(ref.channel))
+        return list(channels)
 
     @property
     def executable(self):
@@ -185,20 +204,22 @@ class AppConfigEntry():
     @icon.setter
     def icon(self, new_value: str):
         # validate icon path
+        emit_warning = False
         if new_value.startswith("//"):  # relative to package
             self._icon = self.package_folder / new_value.replace("//", "")
         elif new_value and not Path(new_value).is_absolute():
             # relative path is calculated from config file path
             self._icon = Path(this.settings.get_string(LAST_CONFIG_FILE)).parent / new_value
+            emit_warning = True
         elif not new_value:  # try to find icon in temp
             self._icon = extract_icon(self.executable, Path(tempfile.gettempdir()))
         else:  # absolute path
             self._icon = Path(new_value)
-
+            emit_warning = True
         # default icon, until package path is updated
         if not self._icon.is_file():
             self._icon = this.asset_path / "icons" / "app.png"
-            if new_value and self.package_folder.exists():  # user input given -> warning
+            if new_value and emit_warning:  # user input given -> warning
                 Logger().error(f"Can't find icon {str(new_value)} for '{self.name}'")
         else:
             self._icon = self._icon.resolve()
