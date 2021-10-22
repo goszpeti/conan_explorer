@@ -193,8 +193,8 @@ class AppConfigEntry():
         # default icon, until package path is updated
         if not self._icon.is_file():
             self._icon = this.asset_path / "icons" / "app.png"
-            if new_value:  # user input given -> warning
-                Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
+            if new_value and self.package_folder.exists():  # user input given -> warning
+                Logger().error(f"Can't find icon {str(new_value)} for '{self.name}'")
         else:
             self._icon = self._icon.resolve()
             self.app_data["icon"] = new_value

@@ -104,7 +104,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.move_l.setDisabled(True)  # TODO upcoming feature
         self.menu.addAction(self.move_l)
 
-        self.add_action.triggered.connect(self.open_edit_dialog)
+        self.add_action.triggered.connect(self.open_app_link_add_dialog)
         self.open_fm_action.triggered.connect(self.open_in_file_manager)
         self.edit_action.triggered.connect(self.open_edit_dialog)
         self.remove_action.triggered.connect(self.remove)
