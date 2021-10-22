@@ -30,10 +30,9 @@ class LineEdit(QtWidgets.QLineEdit):
             self.setStyleSheet("background: PaleGreen;")
             return
 
-        cache_results = this.cache.search_in_remote_refs(text)
-        cache_results_str = [str(entry) for entry in cache_results]
-        self.completer().model().setStringList(cache_results_str)
-        if not any([entry.startswith(text) for entry in cache_results_str]):
+        cache_results = this.cache.search(text)
+        self.completer().model().setStringList(cache_results)
+        if not any([entry.startswith(text) for entry in cache_results]):
             # add label with spinner
             self._validator_thread = Thread(target=self.load_completion, args=[text, ])
             self._validator_thread.start()
