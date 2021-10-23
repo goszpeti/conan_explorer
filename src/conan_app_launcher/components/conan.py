@@ -46,6 +46,9 @@ class ConanApi():
         self.user_io = self.conan.user_io
         self.cache = self.conan.app.cache
 
+    def get_all_local_refs(self) -> List[ConanFileReference]:
+        return self.cache.all_refs()
+
     def get_cleanup_cache_paths(self) -> List[str]:
         """ Get a list of orphaned short path and cache folders """
         # Blessed are the users Microsoft products!

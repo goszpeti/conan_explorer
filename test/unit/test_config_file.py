@@ -213,3 +213,26 @@ def testOptionsEval(base_fixture):
     # empty value
     app_link.conan_options = []
     assert app_link.conan_options == {}
+
+def testOfficialRelease(base_fixture):
+    """
+    Test, if an official reference in the format name/1.0.0@_/_ works correctly.
+    Expects the same option name and value as given to the constructor.
+    """
+    app_data = {"name": "AppName", "conan_ref": "zlib/1.2.11@_/_"}
+    app_link = AppConfigEntry(app_data)
+    assert app_link.channel == AppConfigEntry.OFFICIAL_RELEASE
+    assert str(app_link.conan_ref) == "zlib/1.2.11" # both formats are valid, so we accept the shortened one
+
+    # check, that setting channel works too
+    app_link.channel = "stable"
+    app_link.channel = AppConfigEntry.OFFICIAL_RELEASE
+    assert app_link.channel == AppConfigEntry.OFFICIAL_RELEASE
+
+    # check, that changing the version does not invalidate the channel or user
+    app_link.conan_ref = "zlib/1.2.11@_/_"
+    assert str(app_link.conan_ref) == "zlib/1.2.11"
+    app_link.version = "1.0.0"
+    assert app_link.channel == AppConfigEntry.OFFICIAL_RELEASE
+    assert app_link.conan_ref.user is None
+

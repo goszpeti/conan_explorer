@@ -34,7 +34,7 @@ class EditAppDialog(QtWidgets.QDialog):
         # for some reason OK is not connected at default
         self._ui.button_box.accepted.connect(self.accept)
 
-    def save_edited_dialog(self):
+    def save_data(self):
         # check all input validations
         if not self._ui.conan_ref_line_edit.hasAcceptableInput():
             # TODO handle invalid input

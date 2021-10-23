@@ -47,7 +47,7 @@ def testReadCache(base_fixture):
     assert str(cache.get_local_package_path("my_package/2.0.0@myself/stable")) == "C:\\.conan\\pkg"
     assert str(cache.get_local_package_path("my_package/1.0.0@myself/stable")) == "NULL"
 
-    pkgs = cache.get_remote_pkg_refs("my_package", "myself")
+    pkgs = cache.get_similar_remote_pkg_refs("my_package", "myself")
     assert len(pkgs) == 3
     assert CFR.loads("my_package/1.0.0@myself/stable") in pkgs
     assert CFR.loads("my_package/2.0.0@myself/stable") in pkgs
@@ -84,13 +84,13 @@ def testUpdateCache(base_fixture):
                     CFR.loads("new_pkg/1.1.0@me/testing"), CFR.loads("new_pkg/2.0.0@me/stable")]
     cache.update_remote_package_list(add_packages)
 
-    remote_pkgs = cache.get_remote_pkg_refs("new_pkg", "me")
+    remote_pkgs = cache.get_similar_remote_pkg_refs("new_pkg", "me")
     assert set(remote_pkgs) == set(add_packages)
-    remote_pkgs = cache.get_remote_pkg_refs("my_package", "myself")
+    remote_pkgs = cache.get_similar_remote_pkg_refs("my_package", "myself")
     assert len(remote_pkgs) == 3
 
     cache.update_remote_package_list(add_packages, invalidate=True)
-    remote_pkgs = cache.get_remote_pkg_refs("new_pkg", "me")
+    remote_pkgs = cache.get_similar_remote_pkg_refs("new_pkg", "me")
     assert set(remote_pkgs) == set(add_packages)
-    remote_pkgs = cache.get_remote_pkg_refs("my_package", "myself")
+    remote_pkgs = cache.get_similar_remote_pkg_refs("my_package", "myself")
     assert not remote_pkgs
