@@ -30,7 +30,7 @@ class LineEdit(QtWidgets.QLineEdit):
             self.setStyleSheet("background: PaleGreen;")
             return
         
-        cache_results = this.cache.get_similar_local_pkg_refssearch(text)
+        cache_results = this.cache.search(text)
         self.completer().model().setStringList(cache_results)
         if not any([entry.startswith(text) for entry in cache_results]):
             # add label with spinner?
