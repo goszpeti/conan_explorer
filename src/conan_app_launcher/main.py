@@ -53,6 +53,11 @@ def load_base_components(settings):
 
     if config_file_path.is_file():  # escape error log on first opening
         this.tab_configs = parse_config_file(config_file_path)
+        if not this.tab_configs:
+            tab = TabConfigEntry("New Tab")
+            tab.add_app_entry(AppConfigEntry({"name": "My App Link"}))
+            this.tab_configs.append(tab)
+            write_config_file(config_file_path, [tab])
 
     # start Conan Worker
     this.conan_worker = ConanWorker()
