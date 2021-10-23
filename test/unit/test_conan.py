@@ -1,6 +1,7 @@
 import os
 import time
 import platform
+from pathlib import Path
 from conans.model.ref import ConanFileReference
 
 import conan_app_launcher as app
@@ -9,6 +10,11 @@ from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
 
 TEST_REF = "zlib/1.2.11@_/_"
+
+def testConanShortPathRoot():
+    os.environ["CONAN_USER_HOME_SHORT"] = str(Path().home() / "._myconan")
+    conan = ConanApi()
+    assert conan.get_short_path_root() == Path().home() / "._myconan"
 
 def testEmptyCleanupCache(base_fixture):
     """

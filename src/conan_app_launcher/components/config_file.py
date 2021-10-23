@@ -3,7 +3,6 @@ import platform
 import jsonschema
 import tempfile
 
-from PyQt5 import QtCore
 from pathlib import Path
 from typing import Callable, List, Dict, Optional, TYPE_CHECKING
 

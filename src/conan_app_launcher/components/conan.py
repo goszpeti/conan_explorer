@@ -1,23 +1,29 @@
 import platform
+import shutil
+import tempfile
 from pathlib import Path
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-from typing import Any, Dict, List, Optional
-try:
+if TYPE_CHECKING:
     from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
+else:
+    try:
+        from typing import TypedDict
+    except ImportError:
+        from typing_extensions import TypedDict
 
-from conans import __version__ as conan_version
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.model.ref import ConanFileReference, PackageReference
+from conans.util.windows import path_shortener
 
 try:
-    from conans.util.windows import CONAN_REAL_PATH, rm_conandir, path_shortener
+    from conans.util.windows import (CONAN_REAL_PATH, path_shortener,
+                                     rm_conandir)
 except:
     pass
 
-from conan_app_launcher.base import Logger
 import conan_app_launcher as this
+from conan_app_launcher.base import Logger
 
 
 class ConanPkg(TypedDict):
@@ -37,7 +43,9 @@ class ConanApi():
         self.conan: ConanAPIV1 = None
         self.cache: ClientCache = None
         self.user_io: UserIO = None
+        self.short_path_root = Path("NULL")
         self.init_api()
+
 
     def init_api(self):
         """ Instantiate the api. In some cases it needs to be instatiated anew. """
@@ -45,9 +53,21 @@ class ConanApi():
         self.conan.create_app()
         self.user_io = self.conan.user_io
         self.cache = self.conan.app.cache
+        self.short_path_root = self.get_short_path_root()
 
     def get_all_local_refs(self) -> List[ConanFileReference]:
+        """ Returns all locally installed conan references """
         return self.cache.all_refs()
+
+    def get_short_path_root(self) -> Path:
+        """ Return short path root for Windows. Sadly there is no built-in way to do this. """
+        if self.short_path_root.exists(): # only need to get once
+            return self.short_path_root
+
+        gen_short_path = Path(path_shortener(tempfile.mkdtemp(), True))
+        short_path_root = gen_short_path.parents[1]
+        shutil.rmtree(gen_short_path.parent, ignore_errors=True)
+        return short_path_root
 
     def get_cleanup_cache_paths(self) -> List[str]:
         """ Get a list of orphaned short path and cache folders """
