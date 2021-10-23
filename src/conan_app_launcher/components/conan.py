@@ -303,6 +303,31 @@ class ConanApi():
             default_options = default_options_ret
         return default_options
 
+def build_conan_profile_name_alias(settings: Dict[str, str]):
+    """ Build a short pseduo profile name """
+    if not settings:
+        return "default"
+    name = settings.get("os", "")
+    arch = settings.get("arch", "")
+    if arch:
+        if arch == "x86_64":
+            arch = "x64"
+        name += "_" + arch.lower()
+    comp = settings.get("compiler", "")
+    if comp:
+        if comp == "Visual Studio":
+            comp = "vs"
+        name += "_" + comp.lower()
+    comp_ver = settings.get("compiler.version", "")
+    if comp_ver:
+        name += comp_ver
+    comp_toolset = settings.get("compiler.toolset", "")
+    if comp_toolset:
+        name += "_" + comp_toolset.lower()
+    bt = settings.get("build_type", "")
+    if bt:
+        name += "_" + bt.lower()
+    return name
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
     """
