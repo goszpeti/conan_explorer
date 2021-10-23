@@ -258,7 +258,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_channel_cbox.setCurrentIndex(0)
         self.config_data.version = self._app_version_cbox.currentText()
         self._app_button.setToolTip(str(self.config_data.conan_ref))
-        this.main_window.save_config()
+        if this.main_window:
+            this.main_window.save_config()
 
     def on_channel_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
@@ -272,4 +273,5 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.config_data.channel = self._app_channel_cbox.currentText()
         self._app_button.setToolTip(str(self.config_data.conan_ref))
         self._app_button.set_icon(self.config_data.icon)
-        this.main_window.save_config()
+        if this.main_window:
+            this.main_window.save_config()

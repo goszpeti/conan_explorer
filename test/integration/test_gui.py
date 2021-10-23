@@ -403,7 +403,6 @@ def testAddAppLink(base_fixture, settings_fixture, qtbot, mocker):
     apps = cd.get_app_entries()
     assert len(apps) == prev_count + 1
     assert apps[-1].name == "NewApp"
-    tabs.app_links
     assert tabs[1].app_links[-1]._app_name_label.text() == "NewApp"
 
     # check, that the config file has updated
