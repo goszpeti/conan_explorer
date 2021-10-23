@@ -7,7 +7,8 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 Qt = QtCore.Qt
 
 
-class LineEdit(QtWidgets.QLineEdit):
+class ConanRefLineEdit(QtWidgets.QLineEdit):
+    """ Adds completions for Conan references and a validator. """
     completion_finished = QtCore.pyqtSignal(list)
 
     def __init__(self, parent):
