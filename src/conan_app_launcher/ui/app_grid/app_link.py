@@ -163,7 +163,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_button.grey_icon()
             this.main_window.save_config()
 
-    def open_app_link_add_dialog(self, config_data=None):
+    def open_app_link_add_dialog(self, config_data: AppConfigEntry = None):
         if not config_data:
             config_data = AppConfigEntry()
         # TODO save for testing

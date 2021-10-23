@@ -7,7 +7,6 @@ import conan_app_launcher as this
 from conan_app_launcher.components import TabConfigEntry, parse_config_file
 from conan_app_launcher.settings import GRID_COLUMNS, GRID_ROWS, LAST_CONFIG_FILE
 from .tab_app_grid import TabAppGrid
-# from PyQt5.QtCore import pyqtSlot
 
 Qt = QtCore.Qt
 
@@ -79,7 +78,6 @@ class AppGrid():
         menu.exec_(self._main_window.ui.tab_bar.tabBar().mapToGlobal(position))
         self.menu = None
 
-    # @pyqtSlot()
     def on_new_tab(self):
         # call tab on_app_link_add
         new_tab_dialog = QtWidgets.QInputDialog(self._main_window)
@@ -99,7 +97,6 @@ class AppGrid():
             self._main_window.ui.tab_bar.addTab(tab, text)
             self._main_window.ui.save_config()
 
-    # @pyqtSlot(int)
     def on_tab_rename(self, index):
         tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
 
@@ -111,7 +108,6 @@ class AppGrid():
             self._main_window.ui.tab_bar.setTabText(index, text)
             self._main_window.save_config()
 
-    # @pyqtSlot(int)
     def on_tab_remove(self, index):
         tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
 
