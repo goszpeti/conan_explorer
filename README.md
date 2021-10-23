@@ -15,7 +15,7 @@ The goal of this project is to provide a frontend to start executables contained
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="1024">
 
 Features:
-- configurable layout (tabs and applications) with json file
+- configurable layout (tabs and applications) in GUI itself
 - can also open files with their associated default program
 - installs all referenced packages automatically
 - automatic conan settings resolution for your platform
@@ -30,7 +30,7 @@ Qt for Python must be installed with the native package manager, like:
 
     sudo apt install python3-pyqt5
 
-Ubuntu 16.04 is not supported with its native Python 3.5.
+Ubuntu 16.04 is not supported duw to its native Python 3.5.
 
 ### With pip from Pypi
 `pip install conan-app-launcher`
@@ -48,8 +48,9 @@ Execute `conan_app_launcher`, if the Python "scripts" folder is on your system p
 * PyQt5 >= 5.13.0 
 * conan >= 1.19.4
 
-## Config File
+## Config File layout
 
+It is not needed to edit this by hand, since (almost) every option is available in the GUI.
 The config file uses the following exemplary schema:
 
     {
