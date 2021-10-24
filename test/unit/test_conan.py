@@ -37,6 +37,7 @@ def testConanShortPathRoot():
         assert conan.get_short_path_root() == Path().home() / "._myconan"
     else:
         assert not conan.get_short_path_root().exists()
+    os.environ.pop("CONAN_USER_HOME_SHORT")
 
 def testEmptyCleanupCache(base_fixture):
     """

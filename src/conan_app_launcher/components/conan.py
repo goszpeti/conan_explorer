@@ -96,8 +96,7 @@ class ConanApi():
                     del_list.append(str(pkg_id_dir))
 
         # reverse search for orphaned packages on windows short paths
-        short_path = Path(path_shortener("C:/temp", True)).parent.parent
-        short_path_folders = [f for f in Path(short_path).iterdir() if f.is_dir()]
+        short_path_folders = [f for f in self.get_short_path_root().iterdir() if f.is_dir()]
         for short_path in short_path_folders:
             rp_file = short_path / CONAN_REAL_PATH
             if rp_file.is_file():
