@@ -33,8 +33,10 @@ def testConanShortPathRoot():
     """ Test, that short path root can be read. """
     os.environ["CONAN_USER_HOME_SHORT"] = str(Path().home() / "._myconan")
     conan = ConanApi()
-    assert conan.get_short_path_root() == Path().home() / "._myconan"
-
+    if platform.system() == "Windows":
+        assert conan.get_short_path_root() == Path().home() / "._myconan"
+    else:
+        assert not conan.get_short_path_root().exists()
 
 def testEmptyCleanupCache(base_fixture):
     """
