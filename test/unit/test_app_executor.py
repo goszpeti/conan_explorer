@@ -47,7 +47,10 @@ def testChooseRunScript(base_fixture, tmp_path, mocker):
 
 
 def testChooseRunExe(base_fixture, tmp_path, mocker):
-    # Mock away the calls
+    """
+    Test, that run_file will call execute_app with the correct argumnenst.
+    Mock away the actual calls.
+    """
     mocker.patch('conan_app_launcher.components.file_runner.execute_app')
 
     if platform.system() == "Linux":
@@ -67,34 +70,11 @@ def testChooseRunExe(base_fixture, tmp_path, mocker):
     conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
 
 
-def testStartAppWithArgsNonCli(base_fixture):
-    test_file = Path(tempfile.gettempdir(), "test.txt")
-    executable = Path(sys.executable)
-    is_console_app = False
-    args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
-
-    pid = execute_app(executable, is_console_app, args)
-
-    time.sleep(1)
-    assert test_file.is_file()
-    os.remove(test_file)
-
-
-def testStartAppWithArgsCliOption(base_fixture):
-    test_file = Path(tempfile.gettempdir(), "test.txt")
-
-    executable = Path(sys.executable)
-    is_console_app = True
-    args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
-    pid = execute_app(executable, is_console_app, args)
-
-    time.sleep(5)  # wait for terminal to spawn
-    assert test_file.is_file()
-
-    os.remove(test_file)
-
-
 def testStartCliOptionApp(base_fixture):
+    """
+    Test, that starting with the option is_console_app
+    will spawn a terminal-
+    """
     executable = Path(sys.executable)
     is_console_app = True
     args = ""
@@ -113,8 +93,47 @@ def testStartCliOptionApp(base_fixture):
         assert "python.exe" in ret.decode("utf-8")
         os.system("taskkill /PID " + str(pid))
 
+def testStartAppWithArgsNonCli(base_fixture):
+    """
+    Test that the CLI args will be correctly passed to a non-console app, 
+    by writing out a file in a shell cmd and check, if the file has been created.
+    """
+    test_file = Path(tempfile.gettempdir(), "test.txt")
+    executable = Path(sys.executable)
+    is_console_app = False
+    args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
+
+    pid = execute_app(executable, is_console_app, args)
+
+    time.sleep(1)
+    assert test_file.is_file()
+    os.remove(test_file)
+
+
+def testStartAppWithArgsCliOption(base_fixture):
+    """
+    Test that the CLI args will be correctly passed to a console app, 
+    by writing out a file in a shell cmd and check, if the file has been created.
+    """
+    test_file = Path(tempfile.gettempdir(), "test.txt")
+
+    executable = Path(sys.executable)
+    is_console_app = True
+    args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
+    pid = execute_app(executable, is_console_app, args)
+
+    time.sleep(5)  # wait for terminal to spawn
+    assert test_file.is_file()
+
+    os.remove(test_file)
+
+
 
 def testStartScript(base_fixture, tmp_path):
+    """
+    Test, that calling a batch script will be actually execute,
+    by checking if it will write a file. Windows only!
+    """
     if platform.system() != "Windows":
         return
     res_file = Path(tmp_path) / "res.txt"

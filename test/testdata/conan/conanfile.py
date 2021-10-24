@@ -1,7 +1,7 @@
 from conans import ConanFile
 import platform
+import sys
 import os
-
 
 class Example(ConanFile):
     name = "example"
@@ -16,7 +16,7 @@ class Example(ConanFile):
     def package(self):
         # repackage some executable
         if platform.system() == "Windows":
-            self.copy("procexp.exe", dst="bin")  # "notepad.exe", src=os.getenv("WINDIR"), dst="bin")
+            self.copy("python.exe", src=os.path.dirname(sys.executable), dst="bin")
 
     def package_id(self):
         self.info.settings.build_type = "Any"

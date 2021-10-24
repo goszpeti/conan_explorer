@@ -1,7 +1,7 @@
 """
 Contains global constants and basic/ui variables.
 """
-__version__ = "1.0.0b5"
+__version__ = "1.0.0b6"
 
 from pathlib import Path
 
@@ -21,8 +21,8 @@ SETTINGS_FILE_NAME = ".cal_config"
 CACHE_FILE_NAME = "cache.json"
 
 # Feature flags
-ADD_TAB_BUTTON = False
-ADD_APP_LINK_BUTTON = False
+ADD_TAB_BUTTON = False  # FIXME currently not working
+ADD_APP_LINK_BUTTON = False # FIXME currently not working
 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True
 USE_LOCAL_INTERNAL_CACHE = True
 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH = True

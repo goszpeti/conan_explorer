@@ -1,17 +1,18 @@
 from pathlib import Path
 from shutil import rmtree
 
-from PyQt5 import QtCore, QtWidgets, QtGui, uic
-from PyQt5.QtCore import pyqtSlot
-
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import write_config_file, ConanApi
-from conan_app_launcher.settings import (
-    LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS)
+from conan_app_launcher.components import (AppConfigEntry, ConanApi,
+                                           write_config_file)
+from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
+                                         DISPLAY_APP_VERSIONS,
+                                         LAST_CONFIG_FILE)
+from conan_app_launcher.ui.about_dialog import AboutDialog
 from conan_app_launcher.ui.app_grid import AppGrid
 from conan_app_launcher.ui.package_explorer import LocalConanPackageExplorer
-from conan_app_launcher.ui.about_dialog import AboutDialog
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtCore import pyqtSlot
 
 Qt = QtCore.Qt
 
@@ -21,7 +22,6 @@ class MainUi(QtWidgets.QMainWindow):
     TOOLBOX_GRID_ITEM = 0
     TOOLBOX_PACKAGES_ITEM = 1
 
-    conan_info_updated = QtCore.pyqtSignal()
     display_versions_updated = QtCore.pyqtSignal(bool)
     display_channels_updated = QtCore.pyqtSignal(bool)
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
@@ -176,5 +176,20 @@ class MainUi(QtWidgets.QMainWindow):
         if this.ADD_TAB_BUTTON:
             self.ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
         # menu
+        self.ui.refresh_button.setIcon(QtGui.QIcon(str(self._icons_path / "refresh.png")))
         self.ui.menu_cleanup_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
         self.ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))
+
+    def open_new_app_dialog_from_extern(self, config_data = AppConfigEntry()):
+        """ Called from pacakge explorer, where tab is unknown"""
+        dialog = QtWidgets.QInputDialog(self)
+        tab_list = list(item.name for item in this.tab_configs)
+
+        dialog.setComboBoxItems(tab_list)
+        dialog.setWindowTitle("Choose a tab!")
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            answer = dialog.textValue()
+            tabs = self._app_grid.get_tabs()
+            for tab in tabs:
+                if answer == tab.config_data.name:
+                    tab.open_app_link_add_dialog(config_data)

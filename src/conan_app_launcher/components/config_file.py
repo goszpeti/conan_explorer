@@ -3,7 +3,6 @@ import platform
 import jsonschema
 import tempfile
 
-from PyQt5 import QtCore
 from pathlib import Path
 from typing import Callable, List, Dict, Optional, TYPE_CHECKING
 
@@ -56,21 +55,19 @@ class AppConfigType(TypedDict):
 
 
 class AppConfigEntry():
-    """ Representation of an app entry of the config schema """
+    """ Representation of an app link entry of the config schema """
     INVALID_DESCR = "NA"
-    OFFICIAL_RELEASE = "<official release>"
-    OFFICIAL_USER = "<official user>"
+    OFFICIAL_RELEASE = "<official release>" # to be used for "_" channel
+    OFFICIAL_USER = "<official user>" # to be used for "_" user
 
     def __init__(self, app_data: Optional[AppType] = None):
         if app_data is None:
-            app_data = {"name": "", "conan_ref": this.INVALID_CONAN_REF, "executable": "", "icon": "",
-                        "console_application": False, "args": "", "conan_options": []}
-        #self.update_callback_func = None
-        self.app_data: AppType = app_data
-        self.package_folder = Path("NULL")
-        #self.gui_update_signal: QtCore.pyqtSignal = None
+            app_data = {"name": "", "conan_ref": this.INVALID_CONAN_REF, 
+                        "executable": "", "icon": "", "console_application": False,
+                        "args": "", "conan_options": []}
 
-        self.update_func: Optional[Callable] = None
+        self.app_data: AppType = app_data # underlying format for json
+        self.package_folder = Path("NULL")
 
         # internal repr for vars which have other types or need to be manipulated
         self._executable = Path("NULL")
@@ -79,8 +76,9 @@ class AppConfigEntry():
         # Init values with validation, which can be preloaded
         self.icon = self.app_data.get("icon", "")
         self.conan_ref = app_data.get("conan_ref", this.INVALID_CONAN_REF)
-
-        self._available_refs: List[str] = [self.conan_ref] # holds all conan refs for name/user
+        # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
+        self._update_cbk_func: Optional[Callable] = None
+        self._available_refs: List[ConanFileReference] = [self.conan_ref] # holds all conan refs for name/user
         self.update_from_cache()
 
     def update_from_cache(self):
@@ -95,10 +93,11 @@ class AppConfigEntry():
                 self.set_package_info(package_folder)
 
     def register_update_callback(self, update_func: Callable):
-        self.update_func = update_func
+        self._update_cbk_func = update_func
 
     @property
     def name(self):
+        """ Name to be displayed on the link. """
         return self.app_data["name"]
 
     @name.setter
@@ -107,6 +106,7 @@ class AppConfigEntry():
 
     @property
     def conan_ref(self) -> ConanFileReference:
+        """ The conan reference to be used for the link. """
         return self._conan_ref
 
     @conan_ref.setter
@@ -120,7 +120,7 @@ class AppConfigEntry():
                     and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
                 if this.conan_worker:
                     this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
-            # invalidate old entries
+            # invalidate old entries, which are dependent on the conan ref
             self.app_data["conan_ref"] = new_value
             self._executable = Path("NULL")
             self.icon = self.app_data.get("icon", "")
@@ -128,10 +128,11 @@ class AppConfigEntry():
         except Exception as error:
             # errors happen fairly often, keep going
             self._conan_ref = ConanFileReference.loads(this.INVALID_CONAN_REF)
-            Logger().warning(f"Conan ref id invalid {str(error)}")
+            Logger().warning(f"Conan reference invalid {str(error)}")
 
     @property
-    def version(self):
+    def version(self) -> str:
+        """ Version, as specified in the conan ref """
         return self.conan_ref.version
 
     @version.setter
@@ -140,18 +141,19 @@ class AppConfigEntry():
         channel = self.conan_ref.channel
         if not self.conan_ref.user or not self.conan_ref.channel:
             user = "_"
-            channel = "_"
+            channel = "_"  # both must be unset if channel is official
         self.conan_ref = f"{self.conan_ref.name}/{new_value}@{user}/{channel}"
 
     @classmethod
-    def convert_to_disp_channel(cls, channel):
+    def convert_to_disp_channel(cls, channel: str) -> str:
+        """ Substitute _ for official channel string """
         if not channel:
             return cls.OFFICIAL_RELEASE
-        else:
-            return channel
+        return channel
 
     @property
-    def channel(self):
+    def channel(self) -> str:
+        """ Channel, as specified in the conan ref"""
         return self.convert_to_disp_channel(self.conan_ref.channel)
 
     @channel.setter
@@ -163,14 +165,16 @@ class AppConfigEntry():
         self.conan_ref = f"{self.conan_ref.name}/{self.conan_ref.version}@{user}/{new_value}"
 
     @property
-    def versions(self):
+    def versions(self) -> List[str]:
+        """ All versions for the current name and user"""
         versions = set()
         for ref in self._available_refs:
             versions.add(ref.version)
         return list(versions)
 
     @property
-    def channels(self):  # for the current version only
+    def channels(self) -> List[str] :
+        """ Channels, for the current version only """
         channels = set()
         for ref in self._available_refs:
             if ref.version == self.version:
@@ -178,7 +182,8 @@ class AppConfigEntry():
         return list(channels)
 
     @property
-    def executable(self):
+    def executable(self) -> Path:
+        """ The executabel for this link to trigger """
         return self._executable
 
     @executable.setter
@@ -201,6 +206,7 @@ class AppConfigEntry():
 
     @property
     def icon(self) -> Path:
+        """ Icon to display on the link"""
         return self._icon
 
     @icon.setter
@@ -234,23 +240,25 @@ class AppConfigEntry():
             self.app_data["icon"] = new_value
 
     @property
-    def is_console_application(self):
+    def is_console_application(self) -> bool:
         return bool(self.app_data.get("console_application"))
 
     @is_console_application.setter
-    def is_console_application(self, new_value):
+    def is_console_application(self, new_value: bool):
         self.app_data["console_application"] = new_value
 
     @property
-    def args(self):
+    def args(self) -> str:
+        """ Args to launch the executable with """
         return self.app_data.get("args", "")
 
     @args.setter
-    def args(self, new_value):
+    def args(self, new_value: str):
         self.app_data["args"] = new_value
 
     @property
-    def conan_options(self) -> Dict[str, str]:  # user specified, can differ from the actual installation
+    def conan_options(self) -> Dict[str, str]: 
+        """ User specified conan options, can differ from the actual installation """
         conan_options: Dict[str, str] = {}
         for option_entry in self.app_data.get("conan_options", {}):
             conan_options[option_entry["name"]] = option_entry.get("value", "")
@@ -267,6 +275,7 @@ class AppConfigEntry():
         """
         Sets package path and all dependent paths.
         Use, when conan operation is done and paths can be validated.
+        Usually to be called from conan worker.
         """
 
         if this.USE_LOCAL_INTERNAL_CACHE:
@@ -279,26 +288,22 @@ class AppConfigEntry():
         # icon needs executable
         self.icon = self.app_data.get("icon", "")
 
-        # call gui update
-        if self.update_func:
-            self.update_func()
-        # if self.gui_update_signal:
-        #     self.gui_update_signal.emit()
+        # call registered update callback
+        if self._update_cbk_func:
+            self._update_cbk_func()
 
     def set_available_packages(self, available_refs: List[ConanFileReference]):
         """
         Set all other available packages.
+        Usually to be called from conan worker.
         """
         if self._available_refs != available_refs and this.cache:
             this.cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
 
-        # call gui update
-        if self.update_func:
-            self.update_func()
-        # if self.gui_update_signal:
-        #     self.gui_update_signal.emit()
-
+        # call registered update callback
+        if self._update_cbk_func:
+            self._update_cbk_func()
 
 
 class TabConfigEntry():
@@ -331,6 +336,7 @@ class TabConfigEntry():
 
 
 def update_app_info(app: dict):
+    """ Compatiblity function to convert entries of older json schema version. """
     # change from 0.2.0 to 0.3.0
     if app.get("package_id"):
         value = app.pop("package_id")
@@ -360,12 +366,11 @@ def parse_config_file(config_file_path: Path) -> List[TabConfigEntry]:
     for tab in app_config.get("tabs"):
         tab_entry = TabConfigEntry(tab.get("name"))
         for app in tab.get("apps"):
-            # TODO: not very robust, but enough for small changes
             update_app_info(app)
-            app_entry = AppConfigEntry(app)  # config_file_path
+            app_entry = AppConfigEntry(app)
             tab_entry.add_app_entry(app_entry)
         tabs.append(tab_entry)
-    # auto Update version to next version:
+    # auto update version to next version:
     app_config["version"] = json_schema.get("properties").get("version").get("enum")[-1]
     # write it back with updates
     with open(str(config_file_path), "w") as config_file:
@@ -374,7 +379,7 @@ def parse_config_file(config_file_path: Path) -> List[TabConfigEntry]:
 
 
 def write_config_file(config_file_path: Path, tab_entries: List[TabConfigEntry]):
-    # create json dict from model
+    """ Create json dict from model and write it to path. """
     tabs_data: List[TabType] = []
     for tab in tab_entries:
         apps_data: List[AppType] = []

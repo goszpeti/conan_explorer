@@ -3,11 +3,9 @@
 from pathlib import Path
 from typing import Optional
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-
 from conan_app_launcher import ICON_SIZE
 from conan_app_launcher.base import Logger
-
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
 
@@ -46,8 +44,8 @@ class AppButton(QtWidgets.QPushButton):
             icon = QtGui.QIcon(str(self._image))
             self.setIcon(icon)
         else:
-            image = QtGui.QPixmap(str(self._image)).toImage()
-            icon = QtGui.QPixmap.fromImage(image).scaled(
+            pixmap = QtGui.QPixmap(str(self._image)).toImage()
+            icon = QtGui.QPixmap.fromImage(pixmap).scaled(
                 ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation)
             self._ic = QtGui.QIcon(icon)
             self.setIcon(self._ic)

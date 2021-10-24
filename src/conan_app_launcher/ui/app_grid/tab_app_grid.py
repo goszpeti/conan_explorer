@@ -1,8 +1,9 @@
-from PyQt5 import QtCore, QtWidgets
-
+import conan_app_launcher as this
 from conan_app_launcher.components import TabConfigEntry
+from conan_app_launcher.components.config_file import AppConfigEntry
+from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
 from conan_app_launcher.ui.app_grid.app_link import AppLink
-
+from PyQt5 import QtCore, QtWidgets
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -71,6 +72,19 @@ class TabAppGrid(QtWidgets.QWidget):
             if column == self.max_columns:
                 column = 0
                 row += 1
+
+    def open_app_link_add_dialog(self, config_data = AppConfigEntry()):
+        # TODO save for testing
+        self._edit_app_dialog = EditAppDialog(config_data, self)
+        reply = self._edit_app_dialog.exec_()
+        if reply == EditAppDialog.Accepted:
+            self._edit_app_dialog.save_data()
+            config_data.update_from_cache()  # instantly use local paths and pkgs
+            app_link = AppLink(self, config_data)
+            self.add_app_link_to_tab(app_link)
+            this.main_window.save_config()
+            return app_link  # for testing
+        return None
 
     def add_app_link_to_tab(self, app_link):
         """ To be called from a child AppLink """

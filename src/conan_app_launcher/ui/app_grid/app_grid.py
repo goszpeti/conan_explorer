@@ -1,13 +1,13 @@
 from pathlib import Path
-from typing import TYPE_CHECKING
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from typing import TYPE_CHECKING, List
 
 import conan_app_launcher as this
 from conan_app_launcher.components import TabConfigEntry, parse_config_file
-from conan_app_launcher.settings import GRID_COLUMNS, GRID_ROWS, LAST_CONFIG_FILE
+from conan_app_launcher.settings import (GRID_COLUMNS, GRID_ROWS,
+                                         LAST_CONFIG_FILE)
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 from .tab_app_grid import TabAppGrid
-# from PyQt5.QtCore import pyqtSlot
 
 Qt = QtCore.Qt
 
@@ -34,7 +34,9 @@ class AppGrid():
         tab_count = self._main_window.ui.tab_bar.count()
         for i in range(tab_count, 0, -1):  # delete all tabs
             self._main_window.ui.tab_bar.removeTab(i-1)
-        this.conan_worker.finish_working(3)
+
+        if this.conan_worker:
+            this.conan_worker.finish_working(3)
 
         config_file_path = Path(this.settings.get_string(LAST_CONFIG_FILE))
 
@@ -44,7 +46,8 @@ class AppGrid():
             this.tab_configs = []
 
         # update conan info
-        this.conan_worker.update_all_info()
+        if this.conan_worker:
+            this.conan_worker.update_all_info()
 
         self.load_tabs()
 
@@ -79,7 +82,6 @@ class AppGrid():
         menu.exec_(self._main_window.ui.tab_bar.tabBar().mapToGlobal(position))
         self.menu = None
 
-    # @pyqtSlot()
     def on_new_tab(self):
         # call tab on_app_link_add
         new_tab_dialog = QtWidgets.QInputDialog(self._main_window)
@@ -93,13 +95,12 @@ class AppGrid():
             tab_config = TabConfigEntry(text)
             this.tab_configs.append(tab_config)
 
-            tab = TabAppGrid(self._main_window.ui.tab_bar, tab_config, 
-                max_columns=this.settings.get_int(GRID_COLUMNS), 
-                max_rows=this.settings.get_int(GRID_ROWS))
+            tab = TabAppGrid(self._main_window.ui.tab_bar, tab_config,
+                             max_columns=this.settings.get_int(GRID_COLUMNS),
+                             max_rows=this.settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, text)
             self._main_window.ui.save_config()
 
-    # @pyqtSlot(int)
     def on_tab_rename(self, index):
         tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
 
@@ -111,7 +112,6 @@ class AppGrid():
             self._main_window.ui.tab_bar.setTabText(index, text)
             self._main_window.save_config()
 
-    # @pyqtSlot(int)
     def on_tab_remove(self, index):
         tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
 
@@ -125,6 +125,9 @@ class AppGrid():
             this.tab_configs.remove(tab.config_data)
             self._main_window.ui.tab_bar.removeTab(index)
             self._main_window.save_config()
+
+    def get_tabs(self) -> List[TabAppGrid]:
+        return self._main_window.ui.tab_bar.findChildren(TabAppGrid)
 
     def load_tabs(self):
         """ Creates new layout """

@@ -25,6 +25,7 @@ jobs:
             "ubuntu-py39",
             "windows-py38",
             "ubuntu-py38-conan1.24.0",
+            "ubuntu-py310-conan1.28.0",
           ]
         include:
           - name: "ubuntu-py36"
@@ -53,6 +54,11 @@ jobs:
             python: "3.8"
             os: ubuntu-latest
             conan: "1.24.0"
+            use_coverage: true
+          - name: "ubuntu-py310-conan1.28.0"
+            python: "3.10"
+            os: ubuntu-latest
+            conan: "1.28.0"
             use_coverage: true
 
     env:

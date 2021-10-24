@@ -1,23 +1,29 @@
 import platform
+import shutil
+import tempfile
 from pathlib import Path
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-from typing import Any, Dict, List, Optional
-try:
+if TYPE_CHECKING:
     from typing import TypedDict
-except ImportError:
-    from typing_extensions import TypedDict
+else:
+    try:
+        from typing import TypedDict
+    except ImportError:
+        from typing_extensions import TypedDict
 
-from conans import __version__ as conan_version
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.model.ref import ConanFileReference, PackageReference
+from conans.util.windows import path_shortener
 
 try:
-    from conans.util.windows import CONAN_REAL_PATH, rm_conandir, path_shortener
+    from conans.util.windows import (CONAN_REAL_PATH, path_shortener,
+                                     rm_conandir)
 except:
     pass
 
-from conan_app_launcher.base import Logger
 import conan_app_launcher as this
+from conan_app_launcher.base import Logger
 
 
 class ConanPkg(TypedDict):
@@ -37,7 +43,9 @@ class ConanApi():
         self.conan: ConanAPIV1 = None
         self.cache: ClientCache = None
         self.user_io: UserIO = None
+        self._short_path_root = Path("NULL")
         self.init_api()
+
 
     def init_api(self):
         """ Instantiate the api. In some cases it needs to be instatiated anew. """
@@ -47,7 +55,25 @@ class ConanApi():
         self.cache = self.conan.app.cache
 
     def get_all_local_refs(self) -> List[ConanFileReference]:
+        """ Returns all locally installed conan references """
         return self.cache.all_refs()
+
+    def get_local_pkgs_from_ref(self, conan_ref: ConanFileReference) -> List[ConanPkg]:
+        """ Returns all installed pkg ids for a reference. """
+        response = self.conan.search_packages(str(conan_ref))
+        result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
+        return result
+
+    def get_short_path_root(self) -> Path:
+        """ Return short path root for Windows. Sadly there is no built-in way to do this. """
+        # only need to get once
+        if self._short_path_root.exists() or platform.system() != "Windows":
+            return self._short_path_root
+
+        gen_short_path = Path(path_shortener(tempfile.mkdtemp(), True))
+        short_path_root = gen_short_path.parents[1]
+        shutil.rmtree(gen_short_path.parent, ignore_errors=True)
+        return short_path_root
 
     def get_cleanup_cache_paths(self) -> List[str]:
         """ Get a list of orphaned short path and cache folders """
@@ -70,8 +96,7 @@ class ConanApi():
                     del_list.append(str(pkg_id_dir))
 
         # reverse search for orphaned packages on windows short paths
-        short_path = Path(path_shortener("C:/temp", True)).parent.parent
-        short_path_folders = [f for f in Path(short_path).iterdir() if f.is_dir()]
+        short_path_folders = [f for f in self.get_short_path_root().iterdir() if f.is_dir()]
         for short_path in short_path_folders:
             rp_file = short_path / CONAN_REAL_PATH
             if rp_file.is_file():
@@ -89,7 +114,7 @@ class ConanApi():
     def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Path:
         """ Return the package folder of a conan reference and install it, if it is not available """
 
-        package = self.get_local_package(conan_ref, input_options)
+        package = self.find_best_local_package(conan_ref, input_options)
         if package:
             return self.get_package_folder(conan_ref, package)
 
@@ -98,12 +123,12 @@ class ConanApi():
             return Path("NULL")
 
         if self.install_package(conan_ref, packages[0]):
-            package = self.get_local_package(conan_ref, input_options)
+            package = self.find_best_local_package(conan_ref, input_options)
             return self.get_package_folder(conan_ref, package)
         return Path("NULL")
 
     def search_query_in_remotes(self, query: str) -> List[ConanFileReference]:
-        """ Search in all remotes for all versions of a conan ref """
+        """ Search in all remotes for a specific query. """
         res_list = []
         try:
             # no query possible with pattern
@@ -150,7 +175,7 @@ class ConanApi():
         Logger().warning(f"Can't find a matching package '{str(conan_ref)}' in the remotes")
         return []
 
-    def get_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Optional[ConanPkg]:
+    def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Optional[ConanPkg]:
         """ Find a package in the local cache """
         packages = self.find_best_matching_packages(conan_ref, input_options)
         # TODO what to if multiple ones exits? - for now simply take the first entry
@@ -283,6 +308,32 @@ class ConanApi():
             default_options = default_options_ret
         return default_options
 
+    @classmethod
+    def build_conan_profile_name_alias(cls, settings: Dict[str, str]) -> str:
+        """ Build a  human readable pseduo profile name, like Windows_x64_vs16_v142_release """
+        if not settings:
+            return "default"
+        name = settings.get("os", "")
+        arch = settings.get("arch", "")
+        if arch:
+            if arch == "x86_64":
+                arch = "x64"
+            name += "_" + arch.lower()
+        comp = settings.get("compiler", "")
+        if comp:
+            if comp == "Visual Studio":
+                comp = "vs"
+            name += "_" + comp.lower()
+        comp_ver = settings.get("compiler.version", "")
+        if comp_ver:
+            name += comp_ver
+        comp_toolset = settings.get("compiler.toolset", "")
+        if comp_toolset:
+            name += "_" + comp_toolset.lower()
+        bt = settings.get("build_type", "")
+        if bt:
+            name += "_" + bt.lower()
+        return name
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
     """

@@ -29,13 +29,12 @@ def testReadCache(base_fixture):
     copy_file(str(base_fixture.testdata_path / "cache" / "cache_read.json"), str(temp_cache_path))
 
     cache = ConanInfoCache(temp_cache_path)
-    assert cache._local_packages == {"my_package/1.0.0@myself/stable": "",
-                                     "my_package/2.0.0@myself/stable": "C:\\.conan\\pkg"}
+    assert cache._local_packages == {"my_package/1.0.0@_/_": "",
+                                     "my_package/2.0.0@_/_": "C:\\.conan\\pkg"}
     assert cache._remote_packages == {
-        "my_package@myself": [
-            "1.0.0/stable",
-            "2.0.0/stable",
-            "2.0.0/testing"
+        "my_package@_": [
+            "1.0.0/_",
+            "2.0.0/_",
         ],
         "other_package@others": [
             "1.0.0/testing",
@@ -43,15 +42,13 @@ def testReadCache(base_fixture):
             "3.0.0/stable"
         ]
     }
+    assert str(cache.get_local_package_path("my_package/2.0.0@_/_")) == "C:\\.conan\\pkg"
+    assert str(cache.get_local_package_path("my_package/1.0.0@_/_")) == "NULL"
 
-    assert str(cache.get_local_package_path("my_package/2.0.0@myself/stable")) == "C:\\.conan\\pkg"
-    assert str(cache.get_local_package_path("my_package/1.0.0@myself/stable")) == "NULL"
-
-    pkgs = cache.get_similar_remote_pkg_refs("my_package", "myself")
-    assert len(pkgs) == 3
-    assert CFR.loads("my_package/1.0.0@myself/stable") in pkgs
-    assert CFR.loads("my_package/2.0.0@myself/stable") in pkgs
-    assert CFR.loads("my_package/2.0.0@myself/testing") in pkgs
+    pkgs = cache.get_similar_remote_pkg_refs("my_package", "_")
+    assert len(pkgs) == 2
+    assert CFR.loads("my_package/1.0.0@_/_") in pkgs
+    assert CFR.loads("my_package/2.0.0@_/_") in pkgs
 
 
 def testReadAndDeleteCorruptCache(base_fixture):

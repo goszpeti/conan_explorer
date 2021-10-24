@@ -17,6 +17,14 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
         open_file(file_path)
 
 
+def open_in_file_manager(file_path: Path):
+    if platform.system() == "Linux":
+        os.system("xdg-open " + str(file_path))
+    elif platform.system() == "Windows":
+        # select switch for highlighting
+        os.system("explorer /select," + str(file_path))
+
+
 def is_file_executable(file_path: Path) -> bool:
     """ Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
      program has this flag. Use pathext env-var to determine executable file extensions. """

@@ -66,8 +66,12 @@ class ConanWorker():
         """ Call conan operations from queue """
         while not self._closing and not self._conan_queue.empty():
             conan_ref, conan_options = self._conan_queue.get()
-            package_folder = self._conan.get_path_or_install(
-                ConanFileReference.loads(conan_ref), conan_options)
+            try:
+                package_folder = self._conan.get_path_or_install(
+                    ConanFileReference.loads(conan_ref), conan_options)
+            except:
+                self._conan_queue.task_done()
+                return
             # call update on every entry which has this ref
             for tab in this.tab_configs:
                 for app in tab.get_app_entries():
@@ -76,7 +80,7 @@ class ConanWorker():
             Logger().debug("Finish working on " + conan_ref)
             self._conan_queue.task_done()
 
-    def _get_packages_versions(self, conan_ref):
+    def _get_packages_versions(self, conan_ref: str):
         """ Get all version and channel combination of a package from all remotes. """
         available_refs = self._conan.search_recipe_in_remotes(ConanFileReference.loads(conan_ref))
         if not available_refs:
@@ -85,5 +89,3 @@ class ConanWorker():
             for app in tab.get_app_entries():
                 if not self._closing and str(app.conan_ref) == conan_ref:
                     app.set_available_packages(available_refs)
-
-    # TODO New feature: add a job to query all remote packages periodically

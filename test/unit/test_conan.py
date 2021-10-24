@@ -1,14 +1,47 @@
 import os
-import time
 import platform
-from conans.model.ref import ConanFileReference
+import tempfile
+import time
+from pathlib import Path
+from shutil import copy
 
 import conan_app_launcher as app
-from conan_app_launcher.components.conan import _create_key_value_pair_list, ConanApi
-from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
+from conan_app_launcher.components.conan import (ConanApi,
+                                                 _create_key_value_pair_list)
+from conan_app_launcher.components.conan_worker import ConanWorker
+from conan_app_launcher.settings import LAST_CONFIG_FILE
+from conans.model.ref import ConanFileReference
 
 TEST_REF = "zlib/1.2.11@_/_"
+
+def testConanProfileNameAliasBuilder():
+    """ Test, that the build_conan_profile_name_alias returns human readable strings. """
+    # check empty - should return a default name
+    profile_name = ConanApi.build_conan_profile_name_alias({})
+    assert profile_name == "default"
+
+    # check windows
+    settings = {'os': 'Windows', 'os_build': 'Windows', 'arch': 'x86_64', 'arch_build': 'x86_64',
+                'compiler': 'Visual Studio', 'compiler.version': '16', 'compiler.toolset': 'v142', 'build_type': 'Release'}
+    profile_name = ConanApi.build_conan_profile_name_alias(settings)
+    assert profile_name == "Windows_x64_vs16_v142_release"
+
+
+    settings = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 'compiler.version': '7.4', 'build_type': 'Debug'}
+    profile_name = ConanApi.build_conan_profile_name_alias(settings)
+    assert profile_name == "Linux_x64_gcc7.4_debug"
+
+
+def testConanShortPathRoot():
+    """ Test, that short path root can be read. """
+    os.environ["CONAN_USER_HOME_SHORT"] = str(Path().home() / "._myconan")
+    conan = ConanApi()
+    if platform.system() == "Windows":
+        assert conan.get_short_path_root() == Path().home() / "._myconan"
+    else:
+        assert not conan.get_short_path_root().exists()
+    os.environ.pop("CONAN_USER_HOME_SHORT")
 
 def testEmptyCleanupCache(base_fixture):
     """
@@ -164,6 +197,7 @@ def testCreateKeyValueList(base_fixture):
 
 
 def testSearchForAllPackages(base_fixture):
+    """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi()
     res = conan.search_recipe_in_remotes(ConanFileReference.loads(TEST_REF))
     ref = ConanFileReference.loads(TEST_REF) # need to convert @_/_
@@ -175,8 +209,11 @@ def testConanWorker(base_fixture, settings_fixture):
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
-
-    app.tab_configs = parse_config_file(settings_fixture)
+    temp_dir = tempfile.gettempdir()
+    config_file_path = base_fixture.testdata_path / "config_file" / "worker.json"
+    temp_config_file_path = copy(config_file_path, temp_dir)
+    app.settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
+    app.tab_configs = parse_config_file(config_file_path)
     conan_worker = ConanWorker()
     elements_before = conan_worker._conan_queue.qsize()
     time.sleep(10)

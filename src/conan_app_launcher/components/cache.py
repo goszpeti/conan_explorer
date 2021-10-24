@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components.conan import ConanApi
@@ -43,11 +43,12 @@ class ConanInfoCache():
             self._local_packages.pop(conan_ref_str)
         return pkg_path
 
-    def get_similar_pkg_refs(self, name, user):
+    def get_similar_pkg_refs(self, name: str, user: str):
+        """ Return cached info on all available conan refs from the same ref name and user. """
         return self.get_similar_remote_pkg_refs(name, user) + self.get_similar_local_pkg_refs(name, user)
 
     def get_similar_remote_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
-        """ Return cached info on available conan refs from the same ref name and user. """
+        """ Return cached info on remtotely available conan refs from the same ref name and user. """
         if not user: # official pkgs have no user, substituted by _
             user = "_"
         refs: List[ConanFileReference] = []
@@ -58,6 +59,7 @@ class ConanInfoCache():
         return refs
 
     def get_similar_local_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
+        """ Return cached info on locally available conan refs from the same ref name and user. """
         refs: List[ConanFileReference] = []
         all_local_refs = self._conan.get_all_local_refs()
         for ref in all_local_refs:
@@ -65,19 +67,20 @@ class ConanInfoCache():
                 refs.append(ref)
         return refs
 
-    def search(self, query: str) -> Set[str]:
+    def search(self, query: str) -> Tuple[Set[str], Set[str]]:
         """ Return cached info on available conan refs from a query """
-        refs = set()
-        
+        remote_refs = set()
+        local_refs = set()
+
         for ref_str in self._remote_packages.keys():
             if query in ref_str:
                 name, user = ref_str.split("@")
                 for ref in self.get_similar_remote_pkg_refs(name, user):
-                    refs.add(str(ref))
+                    remote_refs.add(str(ref))
         for ref in self._conan.get_all_local_refs():
             if query in str(ref):
-                refs.add(str(ref))
-        return refs
+                local_refs.add(str(ref))
+        return (local_refs, remote_refs)
 
     def update_local_package_path(self, conan_ref: ConanFileReference, folder: Path):
         """ Update the cache with the path of a local package path. """
@@ -93,8 +96,14 @@ class ConanInfoCache():
             self._remote_packages.clear()
             self._write()
         for ref in remote_packages:
-            current_name_user = f"{ref.name}@{ref.user}"
-            current_version_channel = f"{ref.version}/{ref.channel}"
+            # convert back the official cache entries
+            user = ref.user
+            channel = ref.channel
+            if ref.user is None and ref.channel is None:
+                user = "_"
+                channel = "_"
+            current_name_user = f"{ref.name}@{user}"
+            current_version_channel = f"{ref.version}/{channel}"
             version_channels = set(self._remote_packages.get(current_name_user, []))
             if not current_version_channel in version_channels:
                 version_channels.add(current_version_channel)

@@ -32,7 +32,7 @@ def testCorrectFile(base_fixture, settings_fixture):
     assert tab0_entries[1].name == "App2"
     assert not tab0_entries[1].is_console_application  # default
     assert tab0_entries[1].args == ""
-    assert tab0_entries[1].conan_options == {"shared": "True"}
+    assert tab0_entries[1].conan_options == {"shared": "True", "Option2": "Value2"}
 
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].get_app_entries()
