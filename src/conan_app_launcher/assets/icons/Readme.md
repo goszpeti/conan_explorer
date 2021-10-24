@@ -3,6 +3,9 @@ Icon links:
 about.png -- https://icons8.com/icon/14313/about
 add_link.png -- https://icons8.com/icon/22053/add-link
 app.png -- https://icons8.com/icon/4xX53FeTvzeB/application-window
+copy_link.png -- https://icons8.com/icon/22064/copy-link
+copy -- https://icons8.com/icon/15047/copy
+paste --https://icons8.com/icon/15065/paste
 cleanup.png -- https://icons8.com/icon/14160/broom
 delete.png -- https://icons8.com/icon/15015/trash-can
 edit.png -- https://icons8.com/icon/15049/edit
