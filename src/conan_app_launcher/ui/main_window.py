@@ -176,5 +176,6 @@ class MainUi(QtWidgets.QMainWindow):
         if this.ADD_TAB_BUTTON:
             self.ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
         # menu
+        self.ui.refresh_button.setIcon(QtGui.QIcon(str(self._icons_path / "refresh.png")))
         self.ui.menu_cleanup_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
         self.ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))

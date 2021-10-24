@@ -5,39 +5,12 @@ from typing import TYPE_CHECKING, List, Optional
 import os
 Qt = QtCore.Qt
 
-
-class ConanFilterProxyModel(QtCore.QSortFilterProxyModel):
-    FILTERED_ITEMS = [".lock", ".count", "metadata.json",
-                      "conaninfo.txt", "conanmanifest.txt"  # TODO ??
-                      ]
-
-    def filterAcceptsRow(self, source_row, source_parent) -> bool:
-        # filter out internal files
-        # index = self.sourceModel().index(source_row, 0, source_parent)
-        # # model_index = self.mapToSource(index)
-        # name = self.sourceModel().fileName(index)
-        # if self.sourceModel().fileInfo(index).isDir():
-        #     return True
-
-        # for item in self.FILTERED_ITEMS:
-        #     if item in name:
-        #         return False
-        return True
-
-    def sourceFileInfo(self, index):
-        return super().sourceFileInfo(index)
-
-
 class ConanFileSystemModel(QtWidgets.QFileSystemModel):
     def __init__(self):
         super().__init__()
         self._conan = ConanApi()
         self.setReadOnly(False)
         self.setOption(self.DontWatchForChanges, True)
-        # Set up filters for builtin conan files
-        self.proxy_model = ConanFilterProxyModel()
-        self.proxy_model.setDynamicSortFilter(False)
-        self.proxy_model.setSourceModel(self)
         self.short_path_map = {}
 
     def is_sub_package_dir(self, proxy_index):

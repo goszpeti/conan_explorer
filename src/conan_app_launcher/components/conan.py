@@ -59,6 +59,11 @@ class ConanApi():
         """ Returns all locally installed conan references """
         return self.cache.all_refs()
 
+    def get_local_pkgs_from_ref(self, conan_ref: ConanFileReference) -> List[ConanPkg]:
+        response = self.conan.search_packages(str(conan_ref))
+        result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
+        return result
+
     def get_short_path_root(self) -> Path:
         """ Return short path root for Windows. Sadly there is no built-in way to do this. """
         if self.short_path_root.exists(): # only need to get once
@@ -109,7 +114,7 @@ class ConanApi():
     def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Path:
         """ Return the package folder of a conan reference and install it, if it is not available """
 
-        package = self.get_local_package(conan_ref, input_options)
+        package = self.find_best_local_package(conan_ref, input_options)
         if package:
             return self.get_package_folder(conan_ref, package)
 
@@ -118,12 +123,12 @@ class ConanApi():
             return Path("NULL")
 
         if self.install_package(conan_ref, packages[0]):
-            package = self.get_local_package(conan_ref, input_options)
+            package = self.find_best_local_package(conan_ref, input_options)
             return self.get_package_folder(conan_ref, package)
         return Path("NULL")
 
     def search_query_in_remotes(self, query: str) -> List[ConanFileReference]:
-        """ Search in all remotes for all versions of a conan ref """
+        """ Search in all remotes for a specific query. """
         res_list = []
         try:
             # no query possible with pattern
@@ -170,7 +175,7 @@ class ConanApi():
         Logger().warning(f"Can't find a matching package '{str(conan_ref)}' in the remotes")
         return []
 
-    def get_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Optional[ConanPkg]:
+    def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Optional[ConanPkg]:
         """ Find a package in the local cache """
         packages = self.find_best_matching_packages(conan_ref, input_options)
         # TODO what to if multiple ones exits? - for now simply take the first entry
@@ -303,31 +308,32 @@ class ConanApi():
             default_options = default_options_ret
         return default_options
 
-def build_conan_profile_name_alias(settings: Dict[str, str]):
-    """ Build a short pseduo profile name """
-    if not settings:
-        return "default"
-    name = settings.get("os", "")
-    arch = settings.get("arch", "")
-    if arch:
-        if arch == "x86_64":
-            arch = "x64"
-        name += "_" + arch.lower()
-    comp = settings.get("compiler", "")
-    if comp:
-        if comp == "Visual Studio":
-            comp = "vs"
-        name += "_" + comp.lower()
-    comp_ver = settings.get("compiler.version", "")
-    if comp_ver:
-        name += comp_ver
-    comp_toolset = settings.get("compiler.toolset", "")
-    if comp_toolset:
-        name += "_" + comp_toolset.lower()
-    bt = settings.get("build_type", "")
-    if bt:
-        name += "_" + bt.lower()
-    return name
+    @classmethod
+    def build_conan_profile_name_alias(cls, settings: Dict[str, str]):
+        """ Build a short pseduo profile name """
+        if not settings:
+            return "default"
+        name = settings.get("os", "")
+        arch = settings.get("arch", "")
+        if arch:
+            if arch == "x86_64":
+                arch = "x64"
+            name += "_" + arch.lower()
+        comp = settings.get("compiler", "")
+        if comp:
+            if comp == "Visual Studio":
+                comp = "vs"
+            name += "_" + comp.lower()
+        comp_ver = settings.get("compiler.version", "")
+        if comp_ver:
+            name += comp_ver
+        comp_toolset = settings.get("compiler.toolset", "")
+        if comp_toolset:
+            name += "_" + comp_toolset.lower()
+        bt = settings.get("build_type", "")
+        if bt:
+            name += "_" + bt.lower()
+        return name
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
     """

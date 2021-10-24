@@ -5,7 +5,7 @@ from pathlib import Path
 from conans.model.ref import ConanFileReference
 
 import conan_app_launcher as app
-from conan_app_launcher.components.conan import _create_key_value_pair_list, ConanApi, build_conan_profile_name_alias
+from conan_app_launcher.components.conan import _create_key_value_pair_list, ConanApi
 from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
 
@@ -13,18 +13,18 @@ TEST_REF = "zlib/1.2.11@_/_"
 
 def testConanProfileNameAliasBuilder():
     # check empty - should return a default name
-    profile_name = build_conan_profile_name_alias({})
+    profile_name = ConanApi.build_conan_profile_name_alias({})
     assert profile_name == "default"
 
     # check windows
     settings = {'os': 'Windows', 'os_build': 'Windows', 'arch': 'x86_64', 'arch_build': 'x86_64',
                 'compiler': 'Visual Studio', 'compiler.version': '16', 'compiler.toolset': 'v142', 'build_type': 'Release'}
-    profile_name = build_conan_profile_name_alias(settings)
+    profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Windows_x64_vs16_v142_release"
 
 
     settings = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 'compiler.version': '7.4', 'build_type': 'Debug'}
-    profile_name = build_conan_profile_name_alias(settings)
+    profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
 
