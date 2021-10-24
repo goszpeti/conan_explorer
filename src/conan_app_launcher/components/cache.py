@@ -97,6 +97,8 @@ class ConanInfoCache():
             self._write()
         for ref in remote_packages:
             # convert back the official cache entries
+            user = ref.user
+            channel = ref.channel
             if ref.user is None and ref.channel is None:
                 user = "_"
                 channel = "_"
