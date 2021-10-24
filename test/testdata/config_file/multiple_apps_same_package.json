@@ -7,7 +7,7 @@
                 {
                     "name": "App1 with spaces",
                     "conan_ref": "fft/cci.20061228@_/_",
-                    "executable": "lib/fft.lib",
+                    "executable": "include/fft/fft.h",
                     "icon": "NonExistantIcon.png",
                     "console_application": true,
                     "args": "-n name",
@@ -16,7 +16,7 @@
                 {
                     "name": "App1 new",
                     "conan_ref": "fft/cci.20061228@_/_",
-                    "executable": "lib/fft.lib",
+                    "executable": "include/fft/fft.h",
                     "icon": "NonExistantIcon.png",
                     "conan_options": []
                 },
