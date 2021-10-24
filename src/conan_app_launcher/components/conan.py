@@ -43,6 +43,7 @@ class ConanApi():
         self.conan: ConanAPIV1 = None
         self.cache: ClientCache = None
         self.user_io: UserIO = None
+        self._short_path_root = Path("NULL")
         self.init_api()
 
 
@@ -65,8 +66,9 @@ class ConanApi():
 
     def get_short_path_root(self) -> Path:
         """ Return short path root for Windows. Sadly there is no built-in way to do this. """
-        if self.short_path_root.exists(): # only need to get once
-            return self.short_path_root
+        # only need to get once
+        if self._short_path_root.exists() or platform.system() != "Windows":
+            return self._short_path_root
 
         gen_short_path = Path(path_shortener(tempfile.mkdtemp(), True))
         short_path_root = gen_short_path.parents[1]
