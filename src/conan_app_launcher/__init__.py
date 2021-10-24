@@ -1,7 +1,7 @@
 """
 Contains global constants and basic/ui variables.
 """
-__version__ = "1.0.0b5"
+__version__ = "1.0.0b6"
 
 from pathlib import Path
 
