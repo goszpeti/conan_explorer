@@ -6,8 +6,8 @@
             "apps": [
                 {
                     "name": "App1 with spaces",
-                    "conan_ref": "m4/1.4.19@_/_",
-                    "executable": "bin/m4",
+                    "conan_ref": "fft/cci.20061228@_/_",
+                    "executable": "lib/fft.lib",
                     "icon": "NonExistantIcon.png",
                     "console_application": true,
                     "args": "-n name",
@@ -15,15 +15,15 @@
                 },
                 {
                     "name": "App1 new",
-                    "conan_ref": "m4/1.4.19@_/_",
-                    "executable": "bin/m4",
+                    "conan_ref": "fft/cci.20061228@_/_",
+                    "executable": "lib/fft.lib",
                     "icon": "NonExistantIcon.png",
                     "conan_options": []
                 },
                 {
                     "name": "App1 wrong path",
-                    "conan_ref": "m4/1.4.19@_/_",
-                    "executable": "bin/m5",
+                    "conan_ref": "fft/cci.20061228@_/_",
+                    "executable": "lib/fft2.lib",
                     "icon": "NonExistantIcon.png",
                     "conan_options": []
                 },
