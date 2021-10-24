@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
@@ -145,38 +146,89 @@ class LocalConanPackageExplorer():
         self.file_cntx_menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
 
+        self.paste_action = QtWidgets.QAction("Copy as Path", self._main_window)
+        self.paste_action.setIcon(QtGui.QIcon(str(icons_path / "copy_to_clipboard.png")))
+        self.file_cntx_menu.addAction(self.paste_action)
+        self.paste_action.triggered.connect(self.on_copy_as_path)
+
         self.file_cntx_menu.addSeparator()
 
         self.copy_action = QtWidgets.QAction("Copy", self._main_window)
         self.copy_action.setIcon(QtGui.QIcon(str(icons_path / "copy.png")))
         self.file_cntx_menu.addAction(self.copy_action)
-        self.copy_action.setDisabled(True)  # TODO upcoming feature
-        #self.copy_action.triggered.connect(self.on_open_in_file_manager)
+        self.copy_action.triggered.connect(self.on_copy)
 
         self.paste_action = QtWidgets.QAction("Paste", self._main_window)
         self.paste_action.setIcon(QtGui.QIcon(str(icons_path / "paste.png")))
         self.file_cntx_menu.addAction(self.paste_action)
-        self.paste_action.setDisabled(True)  # TODO upcoming feature
-        #self.paste_action.triggered.connect(self.on_open_in_file_manager)
+        self.paste_action.triggered.connect(self.on_paste)
+
+        self.paste_action = QtWidgets.QAction("Delete", self._main_window)
+        self.paste_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
+        self.file_cntx_menu.addAction(self.paste_action)
+        self.paste_action.triggered.connect(self.on_delete)
 
         self.file_cntx_menu.addSeparator()
 
         self.add_link_action = QtWidgets.QAction("Add link to App Grid", self._main_window)
         self.add_link_action.setIcon(QtGui.QIcon(str(icons_path / "add_link.png")))
         self.file_cntx_menu.addAction(self.add_link_action)
-        #self.add_link_action.setDisabled(True)  # TODO upcoming feature
         self.add_link_action.triggered.connect(self.on_add_app_link)
 
     def on_pkg_context_menu_requested(self, position):
         self.file_cntx_menu.exec_(self._main_window.ui.package_file_view.mapToGlobal(position))
 
-    def on_add_app_link(self):
-        file_view_index = self._get_pkg_file_source_item()
-        if not file_view_index:
+    def on_copy_as_path(self):
+        file = self._get_selected_pkg_file()
+        this.qt_app.clipboard().setText(file)
+
+    def on_delete(self):
+        file = self._get_selected_pkg_file()
+        msg = QtWidgets.QMessageBox(parent=self._main_window)
+        msg.setWindowTitle("Delete file")
+        msg.setText("Are you sure, you want to delete this file\t")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
+        msg.setIcon(QtWidgets.QMessageBox.Warning)
+        reply = msg.exec_()
+        if reply != QtWidgets.QMessageBox.Yes:
             return
+        try:
+            os.remove(file)
+        except Exception as e:
+            Logger().warning(f"Can't delete {file}: {str(e)}")
+
+
+    def on_copy(self):
+        file = self._get_selected_pkg_file()
+        data = QtCore.QMimeData()
+        url = QtCore.QUrl.fromLocalFile(file)
+        data.setUrls([url])
+
+        this.qt_app.clipboard().setMimeData(data)
+
+    def on_paste(self):
+        data = this.qt_app.clipboard().mimeData()
+        if not data:
+            return
+        if not data.hasUrls():
+            return
+        urls = data.urls()
+        for url in urls:
+            # try to copy
+            if not url.isLocalFile():
+                continue
+            file = self._get_selected_pkg_file()
+            if os.path.isfile(file):
+                dir = os.path.basename(file)
+            else:
+                dir = file
+            new_path = os.path.join(dir, url.fileName())
+            QtCore.QFile(url.toLocalFile()).copy(new_path)
+
+    def on_add_app_link(self):
+        file_path = Path(self._get_selected_pkg_file())
         conan_ref = self.get_selected_conan_ref()
         # determine relpath from package
-        file_path = Path(file_view_index.model().fileInfo(file_view_index).absoluteFilePath())
         pkg_path = ConanApi().get_package_folder(ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
         rel_path = file_path.relative_to(pkg_path)
         # TODO get conan options from curent package?
@@ -185,11 +237,8 @@ class LocalConanPackageExplorer():
         self._main_window.open_new_app_dialog_from_extern(AppConfigEntry(app_data))
 
     def on_open_in_file_manager(self, model_index):
-        view_index = self._get_pkg_file_source_item()
-        if not view_index:
-            return
-        path = Path(view_index.model().fileInfo(view_index).absoluteFilePath())
-        open_in_file_manager(path)
+        file_path = Path(self._get_selected_pkg_file())
+        open_in_file_manager(file_path)
 
     def _get_pkg_file_source_item(self) -> Optional[TreeItem]:
         indexes = this.main_window.ui.package_file_view.selectedIndexes()
@@ -197,3 +246,9 @@ class LocalConanPackageExplorer():
             Logger().debug(f"No selected item for context action")
             return None
         return this.main_window.ui.package_file_view.selectedIndexes()[0]
+
+    def _get_selected_pkg_file(self) -> str:
+        file_view_index = self._get_pkg_file_source_item()
+        if not file_view_index:
+            return self.fs_model.rootPath()
+        return file_view_index.model().fileInfo(file_view_index).absoluteFilePath()
