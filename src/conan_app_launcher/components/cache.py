@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components.conan import ConanApi
@@ -67,19 +67,20 @@ class ConanInfoCache():
                 refs.append(ref)
         return refs
 
-    def search(self, query: str) -> Set[str]:
+    def search(self, query: str) -> Tuple[Set[str], Set[str]]:
         """ Return cached info on available conan refs from a query """
-        refs = set()
-        
+        remote_refs = set()
+        local_refs = set()
+
         for ref_str in self._remote_packages.keys():
             if query in ref_str:
                 name, user = ref_str.split("@")
                 for ref in self.get_similar_remote_pkg_refs(name, user):
-                    refs.add(str(ref))
+                    remote_refs.add(str(ref))
         for ref in self._conan.get_all_local_refs():
             if query in str(ref):
-                refs.add(str(ref))
-        return refs
+                local_refs.add(str(ref))
+        return (local_refs, remote_refs)
 
     def update_local_package_path(self, conan_ref: ConanFileReference, folder: Path):
         """ Update the cache with the path of a local package path. """

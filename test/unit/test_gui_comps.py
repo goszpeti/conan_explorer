@@ -1,30 +1,22 @@
 """
-These tests test the self written qt gui components.
+Test the self written qt gui components, which can be instantiated without
+using the whole application (standalone).
 """
+import os
 import platform
 import sys
-import os
+from pathlib import Path
 from subprocess import check_output
 from time import sleep
-from pathlib import Path
 
-
-from conan_app_launcher.components.config_file import AppConfigEntry, AppType, OptionType
+from conan_app_launcher.components.config_file import (AppConfigEntry, AppType,
+                                                       OptionType)
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.app_grid.app_link import AppLink
 from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
-
+from conan_app_launcher.ui.app_grid.app_link import AppLink
 from PyQt5 import QtCore, QtWidgets
+
 Qt = QtCore.Qt
-
-
-class pyqtSignal():
-    def connect(self, *args):
-        pass
-
-    def emit(self, *args):
-        pass
-
 
 def testAboutDialog(base_fixture, qtbot):
     """
@@ -33,7 +25,7 @@ def testAboutDialog(base_fixture, qtbot):
     """
     root_obj = QtWidgets.QWidget()
     widget = main_window.AboutDialog(root_obj)
-    qtbot.addWidget(widget)
+    qtbot.addWidget(root_obj)
     widget.show()
     qtbot.waitForWindowShown(widget)
 

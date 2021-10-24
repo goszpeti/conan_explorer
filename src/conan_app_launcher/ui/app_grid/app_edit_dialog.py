@@ -27,6 +27,8 @@ class EditAppDialog(QtWidgets.QDialog):
         self._ui.icon_line_edit.setText(self._app_config_data.app_data.get("icon", ""))
         self._ui.args_line_edit.setText(self._app_config_data.args)
 
+        self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started)
+        self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished)
         conan_options_text = ""
         for option in self._app_config_data.conan_options:
             conan_options_text += f"{option}={self._app_config_data.conan_options.get(option)}\n"
@@ -34,6 +36,12 @@ class EditAppDialog(QtWidgets.QDialog):
         # for some reason OK is not connected at default
         self._ui.button_box.accepted.connect(self.accept)
 
+    def loading_started(self):
+        self._ui.conan_ref_label.setText("Conan Reference (query in progress)")
+
+    def loading_finished(self):
+        self._ui.conan_ref_label.setText("Conan Reference (query finished)")
+  
     def save_data(self):
         # check all input validations
         if not self._ui.conan_ref_line_edit.hasAcceptableInput():

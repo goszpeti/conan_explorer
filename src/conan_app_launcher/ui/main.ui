@@ -302,12 +302,12 @@
         </rect>
        </property>
        <attribute name="label">
-        <string>Local Packages - DEMO PREVIEW ONLY</string>
+        <string>Local Package Explorer</string>
        </attribute>
        <widget class="QLabel" name="package_filter_label">
         <property name="geometry">
          <rect>
-          <x>50</x>
+          <x>63</x>
           <y>5</y>
           <width>91</width>
           <height>21</height>
@@ -323,11 +323,14 @@
         </property>
         <property name="geometry">
          <rect>
-          <x>150</x>
-          <y>0</y>
-          <width>331</width>
-          <height>31</height>
+          <x>154</x>
+          <y>3</y>
+          <width>171</width>
+          <height>26</height>
          </rect>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhNone</set>
         </property>
         <property name="html">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -385,7 +388,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="headerHidden">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <attribute name="headerVisible">
           <bool>false</bool>
@@ -423,6 +426,34 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
         </widget>
+       </widget>
+       <widget class="QLabel" name="package_path_label">
+        <property name="geometry">
+         <rect>
+          <x>340</x>
+          <y>5</y>
+          <width>481</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>false</bool>
+        </property>
+        <property name="openExternalLinks">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+        </property>
        </widget>
       </widget>
      </widget>
