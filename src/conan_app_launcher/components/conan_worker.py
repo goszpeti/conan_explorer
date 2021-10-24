@@ -66,8 +66,12 @@ class ConanWorker():
         """ Call conan operations from queue """
         while not self._closing and not self._conan_queue.empty():
             conan_ref, conan_options = self._conan_queue.get()
-            package_folder = self._conan.get_path_or_install(
-                ConanFileReference.loads(conan_ref), conan_options)
+            try:
+                package_folder = self._conan.get_path_or_install(
+                    ConanFileReference.loads(conan_ref), conan_options)
+            except:
+                self._conan_queue.task_done()
+                return
             # call update on every entry which has this ref
             for tab in this.tab_configs:
                 for app in tab.get_app_entries():
