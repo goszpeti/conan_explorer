@@ -1,13 +1,17 @@
 import os
-import time
 import platform
+import tempfile
+import time
 from pathlib import Path
-from conans.model.ref import ConanFileReference
+from shutil import copy
 
 import conan_app_launcher as app
-from conan_app_launcher.components.conan import _create_key_value_pair_list, ConanApi
-from conan_app_launcher.components.conan_worker import ConanWorker
 from conan_app_launcher.components import parse_config_file
+from conan_app_launcher.components.conan import (ConanApi,
+                                                 _create_key_value_pair_list)
+from conan_app_launcher.components.conan_worker import ConanWorker
+from conan_app_launcher.settings import LAST_CONFIG_FILE
+from conans.model.ref import ConanFileReference
 
 TEST_REF = "zlib/1.2.11@_/_"
 
@@ -205,8 +209,11 @@ def testConanWorker(base_fixture, settings_fixture):
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
-
-    app.tab_configs = parse_config_file(settings_fixture)
+    temp_dir = tempfile.gettempdir()
+    config_file_path = base_fixture.testdata_path / "config_file" / "worker.json"
+    temp_config_file_path = copy(config_file_path, temp_dir)
+    app.settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
+    app.tab_configs = parse_config_file(config_file_path)
     conan_worker = ConanWorker()
     elements_before = conan_worker._conan_queue.qsize()
     time.sleep(10)
