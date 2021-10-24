@@ -43,11 +43,12 @@ class ConanInfoCache():
             self._local_packages.pop(conan_ref_str)
         return pkg_path
 
-    def get_similar_pkg_refs(self, name, user):
+    def get_similar_pkg_refs(self, name: str, user: str):
+        """ Return cached info on all available conan refs from the same ref name and user. """
         return self.get_similar_remote_pkg_refs(name, user) + self.get_similar_local_pkg_refs(name, user)
 
     def get_similar_remote_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
-        """ Return cached info on available conan refs from the same ref name and user. """
+        """ Return cached info on remtotely available conan refs from the same ref name and user. """
         if not user: # official pkgs have no user, substituted by _
             user = "_"
         refs: List[ConanFileReference] = []
@@ -58,6 +59,7 @@ class ConanInfoCache():
         return refs
 
     def get_similar_local_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
+        """ Return cached info on locally available conan refs from the same ref name and user. """
         refs: List[ConanFileReference] = []
         all_local_refs = self._conan.get_all_local_refs()
         for ref in all_local_refs:

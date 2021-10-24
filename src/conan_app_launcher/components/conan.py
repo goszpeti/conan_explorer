@@ -60,6 +60,7 @@ class ConanApi():
         return self.cache.all_refs()
 
     def get_local_pkgs_from_ref(self, conan_ref: ConanFileReference) -> List[ConanPkg]:
+        """ Returns all installed pkg ids for a reference. """
         response = self.conan.search_packages(str(conan_ref))
         result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
         return result
@@ -309,8 +310,8 @@ class ConanApi():
         return default_options
 
     @classmethod
-    def build_conan_profile_name_alias(cls, settings: Dict[str, str]):
-        """ Build a short pseduo profile name """
+    def build_conan_profile_name_alias(cls, settings: Dict[str, str]) -> str:
+        """ Build a  human readable pseduo profile name, like Windows_x64_vs16_v142_release """
         if not settings:
             return "default"
         name = settings.get("os", "")

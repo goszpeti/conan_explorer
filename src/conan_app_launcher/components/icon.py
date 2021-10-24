@@ -9,8 +9,46 @@ import struct
 import pefile
 from conan_app_launcher.base import Logger
 
+def extract_icon(file_path: Path, output_dir: Path) -> Path:
+    """
+    Extract icons from a file and save them to specified dir.
+    Since we don't know the format (png or ico), the function returns the generated filepath.
+    """
+
+    if platform.system() == "Linux":
+        Logger().info("Automatic icon extraction is not available on Linux.")
+    if platform.system() == "Windows":
+        if file_path.is_file():
+            if file_path.suffix.lower() == ".exe":  # only works for .exe
+                return extract_icon_from_win_executable(file_path, output_dir)
+            Logger().debug("Automatic icon extraction is not available for non executable files.")
+        else:
+            Logger().debug("File for icon extraction does not exist.")
+    return Path("NULL")
+
+
+def extract_icon_from_win_executable(executable_path: Path, output_dir: Path) -> Path:
+    # Currently only pngs supported
+    # cache files - use generic .img since we don't know what it is
+    output_path = output_dir / (executable_path.name + ".img")
+    if output_path.is_file():
+        return output_path
+    try:
+        extractor = ExtractIcon(str(executable_path))
+        groups = extractor.get_group_icons()
+        icon_id = extractor.best_icon(groups[0])
+        image = extractor.export_raw(groups[0], icon_id)
+        with open(output_path, "wb") as extract_file:
+            extract_file.write(bytearray(image))
+        return output_path
+    except Exception as error:
+        # user needs not know this
+        Logger().debug(str(error))
+    return Path("NULL")
+
 
 class ExtractIcon(object):
+    """ Use pefile module to save icons """
     GRPICONDIRENTRY_format = ('GRPICONDIRENTRY',
                               ('B,Width', 'B,Height', 'B,ColorCount', 'B,Reserved',
                                'H,Planes', 'H,BitCount', 'I,BytesInRes', 'H,ID'))
@@ -151,41 +189,3 @@ class ExtractIcon(object):
             dib_size = struct.unpack('<L', data[0:4])[0]
             header = b'BM' + struct.pack('<LLL', len(data) + 14, 0, 14 + dib_size)
         return header
-
-
-def extract_icon(file_path: Path, output_dir: Path) -> Path:
-    """
-    Extract icons from a file and save them to specified dir.
-    Since we don't know the format (png or ico), the function returns the generated filepath.
-    """
-
-    if platform.system() == "Linux":
-        Logger().info("Automatic icon extraction is not available on Linux.")
-    if platform.system() == "Windows":
-        if file_path.is_file():
-            if file_path.suffix.lower() == ".exe":  # only works for .exe
-                return extract_icon_from_win_executable(file_path, output_dir)
-            Logger().debug("Automatic icon extraction is not available for non executable files.")
-        else:
-            Logger().debug("File for icon extraction does not exist.")
-    return Path("NULL")
-
-
-def extract_icon_from_win_executable(executable_path: Path, output_dir: Path) -> Path:
-    # Currently only pngs supported
-    # cache files - use generic .img since we don't know what it is
-    output_path = output_dir / (executable_path.name + ".img")
-    if output_path.is_file():
-        return output_path
-    try:
-        extractor = ExtractIcon(str(executable_path))
-        groups = extractor.get_group_icons()
-        icon_id = extractor.best_icon(groups[0])
-        image = extractor.export_raw(groups[0], icon_id)
-        with open(output_path, "wb") as extract_file:
-            extract_file.write(bytearray(image))
-        return output_path
-    except Exception as error:
-        # user needs not know this
-        Logger().debug(str(error))
-    return Path("NULL")
