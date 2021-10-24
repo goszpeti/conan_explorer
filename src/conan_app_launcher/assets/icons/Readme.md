@@ -11,3 +11,9 @@ plus.png -- https://icons8.com/icon/16142/plus-2
 rename.png -- https://icons8.com/icon/15076/rename
 search.png -- https://icons8.com/icon/14079/search
 search_packages.png -- https://icons8.com/icon/jqacbJ7SsEXY/package-search
+package -- https://icons8.com/icon/BVdE5qStccbJ/open-parcel
+linux -- https://icons8.com/icon/16088/linux
+x64 - https://icons8.com/icon/16981/x64
+android  -- https://icons8.com/icon/16011/android-os
+mac_os -- https://icons8.com/icon/16089/apple-logo
+default_box -- https://icons8.com/icon/16501/empty-box
