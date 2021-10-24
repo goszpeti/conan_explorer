@@ -43,7 +43,6 @@ class ConanApi():
         self.conan: ConanAPIV1 = None
         self.cache: ClientCache = None
         self.user_io: UserIO = None
-        self.short_path_root = Path("NULL")
         self.init_api()
 
 
@@ -53,7 +52,6 @@ class ConanApi():
         self.conan.create_app()
         self.user_io = self.conan.user_io
         self.cache = self.conan.app.cache
-        self.short_path_root = self.get_short_path_root()
 
     def get_all_local_refs(self) -> List[ConanFileReference]:
         """ Returns all locally installed conan references """
