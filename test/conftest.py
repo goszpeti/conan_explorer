@@ -1,15 +1,16 @@
 import os
-from pathlib import Path
-
-import pytest
 import tempfile
+from pathlib import Path
 from shutil import copy
-from conan_app_launcher.settings import *
-import conan_app_launcher.base as logger
+
 import conan_app_launcher as app
+import conan_app_launcher.base as logger
+import pytest
+from conan_app_launcher.settings import *
 
 
 class PathSetup():
+    """ Get the important paths form the source repo. """
     def __init__(self):
         self.test_path = Path(os.path.dirname(__file__))
         self.base_path = self.test_path.parent
@@ -18,7 +19,11 @@ class PathSetup():
 
 @pytest.fixture
 def base_fixture(request):
-
+    """
+    Set up the global variables to be able to start the application.
+    Needs to be used, if the tested component uses the global Logger.
+    Clean up all instances after the test.
+    """
     paths = PathSetup()
     app.base_path = paths.base_path / "src" / "conan_app_launcher"
     app.asset_path: Path = app.base_path / "assets"
@@ -47,6 +52,7 @@ def base_fixture(request):
 
 @pytest.fixture
 def settings_fixture(base_fixture):
+    """ Use temporary settings based on testdata/app_config.json """
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
 

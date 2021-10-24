@@ -1,6 +1,6 @@
 import configparser
 from pathlib import Path
-from typing import Union, Dict
+from typing import Union
 
 from conan_app_launcher.base import Logger
 from conan_app_launcher.settings import (

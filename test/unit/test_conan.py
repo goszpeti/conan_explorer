@@ -12,6 +12,7 @@ from conan_app_launcher.components import parse_config_file
 TEST_REF = "zlib/1.2.11@_/_"
 
 def testConanProfileNameAliasBuilder():
+    """ Test, that the build_conan_profile_name_alias returns human readable strings. """
     # check empty - should return a default name
     profile_name = ConanApi.build_conan_profile_name_alias({})
     assert profile_name == "default"
@@ -29,9 +30,11 @@ def testConanProfileNameAliasBuilder():
 
 
 def testConanShortPathRoot():
+    """ Test, that short path root can be read. """
     os.environ["CONAN_USER_HOME_SHORT"] = str(Path().home() / "._myconan")
     conan = ConanApi()
     assert conan.get_short_path_root() == Path().home() / "._myconan"
+
 
 def testEmptyCleanupCache(base_fixture):
     """
@@ -187,6 +190,7 @@ def testCreateKeyValueList(base_fixture):
 
 
 def testSearchForAllPackages(base_fixture):
+    """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi()
     res = conan.search_recipe_in_remotes(ConanFileReference.loads(TEST_REF))
     ref = ConanFileReference.loads(TEST_REF) # need to convert @_/_
