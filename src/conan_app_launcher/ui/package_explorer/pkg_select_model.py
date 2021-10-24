@@ -8,7 +8,7 @@ REF_TYPE = 0
 PROFILE_TYPE = 1
 
 class TreeItem(object):
-    def __init__(self, data, parent=None, item_type=REF_TYPE):
+    def __init__(self, data: str, parent=None, item_type=REF_TYPE):
         self.parentItem = parent
         self.itemData = data
         self.type = item_type
@@ -92,7 +92,10 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
             if item.type == REF_TYPE:
                 return QtGui.QIcon(str(self._icons_path / "package.png"))
             if item.type == PROFILE_TYPE:
-                profile_name = item.data(index.column()).lower()
+                profile_name = item.data(0)
+                if not profile_name:
+                    return None
+                profile_name = profile_name.lower()
                 if "windows" in profile_name:
                     return QtGui.QIcon(str(self._icons_path / "windows.png"))
                 elif "linux" in profile_name:

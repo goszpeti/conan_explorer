@@ -57,11 +57,11 @@ class EditAppDialog(QtWidgets.QDialog):
         self._app_config_data.args = self._ui.args_line_edit.text()
 
         conan_options_text = self._ui.conan_opts_text_edit.toPlainText().splitlines()
-        conan_options = []
+        conan_options = {}
         for line in conan_options_text:
             split_values = line.split("=")
             if len(split_values) == 2:
-                conan_options.append({"name": split_values[0], "value": split_values[1]})
+                conan_options.update({split_values[0]: split_values[1]})
             else:
                 pass  # TODO warning
         self._app_config_data.conan_options = conan_options

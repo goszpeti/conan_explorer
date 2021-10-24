@@ -17,13 +17,11 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 
 
 class AppLink(QtWidgets.QVBoxLayout):
-    #conan_info_updated = QtCore.pyqtSignal()
 
     def __init__(self, parent: QtWidgets.QWidget, app_config: AppConfigEntry):
         super().__init__(parent)
         self.parent_tab = parent # save parent - don't use qt signals ands solts
         self.config_data = app_config
-        #self.config_data.gui_update_signal = self.conan_info_updated
         self.config_data.register_update_callback(self.update_with_conan_info)
 
         self.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
@@ -67,7 +65,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.addWidget(self._app_channel_cbox)
 
         # connect signals
-        #self.conan_info_updated.connect(self.update_with_conan_info)
         if this.main_window:
             this.main_window.display_versions_updated.connect(self.update_versions_cbox)
             this.main_window.display_channels_updated.connect(self.update_channels_cbox)
@@ -158,7 +155,8 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._edit_app_dialog.save_data()
             self._apply_new_config()
             self._app_button.grey_icon()
-            this.main_window.save_config()
+            if this.main_window:
+                this.main_window.save_config()
 
     def open_app_link_add_dialog(self, config_data: AppConfigEntry = None):
         if not config_data:
@@ -171,7 +169,8 @@ class AppLink(QtWidgets.QVBoxLayout):
             config_data.update_from_cache() # instantly use local paths and pkgs
             app_link = AppLink(self.parent_tab, config_data)
             self.parent_tab.add_app_link_to_tab(app_link)
-            this.main_window.save_config()
+            if this.main_window:
+                this.main_window.save_config()
             return app_link  # for testing
         return None
 
@@ -186,7 +185,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         if reply == QtWidgets.QMessageBox.Yes:
             self.delete()
             self.parent_tab.remove_app_link_from_tab(self)
-            this.main_window.save_config()
+            if this.main_window:
+                this.main_window.save_config()
 
     def update_with_conan_info(self):
         # on changed values

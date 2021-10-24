@@ -34,7 +34,9 @@ class AppGrid():
         tab_count = self._main_window.ui.tab_bar.count()
         for i in range(tab_count, 0, -1):  # delete all tabs
             self._main_window.ui.tab_bar.removeTab(i-1)
-        this.conan_worker.finish_working(3)
+
+        if this.conan_worker:
+            this.conan_worker.finish_working(3)
 
         config_file_path = Path(this.settings.get_string(LAST_CONFIG_FILE))
 
@@ -44,7 +46,8 @@ class AppGrid():
             this.tab_configs = []
 
         # update conan info
-        this.conan_worker.update_all_info()
+        if this.conan_worker:
+            this.conan_worker.update_all_info()
 
         self.load_tabs()
 

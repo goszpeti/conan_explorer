@@ -96,8 +96,12 @@ class ConanInfoCache():
             self._remote_packages.clear()
             self._write()
         for ref in remote_packages:
-            current_name_user = f"{ref.name}@{ref.user}"
-            current_version_channel = f"{ref.version}/{ref.channel}"
+            # convert back the official cache entries
+            if ref.user is None and ref.channel is None:
+                user = "_"
+                channel = "_"
+            current_name_user = f"{ref.name}@{user}"
+            current_version_channel = f"{ref.version}/{channel}"
             version_channels = set(self._remote_packages.get(current_name_user, []))
             if not current_version_channel in version_channels:
                 version_channels.add(current_version_channel)

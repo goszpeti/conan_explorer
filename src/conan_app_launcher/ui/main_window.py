@@ -3,14 +3,13 @@ from shutil import rmtree
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import ConanApi, write_config_file
-from conan_app_launcher.components.config_file import AppConfigEntry
+from conan_app_launcher.components import (AppConfigEntry, ConanApi,
+                                           write_config_file)
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS,
                                          LAST_CONFIG_FILE)
 from conan_app_launcher.ui.about_dialog import AboutDialog
 from conan_app_launcher.ui.app_grid import AppGrid
-from conan_app_launcher.ui.app_grid.app_link import AppLink
 from conan_app_launcher.ui.package_explorer import LocalConanPackageExplorer
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
@@ -23,7 +22,6 @@ class MainUi(QtWidgets.QMainWindow):
     TOOLBOX_GRID_ITEM = 0
     TOOLBOX_PACKAGES_ITEM = 1
 
-    #conan_info_updated = QtCore.pyqtSignal()
     display_versions_updated = QtCore.pyqtSignal(bool)
     display_channels_updated = QtCore.pyqtSignal(bool)
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message

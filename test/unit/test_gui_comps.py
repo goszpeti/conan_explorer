@@ -43,7 +43,7 @@ def testEditAppDialogFillValues(base_fixture, qtbot):
     Test, if the already existant app data is displayed correctly in the dialog.
     """
     app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
-                         "executable": "bin/myexec",
+                         "executable": "bin/myexec", "args": "", "conan_options" : [],
                          "console_application": True, "icon": "//myicon.ico"}
     app_info = AppConfigEntry(app_data)
     app_info.conan_options = {"a": "b", "c": "True", "d": "10"}
