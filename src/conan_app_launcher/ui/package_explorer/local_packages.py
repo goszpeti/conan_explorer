@@ -129,6 +129,11 @@ class LocalConanPackageExplorer():
         self._main_window.ui.package_path_label.setText(str(pkg_path))
 
         self._main_window.ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        try: # need to be removed, otherwise will be called multiple times
+            self._main_window.ui.package_file_view.customContextMenuRequested.disconnect()
+        except TypeError:
+            # no way to check if it is connected and it will throw an error
+            pass
         self._main_window.ui.package_file_view.customContextMenuRequested.connect(
             self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
