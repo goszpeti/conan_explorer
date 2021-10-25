@@ -309,12 +309,12 @@
          <rect>
           <x>63</x>
           <y>5</y>
-          <width>91</width>
+          <width>31</width>
           <height>21</height>
          </rect>
         </property>
         <property name="text">
-         <string>Package Filter</string>
+         <string>Filter:</string>
         </property>
        </widget>
        <widget class="QTextEdit" name="package_filter_edit">
@@ -323,8 +323,8 @@
         </property>
         <property name="geometry">
          <rect>
-          <x>154</x>
-          <y>3</y>
+          <x>100</x>
+          <y>0</y>
           <width>171</width>
           <height>26</height>
          </rect>
@@ -362,10 +362,22 @@ p, li { white-space: pre-wrap; }
           <height>401</height>
          </rect>
         </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <widget class="QTreeView" name="package_select_view">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>100</width>
@@ -374,9 +386,12 @@ p, li { white-space: pre-wrap; }
          </property>
          <property name="baseSize">
           <size>
-           <width>100</width>
+           <width>0</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
          </property>
          <property name="indentation">
           <number>10</number>
@@ -395,15 +410,15 @@ p, li { white-space: pre-wrap; }
          </attribute>
         </widget>
         <widget class="QTreeView" name="package_file_view">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
-           <width>500</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>300</width>
+           <width>100</width>
            <height>0</height>
           </size>
          </property>

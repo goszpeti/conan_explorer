@@ -46,7 +46,6 @@ class ConanApi():
         self._short_path_root = Path("NULL")
         self.init_api()
 
-
     def init_api(self):
         """ Instantiate the api. In some cases it needs to be instatiated anew. """
         self.conan, _, _ = ConanAPIV1.factory()
@@ -87,7 +86,7 @@ class ConanApi():
             try:
                 package_ids = ref_cache.package_ids()
             except:
-                package_ids = ref_cache.packages_ids() # old api
+                package_ids = ref_cache.packages_ids()  # old api
             for pkg_id in package_ids:
                 short_path_dir = self.get_package_folder(ref, {"id": pkg_id})
                 pkg_id_dir = Path(ref_cache.packages()) / pkg_id
@@ -149,10 +148,10 @@ class ConanApi():
         try:
             # no query possible with pattern
             search_results = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
-                                                    remote_name="all").get("results", None)
+                                                       remote_name="all").get("results", None)
             if this.SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
                 local_results = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
-                                                        remote_name=None).get("results", None)
+                                                          remote_name=None).get("results", None)
         except Exception:
             return []
         search_results = search_results + local_results
@@ -261,9 +260,12 @@ class ConanApi():
         if min_opts_set:
             min_opts_list = min_opts_set.pop()
 
-        # TODO this calls external code of the recipe - try catch?
-        default_options = self._resolve_default_options(
-            self.conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
+        # this calls external code of the recipe
+        try:
+            default_options = self._resolve_default_options(
+                self.conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
+        except:
+            default_options = {}
 
         if default_options:
             default_options = dict(filter(lambda opt: opt[0] in min_opts_list, default_options.items()))
@@ -274,10 +276,9 @@ class ConanApi():
                                                        for key, value in default_options.items())
             if len(found_pkgs) > 1:
                 comb_opts_pkgs = list(filter(lambda pkg: default_str_options.items() <=
-                                         pkg["options"].items(), found_pkgs))
+                                             pkg["options"].items(), found_pkgs))
                 if comb_opts_pkgs:
                     found_pkgs = comb_opts_pkgs
-
 
         # now we have all matching packages, but with potentially different compilers
         # reduce with default settings
@@ -314,26 +315,40 @@ class ConanApi():
         if not settings:
             return "default"
         name = settings.get("os", "")
+        if not name:
+            name = settings.get("os_target", "")
+            if not name:
+                name = settings.get("os_build", "")
+
         arch = settings.get("arch", "")
+        if not arch:
+            arch = settings.get("arch_target", "")
+            if not name:
+                arch = settings.get("arch_build", "")
         if arch:
-            if arch == "x86_64":
+            if arch == "x86_64":  # shorten x64
                 arch = "x64"
             name += "_" + arch.lower()
+
         comp = settings.get("compiler", "")
         if comp:
             if comp == "Visual Studio":
                 comp = "vs"
             name += "_" + comp.lower()
+
         comp_ver = settings.get("compiler.version", "")
         if comp_ver:
             name += comp_ver
+
         comp_toolset = settings.get("compiler.toolset", "")
         if comp_toolset:
             name += "_" + comp_toolset.lower()
+
         bt = settings.get("build_type", "")
         if bt:
             name += "_" + bt.lower()
         return name
+
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
     """

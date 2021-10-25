@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
@@ -117,26 +117,32 @@ class LocalConanPackageExplorer():
         self.fs_model.setReadOnly(False) # TODO connect the edit checkbox
         self.fs_model.setRootPath(str(pkg_path))
         self.fs_model.sort(0, Qt.AscendingOrder)
-        self.fs_model.fileRenamed.connect(self.on_file_double_click)
+        self.re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)
         self._main_window.ui.package_file_view.setModel(self.fs_model)
         self._main_window.ui.package_file_view.setRootIndex(self.fs_model.index(str(pkg_path)))
         self._main_window.ui.package_file_view.setColumnHidden(2, True)  # file type
         self._main_window.ui.package_file_view.setColumnWidth(0, 200)
         self._main_window.ui.package_file_view.header().setSortIndicator(0, Qt.AscendingOrder)
-        self._main_window.ui.package_file_view.doubleClicked.connect(self.on_file_double_click)
+        self.re_register_signal(self._main_window.ui.package_file_view.doubleClicked, 
+            self.on_file_double_click)
         # disable edit on double click, since we want to open
         self._main_window.ui.package_file_view.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
         self._main_window.ui.package_path_label.setText(str(pkg_path))
 
         self._main_window.ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
-        try: # need to be removed, otherwise will be called multiple times
-            self._main_window.ui.package_file_view.customContextMenuRequested.disconnect()
+
+        self.re_register_signal(self._main_window.ui.package_file_view.customContextMenuRequested, 
+            self.on_pkg_context_menu_requested)
+        self._init_pkg_context_menu()
+
+    @classmethod
+    def re_register_signal(cls, signal: QtCore.pyqtBoundSignal, slot: Callable):
+        try:  # need to be removed, otherwise will be called multiple times
+            signal.disconnect()
         except TypeError:
             # no way to check if it is connected and it will throw an error
             pass
-        self._main_window.ui.package_file_view.customContextMenuRequested.connect(
-            self.on_pkg_context_menu_requested)
-        self._init_pkg_context_menu()
+        signal.connect(slot)
 
     def on_file_double_click(self, model_index):
         file_path = Path(model_index.model().fileInfo(model_index).absoluteFilePath())

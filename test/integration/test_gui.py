@@ -371,6 +371,9 @@ def testRemoveTabDialog(base_fixture, settings_fixture, qtbot, mocker):
     config_tabs = config_file.parse_config_file(settings_fixture)
     assert len(config_tabs) == prev_count - 1
 
+# TODO
+def testTabMoveIsSaved():
+    pass
 
 def testAddAppLink(base_fixture, settings_fixture, qtbot, mocker):
     load_base_components(app.settings)
