@@ -78,9 +78,8 @@ def testStartCliOptionApp(base_fixture):
     executable = Path(sys.executable)
     is_console_app = True
     test_file = Path(tempfile.gettempdir(), "test.txt")
-    args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
-    execute_app(executable, is_console_app, args)
-    assert test_file.is_file()
+    args = "" # no args os it stays open
+    pid = execute_app(executable, is_console_app, args)
 
     if platform.system() == "Linux":
         time.sleep(5)  # wait for terminal to spawn
@@ -89,7 +88,11 @@ def testStartCliOptionApp(base_fixture):
         assert "Terminal" in ret
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
-        assert True # currently no way to check if it has spawned a terminal
+        assert pid > 0
+        time.sleep(1)
+        ret = check_output(f'tasklist /fi "PID eq {str(pid)}"')
+        assert "python.exe" in ret.decode("utf-8")
+        os.system("taskkill /PID " + str(pid))
 
 def testStartAppWithArgsNonCli(base_fixture):
     """

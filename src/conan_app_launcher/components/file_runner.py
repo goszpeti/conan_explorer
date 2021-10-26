@@ -35,14 +35,14 @@ def is_file_executable(file_path: Path) -> bool:
         if os.access(str(file_path), os.X_OK):
             is_executable = True
     elif platform.system() == "Windows":
-        path_exts = os.getenv("PATHEXT", "").split(";")
-        path_exts = [item.lower() for item in path_exts]
+        # don't use PATHEXT - some programs write other filetypes like .py in it...
+        path_exts = [".cmd", ".com", ".bat", ".ps1", ".exe"]
         if file_path.suffix in path_exts:
             is_executable = True
     return is_executable
 
 
-def execute_app(executable: Path, is_console_app: bool, args: str):
+def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     """
     Executes an application with args and optionally spawns a new shell
     as specified in the app entry.
@@ -52,8 +52,14 @@ def execute_app(executable: Path, is_console_app: bool, args: str):
         cmd = [str(executable)]
         # Linux call errors on creationflags argument, so the calls must be separated
         if platform.system() == "Windows":
-            os.startfile(str(executable), "open", args)
-            return
+            creationflags = 0
+            if is_console_app:
+                creationflags = subprocess.CREATE_NEW_CONSOLE
+            if args:
+                cmd += args.strip().split(" ")
+                # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
+            proc = subprocess.Popen(cmd, creationflags=creationflags)
+            return proc.pid
         elif platform.system() == "Linux":
             if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal emulators available
@@ -63,13 +69,13 @@ def execute_app(executable: Path, is_console_app: bool, args: str):
                 cmd = ["x-terminal-emulator", "-e", str(executable)]
             if args:
                 cmd += args.strip().split(" ")
-            subprocess.Popen(cmd)
-            return
+            proc = subprocess.Popen(cmd)
+            return proc.pid
     Logger().warning(f"No executable {str(executable)} to start.")
-
+    return 0
 
 def open_file(file: Path):
-    """ Open files with their assocoiated programs """
+    """ Open files with their associated programs """
     if file.absolute().is_file():
         if platform.system() == 'Windows':
             os.startfile(str(file))
