@@ -214,7 +214,13 @@ def testConanWorker(base_fixture, settings_fixture):
     temp_config_file_path = copy(config_file_path, temp_dir)
     app.settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
     app.tab_configs = parse_config_file(config_file_path)
-    conan_worker = ConanWorker()
+    conan_refs = []
+    for tab in app.tab_configs:
+        for app_entry in tab.get_app_entries():
+            ref_dict = {"name": str(app_entry.conan_ref), "options": app_entry.conan_options}
+            if ref_dict not in conan_refs:
+                conan_refs.append(ref_dict)
+    conan_worker = ConanWorker(conan_refs)
     elements_before = conan_worker._conan_queue.qsize()
     time.sleep(10)
 
@@ -224,6 +230,7 @@ def testConanWorker(base_fixture, settings_fixture):
     # conan_server
     # conan remote add private http://localhost:9300/
     # conan upload example/1.0.0@myself/testing -r private
+    # conan user -r private -p demo demo
     # .conan_server
     # [write_permissions]
     # */*@*/*: *
