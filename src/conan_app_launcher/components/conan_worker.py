@@ -15,7 +15,8 @@ class ConanWorker():
     """ Sequential worker with a queue to execute conan commands and get info on packages """
 
     def __init__(self):
-        self._conan = ConanApi()
+        if not this.conan_api:
+            this.conan_api = ConanApi()
         self._conan_queue: Queue[Tuple[str, Dict[str, str]]] = Queue(maxsize=0)
         self._version_getter: Optional[Thread] = None
         self._worker: Optional[Thread] = None
@@ -67,7 +68,7 @@ class ConanWorker():
         while not self._closing and not self._conan_queue.empty():
             conan_ref, conan_options = self._conan_queue.get()
             try:
-                package_folder = self._conan.get_path_or_install(
+                package_folder = this.conan_api.get_path_or_install(
                     ConanFileReference.loads(conan_ref), conan_options)
             except:
                 self._conan_queue.task_done()
@@ -82,7 +83,7 @@ class ConanWorker():
 
     def _get_packages_versions(self, conan_ref: str):
         """ Get all version and channel combination of a package from all remotes. """
-        available_refs = self._conan.search_recipe_in_remotes(ConanFileReference.loads(conan_ref))
+        available_refs = this.conan_api.search_recipe_in_remotes(ConanFileReference.loads(conan_ref))
         if not available_refs:
             return
         for tab in this.tab_configs:

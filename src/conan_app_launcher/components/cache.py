@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
+import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components.conan import ConanApi
 
@@ -15,11 +16,13 @@ class ConanInfoCache():
     """
 
     def __init__(self, cache_file: Path):
+        if not this.conan_api:
+            this.conan_api = ConanApi()
         self._cache_file = cache_file
         self._local_packages: Dict[str, str] = {}
         self._remote_packages: Dict[str, List[str]] = {}
         self._read_only = False  # for testing purposes
-        self._conan = ConanApi()
+        self._all_local_refs = this.conan_api.get_all_local_refs()
 
         # create cache file, if it does not exist
         if not self._cache_file.exists():
@@ -61,8 +64,7 @@ class ConanInfoCache():
     def get_similar_local_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
         """ Return cached info on locally available conan refs from the same ref name and user. """
         refs: List[ConanFileReference] = []
-        all_local_refs = self._conan.get_all_local_refs()
-        for ref in all_local_refs:
+        for ref in self._all_local_refs:
             if ref.name == name and ref.user == user: # filter local packages by both to avoid conflicts
                 refs.append(ref)
         return refs
@@ -77,13 +79,15 @@ class ConanInfoCache():
                 name, user = ref_str.split("@")
                 for ref in self.get_similar_remote_pkg_refs(name, user):
                     remote_refs.add(str(ref))
-        for ref in self._conan.get_all_local_refs():
+        for ref in self._all_local_refs:
             if query in str(ref):
                 local_refs.add(str(ref))
         return (local_refs, remote_refs)
 
     def update_local_package_path(self, conan_ref: ConanFileReference, folder: Path):
         """ Update the cache with the path of a local package path. """
+        if self._local_packages.get(str(conan_ref)) == str(folder):
+            return
         self._local_packages.update({str(conan_ref): str(folder)})
         self._write()
 

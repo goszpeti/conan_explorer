@@ -13,7 +13,7 @@ from shutil import rmtree
 
 from conans.model.ref import ConanFileReference
 
-from conan_app_launcher.main import load_base_components
+from conan_app_launcher.__main__ import load_base_components
 import conan_app_launcher as app
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components import ConanApi, config_file

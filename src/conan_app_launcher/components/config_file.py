@@ -80,7 +80,6 @@ class AppConfigEntry():
         self._update_cbk_func: Optional[Callable] = None
         self._available_refs: List[ConanFileReference] = [self.conan_ref] # holds all conan refs for name/user
         self.update_from_cache()
-
     def update_from_cache(self):
         if this.cache: # get all info from cache
             self.set_available_packages(this.cache.get_similar_pkg_refs(
@@ -88,8 +87,9 @@ class AppConfigEntry():
             if this.USE_LOCAL_INTERNAL_CACHE:
                 self.set_package_info(this.cache.get_local_package_path(str(self._conan_ref)))
             elif not this.USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:  # last chance to get path
-                conan = ConanApi()
-                package_folder = conan.get_path_or_install(self.conan_ref, self.conan_options)
+                if not this.conan_api:
+                    this.conan_api = ConanApi()
+                package_folder = this.conan_api.get_path_or_install(self.conan_ref, self.conan_options)
                 self.set_package_info(package_folder)
 
     def register_update_callback(self, update_func: Callable):

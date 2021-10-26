@@ -67,7 +67,6 @@ def main():
     """
     Start the Qt application and an all main components
     """
-
     if platform.system() == "Darwin":
         print("Mac OS is currently not supported.")
         sys.exit(1)

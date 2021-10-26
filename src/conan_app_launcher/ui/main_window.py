@@ -98,8 +98,9 @@ class MainUi(QtWidgets.QMainWindow):
     @ pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
-        conan = ConanApi()
-        paths = conan.get_cleanup_cache_paths()
+        if not this.conan_api:
+            this.conan_api = ConanApi()
+        paths = this.conan_api.get_cleanup_cache_paths()
         if not paths:
             self.write_log("INFO: Nothing found in cache to clean up.")
             return

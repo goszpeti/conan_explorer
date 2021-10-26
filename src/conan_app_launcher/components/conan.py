@@ -17,8 +17,7 @@ from conans.model.ref import ConanFileReference, PackageReference
 from conans.util.windows import path_shortener
 
 try:
-    from conans.util.windows import (CONAN_REAL_PATH, path_shortener,
-                                     rm_conandir)
+    from conans.util.windows import CONAN_REAL_PATH, path_shortener
 except:
     pass
 
@@ -59,7 +58,10 @@ class ConanApi():
 
     def get_local_pkgs_from_ref(self, conan_ref: ConanFileReference) -> List[ConanPkg]:
         """ Returns all installed pkg ids for a reference. """
-        response = self.conan.search_packages(str(conan_ref))
+        ### Experimental fast search - Conan search_packages is VERY slow
+        # HACK: Removed the  @api_method decorator by getting the original function from the closure attribute
+        search_packages = self.conan.search_packages.__closure__[0].cell_contents
+        response = search_packages(self.conan, str(conan_ref))
         result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
         return result
 

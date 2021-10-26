@@ -8,7 +8,7 @@ from pathlib import Path
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Optional, List
 if TYPE_CHECKING:
-    from .components import ConanWorker, ConanInfoCache, TabConfigEntry
+    from .components import ConanWorker, ConanInfoCache, TabConfigEntry, ConanApi
     from .settings import Settings
     from PyQt5 import QtWidgets
 
@@ -39,6 +39,7 @@ asset_path: Path = Path("NULL")
 
 qt_app: Optional["QtWidgets.QApplication"] = None
 main_window: Optional["QtWidgets.QMainWindow"] = None
+conan_api: Optional["ConanApi"] = None
 conan_worker: Optional["ConanWorker"] = None
 cache: Optional["ConanInfoCache"] = None
 settings: Optional["Settings"] = None

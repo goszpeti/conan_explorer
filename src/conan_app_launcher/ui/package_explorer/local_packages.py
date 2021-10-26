@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 class LocalConanPackageExplorer():
     def __init__(self, main_window: "MainUi"):
         self._main_window = main_window
+        if not this.conan_api:
+            this.conan_api = ConanApi()
         self.pkg_sel_model = PkgSelectModel()
         # Set up filters for builtin conan files
         self.proxy_model = QtCore.QSortFilterProxyModel()
@@ -50,6 +52,12 @@ class LocalConanPackageExplorer():
         self.copy_ref_action.setIcon(QtGui.QIcon(str(icons_path / "copy_link.png")))
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self.copy_ref)
+
+        self.remove_ref_action = QtWidgets.QAction("Remove package", self._main_window)
+        self.remove_ref_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
+        self.select_cntx_menu.addAction(self.remove_ref_action)
+        self.remove_ref_action.triggered.connect(self.remove_ref)
+        
 
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
@@ -83,6 +91,12 @@ class LocalConanPackageExplorer():
         conan_ref = self.get_selected_conan_ref()
         this.qt_app.clipboard().setText(conan_ref)
 
+    def remove_ref(self):
+        conan_ref = self.get_selected_conan_ref()
+        # TODO get package id
+        # TODO confirmtaion dialog
+        #self._conan.conan.remove()
+
     # Global pane and cross connection slots
 
     def refresh_pkg_selection_view(self):
@@ -109,7 +123,8 @@ class LocalConanPackageExplorer():
         if source_item.type != PROFILE_TYPE:
             return
         conan_ref = self.get_selected_conan_ref()
-        pkg_path = ConanApi().get_package_folder(ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
+        pkg_path = this.conan_api.get_package_folder(
+            ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
         if not pkg_path.exists():
             Logger().warning(f"Can't find package path for {conan_ref} and {str(source_item.itemData[0])}")
             return
@@ -152,7 +167,7 @@ class LocalConanPackageExplorer():
         self.file_cntx_menu = QtWidgets.QMenu()
         icons_path = this.asset_path / "icons"
 
-        self.open_fm_action = QtWidgets.QAction("Show in file manager", self._main_window)
+        self.open_fm_action = QtWidgets.QAction("Show in File Manager", self._main_window)
         self.open_fm_action.setIcon(QtGui.QIcon(str(icons_path / "file-explorer.png")))
         self.file_cntx_menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
@@ -240,7 +255,8 @@ class LocalConanPackageExplorer():
         file_path = Path(self._get_selected_pkg_file())
         conan_ref = self.get_selected_conan_ref()
         # determine relpath from package
-        pkg_path = ConanApi().get_package_folder(ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
+        pkg_path = this.conan_api.get_package_folder(
+            ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
         rel_path = file_path.relative_to(pkg_path)
         # TODO get conan options from curent package?
         app_data: AppType = {"name": "NewLink", "conan_ref": conan_ref, "executable": str(rel_path),

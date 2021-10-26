@@ -10,11 +10,13 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
     """ Decide, if a file should be opened or executed and call the appropriate method """
     if not file_path.is_file():
         return
-
-    if is_file_executable(file_path):
-        execute_app(file_path, is_console_app, args)
-    else:
-        open_file(file_path)
+    try:
+        if is_file_executable(file_path):
+            execute_app(file_path, is_console_app, args)
+        else:
+            open_file(file_path)
+    except Exception as e:
+        Logger().error(f"Error while executing {str(file_path)} with args: {args}.")
 
 
 def open_in_file_manager(file_path: Path):
@@ -50,13 +52,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
         cmd = [str(executable)]
         # Linux call errors on creationflags argument, so the calls must be separated
         if platform.system() == "Windows":
-            creationflags = 0
-            if is_console_app:
-                creationflags = subprocess.CREATE_NEW_CONSOLE
-            if args:
-                cmd += args.strip().split(" ")
-                # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
-            proc = subprocess.Popen(cmd, creationflags=creationflags)
+            os.startfile(str(executable), "open", args)
             return proc.pid
         elif platform.system() == "Linux":
             if is_console_app:

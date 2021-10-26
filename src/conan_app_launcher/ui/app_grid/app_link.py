@@ -80,7 +80,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu = QtWidgets.QMenu()
         icons_path = this.asset_path / "icons"
 
-        self.open_fm_action = QtWidgets.QAction("Show in file manager", self)
+        self.open_fm_action = QtWidgets.QAction("Show in File Manager", self)
         self.open_fm_action.setIcon(QtGui.QIcon(str(icons_path / "file-explorer.png")))
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
@@ -92,7 +92,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self.menu.addSeparator()
 
-        self.add_action = QtWidgets.QAction("Add new app link", self)
+        self.add_action = QtWidgets.QAction("Add new App Link", self)
         self.add_action.setIcon(QtGui.QIcon(str(icons_path / "add_link.png")))
         self.menu.addAction(self.add_action)
         self.add_action.triggered.connect(self.open_app_link_add_dialog)
@@ -102,7 +102,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu.addAction(self.edit_action)
         self.edit_action.triggered.connect(self.open_edit_dialog)
 
-        self.remove_action = QtWidgets.QAction("Remove app link", self)
+        self.remove_action = QtWidgets.QAction("Remove App Link", self)
         self.remove_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.menu.addAction(self.remove_action)
         self.remove_action.triggered.connect(self.remove)

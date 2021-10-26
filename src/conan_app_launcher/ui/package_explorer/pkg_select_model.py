@@ -44,6 +44,7 @@ class TreeItem(object):
         return 0
 
 class PkgSelectModel(QtCore.QAbstractItemModel):
+
     def __init__(self, *args, **kwargs):
         super(PkgSelectModel, self).__init__(*args, **kwargs)
         self._icons_path = this.asset_path / "icons"
@@ -52,13 +53,16 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
         self.proxy_model = QtCore.QSortFilterProxyModel()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
+        if not this.conan_api:
+            this.conan_api = ConanApi()
 
     def setupModelData(self):
-        for conan_ref in ConanApi().get_all_local_refs():
+        for conan_ref in this.conan_api.get_all_local_refs():
             conan_item = TreeItem([str(conan_ref)], self.rootItem)
             self.rootItem.appendChild(conan_item)
-            for pkg in ConanApi().get_local_pkgs_from_ref(conan_ref):
-                pkg_item = TreeItem([pkg], conan_item, PROFILE_TYPE)
+            infos = this.conan_api.get_local_pkgs_from_ref(conan_ref)
+            for info in infos:
+                pkg_item = TreeItem([info], conan_item, PROFILE_TYPE)
                 conan_item.appendChild(pkg_item)
    
     def columnCount(self, parent):
