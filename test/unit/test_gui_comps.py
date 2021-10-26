@@ -85,7 +85,7 @@ def testEditAppDialogReadValues(base_fixture, qtbot):
     """
     Test, if the entered/modified/untouched data is written correctly after pressing OK.
     """
-    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
+    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable", "args": "", "conan_options": [],
                          "executable": "", "console_application": True, "icon": ""}
     app_info = AppConfigEntry(app_data)
     app_info._executable = Path(sys.executable)
@@ -112,7 +112,7 @@ def testAppLinkOpen(base_fixture, qtbot):
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
-    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
+    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable", "args": "", "conan_options": [],
                          "executable": "", "console_application": True, "icon": ""}
     app_info = AppConfigEntry(app_data)
     app_info._executable = Path(sys.executable)
@@ -150,7 +150,7 @@ def testAppLinkVersionAndChannelSwitch(base_fixture, qtbot):
     """
     TODO Implmement
     """
-    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
+    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable", "args": "", "conan_options": [],
                          "executable": "", "console_application": True, "icon": ""}
     app_info = AppConfigEntry(app_data)
     app_info._executable = Path(sys.executable)

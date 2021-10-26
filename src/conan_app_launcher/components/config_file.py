@@ -73,6 +73,8 @@ class AppConfigEntry():
         self._update_cbk_func: Optional[Callable] = None
         self._available_refs: List[ConanFileReference] = [self.conan_ref] # holds all conan refs for name/user
         self.update_from_cache()
+
+
     def update_from_cache(self):
         if this.cache: # get all info from cache
             self.set_available_packages(this.cache.get_similar_pkg_refs(
@@ -106,6 +108,7 @@ class AppConfigEntry():
     def conan_ref(self, new_value: str):
         try:
             self._conan_ref = ConanFileReference.loads(new_value)
+            #self.update_from_cache()
 
             # add conan ref to worker
             if (self.app_data.get("conan_ref", "") != new_value and new_value != this.INVALID_CONAN_REF

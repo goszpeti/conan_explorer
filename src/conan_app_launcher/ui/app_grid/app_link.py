@@ -207,6 +207,7 @@ class AppLink(QtWidgets.QVBoxLayout):
                     self.config_data.channels.index(self.config_data.channel))
             except Exception:
                 pass
+            # TODO why disable
             self._app_version_cbox.setDisabled(False)
             self._app_channel_cbox.setDisabled(False)
 
@@ -241,6 +242,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         if self.config_data.version == self._app_version_cbox.currentText():  # no change
             return
         self._app_button.grey_icon()
+        self.config_data.version = self._app_version_cbox.currentText()
+
         # update channels to match version
         self._app_channel_cbox.clear()  # reset cbox
         if len(self.config_data.channels) == 1:
@@ -251,10 +254,9 @@ class AppLink(QtWidgets.QVBoxLayout):
             # add tooltip for channels, in case it is too long
             for i in range(0, len(self.config_data.channels)):
                 self._app_channel_cbox.setItemData(i+1, self.config_data.channels[i], Qt.ToolTipRole)
-                self._app_channel_cbox.setDisabled(True)
+            #self._app_channel_cbox.setDisabled(True)
 
         self._app_channel_cbox.setCurrentIndex(0)
-        self.config_data.version = self._app_version_cbox.currentText()
         self._app_button.setToolTip(str(self.config_data.conan_ref))
         if this.main_window:
             this.main_window.save_config()
@@ -267,7 +269,10 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         if self.config_data.channel == self._app_channel_cbox.currentText():
             return
-
+        self._app_button.grey_icon()
+        # remove entry NA after setting something other
+        if self._app_channel_cbox.itemData(0) == self.config_data.INVALID_DESCR:
+            self._app_channel_cbox.removeItem(0)
         self.config_data.channel = self._app_channel_cbox.currentText()
         self._app_button.setToolTip(str(self.config_data.conan_ref))
         self._app_button.set_icon(self.config_data.icon)
