@@ -56,8 +56,9 @@ class LocalConanPackageExplorer():
         self.remove_ref_action = QtWidgets.QAction("Remove package", self._main_window)
         self.remove_ref_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.select_cntx_menu.addAction(self.remove_ref_action)
+        self.select_cntx_menu.setEnabled(False) # TODO not ready yet
         self.remove_ref_action.triggered.connect(self.remove_ref)
-        
+
 
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
@@ -92,10 +93,16 @@ class LocalConanPackageExplorer():
         this.qt_app.clipboard().setText(conan_ref)
 
     def remove_ref(self):
-        conan_ref = self.get_selected_conan_ref()
-        # TODO get package id
-        # TODO confirmtaion dialog
-        #self._conan.conan.remove()
+        # TODO ADD DIALOG!
+        source_item = self.get_selected_pkg_source_item()
+        if not source_item:
+            return ""
+        # TODO add remove all pkgs for pkg selection
+        if source_item.type == PROFILE_TYPE:
+            conan_ref = source_item.parent().itemData[0]
+            pkd_id = source_item.itemData[0].get("id")
+            this.conan_api.conan.remove(conan_ref, packages=[pkd_id], force=True)
+            # TODO remove from model
 
     # Global pane and cross connection slots
 

@@ -14,7 +14,7 @@ from conan_app_launcher.components.conan import ConanApi
 class ConanWorker():
     """ Sequential worker with a queue to execute conan commands and get info on packages """
 
-    def __init__(self):
+    def __init__(self, initial_conan_refs=[]):
         if not this.conan_api:
             this.conan_api = ConanApi()
         self._conan_queue: Queue[Tuple[str, Dict[str, str]]] = Queue(maxsize=0)
@@ -22,18 +22,10 @@ class ConanWorker():
         self._worker: Optional[Thread] = None
         self._closing = False
 
-        self.update_all_info()
+        self.update_all_info(initial_conan_refs)
 
-    def update_all_info(self):
+    def update_all_info(self, conan_refs):
         """ Starts the worker on using the current tabs info global var """
-        # get all conan refs and  make them unique # TODO separate this from worker
-        conan_refs = []
-        for tab in this.tab_configs:
-            for app in tab.get_app_entries():
-                ref_dict = {"name": str(app.conan_ref), "options": app.conan_options}
-                if ref_dict not in conan_refs:
-                    conan_refs.append(ref_dict)
-
         # fill up queue
         for ref in conan_refs:
             if this.USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:

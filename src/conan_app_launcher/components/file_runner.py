@@ -53,7 +53,6 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
         # Linux call errors on creationflags argument, so the calls must be separated
         if platform.system() == "Windows":
             os.startfile(str(executable), "open", args)
-            return proc.pid
         elif platform.system() == "Linux":
             if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal emulators available
@@ -63,10 +62,8 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
                 cmd = ["x-terminal-emulator", "-e", str(executable)]
             if args:
                 cmd += args.strip().split(" ")
-            proc = subprocess.Popen(cmd)
-            return proc.pid
+            subprocess.Popen(cmd)
     Logger().warning(f"No executable {str(executable)} to start.")
-    return 0
 
 
 def open_file(file: Path):

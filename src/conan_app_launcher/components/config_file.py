@@ -22,13 +22,6 @@ from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.components.icon import extract_icon
 from conan_app_launcher.components.conan import ConanApi
 
-# TODO: remove json validation, when user edit will be removed.
-# maybe remove versioning, but keep parsing for all versions?
-# Create it like a database, where evrything is synchronized?
-# Write out package folder for caching?
-# Create setters with validation for everything.
-
-
 class OptionType(TypedDict):
     name: str
     value: str

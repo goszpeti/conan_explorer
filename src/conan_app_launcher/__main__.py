@@ -50,7 +50,7 @@ def load_base_components(settings):
 
     else:
         config_file_path = Path(config_file_setting)
-
+    conan_refs = []
     if config_file_path.is_file():  # escape error log on first opening
         this.tab_configs = parse_config_file(config_file_path)
         if not this.tab_configs:
@@ -58,9 +58,15 @@ def load_base_components(settings):
             tab.add_app_entry(AppConfigEntry({"name": "My App Link"}))
             this.tab_configs.append(tab)
             write_config_file(config_file_path, [tab])
+        else:
+            for tab in this.tab_configs:
+                for app in tab.get_app_entries():
+                    ref_dict = {"name": str(app.conan_ref), "options": app.conan_options}
+                    if ref_dict not in conan_refs:
+                        conan_refs.append(ref_dict)
 
     # start Conan Worker
-    this.conan_worker = ConanWorker()
+    this.conan_worker = ConanWorker(conan_refs)
 
 
 def main():
