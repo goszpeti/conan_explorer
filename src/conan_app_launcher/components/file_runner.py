@@ -42,7 +42,7 @@ def is_file_executable(file_path: Path) -> bool:
     return is_executable
 
 
-def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
+def execute_app(executable: Path, is_console_app: bool, args: str):
     """
     Executes an application with args and optionally spawns a new shell
     as specified in the app entry.
@@ -53,6 +53,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
         # Linux call errors on creationflags argument, so the calls must be separated
         if platform.system() == "Windows":
             os.startfile(str(executable), "open", args)
+            return
         elif platform.system() == "Linux":
             if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal emulators available
@@ -63,6 +64,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
             if args:
                 cmd += args.strip().split(" ")
             subprocess.Popen(cmd)
+            return
     Logger().warning(f"No executable {str(executable)} to start.")
 
 

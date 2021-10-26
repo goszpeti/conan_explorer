@@ -77,8 +77,10 @@ def testStartCliOptionApp(base_fixture):
     """
     executable = Path(sys.executable)
     is_console_app = True
-    args = ""
-    pid = execute_app(executable, is_console_app, args)
+    test_file = Path(tempfile.gettempdir(), "test.txt")
+    args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
+    execute_app(executable, is_console_app, args)
+    assert test_file.is_file()
 
     if platform.system() == "Linux":
         time.sleep(5)  # wait for terminal to spawn
@@ -87,11 +89,7 @@ def testStartCliOptionApp(base_fixture):
         assert "Terminal" in ret
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
-        assert pid > 0
-        time.sleep(1)
-        ret = check_output(f'tasklist /fi "PID eq {str(pid)}"')
-        assert "python.exe" in ret.decode("utf-8")
-        os.system("taskkill /PID " + str(pid))
+        assert True # currently no way to check if it has spawned a terminal
 
 def testStartAppWithArgsNonCli(base_fixture):
     """
@@ -103,7 +101,7 @@ def testStartAppWithArgsNonCli(base_fixture):
     is_console_app = False
     args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
 
-    pid = execute_app(executable, is_console_app, args)
+    execute_app(executable, is_console_app, args)
 
     time.sleep(1)
     assert test_file.is_file()
@@ -120,7 +118,7 @@ def testStartAppWithArgsCliOption(base_fixture):
     executable = Path(sys.executable)
     is_console_app = True
     args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
-    pid = execute_app(executable, is_console_app, args)
+    execute_app(executable, is_console_app, args)
 
     time.sleep(5)  # wait for terminal to spawn
     assert test_file.is_file()
@@ -142,7 +140,7 @@ def testStartScript(base_fixture, tmp_path):
     with open(test_file, "w") as f:
         f.write("echo test > " + str(res_file))
 
-    pid = execute_app(test_file, False, "")
+    execute_app(test_file, False, "")
 
     time.sleep(2)  # wait for command to be executed
 
