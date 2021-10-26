@@ -118,6 +118,8 @@ class LocalConanPackageExplorer():
         # use strip to remove unnecessary whitespace
         text = self._main_window.ui.package_filter_edit.toPlainText().strip()
         self.proxy_model.setFilterWildcard(text)
+        # display the children of found items
+        self.proxy_model.setRecursiveFilteringEnabled(True)
 
     # Package file view init and functions
 
