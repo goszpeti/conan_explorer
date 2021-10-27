@@ -11,7 +11,7 @@ from conan_app_launcher.components.config_file import AppConfigEntry, AppType
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .pkg_select_model import PROFILE_TYPE, PkgSelectModel, TreeItem
+from .pkg_select_model import PROFILE_TYPE, MyFilter, PkgSelectModel, TreeItem
 
 Qt = QtCore.Qt
 
@@ -24,25 +24,21 @@ class LocalConanPackageExplorer():
         self._main_window = main_window
         if not this.conan_api:
             this.conan_api = ConanApi()
-        self.pkg_sel_model = PkgSelectModel()
-        # Set up filters for builtin conan files
-        self.proxy_model = QtCore.QSortFilterProxyModel()
-        self.proxy_model.setSourceModel(self.pkg_sel_model)
 
-        main_window.ui.package_select_view.setModel(self.proxy_model)
         main_window.ui.package_select_view.header().setVisible(True)
         main_window.ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
         main_window.ui.package_select_view.setContextMenuPolicy(Qt.CustomContextMenu)
         main_window.ui.package_select_view.customContextMenuRequested.connect(
             self.on_selection_context_menu_requested)
-
-        main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
         self._init_selection_context_menu()
 
         main_window.ui.refresh_button.clicked.connect(self.refresh_pkg_selection_view)
         main_window.ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
-
+        main_window.ui.main_toolbox.currentChanged.connect(self.on_changed)
     # Selection view context menu
+
+    def on_changed(self, index):
+        self.refresh_pkg_selection_view()
 
     def _init_selection_context_menu(self):
         self.select_cntx_menu = QtWidgets.QMenu()
@@ -56,7 +52,7 @@ class LocalConanPackageExplorer():
         self.remove_ref_action = QtWidgets.QAction("Remove package", self._main_window)
         self.remove_ref_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.select_cntx_menu.addAction(self.remove_ref_action)
-        self.select_cntx_menu.setEnabled(False) # TODO not ready yet
+        self.remove_ref_action.setEnabled(False)  # TODO not ready yet
         self.remove_ref_action.triggered.connect(self.remove_ref)
 
 
@@ -107,9 +103,8 @@ class LocalConanPackageExplorer():
     # Global pane and cross connection slots
 
     def refresh_pkg_selection_view(self):
-        self._main_window.ui.package_select_view
         self.pkg_sel_model = PkgSelectModel()
-        self.proxy_model = QtCore.QSortFilterProxyModel()
+        self.proxy_model = MyFilter()
         self.proxy_model.setSourceModel(self.pkg_sel_model)
         self._main_window.ui.package_select_view.setModel(self.proxy_model)
         self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
@@ -118,8 +113,6 @@ class LocalConanPackageExplorer():
         # use strip to remove unnecessary whitespace
         text = self._main_window.ui.package_filter_edit.toPlainText().strip()
         self.proxy_model.setFilterWildcard(text)
-        # display the children of found items
-        self.proxy_model.setRecursiveFilteringEnabled(True)
 
     # Package file view init and functions
 
