@@ -26,9 +26,9 @@ def testMainLoopMock(base_fixture, mocker):
     main_ui_mock = mocker.patch("conan_app_launcher.ui.main_window.MainUi")
     qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec_")
     # delayed import necessary, so the mocker can patch the object before
-    from conan_app_launcher import main
+    from conan_app_launcher import __main__
 
-    main.main()
+    __main__.main()
     time.sleep(2)
 
     main_ui_mock.assert_called_once()
@@ -48,7 +48,7 @@ def testMainLoop(base_fixture):
     settings.save_to_file()
 
     # conan_app_launcher
-    proc = Popen(["python", str(base_fixture.base_path / "src" / "conan_app_launcher" / "main.py")])
+    proc = Popen(["python", str(base_fixture.base_path / "src" / "conan_app_launcher" / "__main__.py")])
     time.sleep(7)
     try:
         assert proc.poll() is None
