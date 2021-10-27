@@ -20,7 +20,7 @@ class ConanInfoCache():
             this.conan_api = ConanApi()
         self._cache_file = cache_file
         self._local_packages: Dict[str, str] = {}
-        self._remote_packages: Dict[str, List[str]] = {}
+        self._remote_packages: Dict[str, Dict[str, List[str]]] = {}
         self._read_only = False  # for testing purposes
         self._all_local_refs = this.conan_api.get_all_local_refs()
 
@@ -51,21 +51,30 @@ class ConanInfoCache():
         return self.get_similar_remote_pkg_refs(name, user) + self.get_similar_local_pkg_refs(name, user)
 
     def get_similar_remote_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
-        """ Return cached info on remtotely available conan refs from the same ref name and user. """
+        """ Return cached info on remotely available conan refs from the same ref name and user. """
         if not user: # official pkgs have no user, substituted by _
             user = "_"
         refs: List[ConanFileReference] = []
-        version_channels = self._remote_packages.get(f"{name}@{user}", [])
-        for version_channel in version_channels:
-            version, channel = version_channel.split("/")
-            refs.append(ConanFileReference(name, version, user, channel))
+        if user == "*": # find all refs with same name
+            name_pkgs = self._remote_packages.get(name, {})
+            for user in name_pkgs:
+                for version_channel in self._remote_packages.get(name, {}).get(user, []):
+                    version, channel = version_channel.split("/")
+                    refs.append(ConanFileReference(name, version, user, channel))
+        else:
+            user_pkgs = self._remote_packages.get(name, {}).get(user, [])
+            for version_channel in user_pkgs:
+                version, channel = version_channel.split("/")
+                refs.append(ConanFileReference(name, version, user, channel))
         return refs
 
     def get_similar_local_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
         """ Return cached info on locally available conan refs from the same ref name and user. """
         refs: List[ConanFileReference] = []
         for ref in self._all_local_refs:
-            if ref.name == name and ref.user == user: # filter local packages by both to avoid conflicts
+            if ref.name == name:
+                if user != "*" and ref.user != user:
+                    continue # doe not match user
                 refs.append(ref)
         return refs
 
@@ -74,11 +83,11 @@ class ConanInfoCache():
         remote_refs = set()
         local_refs = set()
 
-        for ref_str in self._remote_packages.keys():
-            if query in ref_str:
-                name, user = ref_str.split("@")
-                for ref in self.get_similar_remote_pkg_refs(name, user):
-                    remote_refs.add(str(ref))
+        for name in self._remote_packages.keys():
+            for user in self._remote_packages[name].keys():
+                if query in f"{name}@{user}":
+                    for ref in self.get_similar_remote_pkg_refs(name, user):
+                        remote_refs.add(str(ref))
         for ref in self._all_local_refs:
             if query in str(ref):
                 local_refs.add(str(ref))
@@ -90,6 +99,14 @@ class ConanInfoCache():
             return
         self._local_packages.update({str(conan_ref): str(folder)})
         self._write()
+
+    def invalidate_remote_package(self, conan_ref: ConanFileReference):
+        version_channels = self._remote_packages.get(conan_ref.name, {}).get(conan_ref.user, [])
+        invalid_version_channel = f"{conan_ref.version}/{conan_ref.channel}"
+        if invalid_version_channel in version_channels:
+            Logger().debug(f"Invalidated {str(conan_ref)} from remote cache.")
+            version_channels.remove(f"{conan_ref.version}/{conan_ref.channel}")
+            self._write()
 
     def update_remote_package_list(self, remote_packages=List[ConanFileReference], invalidate=False):
         """
@@ -106,13 +123,16 @@ class ConanInfoCache():
             if ref.user is None and ref.channel is None:
                 user = "_"
                 channel = "_"
-            current_name_user = f"{ref.name}@{user}"
+            #current_name_user = f"{ref.name}@{user}"
             current_version_channel = f"{ref.version}/{channel}"
-            version_channels = set(self._remote_packages.get(current_name_user, []))
+            version_channels = set(self._remote_packages.get(ref.name, {}).get(user, []))
             if not current_version_channel in version_channels:
                 version_channels.add(current_version_channel)
                 version_channels_list = list(version_channels)
-                self._remote_packages.update({current_name_user: version_channels_list})
+                if not self._remote_packages.get(ref.name):
+                    self._remote_packages.update({ref.name: {}})
+                self._remote_packages.get(ref.name, {}).update({user: version_channels_list})
+
 
         self._write()
 

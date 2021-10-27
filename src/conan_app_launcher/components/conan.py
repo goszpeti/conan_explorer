@@ -118,9 +118,13 @@ class ConanApi():
         package = self.find_best_local_package(conan_ref, input_options)
         if package:
             return self.get_package_folder(conan_ref, package)
+        Logger().info(f"Package {conan_ref} not installed with options {input_options}.")
+        
 
         packages: List[ConanPkg] = self.search_package_in_remotes(conan_ref, input_options)
         if not packages:
+            if this.cache:
+                this.cache.invalidate_remote_package(conan_ref)
             return Path("NULL")
 
         if self.install_package(conan_ref, packages[0]):

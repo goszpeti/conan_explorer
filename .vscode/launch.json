@@ -5,7 +5,7 @@
             "name": "Main",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/conan_app_launcher/main.py",
+            "program": "${workspaceFolder}/src/conan_app_launcher/__main__.py",
             "console": "internalConsole",
             "subProcess": false,
             "justMyCode": true
@@ -17,6 +17,14 @@
             "program": "${file}",
             "console": "internalConsole",
             "subProcess": true
+        },
+        {
+            "name": "Python: Testing",
+            "type": "python",
+            "request": "test",
+            "console": "internalConsole",
+            "subProcess": true,
+            "justMyCode": false
         },
     ]
 }
