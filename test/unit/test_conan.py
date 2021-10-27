@@ -6,6 +6,7 @@ from pathlib import Path
 from shutil import copy
 
 import conan_app_launcher as app
+import conan_app_launcher
 from conan_app_launcher.components import parse_config_file
 from conan_app_launcher.components.conan import (ConanApi,
                                                  _create_key_value_pair_list)
@@ -204,7 +205,7 @@ def testSearchForAllPackages(base_fixture):
     assert str(ref) in str(res)
 
 
-def testConanWorker(base_fixture, settings_fixture):
+def testConanWorker(base_fixture, settings_fixture, mocker):
     """
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
@@ -220,17 +221,20 @@ def testConanWorker(base_fixture, settings_fixture):
             ref_dict = {"name": str(app_entry.conan_ref), "options": app_entry.conan_options}
             if ref_dict not in conan_refs:
                 conan_refs.append(ref_dict)
-    conan_worker = ConanWorker(conan_refs)
-    elements_before = conan_worker._conan_queue.qsize()
-    time.sleep(10)
 
-    assert conan_worker._conan_queue.qsize() < elements_before
+    mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
+    conan_worker = ConanWorker(conan_refs)
+    time.sleep(3)
     conan_worker.finish_working()
 
-    # conan_server
-    # conan remote add private http://localhost:9300/
-    # conan upload example/1.0.0@myself/testing -r private
-    # conan user -r private -p demo demo
-    # .conan_server
-    # [write_permissions]
-    # */*@*/*: *
+    conan_app_launcher.components.ConanApi.get_path_or_install.assert_called()
+
+    assert conan_worker._conan_queue.qsize() == 0
+
+# conan_server
+# conan remote add private http://localhost:9300/
+# conan upload example/1.0.0@myself/testing -r private
+# conan user -r private -p demo demo
+# .conan_server
+# [write_permissions]
+# */*@*/*: *

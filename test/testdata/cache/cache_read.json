@@ -5,14 +5,21 @@
         "my_package/2.0.0@_/_": "C:\\.conan\\pkg"
     },
     "remote_packages": {
-        "my_package@_": [
-            "1.0.0/_",
-            "2.0.0/_"
-        ],
-        "other_package@others": [
-            "1.0.0/testing",
-            "2.0.0/stable",
-            "3.0.0/stable"
-        ]
+        "my_package": {
+            "_": [
+                "1.0.0/_",
+                "2.0.0/_"
+            ]
+        },
+        "other_package": {
+            "others": [
+                "1.0.0/testing",
+                "2.0.0/stable",
+                "3.0.0/stable"
+            ],
+            "local": [
+                "1.0.0/testing"
+            ]
+        }
     }
 }

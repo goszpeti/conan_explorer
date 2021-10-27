@@ -22,6 +22,7 @@ from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.components.icon import extract_icon
 from conan_app_launcher.components.conan import ConanApi
 
+
 class OptionType(TypedDict):
     name: str
     value: str
@@ -50,16 +51,19 @@ class AppConfigType(TypedDict):
 class AppConfigEntry():
     """ Representation of an app link entry of the config schema """
     INVALID_DESCR = "NA"
-    OFFICIAL_RELEASE = "<official release>" # to be used for "_" channel
-    OFFICIAL_USER = "<official user>" # to be used for "_" user
+    OFFICIAL_RELEASE = "<official release>"  # to be used for "_" channel
+    OFFICIAL_USER = "<official user>"  # to be used for "_" user
 
     def __init__(self, app_data: Optional[AppType] = None):
         if app_data is None:
-            app_data = {"name": "", "conan_ref": this.INVALID_CONAN_REF, 
+            app_data = {"name": "", "conan_ref": this.INVALID_CONAN_REF,
                         "executable": "", "icon": "", "console_application": False,
                         "args": "", "conan_options": []}
 
-        self.app_data: AppType = app_data # underlying format for json
+        self.app_data: AppType = app_data  # underlying format for json
+        # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
+        self._update_cbk_func: Optional[Callable] = None
+
         self.package_folder = Path("NULL")
 
         # internal repr for vars which have other types or need to be manipulated
@@ -67,18 +71,17 @@ class AppConfigEntry():
         self._icon = Path("NULL")
 
         # Init values with validation, which can be preloaded
-        self.icon = self.app_data.get("icon", "")
-        self.conan_ref = app_data.get("conan_ref", this.INVALID_CONAN_REF)
-        # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
-        self._update_cbk_func: Optional[Callable] = None
-        self._available_refs: List[ConanFileReference] = [self.conan_ref] # holds all conan refs for name/user
-        self.update_from_cache()
 
+        self._available_refs: List[ConanFileReference] = [ConanFileReference.loads(app_data.get(
+            "conan_ref", this.INVALID_CONAN_REF))]  # holds all conan refs for name/user
+        self.icon = self.app_data.get("icon", "")
+        # This must be the last, since calling, since setting self.conan_ref will use almost all other variables!
+        self.conan_ref = app_data.get("conan_ref", this.INVALID_CONAN_REF)
 
     def update_from_cache(self):
-        if this.cache: # get all info from cache
+        if this.cache:  # get all info from cache
             self.set_available_packages(this.cache.get_similar_pkg_refs(
-                self._conan_ref.name, self._conan_ref.user))
+                self._conan_ref.name, user="*"))
             if this.USE_LOCAL_INTERNAL_CACHE:
                 self.set_package_info(this.cache.get_local_package_path(str(self._conan_ref)))
             elif not this.USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:  # last chance to get path
@@ -108,8 +111,6 @@ class AppConfigEntry():
     def conan_ref(self, new_value: str):
         try:
             self._conan_ref = ConanFileReference.loads(new_value)
-            #self.update_from_cache()
-
             # add conan ref to worker
             if (self.app_data.get("conan_ref", "") != new_value and new_value != this.INVALID_CONAN_REF
                     and self._conan_ref.version != self.INVALID_DESCR
@@ -120,6 +121,7 @@ class AppConfigEntry():
             self.app_data["conan_ref"] = new_value
             self._executable = Path("NULL")
             self.icon = self.app_data.get("icon", "")
+            self.update_from_cache()
 
         except Exception as error:
             # errors happen fairly often, keep going
@@ -148,6 +150,26 @@ class AppConfigEntry():
         return channel
 
     @property
+    def user(self) -> str:
+        """ User, as specified in the conan ref """
+        return self.convert_to_disp_user(self.conan_ref.user)
+
+    @user.setter
+    def user(self, new_value: str):
+        channel = self.conan_ref.channel
+        if new_value == self.OFFICIAL_USER or not new_value:
+            new_value = "_"
+            channel = "_"  # both must be unset if channel is official
+        self.conan_ref = f"{self.conan_ref.name}/{self.conan_ref.version}@{new_value}/{channel}"
+
+    @classmethod
+    def convert_to_disp_user(cls, user: str) -> str:
+        """ Substitute _ for official user string """
+        if not user:
+            return cls.OFFICIAL_USER
+        return user
+
+    @property
     def channel(self) -> str:
         """ Channel, as specified in the conan ref"""
         return self.convert_to_disp_channel(self.conan_ref.channel)
@@ -157,7 +179,7 @@ class AppConfigEntry():
         user = self.conan_ref.user
         if new_value == self.OFFICIAL_RELEASE or not new_value:
             new_value = "_"
-            user = "_" # both must be unset if channel is official
+            user = "_"  # both must be unset if channel is official
         self.conan_ref = f"{self.conan_ref.name}/{self.conan_ref.version}@{user}/{new_value}"
 
     @property
@@ -169,11 +191,20 @@ class AppConfigEntry():
         return list(versions)
 
     @property
-    def channels(self) -> List[str] :
-        """ Channels, for the current version only """
-        channels = set()
+    def users(self) -> List[str]:
+        """ All users for the current name and verion """
+        users = set()
         for ref in self._available_refs:
             if ref.version == self.version:
+                users.add(ref.user)
+        return list(users)
+
+    @property
+    def channels(self) -> List[str]:
+        """ Channels, for the current version and user only """
+        channels = set()
+        for ref in self._available_refs:
+            if ref.version == self.version and ref.user == self.user:
                 channels.add(self.convert_to_disp_channel(ref.channel))
         return list(channels)
 
@@ -253,7 +284,7 @@ class AppConfigEntry():
         self.app_data["args"] = new_value
 
     @property
-    def conan_options(self) -> Dict[str, str]: 
+    def conan_options(self) -> Dict[str, str]:
         """ User specified conan options, can differ from the actual installation """
         conan_options: Dict[str, str] = {}
         for option_entry in self.app_data.get("conan_options", {}):
