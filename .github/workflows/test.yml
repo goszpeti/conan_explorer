@@ -100,19 +100,19 @@ jobs:
           conan remote add conancenter https://center.conan.io false
       - name: Execute unitests with pytest
         run: |
-          pytest -v test/unit --junit-xml=./results/result-unit-${{matrix.node-version}}.xml --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
       - name: Execute integration with pytest
         run: |
-          pytest -v test/integration --junit-xml=./results/result-integration-${{matrix.node-version}}.xml --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
       - name: Execute system with pytest
         run: |
-          pytest -v test/system --junit-xml=./results/result-system-${{matrix.node-version}}.xml --cov-report xml:cov/cov-${{matrix.node-version}}.xml --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
       - uses: actions/upload-artifact@v2
         with:
           name: Test results
           path: |
             cov/
-            test/
+            results/
 
   sonarcloud:
     needs:
@@ -125,8 +125,8 @@ jobs:
         fetch-depth: 0
     - uses: actions/download-artifact@v2
       with:
-        name: code-coverage-report
-        path: cov/
+        name: Test results
+        path: ./
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       env:
@@ -141,4 +141,3 @@ jobs:
           -Dsonar.inclusions=src/**/*.ts
           -Dsonar.test.exclusions=test/**/*test*.py
           -Dsonar.sourceEncoding=UTF-8
-          
