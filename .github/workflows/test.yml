@@ -100,13 +100,13 @@ jobs:
           conan remote add conancenter https://center.conan.io false
       - name: Execute unitests with pytest
         run: |
-          pytest -v test/unit --junit-xml=./test/result-unit.xml --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/unit --junit-xml=./test/result-unit-${matrix.os}.xml --cov=conan_app_launcher --cov-branch --cov-append
       - name: Execute integration with pytest
         run: |
-          pytest -v test/integration --junit-xml=./test/result-integration.xml --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/integration --junit-xml=./test/result-integration-${matrix.os}.xml --cov=conan_app_launcher --cov-branch --cov-append
       - name: Execute system with pytest
         run: |
-          pytest -v test/system --junit-xml=./test/result-system.xml --cov-report xml:cov/cov.xml --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/system --junit-xml=./test/result-system-${matrix.os}.xml --cov-report xml:cov/cov-${matrix.os}.xml --cov=conan_app_launcher --cov-branch --cov-append
       - uses: actions/upload-artifact@v2
         with:
           name: Test results
