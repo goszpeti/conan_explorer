@@ -97,7 +97,6 @@ def testInvalidContent(base_fixture, capsys):
     tabs = parse_config_file(base_fixture.testdata_path / "config_file" / "invalid_syntax.json")
     assert tabs == []
     captured = capsys.readouterr()
-    assert "ERROR" in captured.err
     assert "Expecting property name" in captured.err
 
 

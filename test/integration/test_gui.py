@@ -180,13 +180,12 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
     qtbot.waitExposed(main_gui, timeout=3000)
 
     # wait for all tasks to finish
-    app.conan_worker.finish_working(10)
+    app.conan_worker.finish_working(15)
 
     # check app icons first two should be ungreyed, third is invalid->not ungreying
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         for test_app in tab.app_links:
             test_app.update_with_conan_info()  # signal is not emmited with qt bot, must call manually
-
             if test_app.config_data.name in ["App1 with spaces", "App1 new"]:
                 assert not test_app._app_button._greyed_out
             elif test_app.config_data.name in ["App1 wrong path", "App2"]:
