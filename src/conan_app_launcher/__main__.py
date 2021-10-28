@@ -32,7 +32,6 @@ except ImportError:
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
-
 def load_base_components(settings):
     """ Load all default components. """
     this.cache = ConanInfoCache(this.base_path / this.CACHE_FILE_NAME)
@@ -61,12 +60,7 @@ def load_base_components(settings):
             this.tab_configs.append(tab)
             write_config_file(config_file_path, [tab])
         else:
-            for tab in this.tab_configs:
-                for app in tab.get_app_entries():
-                    ref_dict: ConanWorkerElement = {"reference": str(app.conan_ref), "options": app.conan_options}
-                    if ref_dict not in conan_refs:
-                        conan_refs.append(ref_dict)
-
+            conan_refs = this.get_all_conan_refs()
     # start Conan Worker
     this.conan_worker = ConanWorker(conan_refs)
 

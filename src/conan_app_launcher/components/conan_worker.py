@@ -35,7 +35,7 @@ class ConanWorker():
 
         self.update_all_info(initial_elements)
 
-    def update_all_info(self, conan_elements: ConanWorkerElement):
+    def update_all_info(self, conan_elements: List[ConanWorkerElement]):
         """ Starts the worker on using the current tabs info global var """
         # fill up queue
         for ref in conan_elements:

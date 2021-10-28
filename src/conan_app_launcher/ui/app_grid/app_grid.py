@@ -45,16 +45,9 @@ class AppGrid():
         else:
             this.tab_configs = []
 
-        conan_refs = []
-        # TODO code duplication
-        for tab in this.tab_configs:
-            for app in tab.get_app_entries():
-                ref_dict = {"name": str(app.conan_ref), "options": app.conan_options}
-                if ref_dict not in conan_refs:
-                    conan_refs.append(ref_dict)
         # update conan info
         if this.conan_worker:
-            this.conan_worker.update_all_info(conan_refs)
+            this.conan_worker.update_all_info(this.get_all_conan_refs())
 
         self.load_tabs()
 
@@ -146,3 +139,4 @@ class AppGrid():
 
         # always show the first tab first
         self._main_window.ui.tab_bar.setCurrentIndex(0)
+

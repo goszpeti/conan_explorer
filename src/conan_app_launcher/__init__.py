@@ -6,8 +6,10 @@ from pathlib import Path
 
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Optional, List
+
 if TYPE_CHECKING:
     from .components import ConanWorker, ConanInfoCache, TabConfigEntry, ConanApi
+    from .components.conan_worker import ConanWorkerElement
     from .settings import Settings
     from PyQt5 import QtWidgets
 
@@ -44,3 +46,12 @@ conan_worker: Optional["ConanWorker"] = None
 cache: Optional["ConanInfoCache"] = None
 settings: Optional["Settings"] = None
 tab_configs: List["TabConfigEntry"] = []
+
+def get_all_conan_refs():
+    conan_refs: List[ConanWorkerElement] = []
+    for tab in tab_configs:
+        for app in tab.get_app_entries():
+            ref_dict: ConanWorkerElement = {"reference": str(app.conan_ref), "options": app.conan_options}
+            if ref_dict not in conan_refs:
+                conan_refs.append(ref_dict)
+    return conan_refs
