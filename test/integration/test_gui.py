@@ -374,45 +374,6 @@ def testRemoveTabDialog(base_fixture, settings_fixture, qtbot, mocker):
 def testTabMoveIsSaved():
     pass
 
-def testAddAppLink(base_fixture, settings_fixture, qtbot, mocker):
-    load_base_components(app.settings)
-    from pytestqt.plugin import _qapp_instance
-    app.qt_app = _qapp_instance
-    main_gui = main_window.MainUi()
-    app.main_window = main_gui  # needed for signal access
-    main_gui.show()
-    main_gui.start_app_grid()
-
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
-
-    tabs = main_gui.ui.tab_bar.findChildren(TabAppGrid)
-    cd = tabs[1].config_data
-    apps = cd.get_app_entries()
-    prev_count = len(apps)
-    app_link: AppLink = tabs[1].app_links[0] 
-    app_info = AppConfigEntry(
-        app_data={"name": "NewApp", "conan_ref": "zlib/1.2.11@_/_", "executable": "bin/exe"})
-
-    mocker.patch.object(EditAppDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
-    app_link.open_app_link_add_dialog(app_info)
-    assert app_link._edit_app_dialog._ui.name_line_edit.text()
-
-    app_link._edit_app_dialog._ui.button_box.accepted.emit()
-
-    # check that the gui has updated
-    apps = cd.get_app_entries()
-    assert len(apps) == prev_count + 1
-    assert apps[-1].name == "NewApp"
-    assert tabs[1].app_links[-1]._app_name_label.text() == "NewApp"
-
-    # check, that the config file has updated
-    config_tabs = config_file.parse_config_file(settings_fixture)
-    assert config_tabs[0].name == cd.name == "Basics" # just safety that it is the same tab
-    assert len(config_tabs[0].get_app_entries()) == prev_count + 1
-
-
 def testEditAppLink(base_fixture, settings_fixture, qtbot, mocker):
     load_base_components(app.settings)
     from pytestqt.plugin import _qapp_instance
@@ -489,6 +450,47 @@ def testRemoveAppLink(base_fixture, settings_fixture, qtbot, mocker):
 
     config_tabs = config_file.parse_config_file(settings_fixture)
     assert len(config_tabs[0].get_app_entries()) == prev_count - 1
+
+
+def testAddAppLink(base_fixture, settings_fixture, qtbot, mocker):
+    load_base_components(app.settings)
+    from pytestqt.plugin import _qapp_instance
+    app.qt_app = _qapp_instance
+    main_gui = main_window.MainUi()
+    app.main_window = main_gui  # needed for signal access
+    main_gui.show()
+    main_gui.start_app_grid()
+
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    tabs = main_gui.ui.tab_bar.findChildren(TabAppGrid)
+    cd = tabs[1].config_data
+    apps = cd.get_app_entries()
+    prev_count = len(apps)
+    app_link: AppLink = tabs[1].app_links[0]
+    app_info = AppConfigEntry(
+        app_data={"name": "NewApp", "conan_ref": "zlib/1.2.11@_/_", "executable": "bin/exe"})
+
+    mocker.patch.object(EditAppDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Accepted)
+    app_link.open_app_link_add_dialog(app_info)
+    assert app_link._edit_app_dialog._ui.name_line_edit.text()
+
+    app_link._edit_app_dialog._ui.button_box.accepted.emit()
+
+    # check that the gui has updated
+    apps = cd.get_app_entries()
+    assert len(apps) == prev_count + 1
+    assert apps[-1].name == "NewApp"
+    assert tabs[1].app_links[-1]._app_name_label.text() == "NewApp"
+
+    # check, that the config file has updated
+    config_tabs = config_file.parse_config_file(settings_fixture)
+    assert config_tabs[0].name == cd.name == "Basics"  # just safety that it is the same tab
+    assert len(config_tabs[0].get_app_entries()) == prev_count + 1
+    # this test sometimes errors in the ci on teardown
+    Logger.remove_qt_logger()
 
 
 def testOpenFileExplorerOnAppLink(base_fixture, qtbot):
