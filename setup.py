@@ -40,13 +40,14 @@ try:
         branch = os.getenv("GITHUB_REF").split("refs/heads/")
         if len(branch) == 1:
             branch = os.getenv("GITHUB_REF").split("tags")
-        link = "conan_app_launcher/" + branch[1]
-        master_link = "conan_app_launcher/master"
-        for line in long_description.splitlines():
-            if master_link in line:
-                line.replace(master_link, link)
-            temp.append(line)
-        long_description = "\n".join(temp)
+        if len(branch) > 1:
+            link = "conan_app_launcher/" + branch[1]
+            master_link = "conan_app_launcher/master"
+            for line in long_description.splitlines():
+                if master_link in line:
+                    line.replace(master_link, link)
+                temp.append(line)
+            long_description = "\n".join(temp)
 except FileNotFoundError:
     long_description = DESCRIPTION
 
