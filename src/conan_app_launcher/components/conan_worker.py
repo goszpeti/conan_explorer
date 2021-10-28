@@ -2,13 +2,21 @@
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
-from typing import List, Tuple, Dict, Optional, TypedDict
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-from conans.model.ref import ConanFileReference
+if TYPE_CHECKING:
+    from typing import TypedDict
+else:
+    try:
+        from typing import TypedDict
+    except ImportError:
+        from typing_extensions import TypedDict
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components.conan import ConanApi
+from conans.model.ref import ConanFileReference
+
 
 class ConanWorkerElement(TypedDict):
     reference: str

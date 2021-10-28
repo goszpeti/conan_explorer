@@ -12,4 +12,4 @@
 
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="1024">
 
-<!-- add-file: ./doc/README.md -->
+<!-- add-file: ./doc/Readme.md -->
