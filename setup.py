@@ -30,10 +30,22 @@ REQUIRED = [
 here = os.path.abspath(os.path.dirname(__file__))
 
 # Import the README and use it as the long-description.
-# Note: this will only work if 'README.md' is present in your MANIFEST.in file!
 try:
     with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
         long_description = '\n' + f.read()
+    # replace links
+    temp = []
+    if os.getenv("GITHUB_REF"):
+        branch = os.getenv("GITHUB_REF").split("refs/heads/")
+        if len(branch) == 1:
+            branch = os.getenv("GITHUB_REF").split("tags")
+        link = "conan_app_launcher/" + branch[1]
+        master_link = "conan_app_launcher/master"
+        for line in long_description.splitlines():
+            if master_link in line:
+                line.replace(master_link, link)
+            temp.append(line)
+        long_description = "\n".join(temp)
 except FileNotFoundError:
     long_description = DESCRIPTION
 

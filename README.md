@@ -1,6 +1,6 @@
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/src/conan_app_launcher/assets/icons/icon.ico" width="128">
 
-# Conan App Launcher
+# Conan App Launcher and Local Package Explorer
 
 ![https://pypi.org/project/conan-app-launcher/](https://img.shields.io/pypi/v/conan-app-launcher)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
@@ -10,17 +10,13 @@
 ![Violations](https://img.shields.io/sonar/violations/goszpeti_conan_app_launcher?server=https%3A%2F%2Fsonarcloud.io)
 ![Downloads](https://img.shields.io/pypi/dm/conan_app_launcher)
 
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="1024">
-
-<!-- add-file: ./doc/Readme.md -->
-
-``` md markdown-add-files
-
 ## Quick Overview
 
 The goal of this project is to provide a frontend to start executables contained in packages of the package manager conan. It now also contains a local package explorer view, which is handy on Windows with short paths.
 
 It is more enduser, then developer oriented and focuses on using packages. It is intended to be used on Windows and Linux x64 platforms.
+
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/feature/finish-1.0.0/doc/screenshot.png" width="1024">
 
 Features:
 - configurable layout (tabs and applications) in the GUI
@@ -62,43 +58,45 @@ Execute `conan-app-launcher`, if the Python "scripts" folder is on your system p
 It is not needed to edit this by hand anymore, since (almost) every option is available in the GUI.
 The config file uses the following exemplary schema:
 
-    {
-        "version": "0.3.0",
-        "tabs": [
-            {
-                "name": "Basics",
-                "apps": [
-                    {
-                        "name": "App1 with spaces", 
-                        "conan_ref": "app1/0.1.0@user1/stable", // full conan reference
-                        "package_id": "app1/0.1.0@user1/stable" // DEPRECATED - will converted to conan_ref automatically
-                        "executable": "bin/app1", // relative to conan "package folder" - can also be a file to open
-                        "icon": "MyIcon.png" // relative to this config file,
-                        "console_application": true, // start console application in extra window
-                        "args": "--version" // args to start the application with
-                    },
-                    {
-                        "name": "App2",
-                        "conan_ref": "app2/0.2.0@user2/testing",
-                        "executable": "bin/app2", // forward slashes are preferred
-                        "icon": "C:\\CustomIcon.ico" // but escaped backslashes also work
-                    }
-                ]
-            },
-            {
-                "name": "Extra",
-                "apps": [
-                    {
-                        "name": "App3",
-                        "conan_ref": "app3/0.3.0@user3/stable",
-                        "console_application": true, // starts in a new console window
-                        "executable": "bin/app3", // extension (.exe) can be ommited for windows
-                        // Icon can be ommitted, then it will try on Windows to use the applications own icon
-                    }
-                ]
-            }
-        ]
-    }
+```json
+{
+    "version": "0.3.0",
+    "tabs": [
+        {
+            "name": "Basics",
+            "apps": [
+                {
+                    "name": "App1 with spaces", 
+                    "conan_ref": "app1/0.1.0@user1/stable", // full conan reference
+                    "package_id": "app1/0.1.0@user1/stable" // DEPRECATED - will converted to conan_ref automatically
+                    "executable": "bin/app1", // relative to conan "package folder" - can also be a file to open
+                    "icon": "MyIcon.png" // relative to this config file,
+                    "console_application": true, // start console application in extra window
+                    "args": "--version" // args to start the application with
+                },
+                {
+                    "name": "App2",
+                    "conan_ref": "app2/0.2.0@user2/testing",
+                    "executable": "bin/app2", // forward slashes are preferred
+                    "icon": "C:\\CustomIcon.ico" // but escaped backslashes also work
+                }
+            ]
+        },
+        {
+            "name": "Extra",
+            "apps": [
+                {
+                    "name": "App3",
+                    "conan_ref": "app3/0.3.0@user3/stable",
+                    "console_application": true, // starts in a new console window
+                    "executable": "bin/app3", // extension (.exe) can be ommited for windows
+                    // Icon can be ommitted, then it will try on Windows to use the applications own icon
+                }
+            ]
+        }
+    ]
+}
+```
 
 ## Toolchain
 
@@ -112,4 +110,3 @@ IDE configuration is alwaylable for VsCode.
 * Using icons by https://icons8.com, Universal Multimedia Licensing
 Agreement for Icons8, https://icons8.com/vue-static/landings/pricing/icons8-license.pdf
 
-```
