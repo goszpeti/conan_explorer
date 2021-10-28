@@ -23,7 +23,7 @@ REQUIRED = [
     "PyQt5>=5.13.0",
     "conan>=1.24",
     "jsonschema>=3.2.0",
-    "pefile==0.18.2",
+    "pefile==2021.9.3",
     "typing-extensions ; python_version<'3.8'",
 ]
 
