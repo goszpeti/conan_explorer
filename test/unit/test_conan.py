@@ -218,7 +218,7 @@ def testConanWorker(base_fixture, settings_fixture, mocker):
     conan_refs = []
     for tab in app.tab_configs:
         for app_entry in tab.get_app_entries():
-            ref_dict = {"name": str(app_entry.conan_ref), "options": app_entry.conan_options}
+            ref_dict = {"reference": str(app_entry.conan_ref), "options": app_entry.conan_options}
             if ref_dict not in conan_refs:
                 conan_refs.append(ref_dict)
 
