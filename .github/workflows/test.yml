@@ -139,4 +139,4 @@ jobs:
           -Dsonar.sources=./src
           -Dsonar.test.exclusions=test/**/*test*.py
           -Dsonar.sourceEncoding=UTF-8
-          -Dsonar.python.version=3.6, 3.7, 3.8, 3.9, 3.10
+          -Dsonar.python.version=3.6,3.7,3.8,3.9,3.10
