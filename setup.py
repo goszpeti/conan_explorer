@@ -36,6 +36,7 @@ try:
     # replace links
     temp = []
     if os.getenv("GITHUB_REF"):
+        print(f"GITHUB_REF: {str(os.getenv("GITHUB_REF"))}")
         branch = os.getenv("GITHUB_REF").split("refs/heads/")
         if len(branch) == 1:
             branch = os.getenv("GITHUB_REF").split("tags")
