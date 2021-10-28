@@ -23,7 +23,7 @@ REQUIRED = [
     "PyQt5>=5.13.0",
     "conan>=1.24",
     "jsonschema>=3.2.0",
-    "pefile",
+    "pefile==0.18.2",
     "typing-extensions ; python_version<'3.8'",
 ]
 
@@ -39,14 +39,14 @@ except FileNotFoundError:
 
 # Load the package's __version__.py module as a dictionary.
 about = {}
-with open(os.path.join(here, "src", "conan_app_launcher", '__init__.py')) as f:
+with open(os.path.join(here, "src", "conan_app_launcher", '__version__.py')) as f:
     exec(f.read(), about)
 
 
 # Where the magic happens:
 setup(
     name=NAME,
-    version=about['__version__'],
+    version=about['VERSION'],
     description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -57,7 +57,6 @@ setup(
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
     install_requires=REQUIRED,
-    # extras_require=EXTRAS,
     include_package_data=True,
     license='MIT',
     classifiers=[

@@ -135,6 +135,7 @@ class ConanApi():
     def search_query_in_remotes(self, query: str) -> List[ConanFileReference]:
         """ Search in all remotes for a specific query. """
         res_list = []
+        search_results = []
         try:
             # no query possible with pattern
             search_results = self.conan.search_recipes(query, remote_name="all").get("results", None)

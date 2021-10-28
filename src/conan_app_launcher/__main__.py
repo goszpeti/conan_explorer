@@ -8,10 +8,12 @@ import traceback
 import platform
 import tempfile
 from pathlib import Path
+from typing import List
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import conan_app_launcher as this
+from conan_app_launcher.components.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
 from conan_app_launcher.base import Logger
 from conan_app_launcher.ui.main_window import MainUi
@@ -22,7 +24,7 @@ try:
     # this is a workaround for Windows, so that on the taskbar the
     # correct icon will be shown (and not the default python icon)
     from PyQt5.QtWinExtras import QtWin
-    MY_APP_ID = 'ConanAppLauncher.' + this.__version__
+    MY_APP_ID = 'ConanAppLauncher.' + this.VERSION
     QtWin.setCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 except ImportError:
     pass
@@ -50,7 +52,7 @@ def load_base_components(settings):
 
     else:
         config_file_path = Path(config_file_setting)
-    conan_refs = []
+    conan_refs: List[ConanWorkerElement] = []  # TODO typing
     if config_file_path.is_file():  # escape error log on first opening
         this.tab_configs = parse_config_file(config_file_path)
         if not this.tab_configs:
@@ -61,7 +63,7 @@ def load_base_components(settings):
         else:
             for tab in this.tab_configs:
                 for app in tab.get_app_entries():
-                    ref_dict = {"name": str(app.conan_ref), "options": app.conan_options}
+                    ref_dict: ConanWorkerElement = {"reference": str(app.conan_ref), "options": app.conan_options}
                     if ref_dict not in conan_refs:
                         conan_refs.append(ref_dict)
 

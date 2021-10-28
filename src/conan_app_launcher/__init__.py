@@ -1,8 +1,7 @@
 """
 Contains global constants and basic/ui variables.
 """
-__version__ = "1.0.0b8"
-
+from .__version__ import VERSION
 from pathlib import Path
 
 # this allows to use forward declarations to avoid circular imports
@@ -34,6 +33,7 @@ DEBUG_LEVEL = 0
 
 # paths to find folders - points to the folder of this file
 # must be initialized later, otherwise setup.py can't parse this file
+# TODO this is not an issue anymore!
 base_path: Path = Path("NULL")
 asset_path: Path = Path("NULL")
 

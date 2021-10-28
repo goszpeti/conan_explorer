@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 class LocalConanPackageExplorer():
     def __init__(self, main_window: "MainUi"):
         self._main_window = main_window
+        self.pkg_sel_model = None
         if not this.conan_api:
             this.conan_api = ConanApi()
 
@@ -38,7 +39,7 @@ class LocalConanPackageExplorer():
     # Selection view context menu
 
     def on_changed(self, index):
-        self.refresh_pkg_selection_view()
+        self.refresh_pkg_selection_view(update=False)
 
     def _init_selection_context_menu(self):
         self.select_cntx_menu = QtWidgets.QMenu()
@@ -102,7 +103,9 @@ class LocalConanPackageExplorer():
 
     # Global pane and cross connection slots
 
-    def refresh_pkg_selection_view(self):
+    def refresh_pkg_selection_view(self, update=True):
+        if not update and self.pkg_sel_model:
+            return
         self.pkg_sel_model = PkgSelectModel()
         self.proxy_model = MyFilter()
         self.proxy_model.setSourceModel(self.pkg_sel_model)
