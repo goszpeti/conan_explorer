@@ -135,7 +135,7 @@ jobs:
       with:
         args: >
           -Dsonar.organization=goszpeti
-          -Dsonar.projectKey=conan_app_launcher
+          -Dsonar.projectKey=goszpeti_conan_app_launcher
           -Dsonar.sources=./src
           -Dsonar.test.exclusions=test/**/*test*.py
           -Dsonar.sourceEncoding=UTF-8
