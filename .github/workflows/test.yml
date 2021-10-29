@@ -46,8 +46,8 @@ jobs:
             use_coverage: true
             conan: "latest"
             os: ubuntu-latest
-          - name: "windows-py38"
-            python: "3.8"
+          - name: "windows-py310"
+            python: "3.10"
             os: windows-latest
             use_coverage: true
             conan: "latest"
