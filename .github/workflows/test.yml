@@ -24,7 +24,7 @@ jobs:
             "ubuntu-py37",
             "ubuntu-py38",
             "ubuntu-py39",
-            "windows-py38",
+            "windows-py310",
             "ubuntu-py38-conan1.24.0",
             "ubuntu-py310-conan1.28.0",
           ]
