@@ -4,7 +4,6 @@ Sets up cmd arguments, config file and starts the gui
 """
 import os
 import sys
-import traceback
 import platform
 import tempfile
 from pathlib import Path
@@ -13,6 +12,7 @@ from typing import List
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import conan_app_launcher as this
+from conan_app_launcher.ui.bug_report import custom_exception_hook
 from conan_app_launcher.components.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
 from conan_app_launcher.base import Logger
@@ -69,6 +69,7 @@ def main():
     """
     Start the Qt application and an all main components
     """
+    sys.excepthook = custom_exception_hook
     if platform.system() == "Darwin":
         print("Mac OS is currently not supported.")
         sys.exit(1)
@@ -102,15 +103,7 @@ def main():
     this.main_window.setWindowIcon(icon)
     this.main_window.show()
 
-    try:
-        this.qt_app.exec_()
-    except:  # pylint:disable=bare-except
-        trace_back = traceback.format_exc()
-        logger.error(f"Application crashed: \n{trace_back}")
-    finally:
-        if this.conan_worker:  # cancel conan worker tasks on exit
-            this.conan_worker.finish_working()
-
+    this.qt_app.exec_()
 
 if __name__ == "__main__":
     main()
