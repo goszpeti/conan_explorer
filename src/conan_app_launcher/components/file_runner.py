@@ -15,7 +15,7 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
             execute_app(file_path, is_console_app, args)
         else:
             open_file(file_path)
-    except Exception as e:
+    except Exception:
         Logger().error(f"Error while executing {str(file_path)} with args: {args}.")
 
 

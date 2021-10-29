@@ -111,7 +111,7 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     ref = "example/1.0.0@user/testing"
     try:
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
-    except:
+    except Exception:
         pass
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
     os.system(f"conan create {conanfile} user/testing")
@@ -129,7 +129,7 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     ref = "example/1.0.0@user/orphan"
     try:
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
-    except:
+    except Exception:
         pass
     os.system(f"conan create {conanfile} user/orphan")
 

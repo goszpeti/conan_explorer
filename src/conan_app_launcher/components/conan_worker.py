@@ -73,7 +73,7 @@ class ConanWorker():
             try:
                 package_folder = this.conan_api.get_path_or_install(
                     ConanFileReference.loads(conan_ref), conan_options)
-            except:
+            except Exception:
                 self._conan_queue.task_done()
                 return
             # call update on every entry which has this ref

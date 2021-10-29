@@ -196,7 +196,7 @@ class AppConfigEntry():
         users = set()
         for ref in self._available_refs:
             if ref.version == self.version:
-                users.add(ref.user)
+                users.add(self.convert_to_disp_user(ref.user))
         return list(users)
 
     @property
@@ -204,7 +204,7 @@ class AppConfigEntry():
         """ Channels, for the current version and user only """
         channels = set()
         for ref in self._available_refs:
-            if ref.version == self.version and ref.user == self.user:
+            if ref.version == self.version and self.convert_to_disp_user(ref.user) == self.user:
                 channels.add(self.convert_to_disp_channel(ref.channel))
         return list(channels)
 

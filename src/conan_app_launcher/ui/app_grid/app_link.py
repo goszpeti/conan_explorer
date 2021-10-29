@@ -197,8 +197,8 @@ class AppLink(QtWidgets.QVBoxLayout):
                 this.main_window.save_config()
 
     def update_with_conan_info(self):
-        if self._app_channel_cbox.itemText(0) != self.config_data.INVALID_DESCR:
-            if len(self.config_data.versions) > 1 and self._app_version_cbox.count() != len(self.config_data.versions) or \
+        if self._app_channel_cbox.itemText(0) != self.config_data.INVALID_DESCR and \
+            len(self.config_data.versions) > 1 and self._app_version_cbox.count() != len(self.config_data.versions) or \
                     len(self.config_data.channels) > 1 and self._app_channel_cbox.count() != len(self.config_data.channels):
                 # signals the cbox callback that we do not set new user values
                 self._app_version_cbox.setDisabled(True)

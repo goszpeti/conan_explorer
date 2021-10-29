@@ -8,7 +8,7 @@ REF_TYPE = 0
 PROFILE_TYPE = 1
 
 
-class MyFilter(QtCore.QSortFilterProxyModel):
+class PackageFilter(QtCore.QSortFilterProxyModel):
     def __init__(self):
         super().__init__()
         self.setFilterKeyColumn(0)
@@ -97,7 +97,7 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
         super(PkgSelectModel, self).__init__(*args, **kwargs)
         self._icons_path = this.asset_path / "icons"
         self.rootItem = TreeItem(["Packages"])
-        self.proxy_model = MyFilter()
+        self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
         if not this.conan_api:

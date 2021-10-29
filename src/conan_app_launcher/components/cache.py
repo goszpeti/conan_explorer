@@ -123,7 +123,6 @@ class ConanInfoCache():
             if ref.user is None and ref.channel is None:
                 user = "_"
                 channel = "_"
-            #current_name_user = f"{ref.name}@{user}"
             current_version_channel = f"{ref.version}/{channel}"
             version_channels = set(self._remote_packages.get(ref.name, {}).get(user, []))
             if not current_version_channel in version_channels:
@@ -132,7 +131,6 @@ class ConanInfoCache():
                 if not self._remote_packages.get(ref.name):
                     self._remote_packages.update({ref.name: {}})
                 self._remote_packages.get(ref.name, {}).update({user: version_channels_list})
-
 
         self._write()
 
@@ -144,7 +142,7 @@ class ConanInfoCache():
                 content = json_file.read()
                 if len(content) > 0:
                     json_data = json.loads(content)
-        except:  # possibly corrupt, delete cache file
+        except Exception:  # possibly corrupt, delete cache file
             Logger().debug("Can't read speedup-cache file, deleting it.")
             os.remove(self._cache_file)
             # create file anew

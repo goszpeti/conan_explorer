@@ -81,7 +81,6 @@ def main():
     # init logger first
     this.base_path = Path(__file__).absolute().parent
     this.asset_path = this.base_path / "assets"
-    logger = Logger()
 
     # apply Qt attributes (only at init possible)
     QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)

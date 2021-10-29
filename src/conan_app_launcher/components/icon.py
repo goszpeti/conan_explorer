@@ -78,7 +78,7 @@ class ExtractIcon(object):
         if res_index < 0:
             try:
                 idx = [entry.id for entry in rt_base_dir.directory.entries].index(-res_index)
-            except:
+            except Exception:
                 return None
         else:
             idx = res_index if res_index < len(rt_base_dir.directory.entries) else None
