@@ -169,7 +169,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def open_app_link_add_dialog(self, config_data: AppConfigEntry = None):
         if not config_data:
             config_data = AppConfigEntry()
-        # TODO save for testing
+        # save for testing
         self._edit_app_dialog = EditAppDialog(config_data, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:

@@ -116,7 +116,7 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
     os.system(f"conan create {conanfile} user/testing")
     pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
-    pkg_dir_to_delete = conan.get_package_folder(ConanFileReference.loads(ref), pkg)
+    pkg_dir_to_delete = conan.get_package_folder(ConanFileReference.loads(ref), pkg["id"])
 
     real_path_file = pkg_dir_to_delete / ".." / CONAN_REAL_PATH
     with open(str(real_path_file), "r+") as fp:
@@ -137,7 +137,7 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     conan = ConanApi()
     pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
     pkg_cache_folder = os.path.abspath(os.path.join(exp_folder, "..", "package", pkg["id"]))
-    pkg_dir = conan.get_package_folder(ConanFileReference.loads(ref), pkg)
+    pkg_dir = conan.get_package_folder(ConanFileReference.loads(ref), pkg["id"])
     rmtree(pkg_dir)
 
     paths_to_delete = conan.get_cleanup_cache_paths()

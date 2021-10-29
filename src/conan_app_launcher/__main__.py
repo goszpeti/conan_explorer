@@ -51,7 +51,7 @@ def load_base_components(settings):
 
     else:
         config_file_path = Path(config_file_setting)
-    conan_refs: List[ConanWorkerElement] = []  # TODO typing
+    conan_refs: List[ConanWorkerElement] = []
     if config_file_path.is_file():  # escape error log on first opening
         this.tab_configs = parse_config_file(config_file_path)
         if not this.tab_configs:

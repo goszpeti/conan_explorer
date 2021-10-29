@@ -20,11 +20,12 @@ REQUIRES_PYTHON = '>=3.6.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    "PyQt5>=5.13.0",
-    "conan>=1.24",
-    "jsonschema>=3.2.0",
-    "pefile==2021.9.3",
-    "typing-extensions ; python_version<'3.8'",
+    "PyQt5>=5.13.0",  # GPLv3
+    "conan>=1.24",  # MIT License
+    "jsonschema>=3.2.0",  # MIT License
+    "pefile==2021.9.3",  # MIT License
+    "typing-extensions>=3.10.0.2 ; python_version<'3.8'", # Python Software Foundation License(PSF)
+    "dataclasses>=0.8 ; python_version<'3.7'"  # Apache Software License (Apache)
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
