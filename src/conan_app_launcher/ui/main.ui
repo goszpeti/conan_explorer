@@ -307,7 +307,7 @@
        <widget class="QLabel" name="package_filter_label">
         <property name="geometry">
          <rect>
-          <x>63</x>
+          <x>50</x>
           <y>5</y>
           <width>31</width>
           <height>21</height>
@@ -323,7 +323,7 @@
         </property>
         <property name="geometry">
          <rect>
-          <x>100</x>
+          <x>90</x>
           <y>0</y>
           <width>171</width>
           <height>26</height>
@@ -348,6 +348,9 @@ p, li { white-space: pre-wrap; }
           <width>31</width>
           <height>31</height>
          </rect>
+        </property>
+        <property name="toolTip">
+         <string>Refresh package list view</string>
         </property>
         <property name="text">
          <string/>
@@ -430,6 +433,9 @@ p, li { white-space: pre-wrap; }
          </property>
          <property name="defaultDropAction">
           <enum>Qt::TargetMoveAction</enum>
+         </property>
+         <property name="indentation">
+          <number>15</number>
          </property>
          <property name="itemsExpandable">
           <bool>true</bool>

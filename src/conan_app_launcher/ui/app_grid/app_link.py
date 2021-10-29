@@ -6,8 +6,6 @@ from conan_app_launcher.ui.app_grid.app_button import AppButton
 from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-# from conan_app_launcher.ui.tab_app_grid import TabAppGrid
-
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
