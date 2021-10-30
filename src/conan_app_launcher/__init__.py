@@ -7,7 +7,7 @@ from pathlib import Path
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Optional, List
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from .components import ConanWorker, ConanInfoCache, TabConfigEntry, ConanApi
     from .components.conan_worker import ConanWorkerElement
     from .settings import Settings
