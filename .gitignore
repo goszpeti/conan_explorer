@@ -1,11 +1,12 @@
 .vscode/.ropeproject/**
 .vscode/tags
+.venv
 
 **/__pycache__/**
 *.egg-info
 build/**
 dist/**
-result*.xml
+*result*.xml
 cov.xml
 .coverage
 htmlcov/*

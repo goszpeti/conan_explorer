@@ -25,7 +25,8 @@
         "editor.formatOnPaste": true,
         "git.autofetch": true,
         "python.linting.pylintEnabled": true,
-        "python.linting.enabled": true,
+        "python.linting.mypyEnabled": true,
+        "python.linting.enabled": false,
         "pyqt-integration.qtdesigner.path": "designer",
         "python.linting.lintOnSave": true,
         "python.linting.pylintUseMinimalCheckers": false,
@@ -48,7 +49,7 @@
             "--init-hook",
             "import sys;sys.path.append('${workspaceFolder}/test/mock/');sys.path.append('${workspaceFolder}/src/')"
         ],
-        "python.linting.mypyEnabled": true,
-        "githubIssues.issueBranchTitle": "${user}/${issueNumber}-${sanitizedIssueTitle} ",
+        "python.venvPath": "${workspaceFolder}/.venv",
+        "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
     }
 }

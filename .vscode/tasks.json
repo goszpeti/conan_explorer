@@ -6,45 +6,23 @@
         {
             "label": "Install package in editable mode",
             "type": "shell",
-            "windows": {
-                "command": "pip"
-            },
-            "linux": {
-                "command": "pip3"
-            },
-            //"runOptions": {
-            //    "runOn": "folderOpen"
-            //},
+           "command": "${config:python.pythonPath}",
             "args": [
-                "install",
-                "-e",
-                "."
+                "-m", "pip",
+                "install", "-e", "."
             ],
             "problemMatcher": []
         },
         {
             "label": "Install dev and test dependencies",
             "type": "shell",
-            "windows": {
-                "command": "python"
-            },
-            "linux": {
-                "command": "python3"
-            },
-            //"runOptions": {
-            //    "runOn": "folderOpen"
-            //},
+            "command": "${config:python.pythonPath}",
             "args": [
-                "-m",
-                "pip",
-                "install",
-                "--upgrade",
-                "pip",
+                "-m", "pip",
+                "install", "--upgrade", "pip",
                 "&&",
-                "pip",
-                "install",
-                "-r",
-                "test/requirements.txt"
+                "${config:python.pythonPath}", "-m", "pip",
+                "install", "-r", "test/requirements.txt"
             ],
             "problemMatcher": []
         },
