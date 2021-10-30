@@ -22,6 +22,11 @@ def testConanProfileNameAliasBuilder():
     profile_name = ConanApi.build_conan_profile_name_alias({})
     assert profile_name == "default"
 
+    # check a partial
+    settings = {'os': 'Windows', 'arch': 'x86_64'}
+    profile_name = ConanApi.build_conan_profile_name_alias(settings)
+    assert profile_name == "Windows_x64"
+
     # check windows
     settings = {'os': 'Windows', 'os_build': 'Windows', 'arch': 'x86_64', 'arch_build': 'x86_64',
                 'compiler': 'Visual Studio', 'compiler.version': '16', 'compiler.toolset': 'v142', 'build_type': 'Release'}
@@ -29,6 +34,7 @@ def testConanProfileNameAliasBuilder():
     assert profile_name == "Windows_x64_vs16_v142_release"
 
 
+    # check linux
     settings = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 'compiler.version': '7.4', 'build_type': 'Debug'}
     profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Linux_x64_gcc7.4_debug"

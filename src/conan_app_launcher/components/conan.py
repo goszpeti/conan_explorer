@@ -26,7 +26,7 @@ import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 
 
-class ConanPkg(TypedDict):
+class ConanPkg(TypedDict, total=False):
     """ Dummy class to type conan package dicts """
 
     id: str
@@ -70,8 +70,8 @@ class ConanApi():
         # only need to get once
         if self._short_path_root.exists() or platform.system() != "Windows":
             return self._short_path_root
-
-        gen_short_path = Path(path_shortener(tempfile.mkdtemp(), True))
+        temp_dir: str = path_shortener(tempfile.mkdtemp(), True)
+        gen_short_path = Path(temp_dir)
         short_path_root = gen_short_path.parents[1]
         shutil.rmtree(gen_short_path.parent, ignore_errors=True)
         return short_path_root
@@ -92,7 +92,7 @@ class ConanApi():
             except Exception:
                 package_ids = ref_cache.packages_ids()  # old api of Conan
             for pkg_id in package_ids:
-                short_path_dir = self.get_package_folder(ref, {"id": pkg_id})
+                short_path_dir = self.get_package_folder(ref, pkg_id)
                 pkg_id_dir = Path(ref_cache.packages()) / pkg_id
                 if not short_path_dir.exists():
                     Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}")
@@ -120,8 +120,8 @@ class ConanApi():
         """ Return the package folder of a conan reference and install it, if it is not available """
 
         package = self.find_best_local_package(conan_ref, input_options)
-        if package["id"]:
-            return self.get_package_folder(conan_ref, package["id"])
+        if package.get("id", ""):
+            return self.get_package_folder(conan_ref, package.get("id", ""))
         Logger().info(f"Package {conan_ref} not installed with options {input_options}.")
         
 
@@ -133,7 +133,7 @@ class ConanApi():
 
         if self.install_package(conan_ref, packages[0]):
             package = self.find_best_local_package(conan_ref, input_options)
-            return self.get_package_folder(conan_ref, package["id"])
+            return self.get_package_folder(conan_ref, package.get("id", ""))
         return Path("NULL")
 
     def search_query_in_remotes(self, query: str) -> List[ConanFileReference]:
@@ -217,9 +217,9 @@ class ConanApi():
         Try to install a conan package while guessing the mnost suitable package
         for the current platform.
         """
-        package_id = package["id"]
-        options_list = _create_key_value_pair_list(package["options"])
-        settings_list = _create_key_value_pair_list(package["settings"])
+        package_id = package.get("id", "")
+        options_list = _create_key_value_pair_list(package.get("options", {}))
+        settings_list = _create_key_value_pair_list(package.get("settings", {}))
         Logger().info(
             f"Installing '{str(conan_ref)}':{package_id} with settings: {str(settings_list)}, options: {str(options_list)}")
         try:
@@ -250,13 +250,14 @@ class ConanApi():
                     f" AND (os_build=None OR os_build={default_settings.get('os_build')})"
             search_results = self.conan.search_packages(str(conan_ref), query=query,
                                                         remote_name=remote).get("results", None)
-            found_pkgs = search_results[0].get("items")[0].get("packages")
+            if search_results:
+                found_pkgs = search_results[0].get("items")[0].get("packages")
             Logger().debug(str(found_pkgs))
         except Exception:  # no problem, next
             return []
 
         # remove debug releases
-        no_debug_pkgs = list(filter(lambda pkg: pkg["settings"].get(
+        no_debug_pkgs = list(filter(lambda pkg: pkg.get("settings", {}).get(
             "build_type", "").lower() != "debug", found_pkgs))
         # check, if a package remained and only then take the result
         if no_debug_pkgs:
@@ -292,7 +293,7 @@ class ConanApi():
                                                        for key, value in default_options.items())
             if len(found_pkgs) > 1:
                 comb_opts_pkgs = list(filter(lambda pkg: default_str_options.items() <=
-                                             pkg["options"].items(), found_pkgs))
+                                             pkg.get("options", {}).items(), found_pkgs))
                 if comb_opts_pkgs:
                     found_pkgs = comb_opts_pkgs
 
@@ -300,12 +301,12 @@ class ConanApi():
         # reduce with default settings
         if len(found_pkgs) > 1:
             same_comp_pkgs = list(filter(lambda pkg: default_settings.get("compiler", "") ==
-                                         pkg["settings"].get("compiler", ""), found_pkgs))
+                                         pkg.get("settings", {}).get("compiler", ""), found_pkgs))
             if same_comp_pkgs:
                 found_pkgs = same_comp_pkgs
 
             same_comp_version_pkgs = list(filter(lambda pkg: default_settings.get("compiler.version", "") ==
-                                                 pkg["settings"].get("compiler.version", ""), found_pkgs))
+                                                 pkg.get("settings", {}).get("compiler.version", ""), found_pkgs))
             if same_comp_version_pkgs:
                 found_pkgs = same_comp_version_pkgs
         return found_pkgs
@@ -330,40 +331,37 @@ class ConanApi():
         """ Build a  human readable pseduo profile name, like Windows_x64_vs16_v142_release """
         if not settings:
             return "default"
-        name = settings.get("os", "")
-        if not name:
-            name = settings.get("os_target", "")
-            if not name:
-                name = settings.get("os_build", "")
+
+        os = settings.get("os", "")
+        if not os:
+            os = settings.get("os_target", "")
+            if not os:
+                os = settings.get("os_build", "")
 
         arch = settings.get("arch", "")
         if not arch:
             arch = settings.get("arch_target", "")
-            if not name:
+            if not arch:
                 arch = settings.get("arch_build", "")
-        if arch:
-            if arch == "x86_64":  # shorten x64
-                arch = "x64"
-            name += "_" + arch.lower()
+        if arch == "x86_64":  # shorten x64
+            arch = "x64"
 
         comp = settings.get("compiler", "")
-        if comp:
-            if comp == "Visual Studio":
+        if comp == "Visual Studio":
                 comp = "vs"
-            name += "_" + comp.lower()
-
         comp_ver = settings.get("compiler.version", "")
-        if comp_ver:
-            name += comp_ver
+        comp_text = comp.lower() + comp_ver.lower()
 
         comp_toolset = settings.get("compiler.toolset", "")
-        if comp_toolset:
-            name += "_" + comp_toolset.lower()
 
         bt = settings.get("build_type", "")
-        if bt:
-            name += "_" + bt.lower()
-        return name
+
+        alias = os
+        for item in [arch.lower(), comp_text, comp_toolset.lower(), bt.lower()]:
+            if item:
+                alias += "_" +  item
+        
+        return alias
 
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
