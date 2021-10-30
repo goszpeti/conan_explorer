@@ -27,16 +27,16 @@ def base_fixture(request):
     paths = PathSetup()
     app.base_path = paths.base_path / "src" / "conan_app_launcher"
     app.asset_path: Path = app.base_path / "assets"
+    app.DEBUG_LEVEL = 1
     yield paths
 
     # teardown
+    app.DEBUG_LEVEL = 0
+
     if app.conan_worker:
         app.conan_worker.finish_working()
-        del(app.conan_worker)
     # reset singletons
-    del(app.qt_app)
     app.qt_app = None
-    del(logger.Logger._instance)
 
     # delete cache file
     if (app.base_path / app.CACHE_FILE_NAME).exists():

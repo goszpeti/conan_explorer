@@ -16,6 +16,8 @@ from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
 from conan_app_launcher.ui.app_grid.app_link import AppLink
 from PyQt5 import QtCore, QtWidgets
 
+from conan_app_launcher.ui.package_explorer.local_packages import LocalConanPackageExplorer
+
 Qt = QtCore.Qt
 
 def testAboutDialog(base_fixture, qtbot):
@@ -187,3 +189,7 @@ def testAppLinkVersionAndChannelSwitch(base_fixture, qtbot):
 # testNewAppLink()
 
 # testEditPackageReference()
+
+# def testDeletePackageDialog(base_fixture, qtbot):
+#     """ """
+#     LocalConanPackageExplorer.delete_conan_package_dialog("example/1.0.0@test/testing", None)

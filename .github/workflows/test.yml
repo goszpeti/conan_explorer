@@ -115,6 +115,7 @@ jobs:
             results/
 
   sonarcloud:
+    if: always() # eecute, even when tests fail
     needs:
     - test
     runs-on: ubuntu-latest

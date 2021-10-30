@@ -1,5 +1,6 @@
 
 import conan_app_launcher as this
+from conan_app_launcher.base import Logger
 from conan_app_launcher.components import (AppConfigEntry,
                                            open_in_file_manager, run_file)
 from conan_app_launcher.ui.app_grid.app_button import AppButton
@@ -227,6 +228,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         for i in range(0, len(self.config_data.channels)):
             self._app_channel_cbox.setItemData(i, self.config_data.channels[i], Qt.ToolTipRole)
         if self.config_data.executable.is_file():
+            Logger().debug(f"Ungreying {str(self.config_data.__dict__)}")
             self._app_button.set_icon(self.config_data.icon)
             self._app_button.ungrey_icon()
 

@@ -196,7 +196,7 @@ def testMultipleAppsUngreying(base_fixture, qtbot):
         for test_app in tab.app_links:
             test_app.update_with_conan_info()  # signal is not emmited with qt bot, must call manually
             if test_app.config_data.name in ["App1 with spaces", "App1 new"]:
-                assert not test_app._app_button._greyed_out
+                assert not test_app._app_button._greyed_out, repr(test_app.config_data.__dict__)
             elif test_app.config_data.name in ["App1 wrong path", "App2"]:
                 assert test_app._app_button._greyed_out
 
