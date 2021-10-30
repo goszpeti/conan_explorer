@@ -73,8 +73,9 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         # connect signals
         if this.main_window:
-            this.main_window.display_versions_updated.connect(self.update_versions_cbox)
-            this.main_window.display_channels_updated.connect(self.update_channels_cbox)
+            this.main_window.display_versions_changed.connect(self.update_versions_cbox)
+            this.main_window.display_users_changed.connect(self.update_users_cbox)
+            this.main_window.display_channels_changed.connect(self.update_channels_cbox)
         self._app_button.clicked.connect(self.on_click)
         self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
         self._app_user_cbox.currentIndexChanged.connect(self.on_user_selected)
@@ -237,6 +238,12 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_version_cbox.show()
         else:
             self._app_version_cbox.hide()
+
+    def update_users_cbox(self, show: bool):
+        if show:
+            self._app_user_cbox.show()
+        else:
+            self._app_user_cbox.hide()
 
     def update_channels_cbox(self, show: bool):
         if show:

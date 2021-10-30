@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import Union
 
 from conan_app_launcher.base import Logger
-from conan_app_launcher.settings import (
-    LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS)
+from conan_app_launcher.settings import (LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_USERS, 
+    DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS)
 
 
 class Settings():
@@ -39,6 +39,7 @@ class Settings():
                 },
             self._VIEW_SECTION_NAME: {
                     DISPLAY_APP_CHANNELS: True,
+                    DISPLAY_APP_USERS: False,
                     DISPLAY_APP_VERSIONS: True,
                     GRID_ROWS: 20,
                     GRID_COLUMNS: 4,
@@ -68,7 +69,7 @@ class Settings():
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
 
-    def set(self, setting_name: str, value):
+    def set(self, setting_name: str, value, auto_save=True):
         """ Set the value of a specific setting """
         if setting_name in self._values.keys() and isinstance(value, dict): # dict type setting
             self._values[setting_name].update(value)
@@ -77,8 +78,8 @@ class Settings():
                 if setting_name in self._values[section]:
                     self._values[section][setting_name] = value
                     break
-        # autosave
-        self.save_to_file()
+        if auto_save:
+            self.save_to_file()
 
     def save_to_file(self):
         """ Save all user modifiable settings to file. """
@@ -143,8 +144,8 @@ class Settings():
             value = section.get(setting_name)
             self.set(section_name, {setting_name: value})
             return
-
-        self.set(setting_name, value)
+        # autosave must be disabled, otherwise we overwrite the other settings in the file
+        self.set(setting_name, value, auto_save=False)
 
     def _write_setting(self, setting_name, section_name):
         """ Helper function to write a setting. """
@@ -154,5 +155,5 @@ class Settings():
 
         section = self._get_section(section_name)
         if not setting_name in section:
-            self._logger.error("Setting %s to write is unkonwn", setting_name)
+            self._logger.error("Setting %s to write is unknown", setting_name)
         section[setting_name] = str(value)

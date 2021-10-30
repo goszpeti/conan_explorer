@@ -18,7 +18,8 @@ TEST_REF = "zlib/1.2.11@_/_"
 
 
 def test_delete_package_dialog(base_fixture, qtbot, mocker):
-    """ Test, that the delete package dialog deletes a reference with id, without id and cancel does nothing"""
+    """ Test, that the delete package dialog deletes a reference with id, 
+    without id and cancel does nothing"""
     app.active_settings = Settings(Path(tempfile.mktemp()))
     load_base_components(app.active_settings)
     cfr = ConanFileReference.loads(TEST_REF)

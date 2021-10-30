@@ -8,7 +8,7 @@ from typing import Callable, List, Dict, Optional, TYPE_CHECKING
 
 from conans.model.ref import ConanFileReference
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
 else:
     try:

@@ -159,41 +159,6 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     assert not pkg_dir_to_delete.parent.exists()
     Logger.remove_qt_logger()
 
-
-def testMultipleAppsUngreying(base_fixture, qtbot):
-    """
-    Test, that apps ungrey, after their packages are loaded.
-    Set greyed attribute of the underlying app button expected.
-    """
-    temp_dir = tempfile.gettempdir()
-    temp_ini_path = os.path.join(temp_dir, "config.ini")
-
-    app.active_settings = Settings(ini_file=Path(temp_ini_path))
-    config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
-    app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
-
-    load_base_components(app.active_settings)
-
-    main_gui = main_window.MainUi()
-    main_gui.show()
-    main_gui.start_app_grid()
-
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
-
-    # wait for all tasks to finish
-    app.conan_worker.finish_working(15)
-
-    # check app icons first two should be ungreyed, third is invalid->not ungreying
-    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
-        for test_app in tab.app_links:
-            test_app.update_with_conan_info()  # signal is not emmited with qt bot, must call manually
-            if test_app.config_data.name in ["App1 with spaces", "App1 new"]:
-                assert not test_app._app_button._greyed_out, repr(test_app.config_data.__dict__)
-            elif test_app.config_data.name in ["App1 wrong path", "App2"]:
-                assert test_app._app_button._greyed_out
-
-
 def testTabsCleanupOnLoadConfigFile(base_fixture, settings_fixture, qtbot):
     """
     Test, if the previously loaded tabs are deleted, when a new file is loaded
@@ -243,19 +208,19 @@ def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
             assert not test_app._app_channel_cbox.isHidden()
 
     # click and assert
-    main_gui.ui.menu_set_display_versions.trigger()
+    main_gui.ui.menu_toggle_display_versions.trigger()
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
-    main_gui.ui.menu_set_display_channels.trigger()
+    main_gui.ui.menu_toggle_display_channels.trigger()
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert test_app._app_channel_cbox.isHidden()
     # click again
-    main_gui.ui.menu_set_display_versions.trigger()
-    main_gui.ui.menu_set_display_channels.trigger()
+    main_gui.ui.menu_toggle_display_versions.trigger()
+    main_gui.ui.menu_toggle_display_channels.trigger()
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
@@ -268,6 +233,6 @@ def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
 def testIconUpdateFromExecutable():
     """
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
-    Check, that the icon has the temp path.
+    Check, that the icon has the temp path. Use python executable for testing.
     """
     # TODO
