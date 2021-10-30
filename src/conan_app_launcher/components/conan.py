@@ -192,9 +192,14 @@ class ConanApi():
     def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> ConanPkg:
         """ Find a package in the local cache """
         packages = self.find_best_matching_packages(conan_ref, input_options)
-        # TODO what to if multiple ones exits? - for now simply take the first entry
+        # What to if multiple ones exits? - for now simply take the first entry
         if packages:
+            if len(packages) > 1:
+                settings = packages[0].get("settings", {})
+                Logger().warning(f"Multiple matching packages found for {str(conan_ref)}!\n" \
+                                f"Choosing this: {settings}.")
             return packages[0]
+        Logger().warning(f"No matching packages found for {str(conan_ref)}!")
         return {"id": ""}
 
     def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:

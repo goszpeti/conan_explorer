@@ -101,7 +101,9 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     Test, that clicking on on open config file and selecting a file writes it back to settings.
     Same file as selected expected in settings.
     """
-    if not platform.system() == "Windows":
+    ### TEST SETUP
+
+    if not platform.system() == "Windows": # Feature only "available" on Windows
         return
     from conans.util.windows import CONAN_REAL_PATH
     conan = ConanApi()
@@ -113,9 +115,11 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
     except Exception:
         pass
+    # shortpaths is enbaled in conanfile
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
     os.system(f"conan create {conanfile} user/testing")
     pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
+    assert pkg["id"]
     pkg_dir_to_delete = conan.get_package_folder(ConanFileReference.loads(ref), pkg["id"])
 
     real_path_file = pkg_dir_to_delete / ".." / CONAN_REAL_PATH
@@ -144,6 +148,8 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     assert pkg_cache_folder in paths_to_delete
     assert str(pkg_dir_to_delete.parent) in paths_to_delete
 
+    ### TEST ACTION
+
     main_gui = main_window.MainUi()
     main_gui.show()
     qtbot.addWidget(main_gui)
@@ -153,6 +159,9 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
 
     main_gui.ui.menu_cleanup_cache.trigger()
     time.sleep(3)
+
+    ### TEST EVALUATION
+
     assert not os.path.exists(pkg_cache_folder)
     assert not pkg_dir_to_delete.parent.exists()
     Logger.remove_qt_logger()
