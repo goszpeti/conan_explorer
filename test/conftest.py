@@ -46,7 +46,7 @@ def base_fixture(request):
     app.base_path = None
     app.conan_worker = None
     app.cache = None
-    app.settings = None
+    app.active_settings = None
     app.tab_configs = []
 
 
@@ -56,8 +56,8 @@ def settings_fixture(base_fixture):
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
 
-    app.settings = Settings(ini_file=Path(temp_ini_path))
+    app.active_settings = Settings(ini_file=Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "app_config.json"
     temp_config_file_path = copy(config_file_path, temp_dir)
-    app.settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
+    app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
     yield Path(temp_config_file_path)

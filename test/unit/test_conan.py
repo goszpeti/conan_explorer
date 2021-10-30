@@ -219,7 +219,7 @@ def testConanWorker(base_fixture, settings_fixture, mocker):
     temp_dir = tempfile.gettempdir()
     config_file_path = base_fixture.testdata_path / "config_file" / "worker.json"
     temp_config_file_path = copy(config_file_path, temp_dir)
-    app.settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
+    app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
     app.tab_configs = parse_config_file(config_file_path)
     conan_refs = []
     for tab in app.tab_configs:

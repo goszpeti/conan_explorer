@@ -44,7 +44,7 @@ main_window: Optional["QtWidgets.QMainWindow"] = None
 conan_api: Optional["ConanApi"] = None
 conan_worker: Optional["ConanWorker"] = None
 cache: Optional["ConanInfoCache"] = None
-settings: Optional["Settings"] = None
+active_settings: Optional["Settings"] = None # can't name it settings - will clash with settings module
 tab_configs: List["TabConfigEntry"] = []
 
 def get_all_conan_refs():

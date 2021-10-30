@@ -124,28 +124,28 @@ class MainUi(QtWidgets.QMainWindow):
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = Path.home()
-        config_file_path = Path(this.settings.get_string(LAST_CONFIG_FILE))
+        config_file_path = Path(this.active_settings.get_string(LAST_CONFIG_FILE))
         if config_file_path.exists():
             dialog_path = config_file_path.parent
         dialog = QtWidgets.QFileDialog(parent=self, caption="Select JSON Config File",
                                        directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            this.settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
+            this.active_settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
             self._app_grid.re_init()
 
     @ pyqtSlot()
     def toggle_display_versions(self):
         """ Reads the current menu setting, sevaes it and updates the gui """
         version_status = self.ui.menu_set_display_versions.isChecked()
-        this.settings.set(DISPLAY_APP_VERSIONS, version_status)
+        this.active_settings.set(DISPLAY_APP_VERSIONS, version_status)
         self.display_versions_updated.emit(version_status)
 
     @ pyqtSlot()
     def toogle_display_channels(self):
         """ Reads the current menu setting, sevaes it and updates the gui """
         channel_status = self.ui.menu_set_display_channels.isChecked()
-        this.settings.set(DISPLAY_APP_CHANNELS, channel_status)
+        this.active_settings.set(DISPLAY_APP_CHANNELS, channel_status)
         self.display_channels_updated.emit(channel_status)
 
     @pyqtSlot()
@@ -161,7 +161,7 @@ class MainUi(QtWidgets.QMainWindow):
 
     def save_config(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
-        write_config_file(Path(this.settings.get_string(LAST_CONFIG_FILE)), this.tab_configs)
+        write_config_file(Path(this.active_settings.get_string(LAST_CONFIG_FILE)), this.tab_configs)
 
     def load_icons(self):
         icon = QtGui.QIcon()

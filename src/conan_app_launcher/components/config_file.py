@@ -244,7 +244,7 @@ class AppConfigEntry():
             self._icon = self.package_folder / new_value.replace("//", "")
         elif new_value and not Path(new_value).is_absolute():
             # relative path is calculated from config file path
-            self._icon = Path(this.settings.get_string(LAST_CONFIG_FILE)).parent / new_value
+            self._icon = Path(this.active_settings.get_string(LAST_CONFIG_FILE)).parent / new_value
             emit_warning = True
         elif not new_value:  # try to find icon in temp
             self._icon = extract_icon(self.executable, Path(tempfile.gettempdir()))

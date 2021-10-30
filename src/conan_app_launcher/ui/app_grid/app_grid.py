@@ -38,7 +38,7 @@ class AppGrid():
         if this.conan_worker:
             this.conan_worker.finish_working(3)
 
-        config_file_path = Path(this.settings.get_string(LAST_CONFIG_FILE))
+        config_file_path = Path(this.active_settings.get_string(LAST_CONFIG_FILE))
 
         if config_file_path.is_file():  # escape error log on first opening
             this.tab_configs = parse_config_file(config_file_path)
@@ -96,8 +96,8 @@ class AppGrid():
             this.tab_configs.append(tab_config)
 
             tab = TabAppGrid(self._main_window.ui.tab_bar, tab_config,
-                             max_columns=this.settings.get_int(GRID_COLUMNS),
-                             max_rows=this.settings.get_int(GRID_ROWS))
+                             max_columns=this.active_settings.get_int(GRID_COLUMNS),
+                             max_rows=this.active_settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, text)
             self._main_window.ui.save_config()
 
@@ -134,7 +134,7 @@ class AppGrid():
         for config_data in this.tab_configs:
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             tab = TabAppGrid(parent=self._main_window.ui.tab_bar, config_data=config_data,
-                             max_columns=this.settings.get_int(GRID_COLUMNS), max_rows=this.settings.get_int(GRID_ROWS))
+                             max_columns=this.active_settings.get_int(GRID_COLUMNS), max_rows=this.active_settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, config_data.name)
 
         # always show the first tab first

@@ -92,9 +92,9 @@ def main():
     icon = QtGui.QIcon(str(this.asset_path / "icons" / "icon.ico"))
 
     settings_file_path = Path.home() / this.SETTINGS_FILE_NAME
-    this.settings = Settings(ini_file=settings_file_path)
+    this.active_settings = Settings(ini_file=settings_file_path)
 
-    load_base_components(this.settings)
+    load_base_components(this.active_settings)
 
     this.main_window = MainUi()
     # load tabs needs the pyqt signals - constructor has to be finished

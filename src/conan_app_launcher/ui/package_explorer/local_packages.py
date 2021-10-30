@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
@@ -51,13 +51,13 @@ class LocalConanPackageExplorer():
         self.copy_ref_action = QtWidgets.QAction("Copy reference", self._main_window)
         self.copy_ref_action.setIcon(QtGui.QIcon(str(icons_path / "copy_link.png")))
         self.select_cntx_menu.addAction(self.copy_ref_action)
-        self.copy_ref_action.triggered.connect(self.copy_ref)
+        self.copy_ref_action.triggered.connect(self.on_copy_ref_requested)
 
         self.remove_ref_action = QtWidgets.QAction("Remove package", self._main_window)
         self.remove_ref_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.select_cntx_menu.addAction(self.remove_ref_action)
         self.remove_ref_action.setEnabled(False)  # TODO not ready yet
-        self.remove_ref_action.triggered.connect(self.remove_ref)
+        self.remove_ref_action.triggered.connect(self.on_remove_ref_requested)
 
 
     def on_selection_context_menu_requested(self, position):
@@ -88,21 +88,30 @@ class LocalConanPackageExplorer():
             return {}
         return source_item.itemData[0]
 
-    def copy_ref(self):
+    def on_copy_ref_requested(self):
         conan_ref = self.get_selected_conan_ref()
         this.qt_app.clipboard().setText(conan_ref)
 
-    def remove_ref(self):
-        # TODO ADD DIALOG!
+    def on_remove_ref_requested(self):
         source_item = self.get_selected_pkg_source_item()
         if not source_item:
-            return ""
+            return
         # TODO add remove all pkgs for pkg selection
-        if source_item.type == PROFILE_TYPE:
-            conan_ref = source_item.parent().itemData[0]
-            pkd_id = source_item.itemData[0].get("id")
-            this.conan_api.conan.remove(conan_ref, packages=[pkd_id], force=True)
-            # TODO remove from model
+        conan_ref = self.get_selected_conan_ref()
+        pkg_id = self.get_selected_conan_pkg_info().get("id")
+        pkg_ids = ([pkg_id] if pkg_id else None)
+        self.delete_conan_package_dialog(conan_ref, pkg_ids)
+
+    def delete_conan_package_dialog(self, conan_ref: str, pkg_ids: Optional[List[str]]):
+        msg = QtWidgets.QMessageBox(parent=self._main_window)
+        msg.setWindowTitle("Delete package")
+        msg.setText("Are you sure, you want to delete this package?")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
+        msg.setIcon(QtWidgets.QMessageBox.Question)
+        reply = msg.exec_()
+        if reply == QtWidgets.QMessageBox.Yes:
+            if this.conan_api:
+                this.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True, quiet=False)
 
     # Global pane and cross connection slots
 
