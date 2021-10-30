@@ -62,7 +62,12 @@ class ConanApi():
         # HACK: Removed the  @api_method decorator by getting the original function from the closure attribute
         search_packages = self.conan.search_packages.__closure__[0].cell_contents
         response = search_packages(self.conan, str(conan_ref))
-        result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
+        result: List[ConanPkg] = [{"id": ""}]
+        if not response.get("error"):
+            try:
+                result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
+            except Exception:
+                Logger().error(f"Received invalid package response format for {str(conan_ref)}")
         return result
 
     def get_short_path_root(self) -> Path:
