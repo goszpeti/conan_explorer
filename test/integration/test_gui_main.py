@@ -47,7 +47,7 @@ def testStartupNoExistingConfig(base_fixture, settings_fixture, qtbot):
 
 def testStartupWithExistingConfigAndOpenMenu(base_fixture, settings_fixture, qtbot):
     """
-    Test, loading a config file and opening the about menu, and clicking on OK
+    Test, that loading a config file and opening the about menu, and clicking on OK
     The about dialog showing is expected.
     """
     main_gui = main_window.MainUi()
@@ -191,6 +191,11 @@ def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
     Test the view menu entries.
     Check, that activating the entry set the hide flag is set on the widget.
     """
+    # deactivate all settings
+    app.active_settings.set(DISPLAY_APP_CHANNELS, False)
+    app.active_settings.set(DISPLAY_APP_VERSIONS, False)
+    app.active_settings.set(DISPLAY_APP_USERS, False)
+
     load_base_components(app.active_settings)
     main_gui = main_window.MainUi()
     app.main_window = main_gui  # needed for signal access
@@ -200,31 +205,59 @@ def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 
-    time.sleep(5)
     # assert default state
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         for test_app in tab.app_links:
+            assert test_app._app_version_cbox.isHidden()
+            assert test_app._app_user_cbox.isHidden()
+            assert test_app._app_channel_cbox.isHidden()
+
+    # click VERSIONS
+    main_gui.ui.menu_toggle_display_versions.trigger()
+    time.sleep(1)
+    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
+        for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
+            assert test_app._app_user_cbox.isHidden()
+            assert test_app._app_channel_cbox.isHidden()
+
+    # check settings
+    assert app.active_settings.get(DISPLAY_APP_VERSIONS)
+
+    # reload settings and check again
+    app.active_settings._read_ini()
+    assert app.active_settings.get(DISPLAY_APP_VERSIONS)
+
+    # click CHANNELS
+    main_gui.ui.menu_toggle_display_channels.trigger()
+    time.sleep(1)
+    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
+        for test_app in tab.app_links:
+            assert not test_app._app_version_cbox.isHidden()
+            assert test_app._app_user_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
-    # click and assert
-    main_gui.ui.menu_toggle_display_versions.trigger()
+    # click USERS
+    main_gui.ui.menu_toggle_display_users.trigger()
+    time.sleep(1)
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         for test_app in tab.app_links:
-            assert test_app._app_version_cbox.isHidden()
+            assert not test_app._app_version_cbox.isHidden()
+            assert not test_app._app_user_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
-    main_gui.ui.menu_toggle_display_channels.trigger()
-    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
-        for test_app in tab.app_links:
-            assert test_app._app_version_cbox.isHidden()
-            assert test_app._app_channel_cbox.isHidden()
+
     # click again
     main_gui.ui.menu_toggle_display_versions.trigger()
     main_gui.ui.menu_toggle_display_channels.trigger()
+    main_gui.ui.menu_toggle_display_users.trigger()
+    time.sleep(1)
+
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         for test_app in tab.app_links:
-            assert not test_app._app_version_cbox.isHidden()
-            assert not test_app._app_channel_cbox.isHidden()
+            assert test_app._app_version_cbox.isHidden()
+            assert test_app._app_user_cbox.isHidden()
+            assert test_app._app_channel_cbox.isHidden()
+
 
     app.conan_worker.finish_working(10)
     Logger.remove_qt_logger()

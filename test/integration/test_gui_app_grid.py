@@ -2,18 +2,19 @@
 These test starts the application but not with the main function,
 so the qtbot is usable to inspect gui objects.
 """
-from conan_app_launcher.__main__ import load_base_components
+import os
+import tempfile
+from pathlib import Path
+
 import conan_app_launcher as app
+from conan_app_launcher.__main__ import load_base_components
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import config_file
+from conan_app_launcher.components import AppConfigEntry, config_file
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.app_grid.app_link import AppLink, OFFICIAL_RELEASE_DISP_NAME
-
-from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
-from conan_app_launcher.components import AppConfigEntry
 from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
-
+from conan_app_launcher.ui.app_grid.app_link import AppLink
+from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
