@@ -26,7 +26,7 @@ If applicable, add screenshots to help explain your problem.
 **Desktop:**
  - OS: {platform.platform(terse=True)}
  - Python Version: {platform.python_version()}
- - Version: {this.__version__}
+ - Version: {__version__}
 
 **Additional context**
 Add any other context about the problem here.
@@ -35,9 +35,9 @@ Add any other context about the problem here.
 
 def custom_exception_hook(exctype, value, tb):
     Logger().error("Application crashed:")
-    with open(this.base_path / "crash.log", "w") as fd:
+    with open(base_path / "crash.log", "w") as fd:
         traceback.print_tb(tb, limit=10, file=fd)
-    if this.qt_app:
+    if qt_app:
         import urllib.parse
         title = urllib.parse.quote("Application Crash on <>")
         body = urllib.parse.quote(f"{BUG_REPORT}\n**Stacktrace**:\n" +
@@ -55,6 +55,6 @@ def custom_exception_hook(exctype, value, tb):
         msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
         msg.setIcon(QtWidgets.QMessageBox.Warning)
         msg.exec_()
-    if this.conan_worker:  # cancel conan worker tasks on exit
-        this.conan_worker.finish_working()
+    if conan_worker:  # cancel conan worker tasks on exit
+        conan_worker.finish_working()
     sys.exit(1)

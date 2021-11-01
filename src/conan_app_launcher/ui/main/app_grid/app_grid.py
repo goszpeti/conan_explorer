@@ -17,8 +17,13 @@ if TYPE_CHECKING:  # pragma: no cover
 class AppGrid():
 
     def __init__(self, main_window: "MainWindow"):
+        self.model = UiApplicationModel()
+        # conan works, model can be loaded
+        new_cfg_path = model.loadf(active_settings.get(LAST_CONFIG_FILE))
+        active_settings.set(LAST_CONFIG_FILE, str(new_cfg_path))
+
         self._main_window = main_window
-        self._icons_path = this.asset_path / "icons"
+        self._icons_path = asset_path / "icons"
 
         self._main_window.ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._main_window.ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
@@ -28,25 +33,30 @@ class AppGrid():
         if self._main_window.ui.tab_bar.count() > 0:  # remove the default tab
             self._main_window.ui.tab_bar.removeTab(0)
 
+    def save_config(self):
+        """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
+        save_config_file(Path(active_settings.get_string(LAST_CONFIG_FILE)), tab_configs)
+
+
     def re_init(self):
         """ To be called, when a new config file is loaded """
         tab_count = self._main_window.ui.tab_bar.count()
         for i in range(tab_count, 0, -1):  # delete all tabs
             self._main_window.ui.tab_bar.removeTab(i-1)
 
-        if this.conan_worker:
-            this.conan_worker.finish_working(3)
+        if conan_worker:
+            conan_worker.finish_working(3)
 
-        config_file_path = Path(this.active_settings.get_string(LAST_CONFIG_FILE))
+        config_file_path = Path(active_settings.get_string(LAST_CONFIG_FILE))
 
         if config_file_path.is_file():  # escape error log on first opening
-            this.tab_configs = load_config_file(config_file_path)
+            tab_configs = load_config_file(config_file_path)
         else:
-            this.tab_configs = []
+            tab_configs = []
 
         # update conan info
-        if this.conan_worker:
-            this.conan_worker.update_all_info(this.get_all_conan_refs())
+        if conan_worker:
+            conan_worker.update_all_info(get_all_conan_refs())
 
         self.load_tabs()
 
@@ -55,7 +65,7 @@ class AppGrid():
         new_list = []
         for i in range(self._main_window.ui.tab_bar.count()):
             new_list.append(self._main_window.ui.tab_bar.widget(i).config_data)
-        this.tab_configs = new_list
+        tab_configs = new_list
         self._main_window.save_config()
 
     def on_tab_context_menu_requested(self, position):
@@ -92,11 +102,11 @@ class AppGrid():
                 return
             # add tab
             tab_config = TabConfigModel(text)
-            this.tab_configs.append(tab_config)
+            tab_configs.append(tab_config)
 
             tab = TabAppGrid(self._main_window.ui.tab_bar, tab_config,
-                             max_columns=this.active_settings.get_int(GRID_COLUMNS),
-                             max_rows=this.active_settings.get_int(GRID_ROWS))
+                             max_columns=active_settings.get_int(GRID_COLUMNS),
+                             max_rows=active_settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, text)
             self._main_window.ui.save_config()
 
@@ -121,7 +131,7 @@ class AppGrid():
         msg.setIcon(QtWidgets.QMessageBox.Question)
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            this.tab_configs.remove(tab.config_data)
+            tab_configs.remove(tab.config_data)
             self._main_window.ui.tab_bar.removeTab(index)
             self._main_window.save_config()
 
@@ -130,10 +140,10 @@ class AppGrid():
 
     def load_tabs(self):
         """ Creates new layout """
-        for config_data in this.tab_configs:
+        for config_data in tab_configs:
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             tab = TabAppGrid(parent=self._main_window.ui.tab_bar, config_data=config_data,
-                             max_columns=this.active_settings.get_int(GRID_COLUMNS), max_rows=this.active_settings.get_int(GRID_ROWS))
+                             max_columns=active_settings.get_int(GRID_COLUMNS), max_rows=active_settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, config_data.name)
 
         # always show the first tab first

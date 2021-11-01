@@ -37,8 +37,8 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
             valid = True
             self.setStyleSheet("background: PaleGreen;")
         
-        if this.cache:
-            local_refs, remote_refs = this.cache.search(text)
+        if cache:
+            local_refs, remote_refs = cache.search(text)
             combined_refs = set()
             combined_refs.update(local_refs)
             combined_refs.update(remote_refs)
@@ -53,10 +53,10 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
                     self._loading_cbk()
 
     def load_completion(self, text):
-        if this.cache:
-            if not this.conan_api:
-                this.conan_api = ConanApi()
-            recipes = this.conan_api.search_query_in_remotes(f"{text}*")
-            this.cache.update_remote_package_list(recipes)  # add to cache
+        if cache:
+            if not conan_api:
+                conan_api = ConanApi()
+            recipes = conan_api.search_query_in_remotes(f"{text}*")
+            cache.update_remote_package_list(recipes)  # add to cache
             self.completion_finished.emit()
 

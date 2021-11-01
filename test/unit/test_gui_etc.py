@@ -2,7 +2,7 @@
 Test the self written qt gui components, which can be instantiated without
 using the whole application (standalone).
 """
-from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.main.about_dialog import AboutDialog
 from PyQt5 import QtCore, QtWidgets
 
 
@@ -14,7 +14,7 @@ def testAboutDialog(base_fixture, qtbot):
     Check, that the app name is visible and it is hidden after clicking OK:
     """
     root_obj = QtWidgets.QWidget()
-    widget = main_window.AboutDialog(root_obj)
+    widget = AboutDialog(root_obj)
     qtbot.addWidget(root_obj)
     widget.show()
     qtbot.waitExposed(widget)

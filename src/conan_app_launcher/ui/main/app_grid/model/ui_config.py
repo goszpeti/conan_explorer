@@ -9,7 +9,8 @@ from conan_app_launcher.logger import Logger
 from conan_app_launcher.components.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 
-from conan_app_launcher.data.ui_config import UiAppLinkConfig, UiApplicationConfig, UiTabConfig, UiConfigFactory, UI_CONFIG_JSON_TYPE
+from conan_app_launcher.model.data.ui_config import UiAppLinkConfig, UiApplicationConfig, UiTabConfig, UiConfigFactory, UI_CONFIG_JSON_TYPE
+
 
 class UiApplicationModel(UiApplicationConfig):
 
@@ -17,7 +18,7 @@ class UiApplicationModel(UiApplicationConfig):
         """ Create an empty AppModel on init, so we can load it later"""
         super().__init__(*args, **kwargs)
 
-    def load(self, UiApplicationConfig): # TODO
+    def load(self, UiApplicationConfig):  # TODO
         pass
 
     def loadf(self, config_file_setting) -> Path:
@@ -48,7 +49,7 @@ class UiApplicationModel(UiApplicationConfig):
         conan_refs: List[ConanWorkerElement] = []
         for tab in self.tabs:
             for app in tab.apps():
-                ref_dict: ConanWorkerElement = {"reference": str(app.conan_ref), 
+                ref_dict: ConanWorkerElement = {"reference": str(app.conan_ref),
                                                 "options": app.conan_options}
                 if ref_dict not in conan_refs:
                     conan_refs.append(ref_dict)
@@ -61,9 +62,8 @@ class UiAppLinkModel(UiAppLinkConfig):
     OFFICIAL_RELEASE = "<official release>"  # to be used for "_" channel
     OFFICIAL_USER = "<official user>"  # to be used for "_" user
 
-
     def load(self, parent, app_link_config):
-        #super().__init__(app_link_config)
+        # super().__init__(app_link_config)
 
         # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
@@ -78,15 +78,15 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._available_refs: List[ConanFileReference] = [ConanFileReference.loads(self.conan_ref)]
 
     def update_from_cache(self):
-        if this.cache:  # get all info from cache
-            self.set_available_packages(this.cache.get_similar_pkg_refs(
+        if cache:  # get all info from cache
+            self.set_available_packages(cache.get_similar_pkg_refs(
                 self._conan_ref.name, user="*"))
-            if this.USE_LOCAL_INTERNAL_CACHE:
-                self.set_package_info(this.cache.get_local_package_path(str(self._conan_ref)))
-            elif not this.USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:  # last chance to get path
-                if not this.conan_api:
-                    this.conan_api = ConanApi()
-                package_folder = this.conan_api.get_path_or_install(self.conan_ref, self.conan_options)
+            if USE_LOCAL_INTERNAL_CACHE:
+                self.set_package_info(cache.get_local_package_path(str(self._conan_ref)))
+            elif not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:  # last chance to get path
+                if not conan_api:
+                    conan_api = ConanApi()
+                package_folder = conan_api.get_path_or_install(self.conan_ref, self.conan_options)
                 self.set_package_info(package_folder)
 
     def register_update_callback(self, update_func: Callable):
@@ -114,8 +114,8 @@ class UiAppLinkModel(UiAppLinkConfig):
             if (self.app_data.get("conan_ref", "") != new_value and new_value != INVALID_CONAN_REF
                     and self._conan_ref.version != self.INVALID_DESCR
                     and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
-                if this.conan_worker:
-                    this.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
+                if conan_worker:
+                    conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
             # invalidate old entries, which are dependent on the conan ref
             self.app_data["conan_ref"] = new_value
             self._executable = Path("NULL")
@@ -249,7 +249,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             self._icon = self._package_folder / new_value.replace("//", "")
         elif new_value and not Path(new_value).is_absolute():
             # relative path is calculated from config file path
-            self._icon = Path(this.active_settings.get_string(LAST_CONFIG_FILE)).parent / new_value
+            self._icon = Path(active_settings.get_string(LAST_CONFIG_FILE)).parent / new_value
             emit_warning = True
         elif not new_value:  # try to find icon in temp
             self._icon = extract_icon(self.executable, Path(tempfile.gettempdir()))
@@ -258,13 +258,13 @@ class UiAppLinkModel(UiAppLinkConfig):
             emit_warning = True
         # default icon, until package path is updated
         if not self._icon.is_file():
-            self._icon = this.asset_path / "icons" / "app.png"
+            self._icon = asset_path / "icons" / "app.png"
             if new_value and emit_warning:  # user input given -> warning
                 Logger().error(f"Can't find icon {str(new_value)} for '{self.name}'")
 
         # default icon, until package path is updated
         if not self._icon.is_file():
-            self._icon = this.asset_path / "icons" / "app.png"
+            self._icon = asset_path / "icons" / "app.png"
             if new_value:  # user input given -> warning
                 Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
         else:
@@ -310,9 +310,9 @@ class UiAppLinkModel(UiAppLinkConfig):
         Usually to be called from conan worker.
         """
 
-        if this.USE_LOCAL_INTERNAL_CACHE:
-            if self._package_folder != package_folder and this.cache:
-                this.cache.update_local_package_path(str(self.conan_ref), package_folder)
+        if USE_LOCAL_INTERNAL_CACHE:
+            if self._package_folder != package_folder and cache:
+                cache.update_local_package_path(str(self.conan_ref), package_folder)
         self._package_folder = package_folder
 
         # use setter to reevaluate
@@ -329,8 +329,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         Set all other available packages.
         Usually to be called from conan worker.
         """
-        if self._available_refs != available_refs and this.cache:
-            this.cache.update_remote_package_list(available_refs)
+        if self._available_refs != available_refs and cache:
+            cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
 
         # call registered update callback
@@ -344,12 +344,12 @@ class UiTabModel(UiTabConfig):
     # Inherit constructor
 
     def load(self, tab_config: UiTabConfig):
-            # currently this is trivial, but this can change
-            # convert all apps to the extended Model
-            for app in self.apps:
-                app = UiAppLinkModel(app, self)
-       # = [], tab_config: UiTabConfig = None
-            self._convert_to_model_repr()
+        # currently this is trivial, but this can change
+        # convert all apps to the extended Model
+        for app in self.apps:
+            app = UiAppLinkModel(app, self)
+   # = [], tab_config: UiTabConfig = None
+        self._convert_to_model_repr()
 
     def _convert_to_model_repr(self):
         """ Convert from entries UiTabConfig to other models """
@@ -357,4 +357,3 @@ class UiTabModel(UiTabConfig):
         for app in self.apps:
             converted_apps.append(UiAppLinkModel().load(app))
         self.apps = converted_apps
-

@@ -22,8 +22,8 @@ class LocalConanPackageExplorer():
     def __init__(self, main_window: "MainWindow"):
         self._main_window = main_window
         self.pkg_sel_model = None
-        if not this.conan_api:
-            this.conan_api = ConanApi()
+        if not conan_api:
+            conan_api = ConanApi()
 
         main_window.ui.package_select_view.header().setVisible(True)
         main_window.ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
@@ -45,7 +45,7 @@ class LocalConanPackageExplorer():
 
     def _init_selection_context_menu(self):
         self.select_cntx_menu = QtWidgets.QMenu()
-        icons_path = this.asset_path / "icons"
+        icons_path = asset_path / "icons"
 
         self.copy_ref_action = QtWidgets.QAction("Copy reference", self._main_window)
         self.copy_ref_action.setIcon(QtGui.QIcon(str(icons_path / "copy_link.png")))
@@ -63,11 +63,11 @@ class LocalConanPackageExplorer():
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
 
     def get_selected_pkg_source_item(self) -> Optional[TreeItem]:
-        indexes = this.main_window.ui.package_select_view.selectedIndexes()
+        indexes = main_window.ui.package_select_view.selectedIndexes()
         if len(indexes) != 1:
             Logger().debug(f"Mismatch in selected items for context action: {str(len(indexes))}")
             return None
-        view_index = this.main_window.ui.package_select_view.selectedIndexes()[0]
+        view_index = main_window.ui.package_select_view.selectedIndexes()[0]
         source_item: TreeItem = view_index.model().mapToSource(view_index).internalPointer()
         return source_item
 
@@ -110,8 +110,8 @@ class LocalConanPackageExplorer():
         msg.setIcon(QtWidgets.QMessageBox.Question)
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            if this.conan_api:
-                this.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True, quiet=False)
+            if conan_api:
+                conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True, quiet=False)
 
     # Global pane and cross connection slots
 
@@ -141,7 +141,7 @@ class LocalConanPackageExplorer():
             return
         conan_ref = self.get_selected_conan_ref()
         pkg_id = self.get_selected_conan_pkg_info().get("id", "")
-        pkg_path = this.conan_api.get_package_folder(
+        pkg_path = conan_api.get_package_folder(
             ConanFileReference.loads(conan_ref), pkg_id)
         if not pkg_path.exists():
             Logger().warning(f"Can't find package path for {conan_ref} and {str(source_item.itemData[0])}")
@@ -183,7 +183,7 @@ class LocalConanPackageExplorer():
 
     def _init_pkg_context_menu(self):
         self.file_cntx_menu = QtWidgets.QMenu()
-        icons_path = this.asset_path / "icons"
+        icons_path = asset_path / "icons"
 
         self.open_fm_action = QtWidgets.QAction("Show in File Manager", self._main_window)
         self.open_fm_action.setIcon(QtGui.QIcon(str(icons_path / "file-explorer.png")))
@@ -273,7 +273,7 @@ class LocalConanPackageExplorer():
         file_path = Path(self._get_selected_pkg_file())
         conan_ref = self.get_selected_conan_ref()
         # determine relpath from package
-        pkg_path = this.conan_api.get_package_folder(
+        pkg_path = conan_api.get_package_folder(
             ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
         rel_path = file_path.relative_to(pkg_path)
 
@@ -286,11 +286,11 @@ class LocalConanPackageExplorer():
         open_in_file_manager(file_path)
 
     def _get_pkg_file_source_item(self) -> Optional[TreeItem]:
-        indexes = this.main_window.ui.package_file_view.selectedIndexes()
+        indexes = main_window.ui.package_file_view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug(f"No selected item for context action")
             return None
-        return this.main_window.ui.package_file_view.selectedIndexes()[0]
+        return main_window.ui.package_file_view.selectedIndexes()[0]
 
     def _get_selected_pkg_file(self) -> str:
         file_view_index = self._get_pkg_file_source_item()

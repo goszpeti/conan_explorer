@@ -6,7 +6,7 @@ from distutils.version import StrictVersion
 from pathlib import Path
 from typing import Any, Dict, List, TYPE_CHECKING, Optional, Type, TypeVar, Union
 
-from conan_app_launcher.data.ui_config import UiAppLinkConfig, UiApplicationConfig, UiTabConfig, UiConfigInterface
+from conan_app_launcher.model.data.ui_config import UiAppLinkConfig, UiApplicationConfig, UiTabConfig, UiConfigInterface
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict

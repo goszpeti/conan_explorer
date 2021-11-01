@@ -95,21 +95,21 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
 
     def __init__(self, *args, **kwargs):
         super(PkgSelectModel, self).__init__(*args, **kwargs)
-        self._icons_path = this.asset_path / "icons"
+        self._icons_path = asset_path / "icons"
         self.rootItem = TreeItem(["Packages"])
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
-        if not this.conan_api:
-            this.conan_api = ConanApi()
+        if not conan_api:
+            conan_api = ConanApi()
         self.setupModelData()
 
 
     def setupModelData(self):
-        for conan_ref in this.conan_api.get_all_local_refs():
+        for conan_ref in conan_api.get_all_local_refs():
             conan_item = TreeItem([str(conan_ref)], self.rootItem)
             self.rootItem.appendChild(conan_item)
-            infos = this.conan_api.get_local_pkgs_from_ref(conan_ref)
+            infos = conan_api.get_local_pkgs_from_ref(conan_ref)
             for info in infos:
                 pkg_item = TreeItem([info], conan_item, PROFILE_TYPE)
                 conan_item.appendChild(pkg_item)

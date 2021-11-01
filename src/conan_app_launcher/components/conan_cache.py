@@ -15,7 +15,7 @@ class ConanInfoCache():
 
     CACHE_FILE_NAME = "cache.json"
 
-    def __init__(self, cache_dir: Path, local_refs: List[ConanFileReference]):
+    def __init__(self, cache_dir: Path, local_refs: List[ConanFileReference]=[]):
         self._cache_file = cache_dir / self.CACHE_FILE_NAME
         self._local_packages: Dict[str, str] = {}
         self._remote_packages: Dict[str, Dict[str, List[str]]] = {}

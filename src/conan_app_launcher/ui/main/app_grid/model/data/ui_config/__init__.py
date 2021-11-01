@@ -9,7 +9,8 @@ from dataclasses import dataclass, field
 
 UI_CONFIG_JSON_TYPE = "json"
 
-# classes representing the ui config (Data Transfer Objects)
+# classes representing the ui config (Data Transfer Objects) - this is a bit overblown for this usecase,
+# but ot is worth an experiment
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.model import UiAppLinkModel, UiTabModel
 
@@ -45,8 +46,6 @@ def UiConfigFactory(type: str, source: PathLike) -> "UiConfigInterface":
     else:
         raise NotImplementedError
     return implementation
-
-# Interface for Settings to implement
 
 
 class UiConfigInterface(ABC):

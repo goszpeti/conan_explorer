@@ -73,10 +73,10 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.addSpacerItem(self._v_spacer)
 
         # connect signals
-        if this.main_window:
-            this.main_window.display_versions_changed.connect(self.update_versions_cbox)
-            this.main_window.display_users_changed.connect(self.update_users_cbox)
-            this.main_window.display_channels_changed.connect(self.update_channels_cbox)
+        if main_window:
+            main_window.display_versions_changed.connect(self.update_versions_cbox)
+            main_window.display_users_changed.connect(self.update_users_cbox)
+            main_window.display_channels_changed.connect(self.update_channels_cbox)
         self._app_button.clicked.connect(self.on_click)
         self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
         self._app_user_cbox.currentIndexChanged.connect(self.on_user_selected)
@@ -88,7 +88,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def _init_menu(self):
         self.menu = QtWidgets.QMenu()
-        icons_path = this.asset_path / "icons"
+        icons_path = asset_path / "icons"
 
         self.open_fm_action = QtWidgets.QAction("Show in File Manager", self)
         self.open_fm_action.setIcon(QtGui.QIcon(str(icons_path / "file-explorer.png")))
@@ -165,8 +165,8 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._apply_new_config()
             self._app_button.grey_icon()
             self.config_data.update_from_cache()
-            if this.main_window:
-                this.main_window.save_config()
+            if main_window:
+                main_window.save_config()
 
     def open_app_link_add_dialog(self, new_config_data = None):
         if not new_config_data:
@@ -179,14 +179,14 @@ class AppLink(QtWidgets.QVBoxLayout):
             new_config_data.update_from_cache() # instantly use local paths and pkgs
             app_link = AppLink(self.parent_tab, new_config_data)
             self.parent_tab.add_app_link_to_tab(app_link)
-            if this.main_window:
-                this.main_window.save_config()
+            if main_window:
+                main_window.save_config()
             return app_link  # for testing
         return None
 
     def remove(self):
         # confirmation dialog
-        message_box = QtWidgets.QMessageBox(parent=this.main_window)
+        message_box = QtWidgets.QMessageBox(parent=main_window)
         message_box.setWindowTitle("Delete app link")
         message_box.setText(f"Are you sure, you want to delete the link \"{self.config_data.name}?\"")
         message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
@@ -195,8 +195,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         if reply == QtWidgets.QMessageBox.Yes:
             self.delete()
             self.parent_tab.remove_app_link_from_tab(self)
-            if this.main_window:
-                this.main_window.save_config()
+            if main_window:
+                main_window.save_config()
 
     def update_with_conan_info(self):
         if self._app_channel_cbox.itemText(0) != self.config_data.INVALID_DESCR and \
@@ -234,20 +234,20 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_button.ungrey_icon()
 
     def update_versions_cbox(self):
-        if this.active_settings and this.active_settings.get(DISPLAY_APP_VERSIONS):
+        if active_settings and active_settings.get(DISPLAY_APP_VERSIONS):
             self._app_version_cbox.show()
         else:
             self._app_version_cbox.hide()
 
 
     def update_users_cbox(self):
-        if this.active_settings and this.active_settings.get(DISPLAY_APP_USERS):
+        if active_settings and active_settings.get(DISPLAY_APP_USERS):
             self._app_user_cbox.show()
         else:
             self._app_user_cbox.hide()
 
     def update_channels_cbox(self):
-        if this.active_settings and this.active_settings.get(DISPLAY_APP_CHANNELS):
+        if active_settings and active_settings.get(DISPLAY_APP_CHANNELS):
             self._app_channel_cbox.show()
         else:
             self._app_channel_cbox.hide()
@@ -279,8 +279,8 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self._app_channel_cbox.setCurrentIndex(0)
         self._app_button.setToolTip(str(self.config_data.conan_ref))
-        if this.main_window:
-            this.main_window.save_config()
+        if main_window:
+            main_window.save_config()
 
     def on_user_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
@@ -310,8 +310,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.setToolTip(str(self.config_data.conan_ref))
         #self._app_channel_cbox.setEnabled(True)
 
-        if this.main_window:
-            this.main_window.save_config()
+        if main_window:
+            main_window.save_config()
 
     def on_channel_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
@@ -329,5 +329,5 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.config_data.channel = self._app_channel_cbox.currentText()
         self._app_button.setToolTip(str(self.config_data.conan_ref))
         self._app_button.set_icon(self.config_data.icon)
-        if this.main_window:
-            this.main_window.save_config()
+        if main_window:
+            main_window.save_config()

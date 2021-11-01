@@ -4,13 +4,12 @@ import tempfile
 import time
 from pathlib import Path
 from shutil import copy
+from typing import List
 
-import conan_app_launcher as app
 import conan_app_launcher
-from conan_app_launcher.components import load_config_file
 from conan_app_launcher.components.conan import (ConanApi,
                                                  _create_key_value_pair_list)
-from conan_app_launcher.components.conan_worker import ConanWorker
+from conan_app_launcher.components.conan_worker import ConanWorker, ConanWorkerElement
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conans.model.ref import ConanFileReference
 
@@ -68,7 +67,7 @@ def testConanFindRemotePkg(base_fixture):
     """
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
-    default_settings = dict(conan.cache.default_profile.settings)
+    default_settings = dict(conan.client_cache.default_profile.settings)
 
     pkgs = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
     assert len(pkgs) == 2
@@ -80,7 +79,7 @@ def testConanFindRemotePkg(base_fixture):
             assert default_settings[setting] in pkg["settings"][setting]
 
 
-def testConanNotFindRemotePkgWrongOpts(base_fixture, capsys):
+def testConanNotFindRemotePkgWrongOpts(base_fixture, capfd):
     """
     Test, if a wrong Option return causes an error.
     Empty list must be returned and the error be logged.
@@ -88,7 +87,7 @@ def testConanNotFindRemotePkgWrongOpts(base_fixture, capsys):
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
     pkg = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"BogusOption": "True"})
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
     assert not pkg
     assert "Can't find a matching package" in captured.err
 
@@ -211,25 +210,17 @@ def testSearchForAllPackages(base_fixture):
     assert str(ref) in str(res)
 
 
-def testConanWorker(base_fixture, ui_config_fixture, mocker):
+def testConanWorker(base_fixture, mocker):
     """
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
-    temp_dir = tempfile.gettempdir()
-    config_file_path = base_fixture.testdata_path / "config_file" / "worker.json"
-    temp_config_file_path = copy(config_file_path, temp_dir)
-    app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
-    app.tab_configs = load_config_file(config_file_path)
-    conan_refs = []
-    for tab in app.tab_configs:
-        for app_entry in tab.get_app_entries():
-            ref_dict = {"reference": str(app_entry.conan_ref), "options": app_entry.conan_options}
-            if ref_dict not in conan_refs:
-                conan_refs.append(ref_dict)
+    conan_refs: List[ConanWorkerElement] = [{"reference": "m4/1.4.19@_/_", "options": {}},
+                {"reference": "zlib/1.2.11@conan/stable", "options": {"shared": "True"}}]
 
     mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
-    conan_worker = ConanWorker(conan_refs)
+    conan_worker = ConanWorker(conan_api=ConanApi())
+    conan_worker.update_all_info(conan_refs)
     time.sleep(3)
     conan_worker.finish_working()
 

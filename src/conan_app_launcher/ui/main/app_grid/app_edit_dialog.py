@@ -12,11 +12,11 @@ class EditAppDialog(QtWidgets.QDialog):
     def __init__(self,  app_config_data, parent: QtWidgets.QWidget, flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
         self._app_config_data = app_config_data
-        self._ui = uic.loadUi(this.base_path / "ui" / "app_grid" / "app_edit.ui", baseinstance=self)
+        self._ui = uic.loadUi(base_path / "ui" / "app_grid" / "app_edit.ui", baseinstance=self)
 
         self.setModal(True)
         self.setWindowTitle("Edit App Link")
-        self.setWindowIcon(QtGui.QIcon(str(this.asset_path / "icons" / "edit.png")))
+        self.setWindowIcon(QtGui.QIcon(str(asset_path / "icons" / "edit.png")))
 
         # fill up current info
         self._ui.name_line_edit.setText(self._app_config_data.name)

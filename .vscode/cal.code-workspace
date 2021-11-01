@@ -27,7 +27,6 @@
         "coverage-gutters.showLineCoverage": true,
         "coverage-gutters.showRulerCoverage": true,
         "python.testing.pytestArgs": [
-            "--capture=no", // print output
             "-v",
             "--junit-xml=${workspaceFolder}/result.xml"
         ],

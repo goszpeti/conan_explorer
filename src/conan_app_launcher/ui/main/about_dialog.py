@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtGui
-import conan_app_launcher as this
+from conan_app_launcher import asset_path, __version__
 
 
 class AboutDialog(QtWidgets.QDialog):
@@ -22,13 +22,13 @@ class AboutDialog(QtWidgets.QDialog):
         self.resize(430, 280)
         ok_button = QtWidgets.QDialogButtonBox.Ok
 
-        icon = QtGui.QIcon(str(this.asset_path / "icons" / "icon.ico"))
+        icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
         self._logo_label = QtWidgets.QLabel(self)
         self._logo_label.setPixmap(icon.pixmap(100, 100))
         self._text = QtWidgets.QTextBrowser(self)
         self._text.setOpenExternalLinks(True)
         self._text.setStyleSheet("background-color: #F0F0F0;")
-        self._text.setHtml(self.html_content.replace("${version}", this.__version__))
+        self._text.setHtml(self.html_content.replace("${version}", __version__))
         self._text.setFrameShape(QtWidgets.QFrame.NoFrame)
 
         self._button_box = QtWidgets.QDialogButtonBox(ok_button)

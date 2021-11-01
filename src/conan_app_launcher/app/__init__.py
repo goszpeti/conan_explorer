@@ -1,33 +1,26 @@
+from conan_app_launcher.components import ConanApi, ConanWorker
+from conan_app_launcher import (SETTINGS_FILE_NAME, PROG_NAME, __version__, asset_path, user_save_path)
+from typing import List, Optional
 import os
 import platform
 import sys
 import tempfile
 from pathlib import Path
-from typing import List
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from conan_app_launcher.ui.main_window import MainWindow
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsFactory, SettingsInterface
-from conan_app_launcher.data.ui_config import UI_CONFIG_JSON_TYPE
-from conan_app_launcher.data.ui_config.json_file import JsonUiConfig
-from conan_app_launcher.model.ui_config import UiApplicationModel
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
 # this allows to use forward declarations to avoid circular imports
-from typing import List, Optional
 
-from conan_app_launcher import (
-                                SETTINGS_FILE_NAME, PROG_NAME, __version__, asset_path,
-                                base_path, user_save_path)
-from conan_app_launcher.logger import Logger
-from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
-from conan_app_launcher.components.conan_worker import ConanWorkerElement
-from conan_app_launcher.settings.ini_file import (LAST_CONFIG_FILE,
-                                                       IniSettings)
-from conan_app_launcher.ui.bug_report import custom_exception_hook
-from conan_app_launcher.ui.main_window import MainWindow
 
 try:
     # this is a workaround for Windows, so that on the taskbar the
@@ -40,17 +33,18 @@ except ImportError:
 
 ### Global variables ###
 
-main_window: Optional[MainWindow] = None  # TODO can this be removed?
+main_window: Optional["MainWindow"] = None  # TODO can this be removed?
 conan_api = ConanApi()
 conan_worker = ConanWorker(conan_api)
-active_settings = SettingsFactory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
-model = UiApplicationModel()
+active_settings: SettingsInterface = SettingsFactory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
+
 
 def main():
     """
     Start the Qt application and an all main components
     """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
+    from conan_app_launcher.ui.bug_report import custom_exception_hook
     sys.excepthook = custom_exception_hook
 
     if platform.system() == "Darwin":
@@ -63,10 +57,6 @@ def main():
         sys.stdout = open(os.devnull, "w")
         sys.stderr = open(os.path.join(tempfile.gettempdir(), "stderr-" + PROG_NAME), "w")
 
-    # conan works, model can be loaded
-    new_cfg_path = model.loadf(active_settings.get(LAST_CONFIG_FILE))
-    active_settings.set(LAST_CONFIG_FILE, str(new_cfg_path))
-
     # apply Qt attributes (only at init possible)
     QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QtWidgets.QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
@@ -77,7 +67,7 @@ def main():
     app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
 
     from conan_app_launcher.ui.main_window import MainWindow
-    main_window = MainWindow(model)
+    main_window = MainWindow()
     # load tabs needs the pyqt signals - constructor has to be finished
     main_window.start_app_grid()
     main_window.setWindowIcon(app_icon)

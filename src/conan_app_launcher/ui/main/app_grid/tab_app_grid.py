@@ -98,7 +98,7 @@ class TabAppGrid(QtWidgets.QWidget):
             config_data.update_from_cache()  # instantly use local paths and pkgs
             app_link = AppLink(self, config_data)
             self.add_app_link_to_tab(app_link)
-            this.main_window.save_config()
+            main_window.save_config()
             return app_link  # for testing
         return None
 

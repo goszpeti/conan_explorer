@@ -80,7 +80,7 @@ class ConanApi():
         return result
 
     def get_short_path_root(self) -> Path:
-        """ Return short path root for Windows. Sadly there is no built-in way to do this. """
+        """ Return short path root for Windows. Sadly there is no built-in way to do  """
         # only need to get once
         if self._short_path_root.exists() or platform.system() != "Windows":
             return self._short_path_root
