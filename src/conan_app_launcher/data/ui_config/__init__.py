@@ -1,30 +1,31 @@
 
-from conan_app_launcher import PathLike
+from conans.model.ref import ConanFileReference
+from conan_app_launcher import INVALID_CONAN_REF, PathLike
 from typing import Union
 from abc import ABC, abstractmethod
 
 from typing import Dict, List, TYPE_CHECKING, Optional
+from dataclasses import dataclass, field
 
 UI_CONFIG_JSON_TYPE = "json"
 
 # classes representing the ui config (Data Transfer Objects)
 
-class OptionType():
-    name: str
-    value: str
-
+@dataclass
 class AppLinkConfig():
     name: str = "New App"
-    conan_ref: str
-    executable: str
-    icon: str
-    is_console_application: bool
-    args: str
-    conan_options: List[OptionType]
+    conan_ref: ConanFileReference = ConanFileReference.loads(INVALID_CONAN_REF)
+    executable: str = ""
+    icon: str = ""
+    is_console_application: bool = False
+    args: str = ""
+    conan_options: Dict[str, str] = field(default_factory=dict)
 
+
+@dataclass
 class TabConfig():
     name: str = "New Tab"
-    apps: List[AppLinkConfig]
+    apps: List[AppLinkConfig] = field(default_factory=list)
 
 
 def UiConfigFactory(type: str, source: PathLike) -> "UiConfigInterface":

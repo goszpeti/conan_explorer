@@ -3,6 +3,7 @@ import os
 import platform
 import sys
 import tempfile
+from dataclasses import asdict
 from distutils.file_util import copy_file
 from pathlib import Path
 
@@ -15,11 +16,10 @@ def testCorrectFile(base_fixture, ui_config_fixture):
     Tests reading a correct config json with 2 tabs.
     Expects the same values as in the file.
     """
-    config = JsonUiConfig(ui_config_fixture)
-    tabs = config.load()
+    tabs = JsonUiConfig(ui_config_fixture).load()
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19"
+    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19@_/_"
     assert tab0_entries[0].executable == "bin/m4"
     assert tab0_entries[0].icon == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
@@ -27,53 +27,54 @@ def testCorrectFile(base_fixture, ui_config_fixture):
     assert tab0_entries[0].args == "-n name"
 
     assert str(tab0_entries[1].conan_ref) == "zlib/1.2.11@conan/stable"
-    assert tab0_entries[1].app_data.get("executable") == "bin/app2"
-    assert tab0_entries[1].app_data.get("icon") == "icon.ico"
+    assert tab0_entries[1].executable == "bin/app2"
+    assert tab0_entries[1].icon == "icon.ico"
     assert tab0_entries[1].name == "App2"
     assert not tab0_entries[1].is_console_application  # default
     assert tab0_entries[1].args == ""
     assert tab0_entries[1].conan_options == {"shared": "True", "Option2": "Value2"}
 
     assert tabs[1].name == "Extra"
-    tab1_entries = tabs[1].get_app_entries()
+    tab1_entries = tabs[1].apps
     assert str(tab1_entries[0].conan_ref) == "app2/1.0.0@user/stable"
-    assert tab1_entries[0].app_data["executable"] == "bin/app2.exe"
-    assert tab1_entries[0].app_data.get("icon") == "//myicon.png"
+    assert tab1_entries[0].executable == "bin/app2.exe"
+    assert tab1_entries[0].icon == "//myicon.png"
     assert tab1_entries[0].name == "App2"
 
 
-def testUpdate(base_fixture, ui_config_fixture):
+def testUpdate(base_fixture):
     temp_file = Path(tempfile.gettempdir()) / "update.json"
     copy_file(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
 
-    tabs = load_config_file(temp_file)
+    tabs = JsonUiConfig(temp_file).load()
     assert tabs[0].name == "Basics"
-    tab0_entries = tabs[0].get_app_entries()
-    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19"
+    tab0_entries = tabs[0].apps
+    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19@_/_"
     assert str(tab0_entries[1].conan_ref) == "boost_functional/1.69.0@bincrafters/stable"
     assert tabs[1].name == "Extra"
-    tab1_entries = tabs[1].get_app_entries()
+    tab1_entries = tabs[1].apps
     assert str(tab1_entries[0].conan_ref) == "app2/1.0.0@user/stable"
 
     # now check the file, don't trust the own parser
     read_obj = {}
     with open(temp_file) as config_file:
         read_obj = json.load(config_file)
-    assert read_obj.get("version") == "0.3.1"  # last version
+    assert read_obj.get("version") == "0.4.0"  # last version
     assert read_obj.get("tabs")[0].get("apps")[0].get("conan_ref") == "m4/1.4.19@_/_"
     assert read_obj.get("tabs")[0].get("apps")[0].get("package_id") is None
+    assert read_obj.get("tabs")[0].get("apps")[0].get("is_console_application") is True
+    assert read_obj.get("tabs")[0].get("apps")[0].get("console_application") is None
 
 
-def testNoneExistantFilename(base_fixture, capfd):
+def testNewFilenameIsCreated(base_fixture):
     """
     Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
-    tabs = load_config_file(base_fixture.testdata_path / "nofile.json")
+    new_file_path = tempfile.mktemp()
+    tabs = JsonUiConfig(new_file_path).load()
     assert tabs == []
-    captured = capfd.readouterr()
-    assert "ERROR" in captured.err
-    assert "does not exist" in captured.err
+    assert Path(new_file_path).exists()
 
 
 def testInvalidVersion(base_fixture, capfd):
@@ -81,7 +82,7 @@ def testInvalidVersion(base_fixture, capfd):
     Tests, that reading a config file with the wrong version will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
-    tabs = load_config_file(base_fixture.testdata_path / "config_file" / "wrong_version.json")
+    tabs = JsonUiConfig(base_fixture.testdata_path / "config_file" / "wrong_version.json").load()
     assert tabs == []
     captured = capfd.readouterr()
     assert "ERROR" in captured.err
@@ -94,10 +95,28 @@ def testInvalidContent(base_fixture, capfd):
     Tests, that reading a config file with invalid syntax will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
-    tabs = load_config_file(base_fixture.testdata_path / "config_file" / "invalid_syntax.json")
+    tabs = JsonUiConfig(base_fixture.testdata_path / "config_file" / "invalid_syntax.json").load()
     assert tabs == []
     captured = capfd.readouterr()
     assert "Expecting property name" in captured.err
+
+
+def check_config(ref_dict, test_dict):
+    """ Check dict entries to a ref dict (recursive) """
+    for key in test_dict:
+        if ref_dict.get(key):
+            if isinstance(ref_dict.get(key), list):
+                test_list = ref_dict.get(key)
+                ref_list = test_dict.get(key)
+                for i in range(len(test_list)):
+                    check_config(test_list[i], ref_list[i])
+            elif isinstance(ref_dict.get(key), dict):
+                check_config(ref_dict.get(key), test_dict.get(key))
+                continue
+            else:
+                assert test_dict.get(key) == ref_dict.get(key)
+        else:
+            assert not test_dict.get(key)
 
 
 def testWriteConfigFile(base_fixture, ui_config_fixture, tmp_path):
@@ -107,131 +126,15 @@ def testWriteConfigFile(base_fixture, ui_config_fixture, tmp_path):
     """
     test_file = Path(tmp_path) / "test.json"
 
-    tabs = load_config_file(ui_config_fixture)
-    save_config_file(base_fixture.testdata_path / test_file, tabs)
+    config = JsonUiConfig(ui_config_fixture)
+    tabs = config.load()
+    new_config = JsonUiConfig(base_fixture.testdata_path / test_file)
+    new_config.save(tabs)
     with open(str(ui_config_fixture)) as config:
         ref_dict = json.load(config)
     with open(str(test_file)) as config:
         test_dict = json.load(config)
-    assert test_dict == ref_dict
-
-
-def testExecutableEval(base_fixture, capfd):
-    """
-    Tests, that the executable setter works on all cases.
-    Expects correct file, error messoge on wrong file an error message on no file.
-    """
-    app_data = {"name": "AppName", "executable": "python"}
-    exe = Path(sys.executable)
-    app_link = AppConfigEntry(app_data)
-
-    app_link.set_package_info(exe.parent)  # trigger set
-    assert app_link.executable == exe
-
-    app_link.executable = "nonexistant"
-    captured = capfd.readouterr()
-    assert "ERROR" in captured.err
-    assert "Can't find file" in captured.err
-
-    app_link.executable = ""
-    captured = capfd.readouterr()
-    assert "ERROR" in captured.err
-    assert "No file" in captured.err
-
-
-def testIconEval(base_fixture, ui_config_fixture, tmp_path):
-    """
-    Tests, that the icon setter works on all cases.
-    Expects package relative file, config-file rel. file, automaticaly extracted file,
-    and error message and default icon on no file.
-    """
-
-    # copy icons to tmp_path to fake package path
-    copy_file(app.asset_path / "icons" / "icon.ico", tmp_path)
-    copy_file(app.asset_path / "icons" / "app.png", tmp_path)
-
-    # relative to package with // notation
-    app_data = {"name": "AppName", "icon": "//icon.ico", "executable": sys.executable}
-    app_link = AppConfigEntry(app_data)
-    app_link.set_package_info(tmp_path)  # trigger set
-    assert app_link.icon == tmp_path / "icon.ico"
-    assert app_link.app_data["icon"] == "//icon.ico"
-
-    # relative to config file
-    rel_path = "icons/../icons"
-    new_ico_path = ui_config_fixture.parent / rel_path
-    os.makedirs(str(new_ico_path), exist_ok=True)
-    copy_file(app.asset_path / "icons" / "icon.ico", new_ico_path)
-    app_link.icon = rel_path + "/icon.ico"
-    assert app_link.icon == (new_ico_path / "icon.ico").resolve()
-
-    # absolute path
-    app_link.icon = str(tmp_path / "icon.ico")
-    assert app_link.icon == tmp_path / "icon.ico"
-
-    # extract icon
-    app_link.icon = ""
-    if platform.system() == "Windows":
-        icon_path = Path(tempfile.gettempdir()) / (str(Path(sys.executable).name) + ".img")
-        assert app_link.icon == icon_path.resolve()
-    elif platform.system() == "Linux":
-        assert app_link.icon == app.asset_path / "icons" / "app.png"
-
-
-def testIconEvalWrongPath(capfd, base_fixture, tmp_path):
-    """ Test, that a nonexistant path returns an error """
-    app_data = {"conan_ref": "zlib/1.2.11@conan/stable", "name": "AppName",
-                "icon": str(Path.home() / "nonexistant.png"), "executable": sys.executable}
-    app_link = AppConfigEntry(app_data)
-
-    # wrong path
-    captured = capfd.readouterr()
-    assert "ERROR" in captured.err
-    assert "Can't find icon" in captured.err
-    assert app_link.icon == app.asset_path / "icons" / "app.png"
-
-
-def testOptionsEval(base_fixture):
-    """
-    Test, if extraction of option works correctly.
-    Expects the same option name and value as given to the constructor.
-    """
-    app_data = {"name": "AppName", "executable": "python",
-                "conan_options": [{"name": "myopt", "value": "myvalue"}]}
-    app_link = AppConfigEntry(app_data)
-
-    # one value
-    assert app_link.conan_options == {"myopt": "myvalue"}
-
-    # multi value
-    app_link.conan_options = {"myopt1": "myvalue1", "myopt2": "myvalue2"}
-    assert app_link.app_data["conan_options"] == [{"name": "myopt1", "value": "myvalue1"},
-                                                  {"name": "myopt2", "value": "myvalue2"}]
-    assert app_link.conan_options == {"myopt1": "myvalue1", "myopt2": "myvalue2"}
-
-    # empty value
-    app_link.conan_options = []
-    assert app_link.conan_options == {}
-
-def testOfficialRelease(base_fixture):
-    """
-    Test, if an official reference in the format name/1.0.0@_/_ works correctly.
-    Expects the same option name and value as given to the constructor.
-    """
-    app_data = {"name": "AppName", "conan_ref": "zlib/1.2.11@_/_"}
-    app_link = AppConfigEntry(app_data)
-    assert app_link.channel == AppConfigEntry.OFFICIAL_RELEASE
-    assert str(app_link.conan_ref) == "zlib/1.2.11" # both formats are valid, so we accept the shortened one
-
-    # check, that setting channel works too
-    app_link.channel = "stable"
-    app_link.channel = AppConfigEntry.OFFICIAL_RELEASE
-    assert app_link.channel == AppConfigEntry.OFFICIAL_RELEASE
-
-    # check, that changing the version does not invalidate the channel or user
-    app_link.conan_ref = "zlib/1.2.11@_/_"
-    assert str(app_link.conan_ref) == "zlib/1.2.11"
-    app_link.version = "1.0.0"
-    assert app_link.channel == AppConfigEntry.OFFICIAL_RELEASE
-    assert app_link.conan_ref.user is None
-
+    # there are diffs - the file written always contains all keys, whereas the (legacy) user config
+    # can omit values, so test_dict is a superset of ref_dict
+    # so test, that all all values from ref_dict are equal and the new ones are empty
+    check_config(ref_dict, test_dict)

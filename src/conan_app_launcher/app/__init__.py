@@ -44,8 +44,7 @@ main_window: Optional[MainWindow] = None  # TODO can this be removed?
 conan_api = ConanApi()
 conan_worker = ConanWorker(conan_api)
 active_settings = SettingsFactory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
-
-model = ApplicationModel(active_settings.get_string(LAST_CONFIG_FILE))
+model = ApplicationModel(active_settings)
 
 def main():
     """

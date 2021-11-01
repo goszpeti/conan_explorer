@@ -1,4 +1,6 @@
+from dataclasses import asdict
 import json
+from conans.model.ref import ConanFileReference
 import jsonschema
 from distutils.version import StrictVersion
 from pathlib import Path
@@ -19,11 +21,13 @@ from conan_app_launcher.base import Logger
 
 ### Internal represantation of JSON save format
 
-
 class JsonAppConfig(TypedDict):
     version: str
-    tabs: List[Dict]
+    tabs: List[Dict] # same as ConfogTypes, but as dict
 
+class ConanOptionConfig(TypedDict):
+    name: str
+    value: str
 
 class JsonUiConfig(UiConfigInterface):
 
@@ -35,70 +39,74 @@ class JsonUiConfig(UiConfigInterface):
             Logger().debug('UiConfig: Creating json file')
             self._json_file_path.touch()
         else:
-            Logger().debug(f'Settings: Using {self._json_file_path}')
+            Logger().debug(f'UiConfig: Using {self._json_file_path}')
 
     T = TypeVar('T', bound=Union[TabConfig, AppLinkConfig])
-
-    @staticmethod
-    def _convert_to_dict(config: T) -> Dict[str, Any]:
-        result_dict = {}
-        for attr in vars(config):
-            result_dict[attr] = getattr(config, attr)
-        return result_dict
-
-
     @staticmethod
     def _convert_to_config_type(dict: Dict[str, Any], config_type: Type[T]) -> T:
         result_config = config_type()
-        for key in dict: # matches 1-1
-            setattr(result_config, key, dict[key])
+        for key in dict.keys(): # matches 1-1
+            value = dict[key]
+            if key == "apps":
+                value = []
+                for dict_val in dict[key]:
+                    app = JsonUiConfig._convert_to_config_type(dict_val, AppLinkConfig)
+                    value.append(app)
+            elif key == "conan_options":
+                options: List[ConanOptionConfig] = dict[key]
+                value = {}
+                for option in options:
+                    value[option["name"]] = option.get("value", "")
+            if key == "conan_ref":
+                value = ConanFileReference.loads(value)
+            setattr(result_config, key, value)
         return result_config
 
     def load(self) -> List[TabConfig]:
         """ Parse the json config file, validate and convert to object structure """
-        app_config: JsonAppConfig = {"version": "0.0.0", "tabs": []}
+        app_json_config: JsonAppConfig = {"version": "0.0.0", "tabs": []}
         Logger().info(f"Loading file '{self._json_file_path}'...")
 
         with open(str(self._json_file_path)) as fp:
             try:
-                app_config = json.load(fp)
+                app_json_config = json.load(fp)
                 with open(asset_path / "config_schema.json") as schema_file:
                     json_schema = json.load(schema_file)
-                    jsonschema.validate(instance=app_config, schema=json_schema)
-            except BaseException as error:
+                    jsonschema.validate(instance=app_json_config, schema=json_schema)
+            except Exception as error:
                 Logger().error(f"Config file:\n{str(error)}")
                 return []
 
         # implement subsequent migration functions
-        self.migrate_to_0_3_0(app_config)
-        self.migrate_to_0_4_0(app_config)
+        self.migrate_to_0_3_0(app_json_config)
+        self.migrate_to_0_4_0(app_json_config)
 
         # build the object abstraction and update
         tabs_result: List[TabConfig] = []
-        for tab in app_config.get("tabs", {}):
-            tab_entry = self._convert_to_config_type(tab, TabConfig)
-            for app in tab.get("apps", {}):
-                app_entry = self._convert_to_config_type(app, AppLinkConfig)
-                tab_entry.apps.append(app_entry)
-            tabs_result.append(tab_entry)
+        for tab_dict in app_json_config.get("tabs", {}):
+            tab_result = self._convert_to_config_type(tab_dict, TabConfig)
+            tabs_result.append(tab_result)
 
-        # auto update version to last version:
-        app_config["version"] = json_schema.get("properties").get("version").get("enum")[-1]
+        # auto update version to last version
+        app_json_config["version"] = json_schema.get("properties").get("version").get("enum")[-1]
 
         # write it back with updates
         with open(str(self._json_file_path), "w") as config_file:
-            json.dump(app_config, config_file, indent=4)
+            json.dump(app_json_config, config_file, indent=4)
         return tabs_result
 
     def save(self, tabs: List[TabConfig]):
         """ Create json dict from model and write it to path. """
         tabs_data = []
         for tab in tabs:
-            apps_data = []
-            for app_entry in tab.apps:
-                apps_data.append(self._convert_to_dict(app_entry))
-            tab_data = {"name": tab.name, "apps": apps_data}
-            tabs_data.append(tab_data)
+            tab_dict = asdict(tab)
+            # convert options
+            for app_dict in tab_dict.get("apps", {}):
+                opt_list = []
+                for opt_key in app_dict.get("conan_options", {}):
+                    opt_list.append({"name": opt_key, "value": app_dict["conan_options"][opt_key]})
+                app_dict["conan_options"] = opt_list
+            tabs_data.append(tab_dict)
 
         # get last version
         with open(asset_path / "config_schema.json") as schema_file:

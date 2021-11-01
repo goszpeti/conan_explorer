@@ -2,8 +2,7 @@ import platform
 import shutil
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, TYPE_CHECKING
-
+from typing import TYPE_CHECKING, Any, Dict, List
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
@@ -14,8 +13,9 @@ else:
         from typing_extensions import TypedDict
 
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
-from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
 from conans.model.ref import ConanFileReference, PackageReference
+from conans.paths.package_layouts.package_editable_layout import \
+    PackageEditableLayout
 from conans.util.windows import path_shortener
 
 try:
@@ -23,9 +23,10 @@ try:
 except Exception:
     pass
 
-from conan_app_launcher import INVALID_CONAN_REF, base_path, SEARCH_APP_VERSIONS_IN_LOCAL_CACHE
+from conan_app_launcher import (INVALID_CONAN_REF,
+                                SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path)
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import ConanInfoCache
+from conan_app_launcher.components.conan_cache import ConanInfoCache
 
 
 class ConanPkg(TypedDict, total=False):
@@ -246,7 +247,7 @@ class ConanApi():
             self.conan.install_reference(conan_ref, update=True,
                                          settings=settings_list, options=options_list)
             return True
-        except BaseException as error:
+        except Exception as error:
             Logger().error(f"Can't install package '{str(conan_ref)}': {str(error)}")
             return False
 

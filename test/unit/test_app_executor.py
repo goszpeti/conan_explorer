@@ -6,7 +6,7 @@ import tempfile
 import time
 from pathlib import Path
 from subprocess import check_output
-import conan_app_launcher
+import conan_app_launcher # for mocker
 from conan_app_launcher.components.file_runner import (execute_app, open_file,
                                                        run_file)
 
@@ -52,7 +52,7 @@ def test_choose_run_exe(base_fixture, tmp_path, mocker):
     Mock away the actual calls.
     """
     mocker.patch('conan_app_launcher.components.file_runner.execute_app')
-
+    test_file = Path()
     if platform.system() == "Linux":
         test_file = Path(tmp_path) / "test"
         with open(test_file, "w") as f:

@@ -2,13 +2,9 @@ import logging
 from threading import Lock
 from typing import TYPE_CHECKING, Optional
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import pyqtBoundSignal, pyqtSignal
+from PyQt5.QtCore import pyqtBoundSignal
 
 from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
-
-if TYPE_CHECKING:
-    from conan_app_launcher.ui.main_window import MainWindow
 
 
 class Logger(logging.Logger):
@@ -54,7 +50,10 @@ class Logger(logging.Logger):
         return logger
 
     class QtLogHandler(logging.Handler):
-        """ This log handler prints to a qt widget """
+        """
+        This log handler sends a logger string to a qt widget.
+        update_signal needs str as argument.
+        """
         _lock = Lock()
 
         def __init__(self, update_signal: pyqtBoundSignal):
@@ -74,6 +73,7 @@ class Logger(logging.Logger):
         """
         Redirects the logger to QT widget.
         Needs to be called when GUI objects are available.
+        update_signal needs str as argument.
         """
         if not cls._instance:
             raise RuntimeError

@@ -1,41 +1,47 @@
 from pathlib import Path
 from typing import AnyStr, Callable, Dict, List, Optional
-from conan_app_launcher import INVALID_CONAN_REF, PathLike
-from conans.model.ref import ConanFileReference
+import tempfile
 
-from conan_app_launcher.data.ui_config import AppLinkConfig
+from conan_app_launcher import INVALID_CONAN_REF, user_save_path, DEFAULT_UI_CFG_FILE_NAME
+from conans.model.ref import ConanFileReference
+from conan_app_launcher.base.logger import Logger
+from conan_app_launcher.components.conan_worker import ConanWorkerElement
+from conan_app_launcher.data.settings import LAST_CONFIG_FILE
+
+from conan_app_launcher.data.ui_config import AppLinkConfig, TabConfig, UiConfigFactory, UI_CONFIG_JSON_TYPE
 
 class ApplicationModel():
 
-    def __init__(self, config_path: PathLike):
-        pass
-        # user_save_path / self.DEFAULT_FILE_NAME
-        # tab_configs: List[TabConfigModel] = []
-        # # empty config, create it in home path
-        # if not config_file_setting or not os.path.exists(default_config_file_path):
-        #     config_file_path = default_config_file_path
-        #     Logger().info("Creating empty ui config file " + str(default_config_file_path))
-        #     tab = TabConfigModel("New Tab")
-        #     tab.add_app_entry(AppLinkModel({"name": "My App Link"}))
-        #     save_config_file(default_config_file_path, [tab])
-        #     settings.set(LAST_CONFIG_FILE, str(default_config_file_path))
+    def __init__(self, active_settings):
+        self._settings = active_settings
 
-        # else:
-        #     config_file_path = Path(config_file_setting)
-        # if config_file_path.is_file():  # escape error log on first opening
-        #     tab_configs = load_config_file(config_file_path)
-        #     if not tab_configs:
-        #         tab = TabConfigModel("New Tab")
-        #         tab.add_app_entry(AppLinkModel({"name": "My App Link"}))
-        #         tab_configs.append(tab)
-        #         save_config_file(config_file_path, [tab])
+    def load(self):
+        # empty config, create it in user path
+        default_config_file_path = user_save_path / DEFAULT_UI_CFG_FILE_NAME
+        config_file_setting = active_settings.get(LAST_CONFIG_FILE)
+        if not config_file_setting or not default_config_file_path.exists():
+            active_settings.set(LAST_CONFIG_FILE, str(default_config_file_path))
+            config_file_setting = default_config_file_path
 
+        ui_config = UiConfigFactory(UI_CONFIG_JSON_TYPE, config_file_setting)
+        tab_configs = ui_config.load()
 
-    def get_all_conan_refs():  # TODO move this
-        conan_refs: List[ConanWorkerElement] = []
+        # initalite default config
+        if not tab_configs:
+            tab_configs.append(TabConfig())
+            tab_configs[0].apps.append(AppLinkConfig())
+            ui_config.save(tab_configs)
+
+        self.tabs: List[TabConfigModel] = []
         for tab in tab_configs:
-            for app in tab.get_app_entries():
-                ref_dict: ConanWorkerElement = {"reference": str(app.conan_ref), "options": app.conan_options}
+            self.tabs.append(TabConfigModel(tab_config=tab))
+
+    def get_all_conan_refs(self):
+        conan_refs: List[ConanWorkerElement] = []
+        for tab in self.tabs:
+            for app in tab.apps():
+                ref_dict: ConanWorkerElement = {"reference": str(app.conan_ref), 
+                                                "options": app.conan_options}
                 if ref_dict not in conan_refs:
                     conan_refs.append(ref_dict)
         return conan_refs
@@ -47,7 +53,9 @@ class AppLinkModel(AppLinkConfig):
     OFFICIAL_RELEASE = "<official release>"  # to be used for "_" channel
     OFFICIAL_USER = "<official user>"  # to be used for "_" user
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
 
@@ -58,7 +66,7 @@ class AppLinkModel(AppLinkConfig):
         self.conan_ref = INVALID_CONAN_REF
 
         # holds all conan refs for name/user
-        self._available_refs: List[ConanFileReference] = [self.conan_ref]
+        self._available_refs: List[ConanFileReference] = [ConanFileReference.loads(self.conan_ref)]
 
     def update_from_cache(self):
         if this.cache:  # get all info from cache
@@ -75,14 +83,14 @@ class AppLinkModel(AppLinkConfig):
     def register_update_callback(self, update_func: Callable):
         self._update_cbk_func = update_func
 
-    @property
-    def name(self):
-        """ Name to be displayed on the link. """
-        return self.app_data["name"]
+    # @property
+    # def name(self):
+    #     """ Name to be displayed on the link. """
+    #     return self.app_data["name"]
 
-    @name.setter
-    def name(self, new_value: str):
-        self.app_data["name"] = new_value
+    # @name.setter
+    # def name(self, new_value: str):
+    #     self.app_data["name"] = new_value
 
     @property
     def conan_ref(self) -> ConanFileReference:
@@ -321,30 +329,20 @@ class AppLinkModel(AppLinkConfig):
             self._update_cbk_func()
 
 
-class TabConfigModel():
+class TabConfigModel(TabConfig):
     """ Representation of a tab entry of the config schema """
 
-    def __init__(self, name):
-        self.name = name
-        self._app_entries: List[AppLinkModel] = []
-        Logger().debug(f"Adding tab {name}")
+    def __init__(self, name="", apps: List[AppLinkConfig] = [], tab_config: TabConfig = None):
+        if tab_config:
+            super().__init__(tab_config.name, tab_config.apps)
 
-    def add_app_entry(self, app_entry: AppLinkModel):
-        """ Add an AppLinkModel object to the tabs layout """
-        self._app_entries.append(app_entry)
+            # currently this is trivial, but this can change
+            # convert all apps to the extended Model
+            for app in self.apps:
+                app = AppLinkModel(app)
+            Logger().debug(f"Adding tab {self.name}")
+        else:
+            self.name = ""
+            self.apps = apps
 
-    def remove_app_entry(self, app_entry: AppLinkModel):
-        """ Remove an AppLinkModel object from the tabs layout """
-        self._app_entries.remove(app_entry)
 
-    def get_app_entries(self) -> List[AppLinkModel]:
-        """ Get all app entries on the tab layout """
-        return self._app_entries
-
-    def get_app_entry(self, name: str) -> Optional[AppLinkModel]:
-        """ Get one app entry of the tab layout based on it's name"""
-        app = None
-        for app in self.tab.get_app_entries():
-            if name == app.name:
-                break
-        return app

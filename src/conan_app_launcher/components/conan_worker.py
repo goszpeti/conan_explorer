@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
+    from conan_app_launcher.components.conan import ConanApi
 else:
     try:
         from typing import TypedDict
@@ -14,7 +15,6 @@ else:
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components.conan import ConanApi
 from conans.model.ref import ConanFileReference
 
 
@@ -25,7 +25,7 @@ class ConanWorkerElement(TypedDict):
 class ConanWorker():
     """ Sequential worker with a queue to execute conan commands and get info on packages """
 
-    def __init__(self, conan_api: ConanApi):
+    def __init__(self, conan_api: "ConanApi"):
         self._conan_api = conan_api
         self._conan_queue: Queue[Tuple[str, Dict[str, str]]] = Queue(maxsize=0)
         self._version_getter: Optional[Thread] = None

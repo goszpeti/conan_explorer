@@ -10,7 +10,7 @@ from subprocess import Popen
 
 from PyQt5 import QtWidgets
 import conan_app_launcher
-from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
+from conan_app_launcher.data.settings import SettingsFactory, LAST_CONFIG_FILE, SETTINGS_INI_TYPE
 
 
 def testMainLoopMock(base_fixture, mocker):
@@ -38,10 +38,10 @@ def testMainLoop(base_fixture):
     """
 
     settings_file_path = Path.home() / conan_app_launcher.SETTINGS_FILE_NAME
-    settings = Settings(ini_file=settings_file_path)
+    settings = SettingsFactory(SETTINGS_INI_TYPE, settings_file_path)
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
-    settings.save_to_file()
+    settings.save()
 
     # conan_app_launcher
     proc = Popen(["python", str(base_fixture.base_path / "src" / "conan_app_launcher" / "__main__.py")])
