@@ -1,4 +1,8 @@
 from typing import List
+from conan_app_launcher.ui.components.app_grid.model import UiTabModel
+from conan_app_launcher.ui.data import UiTabConfig
+
+from conan_app_launcher.ui.model import UiApplicationModel
 
 from .components.app_edit_dialog import EditAppDialog
 from .app_link import AppLink
@@ -11,15 +15,16 @@ Qt = QtCore.Qt
 class TabAppGrid(QtWidgets.QWidget):
     
 
-    def __init__(self, parent: QtWidgets.QTabWidget, config_data,
-                 max_rows: int, max_columns: int):
+    def __init__(self, parent: QtWidgets.QTabWidget, max_rows: int, max_columns: int):
         super().__init__(parent)
-        self.config_data = config_data
-        self.setObjectName("tab_" + self.config_data.name)
-
+        self.model = UiTabModel()
         self.app_links: List[AppLink] = []  # list of refs to app links
-        self.max_rows = max_rows # TODO currently not handled correctly
+        self.max_rows = max_rows  # TODO currently not handled correctly
         self.max_columns = max_columns
+
+    def init_app_grid(self):
+        self.setObjectName("tab_" + self.model.name)
+
         # this is a dummy, because tab_scroll_area needs a layout
         self.tab_layout = QtWidgets.QVBoxLayout(self)
         self._v_spacer = QtWidgets.QSpacerItem(
@@ -28,19 +33,16 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_scroll_area = QtWidgets.QScrollArea(self)
         # this holds all the app links, which are layouts
         self.tab_scroll_area_widgets = QtWidgets.QWidget(self.tab_scroll_area)
-        self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.config_data.name)
+        self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.model.name)
         # grid layout for tab_scroll_area_widgets
         self.tab_grid_layout = QtWidgets.QGridLayout(self.tab_scroll_area_widgets)
 
-        # set maximum on vertical is needed, so the app links very shrink, when a dropdown is hidden
+        # set minimum on vertical is needed, so the app links very shrink, 
+        # when a dropdown is hidden
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                           QtWidgets.QSizePolicy.Minimum)  # Maximum
+                                           QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        #sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
-        # own_size_poicy = sizePolicy
-        # own_size_poicy.setVerticalPolicy(QtWidgets.QSizePolicy.Expanding)
-        #self.setSizePolicy(sizePolicy)
 
         self.tab_layout.setContentsMargins(2, 0, 2, 0)
         self.tab_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
@@ -71,14 +73,16 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.tab_layout.addWidget(self.tab_scroll_area)
 
-        self.add_all_app_links()
 
-    def add_all_app_links(self):
+    def load(self, ui_config: UiTabConfig, model_parent):
+        self.model.load(ui_config, model_parent)
+        self.init_app_grid()
         row = 0
         column = 0
-        for app_info in self.config_data.get_app_entries():
+        for app_info in self.model.apps:
             # add in order of occurence
-            app_link = AppLink(self, app_info)
+            app_link = AppLink(self)
+            app_link.load(app_info, self.model)
             self.app_links.append(app_link)
             self.tab_grid_layout.addLayout(app_link, row, column)
             column += 1

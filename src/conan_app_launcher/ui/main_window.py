@@ -98,7 +98,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.model.loadf(config_file_setting)
 
         # conan works, model can be loaded
-        self._app_grid.load_tabs()
+        self._app_grid.load_tabs(self.model)
         self.apply_view_settings()
 
     def apply_view_settings(self):

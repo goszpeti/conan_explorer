@@ -1,6 +1,6 @@
 
 from conan_app_launcher.components import ConanApi
-import conan_app_launcher as this
+from conan_app_launcher.app import asset_path, conan_api
 from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 
@@ -100,8 +100,6 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
-        if not conan_api:
-            conan_api = ConanApi()
         self.setupModelData()
 
 

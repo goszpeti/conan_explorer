@@ -2,15 +2,15 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
 
-from conan_app_launcher import asset_path
+from conan_app_launcher.app import asset_path, conan_api
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.components import (ConanApi, open_in_file_manager,
+from conan_app_launcher.components import (open_in_file_manager,
                                            run_file)
 from conan_app_launcher.components.conan import ConanPkg
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .pkg_select_model import PROFILE_TYPE, PackageFilter, PkgSelectModel, TreeItem
+from .model import PROFILE_TYPE, PackageFilter, PkgSelectModel, TreeItem
 
 Qt = QtCore.Qt
 
@@ -61,11 +61,11 @@ class LocalConanPackageExplorer():
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
 
     def get_selected_pkg_source_item(self) -> Optional[TreeItem]:
-        indexes = main_window.ui.package_select_view.selectedIndexes()
+        indexes = self._main_window.ui.package_select_view.selectedIndexes()
         if len(indexes) != 1:
             Logger().debug(f"Mismatch in selected items for context action: {str(len(indexes))}")
             return None
-        view_index = main_window.ui.package_select_view.selectedIndexes()[0]
+        view_index = self._main_window.ui.package_select_view.selectedIndexes()[0]
         source_item: TreeItem = view_index.model().mapToSource(view_index).internalPointer()
         return source_item
 

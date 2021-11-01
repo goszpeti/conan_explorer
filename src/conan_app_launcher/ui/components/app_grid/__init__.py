@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, List
+from conan_app_launcher.ui.model import UiApplicationModel
 
-import conan_app_launcher as this
+from conan_app_launcher.app import active_settings, asset_path, conan_worker
 from conan_app_launcher.settings import (GRID_COLUMNS, GRID_ROWS,
                                          LAST_CONFIG_FILE)
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -9,7 +10,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 
 from .tab import TabAppGrid
-from conan_app_launcher.app import asset_path, conan_worker
 
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
@@ -18,7 +18,6 @@ if TYPE_CHECKING:  # pragma: no cover
 class AppGrid():
 
     def __init__(self, main_window: "MainWindow"):
-        self.model = main_window.model.tabs
         self._main_window = main_window
         self._icons_path = asset_path / "icons"
 
@@ -134,14 +133,14 @@ class AppGrid():
     def get_tabs(self) -> List[TabAppGrid]:
         return self._main_window.ui.tab_bar.findChildren(TabAppGrid)
 
-    def load_tabs(self):
+    def load_tabs(self, model: UiApplicationModel):
         """ Creates new layout """
-        for config_data in self.model:
+        for config_data in model.tabs:
             
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabAppGrid(parent=self._main_window.ui.tab_bar, config_data=config_data,
-                             max_columns=active_settings.get_int(GRID_COLUMNS), max_rows=active_settings.get_int(GRID_ROWS))
+            tab = TabAppGrid(parent=self._main_window.ui.tab_bar, max_columns=active_settings.get_int(GRID_COLUMNS), max_rows=active_settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, config_data.name)
+            tab.load(config_data, model)
 
         # always show the first tab first
         self._main_window.ui.tab_bar.setCurrentIndex(0)
