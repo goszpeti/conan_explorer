@@ -7,7 +7,6 @@ from conan_app_launcher.base import Logger
 from conan_app_launcher.components import (ConanApi, open_in_file_manager,
                                            run_file)
 from conan_app_launcher.components.conan import ConanPkg
-from conan_app_launcher.components.config_file import AppConfigEntry, AppType
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -16,11 +15,11 @@ from .pkg_select_model import PROFILE_TYPE, PackageFilter, PkgSelectModel, TreeI
 Qt = QtCore.Qt
 
 if TYPE_CHECKING:  # pragma: no cover
-    from conan_app_launcher.ui.main_window import MainUi
+    from conan_app_launcher.ui.main_window import MainWindow
 
 
 class LocalConanPackageExplorer():
-    def __init__(self, main_window: "MainUi"):
+    def __init__(self, main_window: "MainWindow"):
         self._main_window = main_window
         self.pkg_sel_model = None
         if not this.conan_api:
@@ -90,13 +89,14 @@ class LocalConanPackageExplorer():
 
     def on_copy_ref_requested(self):
         conan_ref = self.get_selected_conan_ref()
-        this.qt_app.clipboard().setText(conan_ref)
+        
+        QtWidgets.QApplication.clipboard().setText(conan_ref)
 
     def on_remove_ref_requested(self):
         source_item = self.get_selected_pkg_source_item()
         if not source_item:
             return
-        # TODO add remove all pkgs for pkg selection
+
         conan_ref = self.get_selected_conan_ref()
         pkg_id = self.get_selected_conan_pkg_info().get("id")
         pkg_ids = ([pkg_id] if pkg_id else None)
@@ -224,7 +224,7 @@ class LocalConanPackageExplorer():
 
     def on_copy_as_path(self):
         file = self._get_selected_pkg_file()
-        this.qt_app.clipboard().setText(file)
+        QtWidgets.QApplication.clipboard().setText(file)
 
     def on_delete(self):
         file = self._get_selected_pkg_file()
@@ -248,10 +248,10 @@ class LocalConanPackageExplorer():
         url = QtCore.QUrl.fromLocalFile(file)
         data.setUrls([url])
 
-        this.qt_app.clipboard().setMimeData(data)
+        QtWidgets.QApplication.clipboard().setMimeData(data)
 
     def on_paste(self):
-        data = this.qt_app.clipboard().mimeData()
+        data = QtWidgets.QApplication.clipboard().mimeData()
         if not data:
             return
         if not data.hasUrls():
@@ -276,10 +276,10 @@ class LocalConanPackageExplorer():
         pkg_path = this.conan_api.get_package_folder(
             ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
         rel_path = file_path.relative_to(pkg_path)
-        # TODO get conan options from curent package?
+
         app_data: AppType = {"name": "NewLink", "conan_ref": conan_ref, "executable": str(rel_path),
                             "icon": "", "console_application": False, "args": "", "conan_options": []}
-        self._main_window.open_new_app_dialog_from_extern(AppConfigEntry(app_data))
+        self._main_window.open_new_app_dialog_from_extern(AppLinkModel(app_data))
 
     def on_open_in_file_manager(self, model_index):
         file_path = Path(self._get_selected_pkg_file())

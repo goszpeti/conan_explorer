@@ -25,15 +25,12 @@ class ConanWorkerElement(TypedDict):
 class ConanWorker():
     """ Sequential worker with a queue to execute conan commands and get info on packages """
 
-    def __init__(self, initial_elements=[ConanWorkerElement]):
-        if not this.conan_api:
-            this.conan_api = ConanApi()
+    def __init__(self, conan_api: ConanApi):
+        self._conan_api = conan_api
         self._conan_queue: Queue[Tuple[str, Dict[str, str]]] = Queue(maxsize=0)
         self._version_getter: Optional[Thread] = None
         self._worker: Optional[Thread] = None
         self._closing = False
-
-        self.update_all_info(initial_elements)
 
     def update_all_info(self, conan_elements: List[ConanWorkerElement]):
         """ Starts the worker on using the current tabs info global var """
@@ -71,12 +68,13 @@ class ConanWorker():
         while not self._closing and not self._conan_queue.empty():
             conan_ref, conan_options = self._conan_queue.get()
             try:
-                package_folder = this.conan_api.get_path_or_install(
+                package_folder = self._conan_api.get_path_or_install(
                     ConanFileReference.loads(conan_ref), conan_options)
             except Exception:
                 self._conan_queue.task_done()
                 return
             # call update on every entry which has this ref
+            # this dependency should not be here!
             for tab in this.tab_configs:
                 for app in tab.get_app_entries():
                     if str(app.conan_ref) == conan_ref:
@@ -84,15 +82,15 @@ class ConanWorker():
             Logger().debug("Finish working on " + conan_ref)
             self._conan_queue.task_done()
 
-    def _get_packages_versions(self, conan_refs: ConanWorkerElement):
+    def _get_packages_versions(self, conan_refs: List[ConanWorkerElement]):
         """ Get all version and channel combination of a package from all remotes. """
         for conan_ref in conan_refs:
-            if not this.conan_api:
-                this.conan_api = ConanApi()
-            available_refs = this.conan_api.search_recipe_in_remotes(ConanFileReference.loads(conan_ref["reference"]))
+            available_refs = self._conan_api.search_recipe_in_remotes(
+                ConanFileReference.loads(conan_ref["reference"]))
             Logger().debug(f"Finished available package query for{str(conan_ref)}")
             if not available_refs:
                 continue
+            # this dependency should not be here!
             for tab in this.tab_configs:
                 for app in tab.get_app_entries():
                     if not self._closing and str(app.conan_ref) == conan_ref:

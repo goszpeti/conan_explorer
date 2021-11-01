@@ -28,7 +28,7 @@ class AboutDialog(QtWidgets.QDialog):
         self._text = QtWidgets.QTextBrowser(self)
         self._text.setOpenExternalLinks(True)
         self._text.setStyleSheet("background-color: #F0F0F0;")
-        self._text.setHtml(self.html_content.replace("${version}", this.VERSION))
+        self._text.setHtml(self.html_content.replace("${version}", this.__version__))
         self._text.setFrameShape(QtWidgets.QFrame.NoFrame)
 
         self._button_box = QtWidgets.QDialogButtonBox(ok_button)

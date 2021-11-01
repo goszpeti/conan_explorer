@@ -3,12 +3,13 @@ import tempfile
 from pathlib import Path
 from shutil import copy
 
-import conan_app_launcher as app
+from conan_app_launcher import asset_path, base_path
+import conan_app_launcher.app as app
 import conan_app_launcher.base as logger
 import pytest
-from conan_app_launcher.settings import *
+from conan_app_launcher.data.settings import *
 
-
+ 
 class PathSetup():
     """ Get the important paths form the source repo. """
     def __init__(self):
@@ -26,38 +27,33 @@ def base_fixture(request):
     """
     paths = PathSetup()
     app.base_path = paths.base_path / "src" / "conan_app_launcher"
-    app.asset_path: Path = app.base_path / "assets"
-    app.DEBUG_LEVEL = 1
+    app.asset_path = base_path / "assets"
     yield paths
 
     # teardown
-    app.DEBUG_LEVEL = 0
 
-    if app.conan_worker:
-        app.conan_worker.finish_working()
+    # if app.conan_worker:
+    #     app.conan_worker.finish_working()
     # reset singletons
-    app.qt_app = None
+    #app.qt_app = None
 
     # delete cache file
-    if (app.base_path / app.CACHE_FILE_NAME).exists():
-        os.remove(app.base_path / app.CACHE_FILE_NAME)
+    # if (app.base_path / app.CACHE_FILE_NAME).exists():
+    #     os.remove(app.base_path / app.CACHE_FILE_NAME)
 
-    logger.Logger._instance = None
-    app.base_path = None
-    app.conan_worker = None
-    app.cache = None
-    app.active_settings = None
-    app.tab_configs = []
+    # logger.Logger._instance = None
+    # app.base_path = None
+    # app.conan_worker = None
+    # app.cache = None
+    # app.active_settings = None
 
 
 @pytest.fixture
-def settings_fixture(base_fixture):
-    """ Use temporary settings based on testdata/app_config.json """
-    temp_dir = tempfile.gettempdir()
-    temp_ini_path = os.path.join(temp_dir, "config.ini")
-
-    app.active_settings = Settings(ini_file=Path(temp_ini_path))
+def ui_config_fixture(base_fixture):
+    """ Use temporary default settings and config file based on testdata/app_config.json """
+    app.active_settings = SettingsFactory(SETTINGS_INI_TYPE, Path(tempfile.mktemp()))
     config_file_path = base_fixture.testdata_path / "app_config.json"
-    temp_config_file_path = copy(config_file_path, temp_dir)
+    temp_config_file_path = copy(config_file_path, tempfile.gettempdir())
+
     app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
     yield Path(temp_config_file_path)

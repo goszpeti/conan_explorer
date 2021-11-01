@@ -15,41 +15,26 @@
         "python.formatting.autopep8Args": [
             "--max-line-length=110"
         ],
-        "python.testing.unittestArgs": [
-            "-v",
-            "-s",
-            "./test",
-            "-p",
-            "*test*.py"
-        ],
         "editor.formatOnPaste": true,
         "git.autofetch": true,
+        "python.analysis.typeCheckingMode": "basic",
+        "python.linting.enabled": false,
         "python.linting.pylintEnabled": true,
         "python.linting.mypyEnabled": true,
-        "python.linting.enabled": false,
-        "pyqt-integration.qtdesigner.path": "designer",
         "python.linting.lintOnSave": true,
-        "python.linting.pylintUseMinimalCheckers": false,
         "python.linting.pylintCategorySeverity.refactor": "Information",
         "python.testing.pytestEnabled": true,
         "coverage-gutters.showLineCoverage": true,
         "coverage-gutters.showRulerCoverage": true,
         "python.testing.pytestArgs": [
             "-v",
-            "--cov-report=xml:cov.xml",
-            "--cov-report=term",
-            "--cov=conan_app_launcher",
-            "--cov-append",
-            "--cov-branch",
-            "--capture=no", // print output
-            "--junit-xml=${workspaceFolder}/result.xml",
-            "--no-cov" // no coverage while debugging
+            "--junit-xml=${workspaceFolder}/result.xml"
         ],
         "python.linting.pylintArgs": [
             "--init-hook",
             "import sys;sys.path.append('${workspaceFolder}/test/mock/');sys.path.append('${workspaceFolder}/src/')"
         ],
-        "python.venvPath": "${workspaceFolder}/.venv",
         "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "pyqt-integration.qtdesigner.path": "designer",
     }
 }

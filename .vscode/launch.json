@@ -6,6 +6,9 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/src/conan_app_launcher/__main__.py",
+            "env": {
+                "CAL_DEBUG_LEVEL": "1"
+            },
             "console": "internalConsole",
             "subProcess": false,
             "justMyCode": true
@@ -16,7 +19,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "internalConsole",
-            "subProcess": true
+            "subProcess": true,
         },
         {
             "name": "Python: Testing",
@@ -24,7 +27,10 @@
             "request": "test",
             "console": "internalConsole",
             "subProcess": true,
-            "justMyCode": false
+            "justMyCode": false,
+            "env": {
+                "CAL_DEBUG_LEVEL": "1"
+            },
         },
     ]
 }

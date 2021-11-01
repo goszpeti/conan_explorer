@@ -2,7 +2,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 import conan_app_launcher as this
-from conan_app_launcher.components import AppConfigEntry
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -10,7 +9,7 @@ Qt = QtCore.Qt
 
 class EditAppDialog(QtWidgets.QDialog):
 
-    def __init__(self,  app_config_data: AppConfigEntry, parent: QtWidgets.QWidget, flags=Qt.WindowFlags()):
+    def __init__(self,  app_config_data, parent: QtWidgets.QWidget, flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
         self._app_config_data = app_config_data
         self._ui = uic.loadUi(this.base_path / "ui" / "app_grid" / "app_edit.ui", baseinstance=self)

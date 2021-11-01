@@ -13,17 +13,13 @@ import conan_app_launcher
 from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
 
 
-def testDebugDisabledForRelease():
-    assert conan_app_launcher.DEBUG_LEVEL == 0  # debug level should be 0 for release
-
-
 def testMainLoopMock(base_fixture, mocker):
     """
     Smoke test, that the application runs through.
     No error expected.
     """
 
-    main_ui_mock = mocker.patch("conan_app_launcher.ui.main_window.MainUi")
+    main_ui_mock = mocker.patch("conan_app_launcher.ui.main_window.MainWindow")
     qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec_")
     # delayed import necessary, so the mocker can patch the object before
     from conan_app_launcher import __main__

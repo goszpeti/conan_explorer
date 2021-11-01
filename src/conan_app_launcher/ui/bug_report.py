@@ -26,7 +26,7 @@ If applicable, add screenshots to help explain your problem.
 **Desktop:**
  - OS: {platform.platform(terse=True)}
  - Python Version: {platform.python_version()}
- - Version: {this.VERSION}
+ - Version: {this.__version__}
 
 **Additional context**
 Add any other context about the problem here.

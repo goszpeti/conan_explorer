@@ -3,11 +3,11 @@ from shutil import rmtree
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import (AppConfigEntry, ConanApi,
-                                           write_config_file)
-from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS,
-                                         DISPLAY_APP_VERSIONS,
-                                         LAST_CONFIG_FILE)
+from conan_app_launcher.components import (ConanApi,
+                                           )
+# from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS,
+#                                          DISPLAY_APP_VERSIONS,
+#                                          LAST_CONFIG_FILE)
 from conan_app_launcher.ui.about_dialog import AboutDialog
 from conan_app_launcher.ui.app_grid import AppGrid
 from conan_app_launcher.ui.package_explorer import LocalConanPackageExplorer
@@ -17,14 +17,14 @@ from PyQt5.QtCore import pyqtSlot
 Qt = QtCore.Qt
 
 
-class MainUi(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
     TOOLBOX_GRID_ITEM = 0
     TOOLBOX_PACKAGES_ITEM = 1
 
-    display_versions_changed = QtCore.pyqtSignal(bool)
-    display_channels_changed = QtCore.pyqtSignal(bool)
-    display_users_changed = QtCore.pyqtSignal(bool)
+    display_versions_changed = QtCore.pyqtSignal()
+    display_channels_changed = QtCore.pyqtSignal()
+    display_users_changed = QtCore.pyqtSignal()
 
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
 
@@ -138,7 +138,7 @@ class MainUi(QtWidgets.QMainWindow):
     @ pyqtSlot()
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
-        dialog_path = Path.home()
+        dialog_path = user_save_path
         config_file_path = Path(this.active_settings.get_string(LAST_CONFIG_FILE))
         if config_file_path.exists():
             dialog_path = config_file_path.parent
@@ -150,27 +150,26 @@ class MainUi(QtWidgets.QMainWindow):
             self._app_grid.re_init() # loads tabs
             self.apply_view_settings() # now view settings can be applied
 
-
-    @ pyqtSlot()
+    @pyqtSlot()
     def apply_display_versions_setting(self):
         """ Reads the current menu setting, saves it and updates the gui """
         status = self.ui.menu_toggle_display_versions.isChecked()
         this.active_settings.set(DISPLAY_APP_VERSIONS, status)
-        self.display_versions_changed.emit(status)
+        self.display_versions_changed.emit()
 
-    @ pyqtSlot()
+    @pyqtSlot()
     def apply_display_users_setting(self):
         """ Reads the current menu setting, saves it and updates the gui """
         status = self.ui.menu_toggle_display_users.isChecked()
         this.active_settings.set(DISPLAY_APP_USERS, status)
-        self.display_users_changed.emit(status)
+        self.display_users_changed.emit()
 
-    @ pyqtSlot()
+    @pyqtSlot()
     def apply_display_channels_setting(self):
         """ Reads the current menu setting, saves it and updates the gui """
         status = self.ui.menu_toggle_display_channels.isChecked()
         this.active_settings.set(DISPLAY_APP_CHANNELS, status)
-        self.display_channels_changed.emit(status)
+        self.display_channels_changed.emit()
 
 
     @pyqtSlot()
@@ -179,14 +178,14 @@ class MainUi(QtWidgets.QMainWindow):
         current_tab = self.ui.tab_bar.widget(self.ui.tab_bar.currentIndex())
         current_tab.open_app_link_add_dialog()
 
-    @ pyqtSlot(str)
+    @pyqtSlot(str)
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self.ui.console.append(text)
 
     def save_config(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
-        write_config_file(Path(this.active_settings.get_string(LAST_CONFIG_FILE)), this.tab_configs)
+        save_config_file(Path(this.active_settings.get_string(LAST_CONFIG_FILE)), this.tab_configs)
 
     def load_icons(self):
         icon = QtGui.QIcon()
@@ -206,7 +205,7 @@ class MainUi(QtWidgets.QMainWindow):
         self.ui.menu_cleanup_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
         self.ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))
 
-    def open_new_app_dialog_from_extern(self, config_data = AppConfigEntry()):
+    def open_new_app_dialog_from_extern(self, config_data):
         """ Called from pacakge explorer, where tab is unknown"""
         dialog = QtWidgets.QInputDialog(self)
         tab_list = list(item.name for item in this.tab_configs)

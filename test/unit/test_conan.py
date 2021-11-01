@@ -7,7 +7,7 @@ from shutil import copy
 
 import conan_app_launcher as app
 import conan_app_launcher
-from conan_app_launcher.components import parse_config_file
+from conan_app_launcher.components import load_config_file
 from conan_app_launcher.components.conan import (ConanApi,
                                                  _create_key_value_pair_list)
 from conan_app_launcher.components.conan_worker import ConanWorker
@@ -211,7 +211,7 @@ def testSearchForAllPackages(base_fixture):
     assert str(ref) in str(res)
 
 
-def testConanWorker(base_fixture, settings_fixture, mocker):
+def testConanWorker(base_fixture, ui_config_fixture, mocker):
     """
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
@@ -220,7 +220,7 @@ def testConanWorker(base_fixture, settings_fixture, mocker):
     config_file_path = base_fixture.testdata_path / "config_file" / "worker.json"
     temp_config_file_path = copy(config_file_path, temp_dir)
     app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
-    app.tab_configs = parse_config_file(config_file_path)
+    app.tab_configs = load_config_file(config_file_path)
     conan_refs = []
     for tab in app.tab_configs:
         for app_entry in tab.get_app_entries():

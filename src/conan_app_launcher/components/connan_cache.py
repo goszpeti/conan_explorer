@@ -3,9 +3,7 @@ import os
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components.conan import ConanApi
 
 from conans.model.ref import ConanFileReference
 
@@ -15,14 +13,14 @@ class ConanInfoCache():
     It also has an option to store the local package path.
     """
 
-    def __init__(self, cache_file: Path):
-        if not this.conan_api:
-            this.conan_api = ConanApi()
-        self._cache_file = cache_file
+    CACHE_FILE_NAME = "cache.json"
+
+    def __init__(self, cache_dir: Path, local_refs: List[ConanFileReference]):
+        self._cache_file = cache_dir / self.CACHE_FILE_NAME
         self._local_packages: Dict[str, str] = {}
         self._remote_packages: Dict[str, Dict[str, List[str]]] = {}
         self._read_only = False  # for testing purposes
-        self._all_local_refs = this.conan_api.get_all_local_refs()
+        self._all_local_refs = local_refs
 
         # create cache file, if it does not exist
         if not self._cache_file.exists():
@@ -143,10 +141,10 @@ class ConanInfoCache():
                 if len(content) > 0:
                     json_data = json.loads(content)
         except Exception:  # possibly corrupt, delete cache file
-            Logger().debug("Can't read speedup-cache file, deleting it.")
+            Logger().debug("ConanCache: Can't read speedup-cache file, deleting it.")
             os.remove(self._cache_file)
             # create file anew
-            self._cache_file.open('a').close()
+            self._cache_file.touch()
             return
         self._local_packages = json_data.get("local_packages", {})
         self._remote_packages = json_data.get("remote_packages", {})

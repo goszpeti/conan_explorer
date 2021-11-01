@@ -1,57 +1,35 @@
 """
-Contains global constants and basic/ui variables.
+Contains all basic constants used in the application.
+No imports from own modules allowed!
 """
-from .__version__ import VERSION
+import os
 from pathlib import Path
+from typing import TypeVar
 
-# this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING, Optional, List
-
-if TYPE_CHECKING:  # pragma: no cover
-    from .components import ConanWorker, ConanInfoCache, TabConfigEntry, ConanApi
-    from .components.conan_worker import ConanWorkerElement
-    from .settings import Settings
-    from PyQt5 import QtWidgets
+PathLike = TypeVar("PathLike", str, Path)
 
 ### Global constants ###
+__version__ = "1.0.0b8"
+
 PROG_NAME = "conan_app_launcher"
 ICON_SIZE = 60
 INVALID_CONAN_REF = "Invalid/NA@NA/NA"
-DEFAULT_GRID_CONFIG_FILE_NAME = "cal_ui.json"
 SETTINGS_FILE_NAME = ".cal_config"
-CACHE_FILE_NAME = "cache.json"
+DEFAULT_UI_CFG_FILE_NAME = "cal_ui.json" # for legacy 0.X support
 
 # Feature flags
 ADD_TAB_BUTTON = False  # FIXME currently not working
-ADD_APP_LINK_BUTTON = False # FIXME currently not working
+ADD_APP_LINK_BUTTON = False  # FIXME currently not working
 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True
 USE_LOCAL_INTERNAL_CACHE = True
 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH = True
 
-# 0: No debug, 1 = debug logging on
-DEBUG_LEVEL = 0
+# From ennvar DEBUG - 0: No debug, 1 = debug logging on
+DEBUG_LEVEL =int(os.getenv("CAL_DEBUG_LEVEL", "0"))
 
-### Global variables ###
-
-# paths to find folders - points to the folder of this file
+# Paths to find folders - points to the folder of this file
 # must be initialized later, otherwise setup.py can't parse this file
-# TODO this is not an issue anymore!
-base_path: Path = Path("NULL")
-asset_path: Path = Path("NULL")
-
-qt_app: Optional["QtWidgets.QApplication"] = None
-main_window: Optional["QtWidgets.QMainWindow"] = None
-conan_api: Optional["ConanApi"] = None
-conan_worker: Optional["ConanWorker"] = None
-cache: Optional["ConanInfoCache"] = None
-active_settings: Optional["Settings"] = None # can't name it settings - will clash with settings module
-tab_configs: List["TabConfigEntry"] = []
-
-def get_all_conan_refs():
-    conan_refs: List[ConanWorkerElement] = []
-    for tab in tab_configs:
-        for app in tab.get_app_entries():
-            ref_dict: ConanWorkerElement = {"reference": str(app.conan_ref), "options": app.conan_options}
-            if ref_dict not in conan_refs:
-                conan_refs.append(ref_dict)
-    return conan_refs
+base_path = Path(__file__).absolute().parent
+asset_path = base_path / "assets"
+# to be used for all default paths of configuration files, which will be used for multiple versions
+user_save_path = Path().home()

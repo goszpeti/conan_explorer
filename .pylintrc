@@ -143,6 +143,7 @@ disable=print-statement,
         broad-except,
         wrong-import-position,
         missing-module-docstring
+        logging-fstring-interpolation
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

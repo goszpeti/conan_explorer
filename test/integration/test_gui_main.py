@@ -5,7 +5,6 @@ so the qtbot is usable to inspect gui objects.
 
 import os
 import platform
-import tempfile
 import time
 from pathlib import Path
 from shutil import rmtree
@@ -19,77 +18,94 @@ from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
+from conan_app_launcher import asset_path, user_save_path
 
 Qt = QtCore.Qt
 
 
-def testStartupNoExistingConfig(base_fixture, settings_fixture, qtbot):
+def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
+    """ Test, that when no condig file is set, 
+    a new tab with a new default app is automatically added."""
+
+    ### TEST SETUP
     # no settings entry
     app.active_settings.set(LAST_CONFIG_FILE, "")
     # delete default file, in case it exists and has content
     default_config_file_path = Path.home() / app.DEFAULT_GRID_CONFIG_FILE_NAME
     if default_config_file_path.exists():
         os.remove(default_config_file_path)
+
+    ### TEST ACTION
     # init config file and parse
     load_base_components(app.active_settings)
-
-    main_gui = main_window.MainUi()
+    main_gui = main_window.MainWindow()
     qtbot.addWidget(main_gui)
     main_gui.start_app_grid()
-
     main_gui.show()
     qtbot.waitExposed(main_gui, timeout=3000)
+
+    ### TEST EVALUATION
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         assert tab.config_data.name == "New Tab"
         for test_app in tab.app_links:
             assert test_app.config_data.name == "My App Link"
     Logger.remove_qt_logger()
 
-def testStartupWithExistingConfigAndOpenMenu(base_fixture, settings_fixture, qtbot):
+def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixture, qtbot):
     """
     Test, that loading a config file and opening the about menu, and clicking on OK
     The about dialog showing is expected.
     """
-    main_gui = main_window.MainUi()
+    ### TEST SETUP
+    main_gui = main_window.MainWindow()
     qtbot.addWidget(main_gui)
     main_gui.start_app_grid()
 
     main_gui.show()
     qtbot.waitExposed(main_gui, timeout=3000)
+
+    ### TEST ACTION
     main_gui.ui.menu_about_action.trigger()
     time.sleep(3)
     assert main_gui._about_dialog.isEnabled()
     qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], Qt.LeftButton)
+
+    ### TEST EVALUATION
+    assert main_gui._about_dialog.isHidden()
+
     Logger.remove_qt_logger()
 
 
-def testSelectConfigFileDialog(base_fixture, settings_fixture, qtbot, mocker):
+def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     """
     Test, that clicking on on open config file and selecting a file writes it back to settings.
     Same file as selected expected in settings.
     """
-
+    ### TEST SETUP
     load_base_components(app.active_settings)
 
-    main_gui = main_window.MainUi()
+    main_gui = main_window.MainWindow()
     main_gui.show()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
+
+    ### TEST ACTION
     selection = str(Path.home() / "new_config.json")
     mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[selection])
-
     main_gui.ui.menu_open_config_file.trigger()
+    
+    ### TEST EVALUATION
     time.sleep(3)
     assert app.active_settings.get(LAST_CONFIG_FILE) == selection
     app.conan_worker.finish_working(3)
     Logger.remove_qt_logger()
 
 
-def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
+def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     """
     Test, that clicking on on open config file and selecting a file writes it back to settings.
     Same file as selected expected in settings.
@@ -142,8 +158,7 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     assert str(pkg_dir_to_delete.parent) in paths_to_delete
 
     ### TEST ACTION
-
-    main_gui = main_window.MainUi()
+    main_gui = main_window.MainWindow()
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -154,19 +169,19 @@ def testConanCacheWithDialog(base_fixture, settings_fixture, qtbot, mocker):
     time.sleep(3)
 
     ### TEST EVALUATION
-
     assert not os.path.exists(pkg_cache_folder)
     assert not pkg_dir_to_delete.parent.exists()
     Logger.remove_qt_logger()
 
-def testTabsCleanupOnLoadConfigFile(base_fixture, settings_fixture, qtbot):
+def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot):
     """
     Test, if the previously loaded tabs are deleted, when a new file is loaded
     The same tab number ist expected, as before.
     """
+    ### TEST SETUP
     load_base_components(app.active_settings)
 
-    main_gui = main_window.MainUi()
+    main_gui = main_window.MainWindow()
     main_gui.show()
     main_gui.start_app_grid()
 
@@ -180,13 +195,13 @@ def testTabsCleanupOnLoadConfigFile(base_fixture, settings_fixture, qtbot):
     app.conan_worker.finish_working(10)
 
     main_gui._app_grid.re_init() # re-init with same file
+
+    ### TEST EVALUATION
     time.sleep(5)
-
     assert main_gui.ui.tab_bar.count() == tabs_num
-    app.conan_worker.finish_working(10)
 
 
-def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
+def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     """
     Test the view menu entries.
     Check, that activating the entry set the hide flag is set on the widget.
@@ -197,14 +212,14 @@ def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
     app.active_settings.set(DISPLAY_APP_USERS, False)
 
     load_base_components(app.active_settings)
-    main_gui = main_window.MainUi()
+    main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
     main_gui.start_app_grid()
-
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 
+    ### TEST ACTION and EVALUATION
     # assert default state
     for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
         for test_app in tab.app_links:
@@ -263,9 +278,3 @@ def testViewMenuOptions(base_fixture, settings_fixture, qtbot):
     Logger.remove_qt_logger()
 
 
-def testIconUpdateFromExecutable():
-    """
-    Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
-    Check, that the icon has the temp path. Use python executable for testing.
-    """
-    # TODO

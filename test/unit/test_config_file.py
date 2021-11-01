@@ -7,21 +7,21 @@ from distutils.file_util import copy_file
 from pathlib import Path
 
 import conan_app_launcher as app
-from conan_app_launcher.components import (AppConfigEntry, parse_config_file,
-                                           write_config_file)
+from conan_app_launcher.data.ui_config.json_file import JsonUiConfig
 
 
-def testCorrectFile(base_fixture, settings_fixture):
+def testCorrectFile(base_fixture, ui_config_fixture):
     """
     Tests reading a correct config json with 2 tabs.
     Expects the same values as in the file.
     """
-    tabs = parse_config_file(settings_fixture)
+    config = JsonUiConfig(ui_config_fixture)
+    tabs = config.load()
     assert tabs[0].name == "Basics"
-    tab0_entries = tabs[0].get_app_entries()
+    tab0_entries = tabs[0].apps
     assert str(tab0_entries[0].conan_ref) == "m4/1.4.19"
-    assert tab0_entries[0].app_data.get("executable") == "bin/m4"
-    assert tab0_entries[0].app_data.get("icon") == "NonExistantIcon.png"
+    assert tab0_entries[0].executable == "bin/m4"
+    assert tab0_entries[0].icon == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
     assert tab0_entries[0].is_console_application
     assert tab0_entries[0].args == "-n name"
@@ -42,11 +42,11 @@ def testCorrectFile(base_fixture, settings_fixture):
     assert tab1_entries[0].name == "App2"
 
 
-def testUpdate(base_fixture, settings_fixture):
+def testUpdate(base_fixture, ui_config_fixture):
     temp_file = Path(tempfile.gettempdir()) / "update.json"
     copy_file(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
 
-    tabs = parse_config_file(temp_file)
+    tabs = load_config_file(temp_file)
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].get_app_entries()
     assert str(tab0_entries[0].conan_ref) == "m4/1.4.19"
@@ -69,7 +69,7 @@ def testNoneExistantFilename(base_fixture, capfd):
     Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
-    tabs = parse_config_file(base_fixture.testdata_path / "nofile.json")
+    tabs = load_config_file(base_fixture.testdata_path / "nofile.json")
     assert tabs == []
     captured = capfd.readouterr()
     assert "ERROR" in captured.err
@@ -81,7 +81,7 @@ def testInvalidVersion(base_fixture, capfd):
     Tests, that reading a config file with the wrong version will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
-    tabs = parse_config_file(base_fixture.testdata_path / "config_file" / "wrong_version.json")
+    tabs = load_config_file(base_fixture.testdata_path / "config_file" / "wrong_version.json")
     assert tabs == []
     captured = capfd.readouterr()
     assert "ERROR" in captured.err
@@ -94,22 +94,22 @@ def testInvalidContent(base_fixture, capfd):
     Tests, that reading a config file with invalid syntax will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
-    tabs = parse_config_file(base_fixture.testdata_path / "config_file" / "invalid_syntax.json")
+    tabs = load_config_file(base_fixture.testdata_path / "config_file" / "invalid_syntax.json")
     assert tabs == []
     captured = capfd.readouterr()
     assert "Expecting property name" in captured.err
 
 
-def testWriteConfigFile(base_fixture, settings_fixture, tmp_path):
+def testWriteConfigFile(base_fixture, ui_config_fixture, tmp_path):
     """
     Tests, that writing a config file from internal state is correct.
     Expects the same content, as the original file.
     """
     test_file = Path(tmp_path) / "test.json"
 
-    tabs = parse_config_file(settings_fixture)
-    write_config_file(base_fixture.testdata_path / test_file, tabs)
-    with open(str(settings_fixture)) as config:
+    tabs = load_config_file(ui_config_fixture)
+    save_config_file(base_fixture.testdata_path / test_file, tabs)
+    with open(str(ui_config_fixture)) as config:
         ref_dict = json.load(config)
     with open(str(test_file)) as config:
         test_dict = json.load(config)
@@ -139,7 +139,7 @@ def testExecutableEval(base_fixture, capfd):
     assert "No file" in captured.err
 
 
-def testIconEval(base_fixture, settings_fixture, tmp_path):
+def testIconEval(base_fixture, ui_config_fixture, tmp_path):
     """
     Tests, that the icon setter works on all cases.
     Expects package relative file, config-file rel. file, automaticaly extracted file,
@@ -159,7 +159,7 @@ def testIconEval(base_fixture, settings_fixture, tmp_path):
 
     # relative to config file
     rel_path = "icons/../icons"
-    new_ico_path = settings_fixture.parent / rel_path
+    new_ico_path = ui_config_fixture.parent / rel_path
     os.makedirs(str(new_ico_path), exist_ok=True)
     copy_file(app.asset_path / "icons" / "icon.ico", new_ico_path)
     app_link.icon = rel_path + "/icon.ico"

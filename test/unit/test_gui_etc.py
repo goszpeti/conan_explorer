@@ -23,7 +23,13 @@ def testAboutDialog(base_fixture, qtbot):
     qtbot.mouseClick(widget._button_box.buttons()[0], Qt.LeftButton)
     assert widget.isHidden()
 
-# testBugReport
+def test_bug_report():
+    """ Test, that the report generates the dialog correctly and fills out the info """
+    # TODO
 
+def test_edit_line_conan():
+    """ Test, that the line edit validates on edit 
+    and displays the local packages instantly and the remote ones after a delay
+    """
+    # TODO
 
-# test_edit_line_conan

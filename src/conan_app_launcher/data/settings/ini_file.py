@@ -1,30 +1,38 @@
 import configparser
+import os
 from pathlib import Path
-from typing import Union
+from typing import Any, Dict, Optional, Union
 
+from conan_app_launcher import PathLike
 from conan_app_launcher.base import Logger
-from conan_app_launcher.settings import (LAST_CONFIG_FILE, DISPLAY_APP_VERSIONS, DISPLAY_APP_USERS, 
-    DISPLAY_APP_CHANNELS, GRID_COLUMNS, GRID_ROWS)
+
+from . import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS,
+               GRID_COLUMNS, GRID_ROWS, LAST_CONFIG_FILE, SettingsInterface)
 
 
-class Settings():
+class IniSettings(SettingsInterface):
     """
     Settings mechanism with an ini file to use as a storage.
     File and entries are automatically created from the default value of the class.
     """
-
     # internal constants
     _GENERAL_SECTION_NAME = "General"
     _VIEW_SECTION_NAME = "View"
 
-    def __init__(self, ini_file: Path):
+    def __init__(self, ini_file_path: Optional[PathLike], auto_save=True):
         """
         Read config.ini file to load settings.
-        Verify config.ini existence, if folder is passed.
+        Create, if not existing, but the directory must already exist!
+        Default path is current working dir / settings.ini
         """
+        if not ini_file_path:
+            self._ini_file_path = Path().cwd() / "settings.ini"
+        else:
+            self._ini_file_path = Path(ini_file_path)
+        self._auto_save = auto_save
+
         self._logger = Logger()
         self._parser = configparser.ConfigParser()
-        self._ini_file_path = ini_file
         # create Settings ini file, if not available for first start
         if not self._ini_file_path.is_file():
             self._ini_file_path.open('a').close()
@@ -33,28 +41,33 @@ class Settings():
             self._logger.debug(f'Settings: Using {self._ini_file_path}')
 
         ### default setting values ###
-        self._values = {
+        self._values: Dict[str, Dict[str, Any]] = {
             self._GENERAL_SECTION_NAME: {
-                    LAST_CONFIG_FILE: "",
-                },
+                LAST_CONFIG_FILE: "",
+            },
             self._VIEW_SECTION_NAME: {
-                    DISPLAY_APP_CHANNELS: True,
-                    DISPLAY_APP_USERS: False,
-                    DISPLAY_APP_VERSIONS: True,
-                    GRID_ROWS: 20,
-                    GRID_COLUMNS: 4,
+                DISPLAY_APP_CHANNELS: True,
+                DISPLAY_APP_USERS: False,
+                DISPLAY_APP_VERSIONS: True,
+                GRID_ROWS: 20,
+                GRID_COLUMNS: 4,
             },
         }
 
         self._read_ini()
 
+    def set_auto_save(self, value):
+        self._auto_save = value
+
     def get(self, name: str) -> Union[str, int, float, bool]:
         """ Get a specific setting """
         value = None
-        for section in self._values:
-            if name in self._values[section]:
-                value = self._values[section].get(name)
+        for section in self._values.values():
+            if name in section:
+                value = section.get(name)
                 break
+        if value is None:
+            raise LookupError
         return value
 
     def get_string(self, name: str) -> str:
@@ -69,19 +82,19 @@ class Settings():
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
 
-    def set(self, setting_name: str, value, auto_save=True):
+    def set(self, setting_name: str, value):
         """ Set the value of a specific setting """
-        if setting_name in self._values.keys() and isinstance(value, dict): # dict type setting
+        if setting_name in self._values.keys() and isinstance(value, dict):  # dict type setting
             self._values[setting_name].update(value)
         else:
             for section in self._values.keys():
                 if setting_name in self._values[section]:
                     self._values[section][setting_name] = value
                     break
-        if auto_save:
-            self.save_to_file()
+        if self._auto_save:
+            self.save()
 
-    def save_to_file(self):
+    def save(self):
         """ Save all user modifiable settings to file. """
         for section in self._values.keys():
             for setting in self._values[section]:
@@ -92,13 +105,17 @@ class Settings():
 
     def _read_ini(self):
         """ Read settings ini with configparser. """
-        self._parser.read(self._ini_file_path, encoding="UTF-8")
-
-        for section in self._values.keys():
-            if not self._values[section]: # empty section - this is a user filled dict
-                self._read_dict_setting(section)
-            for setting in self._values[section]:
-                self._read_setting(setting, section)
+        try:
+            self._parser.read(self._ini_file_path, encoding="UTF-8")
+            for section in self._values.keys():
+                if not self._values[section]:  # empty section - this is a user filled dict
+                    self._read_dict_setting(section)
+                for setting in self._values[section]:
+                    self._read_setting(setting, section)
+        except Exception as e:
+            Logger().error(
+                f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
+            os.remove(str(self._ini_file_path)) # let an exeception to the user, file can't be deleted
 
         # write file - to record defaults, if missing
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
@@ -125,7 +142,7 @@ class Settings():
         section = self._get_section(section_name)
         default_value = self.get(setting_name)
         if isinstance(default_value, dict):  # no dicts supported directly
-           return
+            return
 
         if not setting_name in section:  # write out
             section[setting_name] = str(default_value)
@@ -140,12 +157,15 @@ class Settings():
             value = float(section.get(setting_name))
         elif isinstance(default_value, int):
             value = int(section.get(setting_name))
-        if value is None: # dict type, value will be taken as a string
+        if value is None:  # dict type, value will be taken as a string
             value = section.get(setting_name)
             self.set(section_name, {setting_name: value})
             return
         # autosave must be disabled, otherwise we overwrite the other settings in the file
-        self.set(setting_name, value, auto_save=False)
+        auto_save = self._auto_save
+        self._auto_save = False
+        self.set(setting_name, value)
+        self._auto_save = auto_save
 
     def _write_setting(self, setting_name, section_name):
         """ Helper function to write a setting. """
@@ -155,5 +175,5 @@ class Settings():
 
         section = self._get_section(section_name)
         if not setting_name in section:
-            self._logger.error("Setting %s to write is unknown", setting_name)
+            self._logger.error("Settings: Setting %s to write is unknown", setting_name)
         section[setting_name] = str(value)

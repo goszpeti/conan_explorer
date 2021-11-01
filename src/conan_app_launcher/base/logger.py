@@ -1,16 +1,21 @@
 import logging
 from threading import Lock
+from typing import TYPE_CHECKING, Optional
 
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtBoundSignal, pyqtSignal
 
 from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
+
+if TYPE_CHECKING:
+    from conan_app_launcher.ui.main_window import MainWindow
 
 
 class Logger(logging.Logger):
     """
     Singleton instance for the global dual logger (Qt Widget/console)
     """
-    _instance: logging.Logger = None
+    _instance: Optional[logging.Logger] = None
     formatter = logging.Formatter(r"%(levelname)s: %(message)s")
     qt_handler_name = "qt_handler"
 
@@ -50,28 +55,30 @@ class Logger(logging.Logger):
 
     class QtLogHandler(logging.Handler):
         """ This log handler prints to a qt widget """
-        lock = Lock()
+        _lock = Lock()
 
-        def __init__(self, widget: QtWidgets.QWidget):
+        def __init__(self, update_signal: pyqtBoundSignal):
             super().__init__(logging.DEBUG)
-            self._widget = widget
+            self._update_signal = update_signal
 
         def emit(self, record):
             # don't access the qt object directly, since updates will only work
             # correctly in main loop, so instead send a PyQt Signal with the text to the Ui
             record = self.format(record)
-            if record:
-                with self.lock:
-                    self._widget.new_message_logged.emit(record)
+            if record and self._lock:
+                with self._lock:
+                    self._update_signal.emit(record)
 
     @classmethod
-    def init_qt_logger(cls, widget):
+    def init_qt_logger(cls, update_signal: pyqtBoundSignal):
         """
         Redirects the logger to QT widget.
         Needs to be called when GUI objects are available.
         """
+        if not cls._instance:
+            raise RuntimeError
         logger = cls._instance
-        qt_handler = Logger.QtLogHandler(widget)
+        qt_handler = Logger.QtLogHandler(update_signal)
         qt_handler.set_name(cls.qt_handler_name)
         log_debug_level = logging.INFO
         if DEBUG_LEVEL > 0:
@@ -84,7 +91,9 @@ class Logger(logging.Logger):
     @classmethod
     def remove_qt_logger(cls) -> bool:
         """ Remove qt logger (to be called before gui closes) """
-        logger: logging.Logger = cls._instance
+        if not cls._instance:
+            raise RuntimeError
+        logger = cls._instance
 
         for handler in logger.handlers:
             if handler.get_name() == cls.qt_handler_name:

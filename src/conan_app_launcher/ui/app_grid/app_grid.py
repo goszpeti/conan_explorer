@@ -2,8 +2,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, List
 
 import conan_app_launcher as this
-from conan_app_launcher.components import TabConfigEntry, parse_config_file
-from conan_app_launcher.settings import (GRID_COLUMNS, GRID_ROWS,
+from conan_app_launcher.data.settings import (GRID_COLUMNS, GRID_ROWS,
                                          LAST_CONFIG_FILE)
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -12,12 +11,12 @@ from .tab_app_grid import TabAppGrid
 Qt = QtCore.Qt
 
 if TYPE_CHECKING:  # pragma: no cover
-    from conan_app_launcher.ui.main_window import MainUi
+    from conan_app_launcher.ui.main_window import MainWindow
 
 
 class AppGrid():
 
-    def __init__(self, main_window: "MainUi"):
+    def __init__(self, main_window: "MainWindow"):
         self._main_window = main_window
         self._icons_path = this.asset_path / "icons"
 
@@ -41,7 +40,7 @@ class AppGrid():
         config_file_path = Path(this.active_settings.get_string(LAST_CONFIG_FILE))
 
         if config_file_path.is_file():  # escape error log on first opening
-            this.tab_configs = parse_config_file(config_file_path)
+            this.tab_configs = load_config_file(config_file_path)
         else:
             this.tab_configs = []
 
@@ -92,7 +91,7 @@ class AppGrid():
             if not text:
                 return
             # add tab
-            tab_config = TabConfigEntry(text)
+            tab_config = TabConfigModel(text)
             this.tab_configs.append(tab_config)
 
             tab = TabAppGrid(self._main_window.ui.tab_bar, tab_config,

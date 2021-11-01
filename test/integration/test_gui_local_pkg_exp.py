@@ -30,7 +30,7 @@ def test_delete_package_dialog(base_fixture, qtbot, mocker):
     assert found_pkg
 
     app.qt_app = _qapp_instance
-    main_gui = main_window.MainUi()
+    main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
     qtbot.addWidget(main_gui)

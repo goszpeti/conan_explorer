@@ -3,15 +3,16 @@ import tempfile
 import shutil
 import configparser
 from pathlib import Path
-from conan_app_launcher.settings import *
+from conan_app_launcher.data.settings import *
+from conan_app_launcher.data.settings.ini_file import IniSettings
 
 
-def testReadFromFile(base_fixture):
+def test_read_from_file(base_fixture):
     """
     Tests, that the settings file is read by using a string setting.
     Correct setting value expected.
     """
-    sets = Settings(ini_file=base_fixture.testdata_path / "settings/read/config.ini")
+    sets = IniSettings(base_fixture.testdata_path / "settings/read/config.ini")
     assert sets.get(LAST_CONFIG_FILE) == "C:/work/app_config.json"
     assert sets.get_bool(DISPLAY_APP_CHANNELS) == False
     assert sets.get_bool(DISPLAY_APP_VERSIONS) == False
@@ -19,7 +20,7 @@ def testReadFromFile(base_fixture):
     assert sets.get_int(GRID_COLUMNS) == 10
     assert sets.get_int(GRID_ROWS) == 30
 
-def testSaveToFile(base_fixture):
+def test_save_to_file(base_fixture):
     """
     Tests, that writing a value works and untouched entries remain.
     Correctly read back setting value expected.
@@ -28,7 +29,7 @@ def testSaveToFile(base_fixture):
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
     shutil.copy(base_fixture.testdata_path / "settings/write/config.ini", temp_dir)
-    sets = Settings(ini_file=Path(temp_ini_path))
+    sets = IniSettings(Path(temp_ini_path))
 
     last_config_file = "D:/file.ini"
 

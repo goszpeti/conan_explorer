@@ -1,8 +1,9 @@
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
-from conan_app_launcher.components import (AppConfigEntry,
+from conan_app_launcher.components import (
                                            open_in_file_manager, run_file)
+from conan_app_launcher.data.settings import DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS
 from conan_app_launcher.ui.app_grid.app_button import AppButton
 from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -18,13 +19,11 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 class AppLink(QtWidgets.QVBoxLayout):
     MAX_WIDTH = 193
 
-    def __init__(self, parent: QtWidgets.QWidget, app_config: AppConfigEntry):
+    def __init__(self, parent: QtWidgets.QWidget, app_config):
         super().__init__(parent)
-        self.parent_tab = parent # save parent - don't use qt signals ands solts
+        self.parent_tab = parent # save parent - don't use qt signals ands slots
         self.config_data = app_config
         self.config_data.register_update_callback(self.update_with_conan_info)
-
-        self.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         self._app_name_label = QtWidgets.QLabel(parent)
         self._app_version_cbox = QtWidgets.QComboBox(parent)
@@ -34,21 +33,21 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         # size policies
         self.setSpacing(3)
-        self.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        self.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
-                                            QtWidgets.QSizePolicy.Fixed)
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
+                                           QtWidgets.QSizePolicy.Fixed)
+        #size_policy.setHorizontalStretch(0)
+        #size_policy.setVerticalStretch(0)
+        # add sub widgets
+
         self._app_button.setSizePolicy(size_policy)
         self._app_button.setContextMenuPolicy(Qt.CustomContextMenu)
         self._app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
-
-        # add sub widgets
         self.addWidget(self._app_button)
+
         self._app_name_label.setAlignment(Qt.AlignCenter)
         self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setText(app_config.name)
-
         self.addWidget(self._app_name_label)
 
         self._app_version_cbox.setDisabled(True)
@@ -61,15 +60,17 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_user_cbox.setDuplicatesEnabled(False)
         self._app_user_cbox.setSizePolicy(size_policy)
         self._app_user_cbox.setMaximumWidth(self.MAX_WIDTH)
-
         self.addWidget(self._app_user_cbox)
 
         self._app_channel_cbox.setDisabled(True)
         self._app_channel_cbox.setDuplicatesEnabled(False)
         self._app_channel_cbox.setSizePolicy(size_policy)
         self._app_channel_cbox.setMaximumWidth(self.MAX_WIDTH)
-
         self.addWidget(self._app_channel_cbox)
+
+        self._v_spacer = QtWidgets.QSpacerItem(
+            20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.addSpacerItem(self._v_spacer)
 
         # connect signals
         if this.main_window:
@@ -128,13 +129,9 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def delete(self):
         self._app_name_label.hide()
-        self._app_name_label.deleteLater()
         self._app_version_cbox.hide()
-        self._app_version_cbox.deleteLater()
         self._app_channel_cbox.hide()
-        self._app_channel_cbox.deleteLater()
         self._app_button.hide()
-        self._app_button.deleteLater()
 
     def on_context_menu_requested(self, position):
         self.menu.exec_(self._app_button.mapToGlobal(position))
@@ -153,9 +150,12 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_version_cbox.addItem(self.config_data.version)
         self._app_user_cbox.clear()
         self._app_user_cbox.addItem(self.config_data.user)
+        self.update_versions_cbox()
+        self.update_users_cbox()
+        self.update_channels_cbox()
 
 
-    def open_edit_dialog(self, config_data: AppConfigEntry = None):
+    def open_edit_dialog(self, config_data = None):
         if config_data:
             self.config_data = config_data
         self._edit_app_dialog = EditAppDialog(self.config_data, parent=self.parentWidget())
@@ -168,16 +168,16 @@ class AppLink(QtWidgets.QVBoxLayout):
             if this.main_window:
                 this.main_window.save_config()
 
-    def open_app_link_add_dialog(self, config_data: AppConfigEntry = None):
-        if not config_data:
-            config_data = AppConfigEntry()
+    def open_app_link_add_dialog(self, new_config_data = None):
+        if not new_config_data:
+            new_config_data = AppLinkModel()
         # save for testing
-        self._edit_app_dialog = EditAppDialog(config_data, parent=self.parentWidget())
+        self._edit_app_dialog = EditAppDialog(new_config_data, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
             self._edit_app_dialog.save_data()
-            config_data.update_from_cache() # instantly use local paths and pkgs
-            app_link = AppLink(self.parent_tab, config_data)
+            new_config_data.update_from_cache() # instantly use local paths and pkgs
+            app_link = AppLink(self.parent_tab, new_config_data)
             self.parent_tab.add_app_link_to_tab(app_link)
             if this.main_window:
                 this.main_window.save_config()
@@ -233,20 +233,21 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_button.set_icon(self.config_data.icon)
             self._app_button.ungrey_icon()
 
-    def update_versions_cbox(self, show: bool):
-        if show:
+    def update_versions_cbox(self):
+        if this.active_settings and this.active_settings.get(DISPLAY_APP_VERSIONS):
             self._app_version_cbox.show()
         else:
             self._app_version_cbox.hide()
 
-    def update_users_cbox(self, show: bool):
-        if show:
+
+    def update_users_cbox(self):
+        if this.active_settings and this.active_settings.get(DISPLAY_APP_USERS):
             self._app_user_cbox.show()
         else:
             self._app_user_cbox.hide()
 
-    def update_channels_cbox(self, show: bool):
-        if show:
+    def update_channels_cbox(self):
+        if this.active_settings and this.active_settings.get(DISPLAY_APP_CHANNELS):
             self._app_channel_cbox.show()
         else:
             self._app_channel_cbox.hide()

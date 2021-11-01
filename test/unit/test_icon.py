@@ -1,16 +1,11 @@
-import os
 import platform
 import sys
-import tempfile
-import time
-import pytest
 from pathlib import Path
-from subprocess import check_output
 
 from conan_app_launcher.components.icon import extract_icon, extract_icon_from_win_executable
 
 
-def testExtractIconFromExeOnWindows(tmp_path):
+def test_extract_icon_from_exe_windows(tmp_path):
     """
     Tests, that an icon is extracted.
     Existant path with a filesize > 0 expected
@@ -23,7 +18,7 @@ def testExtractIconFromExeOnWindows(tmp_path):
         pass
 
 
-def testExtractIconFromGenericFile(tmp_path):
+def test_extract_icon_from_generic_file(tmp_path):
     """ 
     Generic files have no icon embedded.
     Nonexistant path expected.
@@ -35,7 +30,7 @@ def testExtractIconFromGenericFile(tmp_path):
     assert not wrong_path.is_file()
 
 
-def testExtractIconWrapper(tmp_path):
+def test_extract_icon_wrapper(tmp_path):
     """
     Tests, that only for windows the fct is called.
     Nonexistant path / fct call expected.

@@ -11,7 +11,7 @@ from conan_app_launcher.components.file_runner import (execute_app, open_file,
                                                        run_file)
 
 
-def testChooseRunFile(base_fixture, tmp_path, mocker):
+def test_choose_run_file(base_fixture, tmp_path, mocker):
     """
     Tests, that the function call is propagated correctly
     Existing path with a filesize > 0 expected
@@ -27,7 +27,7 @@ def testChooseRunFile(base_fixture, tmp_path, mocker):
     conan_app_launcher.components.file_runner.open_file.assert_called_once_with(test_file)
 
 
-def testChooseRunScript(base_fixture, tmp_path, mocker):
+def test_choose_run_script(base_fixture, tmp_path, mocker):
     """
     Tests, that the function call is propagated correctly
     Existing path with a filesize > 0 expected
@@ -46,7 +46,7 @@ def testChooseRunScript(base_fixture, tmp_path, mocker):
     conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
 
 
-def testChooseRunExe(base_fixture, tmp_path, mocker):
+def test_choose_run_exe(base_fixture, tmp_path, mocker):
     """
     Test, that run_file will call execute_app with the correct argumnenst.
     Mock away the actual calls.
@@ -70,7 +70,7 @@ def testChooseRunExe(base_fixture, tmp_path, mocker):
     conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
 
 
-def testStartCliOptionApp(base_fixture):
+def test_start_cli_option_app(base_fixture):
     """
     Test, that starting with the option is_console_app
     will spawn a terminal-
@@ -94,7 +94,7 @@ def testStartCliOptionApp(base_fixture):
         assert "python.exe" in ret.decode("utf-8")
         os.system("taskkill /PID " + str(pid))
 
-def testStartAppWithArgsNonCli(base_fixture):
+def test_start_app_with_args_non_cli(base_fixture):
     """
     Test that the CLI args will be correctly passed to a non-console app, 
     by writing out a file in a shell cmd and check, if the file has been created.
@@ -111,7 +111,7 @@ def testStartAppWithArgsNonCli(base_fixture):
     os.remove(test_file)
 
 
-def testStartAppWithArgsCliOption(base_fixture):
+def test_start_app_with_args_cli_option(base_fixture):
     """
     Test that the CLI args will be correctly passed to a console app, 
     by writing out a file in a shell cmd and check, if the file has been created.
@@ -129,8 +129,7 @@ def testStartAppWithArgsCliOption(base_fixture):
     os.remove(test_file)
 
 
-
-def testStartScript(base_fixture, tmp_path):
+def test_start_script(base_fixture, tmp_path):
     """
     Test, that calling a batch script will be actually execute,
     by checking if it will write a file. Windows only!
@@ -150,7 +149,7 @@ def testStartScript(base_fixture, tmp_path):
     assert res_file.is_file()
 
 
-def testOpenFile(base_fixture):
+def test_open_file(base_fixture):
     """ Test file opener by opening a text file and checking for the app to spawn"""
     test_file = Path(tempfile.gettempdir(), "test.txt")
     with open(str(test_file), "w") as f:
