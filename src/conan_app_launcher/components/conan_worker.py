@@ -14,7 +14,7 @@ else:
         from typing_extensions import TypedDict
 
 import conan_app_launcher as this
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 from conans.model.ref import ConanFileReference
 
 

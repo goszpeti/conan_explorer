@@ -3,8 +3,8 @@ import tempfile
 import shutil
 import configparser
 from pathlib import Path
-from conan_app_launcher.data.settings import *
-from conan_app_launcher.data.settings.ini_file import IniSettings
+from conan_app_launcher.settings import *
+from conan_app_launcher.settings.ini_file import IniSettings
 
 
 def test_read_from_file(base_fixture):

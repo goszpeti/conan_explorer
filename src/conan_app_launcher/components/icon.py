@@ -7,7 +7,7 @@ from pathlib import Path
 
 import struct
 import pefile
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 
 def extract_icon(file_path: Path, output_dir: Path) -> Path:
     """

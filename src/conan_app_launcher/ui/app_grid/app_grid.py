@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, List
 
 import conan_app_launcher as this
-from conan_app_launcher.data.settings import (GRID_COLUMNS, GRID_ROWS,
+from conan_app_launcher.settings import (GRID_COLUMNS, GRID_ROWS,
                                          LAST_CONFIG_FILE)
 from PyQt5 import QtCore, QtGui, QtWidgets
 

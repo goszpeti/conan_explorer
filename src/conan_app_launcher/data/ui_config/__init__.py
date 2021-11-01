@@ -1,7 +1,7 @@
 
+from typing import Type, TypeVar, Union
 from conans.model.ref import ConanFileReference
 from conan_app_launcher import INVALID_CONAN_REF, PathLike
-from typing import Union
 from abc import ABC, abstractmethod
 
 from typing import Dict, List, TYPE_CHECKING, Optional
@@ -10,9 +10,12 @@ from dataclasses import dataclass, field
 UI_CONFIG_JSON_TYPE = "json"
 
 # classes representing the ui config (Data Transfer Objects)
+if TYPE_CHECKING:  # pragma: no cover
+    from conan_app_launcher.model import UiAppLinkModel, UiTabModel
+
 
 @dataclass
-class AppLinkConfig():
+class UiAppLinkConfig():
     name: str = "New App"
     conan_ref: ConanFileReference = ConanFileReference.loads(INVALID_CONAN_REF)
     executable: str = ""
@@ -23,9 +26,15 @@ class AppLinkConfig():
 
 
 @dataclass
-class TabConfig():
+class UiTabConfig():
     name: str = "New Tab"
-    apps: List[AppLinkConfig] = field(default_factory=list)
+    # TODO: The Union is a workaround. How to say, that this is the base class?
+    apps: List[Union[UiAppLinkConfig, "UiAppLinkModel"]] = field(default_factory=list)
+
+@dataclass
+class UiApplicationConfig():
+    # TODO: The Union is a workaround. How to say, that this is the base class?
+    tabs: List[Union[UiTabConfig, "UiTabModel"]] = field(default_factory=list)
 
 
 def UiConfigFactory(type: str, source: PathLike) -> "UiConfigInterface":
@@ -39,6 +48,7 @@ def UiConfigFactory(type: str, source: PathLike) -> "UiConfigInterface":
 
 # Interface for Settings to implement
 
+
 class UiConfigInterface(ABC):
     """
     Abstract Class to implement settings mechanisms.
@@ -46,9 +56,9 @@ class UiConfigInterface(ABC):
     """
 
     @abstractmethod
-    def load(self) -> List[TabConfig]:
+    def load(self) -> UiApplicationConfig:
         raise NotImplementedError
 
     @abstractmethod
-    def save(self, tabs: List[TabConfig]):
+    def save(self, app_config: UiApplicationConfig):
         raise NotImplementedError

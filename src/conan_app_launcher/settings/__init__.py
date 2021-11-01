@@ -23,7 +23,7 @@ SETTINGS_QT_TYPE = "qt" # TODO try this out, see issue #56
 def SettingsFactory(type: str, source: PathLike) -> "SettingsInterface":
 
     if type == SETTINGS_INI_TYPE:
-        from conan_app_launcher.data.settings.ini_file import IniSettings
+        from conan_app_launcher.settings.ini_file import IniSettings
         implementation = IniSettings(source)
     elif type == SETTINGS_QT_TYPE:
         raise NotImplementedError

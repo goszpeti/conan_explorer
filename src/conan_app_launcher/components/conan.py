@@ -25,7 +25,7 @@ except Exception:
 
 from conan_app_launcher import (INVALID_CONAN_REF,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path)
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.components.conan_cache import ConanInfoCache
 
 

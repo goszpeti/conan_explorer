@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
 
 import conan_app_launcher as this
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (ConanApi, open_in_file_manager,
                                            run_file)
 from conan_app_launcher.components.conan import ConanPkg

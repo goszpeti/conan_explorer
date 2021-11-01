@@ -7,10 +7,10 @@ from typing import List
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from conan_app_launcher.data.settings import SETTINGS_INI_TYPE, SettingsFactory, SettingsInterface
+from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsFactory, SettingsInterface
 from conan_app_launcher.data.ui_config import UI_CONFIG_JSON_TYPE
 from conan_app_launcher.data.ui_config.json_file import JsonUiConfig
-from conan_app_launcher.model.ui_config import ApplicationModel
+from conan_app_launcher.model.ui_config import UiApplicationModel
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -21,10 +21,10 @@ from typing import List, Optional
 from conan_app_launcher import (
                                 SETTINGS_FILE_NAME, PROG_NAME, __version__, asset_path,
                                 base_path, user_save_path)
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.components.conan_worker import ConanWorkerElement
-from conan_app_launcher.data.settings.ini_file import (LAST_CONFIG_FILE,
+from conan_app_launcher.settings.ini_file import (LAST_CONFIG_FILE,
                                                        IniSettings)
 from conan_app_launcher.ui.bug_report import custom_exception_hook
 from conan_app_launcher.ui.main_window import MainWindow
@@ -44,7 +44,7 @@ main_window: Optional[MainWindow] = None  # TODO can this be removed?
 conan_api = ConanApi()
 conan_worker = ConanWorker(conan_api)
 active_settings = SettingsFactory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
-model = ApplicationModel(active_settings)
+model = UiApplicationModel()
 
 def main():
     """
@@ -63,6 +63,10 @@ def main():
         sys.stdout = open(os.devnull, "w")
         sys.stderr = open(os.path.join(tempfile.gettempdir(), "stderr-" + PROG_NAME), "w")
 
+    # conan works, model can be loaded
+    new_cfg_path = model.loadf(active_settings.get(LAST_CONFIG_FILE))
+    active_settings.set(LAST_CONFIG_FILE, str(new_cfg_path))
+
     # apply Qt attributes (only at init possible)
     QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QtWidgets.QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
@@ -73,7 +77,7 @@ def main():
     app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
 
     from conan_app_launcher.ui.main_window import MainWindow
-    main_window = MainWindow()
+    main_window = MainWindow(model)
     # load tabs needs the pyqt signals - constructor has to be finished
     main_window.start_app_grid()
     main_window.setWindowIcon(app_icon)

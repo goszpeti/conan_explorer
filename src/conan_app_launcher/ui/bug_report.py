@@ -6,7 +6,7 @@ import sys
 import traceback
 
 import conan_app_launcher as this
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore, QtWidgets
 
 BUG_REPORT = f"""

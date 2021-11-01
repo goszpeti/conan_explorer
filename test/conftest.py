@@ -5,9 +5,9 @@ from shutil import copy
 
 from conan_app_launcher import asset_path, base_path
 import conan_app_launcher.app as app
-import conan_app_launcher.base as logger
+import conan_app_launcher.logger as logger
 import pytest
-from conan_app_launcher.data.settings import *
+from conan_app_launcher.settings import *
 
  
 class PathSetup():

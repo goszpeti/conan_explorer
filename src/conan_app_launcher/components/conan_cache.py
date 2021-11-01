@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 
 from conans.model.ref import ConanFileReference
 

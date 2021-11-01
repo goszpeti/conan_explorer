@@ -2,7 +2,7 @@ from pathlib import Path
 from shutil import rmtree
 
 import conan_app_launcher as this
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (ConanApi,
                                            )
 # from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS,
@@ -28,7 +28,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
 
-    def __init__(self):
+    def __init__(self, model):
         super().__init__()
         self._icons_path = this.asset_path / "icons"
 

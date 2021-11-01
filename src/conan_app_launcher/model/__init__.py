@@ -1,1 +1,1 @@
-from .ui_config import AppLinkModel, TabConfigModel
+from .ui_config import UiAppLinkModel, UiTabModel

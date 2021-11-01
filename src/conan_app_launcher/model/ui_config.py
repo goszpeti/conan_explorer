@@ -1,40 +1,48 @@
 from pathlib import Path
 from typing import AnyStr, Callable, Dict, List, Optional
 import tempfile
+from typing import Type
 
 from conan_app_launcher import INVALID_CONAN_REF, user_save_path, DEFAULT_UI_CFG_FILE_NAME
 from conans.model.ref import ConanFileReference
-from conan_app_launcher.base.logger import Logger
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.components.conan_worker import ConanWorkerElement
-from conan_app_launcher.data.settings import LAST_CONFIG_FILE
+from conan_app_launcher.settings import LAST_CONFIG_FILE
 
-from conan_app_launcher.data.ui_config import AppLinkConfig, TabConfig, UiConfigFactory, UI_CONFIG_JSON_TYPE
+from conan_app_launcher.data.ui_config import UiAppLinkConfig, UiApplicationConfig, UiTabConfig, UiConfigFactory, UI_CONFIG_JSON_TYPE
 
-class ApplicationModel():
+class UiApplicationModel(UiApplicationConfig):
 
-    def __init__(self, active_settings):
-        self._settings = active_settings
+    def __init__(self, *args, **kwargs):
+        """ Create an empty AppModel on init, so we can load it later"""
+        super().__init__(*args, **kwargs)
 
-    def load(self):
+    def load(self, UiApplicationConfig): # TODO
+        pass
+
+    def loadf(self, config_file_setting) -> Path:
+
         # empty config, create it in user path
         default_config_file_path = user_save_path / DEFAULT_UI_CFG_FILE_NAME
-        config_file_setting = active_settings.get(LAST_CONFIG_FILE)
         if not config_file_setting or not default_config_file_path.exists():
-            active_settings.set(LAST_CONFIG_FILE, str(default_config_file_path))
             config_file_setting = default_config_file_path
 
         ui_config = UiConfigFactory(UI_CONFIG_JSON_TYPE, config_file_setting)
-        tab_configs = ui_config.load()
-
+        tab_configs = ui_config.load().tabs
+        issubclass(UiTabConfig, UiTabModel)
         # initalite default config
         if not tab_configs:
-            tab_configs.append(TabConfig())
-            tab_configs[0].apps.append(AppLinkConfig())
-            ui_config.save(tab_configs)
+            app_config = UiApplicationConfig()
+            tab_configs.append(UiTabConfig())
+            tab_configs[0].apps.append(UiAppLinkConfig())
+            app_config.tabs = tab_configs
+            ui_config.save(app_config)
 
-        self.tabs: List[TabConfigModel] = []
         for tab in tab_configs:
-            self.tabs.append(TabConfigModel(tab_config=tab))
+            model_tab = UiTabModel()
+            model_tab.load(tab)
+            self.tabs.append(model_tab)
+        return config_file_setting
 
     def get_all_conan_refs(self):
         conan_refs: List[ConanWorkerElement] = []
@@ -47,14 +55,15 @@ class ApplicationModel():
         return conan_refs
 
 
-class AppLinkModel(AppLinkConfig):
+class UiAppLinkModel(UiAppLinkConfig):
     """ Representation of an app link entry of the config """
     INVALID_DESCR = "NA"
     OFFICIAL_RELEASE = "<official release>"  # to be used for "_" channel
     OFFICIAL_USER = "<official user>"  # to be used for "_" user
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+
+    def load(self, parent, app_link_config):
+        #super().__init__(app_link_config)
 
         # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
@@ -329,20 +338,23 @@ class AppLinkModel(AppLinkConfig):
             self._update_cbk_func()
 
 
-class TabConfigModel(TabConfig):
+class UiTabModel(UiTabConfig):
     """ Representation of a tab entry of the config schema """
 
-    def __init__(self, name="", apps: List[AppLinkConfig] = [], tab_config: TabConfig = None):
-        if tab_config:
-            super().__init__(tab_config.name, tab_config.apps)
+    # Inherit constructor
 
+    def load(self, tab_config: UiTabConfig):
             # currently this is trivial, but this can change
             # convert all apps to the extended Model
             for app in self.apps:
-                app = AppLinkModel(app)
-            Logger().debug(f"Adding tab {self.name}")
-        else:
-            self.name = ""
-            self.apps = apps
+                app = UiAppLinkModel(app, self)
+       # = [], tab_config: UiTabConfig = None
+            self._convert_to_model_repr()
 
+    def _convert_to_model_repr(self):
+        """ Convert from entries UiTabConfig to other models """
+        converted_apps: List[UiAppLinkModel] = []
+        for app in self.apps:
+            converted_apps.append(UiAppLinkModel().load(app))
+        self.apps = converted_apps
 

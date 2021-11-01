@@ -11,7 +11,7 @@ from shutil import rmtree
 
 import conan_app_launcher as app
 from conan_app_launcher.__main__ import load_base_components
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import ConanApi
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window

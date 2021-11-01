@@ -7,19 +7,32 @@ from dataclasses import asdict
 from distutils.file_util import copy_file
 from pathlib import Path
 
+from conans.model.ref import ConanFileReference
+
 import conan_app_launcher as app
 from conan_app_launcher.data.ui_config.json_file import JsonUiConfig
 
 
-def testCorrectFile(base_fixture, ui_config_fixture):
+def testNewFilenameIsCreated(base_fixture):
+    """
+    Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
+    Expects the sdterr to contain the error level(ERROR) and the error cause.
+    """
+    new_file_path = tempfile.mktemp()
+    tabs = JsonUiConfig(new_file_path).load()
+    assert tabs == []
+    assert Path(new_file_path).exists()
+
+
+def testReadCorrectFile(base_fixture, ui_config_fixture):
     """
     Tests reading a correct config json with 2 tabs.
     Expects the same values as in the file.
     """
-    tabs = JsonUiConfig(ui_config_fixture).load()
+    tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19@_/_"
+    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19" # internal repr omits the @_/_
     assert tab0_entries[0].executable == "bin/m4"
     assert tab0_entries[0].icon == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
@@ -43,13 +56,14 @@ def testCorrectFile(base_fixture, ui_config_fixture):
 
 
 def testUpdate(base_fixture):
+    """ Test that the oldest schema version updates correctly to the newest one """
     temp_file = Path(tempfile.gettempdir()) / "update.json"
     copy_file(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
 
-    tabs = JsonUiConfig(temp_file).load()
+    tabs = JsonUiConfig(temp_file).load().tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19@_/_"
+    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19"
     assert str(tab0_entries[1].conan_ref) == "boost_functional/1.69.0@bincrafters/stable"
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].apps
@@ -65,19 +79,7 @@ def testUpdate(base_fixture):
     assert read_obj.get("tabs")[0].get("apps")[0].get("is_console_application") is True
     assert read_obj.get("tabs")[0].get("apps")[0].get("console_application") is None
 
-
-def testNewFilenameIsCreated(base_fixture):
-    """
-    Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
-    Expects the sdterr to contain the error level(ERROR) and the error cause.
-    """
-    new_file_path = tempfile.mktemp()
-    tabs = JsonUiConfig(new_file_path).load()
-    assert tabs == []
-    assert Path(new_file_path).exists()
-
-
-def testInvalidVersion(base_fixture, capfd):
+def testReadInvalidVersion(base_fixture, capfd):
     """
     Tests, that reading a config file with the wrong version will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -90,7 +92,7 @@ def testInvalidVersion(base_fixture, capfd):
     assert "version" in captured.err
 
 
-def testInvalidContent(base_fixture, capfd):
+def testReadInvalidContent(base_fixture, capfd):
     """
     Tests, that reading a config file with invalid syntax will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -114,7 +116,12 @@ def check_config(ref_dict, test_dict):
                 check_config(ref_dict.get(key), test_dict.get(key))
                 continue
             else:
-                assert test_dict.get(key) == ref_dict.get(key)
+                try: # test if it is conanref in string form. 
+                    # We don't care if it is written differently, as long as it is the same object
+                    ConanFileReference.loads(test_dict.get(
+                        key)) == ConanFileReference.loads(ref_dict.get(key))
+                except:
+                    assert test_dict.get(key) == ref_dict.get(key)
         else:
             assert not test_dict.get(key)
 
@@ -128,7 +135,7 @@ def testWriteConfigFile(base_fixture, ui_config_fixture, tmp_path):
 
     config = JsonUiConfig(ui_config_fixture)
     tabs = config.load()
-    new_config = JsonUiConfig(base_fixture.testdata_path / test_file)
+    new_config = JsonUiConfig(test_file)
     new_config.save(tabs)
     with open(str(ui_config_fixture)) as config:
         ref_dict = json.load(config)

@@ -3,7 +3,7 @@ import platform
 import subprocess
 from pathlib import Path
 
-from conan_app_launcher.base import Logger
+from conan_app_launcher.logger import Logger
 
 
 def run_file(file_path: Path, is_console_app: bool, args: str):
