@@ -12,7 +12,7 @@ UI_CONFIG_JSON_TYPE = "json"
 # classes representing the ui config (Data Transfer Objects) - this is a bit overblown for this usecase,
 # but ot is worth an experiment
 if TYPE_CHECKING:  # pragma: no cover
-    from conan_app_launcher.model import UiAppLinkModel, UiTabModel
+    from ..components.app_grid.model import UiAppLinkModel, UiTabModel
 
 
 @dataclass
@@ -31,6 +31,7 @@ class UiTabConfig():
     name: str = "New Tab"
     # TODO: The Union is a workaround. How to say, that this is the base class?
     apps: List[Union[UiAppLinkConfig, "UiAppLinkModel"]] = field(default_factory=list)
+
 
 @dataclass
 class UiApplicationConfig():

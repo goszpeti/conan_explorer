@@ -40,7 +40,7 @@ def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
     load_base_components(app.active_settings)
     main_gui = main_window.MainWindow()
     qtbot.addWidget(main_gui)
-    main_gui.start_app_grid()
+    main_gui.load()
     main_gui.show()
     qtbot.waitExposed(main_gui, timeout=3000)
 
@@ -59,7 +59,7 @@ def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixt
     ### TEST SETUP
     main_gui = main_window.MainWindow()
     qtbot.addWidget(main_gui)
-    main_gui.start_app_grid()
+    main_gui.load()
 
     main_gui.show()
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -183,7 +183,7 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
 
     main_gui = main_window.MainWindow()
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -215,7 +215,7 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 

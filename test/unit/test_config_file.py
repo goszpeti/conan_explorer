@@ -8,9 +8,7 @@ from distutils.file_util import copy_file
 from pathlib import Path
 
 from conans.model.ref import ConanFileReference
-
-import conan_app_launcher as app
-from conan_app_launcher.data.ui_config.json_file import JsonUiConfig
+from conan_app_launcher.ui.main.app_grid.model.json_file import JsonUiConfig
 
 
 def testNewFilenameIsCreated(base_fixture):

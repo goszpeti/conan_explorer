@@ -29,7 +29,7 @@ def test_rename_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -55,7 +55,7 @@ def test_add_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -85,7 +85,7 @@ def test_remove_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -121,7 +121,7 @@ def test_tab_move_is_saved(base_fixture, ui_config_fixture, qtbot):
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -144,7 +144,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -190,7 +190,7 @@ def test_remove_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -225,7 +225,7 @@ def test_add_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -276,7 +276,7 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
 
     main_gui = main_window.MainWindow()
     main_gui.show()
-    main_gui.start_app_grid()
+    main_gui.load()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)

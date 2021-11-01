@@ -4,8 +4,8 @@ from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (
                                            open_in_file_manager, run_file)
 from conan_app_launcher.settings import DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS
-from conan_app_launcher.ui.app_grid.app_button import AppButton
-from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
+from .components.app_button import AppButton
+from .components.app_edit_dialog import EditAppDialog
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 

@@ -6,7 +6,7 @@ from distutils.version import StrictVersion
 from pathlib import Path
 from typing import Any, Dict, List, TYPE_CHECKING, Optional, Type, TypeVar, Union
 
-from conan_app_launcher.model.data.ui_config import UiAppLinkConfig, UiApplicationConfig, UiTabConfig, UiConfigInterface
+from . import UiAppLinkConfig, UiApplicationConfig, UiTabConfig, UiConfigInterface
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
@@ -36,10 +36,10 @@ class JsonUiConfig(UiConfigInterface):
         
         # create file, if not available for first start
         if not self._json_file_path.is_file():
-            Logger().debug('UiConfig: Creating json file')
+            Logger().info('UiConfig: Creating json file')
             self._json_file_path.touch()
         else:
-            Logger().debug(f'UiConfig: Using {self._json_file_path}')
+            Logger().info(f'UiConfig: Using {self._json_file_path}')
 
     T = TypeVar('T', bound=Union[UiTabConfig, UiAppLinkConfig])
     @staticmethod
@@ -65,7 +65,7 @@ class JsonUiConfig(UiConfigInterface):
     def load(self) -> UiApplicationConfig:
         """ Parse the json config file, validate and convert to object structure """
         json_app_config: JsonAppConfig = {"version": "0.0.0", "tabs": []}
-        Logger().info(f"Loading file '{self._json_file_path}'...")
+        Logger().debug(f"UiConfig: Loading file '{self._json_file_path}'...")
 
         with open(str(self._json_file_path)) as fp:
             try:

@@ -5,11 +5,12 @@ import platform
 import sys
 import traceback
 
-import conan_app_launcher as this
+from conan_app_launcher import base_path, __version__
+from conan_app_launcher.app import conan_worker
 from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore, QtWidgets
 
-BUG_REPORT = f"""
+bug_dialog_text = f"""
 **Describe the bug**
 Application crash.
 
@@ -33,14 +34,14 @@ Add any other context about the problem here.
 """
 
 
-def custom_exception_hook(exctype, value, tb):
-    Logger().error("Application crashed:")
+def show_bug_dialog_exc_hook(exctype, value, tb):
+    Logger().error("Application crashed")
     with open(base_path / "crash.log", "w") as fd:
         traceback.print_tb(tb, limit=10, file=fd)
-    if qt_app:
+    try:
         import urllib.parse
         title = urllib.parse.quote("Application Crash on <>")
-        body = urllib.parse.quote(f"{BUG_REPORT}\n**Stacktrace**:\n" +
+        body = urllib.parse.quote(f"{bug_dialog_text}\n**Stacktrace**:\n" +
                                   "\n".join(traceback.format_tb(tb, limit=None)))
         new_issue_with_info_text = f"https://github.com/goszpeti/conan_app_launcher/issues/new?title={title}&body={body}&labels=bug"
         html_crash_text = f'<html><head/><body><p> \
@@ -55,6 +56,8 @@ def custom_exception_hook(exctype, value, tb):
         msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
         msg.setIcon(QtWidgets.QMessageBox.Warning)
         msg.exec_()
-    if conan_worker:  # cancel conan worker tasks on exit
-        conan_worker.finish_working()
-    sys.exit(1)
+    except:
+        # gui does not work anymore, emit error on log too
+        Logger().error(traceback.print_tb(tb, limit=10, file=fd))
+    finally:
+        sys.exit(1)

@@ -1,19 +1,23 @@
 from pathlib import Path
 from shutil import rmtree
-from conan_app_launcher import ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON
 
+from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON,
+                                DEFAULT_UI_CFG_FILE_NAME, base_path)
+from conan_app_launcher.app import (active_settings, asset_path, conan_api,
+                                    user_save_path)
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.components import ConanApi
-from conan_app_launcher.app import active_settings, asset_path, base_path, conan_api, user_save_path
-
-from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS,
+from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
+                                         DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
                                          LAST_CONFIG_FILE)
-from .main.about_dialog import AboutDialog
-from .main.app_grid import AppGrid
-from .main.package_explorer import LocalConanPackageExplorer
+from conan_app_launcher.ui.data import UI_CONFIG_JSON_TYPE, UiConfigFactory
+from conan_app_launcher.ui.model import UiApplicationModel
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
+
+from .components.about_dialog import AboutDialog
+from .components.app_grid import AppGrid
+from .components.package_explorer import LocalConanPackageExplorer
 
 Qt = QtCore.Qt
 
@@ -31,8 +35,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self._icons_path = asset_path / "icons"
+        self.model = UiApplicationModel()
 
+        self._icons_path = asset_path / "icons"
         self.ui = uic.loadUi(base_path / "ui" / "main.ui", baseinstance=self)
         self._about_dialog = AboutDialog(self)
 
@@ -82,7 +87,17 @@ class MainWindow(QtWidgets.QMainWindow):
         Logger.remove_qt_logger()
         super().closeEvent(event)
 
-    def start_app_grid(self):
+    def load(self, config_file_setting):
+        # empty config, create it in user path
+        default_config_file_path = user_save_path / DEFAULT_UI_CFG_FILE_NAME
+        if not config_file_setting or not default_config_file_path.exists():
+            config_file_setting = default_config_file_path
+        active_settings.set(LAST_CONFIG_FILE, str(config_file_setting))
+
+        # model loads incrementally
+        self.model.loadf(config_file_setting)
+
+        # conan works, model can be loaded
         self._app_grid.load_tabs()
         self.apply_view_settings()
 

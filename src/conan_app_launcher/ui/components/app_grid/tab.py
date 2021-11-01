@@ -1,8 +1,7 @@
 from typing import List
-import conan_app_launcher as this
 
-from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
-from conan_app_launcher.ui.app_grid.app_link import AppLink
+from .components.app_edit_dialog import EditAppDialog
+from .app_link import AppLink
 from PyQt5 import QtCore, QtWidgets
 
 # define Qt so we can use it like the namespace in C++

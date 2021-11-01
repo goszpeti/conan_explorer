@@ -23,7 +23,7 @@ def testAboutDialog(base_fixture, qtbot):
     qtbot.mouseClick(widget._button_box.buttons()[0], Qt.LeftButton)
     assert widget.isHidden()
 
-def test_bug_report():
+def test_bug_dialog():
     """ Test, that the report generates the dialog correctly and fills out the info """
     # TODO
 

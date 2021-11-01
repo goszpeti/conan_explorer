@@ -36,9 +36,9 @@ class IniSettings(SettingsInterface):
         # create Settings ini file, if not available for first start
         if not self._ini_file_path.is_file():
             self._ini_file_path.open('a').close()
-            self._logger.debug('Settings: Creating settings ini-file')
+            self._logger.info('Settings: Creating settings ini-file')
         else:
-            self._logger.debug(f'Settings: Using {self._ini_file_path}')
+            self._logger.info(f'Settings: Using {self._ini_file_path}')
 
         ### default setting values ###
         self._values: Dict[str, Dict[str, Any]] = {

@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
 
-import conan_app_launcher as this
+from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (ConanApi, open_in_file_manager,
                                            run_file)
@@ -22,8 +22,6 @@ class LocalConanPackageExplorer():
     def __init__(self, main_window: "MainWindow"):
         self._main_window = main_window
         self.pkg_sel_model = None
-        if not conan_api:
-            conan_api = ConanApi()
 
         main_window.ui.package_select_view.header().setVisible(True)
         main_window.ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
