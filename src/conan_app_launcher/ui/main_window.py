@@ -5,7 +5,7 @@ import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 from conan_app_launcher.components import (AppConfigEntry, ConanApi,
                                            write_config_file)
-from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
+from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
                                          LAST_CONFIG_FILE)
 from conan_app_launcher.ui.about_dialog import AboutDialog
@@ -22,8 +22,10 @@ class MainUi(QtWidgets.QMainWindow):
     TOOLBOX_GRID_ITEM = 0
     TOOLBOX_PACKAGES_ITEM = 1
 
-    display_versions_updated = QtCore.pyqtSignal(bool)
-    display_channels_updated = QtCore.pyqtSignal(bool)
+    display_versions_changed = QtCore.pyqtSignal(bool)
+    display_channels_changed = QtCore.pyqtSignal(bool)
+    display_users_changed = QtCore.pyqtSignal(bool)
+
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
 
     def __init__(self):
@@ -57,10 +59,16 @@ class MainUi(QtWidgets.QMainWindow):
         self._app_grid = AppGrid(self)
         self._local_package_explorer = LocalConanPackageExplorer(self)
 
+        # initialize view user settings
+        self.ui.menu_toggle_display_versions.setChecked(this.active_settings.get_bool(DISPLAY_APP_VERSIONS))
+        self.ui.menu_toggle_display_users.setChecked(this.active_settings.get_bool(DISPLAY_APP_USERS))
+        self.ui.menu_toggle_display_channels.setChecked(this.active_settings.get_bool(DISPLAY_APP_CHANNELS))
+
         self.ui.menu_about_action.triggered.connect(self._about_dialog.show)
         self.ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
-        self.ui.menu_set_display_versions.triggered.connect(self.toggle_display_versions)
-        self.ui.menu_set_display_channels.triggered.connect(self.toogle_display_channels)
+        self.ui.menu_toggle_display_versions.triggered.connect(self.apply_display_versions_setting)
+        self.ui.menu_toggle_display_users.triggered.connect(self.apply_display_users_setting)
+        self.ui.menu_toggle_display_channels.triggered.connect(self.apply_display_channels_setting)
         self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
         self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
 
@@ -76,7 +84,14 @@ class MainUi(QtWidgets.QMainWindow):
 
     def start_app_grid(self):
         self._app_grid.load_tabs()
+        self.apply_view_settings()
 
+    def apply_view_settings(self):
+        self.apply_display_versions_setting()
+        self.apply_display_users_setting()
+        self.apply_display_channels_setting()
+
+    
     # Menu callbacks #
 
     @pyqtSlot()
@@ -98,8 +113,9 @@ class MainUi(QtWidgets.QMainWindow):
     @ pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
-        conan = ConanApi()
-        paths = conan.get_cleanup_cache_paths()
+        if not this.conan_api:
+            this.conan_api = ConanApi()
+        paths = this.conan_api.get_cleanup_cache_paths()
         if not paths:
             self.write_log("INFO: Nothing found in cache to clean up.")
             return
@@ -123,29 +139,39 @@ class MainUi(QtWidgets.QMainWindow):
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = Path.home()
-        config_file_path = Path(this.settings.get_string(LAST_CONFIG_FILE))
+        config_file_path = Path(this.active_settings.get_string(LAST_CONFIG_FILE))
         if config_file_path.exists():
             dialog_path = config_file_path.parent
         dialog = QtWidgets.QFileDialog(parent=self, caption="Select JSON Config File",
                                        directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            this.settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
-            self._app_grid.re_init()
+            this.active_settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
+            self._app_grid.re_init() # loads tabs
+            self.apply_view_settings() # now view settings can be applied
+
 
     @ pyqtSlot()
-    def toggle_display_versions(self):
-        """ Reads the current menu setting, sevaes it and updates the gui """
-        version_status = self.ui.menu_set_display_versions.isChecked()
-        this.settings.set(DISPLAY_APP_VERSIONS, version_status)
-        self.display_versions_updated.emit(version_status)
+    def apply_display_versions_setting(self):
+        """ Reads the current menu setting, saves it and updates the gui """
+        status = self.ui.menu_toggle_display_versions.isChecked()
+        this.active_settings.set(DISPLAY_APP_VERSIONS, status)
+        self.display_versions_changed.emit(status)
 
     @ pyqtSlot()
-    def toogle_display_channels(self):
-        """ Reads the current menu setting, sevaes it and updates the gui """
-        channel_status = self.ui.menu_set_display_channels.isChecked()
-        this.settings.set(DISPLAY_APP_CHANNELS, channel_status)
-        self.display_channels_updated.emit(channel_status)
+    def apply_display_users_setting(self):
+        """ Reads the current menu setting, saves it and updates the gui """
+        status = self.ui.menu_toggle_display_users.isChecked()
+        this.active_settings.set(DISPLAY_APP_USERS, status)
+        self.display_users_changed.emit(status)
+
+    @ pyqtSlot()
+    def apply_display_channels_setting(self):
+        """ Reads the current menu setting, saves it and updates the gui """
+        status = self.ui.menu_toggle_display_channels.isChecked()
+        this.active_settings.set(DISPLAY_APP_CHANNELS, status)
+        self.display_channels_changed.emit(status)
+
 
     @pyqtSlot()
     def open_new_app_link_dialog(self):
@@ -160,7 +186,7 @@ class MainUi(QtWidgets.QMainWindow):
 
     def save_config(self):
         """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
-        write_config_file(Path(this.settings.get_string(LAST_CONFIG_FILE)), this.tab_configs)
+        write_config_file(Path(this.active_settings.get_string(LAST_CONFIG_FILE)), this.tab_configs)
 
     def load_icons(self):
         icon = QtGui.QIcon()

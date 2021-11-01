@@ -13,10 +13,11 @@ def testReadFromFile(base_fixture):
     """
     sets = Settings(ini_file=base_fixture.testdata_path / "settings/read/config.ini")
     assert sets.get(LAST_CONFIG_FILE) == "C:/work/app_config.json"
-    assert sets.get_bool(DISPLAY_APP_CHANNELS) == True
-    assert sets.get_bool(DISPLAY_APP_VERSIONS) == True
-    assert sets.get_int(GRID_COLUMNS) == 4
-    assert sets.get_int(GRID_ROWS) == 20
+    assert sets.get_bool(DISPLAY_APP_CHANNELS) == False
+    assert sets.get_bool(DISPLAY_APP_VERSIONS) == False
+    assert sets.get_bool(DISPLAY_APP_USERS) == False
+    assert sets.get_int(GRID_COLUMNS) == 10
+    assert sets.get_int(GRID_ROWS) == 30
 
 def testSaveToFile(base_fixture):
     """

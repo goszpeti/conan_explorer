@@ -1,12 +1,11 @@
 
 import conan_app_launcher as this
+from conan_app_launcher.base import Logger
 from conan_app_launcher.components import (AppConfigEntry,
                                            open_in_file_manager, run_file)
 from conan_app_launcher.ui.app_grid.app_button import AppButton
 from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
 from PyQt5 import QtCore, QtGui, QtWidgets
-
-# from conan_app_launcher.ui.tab_app_grid import TabAppGrid
 
 
 # define Qt so we can use it like the namespace in C++
@@ -17,6 +16,7 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 
 
 class AppLink(QtWidgets.QVBoxLayout):
+    MAX_WIDTH = 193
 
     def __init__(self, parent: QtWidgets.QWidget, app_config: AppConfigEntry):
         super().__init__(parent)
@@ -28,6 +28,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self._app_name_label = QtWidgets.QLabel(parent)
         self._app_version_cbox = QtWidgets.QComboBox(parent)
+        self._app_user_cbox = QtWidgets.QComboBox(parent)
         self._app_channel_cbox = QtWidgets.QComboBox(parent)
         self._app_button = AppButton(parent)
 
@@ -53,23 +54,31 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_version_cbox.setDisabled(True)
         self._app_version_cbox.setDuplicatesEnabled(False)
         self._app_version_cbox.setSizePolicy(size_policy)
-        self._app_version_cbox.setMaximumWidth(193)  # TODO should be used from a const
-
+        self._app_version_cbox.setMaximumWidth(self.MAX_WIDTH)
         self.addWidget(self._app_version_cbox)
+
+        self._app_user_cbox.setDisabled(True)
+        self._app_user_cbox.setDuplicatesEnabled(False)
+        self._app_user_cbox.setSizePolicy(size_policy)
+        self._app_user_cbox.setMaximumWidth(self.MAX_WIDTH)
+
+        self.addWidget(self._app_user_cbox)
 
         self._app_channel_cbox.setDisabled(True)
         self._app_channel_cbox.setDuplicatesEnabled(False)
         self._app_channel_cbox.setSizePolicy(size_policy)
-        self._app_channel_cbox.setMaximumWidth(193)  # TODO should be used from a const
+        self._app_channel_cbox.setMaximumWidth(self.MAX_WIDTH)
 
         self.addWidget(self._app_channel_cbox)
 
         # connect signals
         if this.main_window:
-            this.main_window.display_versions_updated.connect(self.update_versions_cbox)
-            this.main_window.display_channels_updated.connect(self.update_channels_cbox)
+            this.main_window.display_versions_changed.connect(self.update_versions_cbox)
+            this.main_window.display_users_changed.connect(self.update_users_cbox)
+            this.main_window.display_channels_changed.connect(self.update_channels_cbox)
         self._app_button.clicked.connect(self.on_click)
         self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
+        self._app_user_cbox.currentIndexChanged.connect(self.on_user_selected)
         self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
 
         self._init_menu()
@@ -80,7 +89,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu = QtWidgets.QMenu()
         icons_path = this.asset_path / "icons"
 
-        self.open_fm_action = QtWidgets.QAction("Show in file manager", self)
+        self.open_fm_action = QtWidgets.QAction("Show in File Manager", self)
         self.open_fm_action.setIcon(QtGui.QIcon(str(icons_path / "file-explorer.png")))
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
@@ -92,7 +101,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self.menu.addSeparator()
 
-        self.add_action = QtWidgets.QAction("Add new app link", self)
+        self.add_action = QtWidgets.QAction("Add new App Link", self)
         self.add_action.setIcon(QtGui.QIcon(str(icons_path / "add_link.png")))
         self.menu.addAction(self.add_action)
         self.add_action.triggered.connect(self.open_app_link_add_dialog)
@@ -102,7 +111,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu.addAction(self.edit_action)
         self.edit_action.triggered.connect(self.open_edit_dialog)
 
-        self.remove_action = QtWidgets.QAction("Remove app link", self)
+        self.remove_action = QtWidgets.QAction("Remove App Link", self)
         self.remove_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.menu.addAction(self.remove_action)
         self.remove_action.triggered.connect(self.remove)
@@ -139,12 +148,12 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.set_icon(self.config_data.icon)
 
         self._app_channel_cbox.clear()
-        channel = self.config_data.conan_ref.channel
-        if not channel:
-            channel = AppConfigEntry.OFFICIAL_RELEASE
-        self._app_channel_cbox.addItem(channel)
+        self._app_channel_cbox.addItem(self.config_data.channel)
         self._app_version_cbox.clear()
-        self._app_version_cbox.addItem(self.config_data.conan_ref.version)
+        self._app_version_cbox.addItem(self.config_data.version)
+        self._app_user_cbox.clear()
+        self._app_user_cbox.addItem(self.config_data.user)
+
 
     def open_edit_dialog(self, config_data: AppConfigEntry = None):
         if config_data:
@@ -155,13 +164,14 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._edit_app_dialog.save_data()
             self._apply_new_config()
             self._app_button.grey_icon()
+            self.config_data.update_from_cache()
             if this.main_window:
                 this.main_window.save_config()
 
     def open_app_link_add_dialog(self, config_data: AppConfigEntry = None):
         if not config_data:
             config_data = AppConfigEntry()
-        # TODO save for testing
+        # save for testing
         self._edit_app_dialog = EditAppDialog(config_data, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
@@ -189,31 +199,37 @@ class AppLink(QtWidgets.QVBoxLayout):
                 this.main_window.save_config()
 
     def update_with_conan_info(self):
-        # on changed values
-        if len(self.config_data.versions) > 1 and self._app_version_cbox.count() != len(self.config_data.versions) or \
-                len(self.config_data.channels) > 1 and self._app_channel_cbox.count() != len(self.config_data.channels):
-            # signals the cbox callback that we do not sen new user values
-            self._app_version_cbox.setEnabled(False)
-            self._app_channel_cbox.setEnabled(False)
-            # TODO callback from changing channel zeroes selection
-            self._app_version_cbox.clear()
-            self._app_channel_cbox.clear()
-            self._app_version_cbox.addItems(self.config_data.versions)
-            self._app_channel_cbox.addItems(self.config_data.channels)
-            try:  # TODO
-                self._app_version_cbox.setCurrentIndex(
-                    self.config_data.versions.index(self.config_data.version))
-                self._app_channel_cbox.setCurrentIndex(
-                    self.config_data.channels.index(self.config_data.channel))
-            except Exception:
-                pass
-            self._app_version_cbox.setDisabled(False)
-            self._app_channel_cbox.setDisabled(False)
+        if self._app_channel_cbox.itemText(0) != self.config_data.INVALID_DESCR and \
+            len(self.config_data.versions) > 1 and self._app_version_cbox.count() != len(self.config_data.versions) or \
+                    len(self.config_data.channels) > 1 and self._app_channel_cbox.count() != len(self.config_data.channels):
+                # signals the cbox callback that we do not set new user values
+                self._app_version_cbox.setDisabled(True)
+                self._app_user_cbox.setDisabled(True)
+                self._app_channel_cbox.setDisabled(True)
+                self._app_version_cbox.clear()
+                self._app_user_cbox.clear()
+                self._app_channel_cbox.clear()
+                self._app_version_cbox.addItems(self.config_data.versions)
+                self._app_user_cbox.addItems(self.config_data.users)
+                self._app_channel_cbox.addItems(self.config_data.channels)
+                try:  # try to set updated values
+                    self._app_version_cbox.setCurrentIndex(
+                        self.config_data.versions.index(self.config_data.version))
+                    self._app_user_cbox.setCurrentIndex(
+                        self.config_data.users.index(self.config_data.user))
+                    self._app_channel_cbox.setCurrentIndex(
+                        self.config_data.channels.index(self.config_data.channel))
+                except Exception:
+                    pass
+                self._app_version_cbox.setEnabled(True)
+                self._app_user_cbox.setEnabled(True)
+                self._app_channel_cbox.setEnabled(True)
 
         # add tooltip for channels, in case it is too long
         for i in range(0, len(self.config_data.channels)):
             self._app_channel_cbox.setItemData(i, self.config_data.channels[i], Qt.ToolTipRole)
         if self.config_data.executable.is_file():
+            Logger().debug(f"Ungreying {str(self.config_data.__dict__)}")
             self._app_button.set_icon(self.config_data.icon)
             self._app_button.ungrey_icon()
 
@@ -222,6 +238,12 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_version_cbox.show()
         else:
             self._app_version_cbox.hide()
+
+    def update_users_cbox(self, show: bool):
+        if show:
+            self._app_user_cbox.show()
+        else:
+            self._app_user_cbox.hide()
 
     def update_channels_cbox(self, show: bool):
         if show:
@@ -241,6 +263,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         if self.config_data.version == self._app_version_cbox.currentText():  # no change
             return
         self._app_button.grey_icon()
+        self.config_data.version = self._app_version_cbox.currentText()
+
         # update channels to match version
         self._app_channel_cbox.clear()  # reset cbox
         if len(self.config_data.channels) == 1:
@@ -251,23 +275,56 @@ class AppLink(QtWidgets.QVBoxLayout):
             # add tooltip for channels, in case it is too long
             for i in range(0, len(self.config_data.channels)):
                 self._app_channel_cbox.setItemData(i+1, self.config_data.channels[i], Qt.ToolTipRole)
-                self._app_channel_cbox.setDisabled(True)
 
         self._app_channel_cbox.setCurrentIndex(0)
-        self.config_data.version = self._app_version_cbox.currentText()
         self._app_button.setToolTip(str(self.config_data.conan_ref))
+        if this.main_window:
+            this.main_window.save_config()
+
+    def on_user_selected(self, index):
+        """ This is callback is also called on cbox_add_items, so a workaround is needed"""
+
+        if not self._app_user_cbox.isEnabled():
+            return
+        if index == -1:
+            return
+        if self.config_data.user == self._app_user_cbox.currentText():
+            return
+        #self._app_channel_cbox.setDisabled(True)
+        self._app_button.grey_icon()
+        self.config_data.user = self._app_user_cbox.currentText()
+
+        # update channels to match version
+        self._app_channel_cbox.clear()  # reset cbox
+        if len(self.config_data.channels) == 1:
+            self._app_channel_cbox.addItems(self.config_data.channels)
+        else:
+            self._app_channel_cbox.addItems([self.config_data.INVALID_DESCR] + self.config_data.channels)
+            self.config_data.channel = self.config_data.INVALID_DESCR
+            # add tooltip for channels, in case it is too long
+            for i in range(0, len(self.config_data.channels)):
+                self._app_channel_cbox.setItemData(i+1, self.config_data.channels[i], Qt.ToolTipRole)
+
+        self._app_channel_cbox.setCurrentIndex(0)
+        self._app_button.setToolTip(str(self.config_data.conan_ref))
+        #self._app_channel_cbox.setEnabled(True)
+
         if this.main_window:
             this.main_window.save_config()
 
     def on_channel_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
+
         if not self._app_channel_cbox.isEnabled():
             return
         if index == -1:
             return
         if self.config_data.channel == self._app_channel_cbox.currentText():
             return
-
+        self._app_button.grey_icon()
+        # remove entry NA after setting something other
+        if index != 0 and self._app_channel_cbox.itemText(0) == self.config_data.INVALID_DESCR:
+           self._app_channel_cbox.removeItem(0)
         self.config_data.channel = self._app_channel_cbox.currentText()
         self._app_button.setToolTip(str(self.config_data.conan_ref))
         self._app_button.set_icon(self.config_data.icon)

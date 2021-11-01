@@ -32,15 +32,18 @@ def testReadCache(base_fixture):
     assert cache._local_packages == {"my_package/1.0.0@_/_": "",
                                      "my_package/2.0.0@_/_": "C:\\.conan\\pkg"}
     assert cache._remote_packages == {
-        "my_package@_": [
+        "my_package": {"_" : [
             "1.0.0/_",
-            "2.0.0/_",
-        ],
-        "other_package@others": [
+            "2.0.0/_"]
+        },
+        "other_package": {"others": [
             "1.0.0/testing",
             "2.0.0/stable",
-            "3.0.0/stable"
+            "3.0.0/stable"],
+            "local": [
+                "1.0.0/testing"
         ]
+        }
     }
     assert str(cache.get_local_package_path("my_package/2.0.0@_/_")) == "C:\\.conan\\pkg"
     assert str(cache.get_local_package_path("my_package/1.0.0@_/_")) == "NULL"
@@ -85,6 +88,9 @@ def testUpdateCache(base_fixture):
     assert set(remote_pkgs) == set(add_packages)
     remote_pkgs = cache.get_similar_remote_pkg_refs("my_package", "myself")
     assert len(remote_pkgs) == 3
+    remote_pkgs = cache.get_similar_remote_pkg_refs("other_package", "*")
+    assert len(remote_pkgs) == 4
+
 
     cache.update_remote_package_list(add_packages, invalidate=True)
     remote_pkgs = cache.get_similar_remote_pkg_refs("new_pkg", "me")

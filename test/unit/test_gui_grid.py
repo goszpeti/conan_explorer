@@ -9,38 +9,19 @@ from pathlib import Path
 from subprocess import check_output
 from time import sleep
 
-from conan_app_launcher.components.config_file import (AppConfigEntry, AppType,
-                                                       OptionType)
-from conan_app_launcher.ui import main_window
+from conan_app_launcher.components.config_file import AppConfigEntry, AppType
 from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
 from conan_app_launcher.ui.app_grid.app_link import AppLink
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
-def testAboutDialog(base_fixture, qtbot):
+TEST_REF = "zlib/1.2.11@_/_"
+
+
+def test_EditAppDialog_display_values(base_fixture, qtbot):
     """
-    Test the about dialog separately.
-    Check, that the app name is visible and it is hidden after clicking OK:
-    """
-    root_obj = QtWidgets.QWidget()
-    widget = main_window.AboutDialog(root_obj)
-    qtbot.addWidget(root_obj)
-    widget.show()
-    qtbot.waitForWindowShown(widget)
-
-    assert "Conan App Launcher" in widget._text.toPlainText()
-    qtbot.mouseClick(widget._button_box.buttons()[0], Qt.LeftButton)
-    assert widget.isHidden()
-
-
-def testEditAppDialogNewAppLink(base_fixture, qtbot):
-    """ Test, if a new dialog on empty AppData will ..."""
-    pass
-
-def testEditAppDialogFillValues(base_fixture, qtbot):
-    """
-    Test, if the already existant app data is displayed correctly in the dialog.
+    Test, if the already existent app data is displayed correctly in the dialog.
     """
     app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
                          "executable": "bin/myexec", "args": "", "conan_options" : [],
@@ -59,7 +40,7 @@ def testEditAppDialogFillValues(base_fixture, qtbot):
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
-    qtbot.waitForWindowShown(root_obj)
+    qtbot.waitExposed(root_obj)
 
     # assert values
     assert diag._ui.name_line_edit.text() == app_info.name
@@ -71,7 +52,6 @@ def testEditAppDialogFillValues(base_fixture, qtbot):
     conan_options_text = diag._ui.conan_opts_text_edit.toPlainText()
     for opt in app_info.conan_options:
         assert f"{opt}={app_info.conan_options[opt]}" in conan_options_text
-
     # modify smth
     diag._ui.name_line_edit.setText("NewName")
 
@@ -81,12 +61,12 @@ def testEditAppDialogFillValues(base_fixture, qtbot):
     assert app_info.name == "test"
 
 
-def testEditAppDialogReadValues(base_fixture, qtbot):
+def test_EditAppDialog_save_values(base_fixture, qtbot):
     """
-    Test, if the entered/modified/untouched data is written correctly after pressing OK.
+    Test, if the entereddata is written correctly.
     """
-    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
-                         "executable": "", "console_application": True, "icon": ""}
+    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable", "args": "", 
+                        "conan_options": [], "executable": "", "console_application": True, "icon": ""}
     app_info = AppConfigEntry(app_data)
     app_info._executable = Path(sys.executable)
 
@@ -97,22 +77,42 @@ def testEditAppDialogReadValues(base_fixture, qtbot):
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    EditAppDialog(app_info, root_obj)
+    diag = EditAppDialog(app_info, root_obj)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
-    qtbot.waitForWindowShown(root_obj)
+    qtbot.waitExposed(root_obj)
 
-    # qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
-    # sleep(5)  # wait for terminal to spawn
+    # edit dialog
+    diag._ui.name_line_edit.setText("NewName")
+    diag._ui.conan_ref_line_edit.setText(TEST_REF)
+    diag._ui.exec_path_line_edit.setText("include/zlib.h")
+    diag._ui.is_console_app_checkbox.setChecked(True)
+    diag._ui.icon_line_edit.setText("//Myico.ico")
+    diag._ui.args_line_edit.setText("--help -kw=value")
+    diag._ui.conan_opts_text_edit.setText("a=b\nb=c")
 
+    # the caller must call save_data manually
+    diag.save_data()
 
-def testAppLinkOpen(base_fixture, qtbot):
+    # assert that all infos where saved
+    assert diag._ui.name_line_edit.text() == app_info.name
+    assert diag._ui.conan_ref_line_edit.text() == "zlib/1.2.11@_/_" # internal representation will strip @_/_
+    assert diag._ui.exec_path_line_edit.text() == app_data.get("executable")
+    assert diag._ui.is_console_app_checkbox.isChecked() == app_info.is_console_application
+    assert diag._ui.icon_line_edit.text() == app_data.get("icon")
+    assert diag._ui.args_line_edit.text() == app_info.args
+    conan_options_text = diag._ui.conan_opts_text_edit.toPlainText()
+
+    for opt in app_info.conan_options:
+        assert f"{opt}={app_info.conan_options[opt]}" in conan_options_text
+
+def test_AppLink_open(base_fixture, qtbot):
     """
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
-    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
+    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable", "args": "", "conan_options": [],
                          "executable": "", "console_application": True, "icon": ""}
     app_info = AppConfigEntry(app_data)
     app_info._executable = Path(sys.executable)
@@ -128,7 +128,7 @@ def testAppLinkOpen(base_fixture, qtbot):
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
-    qtbot.waitForWindowShown(root_obj)
+    qtbot.waitExposed(root_obj)
     qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
     sleep(5)  # wait for terminal to spawn
     # check pid of created process
@@ -145,12 +145,11 @@ def testAppLinkOpen(base_fixture, qtbot):
         pid = line.split("python.exe")[1].split("Console")[0]
         os.system("taskkill /PID " + pid)
 
-
-def testAppLinkVersionAndChannelSwitch(base_fixture, qtbot):
+def test_AppLink_version_switch(base_fixture, qtbot):
     """
-    TODO Implmement
+    Test, that changing the version resets the channel and user correctly
     """
-    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
+    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable", "args": "", "conan_options": [],
                          "executable": "", "console_application": True, "icon": ""}
     app_info = AppConfigEntry(app_data)
     app_info._executable = Path(sys.executable)
@@ -166,7 +165,7 @@ def testAppLinkVersionAndChannelSwitch(base_fixture, qtbot):
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
-    qtbot.waitForWindowShown(root_obj)
+    qtbot.waitExposed(root_obj)
     qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
     sleep(5)  # wait for terminal to spawn
     # check pid of created process
@@ -182,8 +181,3 @@ def testAppLinkVersionAndChannelSwitch(base_fixture, qtbot):
         line = lines[3].replace(" ", "")
         pid = line.split("python.exe")[1].split("Console")[0]
         os.system("taskkill /PID " + pid)
-
-
-# testNewAppLink()
-
-# testEditPackageReference()

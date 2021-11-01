@@ -307,14 +307,14 @@
        <widget class="QLabel" name="package_filter_label">
         <property name="geometry">
          <rect>
-          <x>63</x>
+          <x>50</x>
           <y>5</y>
-          <width>91</width>
+          <width>31</width>
           <height>21</height>
          </rect>
         </property>
         <property name="text">
-         <string>Package Filter</string>
+         <string>Filter:</string>
         </property>
        </widget>
        <widget class="QTextEdit" name="package_filter_edit">
@@ -323,8 +323,8 @@
         </property>
         <property name="geometry">
          <rect>
-          <x>154</x>
-          <y>3</y>
+          <x>90</x>
+          <y>0</y>
           <width>171</width>
           <height>26</height>
          </rect>
@@ -349,6 +349,9 @@ p, li { white-space: pre-wrap; }
           <height>31</height>
          </rect>
         </property>
+        <property name="toolTip">
+         <string>Refresh package list view</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -362,10 +365,22 @@ p, li { white-space: pre-wrap; }
           <height>401</height>
          </rect>
         </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <widget class="QTreeView" name="package_select_view">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>100</width>
@@ -374,9 +389,12 @@ p, li { white-space: pre-wrap; }
          </property>
          <property name="baseSize">
           <size>
-           <width>100</width>
+           <width>0</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
          </property>
          <property name="indentation">
           <number>10</number>
@@ -395,15 +413,15 @@ p, li { white-space: pre-wrap; }
          </attribute>
         </widget>
         <widget class="QTreeView" name="package_file_view">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
-           <width>500</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>300</width>
+           <width>100</width>
            <height>0</height>
           </size>
          </property>
@@ -415,6 +433,9 @@ p, li { white-space: pre-wrap; }
          </property>
          <property name="defaultDropAction">
           <enum>Qt::TargetMoveAction</enum>
+         </property>
+         <property name="indentation">
+          <number>15</number>
          </property>
          <property name="itemsExpandable">
           <bool>true</bool>
@@ -486,8 +507,9 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="menu_set_display_versions"/>
-    <addaction name="menu_set_display_channels"/>
+    <addaction name="menu_toggle_display_versions"/>
+    <addaction name="menu_toggle_display_users"/>
+    <addaction name="menu_toggle_display_channels"/>
     <addaction name="separator"/>
    </widget>
    <addaction name="menu_file"/>
@@ -585,7 +607,7 @@ p, li { white-space: pre-wrap; }
     <string>Open Config File</string>
    </property>
   </action>
-  <action name="menu_set_display_versions">
+  <action name="menu_toggle_display_versions">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -593,10 +615,10 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Display versions</string>
+    <string>Display versions dropdown</string>
    </property>
   </action>
-  <action name="menu_set_display_channels">
+  <action name="menu_toggle_display_channels">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -604,7 +626,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Display channels</string>
+    <string>Display channels dropdown</string>
    </property>
   </action>
   <action name="menu_settings">
@@ -625,6 +647,17 @@ p, li { white-space: pre-wrap; }
   <action name="menu_add_remove_conan_link">
    <property name="text">
     <string>Add/Remove Conan Link</string>
+   </property>
+  </action>
+  <action name="menu_toggle_display_users">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Display users dropdown</string>
    </property>
   </action>
  </widget>

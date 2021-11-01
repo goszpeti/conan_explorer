@@ -1,13 +1,14 @@
 .vscode/.ropeproject/**
 .vscode/tags
+.venv
 
 **/__pycache__/**
 *.egg-info
 build/**
 dist/**
-result*.xml
+*result*.xml
 cov.xml
 .coverage
 htmlcov/*
 
-src/conan_app_launcher/ui/qt/app_grid.py
+src/conan_app_launcher/cache.json

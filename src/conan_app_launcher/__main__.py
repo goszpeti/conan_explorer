@@ -4,14 +4,16 @@ Sets up cmd arguments, config file and starts the gui
 """
 import os
 import sys
-import traceback
 import platform
 import tempfile
 from pathlib import Path
+from typing import List
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 import conan_app_launcher as this
+from conan_app_launcher.ui.bug_report import custom_exception_hook
+from conan_app_launcher.components.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import Settings, LAST_CONFIG_FILE
 from conan_app_launcher.base import Logger
 from conan_app_launcher.ui.main_window import MainUi
@@ -22,14 +24,13 @@ try:
     # this is a workaround for Windows, so that on the taskbar the
     # correct icon will be shown (and not the default python icon)
     from PyQt5.QtWinExtras import QtWin
-    MY_APP_ID = 'ConanAppLauncher.' + this.__version__
+    MY_APP_ID = 'ConanAppLauncher.' + this.VERSION
     QtWin.setCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 except ImportError:
     pass
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
-
 
 def load_base_components(settings):
     """ Load all default components. """
@@ -50,7 +51,7 @@ def load_base_components(settings):
 
     else:
         config_file_path = Path(config_file_setting)
-
+    conan_refs: List[ConanWorkerElement] = []
     if config_file_path.is_file():  # escape error log on first opening
         this.tab_configs = parse_config_file(config_file_path)
         if not this.tab_configs:
@@ -58,16 +59,17 @@ def load_base_components(settings):
             tab.add_app_entry(AppConfigEntry({"name": "My App Link"}))
             this.tab_configs.append(tab)
             write_config_file(config_file_path, [tab])
-
+        else:
+            conan_refs = this.get_all_conan_refs()
     # start Conan Worker
-    this.conan_worker = ConanWorker()
+    this.conan_worker = ConanWorker(conan_refs)
 
 
 def main():
     """
     Start the Qt application and an all main components
     """
-
+    sys.excepthook = custom_exception_hook
     if platform.system() == "Darwin":
         print("Mac OS is currently not supported.")
         sys.exit(1)
@@ -79,7 +81,6 @@ def main():
     # init logger first
     this.base_path = Path(__file__).absolute().parent
     this.asset_path = this.base_path / "assets"
-    logger = Logger()
 
     # apply Qt attributes (only at init possible)
     QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
@@ -91,9 +92,9 @@ def main():
     icon = QtGui.QIcon(str(this.asset_path / "icons" / "icon.ico"))
 
     settings_file_path = Path.home() / this.SETTINGS_FILE_NAME
-    this.settings = Settings(ini_file=settings_file_path)
+    this.active_settings = Settings(ini_file=settings_file_path)
 
-    load_base_components(this.settings)
+    load_base_components(this.active_settings)
 
     this.main_window = MainUi()
     # load tabs needs the pyqt signals - constructor has to be finished
@@ -101,15 +102,7 @@ def main():
     this.main_window.setWindowIcon(icon)
     this.main_window.show()
 
-    try:
-        this.qt_app.exec_()
-    except:  # pylint:disable=bare-except
-        trace_back = traceback.format_exc()
-        logger.error(f"Application crashed: \n{trace_back}")
-    finally:
-        if this.conan_worker:  # cancel conan worker tasks on exit
-            this.conan_worker.finish_working()
-
+    this.qt_app.exec_()
 
 if __name__ == "__main__":
     main()

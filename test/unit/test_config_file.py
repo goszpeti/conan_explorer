@@ -64,40 +64,39 @@ def testUpdate(base_fixture, settings_fixture):
     assert read_obj.get("tabs")[0].get("apps")[0].get("package_id") is None
 
 
-def testNoneExistantFilename(base_fixture, capsys):
+def testNoneExistantFilename(base_fixture, capfd):
     """
     Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     tabs = parse_config_file(base_fixture.testdata_path / "nofile.json")
     assert tabs == []
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
     assert "ERROR" in captured.err
     assert "does not exist" in captured.err
 
 
-def testInvalidVersion(base_fixture, capsys):
+def testInvalidVersion(base_fixture, capfd):
     """
     Tests, that reading a config file with the wrong version will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     tabs = parse_config_file(base_fixture.testdata_path / "config_file" / "wrong_version.json")
     assert tabs == []
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
     assert "ERROR" in captured.err
     assert "Failed validating" in captured.err
     assert "version" in captured.err
 
 
-def testInvalidContent(base_fixture, capsys):
+def testInvalidContent(base_fixture, capfd):
     """
     Tests, that reading a config file with invalid syntax will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     tabs = parse_config_file(base_fixture.testdata_path / "config_file" / "invalid_syntax.json")
     assert tabs == []
-    captured = capsys.readouterr()
-    assert "ERROR" in captured.err
+    captured = capfd.readouterr()
     assert "Expecting property name" in captured.err
 
 
@@ -117,7 +116,7 @@ def testWriteConfigFile(base_fixture, settings_fixture, tmp_path):
     assert test_dict == ref_dict
 
 
-def testExecutableEval(base_fixture, capsys):
+def testExecutableEval(base_fixture, capfd):
     """
     Tests, that the executable setter works on all cases.
     Expects correct file, error messoge on wrong file an error message on no file.
@@ -130,12 +129,12 @@ def testExecutableEval(base_fixture, capsys):
     assert app_link.executable == exe
 
     app_link.executable = "nonexistant"
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
     assert "ERROR" in captured.err
     assert "Can't find file" in captured.err
 
     app_link.executable = ""
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
     assert "ERROR" in captured.err
     assert "No file" in captured.err
 
@@ -179,14 +178,14 @@ def testIconEval(base_fixture, settings_fixture, tmp_path):
         assert app_link.icon == app.asset_path / "icons" / "app.png"
 
 
-def testIconEvalWrongPath(capsys, base_fixture, tmp_path):
+def testIconEvalWrongPath(capfd, base_fixture, tmp_path):
     """ Test, that a nonexistant path returns an error """
     app_data = {"conan_ref": "zlib/1.2.11@conan/stable", "name": "AppName",
                 "icon": str(Path.home() / "nonexistant.png"), "executable": sys.executable}
     app_link = AppConfigEntry(app_data)
 
     # wrong path
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
     assert "ERROR" in captured.err
     assert "Can't find icon" in captured.err
     assert app_link.icon == app.asset_path / "icons" / "app.png"

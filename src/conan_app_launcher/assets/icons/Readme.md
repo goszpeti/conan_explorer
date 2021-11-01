@@ -16,7 +16,7 @@ rename.png -- https://icons8.com/icon/15076/rename
 search.png -- https://icons8.com/icon/14079/search
 search_packages.png -- https://icons8.com/icon/jqacbJ7SsEXY/package-search
 package -- https://icons8.com/icon/BVdE5qStccbJ/open-parcel
-linux -- https://icons8.com/icon/16088/linux
+linux -- https://icons8.com/icon/33529/linux
 x64 - https://icons8.com/icon/16981/x64
 android  -- https://icons8.com/icon/16011/android-os
 mac_os -- https://icons8.com/icon/16089/apple-logo

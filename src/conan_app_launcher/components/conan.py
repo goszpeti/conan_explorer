@@ -1,10 +1,11 @@
+from dataclasses import dataclass, field
 import platform
 import shutil
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
 else:
     try:
@@ -17,24 +18,22 @@ from conans.model.ref import ConanFileReference, PackageReference
 from conans.util.windows import path_shortener
 
 try:
-    from conans.util.windows import (CONAN_REAL_PATH, path_shortener,
-                                     rm_conandir)
-except:
+    from conans.util.windows import CONAN_REAL_PATH, path_shortener
+except Exception:
     pass
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
 
 
-class ConanPkg(TypedDict):
+class ConanPkg(TypedDict, total=False):
     """ Dummy class to type conan package dicts """
 
     id: str
     options: Dict[str, str]
     settings: Dict[str, str]
-    requires: List  # ?
+    requires: List
     outdated: bool
-
 
 class ConanApi():
     """ Wrapper around ConanAPIV1 """
@@ -45,7 +44,6 @@ class ConanApi():
         self.user_io: UserIO = None
         self._short_path_root = Path("NULL")
         self.init_api()
-
 
     def init_api(self):
         """ Instantiate the api. In some cases it needs to be instatiated anew. """
@@ -60,8 +58,16 @@ class ConanApi():
 
     def get_local_pkgs_from_ref(self, conan_ref: ConanFileReference) -> List[ConanPkg]:
         """ Returns all installed pkg ids for a reference. """
-        response = self.conan.search_packages(str(conan_ref))
-        result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
+        ### Experimental fast search - Conan search_packages is VERY slow
+        # HACK: Removed the  @api_method decorator by getting the original function from the closure attribute
+        search_packages = self.conan.search_packages.__closure__[0].cell_contents
+        response = search_packages(self.conan, str(conan_ref))
+        result: List[ConanPkg] = [{"id": ""}]
+        if not response.get("error"):
+            try:
+                result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
+            except Exception:
+                Logger().error(f"Received invalid package response format for {str(conan_ref)}")
         return result
 
     def get_short_path_root(self) -> Path:
@@ -69,8 +75,8 @@ class ConanApi():
         # only need to get once
         if self._short_path_root.exists() or platform.system() != "Windows":
             return self._short_path_root
-
-        gen_short_path = Path(path_shortener(tempfile.mkdtemp(), True))
+        temp_dir: str = path_shortener(tempfile.mkdtemp(), True)
+        gen_short_path = Path(temp_dir)
         short_path_root = gen_short_path.parents[1]
         shutil.rmtree(gen_short_path.parent, ignore_errors=True)
         return short_path_root
@@ -80,22 +86,27 @@ class ConanApi():
         # Blessed are the users Microsoft products!
         if not platform.system() == "Windows":
             return []
+        return self.get_orphaned_references() + self.get_orphaned_packages()
+
+    def get_orphaned_references(self):
         del_list = []
-        # search for orphaned refs
         for ref in self.cache.all_refs():
             ref_cache = self.cache.package_layout(ref)
             try:
                 package_ids = ref_cache.package_ids()
-            except:
-                package_ids = ref_cache.packages_ids() # old api
+            except Exception:
+                package_ids = ref_cache.packages_ids()  # old api of Conan
             for pkg_id in package_ids:
-                short_path_dir = self.get_package_folder(ref, {"id": pkg_id})
+                short_path_dir = self.get_package_folder(ref, pkg_id)
                 pkg_id_dir = Path(ref_cache.packages()) / pkg_id
                 if not short_path_dir.exists():
                     Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}")
                     del_list.append(str(pkg_id_dir))
+        return del_list
 
-        # reverse search for orphaned packages on windows short paths
+    def get_orphaned_packages(self):
+        """ Reverse search for orphaned packages on windows short paths """
+        del_list = []
         short_path_folders = [f for f in self.get_short_path_root().iterdir() if f.is_dir()]
         for short_path in short_path_folders:
             rp_file = short_path / CONAN_REAL_PATH
@@ -106,35 +117,41 @@ class ConanApi():
                     if not Path(real_path).is_dir():
                         Logger().debug(f"Can't find {real_path} for {str(short_path)}")
                         del_list.append(str(short_path))
-                except:
+                except Exception:
                     Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")
-
         return del_list
 
     def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Path:
         """ Return the package folder of a conan reference and install it, if it is not available """
 
         package = self.find_best_local_package(conan_ref, input_options)
-        if package:
-            return self.get_package_folder(conan_ref, package)
+        if package.get("id", ""):
+            return self.get_package_folder(conan_ref, package.get("id", ""))
+        Logger().info(f"Package {conan_ref} not installed with options {input_options}.")
+        
 
         packages: List[ConanPkg] = self.search_package_in_remotes(conan_ref, input_options)
         if not packages:
+            if this.cache:
+                this.cache.invalidate_remote_package(conan_ref)
             return Path("NULL")
 
         if self.install_package(conan_ref, packages[0]):
             package = self.find_best_local_package(conan_ref, input_options)
-            return self.get_package_folder(conan_ref, package)
+            return self.get_package_folder(conan_ref, package.get("id", ""))
         return Path("NULL")
 
     def search_query_in_remotes(self, query: str) -> List[ConanFileReference]:
         """ Search in all remotes for a specific query. """
         res_list = []
+        search_results = []
         try:
             # no query possible with pattern
             search_results = self.conan.search_recipes(query, remote_name="all").get("results", None)
         except Exception:
             return []
+        if not search_results:
+            return res_list
 
         for res in search_results:
             for item in res.get("items", []):
@@ -145,18 +162,20 @@ class ConanApi():
 
     def search_recipe_in_remotes(self, conan_ref: ConanFileReference) -> List[ConanFileReference]:
         """ Search in all remotes for all versions of a conan ref """
-        res_list = []
+        search_results = []
+        local_results = []
         try:
             # no query possible with pattern
-            search_results = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
-                                                    remote_name="all").get("results", None)
+            search_results: List = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
+                                                       remote_name="all").get("results", None)
             if this.SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
-                local_results = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
-                                                        remote_name=None).get("results", None)
+                local_results: List = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
+                                                          remote_name=None).get("results", None)
         except Exception:
             return []
-        search_results = search_results + local_results
-        for res in search_results:
+
+        res_list = []
+        for res in search_results + local_results:
             for item in res.get("items", []):
                 res_list.append(ConanFileReference.loads(item.get("recipe", {}).get("id", "")))
         res_list = list(set(res_list))  # make unique
@@ -175,19 +194,24 @@ class ConanApi():
         Logger().warning(f"Can't find a matching package '{str(conan_ref)}' in the remotes")
         return []
 
-    def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Optional[ConanPkg]:
+    def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> ConanPkg:
         """ Find a package in the local cache """
         packages = self.find_best_matching_packages(conan_ref, input_options)
-        # TODO what to if multiple ones exits? - for now simply take the first entry
+        # What to if multiple ones exits? - for now simply take the first entry
         if packages:
+            if len(packages) > 1:
+                settings = packages[0].get("settings", {})
+                Logger().warning(f"Multiple matching packages found for {str(conan_ref)}!\n" \
+                                f"Choosing this: {settings}.")
             return packages[0]
-        return None
+        Logger().warning(f"No matching packages found for {str(conan_ref)}!")
+        return {"id": ""}
 
-    def get_package_folder(self, conan_ref: ConanFileReference, package: Optional[ConanPkg]) -> Path:
+    def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """
         try:
             layout = self.cache.package_layout(conan_ref)
-            return Path(layout.package(PackageReference(conan_ref, package["id"])))
+            return Path(layout.package(PackageReference(conan_ref, package_id)))
         except Exception:  # gotta catch 'em all!
             return Path("NULL")
 
@@ -203,9 +227,9 @@ class ConanApi():
         Try to install a conan package while guessing the mnost suitable package
         for the current platform.
         """
-        package_id = package["id"]
-        options_list = _create_key_value_pair_list(package["options"])
-        settings_list = _create_key_value_pair_list(package["settings"])
+        package_id = package.get("id", "")
+        options_list = _create_key_value_pair_list(package.get("options", {}))
+        settings_list = _create_key_value_pair_list(package.get("settings", {}))
         Logger().info(
             f"Installing '{str(conan_ref)}':{package_id} with settings: {str(settings_list)}, options: {str(options_list)}")
         try:
@@ -227,21 +251,23 @@ class ConanApi():
             return []
 
         found_pkgs: List[ConanPkg] = []
-        default_settings: Dict[str, str] = dict(self.cache.default_profile.settings)
+        default_settings: Dict[str, str] = {}
         try:
+            default_settings = dict(self.cache.default_profile.settings)
             query = f"(arch=None OR arch={default_settings.get('arch')})" \
                     f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"\
                     f" AND (os_build=None OR os_build={default_settings.get('os_build')})"
             search_results = self.conan.search_packages(str(conan_ref), query=query,
                                                         remote_name=remote).get("results", None)
-            found_pkgs = search_results[0].get("items")[0].get("packages")
+            if search_results:
+                found_pkgs = search_results[0].get("items")[0].get("packages")
             Logger().debug(str(found_pkgs))
         except Exception:  # no problem, next
             return []
 
         # remove debug releases
-        no_debug_pkgs = list(filter(lambda pkg: pkg["settings"].get(
+        no_debug_pkgs = list(filter(lambda pkg: pkg.get("settings", {}).get(
             "build_type", "").lower() != "debug", found_pkgs))
         # check, if a package remained and only then take the result
         if no_debug_pkgs:
@@ -261,9 +287,12 @@ class ConanApi():
         if min_opts_set:
             min_opts_list = min_opts_set.pop()
 
-        # TODO this calls external code of the recipe - try catch?
-        default_options = self._resolve_default_options(
-            self.conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
+        # this calls external code of the recipe
+        try:
+            default_options = self._resolve_default_options(
+                self.conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
+        except Exception:
+            default_options = {}
 
         if default_options:
             default_options = dict(filter(lambda opt: opt[0] in min_opts_list, default_options.items()))
@@ -274,21 +303,20 @@ class ConanApi():
                                                        for key, value in default_options.items())
             if len(found_pkgs) > 1:
                 comb_opts_pkgs = list(filter(lambda pkg: default_str_options.items() <=
-                                         pkg["options"].items(), found_pkgs))
+                                             pkg.get("options", {}).items(), found_pkgs))
                 if comb_opts_pkgs:
                     found_pkgs = comb_opts_pkgs
-
 
         # now we have all matching packages, but with potentially different compilers
         # reduce with default settings
         if len(found_pkgs) > 1:
             same_comp_pkgs = list(filter(lambda pkg: default_settings.get("compiler", "") ==
-                                         pkg["settings"].get("compiler", ""), found_pkgs))
+                                         pkg.get("settings", {}).get("compiler", ""), found_pkgs))
             if same_comp_pkgs:
                 found_pkgs = same_comp_pkgs
 
             same_comp_version_pkgs = list(filter(lambda pkg: default_settings.get("compiler.version", "") ==
-                                                 pkg["settings"].get("compiler.version", ""), found_pkgs))
+                                                 pkg.get("settings", {}).get("compiler.version", ""), found_pkgs))
             if same_comp_version_pkgs:
                 found_pkgs = same_comp_version_pkgs
         return found_pkgs
@@ -313,27 +341,38 @@ class ConanApi():
         """ Build a  human readable pseduo profile name, like Windows_x64_vs16_v142_release """
         if not settings:
             return "default"
-        name = settings.get("os", "")
+
+        os = settings.get("os", "")
+        if not os:
+            os = settings.get("os_target", "")
+            if not os:
+                os = settings.get("os_build", "")
+
         arch = settings.get("arch", "")
-        if arch:
-            if arch == "x86_64":
-                arch = "x64"
-            name += "_" + arch.lower()
+        if not arch:
+            arch = settings.get("arch_target", "")
+            if not arch:
+                arch = settings.get("arch_build", "")
+        if arch == "x86_64":  # shorten x64
+            arch = "x64"
+
         comp = settings.get("compiler", "")
-        if comp:
-            if comp == "Visual Studio":
+        if comp == "Visual Studio":
                 comp = "vs"
-            name += "_" + comp.lower()
         comp_ver = settings.get("compiler.version", "")
-        if comp_ver:
-            name += comp_ver
+        comp_text = comp.lower() + comp_ver.lower()
+
         comp_toolset = settings.get("compiler.toolset", "")
-        if comp_toolset:
-            name += "_" + comp_toolset.lower()
+
         bt = settings.get("build_type", "")
-        if bt:
-            name += "_" + bt.lower()
-        return name
+
+        alias = os
+        for item in [arch.lower(), comp_text, comp_toolset.lower(), bt.lower()]:
+            if item:
+                alias += "_" +  item
+        
+        return alias
+
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
     """

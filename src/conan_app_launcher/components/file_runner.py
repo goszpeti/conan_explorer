@@ -10,11 +10,13 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
     """ Decide, if a file should be opened or executed and call the appropriate method """
     if not file_path.is_file():
         return
-
-    if is_file_executable(file_path):
-        execute_app(file_path, is_console_app, args)
-    else:
-        open_file(file_path)
+    try:
+        if is_file_executable(file_path):
+            execute_app(file_path, is_console_app, args)
+        else:
+            open_file(file_path)
+    except Exception:
+        Logger().error(f"Error while executing {str(file_path)} with args: {args}.")
 
 
 def open_in_file_manager(file_path: Path):
@@ -33,8 +35,8 @@ def is_file_executable(file_path: Path) -> bool:
         if os.access(str(file_path), os.X_OK):
             is_executable = True
     elif platform.system() == "Windows":
-        path_exts = os.getenv("PATHEXT", "").split(";")
-        path_exts = [item.lower() for item in path_exts]
+        # don't use PATHEXT - some programs write other filetypes like .py in it...
+        path_exts = [".cmd", ".com", ".bat", ".ps1", ".exe"]
         if file_path.suffix in path_exts:
             is_executable = True
     return is_executable
@@ -72,9 +74,8 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     Logger().warning(f"No executable {str(executable)} to start.")
     return 0
 
-
 def open_file(file: Path):
-    """ Open files with their assocoiated programs """
+    """ Open files with their associated programs """
     if file.absolute().is_file():
         if platform.system() == 'Windows':
             os.startfile(str(file))

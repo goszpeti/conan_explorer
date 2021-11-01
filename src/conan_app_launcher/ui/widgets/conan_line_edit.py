@@ -54,8 +54,9 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
 
     def load_completion(self, text):
         if this.cache:
-            conan = ConanApi()
-            recipes = conan.search_query_in_remotes(f"{text}*")
+            if not this.conan_api:
+                this.conan_api = ConanApi()
+            recipes = this.conan_api.search_query_in_remotes(f"{text}*")
             this.cache.update_remote_package_list(recipes)  # add to cache
             self.completion_finished.emit()
 

@@ -9,8 +9,9 @@ on:
   pull_request:
     branches: [master]
 
+
 jobs:
-  Test:
+  test:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
 
@@ -23,7 +24,7 @@ jobs:
             "ubuntu-py37",
             "ubuntu-py38",
             "ubuntu-py39",
-            "windows-py38",
+            "windows-py310",
             "ubuntu-py38-conan1.24.0",
             "ubuntu-py310-conan1.28.0",
           ]
@@ -45,8 +46,8 @@ jobs:
             use_coverage: true
             conan: "latest"
             os: ubuntu-latest
-          - name: "windows-py38"
-            python: "3.8"
+          - name: "windows-py310"
+            python: "3.10"
             os: windows-latest
             use_coverage: true
             conan: "latest"
@@ -99,10 +100,50 @@ jobs:
           conan remote add conancenter https://center.conan.io false
       - name: Execute unitests with pytest
         run: |
-          pytest -v test/unit --junit-xml=./result_unit.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
       - name: Execute integration with pytest
         run: |
-          pytest -v test/integration --junit-xml=./result_integration.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
       - name: Execute system with pytest
         run: |
-          pytest -v test/system --junit-xml=./result_system.xml --cov-report=term --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Test results
+          path: |
+            cov/
+            results/
+
+  sonarcloud:
+    if: always() # eecute, even when tests fail
+    needs:
+    - test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting, cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
+        fetch-depth: 0
+    - uses: actions/download-artifact@v2
+      with:
+        name: Test results
+        path: ./
+    - name: Fix code coverage paths
+      working-directory: ./cov
+      run: |
+          sed -i 's@/home/runner/work/conan_app_launcher/conan_app_launcher@.@g' cov-*.xml
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        args: >
+          -Dsonar.organization=goszpeti
+          -Dsonar.projectKey=goszpeti_conan_app_launcher
+          -Dsonar.sources=./src
+          -Dsonar.tests=./test
+          -Dsonar.sourceEncoding=UTF-8
+          -Dsonar.python.version=3.6,3.7,3.8,3.9
+          -Dsonar.python.coverage.reportPaths=cov/cov-*.xml
+          -Dsonar.python.xunit.reportPath=results/result-*-ubuntu-py39.xml

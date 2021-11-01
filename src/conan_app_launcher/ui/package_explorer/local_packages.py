@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 import conan_app_launcher as this
 from conan_app_launcher.base import Logger
@@ -11,36 +11,38 @@ from conan_app_launcher.components.config_file import AppConfigEntry, AppType
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .pkg_select_model import PROFILE_TYPE, PkgSelectModel, TreeItem
+from .pkg_select_model import PROFILE_TYPE, PackageFilter, PkgSelectModel, TreeItem
 
 Qt = QtCore.Qt
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainUi
 
 
 class LocalConanPackageExplorer():
     def __init__(self, main_window: "MainUi"):
         self._main_window = main_window
-        self.pkg_sel_model = PkgSelectModel()
-        # Set up filters for builtin conan files
-        self.proxy_model = QtCore.QSortFilterProxyModel()
-        self.proxy_model.setSourceModel(self.pkg_sel_model)
+        self.pkg_sel_model = None
+        if not this.conan_api:
+            this.conan_api = ConanApi()
 
-        main_window.ui.package_select_view.setModel(self.proxy_model)
         main_window.ui.package_select_view.header().setVisible(True)
         main_window.ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
         main_window.ui.package_select_view.setContextMenuPolicy(Qt.CustomContextMenu)
         main_window.ui.package_select_view.customContextMenuRequested.connect(
             self.on_selection_context_menu_requested)
-
-        main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
         self._init_selection_context_menu()
 
-        main_window.ui.refresh_button.clicked.connect(self.refresh_pkg_selection_view)
+        main_window.ui.refresh_button.clicked.connect(self.on_refresh_clicked)
         main_window.ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
-
+        main_window.ui.main_toolbox.currentChanged.connect(self.on_changed)
     # Selection view context menu
+
+    def on_changed(self, index):
+        self.refresh_pkg_selection_view(update=False)
+    
+    def on_refresh_clicked(self):
+        self.refresh_pkg_selection_view(update=True)
 
     def _init_selection_context_menu(self):
         self.select_cntx_menu = QtWidgets.QMenu()
@@ -49,7 +51,14 @@ class LocalConanPackageExplorer():
         self.copy_ref_action = QtWidgets.QAction("Copy reference", self._main_window)
         self.copy_ref_action.setIcon(QtGui.QIcon(str(icons_path / "copy_link.png")))
         self.select_cntx_menu.addAction(self.copy_ref_action)
-        self.copy_ref_action.triggered.connect(self.copy_ref)
+        self.copy_ref_action.triggered.connect(self.on_copy_ref_requested)
+
+        self.remove_ref_action = QtWidgets.QAction("Remove package", self._main_window)
+        self.remove_ref_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
+        self.select_cntx_menu.addAction(self.remove_ref_action)
+        self.remove_ref_action.setEnabled(False)  # TODO not ready yet
+        self.remove_ref_action.triggered.connect(self.on_remove_ref_requested)
+
 
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
@@ -79,16 +88,38 @@ class LocalConanPackageExplorer():
             return {}
         return source_item.itemData[0]
 
-    def copy_ref(self):
+    def on_copy_ref_requested(self):
         conan_ref = self.get_selected_conan_ref()
         this.qt_app.clipboard().setText(conan_ref)
 
+    def on_remove_ref_requested(self):
+        source_item = self.get_selected_pkg_source_item()
+        if not source_item:
+            return
+        # TODO add remove all pkgs for pkg selection
+        conan_ref = self.get_selected_conan_ref()
+        pkg_id = self.get_selected_conan_pkg_info().get("id")
+        pkg_ids = ([pkg_id] if pkg_id else None)
+        self.delete_conan_package_dialog(conan_ref, pkg_ids)
+
+    def delete_conan_package_dialog(self, conan_ref: str, pkg_ids: Optional[List[str]]):
+        msg = QtWidgets.QMessageBox(parent=self._main_window)
+        msg.setWindowTitle("Delete package")
+        msg.setText("Are you sure, you want to delete this package?")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
+        msg.setIcon(QtWidgets.QMessageBox.Question)
+        reply = msg.exec_()
+        if reply == QtWidgets.QMessageBox.Yes:
+            if this.conan_api:
+                this.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True, quiet=False)
+
     # Global pane and cross connection slots
 
-    def refresh_pkg_selection_view(self):
-        self._main_window.ui.package_select_view
+    def refresh_pkg_selection_view(self, update=True):
+        if not update and self.pkg_sel_model:
+            return
         self.pkg_sel_model = PkgSelectModel()
-        self.proxy_model = QtCore.QSortFilterProxyModel()
+        self.proxy_model = PackageFilter()
         self.proxy_model.setSourceModel(self.pkg_sel_model)
         self._main_window.ui.package_select_view.setModel(self.proxy_model)
         self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
@@ -109,7 +140,9 @@ class LocalConanPackageExplorer():
         if source_item.type != PROFILE_TYPE:
             return
         conan_ref = self.get_selected_conan_ref()
-        pkg_path = ConanApi().get_package_folder(ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
+        pkg_id = self.get_selected_conan_pkg_info().get("id", "")
+        pkg_path = this.conan_api.get_package_folder(
+            ConanFileReference.loads(conan_ref), pkg_id)
         if not pkg_path.exists():
             Logger().warning(f"Can't find package path for {conan_ref} and {str(source_item.itemData[0])}")
             return
@@ -117,26 +150,32 @@ class LocalConanPackageExplorer():
         self.fs_model.setReadOnly(False) # TODO connect the edit checkbox
         self.fs_model.setRootPath(str(pkg_path))
         self.fs_model.sort(0, Qt.AscendingOrder)
-        self.fs_model.fileRenamed.connect(self.on_file_double_click)
+        self.re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)
         self._main_window.ui.package_file_view.setModel(self.fs_model)
         self._main_window.ui.package_file_view.setRootIndex(self.fs_model.index(str(pkg_path)))
         self._main_window.ui.package_file_view.setColumnHidden(2, True)  # file type
         self._main_window.ui.package_file_view.setColumnWidth(0, 200)
         self._main_window.ui.package_file_view.header().setSortIndicator(0, Qt.AscendingOrder)
-        self._main_window.ui.package_file_view.doubleClicked.connect(self.on_file_double_click)
+        self.re_register_signal(self._main_window.ui.package_file_view.doubleClicked, 
+            self.on_file_double_click)
         # disable edit on double click, since we want to open
         self._main_window.ui.package_file_view.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
         self._main_window.ui.package_path_label.setText(str(pkg_path))
 
         self._main_window.ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
-        try: # need to be removed, otherwise will be called multiple times
-            self._main_window.ui.package_file_view.customContextMenuRequested.disconnect()
+
+        self.re_register_signal(self._main_window.ui.package_file_view.customContextMenuRequested, 
+            self.on_pkg_context_menu_requested)
+        self._init_pkg_context_menu()
+
+    @classmethod
+    def re_register_signal(cls, signal: QtCore.pyqtBoundSignal, slot: Callable):
+        try:  # need to be removed, otherwise will be called multiple times
+            signal.disconnect()
         except TypeError:
             # no way to check if it is connected and it will throw an error
             pass
-        self._main_window.ui.package_file_view.customContextMenuRequested.connect(
-            self.on_pkg_context_menu_requested)
-        self._init_pkg_context_menu()
+        signal.connect(slot)
 
     def on_file_double_click(self, model_index):
         file_path = Path(model_index.model().fileInfo(model_index).absoluteFilePath())
@@ -146,7 +185,7 @@ class LocalConanPackageExplorer():
         self.file_cntx_menu = QtWidgets.QMenu()
         icons_path = this.asset_path / "icons"
 
-        self.open_fm_action = QtWidgets.QAction("Show in file manager", self._main_window)
+        self.open_fm_action = QtWidgets.QAction("Show in File Manager", self._main_window)
         self.open_fm_action.setIcon(QtGui.QIcon(str(icons_path / "file-explorer.png")))
         self.file_cntx_menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
@@ -234,7 +273,8 @@ class LocalConanPackageExplorer():
         file_path = Path(self._get_selected_pkg_file())
         conan_ref = self.get_selected_conan_ref()
         # determine relpath from package
-        pkg_path = ConanApi().get_package_folder(ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
+        pkg_path = this.conan_api.get_package_folder(
+            ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
         rel_path = file_path.relative_to(pkg_path)
         # TODO get conan options from curent package?
         app_data: AppType = {"name": "NewLink", "conan_ref": conan_ref, "executable": str(rel_path),

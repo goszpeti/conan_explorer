@@ -14,7 +14,7 @@ from conan_app_launcher.components.file_runner import (execute_app, open_file,
 def testChooseRunFile(base_fixture, tmp_path, mocker):
     """
     Tests, that the function call is propagated correctly
-    Existant path with a filesize > 0 expected
+    Existing path with a filesize > 0 expected
     """
     # Mock away the calls
     mocker.patch('conan_app_launcher.components.file_runner.open_file')
@@ -30,7 +30,7 @@ def testChooseRunFile(base_fixture, tmp_path, mocker):
 def testChooseRunScript(base_fixture, tmp_path, mocker):
     """
     Tests, that the function call is propagated correctly
-    Existant path with a filesize > 0 expected
+    Existing path with a filesize > 0 expected
     """
     if platform.system() != "Windows":
         return
@@ -77,7 +77,8 @@ def testStartCliOptionApp(base_fixture):
     """
     executable = Path(sys.executable)
     is_console_app = True
-    args = ""
+    test_file = Path(tempfile.gettempdir(), "test.txt")
+    args = "" # no args os it stays open
     pid = execute_app(executable, is_console_app, args)
 
     if platform.system() == "Linux":
@@ -103,7 +104,7 @@ def testStartAppWithArgsNonCli(base_fixture):
     is_console_app = False
     args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
 
-    pid = execute_app(executable, is_console_app, args)
+    execute_app(executable, is_console_app, args)
 
     time.sleep(1)
     assert test_file.is_file()
@@ -120,7 +121,7 @@ def testStartAppWithArgsCliOption(base_fixture):
     executable = Path(sys.executable)
     is_console_app = True
     args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
-    pid = execute_app(executable, is_console_app, args)
+    execute_app(executable, is_console_app, args)
 
     time.sleep(5)  # wait for terminal to spawn
     assert test_file.is_file()
@@ -142,7 +143,7 @@ def testStartScript(base_fixture, tmp_path):
     with open(test_file, "w") as f:
         f.write("echo test > " + str(res_file))
 
-    pid = execute_app(test_file, False, "")
+    execute_app(test_file, False, "")
 
     time.sleep(2)  # wait for command to be executed
 

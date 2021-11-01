@@ -6,6 +6,7 @@ from pathlib import Path
 from shutil import copy
 
 import conan_app_launcher as app
+import conan_app_launcher
 from conan_app_launcher.components import parse_config_file
 from conan_app_launcher.components.conan import (ConanApi,
                                                  _create_key_value_pair_list)
@@ -21,6 +22,11 @@ def testConanProfileNameAliasBuilder():
     profile_name = ConanApi.build_conan_profile_name_alias({})
     assert profile_name == "default"
 
+    # check a partial
+    settings = {'os': 'Windows', 'arch': 'x86_64'}
+    profile_name = ConanApi.build_conan_profile_name_alias(settings)
+    assert profile_name == "Windows_x64"
+
     # check windows
     settings = {'os': 'Windows', 'os_build': 'Windows', 'arch': 'x86_64', 'arch_build': 'x86_64',
                 'compiler': 'Visual Studio', 'compiler.version': '16', 'compiler.toolset': 'v142', 'build_type': 'Release'}
@@ -28,6 +34,7 @@ def testConanProfileNameAliasBuilder():
     assert profile_name == "Windows_x64_vs16_v142_release"
 
 
+    # check linux
     settings = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 'compiler.version': '7.4', 'build_type': 'Debug'}
     profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Linux_x64_gcc7.4_debug"
@@ -204,7 +211,7 @@ def testSearchForAllPackages(base_fixture):
     assert str(ref) in str(res)
 
 
-def testConanWorker(base_fixture, settings_fixture):
+def testConanWorker(base_fixture, settings_fixture, mocker):
     """
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
@@ -212,18 +219,28 @@ def testConanWorker(base_fixture, settings_fixture):
     temp_dir = tempfile.gettempdir()
     config_file_path = base_fixture.testdata_path / "config_file" / "worker.json"
     temp_config_file_path = copy(config_file_path, temp_dir)
-    app.settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
+    app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
     app.tab_configs = parse_config_file(config_file_path)
-    conan_worker = ConanWorker()
-    elements_before = conan_worker._conan_queue.qsize()
-    time.sleep(10)
+    conan_refs = []
+    for tab in app.tab_configs:
+        for app_entry in tab.get_app_entries():
+            ref_dict = {"reference": str(app_entry.conan_ref), "options": app_entry.conan_options}
+            if ref_dict not in conan_refs:
+                conan_refs.append(ref_dict)
 
-    assert conan_worker._conan_queue.qsize() < elements_before
+    mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
+    conan_worker = ConanWorker(conan_refs)
+    time.sleep(3)
     conan_worker.finish_working()
 
-    # conan_server
-    # conan remote add private http://localhost:9300/
-    # conan upload example/1.0.0@myself/testing -r private
-    # .conan_server
-    # [write_permissions]
-    # */*@*/*: *
+    conan_app_launcher.components.ConanApi.get_path_or_install.assert_called()
+
+    assert conan_worker._conan_queue.qsize() == 0
+
+# conan_server
+# conan remote add private http://localhost:9300/
+# conan upload example/1.0.0@myself/testing -r private
+# conan user -r private -p demo demo
+# .conan_server
+# [write_permissions]
+# */*@*/*: *
