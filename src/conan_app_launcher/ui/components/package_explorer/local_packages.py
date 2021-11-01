@@ -284,11 +284,11 @@ class LocalConanPackageExplorer():
         open_in_file_manager(file_path)
 
     def _get_pkg_file_source_item(self) -> Optional[TreeItem]:
-        indexes = main_window.ui.package_file_view.selectedIndexes()
+        indexes = self._main_window.ui.package_file_view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug(f"No selected item for context action")
             return None
-        return main_window.ui.package_file_view.selectedIndexes()[0]
+        return self._main_window.ui.package_file_view.selectedIndexes()[0]
 
     def _get_selected_pkg_file(self) -> str:
         file_view_index = self._get_pkg_file_source_item()

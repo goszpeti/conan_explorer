@@ -1,8 +1,7 @@
 from threading import Thread
 from typing import Callable
 
-import conan_app_launcher as this
-from conan_app_launcher.components.conan import ConanApi
+from conan_app_launcher.app import conan_api
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
@@ -37,26 +36,22 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
             valid = True
             self.setStyleSheet("background: PaleGreen;")
         
-        if cache:
-            local_refs, remote_refs = cache.search(text)
-            combined_refs = set()
-            combined_refs.update(local_refs)
-            combined_refs.update(remote_refs)
-    
-            self.completer().model().setStringList(combined_refs)
-            if not any([entry.startswith(text) for entry in remote_refs]) or not valid:
-                if self._validator_thread and self._validator_thread.is_alive(): # one query at a time
-                    return
-                self._validator_thread = Thread(target=self.load_completion, args=[text, ])
-                self._validator_thread.start()
-                if self._loading_cbk:
-                    self._loading_cbk()
+        local_refs, remote_refs = conan_api.info_cache.search(text)
+        combined_refs = set()
+        combined_refs.update(local_refs)
+        combined_refs.update(remote_refs)
+
+        self.completer().model().setStringList(combined_refs)
+        if not any([entry.startswith(text) for entry in remote_refs]) or not valid:
+            if self._validator_thread and self._validator_thread.is_alive(): # one query at a time
+                return
+            self._validator_thread = Thread(target=self.load_completion, args=[text, ])
+            self._validator_thread.start()
+            if self._loading_cbk:
+                self._loading_cbk()
 
     def load_completion(self, text):
-        if cache:
-            if not conan_api:
-                conan_api = ConanApi()
-            recipes = conan_api.search_query_in_remotes(f"{text}*")
-            cache.update_remote_package_list(recipes)  # add to cache
-            self.completion_finished.emit()
+        recipes = conan_api.search_query_in_remotes(f"{text}*")
+        conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
+        self.completion_finished.emit()
 

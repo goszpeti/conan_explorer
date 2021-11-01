@@ -1,4 +1,5 @@
 
+from typing import Dict, List, Union
 from conan_app_launcher.components import ConanApi
 from conan_app_launcher.app import asset_path, conan_api
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -56,7 +57,7 @@ class PackageFilter(QtCore.QSortFilterProxyModel):
         return False
 
 class TreeItem(object):
-    def __init__(self, data: str, parent=None, item_type=REF_TYPE):
+    def __init__(self, data: List[Union[str, Dict]], parent=None, item_type=REF_TYPE):
         self.parentItem = parent
         self.itemData = data
         self.type = item_type

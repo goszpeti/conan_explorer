@@ -9,13 +9,12 @@ import time
 from pathlib import Path
 from shutil import rmtree
 
-import conan_app_launcher as app
-from conan_app_launcher.__main__ import load_base_components
+from conan_app_launcher import app
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import ConanApi
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
+
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 from conan_app_launcher import asset_path, user_save_path
@@ -31,7 +30,7 @@ def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
     # no settings entry
     app.active_settings.set(LAST_CONFIG_FILE, "")
     # delete default file, in case it exists and has content
-    default_config_file_path = Path.home() / app.DEFAULT_GRID_CONFIG_FILE_NAME
+    default_config_file_path = Path.home() / DEFAULT_GRID_CONFIG_FILE_NAME
     if default_config_file_path.exists():
         os.remove(default_config_file_path)
 

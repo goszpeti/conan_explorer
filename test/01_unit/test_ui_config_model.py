@@ -6,7 +6,7 @@ import tempfile
 from distutils.file_util import copy_file
 from pathlib import Path
 
-from conan_app_launcher.data.ui_config.json_file import JsonUiConfig
+from conan_app_launcher.ui.data.json_file import JsonUiConfig
 
 def testExecutableEval(base_fixture, capfd):
     """

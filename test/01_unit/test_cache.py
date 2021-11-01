@@ -1,4 +1,3 @@
-import os
 
 import tempfile
 from distutils.file_util import copy_file

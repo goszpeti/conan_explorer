@@ -6,8 +6,7 @@ import tempfile
 from pathlib import Path
 
 import conan_app_launcher as app
-from conan_app_launcher.__main__ import load_base_components
-from conan_app_launcher.settings.settings import Settings
+from conan_app_launcher.settings import SettingsFactory
 from conan_app_launcher.ui import main_window
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets

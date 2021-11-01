@@ -79,7 +79,7 @@ def testConanFindRemotePkg(base_fixture):
             assert default_settings[setting] in pkg["settings"][setting]
 
 
-def testConanNotFindRemotePkgWrongOpts(base_fixture, capfd):
+def testConanNotFindRemotePkgWrongOpts(base_fixture):
     """
     Test, if a wrong Option return causes an error.
     Empty list must be returned and the error be logged.
@@ -87,9 +87,7 @@ def testConanNotFindRemotePkgWrongOpts(base_fixture, capfd):
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
     pkg = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"BogusOption": "True"})
-    captured = capfd.readouterr()
     assert not pkg
-    assert "Can't find a matching package" in captured.err
 
 
 def testConanFindLocalPkg(base_fixture):
@@ -133,7 +131,7 @@ def testGetPathOrInstallManualOptions(capsys):
         assert (package_folder / "lib" / "libz.so").is_file()
 
 
-def testInstallWithAnySettings(mocker, capsys):
+def testInstallWithAnySettings(mocker, capfd):
     """
     Test, if a package with <setting>=Any flags can install
     The actual installaton must not return an error.
@@ -145,12 +143,12 @@ def testInstallWithAnySettings(mocker, capsys):
     assert conan.install_package(ConanFileReference.loads(TEST_REF), 
         {'id': '6cc50b139b9c3d27b3e9042d5f5372d327b3a9f7', 'options': {}, 'settings': {
         'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
     assert "ERROR" not in captured.err
     assert "Cannot install package" not in captured.err
 
 
-def testCompilerNoSettings(base_fixture, capsys):
+def testCompilerNoSettings(base_fixture, capfd):
     """
     Test, if a package with no settings at all can install
     The actual installaton must not return an error.
@@ -160,7 +158,7 @@ def testCompilerNoSettings(base_fixture, capsys):
     conan = ConanApi()
     package_folder = conan.get_path_or_install(ConanFileReference.loads(ref))
     assert (package_folder / "include").is_dir()
-    captured = capsys.readouterr()
+    captured = capfd.readouterr()
     assert "ERROR" not in captured.err
     assert "Can't find a matching package" not in captured.err
 

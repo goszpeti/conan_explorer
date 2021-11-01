@@ -1,4 +1,5 @@
 import os
+import sys
 import tempfile
 from pathlib import Path
 from shutil import copy
@@ -8,7 +9,6 @@ import conan_app_launcher.app as app
 import conan_app_launcher.logger as logger
 import pytest
 from conan_app_launcher.settings import *
-
  
 class PathSetup():
     """ Get the important paths form the source repo. """

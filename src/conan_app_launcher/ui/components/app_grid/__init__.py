@@ -29,10 +29,6 @@ class AppGrid():
         if self._main_window.ui.tab_bar.count() > 0:  # remove the default tab
             self._main_window.ui.tab_bar.removeTab(0)
 
-    def save_config(self):
-        """ Update without cleaning up. Ungrey entries and set correct icon and add hover text """
-        save_config_file(Path(active_settings.get_string(LAST_CONFIG_FILE)), tab_configs)
-
     def re_init(self):
         """ To be called, when a new config file is loaded """
         tab_count = self._main_window.ui.tab_bar.count()
@@ -96,7 +92,7 @@ class AppGrid():
             if not text:
                 return
             # add tab
-            tab_config = TabConfigModel(text)
+            tab_config = UiTabConfig(text)
             tab_configs.append(tab_config)
 
             tab = TabAppGrid(self._main_window.ui.tab_bar, tab_config,
@@ -110,11 +106,11 @@ class AppGrid():
 
         rename_tab_dialog = QtWidgets.QInputDialog(self._main_window)
         text, accepted = rename_tab_dialog.getText(self._main_window, 'Rename tab',
-                                                   'Enter new name:', text=tab.config_data.name)
+                                                   'Enter new name:', text=tab.model.name)
         if accepted:
-            tab.config_data.name = text
+            tab.model.name = text
             self._main_window.ui.tab_bar.setTabText(index, text)
-            self._main_window.save_config()
+            tab.model.save()
 
     def on_tab_remove(self, index):
         tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)

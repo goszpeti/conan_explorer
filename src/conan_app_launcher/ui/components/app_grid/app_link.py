@@ -144,7 +144,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu.exec_(self._app_button.mapToGlobal(position))
 
     def on_open_in_file_manager(self):
-        open_in_file_manager(self.model.executable.parent)
+        open_in_file_manager(self.model.get_executable_path().parent)
 
     def _apply_new_config(self):
         self._app_name_label.setText(self.model.name)
@@ -175,16 +175,16 @@ class AppLink(QtWidgets.QVBoxLayout):
             # if main_window:
             #     main_window.save_config()
 
-    def open_app_link_add_dialog(self, new_model = None):
-        if not new_model:
-            new_model = UiAppLinkModel()
+    def open_app_link_add_dialog(self, new_config = None):
+        if not new_config:
+            new_config = UiAppLinkConfig()
         # save for testing
-        self._edit_app_dialog = EditAppDialog(new_model, parent=self.parentWidget())
+        self._edit_app_dialog = EditAppDialog(new_config, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
             self._edit_app_dialog.save_data()
-            new_model.update_from_cache() # instantly use local paths and pkgs
-            app_link = AppLink(self.parent_tab, new_model)
+            app_link = AppLink(self.parent_tab).load(new_config, self.model.parent)
+            self.model.parent.apps.append(new_config)
             self.parent_tab.add_app_link_to_tab(app_link)
             # if main_window:
             #     main_window.save_config()
@@ -193,7 +193,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def remove(self):
         # confirmation dialog
-        message_box = QtWidgets.QMessageBox(parent=main_window)
+        message_box = QtWidgets.QMessageBox(parent=self.parentWidget())
         message_box.setWindowTitle("Delete app link")
         message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}?\"")
         message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
@@ -202,8 +202,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         if reply == QtWidgets.QMessageBox.Yes:
             self.delete()
             self.parent_tab.remove_app_link_from_tab(self)
-            if main_window:
-                main_window.save_config()
+            self.model.save()
 
     def update_with_conan_info(self):
         if self._app_channel_cbox.itemText(0) != self.model.INVALID_DESCR and \
@@ -235,9 +234,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         # add tooltip for channels, in case it is too long
         for i in range(0, len(self.model.channels)):
             self._app_channel_cbox.setItemData(i, self.model.channels[i], Qt.ToolTipRole)
-        if self.model.executable.is_file():
+        if self.model.get_executable_path().is_file():
             Logger().debug(f"Ungreying {str(self.model.__dict__)}")
-            self._app_button.set_icon(self.model.icon)
+            self._app_button.set_icon(self.model.get_icon_path())
             self._app_button.ungrey_icon()
 
     def update_versions_cbox(self):
@@ -261,7 +260,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def on_click(self):
         """ Callback for opening the executable on click """
-        run_file(self.model.executable, self.model.is_console_application, self.model.args)
+        run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
 
     def on_version_selected(self, index):
         if not self._app_version_cbox.isEnabled():
@@ -315,10 +314,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self._app_channel_cbox.setCurrentIndex(0)
         self._app_button.setToolTip(str(self.model.conan_ref))
-        #self._app_channel_cbox.setEnabled(True)
-
-        if main_window:
-            main_window.save_config()
+        self.model.save()
 
     def on_channel_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
@@ -335,6 +331,5 @@ class AppLink(QtWidgets.QVBoxLayout):
            self._app_channel_cbox.removeItem(0)
         self.model.channel = self._app_channel_cbox.currentText()
         self._app_button.setToolTip(str(self.model.conan_ref))
-        self._app_button.set_icon(self.model.icon)
-        if main_window:
-            main_window.save_config()
+        self._app_button.set_icon(self.model.get_icon_path())
+        self.model.save()

@@ -9,9 +9,6 @@ from pathlib import Path
 from subprocess import check_output
 from time import sleep
 
-from conan_app_launcher.components.config_file import AppConfigEntry, AppType
-from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
-from conan_app_launcher.ui.app_grid.app_link import AppLink
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt

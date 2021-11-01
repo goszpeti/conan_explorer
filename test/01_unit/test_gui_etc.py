@@ -2,7 +2,7 @@
 Test the self written qt gui components, which can be instantiated without
 using the whole application (standalone).
 """
-from conan_app_launcher.ui.main.about_dialog import AboutDialog
+from conan_app_launcher.ui.components.about_dialog import AboutDialog
 from PyQt5 import QtCore, QtWidgets
 
 

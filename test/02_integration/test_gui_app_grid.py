@@ -8,14 +8,9 @@ from pathlib import Path
 import time
 
 import conan_app_launcher as app
-from conan_app_launcher.__main__ import load_base_components
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.components import AppConfigEntry, config_file
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.app_grid.app_edit_dialog import EditAppDialog
-from conan_app_launcher.ui.app_grid.app_link import AppLink
-from conan_app_launcher.ui.app_grid.tab_app_grid import TabAppGrid
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
