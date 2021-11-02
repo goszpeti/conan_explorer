@@ -32,6 +32,7 @@ class UiTabConfig():
     # TODO: The Union is a workaround. How to say, that this is the base class?
     apps: List[Union[UiAppLinkConfig, "UiAppLinkModel"]] = field(default_factory=list)
 
+# TODO there should be a UiAppGridConfig here!
 
 @dataclass
 class UiApplicationConfig():

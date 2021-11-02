@@ -61,7 +61,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.new_message_logged.connect(self.write_log)
 
         # load app grid
-        self._app_grid = AppGrid(self)
+        self._app_grid = AppGrid(self, self.model)
         self._local_package_explorer = LocalConanPackageExplorer(self)
 
         # initialize view user settings
@@ -98,7 +98,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.model.loadf(config_file_setting)
 
         # conan works, model can be loaded
-        self._app_grid.load_tabs(self.model)
+        self._app_grid.load_tabs()
         self.apply_view_settings()
 
     def apply_view_settings(self):
@@ -158,8 +158,13 @@ class MainWindow(QtWidgets.QMainWindow):
                                        directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
-            active_settings.set(LAST_CONFIG_FILE, dialog.selectedFiles()[0])
-            self._app_grid.re_init()  # loads tabs
+            dialog.selectedFiles()[0]
+            config_file_setting = active_settings.set(LAST_CONFIG_FILE, )
+            # model loads incrementally
+            self.model.loadf(config_file_setting)
+
+            # conan works, model can be loaded
+            self._app_grid.re_init(self.model)  # loads tabs
             self.apply_view_settings()  # now view settings can be applied
 
     @pyqtSlot()

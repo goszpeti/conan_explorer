@@ -1,10 +1,11 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, List
-from conan_app_launcher.ui.model import UiApplicationModel
+from typing import TYPE_CHECKING, List, Optional
 
 from conan_app_launcher.app import active_settings, asset_path, conan_worker
-from conan_app_launcher.settings import (GRID_COLUMNS, GRID_ROWS,
-                                         LAST_CONFIG_FILE)
+from conan_app_launcher.settings import (GRID_COLUMNS, GRID_ROWS)
+from conan_app_launcher.ui.model import UiApplicationModel
+from conan_app_launcher.ui.data import UiTabConfig
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
@@ -17,8 +18,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class AppGrid():
 
-    def __init__(self, main_window: "MainWindow"):
+    def __init__(self, main_window: "MainWindow", model: UiApplicationModel):
         self._main_window = main_window
+        self._model = model
         self._icons_path = asset_path / "icons"
 
         self._main_window.ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
@@ -29,25 +31,17 @@ class AppGrid():
         if self._main_window.ui.tab_bar.count() > 0:  # remove the default tab
             self._main_window.ui.tab_bar.removeTab(0)
 
-    def re_init(self):
+    def re_init(self, model):
         """ To be called, when a new config file is loaded """
+        # delete all tabs
         tab_count = self._main_window.ui.tab_bar.count()
-        for i in range(tab_count, 0, -1):  # delete all tabs
+        for i in range(tab_count, 0, -1): 
             self._main_window.ui.tab_bar.removeTab(i-1)
-
-        if conan_worker:
-            conan_worker.finish_working(3)
-
-        config_file_path = Path(active_settings.get_string(LAST_CONFIG_FILE))
-
-        if config_file_path.is_file():  # escape error log on first opening
-            tab_configs = load_config_file(config_file_path)
-        else:
-            tab_configs = []
 
         # update conan info
         if conan_worker:
-            conan_worker.update_all_info(get_all_conan_refs())
+            conan_worker.finish_working(3)
+            conan_worker.update_all_info(self._model.get_all_conan_refs())
 
         self.load_tabs()
 
@@ -92,25 +86,25 @@ class AppGrid():
             if not text:
                 return
             # add tab
-            tab_config = UiTabConfig(text)
-            tab_configs.append(tab_config)
-
-            tab = TabAppGrid(self._main_window.ui.tab_bar, tab_config,
+            tab = TabAppGrid(self._main_window.ui.tab_bar,
                              max_columns=active_settings.get_int(GRID_COLUMNS),
                              max_rows=active_settings.get_int(GRID_ROWS))
             self._main_window.ui.tab_bar.addTab(tab, text)
-            self._main_window.ui.save_config()
+            # add to model
+            tab_config = UiTabConfig(text)
+            self._model.tabs.append(tab_config)
+            self._model.save()
 
     def on_tab_rename(self, index):
         tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
 
         rename_tab_dialog = QtWidgets.QInputDialog(self._main_window)
         text, accepted = rename_tab_dialog.getText(self._main_window, 'Rename tab',
-                                                   'Enter new name:', text=tab.model.name)
+                                                   'Enter new name:', text=tab._model.name)
         if accepted:
-            tab.model.name = text
+            tab._model.name = text
             self._main_window.ui.tab_bar.setTabText(index, text)
-            tab.model.save()
+            tab._model.save()
 
     def on_tab_remove(self, index):
         tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
@@ -122,21 +116,21 @@ class AppGrid():
         msg.setIcon(QtWidgets.QMessageBox.Question)
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            tab_configs.remove(tab.config_data)
             self._main_window.ui.tab_bar.removeTab(index)
-            self._main_window.save_config()
+            self._model.tabs.remove(tab._model) # TODO dows this work?
+            self._model.save()
 
     def get_tabs(self) -> List[TabAppGrid]:
         return self._main_window.ui.tab_bar.findChildren(TabAppGrid)
 
-    def load_tabs(self, model: UiApplicationModel):
+    def load_tabs(self):  # , model: UiApplicationModel
         """ Creates new layout """
-        for config_data in model.tabs:
+        for tab_config in self._model.tabs:
             
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             tab = TabAppGrid(parent=self._main_window.ui.tab_bar, max_columns=active_settings.get_int(GRID_COLUMNS), max_rows=active_settings.get_int(GRID_ROWS))
-            self._main_window.ui.tab_bar.addTab(tab, config_data.name)
-            tab.load(config_data, model)
+            self._main_window.ui.tab_bar.addTab(tab, tab_config.name)
+            tab.load(tab_config, self._model)
 
         # always show the first tab first
         self._main_window.ui.tab_bar.setCurrentIndex(0)

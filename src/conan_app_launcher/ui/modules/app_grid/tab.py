@@ -1,5 +1,5 @@
 from typing import List
-from conan_app_launcher.ui.comps.app_grid.model import UiTabModel
+from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
 from conan_app_launcher.ui.data import UiTabConfig
 
 from .common.app_edit_dialog import EditAppDialog
@@ -15,13 +15,13 @@ class TabAppGrid(QtWidgets.QWidget):
 
     def __init__(self, parent: QtWidgets.QTabWidget, max_rows: int, max_columns: int):
         super().__init__(parent)
-        self.model = UiTabModel()
-        self.app_links: List[AppLink] = []  # list of refs to app links
+        self._model = UiTabModel()
         self.max_rows = max_rows  # TODO currently not handled correctly
         self.max_columns = max_columns
+        self.app_links: List[AppLink] = []  # list of refs to app links
 
     def init_app_grid(self):
-        self.setObjectName("tab_" + self.model.name)
+        self.setObjectName("tab_" + self._model.name)
 
         # this is a dummy, because tab_scroll_area needs a layout
         self.tab_layout = QtWidgets.QVBoxLayout(self)
@@ -31,7 +31,7 @@ class TabAppGrid(QtWidgets.QWidget):
         self.tab_scroll_area = QtWidgets.QScrollArea(self)
         # this holds all the app links, which are layouts
         self.tab_scroll_area_widgets = QtWidgets.QWidget(self.tab_scroll_area)
-        self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.model.name)
+        self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self._model.name)
         # grid layout for tab_scroll_area_widgets
         self.tab_grid_layout = QtWidgets.QGridLayout(self.tab_scroll_area_widgets)
 
@@ -73,14 +73,14 @@ class TabAppGrid(QtWidgets.QWidget):
 
 
     def load(self, ui_config: UiTabConfig, model_parent):
-        self.model.load(ui_config, model_parent)
+        self._model.load(ui_config, model_parent)
         self.init_app_grid()
         row = 0
         column = 0
-        for app_info in self.model.apps:
+        for app_info in self._model.apps:
             # add in order of occurence
             app_link = AppLink(self)
-            app_link.load(app_info, self.model)
+            app_link.load(app_info, self._model)
             self.app_links.append(app_link)
             self.tab_grid_layout.addLayout(app_link, row, column)
             column += 1
@@ -97,9 +97,9 @@ class TabAppGrid(QtWidgets.QWidget):
         if reply == EditAppDialog.Accepted:
             self._edit_app_dialog.save_data()
             config_data.update_from_cache()  # instantly use local paths and pkgs
-            app_link = AppLink(self, config_data)
+            app_link = AppLink(self)
             self.add_app_link_to_tab(app_link)
-            main_window.save_config()
+            self._model.save()
             return app_link  # for testing
         return None
 
@@ -117,5 +117,5 @@ class TabAppGrid(QtWidgets.QWidget):
         self.config_data.remove_app_entry(app_link.config_data)
         self.app_links.remove(app_link)
         self.tab_grid_layout.removeItem(app_link)
-        app_link.setParent(None)
+        app_link.setParent(None) # TODO is this needed?
         del app_link

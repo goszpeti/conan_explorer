@@ -7,7 +7,6 @@ import tempfile
 from pathlib import Path
 
 import conan_app_launcher.app as app
-from conan_app_launcher.app import active_settings
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window

@@ -1,15 +1,14 @@
 import platform
 import tempfile
 from pathlib import Path
-from typing import  Callable, List, Optional
+from typing import Callable, List, Optional
 
 from conan_app_launcher import (INVALID_CONAN_REF,
                                 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH,
                                 USE_LOCAL_INTERNAL_CACHE, asset_path)
-from conan_app_launcher.app import active_settings, conan_api, conan_worker
+from conan_app_launcher.app import conan_api, conan_worker
 from conan_app_launcher.components.icon import extract_icon
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
 from conans.model.ref import ConanFileReference
