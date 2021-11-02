@@ -15,9 +15,9 @@ from conan_app_launcher.ui.model import UiApplicationModel
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
 
-from .components.about_dialog import AboutDialog
-from .components.app_grid import AppGrid
-from .components.package_explorer import LocalConanPackageExplorer
+from .modules.about_dialog import AboutDialog
+from .modules.app_grid import AppGrid
+from .modules.package_explorer import LocalConanPackageExplorer
 
 Qt = QtCore.Qt
 

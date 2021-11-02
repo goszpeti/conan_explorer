@@ -1,8 +1,8 @@
 from typing import List
-from conan_app_launcher.ui.components.app_grid.model import UiTabModel
+from conan_app_launcher.ui.comps.app_grid.model import UiTabModel
 from conan_app_launcher.ui.data import UiTabConfig
 
-from .components.app_edit_dialog import EditAppDialog
+from .common.app_edit_dialog import EditAppDialog
 from .app_link import AppLink
 from PyQt5 import QtCore, QtWidgets
 

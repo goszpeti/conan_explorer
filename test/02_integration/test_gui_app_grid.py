@@ -5,7 +5,6 @@ so the qtbot is usable to inspect gui objects.
 import os
 import tempfile
 from pathlib import Path
-import time
 
 import conan_app_launcher.app as app
 from conan_app_launcher.app import active_settings

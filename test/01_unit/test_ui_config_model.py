@@ -6,7 +6,7 @@ from distutils.file_util import copy_file
 from pathlib import Path
 
 from conans.model.ref import ConanFileReference as CFR
-from conan_app_launcher.ui.components.app_grid.model import UiAppLinkModel, UiAppLinkConfig
+from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiAppLinkConfig
 from conan_app_launcher import asset_path
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
 

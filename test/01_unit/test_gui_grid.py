@@ -10,9 +10,9 @@ from subprocess import check_output
 from time import sleep
 
 from PyQt5 import QtCore, QtWidgets
-from conan_app_launcher.ui.components.app_grid.app_link import AppLink
-from conan_app_launcher.ui.components.app_grid.model import UiAppLinkConfig
-from conan_app_launcher.ui.components.app_grid.components.app_edit_dialog import EditAppDialog
+from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
+from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkConfig
+from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import EditAppDialog
 from conans.model.ref import ConanFileReference as CFR
 
 Qt = QtCore.Qt
