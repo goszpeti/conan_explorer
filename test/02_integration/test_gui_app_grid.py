@@ -7,7 +7,8 @@ import tempfile
 from pathlib import Path
 import time
 
-import conan_app_launcher as app
+import conan_app_launcher.app as app
+from conan_app_launcher.app import active_settings
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
@@ -18,13 +19,12 @@ Qt = QtCore.Qt
 
 
 def test_rename_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
-    load_base_components(app.active_settings)
-    from pytestqt.plugin import _qapp_instance
-    app.qt_app = _qapp_instance
+    """ Test, that rename dialog change the guis"""
+
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.load()
+    main_gui.load(ui_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -44,13 +44,11 @@ def test_rename_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
 
 def test_add_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
-    load_base_components(app.active_settings)
-    from pytestqt.plugin import _qapp_instance
-    app.qt_app = _qapp_instance
+    """ """
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.load()
+    main_gui.load(ui_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -62,6 +60,7 @@ def test_add_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     main_gui._app_grid.on_new_tab()
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count + 1
     assert main_gui.ui.tab_bar.tabBar().tabText(prev_count) == new_text
+
     config_tabs = config_file.load_config_file(ui_config_fixture)
     assert len(config_tabs) == prev_count + 1
 
@@ -74,13 +73,11 @@ def test_add_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     assert len(config_tabs) == prev_count + 1
 
 def test_remove_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
-    load_base_components(app.active_settings)
     from pytestqt.plugin import _qapp_instance
-    app.qt_app = _qapp_instance
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.load()
+    main_gui.load(ui_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -110,13 +107,12 @@ def test_remove_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
 def test_tab_move_is_saved(base_fixture, ui_config_fixture, qtbot):
     """ Test, that the config file is saved, when the tab is moved. """
-    load_base_components(app.active_settings)
-    from pytestqt.plugin import _qapp_instance
-    app.qt_app = _qapp_instance
+    # from pytestqt.plugin import _qapp_instance
+    # app.qt_app = _qapp_instance
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.load()
+    main_gui.load(ui_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -133,13 +129,13 @@ def test_tab_move_is_saved(base_fixture, ui_config_fixture, qtbot):
 
 
 def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
-    load_base_components(app.active_settings)
-    from pytestqt.plugin import _qapp_instance
-    app.qt_app = _qapp_instance
+    # load_base_components(app.active_settings)
+    # from pytestqt.plugin import _qapp_instance
+    # app.qt_app = _qapp_instance
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.load()
+    main_gui.load(ui_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -179,13 +175,13 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert len(config_tabs[0].get_app_entries()) == prev_count
 
 def test_remove_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
-    load_base_components(app.active_settings)
-    from pytestqt.plugin import _qapp_instance
-    app.qt_app = _qapp_instance
+    # load_base_components(app.active_settings)
+    # from pytestqt.plugin import _qapp_instance
+    # app.qt_app = _qapp_instance
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.load()
+    main_gui.load(ui_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -214,13 +210,13 @@ def test_add_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     app.active_settings.set(DISPLAY_APP_CHANNELS, False) # disable, to check if a new app uses it
     app.active_settings.set(DISPLAY_APP_VERSIONS, True)  # disable, to check if a new app uses it
 
-    load_base_components(app.active_settings)
-    from pytestqt.plugin import _qapp_instance
-    app.qt_app = _qapp_instance
+    # load_base_components(app.active_settings)
+    # from pytestqt.plugin import _qapp_instance
+    # app.qt_app = _qapp_instance
     main_gui = main_window.MainWindow()
     app.main_window = main_gui  # needed for signal access
     main_gui.show()
-    main_gui.load()
+    main_gui.load(ui_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)

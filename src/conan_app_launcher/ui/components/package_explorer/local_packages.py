@@ -9,7 +9,7 @@ from conan_app_launcher.components import (open_in_file_manager,
 from conan_app_launcher.components.conan import ConanPkg
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from conan_app_launcher.ui.data import UiAppLinkConfig
 from .model import PROFILE_TYPE, PackageFilter, PkgSelectModel, TreeItem
 
 Qt = QtCore.Qt
@@ -269,15 +269,14 @@ class LocalConanPackageExplorer():
 
     def on_add_app_link(self):
         file_path = Path(self._get_selected_pkg_file())
-        conan_ref = self.get_selected_conan_ref()
+        conan_ref = ConanFileReference.loads(self.get_selected_conan_ref())
         # determine relpath from package
-        pkg_path = conan_api.get_package_folder(
-            ConanFileReference.loads(conan_ref), self.get_selected_conan_pkg_info())
+        pkg_info = self.get_selected_conan_pkg_info()
+        pkg_path = conan_api.get_package_folder(conan_ref, pkg_info.get("id", ""))
         rel_path = file_path.relative_to(pkg_path)
 
-        app_data: AppType = {"name": "NewLink", "conan_ref": conan_ref, "executable": str(rel_path),
-                            "icon": "", "console_application": False, "args": "", "conan_options": []}
-        self._main_window.open_new_app_dialog_from_extern(AppLinkModel(app_data))
+        app_config = UiAppLinkConfig(name="NewLink", conan_ref=conan_ref, executable = str(rel_path))
+        self._main_window.open_new_app_dialog_from_extern(app_config)
 
     def on_open_in_file_manager(self, model_index):
         file_path = Path(self._get_selected_pkg_file())

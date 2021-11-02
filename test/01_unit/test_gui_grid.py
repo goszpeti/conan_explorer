@@ -10,6 +10,10 @@ from subprocess import check_output
 from time import sleep
 
 from PyQt5 import QtCore, QtWidgets
+from conan_app_launcher.ui.components.app_grid.app_link import AppLink
+from conan_app_launcher.ui.components.app_grid.model import UiAppLinkConfig
+from conan_app_launcher.ui.components.app_grid.components.app_edit_dialog import EditAppDialog
+from conans.model.ref import ConanFileReference as CFR
 
 Qt = QtCore.Qt
 
@@ -20,16 +24,9 @@ def test_EditAppDialog_display_values(base_fixture, qtbot):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
-    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable",
-                         "executable": "bin/myexec", "args": "", "conan_options" : [],
-                         "console_application": True, "icon": "//myicon.ico"}
-    app_info = AppConfigEntry(app_data)
-    app_info.conan_options = {"a": "b", "c": "True", "d": "10"}
-
-    if platform.system() == "Windows":
-        assert app_info.icon.is_file()
-        assert app_info.icon.suffix == ".png"
-
+    app_info = UiAppLinkConfig(name="test", conan_ref=CFR.loads("abcd/1.0.0@usr/stable"),
+                               executable = "bin/myexec", is_console_application=True,
+                               icon="//myicon.ico", conan_options={"a": "b", "c": "True", "d": "10"})
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
@@ -42,9 +39,9 @@ def test_EditAppDialog_display_values(base_fixture, qtbot):
     # assert values
     assert diag._ui.name_line_edit.text() == app_info.name
     assert diag._ui.conan_ref_line_edit.text() == str(app_info.conan_ref)
-    assert diag._ui.exec_path_line_edit.text() == app_data.get("executable")
+    assert diag._ui.exec_path_line_edit.text() == app_info.executable
     assert diag._ui.is_console_app_checkbox.isChecked() == app_info.is_console_application
-    assert diag._ui.icon_line_edit.text() == app_data.get("icon")
+    assert diag._ui.icon_line_edit.text() == app_info.icon
     assert diag._ui.args_line_edit.text() == app_info.args
     conan_options_text = diag._ui.conan_opts_text_edit.toPlainText()
     for opt in app_info.conan_options:
@@ -62,14 +59,10 @@ def test_EditAppDialog_save_values(base_fixture, qtbot):
     """
     Test, if the entered data is written correctly.
     """
-    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable", "args": "", 
-                        "conan_options": [], "executable": "", "console_application": True, "icon": ""}
-    app_info = AppConfigEntry(app_data)
-    app_info._executable = Path(sys.executable)
-
-    if platform.system() == "Windows":
-        assert app_info.icon.is_file()
-        assert app_info.icon.suffix == ".png"
+    app_info = UiAppLinkConfig(name="test", conan_ref=CFR.loads("abcd/1.0.0@usr/stable"),
+                               executable="bin/myexec", is_console_application=True,
+                               icon="//myicon.ico")
+    app_info.executable = sys.executable
 
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
@@ -95,9 +88,9 @@ def test_EditAppDialog_save_values(base_fixture, qtbot):
     # assert that all infos where saved
     assert diag._ui.name_line_edit.text() == app_info.name
     assert diag._ui.conan_ref_line_edit.text() == "zlib/1.2.11@_/_" # internal representation will strip @_/_
-    assert diag._ui.exec_path_line_edit.text() == app_data.get("executable")
+    assert diag._ui.exec_path_line_edit.text() == app_info.executable
     assert diag._ui.is_console_app_checkbox.isChecked() == app_info.is_console_application
-    assert diag._ui.icon_line_edit.text() == app_data.get("icon")
+    assert diag._ui.icon_line_edit.text() == app_info.icon
     assert diag._ui.args_line_edit.text() == app_info.args
     conan_options_text = diag._ui.conan_opts_text_edit.toPlainText()
 
@@ -109,19 +102,13 @@ def test_AppLink_open(base_fixture, qtbot):
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
-    app_data: AppType = {"name": "test", "conan_ref": "abcd/1.0.0@usr/stable", "args": "", "conan_options": [],
-                         "executable": "", "console_application": True, "icon": ""}
-    app_info = AppConfigEntry(app_data)
-    app_info._executable = Path(sys.executable)
-
-    if platform.system() == "Windows":
-        assert app_info.icon.is_file()
-        assert app_info.icon.suffix == ".png"
-
+    app_info = UiAppLinkConfig(name="test", conan_ref=CFR.loads("abcd/1.0.0@usr/stable"),
+                               is_console_application=True, executable=sys.executable)
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    app_ui = AppLink(root_obj, app_info)
+    app_ui = AppLink(root_obj)
+    app_ui.load(app_info, None)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 

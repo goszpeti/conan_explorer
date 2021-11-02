@@ -1,16 +1,13 @@
 import os
 import platform
-import tempfile
 import time
 from pathlib import Path
-from shutil import copy
 from typing import List
 
 import conan_app_launcher
 from conan_app_launcher.components.conan import (ConanApi,
                                                  _create_key_value_pair_list)
 from conan_app_launcher.components.conan_worker import ConanWorker, ConanWorkerElement
-from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conans.model.ref import ConanFileReference
 
 TEST_REF = "zlib/1.2.11@_/_"

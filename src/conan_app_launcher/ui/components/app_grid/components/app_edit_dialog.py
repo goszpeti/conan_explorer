@@ -16,7 +16,8 @@ class EditAppDialog(QtWidgets.QDialog):
     def __init__(self,  model: UiAppLinkConfig, parent: QtWidgets.QWidget, flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
         self._config = model
-        self._ui = uic.loadUi(current_dir / "app_edit.ui")
+        # without baseinstance, dialog would further needed to be configured
+        self._ui = uic.loadUi(current_dir / "app_edit.ui", baseinstance=self)
 
         self.setModal(True)
         self.setWindowTitle("Edit App Link")

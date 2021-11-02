@@ -1,17 +1,19 @@
-from pathlib import Path
-from typing import AnyStr, Callable, Dict, List, Optional
-import tempfile
 import platform
-from typing import Type
+import tempfile
+from pathlib import Path
+from typing import  Callable, List, Optional
 
-from conan_app_launcher import INVALID_CONAN_REF, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH, USE_LOCAL_INTERNAL_CACHE, asset_path
+from conan_app_launcher import (INVALID_CONAN_REF,
+                                USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH,
+                                USE_LOCAL_INTERNAL_CACHE, asset_path)
 from conan_app_launcher.app import active_settings, conan_api, conan_worker
-from conans.model.ref import ConanFileReference
-from conan_app_launcher.logger import Logger
 from conan_app_launcher.components.icon import extract_icon
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
+from conans.model.ref import ConanFileReference
+
 
 class UiTabModel(UiTabConfig):
     """ Representation of a tab entry of the config schema """
@@ -39,21 +41,23 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def __init__(self, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""
-        # super().__init__() # empty init
+        # internal repr for vars which have other types or need to be manipulated
+        self.conan_options = {}
+        self._package_folder = Path("NULL")
+        self._executable_path = Path("NULL")
+        self._icon_path = Path("NULL")
+        self._conan_ref = ConanFileReference.loads(INVALID_CONAN_REF)
+        self._available_refs = [self.conan_ref]
+        self._executable = ""
+        self._icon: str = ""
         self.parent: Optional[UiTabModel] = None
         # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
-
-        # internal repr for vars which have other types or need to be manipulated
-        self._package_folder = Path("NULL")
-        self._executable_path = Path("NULL")
-        self._executable = ""
-        self._icon: str = ""
-        self._icon_path = Path("NULL")
-        self._conan_ref = ConanFileReference.loads(INVALID_CONAN_REF)
-
         # holds all conan refs for name/user
         self._available_refs: List[ConanFileReference] = []
+        # calls public functions, every internal variable needs to initialitzed
+        super().__init__(*args, **kwargs)  # empty init
+
 
     def load(self, config: UiAppLinkConfig, parent):
         super().__init__(config.name, config.conan_ref, config.executable, config.args,
@@ -86,16 +90,13 @@ class UiAppLinkModel(UiAppLinkConfig):
     @conan_ref.setter
     def conan_ref(self, new_value: ConanFileReference):
         try:
-            self._conan_ref = ConanFileReference.loads(new_value)
+            self._conan_ref = new_value
             # add conan ref to worker
             if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
                     and self._conan_ref.version != self.INVALID_DESCR
                     and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
                 conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
             # invalidate old entries, which are dependent on the conan ref
-            self.conan_ref = new_value
-            self.executable = self._executable
-            self.icon_path = self._icon
             self.update_from_cache()
 
         except Exception as error:
@@ -135,8 +136,10 @@ class UiAppLinkModel(UiAppLinkConfig):
         if new_value == self.OFFICIAL_USER or not new_value:
             new_value = "_"
             channel = "_"  # both must be unset if channel is official
+        if not channel:
+            channel = "NA"
         self.conan_ref = ConanFileReference(self.conan_ref.name, self.conan_ref.version, new_value, channel)
-    
+
     @classmethod
     def convert_to_disp_user(cls, user: str) -> str:
         """ Substitute _ for official user string """
@@ -152,7 +155,8 @@ class UiAppLinkModel(UiAppLinkConfig):
     @channel.setter
     def channel(self, new_value: str):
         user = self.conan_ref.user
-        if new_value == self.OFFICIAL_RELEASE or not new_value:
+        # even when changig to another channel, it will reset, user or whole ref has to be changed
+        if new_value == self.OFFICIAL_RELEASE or not new_value or not user:
             new_value = "_"
             user = "_"  # both must be unset if channel is official
         self.conan_ref = ConanFileReference(self.conan_ref.name, self.conan_ref.version, user, new_value)
@@ -199,11 +203,11 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not new_value:
             Logger().error(f"No file/executable specified for {str(self.name)}")
             return
-
         self._executable = new_value
 
+    def get_executable_path(self) -> Path:
         # adjust path on windows, if no file extension is given
-        path = Path(new_value)
+        path = Path(self._executable)
         if platform.system() == "Windows" and not path.suffix:
             path = path.with_suffix(".exe")
 
@@ -213,7 +217,6 @@ class UiAppLinkModel(UiAppLinkConfig):
                 f"Can't find file in package {str(self.conan_ref)}:\n    {str(full_path)}")
         self._executable_path = full_path
 
-    def get_executable_path(self) -> Path:
         return self._executable_path
 
     @property
@@ -224,34 +227,37 @@ class UiAppLinkModel(UiAppLinkConfig):
     @icon.setter
     def icon(self, new_value: str):
         self._icon = new_value
+
+    def get_icon_path(self) -> Path:
+        # evaluate self.icon, so icon Path
         # validate icon path
         emit_warning = False
-        if new_value.startswith("//"):  # relative to package
-            self._icon_path = self._package_folder / new_value.replace("//", "")
-        elif new_value and not Path(new_value).is_absolute():
-            # relative path is calculated from config file path
-            self._icon_path = Path(active_settings.get_string(LAST_CONFIG_FILE)).parent / new_value
+
+        # relative to package - migrate from old setting
+        # config path will be deprecated
+        if self._icon.startswith("//"):
+            self._icon = self._icon.removeprefix("//")
+        if self._icon and not Path(self._icon).is_absolute():
+            self._icon_path = self._package_folder / self._icon
             emit_warning = True
-        elif not new_value:  # try to find icon in temp
-            self._ic_icon_pathon = extract_icon(self.get_executable_path(), Path(tempfile.gettempdir()))
+        elif not self._icon:  # try to find icon in temp
+            self._icon_path = extract_icon(self.get_executable_path(), Path(tempfile.gettempdir()))
         else:  # absolute path
-            self._icon_path = Path(new_value)
+            self._icon_path = Path(self._icon)
             emit_warning = True
         # default icon, until package path is updated
         if not self._icon_path.is_file():
             self._icon_path = asset_path / "icons" / "app.png"
-            if new_value and emit_warning:  # user input given -> warning
-                Logger().error(f"Can't find icon {str(new_value)} for '{self.name}'")
+            if self._icon and emit_warning:  # user input given -> warning
+                Logger().error(f"Can't find icon {str(self._icon)} for '{self.name}'")
 
         # default icon, until package path is updated
         if not self._icon_path.is_file():
             self._icon_path = asset_path / "icons" / "app.png"
-            if new_value:  # user input given -> warning
-                Logger().error(f"Can't find icon {str(new_value)} for '{self.name}")
+            if self._icon:  # user input given -> warning
+                Logger().error(f"Can't find icon {str(self._icon)} for '{self.name}")
         else:
             self._icon_path = self._icon_path.resolve()
-
-    def get_icon_path(self)-> Path:
         return self._icon_path
 
     def set_package_info(self, package_folder: Path):
@@ -266,10 +272,6 @@ class UiAppLinkModel(UiAppLinkConfig):
                 conan_api.info_cache.update_local_package_path(self.conan_ref, package_folder)
         self._package_folder = package_folder
 
-        # use setter to reevaluate
-        self.executable = self._executable
-        # icon needs executable
-        self.icon = self._icon
         # call registered update callback
         if self._update_cbk_func:
             self._update_cbk_func()
