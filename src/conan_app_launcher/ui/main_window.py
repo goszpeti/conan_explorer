@@ -10,7 +10,6 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
                                          LAST_CONFIG_FILE)
-from conan_app_launcher.ui.data import UI_CONFIG_JSON_TYPE, UiConfigFactory
 from conan_app_launcher.ui.model import UiApplicationModel
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot

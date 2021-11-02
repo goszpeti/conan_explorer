@@ -5,7 +5,6 @@ using the whole application (standalone).
 import os
 import platform
 import sys
-from pathlib import Path
 from subprocess import check_output
 from time import sleep
 

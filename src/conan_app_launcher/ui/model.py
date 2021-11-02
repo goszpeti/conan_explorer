@@ -1,10 +1,11 @@
 
 from pathlib import Path
 from typing import List
-from conan_app_launcher.components.conan_worker import ConanWorkerElement
-from conan_app_launcher.settings import LAST_CONFIG_FILE
 
-from conan_app_launcher.ui.data import UI_CONFIG_JSON_TYPE, UiApplicationConfig, UiConfigFactory, UiConfigInterface
+from conan_app_launcher.components.conan_worker import ConanWorkerElement
+from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE,
+                                        UiApplicationConfig, UiConfigFactory,
+                                        UiConfigInterface)
 
 
 class UiApplicationModel(UiApplicationConfig):
@@ -24,7 +25,7 @@ class UiApplicationModel(UiApplicationConfig):
     def loadf(self, config_file_path):
         self._ui_config_data = UiConfigFactory(self.CONFIG_TYPE, config_file_path)
         ui_config = self._ui_config_data.load()
-        
+
         self.load(ui_config)
 
     #     self_config = ui_config.load()

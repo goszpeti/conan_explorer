@@ -3,8 +3,9 @@ import tempfile
 from distutils.file_util import copy_file
 from pathlib import Path
 
-from conans.model.ref import ConanFileReference
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
+from conans.model.ref import ConanFileReference
+
 
 def testNewFilenameIsCreated(base_fixture):
     """

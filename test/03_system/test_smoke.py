@@ -8,9 +8,10 @@ import time
 from pathlib import Path
 from subprocess import Popen
 
-from PyQt5 import QtWidgets
 import conan_app_launcher
-from conan_app_launcher.settings import SettingsFactory, LAST_CONFIG_FILE, SETTINGS_INI_TYPE
+from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
+                                         SettingsFactory)
+from PyQt5 import QtWidgets
 
 
 def testMainLoopMock(base_fixture, mocker):

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
-    from conan_app_launcher.components.conan import ConanApi
+    from .conan import ConanApi
 else:
     try:
         from typing import TypedDict

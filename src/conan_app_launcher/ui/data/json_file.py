@@ -1,12 +1,14 @@
-from dataclasses import asdict
 import json
-from conans.model.ref import ConanFileReference
-import jsonschema
+from dataclasses import asdict
 from distutils.version import StrictVersion
 from pathlib import Path
-from typing import Any, Dict, List, TYPE_CHECKING, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
-from . import UiAppLinkConfig, UiApplicationConfig, UiTabConfig, UiConfigInterface
+import jsonschema
+from conans.model.ref import ConanFileReference
+
+from . import (UiApplicationConfig, UiAppLinkConfig, UiConfigInterface,
+               UiTabConfig)
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict

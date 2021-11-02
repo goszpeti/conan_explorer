@@ -1,12 +1,13 @@
 import os
-import stat
 import platform
+import stat
 import sys
 import tempfile
 import time
 from pathlib import Path
 from subprocess import check_output
-import conan_app_launcher # for mocker
+
+import conan_app_launcher  # for mocker
 from conan_app_launcher.components.file_runner import (execute_app, open_file,
                                                        run_file)
 

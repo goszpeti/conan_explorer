@@ -19,9 +19,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
-# this allows to use forward declarations to avoid circular imports
-
-
 try:
     # this is a workaround for Windows, so that on the taskbar the
     # correct icon will be shown (and not the default python icon)
@@ -44,7 +41,8 @@ def main():
     Start the Qt application and an all main components
     """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
-    from conan_app_launcher.ui.common.bug_dialog import show_bug_dialog_exc_hook
+    from conan_app_launcher.ui.common.bug_dialog import \
+        show_bug_dialog_exc_hook
     sys.excepthook = show_bug_dialog_exc_hook
 
     if platform.system() == "Darwin":

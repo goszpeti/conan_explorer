@@ -9,15 +9,13 @@ import time
 from pathlib import Path
 from shutil import rmtree
 
-from conan_app_launcher import app
-from conan_app_launcher.logger import Logger
+from conan_app_launcher import app, asset_path, user_save_path
 from conan_app_launcher.components import ConanApi
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
-
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
-from conan_app_launcher import asset_path, user_save_path
 
 Qt = QtCore.Qt
 

@@ -1,16 +1,16 @@
 import os
-import sys
 import tempfile
 from pathlib import Path
 from shutil import copy
 
-from conan_app_launcher import asset_path, base_path
-import conan_app_launcher.app as app
 import conan_app_launcher
+import conan_app_launcher.app as app
 import conan_app_launcher.logger as logger
 import pytest
+from conan_app_launcher import asset_path, base_path
 from conan_app_launcher.settings import *
- 
+
+
 class PathSetup():
     """ Get the important paths form the source repo. """
     def __init__(self):

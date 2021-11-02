@@ -1,8 +1,9 @@
-import os
-import tempfile
-import shutil
 import configparser
+import os
+import shutil
+import tempfile
 from pathlib import Path
+
 from conan_app_launcher.settings import *
 from conan_app_launcher.settings.ini_file import IniSettings
 

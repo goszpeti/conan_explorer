@@ -2,7 +2,8 @@ import platform
 import sys
 from pathlib import Path
 
-from conan_app_launcher.components.icon import extract_icon, extract_icon_from_win_executable
+from conan_app_launcher.components.icon import (
+    extract_icon, extract_icon_from_win_executable)
 
 
 def test_extract_icon_from_exe_windows(tmp_path):

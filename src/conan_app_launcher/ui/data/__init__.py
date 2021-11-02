@@ -12,7 +12,7 @@ UI_CONFIG_JSON_TYPE = "json"
 # classes representing the ui config (Data Transfer Objects) - this is a bit overblown for this usecase,
 # but ot is worth an experiment
 if TYPE_CHECKING:  # pragma: no cover
-    from ..components.app_grid.model import UiAppLinkModel, UiTabModel
+    from ..modules.app_grid.model import UiAppLinkModel, UiTabModel
 
 
 @dataclass

@@ -5,7 +5,6 @@ using the whole application (standalone).
 from conan_app_launcher.ui.modules.about_dialog import AboutDialog
 from PyQt5 import QtCore, QtWidgets
 
-
 Qt = QtCore.Qt
 
 def testAboutDialog(base_fixture, qtbot):

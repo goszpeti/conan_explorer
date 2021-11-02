@@ -3,11 +3,12 @@ Using modified ExtractIcon class from https://github.com/firodj/extract-icon-py
 """
 
 import platform
+import struct
 from pathlib import Path
 
-import struct
 import pefile
 from conan_app_launcher.logger import Logger
+
 
 def extract_icon(file_path: Path, output_dir: Path) -> Path:
     """

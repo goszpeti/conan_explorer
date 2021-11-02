@@ -1,7 +1,6 @@
 
 import tempfile
 from distutils.file_util import copy_file
-
 from pathlib import Path
 
 from conan_app_launcher.components import ConanInfoCache
