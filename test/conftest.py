@@ -3,11 +3,12 @@ import tempfile
 from pathlib import Path
 from shutil import copy
 
-import conan_app_launcher
 import conan_app_launcher.app as app
+from conan_app_launcher.components.conan import ConanApi
+from conan_app_launcher.components.conan_worker import ConanWorker
 import conan_app_launcher.logger as logger
 import pytest
-from conan_app_launcher import asset_path, base_path
+from conan_app_launcher import SETTINGS_FILE_NAME, asset_path, base_path, user_save_path
 from conan_app_launcher.settings import *
 
 
@@ -27,8 +28,12 @@ def base_fixture(request):
     Clean up all instances after the test.
     """
     paths = PathSetup()
-    conan_app_launcher.base_path = paths.base_path / "src" / "conan_app_launcher"
-    conan_app_launcher.asset_path = base_path / "assets"
+
+
+    app.conan_api = ConanApi()
+    app.conan_worker = ConanWorker(app.conan_api)
+    app.active_settings = SettingsFactory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
+
     yield paths
 
     # teardown
@@ -42,7 +47,6 @@ def base_fixture(request):
     #     os.remove(app.base_path / app.CACHE_FILE_NAME)
 
     logger.Logger._instance = None
-    conan_app_launcher.base_path = None
     app.conan_worker = None
     app.conan_api = None
     app.active_settings = None

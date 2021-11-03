@@ -1,7 +1,8 @@
 
 from typing import Dict, List, Union
 from conan_app_launcher.components import ConanApi
-from conan_app_launcher.app import asset_path, conan_api
+import conan_app_launcher.app as app  # using gobal module pattern
+from conan_app_launcher import asset_path
 from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 
@@ -105,10 +106,10 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
 
 
     def setupModelData(self):
-        for conan_ref in conan_api.get_all_local_refs():
+        for conan_ref in app.conan_api.get_all_local_refs():
             conan_item = TreeItem([str(conan_ref)], self.rootItem)
             self.rootItem.appendChild(conan_item)
-            infos = conan_api.get_local_pkgs_from_ref(conan_ref)
+            infos = app.conan_api.get_local_pkgs_from_ref(conan_ref)
             for info in infos:
                 pkg_item = TreeItem([info], conan_item, PROFILE_TYPE)
                 conan_item.appendChild(pkg_item)

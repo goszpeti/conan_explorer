@@ -4,6 +4,7 @@ Because the unit tests use qtbot helper, a QApplication object is already presen
 and it cannot be instatiated anew with the main loop of the program.
 """
 import os
+import sys
 import time
 from pathlib import Path
 from subprocess import Popen
@@ -45,7 +46,7 @@ def testMainLoop(base_fixture):
     settings.save()
 
     # conan_app_launcher
-    proc = Popen(["python", str(base_fixture.base_path / "src" / "conan_app_launcher" / "__main__.py")])
+    proc = Popen([sys.executable, "-m", "conan_app_launcher"])
     time.sleep(7)
     try:
         assert proc.poll() is None

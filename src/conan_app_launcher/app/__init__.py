@@ -2,18 +2,17 @@ import os
 import platform
 import sys
 import tempfile
-from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 from conan_app_launcher import (PROG_NAME, SETTINGS_FILE_NAME, __version__,
                                 asset_path, user_save_path)
 from conan_app_launcher.components import ConanApi, ConanWorker
+from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
+                                         SettingsFactory, SettingsInterface)
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import MainWindow
 
-from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
-                                         SettingsFactory, SettingsInterface)
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 # define Qt so we can use it like the namespace in C++
@@ -30,7 +29,6 @@ except ImportError:
 
 ### Global variables ###
 
-main_window: Optional["MainWindow"] = None  # TODO can this be removed?
 conan_api = ConanApi()
 conan_worker = ConanWorker(conan_api)
 active_settings: SettingsInterface = SettingsFactory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)

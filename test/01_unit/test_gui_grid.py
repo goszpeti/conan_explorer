@@ -10,7 +10,7 @@ from time import sleep
 
 from PyQt5 import QtCore, QtWidgets
 from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
-from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkConfig
+from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkConfig, UiAppLinkModel
 from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import EditAppDialog
 from conans.model.ref import ConanFileReference as CFR
 
@@ -101,13 +101,14 @@ def test_AppLink_open(base_fixture, qtbot):
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
-    app_info = UiAppLinkConfig(name="test", conan_ref=CFR.loads("abcd/1.0.0@usr/stable"),
+    app_config = UiAppLinkConfig(name="test", conan_ref=CFR.loads("abcd/1.0.0@usr/stable"),
                                is_console_application=True, executable=sys.executable)
+    app_model = UiAppLinkModel().load(app_config, None)
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    app_ui = AppLink(root_obj)
-    app_ui.load(app_info, None)
+    app_ui = AppLink(root_obj, app_model)
+    app_ui.load()
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 

@@ -2,7 +2,9 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
 
-from conan_app_launcher.app import asset_path, conan_api
+from conan_app_launcher import asset_path
+import conan_app_launcher.app as app  # using gobal module pattern
+
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (open_in_file_manager,
                                            run_file)
@@ -108,8 +110,7 @@ class LocalConanPackageExplorer():
         msg.setIcon(QtWidgets.QMessageBox.Question)
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            if conan_api:
-                conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True, quiet=False)
+            app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True, quiet=False)
 
     # Global pane and cross connection slots
 
@@ -139,7 +140,7 @@ class LocalConanPackageExplorer():
             return
         conan_ref = self.get_selected_conan_ref()
         pkg_id = self.get_selected_conan_pkg_info().get("id", "")
-        pkg_path = conan_api.get_package_folder(
+        pkg_path = app.conan_api.get_package_folder(
             ConanFileReference.loads(conan_ref), pkg_id)
         if not pkg_path.exists():
             Logger().warning(f"Can't find package path for {conan_ref} and {str(source_item.itemData[0])}")
@@ -272,7 +273,7 @@ class LocalConanPackageExplorer():
         conan_ref = ConanFileReference.loads(self.get_selected_conan_ref())
         # determine relpath from package
         pkg_info = self.get_selected_conan_pkg_info()
-        pkg_path = conan_api.get_package_folder(conan_ref, pkg_info.get("id", ""))
+        pkg_path = app.conan_api.get_package_folder(conan_ref, pkg_info.get("id", ""))
         rel_path = file_path.relative_to(pkg_path)
 
         app_config = UiAppLinkConfig(name="NewLink", conan_ref=conan_ref, executable = str(rel_path))

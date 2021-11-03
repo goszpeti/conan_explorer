@@ -1,6 +1,6 @@
 import logging
 from threading import Lock
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from PyQt5.QtCore import pyqtBoundSignal
 

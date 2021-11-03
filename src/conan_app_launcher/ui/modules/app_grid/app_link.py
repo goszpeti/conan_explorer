@@ -21,10 +21,10 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 class AppLink(QtWidgets.QVBoxLayout):
     MAX_WIDTH = 193
 
-    def __init__(self, parent: QtWidgets.QWidget):
+    def __init__(self, parent: QtWidgets.QWidget, model: UiAppLinkModel):
         super().__init__(parent)
         self._parent_tab = parent # save parent - don't use qt signals ands slots
-        self._model = UiAppLinkModel()
+        self.model = model
         self._init_app_link()
 
 
@@ -49,7 +49,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self._app_name_label.setAlignment(Qt.AlignCenter)
         self._app_name_label.setSizePolicy(size_policy)
-        self._app_name_label.setText(self._model.name)
+        self._app_name_label.setText(self.model.name)
         self.addWidget(self._app_name_label)
 
         self._app_version_cbox.setDisabled(True)
@@ -87,9 +87,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._init_menu()
 
 
-    def load(self, ui_config: UiAppLinkConfig, model_parent):
-        self._model.load(ui_config, model_parent)
-        self._model.register_update_callback(self.update_with_conan_info)
+    def load(self):
+        #self.model.load(ui_config, model_parent)
+        self.model.register_update_callback(self.update_with_conan_info)
         self._apply_new_config()
         self.update_with_conan_info()
 
@@ -144,36 +144,34 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu.exec_(self._app_button.mapToGlobal(position))
 
     def on_open_in_file_manager(self):
-        open_in_file_manager(self._model.get_executable_path().parent)
+        open_in_file_manager(self.model.get_executable_path().parent)
 
     def _apply_new_config(self):
-        self._app_name_label.setText(self._model.name)
-        self._app_button.setToolTip(str(self._model.conan_ref))
-        self._app_button.set_icon(self._model.get_icon_path())
+        self._app_name_label.setText(self.model.name)
+        self._app_button.setToolTip(str(self.model.conan_ref))
+        self._app_button.set_icon(self.model.get_icon_path())
 
         self._app_channel_cbox.clear()
-        self._app_channel_cbox.addItem(self._model.channel)
+        self._app_channel_cbox.addItem(self.model.channel)
         self._app_version_cbox.clear()
-        self._app_version_cbox.addItem(self._model.version)
+        self._app_version_cbox.addItem(self.model.version)
         self._app_user_cbox.clear()
-        self._app_user_cbox.addItem(self._model.user)
+        self._app_user_cbox.addItem(self.model.user)
         self.update_versions_cbox()
         self.update_users_cbox()
         self.update_channels_cbox()
 
 
-    def open_edit_dialog(self, model = None):
+    def open_edit_dialog(self, model: UiAppLinkModel=None):
         if model:
-            self._model = model
-        self._edit_app_dialog = EditAppDialog(self._model, parent=self.parentWidget())
+            self.model = model
+        self._edit_app_dialog = EditAppDialog(self.model, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
             self._edit_app_dialog.save_data()
             self._apply_new_config()
             self._app_button.grey_icon()
-            self._model.update_from_cache()
-            # if main_window:
-            #     main_window.save_config()
+            self.model.update_from_cache()
 
     def open_app_link_add_dialog(self, new_config = None):
         if not new_config:
@@ -183,11 +181,11 @@ class AppLink(QtWidgets.QVBoxLayout):
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
             self._edit_app_dialog.save_data()
-            app_link = AppLink(self._parent_tab).load(new_config, self._model.parent)
-            if self._model.parent:
-                self._model.parent.apps.append(new_config)
+            app_link = AppLink(self._parent_tab).load(new_config, self.model.parent)
+            if self.model.parent:
+                self.model.parent.apps.append(new_config)
             self._parent_tab.add_app_link_to_tab(app_link)
-            self._model.save() # TODO this should happen on apps.append
+            self.model.save() # TODO this should happen on apps.append
             return app_link  # for testing
         return None
 
@@ -195,19 +193,19 @@ class AppLink(QtWidgets.QVBoxLayout):
         # confirmation dialog
         message_box = QtWidgets.QMessageBox(parent=self.parentWidget())
         message_box.setWindowTitle("Delete app link")
-        message_box.setText(f"Are you sure, you want to delete the link \"{self._model.name}?\"")
+        message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}?\"")
         message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         message_box.setIcon(QtWidgets.QMessageBox.Question)
         reply = message_box.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
             self.delete()
             self._parent_tab.remove_app_link_from_tab(self)
-            self._model.save()
+            self.model.save()
 
     def update_with_conan_info(self):
-        if self._app_channel_cbox.itemText(0) != self._model.INVALID_DESCR and \
-            len(self._model.versions) > 1 and self._app_version_cbox.count() != len(self._model.versions) or \
-                    len(self._model.channels) > 1 and self._app_channel_cbox.count() != len(self._model.channels):
+        if self._app_channel_cbox.itemText(0) != self.model.INVALID_DESCR and \
+            len(self.model.versions) > 1 and self._app_version_cbox.count() != len(self.model.versions) or \
+                    len(self.model.channels) > 1 and self._app_channel_cbox.count() != len(self.model.channels):
                 # signals the cbox callback that we do not set new user values
                 self._app_version_cbox.setDisabled(True)
                 self._app_user_cbox.setDisabled(True)
@@ -215,16 +213,16 @@ class AppLink(QtWidgets.QVBoxLayout):
                 self._app_version_cbox.clear()
                 self._app_user_cbox.clear()
                 self._app_channel_cbox.clear()
-                self._app_version_cbox.addItems(self._model.versions)
-                self._app_user_cbox.addItems(self._model.users)
-                self._app_channel_cbox.addItems(self._model.channels)
+                self._app_version_cbox.addItems(self.model.versions)
+                self._app_user_cbox.addItems(self.model.users)
+                self._app_channel_cbox.addItems(self.model.channels)
                 try:  # try to set updated values
                     self._app_version_cbox.setCurrentIndex(
-                        self._model.versions.index(self._model.version))
+                        self.model.versions.index(self.model.version))
                     self._app_user_cbox.setCurrentIndex(
-                        self._model.users.index(self._model.user))
+                        self.model.users.index(self.model.user))
                     self._app_channel_cbox.setCurrentIndex(
-                        self._model.channels.index(self._model.channel))
+                        self.model.channels.index(self.model.channel))
                 except Exception:
                     pass
                 self._app_version_cbox.setEnabled(True)
@@ -232,11 +230,11 @@ class AppLink(QtWidgets.QVBoxLayout):
                 self._app_channel_cbox.setEnabled(True)
 
         # add tooltip for channels, in case it is too long
-        for i in range(0, len(self._model.channels)):
-            self._app_channel_cbox.setItemData(i, self._model.channels[i], Qt.ToolTipRole)
-        if self._model.get_executable_path().is_file():
-            Logger().debug(f"Ungreying {str(self._model.__dict__)}")
-            self._app_button.set_icon(self._model.get_icon_path())
+        for i in range(0, len(self.model.channels)):
+            self._app_channel_cbox.setItemData(i, self.model.channels[i], Qt.ToolTipRole)
+        if self.model.get_executable_path().is_file():
+            Logger().debug(f"Ungreying {str(self.model.__dict__)}")
+            self._app_button.set_icon(self.model.get_icon_path())
             self._app_button.ungrey_icon()
 
     def update_versions_cbox(self):
@@ -260,31 +258,31 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def on_click(self):
         """ Callback for opening the executable on click """
-        run_file(self._model.get_executable_path(), self._model.is_console_application, self._model.args)
+        run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
 
     def on_version_selected(self, index):
         if not self._app_version_cbox.isEnabled():
             return
         if index == -1:  # on clear
             return
-        if self._model.version == self._app_version_cbox.currentText():  # no change
+        if self.model.version == self._app_version_cbox.currentText():  # no change
             return
         self._app_button.grey_icon()
-        self._model.version = self._app_version_cbox.currentText()
+        self.model.version = self._app_version_cbox.currentText()
 
         # update channels to match version
         self._app_channel_cbox.clear()  # reset cbox
-        if len(self._model.channels) == 1:
-            self._app_channel_cbox.addItems(self._model.channels)
+        if len(self.model.channels) == 1:
+            self._app_channel_cbox.addItems(self.model.channels)
         else:
-            self._app_channel_cbox.addItems([self._model.INVALID_DESCR] + self._model.channels)
-            self._model.channel = self._model.INVALID_DESCR
+            self._app_channel_cbox.addItems([self.model.INVALID_DESCR] + self.model.channels)
+            self.model.channel = self.model.INVALID_DESCR
             # add tooltip for channels, in case it is too long
-            for i in range(0, len(self._model.channels)):
-                self._app_channel_cbox.setItemData(i+1, self._model.channels[i], Qt.ToolTipRole)
+            for i in range(0, len(self.model.channels)):
+                self._app_channel_cbox.setItemData(i+1, self.model.channels[i], Qt.ToolTipRole)
 
         self._app_channel_cbox.setCurrentIndex(0)
-        self._app_button.setToolTip(str(self._model.conan_ref))
+        self._app_button.setToolTip(str(self.model.conan_ref))
         # if main_window:
         #     main_window.save_config()
 
@@ -295,26 +293,26 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         if index == -1:
             return
-        if self._model.user == self._app_user_cbox.currentText():
+        if self.model.user == self._app_user_cbox.currentText():
             return
         #self._app_channel_cbox.setDisabled(True)
         self._app_button.grey_icon()
-        self._model.user = self._app_user_cbox.currentText()
+        self.model.user = self._app_user_cbox.currentText()
 
         # update channels to match version
         self._app_channel_cbox.clear()  # reset cbox
-        if len(self._model.channels) == 1:
-            self._app_channel_cbox.addItems(self._model.channels)
+        if len(self.model.channels) == 1:
+            self._app_channel_cbox.addItems(self.model.channels)
         else:
-            self._app_channel_cbox.addItems([self._model.INVALID_DESCR] + self._model.channels)
-            self._model.channel = self._model.INVALID_DESCR
+            self._app_channel_cbox.addItems([self.model.INVALID_DESCR] + self.model.channels)
+            self.model.channel = self.model.INVALID_DESCR
             # add tooltip for channels, in case it is too long
-            for i in range(0, len(self._model.channels)):
-                self._app_channel_cbox.setItemData(i+1, self._model.channels[i], Qt.ToolTipRole)
+            for i in range(0, len(self.model.channels)):
+                self._app_channel_cbox.setItemData(i+1, self.model.channels[i], Qt.ToolTipRole)
 
         self._app_channel_cbox.setCurrentIndex(0)
-        self._app_button.setToolTip(str(self._model.conan_ref))
-        self._model.save()
+        self._app_button.setToolTip(str(self.model.conan_ref))
+        self.model.save()
 
     def on_channel_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
@@ -323,13 +321,13 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         if index == -1:
             return
-        if self._model.channel == self._app_channel_cbox.currentText():
+        if self.model.channel == self._app_channel_cbox.currentText():
             return
         self._app_button.grey_icon()
         # remove entry NA after setting something other
-        if index != 0 and self._app_channel_cbox.itemText(0) == self._model.INVALID_DESCR:
+        if index != 0 and self._app_channel_cbox.itemText(0) == self.model.INVALID_DESCR:
            self._app_channel_cbox.removeItem(0)
-        self._model.channel = self._app_channel_cbox.currentText()
-        self._app_button.setToolTip(str(self._model.conan_ref))
-        self._app_button.set_icon(self._model.get_icon_path())
-        self._model.save()
+        self.model.channel = self._app_channel_cbox.currentText()
+        self._app_button.setToolTip(str(self.model.conan_ref))
+        self._app_button.set_icon(self.model.get_icon_path())
+        self.model.save()

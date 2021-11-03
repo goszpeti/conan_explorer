@@ -3,8 +3,8 @@ from shutil import rmtree
 
 from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON,
                                 DEFAULT_UI_CFG_FILE_NAME, base_path)
-from conan_app_launcher.app import (active_settings, asset_path, conan_api,
-                                    user_save_path)
+import conan_app_launcher.app as app # using gobal module pattern
+from conan_app_launcher import asset_path, base_path, user_save_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
@@ -64,9 +64,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self._local_package_explorer = LocalConanPackageExplorer(self)
 
         # initialize view user settings
-        self.ui.menu_toggle_display_versions.setChecked(active_settings.get_bool(DISPLAY_APP_VERSIONS))
-        self.ui.menu_toggle_display_users.setChecked(active_settings.get_bool(DISPLAY_APP_USERS))
-        self.ui.menu_toggle_display_channels.setChecked(active_settings.get_bool(DISPLAY_APP_CHANNELS))
+        self.ui.menu_toggle_display_versions.setChecked(app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
+        self.ui.menu_toggle_display_users.setChecked(app.active_settings.get_bool(DISPLAY_APP_USERS))
+        self.ui.menu_toggle_display_channels.setChecked(app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
 
         self.ui.menu_about_action.triggered.connect(self._about_dialog.show)
         self.ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
@@ -91,7 +91,7 @@ class MainWindow(QtWidgets.QMainWindow):
         default_config_file_path = user_save_path / DEFAULT_UI_CFG_FILE_NAME
         if not config_file_setting or not default_config_file_path.exists():
             config_file_setting = default_config_file_path
-        active_settings.set(LAST_CONFIG_FILE, str(config_file_setting))
+        app.active_settings.set(LAST_CONFIG_FILE, str(config_file_setting))
 
         # model loads incrementally
         self.model.loadf(config_file_setting)
@@ -126,7 +126,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @ pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
-        paths = conan_api.get_cleanup_cache_paths()
+        paths = app.conan_api.get_cleanup_cache_paths()
         if not paths:
             self.write_log("INFO: Nothing found in cache to clean up.")
             return
@@ -150,7 +150,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = user_save_path
-        config_file_path = Path(active_settings.get_string(LAST_CONFIG_FILE))
+        config_file_path = Path(app.active_settings.get_string(LAST_CONFIG_FILE))
         if config_file_path.exists():
             dialog_path = config_file_path.parent
         dialog = QtWidgets.QFileDialog(parent=self, caption="Select JSON Config File",
@@ -158,7 +158,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
             dialog.selectedFiles()[0]
-            config_file_setting = active_settings.set(LAST_CONFIG_FILE, )
+            config_file_setting = app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
             # model loads incrementally
             self.model.loadf(config_file_setting)
 
@@ -170,21 +170,21 @@ class MainWindow(QtWidgets.QMainWindow):
     def apply_display_versions_setting(self):
         """ Reads the current menu setting, saves it and updates the gui """
         status = self.ui.menu_toggle_display_versions.isChecked()
-        active_settings.set(DISPLAY_APP_VERSIONS, status)
+        app.active_settings.set(DISPLAY_APP_VERSIONS, status)
         self.display_versions_changed.emit()
 
     @pyqtSlot()
     def apply_display_users_setting(self):
         """ Reads the current menu setting, saves it and updates the gui """
         status = self.ui.menu_toggle_display_users.isChecked()
-        active_settings.set(DISPLAY_APP_USERS, status)
+        app.active_settings.set(DISPLAY_APP_USERS, status)
         self.display_users_changed.emit()
 
     @pyqtSlot()
     def apply_display_channels_setting(self):
         """ Reads the current menu setting, saves it and updates the gui """
         status = self.ui.menu_toggle_display_channels.isChecked()
-        active_settings.set(DISPLAY_APP_CHANNELS, status)
+        app.active_settings.set(DISPLAY_APP_CHANNELS, status)
         self.display_channels_changed.emit()
 
     @pyqtSlot()

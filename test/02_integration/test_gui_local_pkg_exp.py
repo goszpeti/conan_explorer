@@ -5,7 +5,8 @@ using the whole application (standalone).
 import tempfile
 from pathlib import Path
 
-from conan_app_launcher.app import active_settings, main_window
+import conan_app_launcher.app as app  # using gobal module pattern
+
 from conan_app_launcher.settings import SettingsFactory
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets

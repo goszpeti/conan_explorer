@@ -1,7 +1,7 @@
 from threading import Thread
 from typing import Callable
 
-from conan_app_launcher.app import conan_api
+import conan_app_launcher.app as app  # using gobal module pattern
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
@@ -36,7 +36,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
             valid = True
             self.setStyleSheet("background: PaleGreen;")
         
-        local_refs, remote_refs = conan_api.info_cache.search(text)
+        local_refs, remote_refs = app.conan_api.info_cache.search(text)
         combined_refs = set()
         combined_refs.update(local_refs)
         combined_refs.update(remote_refs)
@@ -51,7 +51,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
                 self._loading_cbk()
 
     def load_completion(self, text):
-        recipes = conan_api.search_query_in_remotes(f"{text}*")
-        conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
+        recipes = app.conan_api.search_query_in_remotes(f"{text}*")
+        app.conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
         self.completion_finished.emit()
 

@@ -1,17 +1,19 @@
 import platform
 import tempfile
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 from conan_app_launcher import (INVALID_CONAN_REF,
                                 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH,
                                 USE_LOCAL_INTERNAL_CACHE, asset_path)
-from conan_app_launcher.app import conan_api, conan_worker
+import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.components.icon import extract_icon
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
-from conan_app_launcher.ui.model import UiApplicationModel
 from conans.model.ref import ConanFileReference
+
+if TYPE_CHECKING:
+    from conan_app_launcher.ui.model import UiApplicationModel
 
 
 class UiTabModel(UiTabConfig):
@@ -20,12 +22,18 @@ class UiTabModel(UiTabConfig):
     def __init__(self, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""
         super().__init__(*args, **kwargs)
+        self.apps: List[UiAppLinkModel]
         self.parent = None
-        self.root = None
 
-    def load(self, tab_config: UiTabConfig, parent: UiApplicationModel):
-        super().__init__(tab_config.name, tab_config.apps)
+    def load(self, config: UiTabConfig, parent: "UiApplicationModel") -> "UiTabModel":
+        super().__init__(config.name, config.apps)
         self.parent = parent
+        # load all submodels
+        apps_model = []
+        for app_config in self.apps:
+            apps_model.append(UiAppLinkModel().load(app_config, self))
+        self.apps = apps_model
+        return self
 
     def save(self):
         if self.parent:  # delegate to top
@@ -57,12 +65,12 @@ class UiAppLinkModel(UiAppLinkConfig):
         # calls public functions, every internal variable needs to initialitzed
         super().__init__(*args, **kwargs)  # empty init
 
-
-    def load(self, config: UiAppLinkConfig, parent):
+    def load(self, config: UiAppLinkConfig, parent: UiTabModel) -> "UiAppLinkModel":
         super().__init__(config.name, config.conan_ref, config.executable, config.args,
                          config.is_console_application, config.args, config.conan_options)
         self._available_refs = [self.conan_ref]
         self.parent = parent
+        return self
 
     def save(self):
         if self.parent:  # delegate to top
@@ -70,12 +78,12 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def update_from_cache(self):
         # get all info from cache
-        self.set_available_packages(conan_api.info_cache.get_similar_pkg_refs(
+        self.set_available_packages(app.conan_api.info_cache.get_similar_pkg_refs(
             self.conan_ref.name, user="*"))
         if USE_LOCAL_INTERNAL_CACHE:
-            self.set_package_info(conan_api.info_cache.get_local_package_path(self.conan_ref))
+            self.set_package_info(app.conan_api.info_cache.get_local_package_path(self.conan_ref))
         elif not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:  # last chance to get path
-            package_folder = conan_api.get_path_or_install(self.conan_ref, self.conan_options)
+            package_folder = app.conan_api.get_path_or_install(self.conan_ref, self.conan_options)
             self.set_package_info(package_folder)
 
     def register_update_callback(self, update_func: Callable):
@@ -88,13 +96,15 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @conan_ref.setter
     def conan_ref(self, new_value: ConanFileReference):
+        if not isinstance(new_value, ConanFileReference):
+            raise TypeError("conan_ref argument must be ConanFileReference")
         try:
             self._conan_ref = new_value
             # add conan ref to worker
             if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
                     and self._conan_ref.version != self.INVALID_DESCR
                     and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
-                conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
+                app.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
             # invalidate old entries, which are dependent on the conan ref
             self.update_from_cache()
 
@@ -205,6 +215,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._executable = new_value
 
     def get_executable_path(self) -> Path:
+        if not self._executable:
+            return Path("NULL")
         # adjust path on windows, if no file extension is given
         path = Path(self._executable)
         if platform.system() == "Windows" and not path.suffix:
@@ -267,8 +279,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         """
 
         if USE_LOCAL_INTERNAL_CACHE:
-            if self._package_folder != package_folder and conan_api.info_cache:
-                conan_api.info_cache.update_local_package_path(self.conan_ref, package_folder)
+            if self._package_folder != package_folder:
+                app.conan_api.info_cache.update_local_package_path(self.conan_ref, package_folder)
         self._package_folder = package_folder
 
         # call registered update callback
@@ -280,8 +292,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         Set all other available packages.
         Usually to be called from conan worker.
         """
-        if self._available_refs != available_refs and conan_api.info_cache:
-            conan_api.info_cache.update_remote_package_list(available_refs)
+        if self._available_refs != available_refs:
+            app.conan_api.info_cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
 
         # call registered update callback
