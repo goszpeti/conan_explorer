@@ -33,14 +33,14 @@ class ConanWorker():
         self._closing = False
 
     def update_all_info(self, conan_elements: List[ConanWorkerElement]):
-        """ Starts the worker for all given elements. Sh old be called at start. """
+        """ Starts the worker for all given elements. Should be called at start. """
         # fill up queue
         for ref in conan_elements:
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:
                 self._conan_queue.put((ref["reference"], ref["options"]))
-            # start getting versions info in a separate thread in a bundled way to get better performance
-            self._version_getter = Thread(target=self._get_packages_versions, args=[conan_elements, ])
-            self._version_getter.start()
+        # start getting versions info in a separate thread in a bundled way to get better performance
+        self._version_getter = Thread(target=self._get_packages_versions, args=[conan_elements, ])
+        self._version_getter.start()
         self._start_working()
 
     def put_ref_in_queue(self, conan_ref: str, conan_options: Dict[str, str]):

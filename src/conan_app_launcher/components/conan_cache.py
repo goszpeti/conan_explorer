@@ -81,11 +81,17 @@ class ConanInfoCache():
         remote_refs = set()
         local_refs = set()
 
-        for name in self._remote_packages.keys():
-            for user in self._remote_packages[name].keys():
-                if query in f"{name}@{user}":
-                    for ref in self.get_similar_remote_pkg_refs(name, user):
-                        remote_refs.add(str(ref))
+        # try to extract name and user from query
+        split_query = query.split("/")
+        name = split_query[0]
+        user = "*"
+        if len(split_query) > 1:
+            user_split = split_query[1].split("@")
+            if len(user_split) > 1:
+                user = user_split[1]
+
+        for ref in self.get_similar_remote_pkg_refs(name, user):
+            remote_refs.add(str(ref))
         for ref in self._all_local_refs:
             if query in str(ref):
                 local_refs.add(str(ref))
