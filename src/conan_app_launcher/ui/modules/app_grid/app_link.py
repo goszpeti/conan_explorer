@@ -22,7 +22,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     MAX_WIDTH = 193
 
     def __init__(self, parent: QtWidgets.QWidget, model: UiAppLinkModel):
-        super().__init__(parent)
+        super().__init__()
         self._parent_tab = parent # save parent - don't use qt signals ands slots
         self.model = model
         self._init_app_link()
@@ -85,6 +85,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
 
         self._init_menu()
+        #self.setObjectName("applink_" + self.model.name)
 
 
     def load(self):
