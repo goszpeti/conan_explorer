@@ -33,10 +33,14 @@ Add any other context about the problem here.
 """
 
 
-def show_bug_dialog_exc_hook(exctype, value, tb):
+def show_bug_dialog_exc_hook(exctype, excvalue, tb):
     print("Application crashed")
+    error_text = f"ERROR: {excvalue}"
     with open(base_path / "crash.log", "w") as fd:
+        fd.write(error_text + "\n")
         traceback.print_tb(tb, limit=10, file=fd)
+    # print it too the console too
+    print(error_text)
     traceback.print_tb(tb, limit=10)
     try:
         import urllib.parse

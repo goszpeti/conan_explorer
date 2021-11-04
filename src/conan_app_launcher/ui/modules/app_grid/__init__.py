@@ -1,29 +1,40 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, List
 
-from conan_app_launcher import asset_path
+from conan_app_launcher import ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, asset_path
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.settings import (GRID_COLUMNS, GRID_ROWS)
-from conan_app_launcher.ui.data import UiTabConfig
+from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
+from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiTabModel
 
 Qt = QtCore.Qt
 
-from .tab import TabAppGrid
+from .tab import AppGrid
 
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
     from conan_app_launcher.ui.modules.app_grid.model import UiApplicationModel
 
-class AppGrid():
+class TabAppGrid():
 
     def __init__(self, main_window: "MainWindow", model: "UiApplicationModel"):
         self._main_window = main_window
         self.model = model
         self._icons_path = asset_path / "icons"
+
+        if ADD_APP_LINK_BUTTON:
+            self._main_window.ui.add_app_link_button = QtWidgets.QPushButton(self._main_window)
+            self._main_window.ui.add_app_link_button.setGeometry(765, 452, 44, 44)
+            self._main_window.ui.add_app_link_button.setIconSize(QtCore.QSize(44, 44))
+            self._main_window.ui.add_app_link_button.clicked.connect(self.open_new_app_link_dialog)
+        if ADD_TAB_BUTTON:
+            self._main_window.ui.add_tab_button = QtWidgets.QPushButton(self._main_window)
+            self._main_window.ui.add_tab_button.setGeometry(802, 50, 28, 28)
+            self._main_window.ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
+            self._main_window.ui.add_tab_button.clicked.connect(self.open_new_tab_dialog)
 
         self._main_window.ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._main_window.ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
@@ -46,7 +57,27 @@ class AppGrid():
             app.conan_worker.finish_working(3)
             app.conan_worker.update_all_info(self.model.get_all_conan_refs())
 
-        self.load_tabs()
+        self.load()
+
+    def apply_display_versions_setting(self):
+        for tab in self.get_tabs():
+            for app_link in tab.app_links:
+                app_link.update_versions_cbox()
+
+    def apply_display_users_setting(self):
+        for tab in self.get_tabs():
+            for app_link in tab.app_links:
+                app_link.update_users_cbox()
+    
+    def apply_display_channels_setting(self):
+        for tab in self.get_tabs():
+            for app_link in tab.app_links:
+                app_link.update_channels_cbox()
+
+    def open_new_app_link_dialog(self):
+        # call tab on_app_link_add
+        current_tab = self._main_window.ui.tab_bar.widget(self._main_window.ui.tab_bar.currentIndex())
+        current_tab.open_app_link_add_dialog()
 
     def on_tab_move(self):
         """ Refresh backend info when tabs are reordered"""
@@ -89,18 +120,19 @@ class AppGrid():
             if not text:
                 return
             # TODO add to model (move to extra function in model?)
-            tab_model = UiTabModel().load(UiTabConfig(text), self.model)
+            tab_model = UiTabModel().load(UiTabConfig(text, apps=[UiAppLinkConfig()]), self.model)
             self.model.tabs.append(tab_model)
             self.model.save()
             # add tab
-            tab = TabAppGrid(self._main_window.ui.tab_bar,
+            tab = AppGrid(self._main_window.ui.tab_bar,
                              max_columns=app.active_settings.get_int(GRID_COLUMNS),
                              max_rows=app.active_settings.get_int(GRID_ROWS), model=tab_model)
+            tab.load()
             self._main_window.ui.tab_bar.addTab(tab, text)
 
 
     def on_tab_rename(self, index):
-        tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
+        tab: AppGrid = self._main_window.ui.tab_bar.widget(index)
 
         rename_tab_dialog = QtWidgets.QInputDialog(self._main_window)
         text, accepted = rename_tab_dialog.getText(self._main_window, 'Rename tab',
@@ -111,8 +143,9 @@ class AppGrid():
             tab.model.save()
 
     def on_tab_remove(self, index):
-        #tab: TabAppGrid = self._main_window.ui.tab_bar.widget(index)
-
+        # last tab can't be deleted! # TODO dialog
+        if len(self.model.tabs) == 1:
+            return
         msg = QtWidgets.QMessageBox(parent=self._main_window)
         msg.setWindowTitle("Delete tab")
         msg.setText("Are you sure, you want to delete this tab\t")
@@ -124,18 +157,31 @@ class AppGrid():
             self.model.tabs.remove(self.model.tabs[index])
             self.model.save()
 
-    def get_tabs(self) -> List[TabAppGrid]:
-        return self._main_window.ui.tab_bar.findChildren(TabAppGrid)
+    def get_tabs(self) -> List[AppGrid]:
+        return self._main_window.ui.tab_bar.findChildren(AppGrid)
 
-    def load_tabs(self):
+    def load(self):
         """ Creates new layout """
         for tab_config in self.model.tabs:
             
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabAppGrid(parent=self._main_window.ui.tab_bar, max_columns=app.active_settings.get_int(GRID_COLUMNS),
+            tab = AppGrid(parent=self._main_window.ui.tab_bar, max_columns=app.active_settings.get_int(GRID_COLUMNS),
                              max_rows=app.active_settings.get_int(GRID_ROWS), model=tab_config)
             self._main_window.ui.tab_bar.addTab(tab, tab_config.name)
             tab.load()
 
         # always show the first tab first
         self._main_window.ui.tab_bar.setCurrentIndex(0)
+
+    def open_new_app_dialog_from_extern(self, app_config: UiAppLinkConfig):
+        """ Called from pacakge explorer, where tab is unknown"""
+        dialog = QtWidgets.QInputDialog(self._main_window)
+        tab_list = list(item.name for item in self.model.tabs)
+        model = UiAppLinkModel()
+        dialog.setComboBoxItems(tab_list)
+        dialog.setWindowTitle("Choose a tab!")
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            answer = dialog.textValue()
+            for tab in self.get_tabs():
+                if answer == tab.model.name:
+                    tab.open_app_link_add_dialog(model.load(app_config, tab.model))

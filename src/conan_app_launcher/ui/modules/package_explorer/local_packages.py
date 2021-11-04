@@ -12,6 +12,7 @@ from conan_app_launcher.components.conan import ConanPkg
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 from conan_app_launcher.ui.data import UiAppLinkConfig
+from conan_app_launcher.ui.model import UiApplicationModel
 from .model import PROFILE_TYPE, PackageFilter, PkgSelectModel, TreeItem
 
 Qt = QtCore.Qt
@@ -39,7 +40,7 @@ class LocalConanPackageExplorer():
 
     def on_changed(self, index):
         self.refresh_pkg_selection_view(update=False)
-    
+
     def on_refresh_clicked(self):
         self.refresh_pkg_selection_view(update=True)
 
@@ -57,7 +58,6 @@ class LocalConanPackageExplorer():
         self.select_cntx_menu.addAction(self.remove_ref_action)
         self.remove_ref_action.setEnabled(False)  # TODO not ready yet
         self.remove_ref_action.triggered.connect(self.on_remove_ref_requested)
-
 
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
@@ -89,7 +89,7 @@ class LocalConanPackageExplorer():
 
     def on_copy_ref_requested(self):
         conan_ref = self.get_selected_conan_ref()
-        
+
         QtWidgets.QApplication.clipboard().setText(conan_ref)
 
     def on_remove_ref_requested(self):
@@ -122,7 +122,7 @@ class LocalConanPackageExplorer():
         self.proxy_model.setSourceModel(self.pkg_sel_model)
         self._main_window.ui.package_select_view.setModel(self.proxy_model)
         self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
-    
+
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace
         text = self._main_window.ui.package_filter_edit.toPlainText().strip()
@@ -146,7 +146,7 @@ class LocalConanPackageExplorer():
             Logger().warning(f"Can't find package path for {conan_ref} and {str(source_item.itemData[0])}")
             return
         self.fs_model = QtWidgets.QFileSystemModel()
-        self.fs_model.setReadOnly(False) # TODO connect the edit checkbox
+        self.fs_model.setReadOnly(False)  # TODO connect the edit checkbox
         self.fs_model.setRootPath(str(pkg_path))
         self.fs_model.sort(0, Qt.AscendingOrder)
         self.re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)
@@ -155,16 +155,16 @@ class LocalConanPackageExplorer():
         self._main_window.ui.package_file_view.setColumnHidden(2, True)  # file type
         self._main_window.ui.package_file_view.setColumnWidth(0, 200)
         self._main_window.ui.package_file_view.header().setSortIndicator(0, Qt.AscendingOrder)
-        self.re_register_signal(self._main_window.ui.package_file_view.doubleClicked, 
-            self.on_file_double_click)
+        self.re_register_signal(self._main_window.ui.package_file_view.doubleClicked,
+                                self.on_file_double_click)
         # disable edit on double click, since we want to open
         self._main_window.ui.package_file_view.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
         self._main_window.ui.package_path_label.setText(str(pkg_path))
 
         self._main_window.ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
 
-        self.re_register_signal(self._main_window.ui.package_file_view.customContextMenuRequested, 
-            self.on_pkg_context_menu_requested)
+        self.re_register_signal(self._main_window.ui.package_file_view.customContextMenuRequested,
+                                self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
 
     @classmethod
@@ -240,7 +240,6 @@ class LocalConanPackageExplorer():
         except Exception as e:
             Logger().warning(f"Can't delete {file}: {str(e)}")
 
-
     def on_copy(self):
         file = self._get_selected_pkg_file()
         data = QtCore.QMimeData()
@@ -276,8 +275,8 @@ class LocalConanPackageExplorer():
         pkg_path = app.conan_api.get_package_folder(conan_ref, pkg_info.get("id", ""))
         rel_path = file_path.relative_to(pkg_path)
 
-        app_config = UiAppLinkConfig(name="NewLink", conan_ref=conan_ref, executable = str(rel_path))
-        self._main_window.open_new_app_dialog_from_extern(app_config)
+        app_config = UiAppLinkConfig(name="NewLink", conan_ref=conan_ref, executable=str(rel_path))
+        self._main_window.app_grid.open_new_app_dialog_from_extern(app_config)
 
     def on_open_in_file_manager(self, model_index):
         file_path = Path(self._get_selected_pkg_file())

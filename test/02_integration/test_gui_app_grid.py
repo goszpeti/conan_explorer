@@ -15,7 +15,9 @@ from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.modules.app_grid.tab import (AppLink, EditAppDialog,
-                                                        TabAppGrid)
+                                                        AppGrid)
+from conan_app_launcher.settings.ini_file import IniSettings
+
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -37,12 +39,12 @@ def test_rename_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
     mocker.patch.object(QtWidgets.QInputDialog, 'getText',
                         return_value=[new_text, True])
-    main_gui._app_grid.on_tab_rename(0)
+    main_gui.app_grid.on_tab_rename(0)
     assert main_gui.ui.tab_bar.tabBar().tabText(0) == new_text
 
     mocker.patch.object(QtWidgets.QInputDialog, 'getText',
                         return_value=["OtherText", False])
-    main_gui._app_grid.on_tab_rename(0)
+    main_gui.app_grid.on_tab_rename(0)
     # text must be the same
     assert main_gui.ui.tab_bar.tabBar().tabText(0) == new_text
 
@@ -61,7 +63,7 @@ def test_add_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     prev_count = main_gui.ui.tab_bar.tabBar().count()
     mocker.patch.object(QtWidgets.QInputDialog, 'getText',
                         return_value=[new_text, True])
-    main_gui._app_grid.on_new_tab()
+    main_gui.app_grid.on_new_tab()
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count + 1
     assert main_gui.ui.tab_bar.tabBar().tabText(prev_count) == new_text
 
@@ -71,7 +73,7 @@ def test_add_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     # press cancel - count must still be original + 1
     mocker.patch.object(QtWidgets.QInputDialog, 'getText',
                         return_value=["OtherText", False])
-    main_gui._app_grid.on_tab_rename(0)
+    main_gui.app_grid.on_tab_rename(0)
     config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count + 1
     assert len(config_tabs) == prev_count + 1
@@ -93,7 +95,7 @@ def test_remove_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
-    main_gui._app_grid.on_tab_remove(id_to_delete)
+    main_gui.app_grid.on_tab_remove(id_to_delete)
 
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
     assert main_gui.ui.tab_bar.tabBar().tabText(id_to_delete) != text
@@ -103,7 +105,7 @@ def test_remove_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     # press no
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.No)
-    main_gui._app_grid.on_tab_remove(0)
+    main_gui.app_grid.on_tab_remove(0)
     config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
     assert len(config_tabs) == prev_count - 1
@@ -142,7 +144,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 
-    tabs = main_gui.ui.tab_bar.findChildren(TabAppGrid)
+    tabs = main_gui.ui.tab_bar.findChildren(AppGrid)
     tab_model = tabs[1].model
     apps_model = tab_model.apps
     prev_count = len(apps_model)
@@ -187,7 +189,7 @@ def test_remove_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 
-    tabs = main_gui.ui.tab_bar.findChildren(TabAppGrid)
+    tabs = main_gui.ui.tab_bar.findChildren(AppGrid)
     tab_model = tabs[1].model
     apps_model = tab_model.apps
     prev_count = len(apps_model)
@@ -222,20 +224,22 @@ def test_add_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 
-    tabs = main_gui.ui.tab_bar.findChildren(TabAppGrid)
-    tab_model = tabs[1].model
+    tabs = main_gui.ui.tab_bar.findChildren(AppGrid)
+    tab = tabs[1]
+    tab_model = tab.model
     apps_model = tab_model.apps
     prev_count = len(apps_model)
-    app_link: AppLink = tabs[1].app_links[0]
+    app_link: AppLink = tab.app_links[0]
     app_config = UiAppLinkConfig(name="NewApp", conan_ref=CFR.loads(TEST_REF),
                                  executable="bin/exe")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
 
     mocker.patch.object(EditAppDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
-    new_app_link = app_link.open_app_link_add_dialog(app_config)
+    new_app_link = tab.open_app_link_add_dialog(app_model)
     assert new_app_link
-    assert app_link._edit_app_dialog._ui.name_line_edit.text()
+    assert tab._edit_app_dialog._ui.name_line_edit.text()
+
     _qapp_instance.processEvents() # call event loop once, so the hide/show attributes are refreshed
     
     # check that the gui has updated
@@ -262,7 +266,7 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
 
-    app.active_settings = Settings(ini_file=Path(temp_ini_path))
+    app.active_settings = IniSettings(Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
 
@@ -277,7 +281,7 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     app.conan_worker.finish_working(15)
 
     # check app icons first two should be ungreyed, third is invalid->not ungreying
-    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
+    for tab in main_gui.ui.tab_bar.findChildren(AppGrid):
         for test_app in tab.app_links:
             test_app.update_with_conan_info()  # signal is not emmited with qt bot, must call manually
             if test_app.config_data.name in ["App1 with spaces", "App1 new"]:

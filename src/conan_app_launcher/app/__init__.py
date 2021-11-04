@@ -65,7 +65,7 @@ def main():
     from conan_app_launcher.ui.main_window import MainWindow
     main_window = MainWindow()
     # load tabs needs the pyqt signals - constructor has to be finished
-    main_window.load(active_settings.get(LAST_CONFIG_FILE))
+    main_window.load()
     main_window.setWindowIcon(app_icon)
     main_window.show()
 

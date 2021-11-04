@@ -1,5 +1,5 @@
 from typing import List
-from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
+from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiTabModel
 from conan_app_launcher.ui.data import UiTabConfig
 
 from .common.app_edit_dialog import EditAppDialog
@@ -10,7 +10,7 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-class TabAppGrid(QtWidgets.QWidget):
+class AppGrid(QtWidgets.QWidget):
 
     def __init__(self, parent: QtWidgets.QTabWidget, max_rows: int, max_columns: int , model: UiTabModel):
         super().__init__(parent)
@@ -87,32 +87,47 @@ class TabAppGrid(QtWidgets.QWidget):
         # spacer for compressing app links, when hiding cboxes
         self.tab_grid_layout.addItem(self._v_spacer, row+1, 0)
 
-    def open_app_link_add_dialog(self, config_data):  # = AppLinkModel()
+    def open_app_link_add_dialog(self, new_model: UiAppLinkModel=None):
+        if not new_model:
+            new_model = UiAppLinkModel()
+            new_model.parent = self.model
         # save for testing
-        self._edit_app_dialog = EditAppDialog(config_data, self)
+        self._edit_app_dialog = EditAppDialog(new_model, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
             self._edit_app_dialog.save_data()
-            config_data.update_from_cache()  # instantly use local paths and pkgs
-            app_link = AppLink(self)
+            app_link = AppLink(self, new_model)
+            app_link.load()
             self.add_app_link_to_tab(app_link)
-            self.model.save()
+            self.model.save()  # TODO this should happen on apps.append
             return app_link  # for testing
         return None
 
-    def add_app_link_to_tab(self, app_link):
+    def add_app_link_to_tab(self, app_link: AppLink):
         """ To be called from a child AppLink """
-        current_row = int(len(self.config_data.get_app_entries()) / self.max_columns)  # count from 0
-        current_column = len(self.config_data.get_app_entries()) % self.max_columns  # count from 0 to 3
+        current_row = int(len(self.model.apps) / self.max_columns)  # count from 0
+        current_column = len(self.model.apps) % self.max_columns  # count from 0 to 3
 
         self.app_links.append(app_link)
-        self.config_data.add_app_entry(app_link.config_data)
+        self.model.apps.append(app_link.model)
         self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
+
+    def reset_grid(self):
+        for app_link in self.app_links:
+            self.tab_grid_layout.removeItem(app_link)
+        row = 0
+        column = 0
+        for app_link in self.app_links:
+            self.tab_grid_layout.addLayout(app_link, row, column)
+            column += 1
+            if column == self.max_columns:
+                column = 0
+                row += 1
 
     def remove_app_link_from_tab(self, app_link: AppLink):
         """ To be called from a child AppLink """
+        
         self.model.apps.remove(app_link.model)
         self.app_links.remove(app_link)
-        self.tab_grid_layout.removeItem(app_link)
-        app_link.setParent(None)  # TODO is this needed?
-        del app_link
+        self.reset_grid()
+        

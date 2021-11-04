@@ -1,5 +1,5 @@
 {
-    "version": "0.3.1",
+    "version": "0.4.0",
     "tabs": [
         {
             "name": "Basics",
@@ -9,9 +9,9 @@
                     "conan_ref": "m4/1.4.19@_/_",
                     "executable": "bin/m4",
                     "icon": "NonExistantIcon.png",
-                    "console_application": true,
                     "args": "-n name",
-                    "conan_options": []
+                    "conan_options": [],
+                    "is_console_application": true
                 },
                 {
                     "name": "App2",

@@ -57,7 +57,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._available_refs = [self.conan_ref]
         self._executable = ""
         self._icon: str = ""
-        self.parent: Optional[UiTabModel] = None
+        self.parent = UiTabModel("default")
         # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
         # holds all conan refs for name/user

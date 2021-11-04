@@ -1,14 +1,19 @@
 
-from conan_app_launcher.app import asset_path, active_settings
+from typing import TYPE_CHECKING
+import conan_app_launcher.app as app  # using gobal module pattern
+from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (
                                            open_in_file_manager, run_file)
 from conan_app_launcher.settings import DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
-from conan_app_launcher.ui.data import UiAppLinkConfig
 from .common.app_button import AppButton
 from .common.app_edit_dialog import EditAppDialog
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
+if TYPE_CHECKING:
+    from.tab import AppGrid
 
 
 # define Qt so we can use it like the namespace in C++
@@ -21,7 +26,7 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 class AppLink(QtWidgets.QVBoxLayout):
     MAX_WIDTH = 193
 
-    def __init__(self, parent: QtWidgets.QWidget, model: UiAppLinkModel):
+    def __init__(self, parent: "AppGrid", model: UiAppLinkModel):
         super().__init__()
         self._parent_tab = parent # save parent - don't use qt signals ands slots
         self.model = model
@@ -75,10 +80,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.addSpacerItem(self._v_spacer)
 
         # connect signals
-        # if main_window:
-        #     main_window.display_versions_changed.connect(self.update_versions_cbox)
-        #     main_window.display_users_changed.connect(self.update_users_cbox)
-        #     main_window.display_channels_changed.connect(self.update_channels_cbox)
         self._app_button.clicked.connect(self.on_click)
         self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
         self._app_user_cbox.currentIndexChanged.connect(self.on_user_selected)
@@ -113,7 +114,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.add_action = QtWidgets.QAction("Add new App Link", self)
         self.add_action.setIcon(QtGui.QIcon(str(icons_path / "add_link.png")))
         self.menu.addAction(self.add_action)
-        self.add_action.triggered.connect(self.open_app_link_add_dialog)
+        self.add_action.triggered.connect(self._parent_tab.open_app_link_add_dialog)
 
         self.edit_action = QtWidgets.QAction("Edit", self)
         self.edit_action.setIcon(QtGui.QIcon(str(icons_path / "edit.png")))
@@ -174,23 +175,11 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_button.grey_icon()
             self.model.update_from_cache()
 
-    def open_app_link_add_dialog(self, new_config = None):
-        if not new_config:
-            new_config = UiAppLinkConfig()
-        # save for testing
-        self._edit_app_dialog = EditAppDialog(new_config, parent=self.parentWidget())
-        reply = self._edit_app_dialog.exec_()
-        if reply == EditAppDialog.Accepted:
-            self._edit_app_dialog.save_data()
-            app_link = AppLink(self._parent_tab).load(new_config, self.model.parent)
-            if self.model.parent:
-                self.model.parent.apps.append(new_config)
-            self._parent_tab.add_app_link_to_tab(app_link)
-            self.model.save() # TODO this should happen on apps.append
-            return app_link  # for testing
-        return None
-
     def remove(self):
+        # last link can't be deleted! # TODO dialog
+        if len(self.model.parent.apps) == 1:
+            return
+
         # confirmation dialog
         message_box = QtWidgets.QMessageBox(parent=self.parentWidget())
         message_box.setWindowTitle("Delete app link")
@@ -239,20 +228,20 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_button.ungrey_icon()
 
     def update_versions_cbox(self):
-        if active_settings and active_settings.get(DISPLAY_APP_VERSIONS):
+        if app.active_settings.get(DISPLAY_APP_VERSIONS):
             self._app_version_cbox.show()
         else:
             self._app_version_cbox.hide()
 
 
     def update_users_cbox(self):
-        if active_settings and active_settings.get(DISPLAY_APP_USERS):
+        if app.active_settings.get(DISPLAY_APP_USERS):
             self._app_user_cbox.show()
         else:
             self._app_user_cbox.hide()
 
     def update_channels_cbox(self):
-        if active_settings and active_settings.get(DISPLAY_APP_CHANNELS):
+        if app.active_settings.get(DISPLAY_APP_CHANNELS):
             self._app_channel_cbox.show()
         else:
             self._app_channel_cbox.hide()

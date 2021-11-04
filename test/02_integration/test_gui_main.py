@@ -191,7 +191,7 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
 
     app.conan_worker.finish_working(10)
 
-    main_gui._app_grid.re_init() # re-init with same file
+    main_gui.app_grid.re_init() # re-init with same file
 
     ### TEST EVALUATION
     time.sleep(5)
