@@ -1,5 +1,5 @@
 {
-    "version": "0.3.1",
+    "version": "0.4.0",
     "tabs": [
         {
             "name": "Basics",
@@ -9,9 +9,9 @@
                     "conan_ref": "fft/cci.20061228@_/_",
                     "executable": "include/fft/fft.h",
                     "icon": "NonExistantIcon.png",
-                    "console_application": true,
                     "args": "-n name",
-                    "conan_options": []
+                    "conan_options": [],
+                    "is_console_application": true
                 },
                 {
                     "name": "App1 new",

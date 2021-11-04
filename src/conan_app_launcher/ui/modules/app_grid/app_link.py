@@ -114,7 +114,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.add_action = QtWidgets.QAction("Add new App Link", self)
         self.add_action.setIcon(QtGui.QIcon(str(icons_path / "add_link.png")))
         self.menu.addAction(self.add_action)
-        self.add_action.triggered.connect(self._parent_tab.open_app_link_add_dialog)
+        self.add_action.triggered.connect(self.open_app_link_add_dialog)
 
         self.edit_action = QtWidgets.QAction("Edit", self)
         self.edit_action.setIcon(QtGui.QIcon(str(icons_path / "edit.png")))
@@ -163,6 +163,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.update_users_cbox()
         self.update_channels_cbox()
 
+    def open_app_link_add_dialog(self):
+        self._parent_tab.open_app_link_add_dialog()
 
     def open_edit_dialog(self, model: UiAppLinkModel=None):
         if model:

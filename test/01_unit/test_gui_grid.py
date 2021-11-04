@@ -62,11 +62,11 @@ def test_EditAppDialog_save_values(base_fixture, qtbot):
                                executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico")
     app_info.executable = sys.executable
-
+    model = UiAppLinkModel().load(app_info, None)
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    diag = EditAppDialog(app_info, root_obj)
+    diag = EditAppDialog(model, root_obj)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
@@ -85,16 +85,16 @@ def test_EditAppDialog_save_values(base_fixture, qtbot):
     diag.save_data()
 
     # assert that all infos where saved
-    assert diag._ui.name_line_edit.text() == app_info.name
+    assert diag._ui.name_line_edit.text() == model.name
     assert diag._ui.conan_ref_line_edit.text() == "zlib/1.2.11@_/_" # internal representation will strip @_/_
-    assert diag._ui.exec_path_line_edit.text() == app_info.executable
-    assert diag._ui.is_console_app_checkbox.isChecked() == app_info.is_console_application
-    assert diag._ui.icon_line_edit.text() == app_info.icon
-    assert diag._ui.args_line_edit.text() == app_info.args
+    assert diag._ui.exec_path_line_edit.text() == model.executable
+    assert diag._ui.is_console_app_checkbox.isChecked() == model.is_console_application
+    assert diag._ui.icon_line_edit.text() == model.icon
+    assert diag._ui.args_line_edit.text() == model.args
     conan_options_text = diag._ui.conan_opts_text_edit.toPlainText()
 
-    for opt in app_info.conan_options:
-        assert f"{opt}={app_info.conan_options[opt]}" in conan_options_text
+    for opt in model.conan_options:
+        assert f"{opt}={model.conan_options[opt]}" in conan_options_text
 
 def test_AppLink_open(base_fixture, qtbot):
     """
