@@ -17,7 +17,7 @@ from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.modules.app_grid.tab import (AppLink, EditAppDialog,
                                                         TabGrid)
 from conan_app_launcher.settings.ini_file import IniSettings
-
+from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -254,6 +254,9 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     app.active_settings = IniSettings(Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
+    # load path into local cache
+    app.conan_api.get_path_or_install(ConanFileReference.loads("fft/cci.20061228@_/_"), {})
+    
 
     main_gui = main_window.MainWindow()
     main_gui.show()
@@ -261,14 +264,9 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
-
-    # wait for all tasks to finish
-    app.conan_worker.finish_working(15)
-
     # check app icons first two should be ungreyed, third is invalid->not ungreying
     for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
         for test_app in tab.app_links:
-            test_app.update_with_conan_info()  # signal is not emmited with qt bot, must call manually
             if test_app.model.name in ["App1 with spaces", "App1 new"]:
                 assert not test_app._app_button._greyed_out, repr(test_app.model.__dict__)
             elif test_app.model.name in ["App1 wrong path", "App2"]:
