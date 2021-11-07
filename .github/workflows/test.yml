@@ -107,10 +107,6 @@ jobs:
       - name: Execute system with pytest
         run: |
           pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
-      - name: Fix code coverage paths
-        working-directory: ./cov
-        run: |
-          sed -i 's@'$GITHUB_WORKSPACE'/conan_app_launcher@.@g' cov-*.xml
       - uses: actions/upload-artifact@v2
         with:
           name: Test results
@@ -132,6 +128,10 @@ jobs:
       with:
         name: Test results
         path: ./
+    - name: Fix code coverage paths
+      working-directory: ./cov
+      run: |
+          sed -i 's@/home/runner/work/conan_app_launcher/conan_app_launcher@.@g' cov-*.xml
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       env:

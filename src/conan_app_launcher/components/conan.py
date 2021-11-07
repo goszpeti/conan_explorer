@@ -149,7 +149,6 @@ class ConanApi():
         if self.install_package(conan_ref, packages[0]):
             package = self.find_best_local_package(conan_ref, input_options)
             return self.get_package_folder(conan_ref, package.get("id", ""))
-
         return Path("NULL")
 
     def search_query_in_remotes(self, query: str) -> List[ConanFileReference]:

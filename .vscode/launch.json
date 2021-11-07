@@ -32,5 +32,13 @@
                 "CAL_DEBUG_LEVEL": "1"
             },
         },
+        {
+            "name": "Python: Testing",
+            "type": "python",
+            "request": "test",
+            "console": "internalConsole",
+            "subProcess": true,
+            "justMyCode": false
+        },
     ]
 }
