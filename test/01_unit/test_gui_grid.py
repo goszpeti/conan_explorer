@@ -147,14 +147,14 @@ def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
     """
     # all versions have different user and channel names, so we can distinguish them
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile_custom.py")
-    # os.system(f"conan create {conanfile} switch_test/1.0.0@user1/channel1")
-    # os.system(f"conan create {conanfile} switch_test/1.0.0@user1/channel2")
-    # os.system(f"conan create {conanfile} switch_test/1.0.0@user2/channel3")
-    # os.system(f"conan create {conanfile} switch_test/1.0.0@user2/channel4")
-    # os.system(f"conan create {conanfile} switch_test/2.0.0@user3/channel5")
-    # os.system(f"conan create {conanfile} switch_test/2.0.0@user3/channel6")
-    # os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel7")
-    # os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel8")
+    os.system(f"conan create {conanfile} switch_test/1.0.0@user1/channel1")
+    os.system(f"conan create {conanfile} switch_test/1.0.0@user1/channel2")
+    os.system(f"conan create {conanfile} switch_test/1.0.0@user2/channel3")
+    os.system(f"conan create {conanfile} switch_test/1.0.0@user2/channel4")
+    os.system(f"conan create {conanfile} switch_test/2.0.0@user3/channel5")
+    os.system(f"conan create {conanfile} switch_test/2.0.0@user3/channel6")
+    os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel7")
+    os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel8")
     # need cache
     app.active_settings.set(DISPLAY_APP_USERS, True)
 

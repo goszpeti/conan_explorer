@@ -249,7 +249,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         # relative to package - migrate from old setting
         # config path will be deprecated
         if self._icon.startswith("//"):
-            self._icon = self._icon.removeprefix("//")
+            self._icon = self._icon.replace("//", "./")
         if self._icon and not Path(self._icon).is_absolute():
             self._icon_path = self._package_folder / self._icon
             emit_warning = True

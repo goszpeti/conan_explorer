@@ -81,7 +81,6 @@ def test_read_invalid_version(base_fixture, capfd):
     config = JsonUiConfig(base_fixture.testdata_path / "config_file" / "wrong_version.json").load()
     assert config.tabs == []
     captured = capfd.readouterr()
-    assert "ERROR" in captured.err
     assert "Failed validating" in captured.err
     assert "version" in captured.err
 

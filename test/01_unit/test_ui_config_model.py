@@ -28,12 +28,10 @@ def test_executable_eval(base_fixture, capfd):
     app_link.executable = "nonexistant"
     app_link.get_executable_path()
     captured = capfd.readouterr()
-    assert "ERROR" in captured.err
     assert "Can't find file" in captured.err
 
     app_link.executable = ""
     captured = capfd.readouterr()
-    assert "ERROR" in captured.err
     assert "No file" in captured.err
 
 
@@ -52,7 +50,7 @@ def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
     app_link = UiAppLinkModel("AppName", icon="//icon.ico")
     app_link.set_package_info(tmp_path)  # trigger set
     assert app_link.get_icon_path() == tmp_path / "icon.ico"
-    assert app_link.icon == "icon.ico"
+    assert app_link.icon == "./icon.ico"
 
     # absolute path
     app_link.icon = str(tmp_path / "icon.ico")
@@ -75,7 +73,6 @@ def test_icon_eval_wrong_path(capfd, base_fixture, tmp_path):
     app_link.get_icon_path() # eval
     # wrong path
     captured = capfd.readouterr()
-    assert "ERROR" in captured.err
     assert "Can't find icon" in captured.err
     assert app_link.get_icon_path() == asset_path / "icons" / "app.png"
 
