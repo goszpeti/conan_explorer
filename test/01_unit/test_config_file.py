@@ -7,7 +7,7 @@ from conan_app_launcher.ui.data.json_file import JsonUiConfig
 from conans.model.ref import ConanFileReference
 
 
-def testNewFilenameIsCreated(base_fixture):
+def test_new_filename_is_created(base_fixture):
     """
     Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -18,7 +18,7 @@ def testNewFilenameIsCreated(base_fixture):
     assert Path(new_file_path).exists()
 
 
-def testReadCorrectFile(base_fixture, ui_config_fixture):
+def test_read_correct_file(base_fixture, ui_config_fixture):
     """
     Tests reading a correct config json with 2 tabs.
     Expects the same values as in the file.
@@ -49,7 +49,7 @@ def testReadCorrectFile(base_fixture, ui_config_fixture):
     assert tab1_entries[0].name == "App2"
 
 
-def testUpdate(base_fixture):
+def test_update(base_fixture):
     """ Test that the oldest schema version updates correctly to the newest one """
     temp_file = Path(tempfile.gettempdir()) / "update.json"
     copy_file(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
@@ -73,7 +73,7 @@ def testUpdate(base_fixture):
     assert read_obj.get("tabs")[0].get("apps")[0].get("is_console_application") is True
     assert read_obj.get("tabs")[0].get("apps")[0].get("console_application") is None
 
-def testReadInvalidVersion(base_fixture, capfd):
+def test_read_invalid_version(base_fixture, capfd):
     """
     Tests, that reading a config file with the wrong version will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -86,7 +86,7 @@ def testReadInvalidVersion(base_fixture, capfd):
     assert "version" in captured.err
 
 
-def testReadInvalidContent(base_fixture, capfd):
+def test_read_invalid_content(base_fixture, capfd):
     """
     Tests, that reading a config file with invalid syntax will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -120,7 +120,7 @@ def check_config(ref_dict, test_dict):
             assert not test_dict.get(key)
 
 
-def testWriteConfigFile(base_fixture, ui_config_fixture, tmp_path):
+def test_write_config_file(base_fixture, ui_config_fixture, tmp_path):
     """
     Tests, that writing a config file from internal state is correct.
     Expects the same content, as the original file.

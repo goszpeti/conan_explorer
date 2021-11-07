@@ -12,7 +12,7 @@ from conan_app_launcher.ui.data.json_file import JsonUiConfig
 TEST_REF = "zlib/1.2.11@_/_"
 
 
-def testExecutableEval(base_fixture, capfd):
+def test_executable_eval(base_fixture, capfd):
     """
     Tests, that the executable setter works on all cases.
     Expects correct file, error messoge on wrong file an error message on no file.
@@ -37,7 +37,7 @@ def testExecutableEval(base_fixture, capfd):
     assert "No file" in captured.err
 
 
-def testIconEval(base_fixture, ui_config_fixture, tmp_path):
+def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
     """
     Tests, that the icon setter works on all cases.
     Expects package relative file, config-file rel. file, automaticaly extracted file,
@@ -69,7 +69,7 @@ def testIconEval(base_fixture, ui_config_fixture, tmp_path):
         assert app_link.icon == asset_path / "icons" / "app.png"
 
 
-def testIconEvalWrongPath(capfd, base_fixture, tmp_path):
+def test_icon_eval_wrong_path(capfd, base_fixture, tmp_path):
     """ Test, that a nonexistant path returns an error """
 
     app_link = UiAppLinkModel("AppName", icon=str(Path.home() / "nonexistant.png"), executable="abc")
@@ -81,7 +81,7 @@ def testIconEvalWrongPath(capfd, base_fixture, tmp_path):
     assert app_link.get_icon_path() == asset_path / "icons" / "app.png"
 
 
-def testOfficialRelease(base_fixture):
+def test_official_release(base_fixture):
     """
     Test, if an official reference in the format name/1.0.0@_/_ works correctly.
     Expects the same option name and value as given to the constructor.

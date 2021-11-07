@@ -15,7 +15,7 @@ from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
 from PyQt5 import QtWidgets
 
 
-def testMainLoopMock(base_fixture, mocker):
+def test_main_loop_mock(base_fixture, mocker):
     """
     Smoke test, that the application runs through.
     No error expected.
@@ -33,7 +33,7 @@ def testMainLoopMock(base_fixture, mocker):
     qapp_mock.assert_called_once()
 
 
-def testMainLoop(base_fixture):
+def test_main_loop(base_fixture):
     """
     Smoke test, that the application can start.
     No error expected.

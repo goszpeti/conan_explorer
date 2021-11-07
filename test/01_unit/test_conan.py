@@ -13,7 +13,7 @@ from conans.model.ref import ConanFileReference
 
 TEST_REF = "zlib/1.2.11@_/_"
 
-def testConanProfileNameAliasBuilder():
+def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
     # check empty - should return a default name
     profile_name = ConanApi.build_conan_profile_name_alias({})
@@ -37,7 +37,7 @@ def testConanProfileNameAliasBuilder():
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
 
-def testConanShortPathRoot():
+def test_conan_short_path_root():
     """ Test, that short path root can be read. """
     new_short_home = Path(tempfile.gettempdir()) / "._myconan_short"
     os.environ["CONAN_USER_HOME_SHORT"] = str(new_short_home)
@@ -48,7 +48,7 @@ def testConanShortPathRoot():
         assert not conan.get_short_path_root().exists()
     os.environ.pop("CONAN_USER_HOME_SHORT")
 
-def testEmptyCleanupCache(base_fixture):
+def test_empty_cleanup_cache(base_fixture):
     """
     Test, if a clean cache returns no dirs. Actual functionality is tested with gui.
     It is assumed, that the cash is clean, like it would be on the CI.
@@ -62,7 +62,7 @@ def testEmptyCleanupCache(base_fixture):
     os.environ.pop("CONAN_USER_HOME_SHORT")
 
 
-def testConanFindRemotePkg(base_fixture):
+def test_conan_find_remote_pkg(base_fixture):
     """
     Test, if search_package_in_remotes finds a package for the current system and the specified options.
     The function must find exactly one pacakge, which uses the spec. options and corresponds to the
@@ -82,7 +82,7 @@ def testConanFindRemotePkg(base_fixture):
             assert default_settings[setting] in pkg["settings"][setting]
 
 
-def testConanNotFindRemotePkgWrongOpts(base_fixture):
+def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     Test, if a wrong Option return causes an error.
     Empty list must be returned and the error be logged.
@@ -93,7 +93,7 @@ def testConanNotFindRemotePkgWrongOpts(base_fixture):
     assert not pkg
 
 
-def testConanFindLocalPkg(base_fixture):
+def test_conan_find_local_pkg(base_fixture):
     """
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
@@ -104,7 +104,7 @@ def testConanFindLocalPkg(base_fixture):
     assert len(pkgs) == 1
 
 
-def testGetPathOrInstall(base_fixture):
+def test_get_path_or_install(base_fixture):
     """
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
@@ -119,7 +119,7 @@ def testGetPathOrInstall(base_fixture):
     assert (package_folder / "lib").is_dir()
 
 
-def testGetPathOrInstallManualOptions(capsys):
+def test_get_path_or_install_manual_options(capsys):
     """
     Test, if a package with options can install.
     The actual installaton must not return an error and non given options be merged with default options.
@@ -134,7 +134,7 @@ def testGetPathOrInstallManualOptions(capsys):
         assert (package_folder / "lib" / "libz.so").is_file()
 
 
-def testInstallWithAnySettings(mocker, capfd):
+def test_install_with_any_settings(mocker, capfd):
     """
     Test, if a package with <setting>=Any flags can install
     The actual installaton must not return an error.
@@ -151,7 +151,7 @@ def testInstallWithAnySettings(mocker, capfd):
     assert "Cannot install package" not in captured.err
 
 
-def testCompilerNoSettings(base_fixture, capfd):
+def test_compiler_no_settings(base_fixture, capfd):
     """
     Test, if a package with no settings at all can install
     The actual installaton must not return an error.
@@ -166,7 +166,7 @@ def testCompilerNoSettings(base_fixture, capfd):
     assert "Can't find a matching package" not in captured.err
 
 
-def testResolveDefaultOptions(base_fixture):
+def test_resolve_default_options(base_fixture):
     """
     Test, if different kind of types of default options can be converted to a dict
     Dict is expected.
@@ -186,7 +186,7 @@ def testResolveDefaultOptions(base_fixture):
     assert ret.items()
 
 
-def testCreateKeyValueList(base_fixture):
+def test_create_key_value_list(base_fixture):
     """
     Test, that key value pairs can be extracted as strings. No arrays or other tpyes supported.
     The return value must be a list of strings in the format ["key1=value1", "key2=value2]
@@ -203,7 +203,7 @@ def testCreateKeyValueList(base_fixture):
     assert res == ["Key1=Value1"]
 
 
-def testSearchForAllPackages(base_fixture):
+def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi()
     res = conan.search_recipe_in_remotes(ConanFileReference.loads(TEST_REF))
@@ -211,7 +211,7 @@ def testSearchForAllPackages(base_fixture):
     assert str(ref) in str(res)
 
 
-def testConanWorker(base_fixture, mocker):
+def test_conan_worker(base_fixture, mocker):
     """
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.

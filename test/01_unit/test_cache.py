@@ -7,7 +7,7 @@ from conan_app_launcher.components import ConanInfoCache
 from conans.model.ref import ConanFileReference as CFR
 
 
-def testNewCache():
+def test_new_cache():
     """
     Test, if a new cache file is generated, if it does not exist.
     """
@@ -16,7 +16,7 @@ def testNewCache():
     assert (temp_dir / ConanInfoCache.CACHE_FILE_NAME).exists()
 
 
-def testReadCache(base_fixture):
+def test_read_cache(base_fixture):
     """
     Test reading from a cache file. Check internal state and use public API.
     """
@@ -50,7 +50,7 @@ def testReadCache(base_fixture):
     assert CFR.loads("my_package/2.0.0@_/_") in pkgs
 
 
-def testReadAndDeleteCorruptCache(base_fixture):
+def test_read_and_delete_corrupt_cache(base_fixture):
     """Test, that an invalid jsonfile is deleted and a new one created"""
     temp_cache_path = Path(tempfile.mkdtemp()) / ConanInfoCache.CACHE_FILE_NAME
     copy_file(str(base_fixture.testdata_path / "cache" / "cache_read_corrupt.json"), str(temp_cache_path))
@@ -62,7 +62,7 @@ def testReadAndDeleteCorruptCache(base_fixture):
     assert info == ""
 
 
-def testUpdateCache(base_fixture):
+def test_update_cache(base_fixture):
     """
     Test, if updating with new values appends/updates the values correctly in the file
     """
