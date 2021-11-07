@@ -13,8 +13,8 @@ def testNewFilenameIsCreated(base_fixture):
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     new_file_path = tempfile.mktemp()
-    tabs = JsonUiConfig(new_file_path).load()
-    assert tabs == []
+    config = JsonUiConfig(new_file_path).load()
+    assert config.tabs == []
     assert Path(new_file_path).exists()
 
 
@@ -78,8 +78,8 @@ def testReadInvalidVersion(base_fixture, capfd):
     Tests, that reading a config file with the wrong version will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
-    tabs = JsonUiConfig(base_fixture.testdata_path / "config_file" / "wrong_version.json").load()
-    assert tabs == []
+    config = JsonUiConfig(base_fixture.testdata_path / "config_file" / "wrong_version.json").load()
+    assert config.tabs == []
     captured = capfd.readouterr()
     assert "ERROR" in captured.err
     assert "Failed validating" in captured.err
@@ -91,8 +91,8 @@ def testReadInvalidContent(base_fixture, capfd):
     Tests, that reading a config file with invalid syntax will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
-    tabs = JsonUiConfig(base_fixture.testdata_path / "config_file" / "invalid_syntax.json").load()
-    assert tabs == []
+    config = JsonUiConfig(base_fixture.testdata_path / "config_file" / "invalid_syntax.json").load()
+    assert config.tabs == []
     captured = capfd.readouterr()
     assert "Expecting property name" in captured.err
 

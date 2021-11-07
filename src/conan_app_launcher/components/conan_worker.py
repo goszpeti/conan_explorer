@@ -2,7 +2,8 @@
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple
+from PyQt5.QtCore import pyqtBoundSignal
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
@@ -27,72 +28,85 @@ class ConanWorker():
 
     def __init__(self, conan_api: "ConanApi"):
         self._conan_api = conan_api
-        self._conan_queue: Queue[Tuple[str, Dict[str, str]]] = Queue(maxsize=0)
-        self._version_getter: Optional[Thread] = None
-        self._worker: Optional[Thread] = None
-        self._closing = False
+        self._conan_install_queue: Queue[Tuple[str, Dict[str, str], Optional[pyqtBoundSignal]]] = Queue(maxsize=0)
+        self._conan_versions_queue: Queue[Tuple[str, Optional[pyqtBoundSignal]]] = Queue(maxsize=0)
+        self._version_worker: Optional[Thread] = None
+        self._install_worker: Optional[Thread] = None
+        self._shutdown_requested = False
 
-    def update_all_info(self, conan_elements: List[ConanWorkerElement]):
+    def update_all_info(self, conan_elements: List[ConanWorkerElement], 
+                        install_signal: Optional[pyqtBoundSignal], versions_signal: Optional[pyqtBoundSignal]):
         """ Starts the worker for all given elements. Should be called at start. """
         # fill up queue
         for ref in conan_elements:
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:
-                self._conan_queue.put((ref["reference"], ref["options"]))
+                self._conan_install_queue.put((ref["reference"], ref["options"], install_signal))
+            self._conan_versions_queue.put((ref["reference"], versions_signal))
+            
         # start getting versions info in a separate thread in a bundled way to get better performance
-        self._version_getter = Thread(target=self._get_packages_versions, args=[conan_elements, ])
-        self._version_getter.start()
-        self._start_working()
+        self._start_install_worker()
+        self._start_version_worker()
 
-    def put_ref_in_queue(self, conan_ref: str, conan_options: Dict[str, str]):
+    def put_ref_in_version_queue(self, conan_ref: str, versions_callback):
+        self._conan_versions_queue.put((conan_ref, versions_callback))
+        self._start_version_worker()
+
+    def put_ref_in_install_queue(self, conan_ref: str, conan_options: Dict[str, str], install_signal):
         """ Add a new entry to work on """
-        self._conan_queue.put((conan_ref, conan_options))
-        self._start_working()
+        self._conan_install_queue.put((conan_ref, conan_options, install_signal))
+        self._start_install_worker()
 
-    def _start_working(self):
+    def _start_install_worker(self):
         """ Start worker, if it is not already started (can be called multiple times)"""
-        if not self._worker or not self._worker.is_alive():
-            self._worker = Thread(target=self._work_on_conan_queue, name="ConanWorker")
-            self._worker.start()
+        if not self._install_worker or not self._install_worker.is_alive():
+            self._install_worker = Thread(target=self._work_on_conan_install_queue, name="ConanInstallWorker")
+            self._install_worker.start()
+
+    def _start_version_worker(self):
+        """ Start worker, if it is not already started (can be called multiple times)"""
+        if not self._version_worker or not self._version_worker.is_alive():
+            self._version_worker = Thread(target=self._work_on_conan_versions_queue, name="ConanVersionWorker")
+            self._version_worker.start()
 
     def finish_working(self, timeout_s: int = None):
         """ Cancel, if worker is still not finished """
-        self._closing = True
-        if self._worker and self._worker.is_alive():
-            self._worker.join(timeout_s)
-        if self._version_getter and self._version_getter.is_alive():
-            self._version_getter.join(timeout_s)
-        self._conan_queue = Queue(maxsize=0)
-        self._worker = None  # reset thread for later instantiation
+        self._shutdown_requested = True
+        if self._install_worker and self._install_worker.is_alive():
+            self._install_worker.join(timeout_s)
+        if self._version_worker and self._version_worker.is_alive():
+            self._version_worker.join(timeout_s)
+        self._conan_install_queue = Queue(maxsize=0)
+        self._install_worker = None  # reset thread for later instantiation
+        self._shutdown_requested = False
 
-    def _work_on_conan_queue(self):
+    def _work_on_conan_install_queue(self):
         """ Call conan operations from queue """
-        while not self._closing and not self._conan_queue.empty():
-            conan_ref, conan_options = self._conan_queue.get()
+        signal = None
+        while not self._shutdown_requested and not self._conan_install_queue.empty():
+            conan_ref, conan_options, signal= self._conan_install_queue.get()
+            # package path wwill be updated in conan cache
             try:
-                package_folder = self._conan_api.get_path_or_install(
-                    ConanFileReference.loads(conan_ref), conan_options)
+                self._conan_api.get_path_or_install(ConanFileReference.loads(conan_ref), conan_options)
             except Exception:
-                self._conan_queue.task_done()
+                self._conan_install_queue.task_done()
                 return
-            # call update on every entry which has this ref
-            # TODO this dependency should not be here!
-            # for tab in tab_configs:
-            #     for app in tab.get_app_entries():
-            #         if str(app.conan_ref) == conan_ref:
-            #             app.set_package_info(package_folder)
+            # TODO emit signal/ callback
             Logger().debug("Finish working on " + conan_ref)
-            self._conan_queue.task_done()
+            self._conan_install_queue.task_done()
+        # TODO batch signal?
+        if signal:
+            signal.emit(conan_ref)
 
-    def _get_packages_versions(self, conan_refs: List[ConanWorkerElement]):
+    def _work_on_conan_versions_queue(self):
         """ Get all version and channel combination of a package from all remotes. """
-        for conan_ref in conan_refs:
+        signal = None
+        while not self._shutdown_requested and not self._conan_versions_queue.empty():
+            conan_ref, signal = self._conan_versions_queue.get()
+            # available versions will be in cache and retrievable for every item from there
             available_refs = self._conan_api.search_recipe_in_remotes(
-                ConanFileReference.loads(conan_ref["reference"]))
-            Logger().debug(f"Finished available package query for{str(conan_ref)}")
+                ConanFileReference.loads(conan_ref))
+            Logger().debug(f"Finished available package query for {str(conan_ref)}")
             if not available_refs:
                 continue
-            # TODO this dependency should not be here!
-            # for tab in tab_configs:
-            #     for app in tab.get_app_entries():
-            #         if not self._closing and str(app.conan_ref) == conan_ref:
-            #             app.set_available_packages(available_refs)
+        if signal:
+            signal.emit(conan_ref)

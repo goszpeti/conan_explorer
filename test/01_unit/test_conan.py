@@ -3,7 +3,7 @@ import platform
 import time
 from pathlib import Path
 from typing import List
-
+import tempfile
 import conan_app_launcher
 from conan_app_launcher.components.conan import (ConanApi,
                                                  _create_key_value_pair_list)
@@ -39,10 +39,11 @@ def testConanProfileNameAliasBuilder():
 
 def testConanShortPathRoot():
     """ Test, that short path root can be read. """
-    os.environ["CONAN_USER_HOME_SHORT"] = str(Path().home() / "._myconan")
+    new_short_home = Path(tempfile.gettempdir()) / "._myconan_short"
+    os.environ["CONAN_USER_HOME_SHORT"] = str(new_short_home)
     conan = ConanApi()
     if platform.system() == "Windows":
-        assert conan.get_short_path_root() == Path().home() / "._myconan"
+        assert conan.get_short_path_root() == new_short_home
     else:
         assert not conan.get_short_path_root().exists()
     os.environ.pop("CONAN_USER_HOME_SHORT")
@@ -52,9 +53,13 @@ def testEmptyCleanupCache(base_fixture):
     Test, if a clean cache returns no dirs. Actual functionality is tested with gui.
     It is assumed, that the cash is clean, like it would be on the CI.
     """
+    os.environ["CONAN_USER_HOME"] = str(Path(tempfile.gettempdir()) / "._myconan_home")
+    os.environ["CONAN_USER_HOME_SHORT"] = str(Path(tempfile.gettempdir()) / "._myconan_short")
     conan = ConanApi()
     paths = conan.get_cleanup_cache_paths()
     assert not paths
+    os.environ.pop("CONAN_USER_HOME")
+    os.environ.pop("CONAN_USER_HOME_SHORT")
 
 
 def testConanFindRemotePkg(base_fixture):
@@ -216,13 +221,13 @@ def testConanWorker(base_fixture, mocker):
 
     mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
     conan_worker = ConanWorker(conan_api=ConanApi())
-    conan_worker.update_all_info(conan_refs)
+    conan_worker.update_all_info(conan_refs, None,None)
     time.sleep(3)
     conan_worker.finish_working()
 
     conan_app_launcher.components.ConanApi.get_path_or_install.assert_called()
 
-    assert conan_worker._conan_queue.qsize() == 0
+    assert conan_worker._conan_install_queue.qsize() == 0
 
 # conan_server
 # conan remote add private http://localhost:9300/

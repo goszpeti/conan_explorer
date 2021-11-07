@@ -10,7 +10,7 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-class AppGrid(QtWidgets.QWidget):
+class TabGrid(QtWidgets.QWidget):
 
     def __init__(self, parent: QtWidgets.QTabWidget, max_rows: int, max_columns: int , model: UiTabModel):
         super().__init__(parent)

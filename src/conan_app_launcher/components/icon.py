@@ -2,6 +2,7 @@
 Using modified ExtractIcon class from https://github.com/firodj/extract-icon-py
 """
 
+import os
 import platform
 import struct
 from pathlib import Path
@@ -28,24 +29,31 @@ def extract_icon(file_path: Path, output_dir: Path) -> Path:
     return Path("NULL")
 
 
-def extract_icon_from_win_executable(executable_path: Path, output_dir: Path) -> Path:
+def extract_icon_from_win_executable(executable_path: Path, output_path: Path) -> Path:
+    if not output_path.exists():
+        os.makedirs(output_path)
     # Currently only pngs supported
     # cache files - use generic .img since we don't know what it is
-    output_path = output_dir / (executable_path.name + ".img")
-    if output_path.is_file():
-        return output_path
+    icon_path = output_path / (executable_path.name + ".img")
+    # write out a dummy file, so the next time no extraction happens
+    no_icon_path = output_path / (executable_path.name + ".no_icon")
+    if no_icon_path.is_file():
+        return Path("NULL")
+    if icon_path.is_file():
+        return icon_path
     try:
         extractor = ExtractIcon(str(executable_path))
         groups = extractor.get_group_icons()
         icon_id = extractor.best_icon(groups[0])
         image = extractor.export_raw(groups[0], icon_id)
-        with open(output_path, "wb") as extract_file:
+        with open(icon_path, "wb") as extract_file:
             extract_file.write(bytearray(image))
-        return output_path
     except Exception as error:
+        no_icon_path.touch()
         # user needs not know this
         Logger().debug(str(error))
-    return Path("NULL")
+        return Path("NULL")
+    return icon_path
 
 
 class ExtractIcon(object):

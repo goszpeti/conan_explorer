@@ -9,13 +9,14 @@ import time
 from pathlib import Path
 from shutil import rmtree
 
-from conan_app_launcher import app, asset_path, user_save_path
+from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, app, user_save_path
 from conan_app_launcher.components import ConanApi
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
+from conan_app_launcher.ui.modules.app_grid.tab import TabGrid
 
 Qt = QtCore.Qt
 
@@ -28,13 +29,12 @@ def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
     # no settings entry
     app.active_settings.set(LAST_CONFIG_FILE, "")
     # delete default file, in case it exists and has content
-    default_config_file_path = Path.home() / DEFAULT_GRID_CONFIG_FILE_NAME
+    default_config_file_path = user_save_path / DEFAULT_UI_CFG_FILE_NAME
     if default_config_file_path.exists():
         os.remove(default_config_file_path)
 
     ### TEST ACTION
     # init config file and parse
-    load_base_components(app.active_settings)
     main_gui = main_window.MainWindow()
     qtbot.addWidget(main_gui)
     main_gui.load()
@@ -42,10 +42,10 @@ def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
     qtbot.waitExposed(main_gui, timeout=3000)
 
     ### TEST EVALUATION
-    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
-        assert tab.config_data.name == "New Tab"
+    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+        assert tab.model.name == "New Tab"
         for test_app in tab.app_links:
-            assert test_app.config_data.name == "My App Link"
+            assert test_app.model.name == "New App"
     Logger.remove_qt_logger()
 
 def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixture, qtbot):
@@ -79,7 +79,6 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
     Same file as selected expected in settings.
     """
     ### TEST SETUP
-    load_base_components(app.active_settings)
 
     main_gui = main_window.MainWindow()
     main_gui.show()
@@ -176,8 +175,6 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
     The same tab number ist expected, as before.
     """
     ### TEST SETUP
-    load_base_components(app.active_settings)
-
     main_gui = main_window.MainWindow()
     main_gui.show()
     main_gui.load()
@@ -191,7 +188,7 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
 
     app.conan_worker.finish_working(10)
 
-    main_gui.app_grid.re_init() # re-init with same file
+    main_gui.app_grid.re_init(main_gui.model)  # re-init with same file
 
     ### TEST EVALUATION
     time.sleep(5)
@@ -208,9 +205,7 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     app.active_settings.set(DISPLAY_APP_VERSIONS, False)
     app.active_settings.set(DISPLAY_APP_USERS, False)
 
-    load_base_components(app.active_settings)
     main_gui = main_window.MainWindow()
-    app.main_window = main_gui  # needed for signal access
     main_gui.show()
     main_gui.load()
     qtbot.addWidget(main_gui)
@@ -218,7 +213,7 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
 
     ### TEST ACTION and EVALUATION
     # assert default state
-    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
+    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
         for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()
@@ -227,7 +222,7 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     # click VERSIONS
     main_gui.ui.menu_toggle_display_versions.trigger()
     time.sleep(1)
-    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
+    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()
@@ -243,7 +238,7 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     # click CHANNELS
     main_gui.ui.menu_toggle_display_channels.trigger()
     time.sleep(1)
-    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
+    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()
@@ -252,7 +247,7 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     # click USERS
     main_gui.ui.menu_toggle_display_users.trigger()
     time.sleep(1)
-    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
+    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_user_cbox.isHidden()
@@ -264,7 +259,7 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     main_gui.ui.menu_toggle_display_users.trigger()
     time.sleep(1)
 
-    for tab in main_gui.ui.tab_bar.findChildren(TabAppGrid):
+    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
         for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()

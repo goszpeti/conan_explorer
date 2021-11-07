@@ -77,7 +77,7 @@ class JsonUiConfig(UiConfigInterface):
                     jsonschema.validate(instance=json_app_config, schema=json_schema)
             except Exception as error:
                 Logger().error(f"Config file:\n{str(error)}")
-                return []
+                return UiApplicationConfig()
 
         # implement subsequent migration functions
         self.migrate_to_0_3_0(json_app_config)

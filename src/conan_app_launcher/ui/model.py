@@ -6,23 +6,33 @@ from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, PathLike,
                                 user_save_path)
 from conan_app_launcher.components.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import LAST_CONFIG_FILE
-from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE,
+from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiAppLinkConfig,
                                         UiApplicationConfig, UiConfigFactory,
-                                        UiConfigInterface)
-from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
+                                        UiConfigInterface, UiTabConfig)
+from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiTabModel
+from PyQt5 import QtCore
 
-
-class UiApplicationModel(UiApplicationConfig):
+class UiApplicationModel(UiApplicationConfig, QtCore.QObject): # TODO needs to be sliced in an extra AppgridModel
     CONFIG_TYPE = UI_CONFIG_JSON_TYPE
+    conan_install_path_updated = QtCore.pyqtSignal(str) # str is conan_ref
+    conan_available_versions_updated = QtCore.pyqtSignal(str)  # str is conan ref
 
     def __init__(self, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""
-        super().__init__(*args, **kwargs)
+        UiApplicationConfig.__init__(self, *args, **kwargs)
+        QtCore.QObject.__init__(self)
         self.tabs: List[UiTabModel]
         self._ui_config_data: UiConfigInterface
 
-    def load(self, ui_config=UiApplicationConfig) -> "UiApplicationModel":
+    def load(self, ui_config=UiApplicationConfig()) -> "UiApplicationModel":
         super().__init__(ui_config.tabs)
+
+        # update conan info
+        if app.conan_worker:
+            app.conan_worker.finish_working(3)
+            app.conan_worker.update_all_info(self.get_all_conan_refs(), 
+                self.conan_install_path_updated, self.conan_available_versions_updated)
+
         # load all submodels
         tabs_model = []
         for tab_config in self.tabs:
@@ -42,6 +52,11 @@ class UiApplicationModel(UiApplicationConfig):
 
         self._ui_config_data = UiConfigFactory(self.CONFIG_TYPE, config_source)
         ui_config = self._ui_config_data.load()
+
+        # add default tab and link
+        if not ui_config.tabs:
+            ui_config.tabs.append(UiTabConfig())
+            ui_config.tabs[0].apps.append(UiAppLinkConfig())
 
         self.load(ui_config)
         return self

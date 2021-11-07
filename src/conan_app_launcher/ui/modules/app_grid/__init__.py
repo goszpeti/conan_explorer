@@ -12,18 +12,20 @@ from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiTabMo
 
 Qt = QtCore.Qt
 
-from .tab import AppGrid
+from .tab import TabGrid
 
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
     from conan_app_launcher.ui.modules.app_grid.model import UiApplicationModel
 
-class TabAppGrid():
+class AppGridView():
 
     def __init__(self, main_window: "MainWindow", model: "UiApplicationModel"):
         self._main_window = main_window
         self.model = model
         self._icons_path = asset_path / "icons"
+        self.model.conan_install_path_updated.connect(self.update_conan_install_info)
+        self.model.conan_available_versions_updated.connect(self.update_conan_version_info)
 
         if ADD_APP_LINK_BUTTON:
             self._main_window.ui.add_app_link_button = QtWidgets.QPushButton(self._main_window)
@@ -51,12 +53,6 @@ class TabAppGrid():
         tab_count = self._main_window.ui.tab_bar.count()
         for i in range(tab_count, 0, -1): 
             self._main_window.ui.tab_bar.removeTab(i-1)
-
-        # update conan info
-        if app.conan_worker:
-            app.conan_worker.finish_working(3)
-            app.conan_worker.update_all_info(self.model.get_all_conan_refs())
-
         self.load()
 
     def apply_display_versions_setting(self):
@@ -124,7 +120,7 @@ class TabAppGrid():
             self.model.tabs.append(tab_model)
             self.model.save()
             # add tab
-            tab = AppGrid(self._main_window.ui.tab_bar,
+            tab = TabGrid(self._main_window.ui.tab_bar,
                              max_columns=app.active_settings.get_int(GRID_COLUMNS),
                              max_rows=app.active_settings.get_int(GRID_ROWS), model=tab_model)
             tab.load()
@@ -132,7 +128,7 @@ class TabAppGrid():
 
 
     def on_tab_rename(self, index):
-        tab: AppGrid = self._main_window.ui.tab_bar.widget(index)
+        tab: TabGrid = self._main_window.ui.tab_bar.widget(index)
 
         rename_tab_dialog = QtWidgets.QInputDialog(self._main_window)
         text, accepted = rename_tab_dialog.getText(self._main_window, 'Rename tab',
@@ -157,15 +153,16 @@ class TabAppGrid():
             self.model.tabs.remove(self.model.tabs[index])
             self.model.save()
 
-    def get_tabs(self) -> List[AppGrid]:
-        return self._main_window.ui.tab_bar.findChildren(AppGrid)
+    def get_tabs(self) -> List[TabGrid]:
+        return self._main_window.ui.tab_bar.findChildren(TabGrid)
 
     def load(self):
         """ Creates new layout """
+            
         for tab_config in self.model.tabs:
             
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = AppGrid(parent=self._main_window.ui.tab_bar, max_columns=app.active_settings.get_int(GRID_COLUMNS),
+            tab = TabGrid(parent=self._main_window.ui.tab_bar, max_columns=app.active_settings.get_int(GRID_COLUMNS),
                              max_rows=app.active_settings.get_int(GRID_ROWS), model=tab_config)
             self._main_window.ui.tab_bar.addTab(tab, tab_config.name)
             tab.load()
@@ -185,3 +182,21 @@ class TabAppGrid():
             for tab in self.get_tabs():
                 if answer == tab.model.name:
                     tab.open_app_link_add_dialog(model.load(app_config, tab.model))
+
+    def update_conan_install_info(self, conan_ref: str):
+        # call update on every entry which has this ref
+        for tab in self.get_tabs():
+            for app in tab.app_links:
+                pass
+                #if str(app.model.conan_ref) == conan_ref:
+                app.model.update_from_cache()
+                app.update_with_conan_info()
+
+
+    def update_conan_version_info(self, conan_ref: str):
+        for tab in self.get_tabs():
+            for app in tab.app_links:
+               pass
+               # if str(app.model.conan_ref) == conan_ref:
+               app.model.update_from_cache()
+               app.update_with_conan_info()

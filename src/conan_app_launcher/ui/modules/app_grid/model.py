@@ -54,21 +54,18 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._executable_path = Path("NULL")
         self._icon_path = Path("NULL")
         self._conan_ref = ConanFileReference.loads(INVALID_CONAN_REF)
-        self._available_refs = [self.conan_ref]
+        self._available_refs: List[ConanFileReference] = []
         self._executable = ""
         self._icon: str = ""
         self.parent = UiTabModel("default")
         # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
-        # holds all conan refs for name/user
-        self._available_refs: List[ConanFileReference] = []
         # calls public functions, every internal variable needs to initialitzed
         super().__init__(*args, **kwargs)  # empty init
 
     def load(self, config: UiAppLinkConfig, parent: UiTabModel) -> "UiAppLinkModel":
         super().__init__(config.name, config.conan_ref, config.executable, config.args,
                          config.is_console_application, config.args, config.conan_options)
-        self._available_refs = [self.conan_ref]
         self.parent = parent
         return self
 
@@ -77,6 +74,8 @@ class UiAppLinkModel(UiAppLinkConfig):
             self.parent.save()
 
     def update_from_cache(self):
+        if not app.conan_api:
+            return
         # get all info from cache
         self.set_available_packages(app.conan_api.info_cache.get_similar_pkg_refs(
             self.conan_ref.name, user="*"))
@@ -98,20 +97,23 @@ class UiAppLinkModel(UiAppLinkConfig):
     def conan_ref(self, new_value: ConanFileReference):
         if not isinstance(new_value, ConanFileReference):
             raise TypeError("conan_ref argument must be ConanFileReference")
-        try:
+        # add conan ref to worker
+        if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
+                and new_value.version != self.INVALID_DESCR
+                and new_value.channel != self.INVALID_DESCR):  # don't put it for init
+            # invalidate old entries, which are dependent on the conan ref - only for none invalid refs
             self._conan_ref = new_value
-            # add conan ref to worker
-            if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
-                    and self._conan_ref.version != self.INVALID_DESCR
-                    and self._conan_ref.channel != self.INVALID_DESCR):  # don't put it for init
-                app.conan_worker.put_ref_in_queue(str(self._conan_ref), self.conan_options)
-            # invalidate old entries, which are dependent on the conan ref
             self.update_from_cache()
+            if self.parent and self.parent.parent: # TODO
+                try:
+                    app.conan_worker.put_ref_in_install_queue(
+                        str(self._conan_ref), self.conan_options, self.parent.parent.conan_install_path_updated)
+                except Exception as error:
+                    # errors happen fairly often, keep going
+                    Logger().warning(f"Conan reference invalid {str(error)}")
+        else:
+            self._conan_ref = new_value
 
-        except Exception as error:
-            # errors happen fairly often, keep going
-            self._conan_ref = ConanFileReference.loads(INVALID_CONAN_REF)
-            Logger().warning(f"Conan reference invalid {str(error)}")
 
     @property
     def version(self) -> str:
@@ -252,7 +254,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             self._icon_path = self._package_folder / self._icon
             emit_warning = True
         elif not self._icon:  # try to find icon in temp
-            self._icon_path = extract_icon(self.get_executable_path(), Path(tempfile.gettempdir()))
+            self._icon_path = extract_icon(self.get_executable_path(), Path(tempfile.gettempdir()) / "cal_icons")
         else:  # absolute path
             self._icon_path = Path(self._icon)
             emit_warning = True
@@ -261,12 +263,6 @@ class UiAppLinkModel(UiAppLinkConfig):
             self._icon_path = asset_path / "icons" / "app.png"
             if self._icon and emit_warning:  # user input given -> warning
                 Logger().error(f"Can't find icon {str(self._icon)} for '{self.name}'")
-
-        # default icon, until package path is updated
-        if not self._icon_path.is_file():
-            self._icon_path = asset_path / "icons" / "app.png"
-            if self._icon:  # user input given -> warning
-                Logger().error(f"Can't find icon {str(self._icon)} for '{self.name}")
         else:
             self._icon_path = self._icon_path.resolve()
         return self._icon_path
@@ -292,8 +288,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         Set all other available packages.
         Usually to be called from conan worker.
         """
-        if self._available_refs != available_refs:
-            app.conan_api.info_cache.update_remote_package_list(available_refs)
+        # if self._available_refs != available_refs:
+            # app.conan_api.info_cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
 
         # call registered update callback

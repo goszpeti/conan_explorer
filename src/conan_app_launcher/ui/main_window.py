@@ -15,7 +15,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
 
 from .modules.about_dialog import AboutDialog
-from .modules.app_grid import TabAppGrid
+from .modules.app_grid import AppGridView
 from .modules.package_explorer import LocalConanPackageExplorer
 
 Qt = QtCore.Qt
@@ -48,7 +48,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.new_message_logged.connect(self.write_log)
 
         # load app grid
-        self.app_grid = TabAppGrid(self, self.model)
+        self.app_grid = AppGridView(self, self.model)
         self.local_package_explorer = LocalConanPackageExplorer(self)
 
         # initialize view user settings

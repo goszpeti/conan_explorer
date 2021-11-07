@@ -5,14 +5,17 @@ using the whole application (standalone).
 import os
 import platform
 import sys
+from pathlib import Path
 from subprocess import check_output
 from time import sleep
 
 from PyQt5 import QtCore, QtWidgets
+from conan_app_launcher.settings import DISPLAY_APP_USERS
 from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkConfig, UiAppLinkModel
 from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import EditAppDialog
 from conans.model.ref import ConanFileReference as CFR
+import conan_app_launcher.app as app
 
 Qt = QtCore.Qt
 
@@ -105,12 +108,12 @@ def test_AppLink_open(base_fixture, qtbot):
                                is_console_application=True, executable=sys.executable)
     app_model = UiAppLinkModel().load(app_config, None)
     root_obj = QtWidgets.QWidget()
-    qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
     app_ui = AppLink(root_obj, app_model)
     app_ui.load()
     root_obj.setFixedSize(100, 200)
     root_obj.show()
+    qtbot.addWidget(root_obj)
 
     qtbot.waitExposed(root_obj)
     qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
@@ -136,3 +139,90 @@ def test_AppLink_icon_update_from_executable():
     Check, that the icon has the temp path. Use python executable for testing.
     """
     # TODO
+
+
+def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
+    """
+    Test, that changing the version resets the channel and user correctly
+    """
+    # all versions have different user and channel names, so we can distinguish them
+    conanfile = str(base_fixture.testdata_path / "conan" / "conanfile_custom.py")
+    # os.system(f"conan create {conanfile} switch_test/1.0.0@user1/channel1")
+    # os.system(f"conan create {conanfile} switch_test/1.0.0@user1/channel2")
+    # os.system(f"conan create {conanfile} switch_test/1.0.0@user2/channel3")
+    # os.system(f"conan create {conanfile} switch_test/1.0.0@user2/channel4")
+    # os.system(f"conan create {conanfile} switch_test/2.0.0@user3/channel5")
+    # os.system(f"conan create {conanfile} switch_test/2.0.0@user3/channel6")
+    # os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel7")
+    # os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel8")
+    # need cache
+    app.active_settings.set(DISPLAY_APP_USERS, True)
+
+    #app_info._executable = Path(sys.executable)
+    app_config = UiAppLinkConfig(name="test", conan_ref=CFR.loads("switch_test/1.0.0@user1/channel1"),
+                                 is_console_application=True, executable="")
+    app_model = UiAppLinkModel().load(app_config, None)
+    root_obj = QtWidgets.QWidget()
+    root_obj.setFixedSize(100, 200)
+    qtbot.addWidget(root_obj)
+    root_obj.setObjectName("parent")
+    app_link = AppLink(root_obj, app_model)
+    app_link.load()
+    root_obj.show()
+
+    from pytestqt.plugin import _qapp_instance
+
+    qtbot.waitExposed(root_obj)
+
+    # check initial state
+    assert app_link._app_version_cbox.count() == 2
+    assert app_link._app_version_cbox.itemText(0) == "1.0.0"
+    assert app_link._app_version_cbox.itemText(1) == "2.0.0"
+    assert app_link._app_user_cbox.count() == 2
+    assert app_link._app_user_cbox.itemText(0) == "user1"
+    assert app_link._app_user_cbox.itemText(1) == "user2"
+    assert app_link._app_channel_cbox.count() == 2
+    assert app_link._app_channel_cbox.itemText(0) == "channel1"
+    assert app_link._app_channel_cbox.itemText(1) == "channel2"
+
+    # now change version to 2.0.0 -> user can change to default, channel should go to NA
+    # this is done, so that the user can select it and not autinstall something random
+    app_link._app_version_cbox.setCurrentIndex(1)
+    assert app_link._app_version_cbox.count() == 2
+    assert app_link._app_version_cbox.itemText(0) == "1.0.0"
+    assert app_link._app_version_cbox.itemText(1) == "2.0.0"
+    assert app_link._app_user_cbox.count() == 2
+    assert app_link._app_user_cbox.itemText(0) == "user3"
+    assert app_link._app_user_cbox.itemText(1) == "user4"
+    assert app_link._app_channel_cbox.count() == 3
+    assert app_link._app_channel_cbox.itemText(0) == "NA"
+    assert app_link._app_channel_cbox.currentIndex() == 0
+    assert app_link._app_channel_cbox.itemText(1) == "channel5"
+    assert app_link._app_channel_cbox.itemText(2) == "channel6"
+
+    # check that reference and executable has updated
+    assert app_model.conan_ref == CFR.loads("switch_test/2.0.0@user3/NA")
+    assert app_model.get_executable_path() == Path("NULL")
+
+    # change user
+    app_link._app_channel_cbox.setCurrentIndex(1)
+    # setting a channel removes NA entry and entry becomes -1
+    assert app_link._app_channel_cbox.itemText(0) == "channel5"
+    assert app_link._app_channel_cbox.itemText(1) == "channel6"
+    assert app_link._app_channel_cbox.currentIndex() == 0
+    # conan worker currently not integrated -> no pkg path update
+    # assert app_model._package_folder.exists()
+
+    # now change back to 1.0.0 -> user can change to default, channel should go to NA
+    app_link._app_version_cbox.setCurrentIndex(0)
+    assert app_link._app_version_cbox.count() == 2
+    assert app_link._app_version_cbox.itemText(0) == "1.0.0"
+    assert app_link._app_version_cbox.itemText(1) == "2.0.0"
+    assert app_link._app_user_cbox.count() == 2
+    assert app_link._app_user_cbox.itemText(0) == "user1"
+    assert app_link._app_user_cbox.itemText(1) == "user2"
+    assert app_link._app_channel_cbox.count() == 3
+    assert app_link._app_channel_cbox.itemText(0) == "NA"
+    assert app_link._app_channel_cbox.currentIndex() == 0
+    assert app_link._app_channel_cbox.itemText(1) == "channel1"
+    assert app_link._app_channel_cbox.itemText(2) == "channel2"

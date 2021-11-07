@@ -13,7 +13,7 @@ from .common.app_edit_dialog import EditAppDialog
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 if TYPE_CHECKING:
-    from.tab import AppGrid
+    from.tab import TabGrid
 
 
 # define Qt so we can use it like the namespace in C++
@@ -26,7 +26,7 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 class AppLink(QtWidgets.QVBoxLayout):
     MAX_WIDTH = 193
 
-    def __init__(self, parent: "AppGrid", model: UiAppLinkModel):
+    def __init__(self, parent: "TabGrid", model: UiAppLinkModel):
         super().__init__()
         self._parent_tab = parent # save parent - don't use qt signals ands slots
         self.model = model
@@ -261,22 +261,26 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         self._app_button.grey_icon()
         self.model.version = self._app_version_cbox.currentText()
+        # if self.model.users:
+        #     self.model.user = self.model.users[0]
+        # update users to match version
+        self._app_user_cbox.clear()  # reset cbox
+        self._app_user_cbox.addItems(self.model.users)
+        #self._app_user_cbox.setCurrentIndex(0)
 
         # update channels to match version
-        self._app_channel_cbox.clear()  # reset cbox
-        if len(self.model.channels) == 1:
-            self._app_channel_cbox.addItems(self.model.channels)
-        else:
-            self._app_channel_cbox.addItems([self.model.INVALID_DESCR] + self.model.channels)
-            self.model.channel = self.model.INVALID_DESCR
-            # add tooltip for channels, in case it is too long
-            for i in range(0, len(self.model.channels)):
-                self._app_channel_cbox.setItemData(i+1, self.model.channels[i], Qt.ToolTipRole)
+        # self._app_channel_cbox.clear()  # reset cbox
+        # if len(self.model.channels) == 1:
+        #     self._app_channel_cbox.addItems(self.model.channels)
+        # else:
+        #     self._app_channel_cbox.addItems([self.model.INVALID_DESCR] + self.model.channels)
+        #     self.model.channel = self.model.INVALID_DESCR
+        #     # add tooltip for channels, in case it is too long
+        #     for i in range(0, len(self.model.channels)):
+        #         self._app_channel_cbox.setItemData(i+1, self.model.channels[i], Qt.ToolTipRole)
 
-        self._app_channel_cbox.setCurrentIndex(0)
-        self._app_button.setToolTip(str(self.model.conan_ref))
-        # if main_window:
-        #     main_window.save_config()
+        # self._app_channel_cbox.setCurrentIndex(0)
+        # self._app_button.setToolTip(str(self.model.conan_ref))
 
     def on_user_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
@@ -316,7 +320,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         if self.model.channel == self._app_channel_cbox.currentText():
             return
         self._app_button.grey_icon()
-        # remove entry NA after setting something other
+        # remove entry NA after setting something other - NA should always have index 0
         if index != 0 and self._app_channel_cbox.itemText(0) == self.model.INVALID_DESCR:
            self._app_channel_cbox.removeItem(0)
         self.model.channel = self._app_channel_cbox.currentText()

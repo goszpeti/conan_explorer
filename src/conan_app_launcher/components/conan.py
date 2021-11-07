@@ -185,12 +185,14 @@ class ConanApi():
         except Exception:
             return []
 
-        res_list = []
+        res_list: List[ConanFileReference] = []
         for res in search_results + local_results:
             for item in res.get("items", []):
                 res_list.append(ConanFileReference.loads(item.get("recipe", {}).get("id", "")))
         res_list = list(set(res_list))  # make unique
         res_list.sort()
+        # update cache
+        self.info_cache.update_remote_package_list(res_list)
         return res_list
 
     def search_package_in_remotes(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> List[ConanPkg]:
@@ -214,6 +216,9 @@ class ConanApi():
                 settings = packages[0].get("settings", {})
                 Logger().warning(f"Multiple matching packages found for {str(conan_ref)}!\n"
                                  f"Choosing this: {settings}.")
+            # Update cache with this package
+            self.info_cache.update_local_package_path(
+                conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
             return packages[0]
         Logger().warning(f"No matching packages found for {str(conan_ref)}!")
         return {"id": ""}
@@ -274,7 +279,7 @@ class ConanApi():
             if search_results:
                 found_pkgs = search_results[0].get("items")[0].get("packages")
             Logger().debug(str(found_pkgs))
-        except Exception:  # no problem, next
+        except Exception as e:  # no problem, next
             return []
 
         # remove debug releases
