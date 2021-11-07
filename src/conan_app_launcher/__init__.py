@@ -9,7 +9,7 @@ from typing import TypeVar
 PathLike = TypeVar("PathLike", str, Path)
 
 ### Global constants ###
-__version__ = "1.0.0b8"
+from .__version__ import __version__
 
 PROG_NAME = "conan_app_launcher"
 ICON_SIZE = 60

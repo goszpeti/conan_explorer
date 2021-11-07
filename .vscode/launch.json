@@ -9,9 +9,10 @@
             "env": {
                 "CAL_DEBUG_LEVEL": "1"
             },
-            "console": "internalConsole",
-            "subProcess": false,
-            "justMyCode": true
+            "args": ["--debug"],
+            "console": "integratedTerminal",
+            "subProcess": true,
+            "justMyCode": false
         },
         {
             "name": "Python: Current File",
@@ -21,24 +22,16 @@
             "console": "internalConsole",
             "subProcess": true,
         },
-        {
-            "name": "Python: Testing",
-            "type": "python",
-            "request": "test",
-            "console": "internalConsole",
-            "subProcess": true,
-            "justMyCode": false,
-            "env": {
-                "CAL_DEBUG_LEVEL": "1"
-            },
-        },
-        {
-            "name": "Python: Testing",
-            "type": "python",
-            "request": "test",
-            "console": "internalConsole",
-            "subProcess": true,
-            "justMyCode": false
-        },
+        // {
+        //     "name": "Python: Testing",
+        //     "type": "python",
+        //     "request": "test",
+        //     "console": "internalConsole",
+        //     "subProcess": true,
+        //     "justMyCode": false,
+        //     "env": {
+        //         "CAL_DEBUG_LEVEL": "1"
+        //     },
+        // },
     ]
 }

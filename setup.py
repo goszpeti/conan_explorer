@@ -54,7 +54,7 @@ except FileNotFoundError:
 
 # Load the package's __version__.py module as a dictionary.
 about = {}
-with open(os.path.join(here, "src", "conan_app_launcher", '__init__.py')) as f:
+with open(os.path.join(here, "src", "conan_app_launcher", '__version__.py')) as f:
     exec(f.read(), about)
 
 

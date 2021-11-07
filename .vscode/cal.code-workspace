@@ -28,7 +28,14 @@
         "coverage-gutters.showRulerCoverage": true,
         "python.testing.pytestArgs": [
             "-v",
-            "--junit-xml=${workspaceFolder}/result.xml"
+            "--junit-xml=${workspaceFolder}/result.xml",
+            "--cov-report=xml:cov.xml",
+            "--cov-report=term",
+            "--cov=conan_app_launcher",
+            "--cov-append",
+            "--cov-branch",
+            "--capture=no", // print output
+            "--no-cov" // no coverage while debugging
         ],
         "python.linting.pylintArgs": [
             "--init-hook",
