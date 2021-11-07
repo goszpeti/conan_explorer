@@ -44,7 +44,6 @@ def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
     and error message and default icon on no file.
     """
 
-    tabs = JsonUiConfig(base_fixture.testdata_path / "nofile.json").load()
     # copy icons to tmp_path to fake package path
     copy_file(str(asset_path / "icons" / "icon.ico"), tmp_path)
     copy_file(str(asset_path / "icons" / "app.png"), tmp_path)
@@ -63,7 +62,7 @@ def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
     app_link.icon = ""
     if platform.system() == "Windows":
         app_link.executable = sys.executable
-        icon_path = Path(tempfile.gettempdir()) / (str(Path(sys.executable).name) + ".img")
+        icon_path = Path(tempfile.gettempdir()) / "cal_icons" / (str(Path(sys.executable).name) + ".img")
         assert app_link.get_icon_path() == icon_path.resolve()
     elif platform.system() == "Linux":
         assert app_link.icon == asset_path / "icons" / "app.png"
