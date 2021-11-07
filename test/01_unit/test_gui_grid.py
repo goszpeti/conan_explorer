@@ -155,6 +155,9 @@ def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
     os.system(f"conan create {conanfile} switch_test/2.0.0@user3/channel6")
     os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel7")
     os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel8")
+
+    # loads it into cache
+    app.conan_api.search_recipe_in_remotes(CFR.loads("switch_test/1.0.0@user1/channel1"))
     # need cache
     app.active_settings.set(DISPLAY_APP_USERS, True)
 
@@ -169,8 +172,6 @@ def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
     app_link = AppLink(root_obj, app_model)
     app_link.load()
     root_obj.show()
-
-    from pytestqt.plugin import _qapp_instance
 
     qtbot.waitExposed(root_obj)
 

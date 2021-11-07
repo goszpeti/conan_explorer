@@ -63,7 +63,7 @@ def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
         icon_path = Path(tempfile.gettempdir()) / "cal_icons" / (str(Path(sys.executable).name) + ".img")
         assert app_link.get_icon_path() == icon_path.resolve()
     elif platform.system() == "Linux":
-        assert app_link.icon == asset_path / "icons" / "app.png"
+        assert app_link.get_icon_path() == asset_path / "icons" / "app.png"
 
 
 def test_icon_eval_wrong_path(capfd, base_fixture, tmp_path):
