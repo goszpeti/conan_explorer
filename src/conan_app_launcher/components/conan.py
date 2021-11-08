@@ -203,7 +203,7 @@ class ConanApi():
             packages = self.find_best_matching_packages(conan_ref, input_options, remote)
             if packages:
                 return packages
-        Logger().warning(f"Can't find a matching package '{str(conan_ref)}' in the remotes")
+        Logger().info(f"Can't find a matching package '{str(conan_ref)}' in the remotes")
         return []
 
     def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> ConanPkg:
@@ -219,7 +219,7 @@ class ConanApi():
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
             return packages[0]
-        Logger().warning(f"No matching packages found for {str(conan_ref)}!")
+        Logger().debug(f"No matching packages found for {str(conan_ref)}")
         return {"id": ""}
 
     def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:

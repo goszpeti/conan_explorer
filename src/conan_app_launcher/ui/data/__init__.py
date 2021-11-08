@@ -18,7 +18,7 @@ if TYPE_CHECKING:  # pragma: no cover
 @dataclass
 class UiAppLinkConfig():
     name: str = "New App"
-    conan_ref: ConanFileReference = ConanFileReference.loads(INVALID_CONAN_REF)
+    conan_ref: str = INVALID_CONAN_REF
     executable: str = ""
     icon: str = ""
     is_console_application: bool = False

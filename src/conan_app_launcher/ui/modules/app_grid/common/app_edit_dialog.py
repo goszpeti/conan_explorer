@@ -27,7 +27,7 @@ class EditAppDialog(QtWidgets.QDialog):
 
         # fill up current info
         self._ui.name_line_edit.setText(self._model.name)
-        self._ui.conan_ref_line_edit.setText(str(self._model.conan_ref))
+        self._ui.conan_ref_line_edit.setText(self._model.conan_ref)
         self._ui.exec_path_line_edit.setText(self._model.executable)
         self._ui.is_console_app_checkbox.setChecked(self._model.is_console_application)
         self._ui.icon_line_edit.setText(self._model.icon)
@@ -56,7 +56,7 @@ class EditAppDialog(QtWidgets.QDialog):
 
         # write back app info
         self._model.name = self._ui.name_line_edit.text()
-        self._model.conan_ref = ConanFileReference.loads(self._ui.conan_ref_line_edit.text())
+        self._model.conan_ref = self._ui.conan_ref_line_edit.text()
         self._model.executable = self._ui.exec_path_line_edit.text()
         self._model.is_console_application = self._ui.is_console_app_checkbox.isChecked()
         self._model.icon = self._ui.icon_line_edit.text()

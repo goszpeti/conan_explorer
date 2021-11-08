@@ -188,7 +188,6 @@ class AppGridView():
         for tab in self.get_tabs():
             for app in tab.app_links:
                 pass
-                #if str(app.model.conan_ref) == conan_ref:
                 app.model.update_from_cache()
                 app.update_with_conan_info()
 
@@ -197,6 +196,5 @@ class AppGridView():
         for tab in self.get_tabs():
             for app in tab.app_links:
                pass
-               # if str(app.model.conan_ref) == conan_ref:
                app.model.update_from_cache()
                app.update_with_conan_info()

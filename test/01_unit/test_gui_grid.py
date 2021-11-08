@@ -26,7 +26,7 @@ def test_EditAppDialog_display_values(base_fixture, qtbot):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
-    app_info = UiAppLinkConfig(name="test", conan_ref=CFR.loads("abcd/1.0.0@usr/stable"),
+    app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable = "bin/myexec", is_console_application=True,
                                icon="//myicon.ico", conan_options={"a": "b", "c": "True", "d": "10"})
     root_obj = QtWidgets.QWidget()
@@ -61,7 +61,7 @@ def test_EditAppDialog_save_values(base_fixture, qtbot):
     """
     Test, if the entered data is written correctly.
     """
-    app_info = UiAppLinkConfig(name="test", conan_ref=CFR.loads("abcd/1.0.0@usr/stable"),
+    app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico")
     app_info.executable = sys.executable
@@ -104,7 +104,7 @@ def test_AppLink_open(base_fixture, qtbot):
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
-    app_config = UiAppLinkConfig(name="test", conan_ref=CFR.loads("abcd/1.0.0@usr/stable"),
+    app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                is_console_application=True, executable=sys.executable)
     app_model = UiAppLinkModel().load(app_config, None)
     root_obj = QtWidgets.QWidget()
@@ -162,7 +162,7 @@ def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
     app.active_settings.set(DISPLAY_APP_USERS, True)
 
     #app_info._executable = Path(sys.executable)
-    app_config = UiAppLinkConfig(name="test", conan_ref=CFR.loads("switch_test/1.0.0@user1/channel1"),
+    app_config = UiAppLinkConfig(name="test", conan_ref="switch_test/1.0.0@user1/channel1",
                                  is_console_application=True, executable="")
     app_model = UiAppLinkModel().load(app_config, None)
     root_obj = QtWidgets.QWidget()
@@ -202,7 +202,7 @@ def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
     assert app_link._app_channel_cbox.itemText(2) == "channel6"
 
     # check that reference and executable has updated
-    assert app_model.conan_ref == CFR.loads("switch_test/2.0.0@user3/NA")
+    assert app_model.conan_ref == "switch_test/2.0.0@user3/NA"
     assert app_model.get_executable_path() == Path("NULL")
 
     # change user

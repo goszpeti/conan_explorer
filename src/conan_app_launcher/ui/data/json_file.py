@@ -1,4 +1,5 @@
 import json
+import sys
 from dataclasses import asdict
 from distutils.version import StrictVersion
 from pathlib import Path
@@ -59,8 +60,8 @@ class JsonUiConfig(UiConfigInterface):
                 value = {}
                 for option in options:
                     value[option["name"]] = option.get("value", "")
-            if key == "conan_ref":
-                value = ConanFileReference.loads(value)
+            # if key == "conan_ref":
+            #     value = ConanFileReference.loads(value)
             setattr(result_config, key, value)
         return result_config
 
@@ -69,15 +70,18 @@ class JsonUiConfig(UiConfigInterface):
         json_app_config: JsonAppConfig = {"version": "0.0.0", "tabs": []}
         Logger().debug(f"UiConfig: Loading file '{self._json_file_path}'...")
 
+        with open(asset_path / "config_schema.json") as schema_file:
+            json_schema = json.load(schema_file)
+
         with open(str(self._json_file_path)) as fp:
-            try:
-                json_app_config = json.load(fp)
-                with open(asset_path / "config_schema.json") as schema_file:
-                    json_schema = json.load(schema_file)
+            if fp.read():
+                fp.seek(0)
+                try:
+                    json_app_config = json.load(fp)
                     jsonschema.validate(instance=json_app_config, schema=json_schema)
-            except Exception as error:
-                Logger().error(f"Config file:\n{str(error)}")
-                return UiApplicationConfig()
+                except Exception as error:
+                    Logger().error(f"Config file:\n{str(error)}")
+                    return UiApplicationConfig()
 
         # implement subsequent migration functions
         self.migrate_to_0_3_0(json_app_config)
@@ -103,10 +107,8 @@ class JsonUiConfig(UiConfigInterface):
         tabs_data = []
         for tab in tabs:
             tab_dict = asdict(tab)
-            # convert options and conan ref
+            # convert options and conan ref to a json writable format
             for app_dict in tab_dict.get("apps", {}):
-                # proper stringcast by using args expansion
-                app_dict["conan_ref"] = str(ConanFileReference(*app_dict.get("conan_ref", [])))
                 opt_list = []
                 for opt_key in app_dict.get("conan_options", {}):
                     opt_list.append({"name": opt_key, "value": app_dict["conan_options"][opt_key]})

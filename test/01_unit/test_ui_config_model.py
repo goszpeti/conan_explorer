@@ -83,10 +83,10 @@ def test_official_release(base_fixture):
     Expects the same option name and value as given to the constructor.
     """
     conan_ref_short = str(CFR.loads(TEST_REF))
-    app_link = UiAppLinkModel("AppName", conan_ref=CFR.loads(TEST_REF))
+    app_link = UiAppLinkModel("AppName", conan_ref=TEST_REF)
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
     # both formats are valid, so we accept the shortened one
-    assert str(app_link.conan_ref) == conan_ref_short
+    assert str(app_link.conan_file_reference) == conan_ref_short
 
     # check, that setting channel works too
     app_link.channel = "stable"
@@ -101,8 +101,8 @@ def test_official_release(base_fixture):
 
 
     # check, that changing the version does not invalidate the channel or user
-    app_link.conan_ref = CFR.loads("zlib/1.2.12@_/_")
-    assert str(app_link.conan_ref) == "zlib/1.2.12"
+    app_link.conan_ref = "zlib/1.2.12@_/_"
+    assert str(app_link.conan_file_reference) == "zlib/1.2.12"
     app_link.version = "1.0.0"
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
-    assert app_link.conan_ref.user is None
+    assert app_link.conan_file_reference.user is None

@@ -151,7 +151,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert len(config_tabs[0].apps) == prev_count
 
     ### check, that changing something has the change in the saved config and we the same number of elements
-    app_config = UiAppLinkConfig(name="NewApp", conan_ref=CFR.loads(TEST_REF),
+    app_config = UiAppLinkConfig(name="NewApp", conan_ref=TEST_REF,
                                  executable="bin/exe")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
     mocker.patch.object(EditAppDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)

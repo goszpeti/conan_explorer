@@ -26,14 +26,14 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
     tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19" # internal repr omits the @_/_
+    assert tab0_entries[0].conan_ref == "m4/1.4.19" # internal repr omits the @_/_
     assert tab0_entries[0].executable == "bin/m4"
     assert tab0_entries[0].icon == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
     assert tab0_entries[0].is_console_application
     assert tab0_entries[0].args == "-n name"
 
-    assert str(tab0_entries[1].conan_ref) == "zlib/1.2.11@conan/stable"
+    assert tab0_entries[1].conan_ref == "zlib/1.2.11@conan/stable"
     assert tab0_entries[1].executable == "bin/app2"
     assert tab0_entries[1].icon == "icon.ico"
     assert tab0_entries[1].name == "App2"
@@ -43,7 +43,7 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
 
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].apps
-    assert str(tab1_entries[0].conan_ref) == "app2/1.0.0@user/stable"
+    assert tab1_entries[0].conan_ref == "app2/1.0.0@user/stable"
     assert tab1_entries[0].executable == "bin/app2.exe"
     assert tab1_entries[0].icon == "//myicon.png"
     assert tab1_entries[0].name == "App2"
@@ -57,11 +57,11 @@ def test_update(base_fixture):
     tabs = JsonUiConfig(temp_file).load().tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert str(tab0_entries[0].conan_ref) == "m4/1.4.19"
-    assert str(tab0_entries[1].conan_ref) == "boost_functional/1.69.0@bincrafters/stable"
+    assert tab0_entries[0].conan_ref == "m4/1.4.19"
+    assert tab0_entries[1].conan_ref == "boost_functional/1.69.0@bincrafters/stable"
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].apps
-    assert str(tab1_entries[0].conan_ref) == "app2/1.0.0@user/stable"
+    assert tab1_entries[0].conan_ref == "app2/1.0.0@user/stable"
 
     # now check the file, don't trust the own parser
     read_obj = {}

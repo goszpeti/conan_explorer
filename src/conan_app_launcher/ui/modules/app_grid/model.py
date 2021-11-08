@@ -53,12 +53,13 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._package_folder = Path("NULL")
         self._executable_path = Path("NULL")
         self._icon_path = Path("NULL")
-        self._conan_ref = ConanFileReference.loads(INVALID_CONAN_REF)
+        self._conan_ref = INVALID_CONAN_REF
+        self._conan_file_reference = ConanFileReference.loads(self._conan_ref)
         self._available_refs: List[ConanFileReference] = []
         self._executable = ""
         self._icon: str = ""
         self.parent = UiTabModel("default")
-        # can be regsistered from external function to notify when conan infos habe been fetched asynchronnaly
+        # can be registered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
         # calls public functions, every internal variable needs to initialitzed
         super().__init__(*args, **kwargs)  # empty init
@@ -78,29 +79,36 @@ class UiAppLinkModel(UiAppLinkConfig):
             return
         # get all info from cache
         self.set_available_packages(app.conan_api.info_cache.get_similar_pkg_refs(
-            self.conan_ref.name, user="*"))
+            self._conan_file_reference.name, user="*"))
         if USE_LOCAL_INTERNAL_CACHE:
-            self.set_package_info(app.conan_api.info_cache.get_local_package_path(self.conan_ref))
+            self.set_package_info(app.conan_api.info_cache.get_local_package_path(self._conan_file_reference))
         elif not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:  # last chance to get path
-            package_folder = app.conan_api.get_path_or_install(self.conan_ref, self.conan_options)
+            package_folder = app.conan_api.get_path_or_install(self._conan_file_reference, self.conan_options)
             self.set_package_info(package_folder)
 
     def register_update_callback(self, update_func: Callable):
         self._update_cbk_func = update_func
 
     @property
-    def conan_ref(self) -> ConanFileReference:
+    def conan_file_reference(self) -> ConanFileReference:
+        return self._conan_file_reference
+
+    @property
+    def conan_ref(self) -> str:
         """ The conan reference to be used for the link. """
         return self._conan_ref
 
     @conan_ref.setter
-    def conan_ref(self, new_value: ConanFileReference):
-        if not isinstance(new_value, ConanFileReference):
-            raise TypeError("conan_ref argument must be ConanFileReference")
+    def conan_ref(self, new_value: str):
+        try:
+            self._conan_file_reference = ConanFileReference.loads(new_value)
+        except:
+            return
+
         # add conan ref to worker
         if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
-                and new_value.version != self.INVALID_DESCR
-                and new_value.channel != self.INVALID_DESCR):  # don't put it for init
+                and self._conan_file_reference.version != self.INVALID_DESCR
+                and self._conan_file_reference.channel != self.INVALID_DESCR):  # don't put it for init
             # invalidate old entries, which are dependent on the conan ref - only for none invalid refs
             self._conan_ref = new_value
             self.update_from_cache()
@@ -111,23 +119,22 @@ class UiAppLinkModel(UiAppLinkConfig):
                 except Exception as error:
                     # errors happen fairly often, keep going
                     Logger().warning(f"Conan reference invalid {str(error)}")
-        else:
-            self._conan_ref = new_value
+        self._conan_ref = new_value
 
 
     @property
     def version(self) -> str:
         """ Version, as specified in the conan ref """
-        return self.conan_ref.version
+        return self._conan_file_reference.version
 
     @version.setter
     def version(self, new_value: str):
-        user = self.conan_ref.user
-        channel = self.conan_ref.channel
-        if not self.conan_ref.user or not self.conan_ref.channel:
+        user = self._conan_file_reference.user
+        channel = self._conan_file_reference.channel
+        if not self._conan_file_reference.user or not self._conan_file_reference.channel:
             user = "_"
             channel = "_"  # both must be unset if channel is official
-        self.conan_ref = ConanFileReference(self.conan_ref.name, new_value, user, channel)
+        self.conan_ref = str(ConanFileReference(self._conan_file_reference.name, new_value, user, channel))
 
     @classmethod
     def convert_to_disp_channel(cls, channel: str) -> str:
@@ -139,17 +146,18 @@ class UiAppLinkModel(UiAppLinkConfig):
     @property
     def user(self) -> str:
         """ User, as specified in the conan ref """
-        return self.convert_to_disp_user(self.conan_ref.user)
+        return self.convert_to_disp_user(self._conan_file_reference.user)
 
     @user.setter
     def user(self, new_value: str):
-        channel = self.conan_ref.channel
+        channel = self._conan_file_reference.channel
         if new_value == self.OFFICIAL_USER or not new_value:
             new_value = "_"
             channel = "_"  # both must be unset if channel is official
         if not channel:
             channel = "NA"
-        self.conan_ref = ConanFileReference(self.conan_ref.name, self.conan_ref.version, new_value, channel)
+        self.conan_ref = str(ConanFileReference(
+            self._conan_file_reference.name, self._conan_file_reference.version, new_value, channel))
 
     @classmethod
     def convert_to_disp_user(cls, user: str) -> str:
@@ -161,16 +169,17 @@ class UiAppLinkModel(UiAppLinkConfig):
     @property
     def channel(self) -> str:
         """ Channel, as specified in the conan ref"""
-        return self.convert_to_disp_channel(self.conan_ref.channel)
+        return self.convert_to_disp_channel(self._conan_file_reference.channel)
 
     @channel.setter
     def channel(self, new_value: str):
-        user = self.conan_ref.user
+        user = self._conan_file_reference.user
         # even when changig to another channel, it will reset, user or whole ref has to be changed
         if new_value == self.OFFICIAL_RELEASE or not new_value or not user:
             new_value = "_"
             user = "_"  # both must be unset if channel is official
-        self.conan_ref = ConanFileReference(self.conan_ref.name, self.conan_ref.version, user, new_value)
+        self.conan_ref = str(ConanFileReference(
+            self._conan_file_reference.name, self._conan_file_reference.version, user, new_value))
 
     @property
     def versions(self) -> List[str]:
@@ -212,7 +221,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     @executable.setter
     def executable(self, new_value: str):
         if not new_value:
-            Logger().error(f"No file/executable specified for {str(self.name)}")
+            Logger().debug(f"No file/executable specified for {str(self.name)}")
             return
         self._executable = new_value
 
@@ -227,7 +236,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         full_path = Path(self._package_folder / path)
         if self._package_folder.is_dir() and not full_path.is_file():
             Logger().error(
-                f"Can't find file in package {str(self.conan_ref)}:\n    {str(full_path)}")
+                f"Can't find file in package {self.conan_ref}:\n    {str(full_path)}")
         self._executable_path = full_path
 
         return self._executable_path
@@ -276,7 +285,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         if USE_LOCAL_INTERNAL_CACHE:
             if self._package_folder != package_folder:
-                app.conan_api.info_cache.update_local_package_path(self.conan_ref, package_folder)
+                app.conan_api.info_cache.update_local_package_path(self._conan_file_reference, package_folder)
         self._package_folder = package_folder
 
         # call registered update callback
