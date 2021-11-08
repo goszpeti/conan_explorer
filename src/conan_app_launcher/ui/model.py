@@ -7,15 +7,14 @@ from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, PathLike,
 from conan_app_launcher.components.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiAppLinkConfig,
-                                        UiApplicationConfig, UiConfigFactory,
+                                        UiApplicationConfig, ui_config_factory,
                                         UiConfigInterface, UiTabConfig)
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiTabModel
 from PyQt5 import QtCore
 
 class UiApplicationModel(UiApplicationConfig, QtCore.QObject): # TODO needs to be sliced in an extra AppgridModel
     CONFIG_TYPE = UI_CONFIG_JSON_TYPE
-    conan_install_path_updated = QtCore.pyqtSignal(str) # str is conan_ref
-    conan_available_versions_updated = QtCore.pyqtSignal(str)  # str is conan ref
+    conan_info_updated = QtCore.pyqtSignal(str) # str is conan_ref
 
     def __init__(self, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""
@@ -30,8 +29,7 @@ class UiApplicationModel(UiApplicationConfig, QtCore.QObject): # TODO needs to b
         # update conan info
         if app.conan_worker:
             app.conan_worker.finish_working(3)
-            app.conan_worker.update_all_info(self.get_all_conan_refs(), 
-                self.conan_install_path_updated, self.conan_available_versions_updated)
+            app.conan_worker.update_all_info(self.get_all_conan_refs(), self.conan_info_updated)
 
         # load all submodels
         tabs_model = []
@@ -50,7 +48,7 @@ class UiApplicationModel(UiApplicationConfig, QtCore.QObject): # TODO needs to b
             config_source = str(default_config_file_path)
         app.active_settings.set(LAST_CONFIG_FILE, str(config_source))
 
-        self._ui_config_data = UiConfigFactory(self.CONFIG_TYPE, config_source)
+        self._ui_config_data = ui_config_factory(self.CONFIG_TYPE, config_source)
         ui_config = self._ui_config_data.load()
 
         # add default tab and link
@@ -65,7 +63,7 @@ class UiApplicationModel(UiApplicationConfig, QtCore.QObject): # TODO needs to b
         conan_refs: List[ConanWorkerElement] = []
         for tab in self.tabs:
             for app in tab.apps:
-                ref_dict: ConanWorkerElement = {"reference": str(app.conan_ref),
+                ref_dict: ConanWorkerElement = {"reference": app.conan_ref,
                                                 "options": app.conan_options}
                 if ref_dict not in conan_refs:
                     conan_refs.append(ref_dict)

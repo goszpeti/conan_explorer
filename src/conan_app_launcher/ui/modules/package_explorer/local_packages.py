@@ -12,7 +12,6 @@ from conan_app_launcher.components.conan import ConanPkg
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 from conan_app_launcher.ui.data import UiAppLinkConfig
-from conan_app_launcher.ui.model import UiApplicationModel
 from .model import PROFILE_TYPE, PackageFilter, PkgSelectModel, TreeItem
 
 Qt = QtCore.Qt
@@ -261,10 +260,10 @@ class LocalConanPackageExplorer():
                 continue
             file = self._get_selected_pkg_file()
             if os.path.isfile(file):
-                dir = os.path.basename(file)
+                directory = os.path.basename(file)
             else:
-                dir = file
-            new_path = os.path.join(dir, url.fileName())
+                directory = file
+            new_path = os.path.join(directory, url.fileName())
             QtCore.QFile(url.toLocalFile()).copy(new_path)
 
     def on_add_app_link(self):

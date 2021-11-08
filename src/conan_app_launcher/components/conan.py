@@ -278,7 +278,7 @@ class ConanApi():
             if search_results:
                 found_pkgs = search_results[0].get("items")[0].get("packages")
             Logger().debug(str(found_pkgs))
-        except Exception as e:  # no problem, next
+        except Exception:  # no problem, next
             return []
 
         # remove debug releases

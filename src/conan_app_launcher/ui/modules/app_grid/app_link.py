@@ -86,11 +86,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
 
         self._init_menu()
-        #self.setObjectName("applink_" + self.model.name)
 
 
     def load(self):
-        #self.model.load(ui_config, model_parent)
         self.model.register_update_callback(self.update_with_conan_info)
         self._apply_new_config()
         self.update_with_conan_info()
@@ -274,7 +272,6 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         if self.model.user == self._app_user_cbox.currentText():
             return
-        #self._app_channel_cbox.setDisabled(True)
         self._app_button.grey_icon()
         self.model.user = self._app_user_cbox.currentText()
 

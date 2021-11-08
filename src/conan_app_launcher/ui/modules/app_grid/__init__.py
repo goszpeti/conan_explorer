@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import TYPE_CHECKING, List
 
 from conan_app_launcher import ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, asset_path
@@ -24,8 +23,7 @@ class AppGridView():
         self._main_window = main_window
         self.model = model
         self._icons_path = asset_path / "icons"
-        self.model.conan_install_path_updated.connect(self.update_conan_install_info)
-        self.model.conan_available_versions_updated.connect(self.update_conan_version_info)
+        self.model.conan_info_updated.connect(self.update_conan_info)
 
         if ADD_APP_LINK_BUTTON:
             self._main_window.ui.add_app_link_button = QtWidgets.QPushButton(self._main_window)
@@ -36,7 +34,7 @@ class AppGridView():
             self._main_window.ui.add_tab_button = QtWidgets.QPushButton(self._main_window)
             self._main_window.ui.add_tab_button.setGeometry(802, 50, 28, 28)
             self._main_window.ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
-            self._main_window.ui.add_tab_button.clicked.connect(self.open_new_tab_dialog)
+            self._main_window.ui.add_tab_button.clicked.connect(self.on_new_tab)
 
         self._main_window.ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._main_window.ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
@@ -183,18 +181,9 @@ class AppGridView():
                 if answer == tab.model.name:
                     tab.open_app_link_add_dialog(model.load(app_config, tab.model))
 
-    def update_conan_install_info(self, conan_ref: str):
+    def update_conan_info(self, conan_ref: str):
         # call update on every entry which has this ref
         for tab in self.get_tabs():
             for app in tab.app_links:
-                pass
                 app.model.update_from_cache()
                 app.update_with_conan_info()
-
-
-    def update_conan_version_info(self, conan_ref: str):
-        for tab in self.get_tabs():
-            for app in tab.app_links:
-               pass
-               app.model.update_from_cache()
-               app.update_with_conan_info()

@@ -32,7 +32,7 @@ def base_fixture(request):
 
     app.conan_api = ConanApi()
     app.conan_worker = ConanWorker(app.conan_api)
-    app.active_settings = SettingsFactory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
+    app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
 
     yield paths
 
@@ -57,6 +57,6 @@ def ui_config_fixture(base_fixture):
     """ Use temporary default settings and config file based on testdata/app_config.json """
     config_file_path = base_fixture.testdata_path / "app_config.json"
     temp_config_file_path = copy(config_file_path, tempfile.gettempdir())
-    app.active_settings = SettingsFactory(SETTINGS_INI_TYPE, Path(tempfile.mktemp()))
+    app.active_settings = settings_factory(SETTINGS_INI_TYPE, Path(tempfile.mktemp()))
     app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
     yield Path(temp_config_file_path)

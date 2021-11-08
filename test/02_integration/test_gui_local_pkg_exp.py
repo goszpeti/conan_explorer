@@ -8,7 +8,7 @@ from pathlib import Path
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.ui import main_window
 
-from conan_app_launcher.settings import SettingsFactory
+from conan_app_launcher.settings import settings_factory
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 from pytestqt.plugin import _qapp_instance

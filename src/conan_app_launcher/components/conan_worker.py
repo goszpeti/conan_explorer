@@ -35,13 +35,13 @@ class ConanWorker():
         self._shutdown_requested = False
 
     def update_all_info(self, conan_elements: List[ConanWorkerElement], 
-                        install_signal: Optional[pyqtBoundSignal], versions_signal: Optional[pyqtBoundSignal]):
+                        info_signal: Optional[pyqtBoundSignal]):
         """ Starts the worker for all given elements. Should be called at start. """
         # fill up queue
         for ref in conan_elements:
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:
-                self._conan_install_queue.put((ref["reference"], ref["options"], install_signal))
-            self._conan_versions_queue.put((ref["reference"], versions_signal))
+                self._conan_install_queue.put((ref["reference"], ref["options"], info_signal))
+            self._conan_versions_queue.put((ref["reference"], info_signal))
             
         # start getting versions info in a separate thread in a bundled way to get better performance
         self._start_install_worker()
@@ -82,6 +82,7 @@ class ConanWorker():
     def _work_on_conan_install_queue(self):
         """ Call conan operations from queue """
         signal = None
+        conan_ref = ""
         while not self._shutdown_requested and not self._conan_install_queue.empty():
             conan_ref, conan_options, signal= self._conan_install_queue.get()
             # package path wwill be updated in conan cache
@@ -100,6 +101,7 @@ class ConanWorker():
     def _work_on_conan_versions_queue(self):
         """ Get all version and channel combination of a package from all remotes. """
         signal = None
+        conan_ref = ""
         while not self._shutdown_requested and not self._conan_versions_queue.empty():
             conan_ref, signal = self._conan_versions_queue.get()
             # available versions will be in cache and retrievable for every item from there

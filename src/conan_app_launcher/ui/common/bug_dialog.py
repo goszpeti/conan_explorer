@@ -60,7 +60,7 @@ def show_bug_dialog_exc_hook(exctype, excvalue, tb):
         msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
         msg.setIcon(QtWidgets.QMessageBox.Warning)
         msg.exec_()
-    except:
+    except Exception:
         # gui does not work anymore - nothing to do
-        pass
+        sys.exit(2)
     sys.exit(1)

@@ -40,7 +40,7 @@ class UiApplicationConfig():
     tabs: List[Union[UiTabConfig, "UiTabModel"]] = field(default_factory=list)
 
 
-def UiConfigFactory(type: str, source: PathLike) -> "UiConfigInterface":
+def ui_config_factory(type: str, source: PathLike) -> "UiConfigInterface":
 
     if type == UI_CONFIG_JSON_TYPE:
         from .json_file import JsonUiConfig

@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 from conan_app_launcher.components import ConanApi
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui
 Qt = QtCore.Qt
 
 REF_TYPE = 0

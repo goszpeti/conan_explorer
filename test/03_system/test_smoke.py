@@ -11,7 +11,7 @@ from subprocess import Popen
 
 import conan_app_launcher
 from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
-                                         SettingsFactory)
+                                         settings_factory)
 from PyQt5 import QtWidgets
 
 
@@ -40,7 +40,7 @@ def test_main_loop(base_fixture):
     """
 
     settings_file_path = Path.home() / conan_app_launcher.SETTINGS_FILE_NAME
-    settings = SettingsFactory(SETTINGS_INI_TYPE, settings_file_path)
+    settings = settings_factory(SETTINGS_INI_TYPE, settings_file_path)
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
     settings.save()

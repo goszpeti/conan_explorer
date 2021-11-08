@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Optional
 from conan_app_launcher import (PROG_NAME, SETTINGS_FILE_NAME, __version__,
                                 asset_path, user_save_path)
 from conan_app_launcher.components import ConanApi, ConanWorker
-from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
-                                         SettingsFactory, SettingsInterface)
+from conan_app_launcher.settings import (SETTINGS_INI_TYPE,
+                                         settings_factory, SettingsInterface)
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import MainWindow
@@ -31,7 +31,7 @@ except ImportError:
 
 conan_api = ConanApi()
 conan_worker = ConanWorker(conan_api)
-active_settings: SettingsInterface = SettingsFactory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
+active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
 
 
 def main():

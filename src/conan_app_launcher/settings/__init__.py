@@ -20,7 +20,7 @@ GRID_COLUMNS = "grid_columns"
 SETTINGS_INI_TYPE = "ini"
 SETTINGS_QT_TYPE = "qt" # TODO try this out, see issue #56
 
-def SettingsFactory(type: str, source: PathLike) -> "SettingsInterface":
+def settings_factory(type: str, source: PathLike) -> "SettingsInterface":
 
     if type == SETTINGS_INI_TYPE:
         from conan_app_launcher.settings.ini_file import IniSettings
