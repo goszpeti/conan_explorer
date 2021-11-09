@@ -25,15 +25,8 @@ def test_executable_eval(base_fixture, capfd):
     app_link.set_package_info(exe.parent)  # trigger set
     assert app_link.get_executable_path() == exe
 
-    app_link.executable = "nonexistant"
-    app_link.get_executable_path()
-    captured = capfd.readouterr()
-    assert "Can't find file" in captured.err
-
     app_link.executable = ""
-    captured = capfd.readouterr()
-    assert "No file" in captured.err
-
+    assert app_link.get_executable_path() == Path("NULL")
 
 def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
     """

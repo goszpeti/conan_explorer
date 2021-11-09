@@ -220,10 +220,10 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @executable.setter
     def executable(self, new_value: str):
+        self._executable = new_value
         if not new_value:
             Logger().debug(f"No file/executable specified for {str(self.name)}")
             return
-        self._executable = new_value
 
     def get_executable_path(self) -> Path:
         if not self._executable:
