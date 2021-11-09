@@ -78,10 +78,25 @@ class ConanInfoCache():
                 refs.append(ref)
         return refs
 
+    def get_all_remote_refs(self) -> List[str]:
+        refs = []
+        for name in self._remote_packages:
+            for user in self._remote_packages[name]:
+                for version_channel in self._remote_packages.get(name, {}).get(user, []):
+                    version, channel = version_channel.split("/")
+                    refs.append(str(ConanFileReference(name, version, user, channel)))
+        return refs
+
+    def get_all_local_refs(self) -> List[str]:
+        str_local_refs = []
+        for ref in self._all_local_refs:
+            str_local_refs.append(str(ref))
+        return str_local_refs
+        
     def search(self, query: str) -> Tuple[Set[str], Set[str]]:
         """ Return cached info on available conan refs from a query """
         remote_refs = set()
-        local_refs = set()
+        local_refs = set(self.get_all_remote_refs())
 
         # try to extract name and user from query
         split_query = query.split("/")
@@ -92,8 +107,6 @@ class ConanInfoCache():
             if len(user_split) > 1:
                 user = user_split[1]
 
-        for ref in self.get_similar_remote_pkg_refs(name, user):
-            remote_refs.add(str(ref))
         for ref in self._all_local_refs:
             if query in str(ref):
                 local_refs.add(str(ref))

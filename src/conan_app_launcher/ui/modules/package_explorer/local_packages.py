@@ -274,7 +274,8 @@ class LocalConanPackageExplorer():
         pkg_path = app.conan_api.get_package_folder(conan_ref, pkg_info.get("id", ""))
         rel_path = file_path.relative_to(pkg_path)
 
-        app_config = UiAppLinkConfig(name="NewLink", conan_ref=conan_ref, executable=str(rel_path))
+        app_config = UiAppLinkConfig(
+            name="NewLink", conan_ref=self.get_selected_conan_ref(), executable=str(rel_path))
         self._main_window.app_grid.open_new_app_dialog_from_extern(app_config)
 
     def on_open_in_file_manager(self, model_index):

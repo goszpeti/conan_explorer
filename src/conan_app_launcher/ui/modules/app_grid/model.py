@@ -115,7 +115,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             if self.parent and self.parent.parent: # TODO
                 try:
                     app.conan_worker.put_ref_in_install_queue(
-                        str(self._conan_ref), self.conan_options, self.parent.parent.conan_install_path_updated)
+                        str(self._conan_ref), self.conan_options, self.parent.parent.conan_info_updated)
                 except Exception as error:
                     # errors happen fairly often, keep going
                     Logger().warning(f"Conan reference invalid {str(error)}")

@@ -19,7 +19,12 @@ class AboutDialog(QtWidgets.QDialog):
         super().__init__(parent)
         self.setWindowTitle("About")
         self.setModal(True)
-        self.resize(430, 280)
+        self.resize(500, 350)
+
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+                                            QtWidgets.QSizePolicy.Preferred)
+        self.setSizePolicy(size_policy)
+
         ok_button = QtWidgets.QDialogButtonBox.Ok
 
         icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))

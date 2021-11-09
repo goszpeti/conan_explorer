@@ -18,11 +18,16 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         self._validator = QtGui.QRegExpValidator(self)
         self._validator_thread = None
         self._loading_cbk = None
+        self._remote_refs = app.conan_api.info_cache.get_all_remote_refs() # takes a while to get
         # setup range
         part_regex = r"[a-zA-Z0-9_][a-zA-Z0-9_\+\.-]{1,50}"
         recipe_regex = f"{part_regex}/{part_regex}(@{part_regex}/{part_regex})?"
         self._validator.setRegExp(QtCore.QRegExp(recipe_regex))
         self.setCompleter(completer)
+        combined_refs = set()
+        combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
+        combined_refs.update(self._remote_refs)
+        self.completer().model().setStringList(list(combined_refs))
         self.textChanged.connect(self.validate_text)
 
     def set_loading_callback(self, loading_cbk: Callable):
@@ -36,13 +41,10 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
             valid = True
             self.setStyleSheet("background: PaleGreen;")
         
-        local_refs, remote_refs = app.conan_api.info_cache.search(text)
-        combined_refs = set()
-        combined_refs.update(local_refs)
-        combined_refs.update(remote_refs)
+        if len(text) < 4: # skip seraching for such broad terms
+            return
 
-        self.completer().model().setStringList(combined_refs)
-        if not any([entry.startswith(text) for entry in remote_refs]) or not valid:
+        if not any([entry.startswith(text) for entry in self._remote_refs]) or not valid:
             if self._validator_thread and self._validator_thread.is_alive(): # one query at a time
                 return
             self._validator_thread = Thread(target=self.load_completion, args=[text, ])
