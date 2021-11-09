@@ -109,15 +109,21 @@ def test_get_path_or_install(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    install_ref = "m4/1.4.18"
+    from packaging import version
+    install_ref = TEST_REF
+    dir_to_check = "lib"
+    from conans import __version__
+    if version.parse(__version__) < version.parse("1.33"):
+        install_ref = "m4/1.4.18"
+        dir_to_check = "bin"
     os.system(f"conan remove {install_ref} -f")
     conan = ConanApi()
     # Gets package path / installs the package
     package_folder = conan.get_path_or_install(ConanFileReference.loads(install_ref))
-    assert (package_folder / "bin").is_dir()
+    assert (package_folder / dir_to_check).is_dir()
     # check again for already installed package
     package_folder = conan.get_path_or_install(ConanFileReference.loads(install_ref))
-    assert (package_folder / "bin").is_dir()
+    assert (package_folder / dir_to_check).is_dir()
 
 
 def test_get_path_or_install_manual_options(capsys):

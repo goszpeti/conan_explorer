@@ -17,9 +17,10 @@ Qt = QtCore.Qt
 TEST_REF = "zlib/1.2.11@_/_"
 
 
+# TODO extend/add to real integration tets with gui clicks
 def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     """ Test, that the delete package dialog deletes a reference with id, 
-    without id and cancel does nothing"""
+    without id and cancel does nothing""" 
     cfr = ConanFileReference.loads(TEST_REF)
     app.conan_api.conan.install_reference(cfr)
 
@@ -54,3 +55,6 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF, None)
     found_pkg = app.conan_api.find_best_local_package(cfr)
     assert not found_pkg.get("id", "")
+
+def test_change_view():
+    pass

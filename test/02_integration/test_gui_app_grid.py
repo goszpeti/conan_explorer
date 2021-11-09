@@ -24,12 +24,13 @@ Qt = QtCore.Qt
 
 TEST_REF = "zlib/1.2.11@_/_"
 
-def test_rename_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
+
+def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     """ Test, that rename dialog change the guis"""
 
     main_gui = main_window.MainWindow()
     main_gui.show()
-    main_gui.load(ui_config_fixture)
+    main_gui.load(ui_no_refs_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -48,11 +49,11 @@ def test_rename_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     assert main_gui.ui.tab_bar.tabBar().tabText(0) == new_text
 
 
-def test_add_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
+def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     """ """
     main_gui = main_window.MainWindow()
     main_gui.show()
-    main_gui.load(ui_config_fixture)
+    main_gui.load(ui_no_refs_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -65,22 +66,23 @@ def test_add_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count + 1
     assert main_gui.ui.tab_bar.tabBar().tabText(prev_count) == new_text
 
-    config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert len(config_tabs) == prev_count + 1
 
     # press cancel - count must still be original + 1
     mocker.patch.object(QtWidgets.QInputDialog, 'getText',
                         return_value=["OtherText", False])
     main_gui.app_grid.on_tab_rename(0)
-    config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count + 1
     assert len(config_tabs) == prev_count + 1
 
-def test_remove_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
+
+def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     from pytestqt.plugin import _qapp_instance
     main_gui = main_window.MainWindow()
     main_gui.show()
-    main_gui.load(ui_config_fixture)
+    main_gui.load(ui_no_refs_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -96,23 +98,23 @@ def test_remove_tab_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
     assert main_gui.ui.tab_bar.tabBar().tabText(id_to_delete) != text
-    config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert len(config_tabs) == prev_count - 1
 
     # press no
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.No)
     main_gui.app_grid.on_tab_remove(0)
-    config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
     assert len(config_tabs) == prev_count - 1
 
 
-def test_tab_move_is_saved(base_fixture, ui_config_fixture, qtbot):
+def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
     """ Test, that the config file is saved, when the tab is moved. """
     main_gui = main_window.MainWindow()
     main_gui.show()
-    main_gui.load(ui_config_fixture)
+    main_gui.load(ui_no_refs_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -123,7 +125,7 @@ def test_tab_move_is_saved(base_fixture, ui_config_fixture, qtbot):
     assert main_gui.ui.tab_bar.tabBar().tabText(1) == "Basics"
     
     # re-read config
-    config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert config_tabs[0].name == "Extra"
     assert config_tabs[1].name == "Basics"
 
