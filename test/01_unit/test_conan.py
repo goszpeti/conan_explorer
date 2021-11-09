@@ -1,15 +1,19 @@
 import os
 import platform
+import tempfile
 import time
 from pathlib import Path
 from typing import List
-import tempfile
+
 import conan_app_launcher
+import pytest
 from conan_app_launcher.components.conan import (ConanApi,
                                                  _create_key_value_pair_list)
 from conan_app_launcher.components.conan_worker import (ConanWorker,
                                                         ConanWorkerElement)
+from conans import __version__
 from conans.model.ref import ConanFileReference
+from packaging import version
 
 TEST_REF = "zlib/1.2.11@_/_"
 
@@ -109,13 +113,11 @@ def test_get_path_or_install(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    from packaging import version
+    # can't find a package on conan-center which works with conan version lower then 1.33
+    if version.parse(__version__) < version.parse("1.33"):
+        pytest.skip()
     install_ref = TEST_REF
     dir_to_check = "lib"
-    from conans import __version__
-    if version.parse(__version__) < version.parse("1.33"):
-        install_ref = "m4/1.4.18"
-        dir_to_check = "bin"
     os.system(f"conan remove {install_ref} -f")
     conan = ConanApi()
     # Gets package path / installs the package
@@ -131,6 +133,9 @@ def test_get_path_or_install_manual_options(capsys):
     Test, if a package with options can install.
     The actual installaton must not return an error and non given options be merged with default options.
     """
+    # can't find a package on conan-center which works with conan version lower then 1.33
+    if version.parse(__version__) < version.parse("1.33"):
+        pytest.skip()
     # This package has an option "shared" and is fairly small.
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()

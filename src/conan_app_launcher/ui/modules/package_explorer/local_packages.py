@@ -12,7 +12,7 @@ from conan_app_launcher.components.conan import ConanPkg
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 from conan_app_launcher.ui.data import UiAppLinkConfig
-from .model import PROFILE_TYPE, PackageFilter, PkgSelectModel, TreeItem
+from .model import PROFILE_TYPE, REF_TYPE, PackageFilter, PkgSelectModel, TreeItem
 
 Qt = QtCore.Qt
 
@@ -24,6 +24,7 @@ class LocalConanPackageExplorer():
     def __init__(self, main_window: "MainWindow"):
         self._main_window = main_window
         self.pkg_sel_model = None
+        self.fs_model = None
 
         main_window.ui.package_select_view.header().setVisible(True)
         main_window.ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
@@ -55,7 +56,6 @@ class LocalConanPackageExplorer():
         self.remove_ref_action = QtWidgets.QAction("Remove package", self._main_window)
         self.remove_ref_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.select_cntx_menu.addAction(self.remove_ref_action)
-        self.remove_ref_action.setEnabled(False)  # TODO not ready yet
         self.remove_ref_action.triggered.connect(self.on_remove_ref_requested)
 
     def on_selection_context_menu_requested(self, position):
@@ -80,9 +80,9 @@ class LocalConanPackageExplorer():
             conan_ref_item = source_item.parent()
         return conan_ref_item.itemData[0]
 
-    def get_selected_conan_pkg_info(self) -> ConanPkg:
+    def get_selected_conan_pkg_info(self) -> ConanPkg: # TODO
         source_item = self.get_selected_pkg_source_item()
-        if not source_item:
+        if not source_item or source_item.type == REF_TYPE:
             return {}
         return source_item.itemData[0]
 
@@ -95,11 +95,14 @@ class LocalConanPackageExplorer():
         source_item = self.get_selected_pkg_source_item()
         if not source_item:
             return
-
         conan_ref = self.get_selected_conan_ref()
-        pkg_id = self.get_selected_conan_pkg_info().get("id")
-        pkg_ids = ([pkg_id] if pkg_id else None)
+        pkg_info = self.get_selected_conan_pkg_info()
+        pkg_ids = None
+        if pkg_info:
+            pkg_id = pkg_info.get("id")
+            pkg_ids = ([pkg_id] if pkg_id else None)
         self.delete_conan_package_dialog(conan_ref, pkg_ids)
+
 
     def delete_conan_package_dialog(self, conan_ref: str, pkg_ids: Optional[List[str]]):
         msg = QtWidgets.QMessageBox(parent=self._main_window)
@@ -110,11 +113,20 @@ class LocalConanPackageExplorer():
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
             app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True, quiet=False)
+            # Clear view, if this pkg is selected
+            if self.fs_model:
+                self.fs_model.deleteLater()
+                self._main_window.ui.package_path_label.setText("")
+            self.refresh_pkg_selection_view()
 
     # Global pane and cross connection slots
 
     def refresh_pkg_selection_view(self, update=True):
-        if not update and self.pkg_sel_model:
+        """
+        Refresh all packages by reading it from local drive. Can take a while.
+        Update flag can be used for enabling and disabling it. 
+        """
+        if not update and self.pkg_sel_model: # loads only at first init
             return
         self.pkg_sel_model = PkgSelectModel()
         self.proxy_model = PackageFilter()
