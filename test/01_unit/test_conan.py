@@ -109,14 +109,15 @@ def test_get_path_or_install(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    os.system(f"conan remove {TEST_REF} -f")
+    install_ref = "m4/1.4.18"
+    os.system(f"conan remove {install_ref} -f")
     conan = ConanApi()
     # Gets package path / installs the package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF))
-    assert (package_folder / "lib").is_dir()
+    package_folder = conan.get_path_or_install(ConanFileReference.loads(install_ref))
+    assert (package_folder / "bin").is_dir()
     # check again for already installed package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF))
-    assert (package_folder / "lib").is_dir()
+    package_folder = conan.get_path_or_install(ConanFileReference.loads(install_ref))
+    assert (package_folder / "bin").is_dir()
 
 
 def test_get_path_or_install_manual_options(capsys):
@@ -221,7 +222,7 @@ def test_conan_worker(base_fixture, mocker):
 
     mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
     conan_worker = ConanWorker(conan_api=ConanApi())
-    conan_worker.update_all_info(conan_refs, None,None)
+    conan_worker.update_all_info(conan_refs, None)
     time.sleep(3)
     conan_worker.finish_working()
 

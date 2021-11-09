@@ -26,7 +26,7 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
     tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert tab0_entries[0].conan_ref == "m4/1.4.19" # internal repr omits the @_/_
+    assert tab0_entries[0].conan_ref == "m4/1.4.19@_/_"
     assert tab0_entries[0].executable == "bin/m4"
     assert tab0_entries[0].icon == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
@@ -57,7 +57,7 @@ def test_update(base_fixture):
     tabs = JsonUiConfig(temp_file).load().tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert tab0_entries[0].conan_ref == "m4/1.4.19"
+    assert tab0_entries[0].conan_ref == "m4/1.4.19@_/_"
     assert tab0_entries[1].conan_ref == "boost_functional/1.69.0@bincrafters/stable"
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].apps

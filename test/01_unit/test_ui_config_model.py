@@ -70,7 +70,7 @@ def test_icon_eval_wrong_path(capfd, base_fixture, tmp_path):
     """ Test, that a nonexistant path returns an error """
 
     app_link = UiAppLinkModel("AppName", icon=str(Path.home() / "nonexistant.png"), executable="abc")
-    app_link.get_icon_path() # eval
+    app_link.get_icon_path()  # eval
     # wrong path
     captured = capfd.readouterr()
     assert "Can't find icon" in captured.err
@@ -98,7 +98,6 @@ def test_official_release(base_fixture):
     app_link.user = "user"
     assert app_link.user == "user"
     assert app_link.channel == "NA"
-
 
     # check, that changing the version does not invalidate the channel or user
     app_link.conan_ref = "zlib/1.2.12@_/_"

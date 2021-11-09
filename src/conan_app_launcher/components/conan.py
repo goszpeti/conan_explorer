@@ -139,7 +139,7 @@ class ConanApi():
         package = self.find_best_local_package(conan_ref, input_options)
         if package.get("id", ""):
             return self.get_package_folder(conan_ref, package.get("id", ""))
-        Logger().info(f"Package {conan_ref} not installed with options {input_options}.")
+        Logger().info(f"Package {conan_ref} with options {repr(input_options)} is not installed.")
 
         packages: List[ConanPkg] = self.search_package_in_remotes(conan_ref, input_options)
         if not packages:
@@ -400,7 +400,7 @@ def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
     for name, value in input_dict.items():
         value = str(value)
         # this is not really safe, but there can be wild values...
-        if "any" in value.lower():
+        if "any" or "none" in value.lower():
             continue
         res_list.append(name + "=" + value)
     return res_list

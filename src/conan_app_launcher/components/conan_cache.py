@@ -30,7 +30,7 @@ class ConanInfoCache():
             return
 
         # read cached info
-        self._read()
+        self._load()
 
     def get_local_package_path(self, conan_ref: ConanFileReference) -> Path:
         """ Return cached package path of a locally installed package. """
@@ -79,6 +79,7 @@ class ConanInfoCache():
         return refs
 
     def get_all_remote_refs(self) -> List[str]:
+        """ Return all remote references. Updating, when queries finish. """
         refs = []
         for name in self._remote_packages:
             for user in self._remote_packages[name]:
@@ -88,15 +89,19 @@ class ConanInfoCache():
         return refs
 
     def get_all_local_refs(self) -> List[str]:
-        str_local_refs = []
+        """ 
+        Return all locally installed references.
+        Cache updating on start and when installing in this app.
+        """
+        refs = []
         for ref in self._all_local_refs:
-            str_local_refs.append(str(ref))
-        return str_local_refs
+            refs.append(str(ref))
+        return refs
         
-    def search(self, query: str) -> Tuple[Set[str], Set[str]]:
-        """ Return cached info on available conan refs from a query """
+    def search(self, query: str) -> Tuple[Set[str], Set[str]]: # TODO Unused?
+        """ Return cached info on available conan refs from a query """ 
         remote_refs = set()
-        local_refs = set(self.get_all_remote_refs())
+        local_refs = set()
 
         # try to extract name and user from query
         split_query = query.split("/")
@@ -106,6 +111,8 @@ class ConanInfoCache():
             user_split = split_query[1].split("@")
             if len(user_split) > 1:
                 user = user_split[1]
+        for ref in self.get_similar_remote_pkg_refs(name, user):
+            remote_refs.add(str(ref))
 
         for ref in self._all_local_refs:
             if query in str(ref):
@@ -117,15 +124,16 @@ class ConanInfoCache():
         if self._local_packages.get(str(conan_ref)) == str(folder):
             return
         self._local_packages.update({str(conan_ref): str(folder)})
-        self._write()
+        self._save()
 
     def invalidate_remote_package(self, conan_ref: ConanFileReference):
+        """ Remove a package, wich was removed on the remote """
         version_channels = self._remote_packages.get(conan_ref.name, {}).get(conan_ref.user, [])
         invalid_version_channel = f"{conan_ref.version}/{conan_ref.channel}"
         if invalid_version_channel in version_channels:
             Logger().debug(f"Invalidated {str(conan_ref)} from remote cache.")
             version_channels.remove(f"{conan_ref.version}/{conan_ref.channel}")
-            self._write()
+            self._save()
 
     def update_remote_package_list(self, remote_packages=List[ConanFileReference], invalidate=False):
         """
@@ -134,7 +142,7 @@ class ConanInfoCache():
         """
         if invalidate:  # clear cache
             self._remote_packages.clear()
-            self._write()
+            self._save()
         for ref in remote_packages:
             # convert back the official cache entries
             user = ref.user
@@ -151,9 +159,9 @@ class ConanInfoCache():
                     self._remote_packages.update({ref.name: {}})
                 self._remote_packages.get(ref.name, {}).update({user: version_channels_list})
 
-        self._write()
+        self._save()
 
-    def _read(self):
+    def _load(self):
         """ Laod the cache. """
         json_data = {}
         try:
@@ -171,7 +179,7 @@ class ConanInfoCache():
         self._remote_packages = json_data.get("remote_packages", {})
         self._read_only = json_data.get("read_only", False)
 
-    def _write(self):
+    def _save(self):
         """ Write the cache to file. """
         if self._read_only:
             return

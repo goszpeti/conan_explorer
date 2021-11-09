@@ -10,6 +10,7 @@ Qt = QtCore.Qt
 class ConanRefLineEdit(QtWidgets.QLineEdit):
     """ Adds completions for Conan references and a validator. """
     completion_finished = QtCore.pyqtSignal()
+    MINIMUM_CHARS_FOR_QUERY = 4
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -41,7 +42,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
             valid = True
             self.setStyleSheet("background: PaleGreen;")
         
-        if len(text) < 4: # skip seraching for such broad terms
+        if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip seraching for such broad terms
             return
 
         if not any([entry.startswith(text) for entry in self._remote_refs]) or not valid:
