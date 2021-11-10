@@ -4,19 +4,22 @@ using the whole application (standalone).
 """
 import os
 import platform
-import tempfile
 import sys
+import tempfile
 from pathlib import Path
 from subprocess import check_output
 from time import sleep
 
-from PyQt5 import QtCore, QtWidgets
+import conan_app_launcher.app as app
+import pytest
 from conan_app_launcher.settings import DISPLAY_APP_USERS
 from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
-from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkConfig, UiAppLinkModel
-from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import EditAppDialog
+from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
+    EditAppDialog
+from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkConfig,
+                                                          UiAppLinkModel)
 from conans.model.ref import ConanFileReference as CFR
-import conan_app_launcher.app as app
+from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
@@ -141,6 +144,8 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path. Use python executable for testing.
     """
+    if not platform.system() == "Windows":
+        pytest.skip()
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable=sys.executable)
     app_model = UiAppLinkModel().load(app_config, None)
