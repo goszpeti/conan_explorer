@@ -6,7 +6,7 @@ from pathlib import Path
 
 from conans.model.ref import ConanFileReference as CFR
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiAppLinkConfig
-from conan_app_launcher import asset_path
+from conan_app_launcher import TEMP_ICON_DIR_NAME, asset_path
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
 
 TEST_REF = "zlib/1.2.11@_/_"
@@ -54,7 +54,8 @@ def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
     app_link.icon = ""
     if platform.system() == "Windows":
         app_link.executable = sys.executable
-        icon_path = Path(tempfile.gettempdir()) / "cal_icons" / (str(Path(sys.executable).name) + ".img")
+        icon_path = Path(tempfile.gettempdir()) / TEMP_ICON_DIR_NAME / \
+            (str(Path(sys.executable).name) + ".img")
         assert app_link.get_icon_path() == icon_path.resolve()
     elif platform.system() == "Linux":
         assert app_link.get_icon_path() == asset_path / "icons" / "app.png"

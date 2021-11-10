@@ -171,10 +171,11 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count
 
-def test_remove_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
+
+def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
     main_gui.show()
-    main_gui.load(ui_config_fixture)
+    main_gui.load(ui_no_refs_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -195,7 +196,7 @@ def test_remove_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
 
     # check, that the config file has updated
 
-    config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert len(config_tabs[0].apps) == prev_count - 1
 
 

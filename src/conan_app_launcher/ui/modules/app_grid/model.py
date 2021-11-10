@@ -3,10 +3,10 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
 
-from conan_app_launcher import (INVALID_CONAN_REF,
+import conan_app_launcher.app as app  # using gobal module pattern
+from conan_app_launcher import (INVALID_CONAN_REF, TEMP_ICON_DIR_NAME,
                                 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH,
                                 USE_LOCAL_INTERNAL_CACHE, asset_path)
-import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.components.icon import extract_icon
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
@@ -58,7 +58,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._available_refs: List[ConanFileReference] = []
         self._executable = ""
         self._icon: str = ""
-        self.lock_changes = True # values do not emit events. used when multiple changes are needed
+        self.lock_changes = True  # values do not emit events. used when multiple changes are needed
         self.parent = UiTabModel("default")
         # can be registered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
@@ -104,7 +104,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     def conan_ref(self, new_value: str):
         try:
             self._conan_file_reference = ConanFileReference.loads(new_value)
-        except Exception: # invalid ref
+        except Exception:  # invalid ref
             return
         if self.lock_changes:
             return
@@ -115,7 +115,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             # invalidate old entries, which are dependent on the conan ref - only for none invalid refs
             self._conan_ref = new_value
             self.update_from_cache()
-            if self.parent and self.parent.parent: # TODO
+            if self.parent and self.parent.parent:  # TODO
                 try:
                     app.conan_worker.put_ref_in_install_queue(
                         str(self._conan_ref), self.conan_options, self.parent.parent.conan_info_updated)
@@ -123,7 +123,6 @@ class UiAppLinkModel(UiAppLinkConfig):
                     # errors happen fairly often, keep going
                     Logger().warning(f"Conan reference invalid {str(error)}")
         self._conan_ref = new_value
-
 
     @property
     def version(self) -> str:
@@ -263,7 +262,8 @@ class UiAppLinkModel(UiAppLinkConfig):
             self._icon_path = self._package_folder / self._icon
             emit_warning = True
         elif not self._icon:  # try to find icon in temp
-            self._icon_path = extract_icon(self.get_executable_path(), Path(tempfile.gettempdir()) / "cal_icons")
+            self._icon_path = extract_icon(self.get_executable_path(), Path(
+                tempfile.gettempdir()) / TEMP_ICON_DIR_NAME)
         else:  # absolute path
             self._icon_path = Path(self._icon)
             emit_warning = True
@@ -298,7 +298,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         Usually to be called from conan worker.
         """
         # if self._available_refs != available_refs:
-            # app.conan_api.info_cache.update_remote_package_list(available_refs)
+        # app.conan_api.info_cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
 
         # call registered update callback

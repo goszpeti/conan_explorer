@@ -16,6 +16,7 @@ ICON_SIZE = 60
 INVALID_CONAN_REF = "Invalid/NA@NA/NA"
 SETTINGS_FILE_NAME = ".cal_config"
 DEFAULT_UI_CFG_FILE_NAME = "cal_ui.json"  # for legacy 0.X support
+TEMP_ICON_DIR_NAME = "cal_icons"
 
 # Feature flags
 ADD_TAB_BUTTON = False  # FIXME currently not working

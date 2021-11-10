@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 from subprocess import check_output
 from time import sleep
+from conan_app_launcher import TEMP_ICON_DIR_NAME
 
 import conan_app_launcher.app as app
 import pytest
@@ -157,7 +158,7 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     app_ui.load()
 
     icon = app_ui.model.get_icon_path()
-    assert tempfile.gettempdir() in str(icon.parent)
+    assert Path(tempfile.gettempdir()) / TEMP_ICON_DIR_NAME == icon.parent
     assert "python" in icon.name
     assert not app_ui._app_button._greyed_out
 
