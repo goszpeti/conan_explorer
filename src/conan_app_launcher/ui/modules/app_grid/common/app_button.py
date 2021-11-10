@@ -54,10 +54,6 @@ class AppButton(QtWidgets.QPushButton):
             self._ic = QtGui.QIcon(icon)
             self.setIcon(self._ic)
 
-    # def mousePressEvent(self, event):  # override QPushButton
-    #     """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
-    #     super().mousePressEvent(event)
-
     def mouseReleaseEvent(self, event):  # override QPushButton
         """ reset size of icon form mousePressEvent """
         super().mouseReleaseEvent(event)

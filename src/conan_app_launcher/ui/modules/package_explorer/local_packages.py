@@ -79,7 +79,7 @@ class LocalConanPackageExplorer():
             conan_ref_item = source_item.parent()
         return conan_ref_item.itemData[0]
 
-    def get_selected_conan_pkg_info(self) -> ConanPkg: # TODO
+    def get_selected_conan_pkg_info(self) -> ConanPkg:
         source_item = self.get_selected_pkg_source_item()
         if not source_item or source_item.type == REF_TYPE:
             return {}

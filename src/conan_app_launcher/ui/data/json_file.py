@@ -60,8 +60,6 @@ class JsonUiConfig(UiConfigInterface):
                 value = {}
                 for option in options:
                     value[option["name"]] = option.get("value", "")
-            # if key == "conan_ref":
-            #     value = ConanFileReference.loads(value)
             setattr(result_config, key, value)
         return result_config
 

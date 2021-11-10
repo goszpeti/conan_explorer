@@ -104,7 +104,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     def conan_ref(self, new_value: str):
         try:
             self._conan_file_reference = ConanFileReference.loads(new_value)
-        except:
+        except Exception: # invalid ref
             return
         if self.lock_changes:
             return

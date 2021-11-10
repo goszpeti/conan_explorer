@@ -108,9 +108,9 @@ class ConanWorker():
             try:
                 available_refs = self._conan_api.search_recipe_in_remotes(
                     ConanFileReference.loads(conan_ref))
-            except:
+            except Exception as e:
+                Logger().debug(f"ERROR in searching for {conan_ref}: str(e)")
                 continue
-                # TODO log
             Logger().debug(f"Finished available package query for {str(conan_ref)}")
             if not available_refs:
                 continue
