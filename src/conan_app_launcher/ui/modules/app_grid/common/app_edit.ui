@@ -54,7 +54,8 @@
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.875pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Shared=True&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;MyOpt=2&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;MyOpt=2&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -141,7 +142,7 @@ p, li { white-space: pre-wrap; }
       <item row="0" column="0">
        <widget class="QLabel" name="name_label">
         <property name="text">
-         <string>Name</string>
+         <string>Link Name</string>
         </property>
        </widget>
       </item>
@@ -170,7 +171,7 @@ p, li { white-space: pre-wrap; }
       <item row="5" column="0">
        <widget class="QLabel" name="is_console_app_label">
         <property name="text">
-         <string>Console application</string>
+         <string>Start in new console</string>
         </property>
        </widget>
       </item>
@@ -180,7 +181,7 @@ p, li { white-space: pre-wrap; }
       <item row="4" column="0">
        <widget class="QLabel" name="args_label">
         <property name="text">
-         <string>Arguments</string>
+         <string>Launch arguments</string>
         </property>
        </widget>
       </item>
@@ -190,7 +191,7 @@ p, li { white-space: pre-wrap; }
       <item row="6" column="0">
        <widget class="QLabel" name="icon_label">
         <property name="text">
-         <string>Icon (relative or absoulte)</string>
+         <string>Icon path (relative or absoulte)</string>
         </property>
         <property name="textFormat">
          <enum>Qt::RichText</enum>

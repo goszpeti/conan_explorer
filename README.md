@@ -21,15 +21,21 @@ It is more enduser, then developer oriented and focuses on using packages. It is
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_pkg_explorer.png" width="1024">
 
 
-Features:
+**Main Features**
+- compatible with a wide range of conan versions (from 1.24 onwards)
+- integrated console for information an packages and config file
+- installable with pip
+
+App Grid:
 - configurable layout (tabs and applications) in the GUI
 - can also open files with their associated default program
 - installs all referenced packages automatically
 - automatic conan settings resolution for your platform
-- compatible with a wide range of conan versions (from 1.24 onwards)
-- local package explorer for browsing through installed packages
-- integrated console for information an packages and config file
-- installable with pip
+
+Local Package Explorer:
+- view for browsing through installed packages
+- supports copy/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan Workflow
+
 
 ## How to install?
 
@@ -49,63 +55,17 @@ After checkout use the command:
 `pip install .`
 
 ## Running
-Execute `conan-app-launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder.
+Execute `conan-app-launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder. You can also assign its icon to it from the site packages folder in conan_app_launcher/assets/icon.ico.
 
 ### Main dependencies
 
 * PyQt5 >= 5.13.0 
 * conan >= 1.24.0
 
-## Config File layout
-
-It is not needed to edit this by hand anymore, since (almost) every option is available in the GUI.
-The config file uses the following exemplary schema:
-
-```json
-{
-    "version": "0.3.0",
-    "tabs": [
-        {
-            "name": "Basics",
-            "apps": [
-                {
-                    "name": "App1 with spaces", 
-                    "conan_ref": "app1/0.1.0@user1/stable", // full conan reference
-                    "package_id": "app1/0.1.0@user1/stable" // DEPRECATED - will converted to conan_ref automatically
-                    "executable": "bin/app1", // relative to conan "package folder" - can also be a file to open
-                    "icon": "MyIcon.png" // relative to this config file,
-                    "console_application": true, // start console application in extra window
-                    "args": "--version" // args to start the application with
-                },
-                {
-                    "name": "App2",
-                    "conan_ref": "app2/0.2.0@user2/testing",
-                    "executable": "bin/app2", // forward slashes are preferred
-                    "icon": "C:\\CustomIcon.ico" // but escaped backslashes also work
-                }
-            ]
-        },
-        {
-            "name": "Extra",
-            "apps": [
-                {
-                    "name": "App3",
-                    "conan_ref": "app3/0.3.0@user3/stable",
-                    "console_application": true, // starts in a new console window
-                    "executable": "bin/app3", // extension (.exe) can be ommited for windows
-                    // Icon can be ommitted, then it will try on Windows to use the applications own icon
-                }
-            ]
-        }
-    ]
-}
-```
-
 ## Toolchain
 
 This project uses Python with Qt as a frontend using the PyQt integration.
-IDE configuration is alwaylable for VsCode.
-
+IDE configuration is available for VsCode.
 
 ## Licenses of used libraries and code
 

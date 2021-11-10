@@ -1,6 +1,6 @@
 .vscode/.ropeproject/**
 .vscode/tags
-.venv
+.venv*
 
 **/__pycache__/**
 *.egg-info
