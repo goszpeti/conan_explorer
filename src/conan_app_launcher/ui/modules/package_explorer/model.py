@@ -11,6 +11,7 @@ PROFILE_TYPE = 1
 
 
 class PackageFilter(QtCore.QSortFilterProxyModel):
+    """ Filter packages but always showing the parent (ref) of the packages """
     def __init__(self):
         super().__init__()
         self.setFilterKeyColumn(0)
@@ -34,8 +35,9 @@ class PackageFilter(QtCore.QSortFilterProxyModel):
         return super().filterAcceptsRow(row_num, parent)
 
     def filter_accepts_any_parent(self, parent):
-        ''' Traverse to the root node and check if any of the
-            ancestors match the filter
+        '''
+        Traverse to the root node and check if any of the
+        ancestors match the filter
         '''
         while parent.isValid():
             if self.filter_accepts_row_itself(parent.row(), parent.parent()):
@@ -45,8 +47,9 @@ class PackageFilter(QtCore.QSortFilterProxyModel):
 
 
     def has_accepted_children(self, row_num, parent):
-        ''' Starting from the current node as root, traverse all
-            the descendants and test if any of the children match
+        '''
+        Starting from the current node as root, traverse all
+        the descendants and test if any of the children match
         '''
         model = self.sourceModel()
         source_index = model.index(row_num, 0, parent)
@@ -57,39 +60,43 @@ class PackageFilter(QtCore.QSortFilterProxyModel):
                 return True
         return False
 
-class TreeItem(object):
+class PackageTreeItem(object):
+    """
+    Represents a tree item of a Conan pkg.
+    Implemented like the default QT example.  # TODO Should be refactored in the future
+    """
     def __init__(self, data: List[Union[str, Dict]], parent=None, item_type=REF_TYPE):
-        self.parentItem = parent
-        self.itemData = data
+        self.parent_item = parent
+        self.item_data = data
         self.type = item_type
-        self.childItems = []
+        self.child_items = []
 
-    def appendChild(self, item):
-        self.childItems.append(item)
+    def append_child(self, item):
+        self.child_items.append(item)
 
     def child(self, row):
-        return self.childItems[row]
+        return self.child_items[row]
 
-    def childCount(self):
-        return len(self.childItems)
+    def child_count(self):
+        return len(self.child_items)
 
-    def columnCount(self):
-        return len(self.itemData)
+    def column_count(self):
+        return len(self.item_data)
 
     def data(self, column):
         try:
             if self.type == PROFILE_TYPE:
-                return ConanApi.build_conan_profile_name_alias(self.itemData[column].get("settings", {}))
-            return self.itemData[column]
+                return ConanApi.build_conan_profile_name_alias(self.item_data[column].get("settings", {}))
+            return self.item_data[column]
         except IndexError:
             return None
 
     def parent(self):
-        return self.parentItem
+        return self.parent_item
 
     def row(self):
-        if self.parentItem:
-            return self.parentItem.childItems.index(self)
+        if self.parent_item:
+            return self.parent_item.childItems.index(self)
 
         return 0
 
@@ -98,7 +105,7 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
     def __init__(self, *args, **kwargs):
         super(PkgSelectModel, self).__init__(*args, **kwargs)
         self._icons_path = asset_path / "icons"
-        self.rootItem = TreeItem(["Packages"])
+        self.rootItem = PackageTreeItem(["Packages"])
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
@@ -107,18 +114,18 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
 
     def setupModelData(self):
         for conan_ref in app.conan_api.get_all_local_refs():
-            conan_item = TreeItem([str(conan_ref)], self.rootItem)
-            self.rootItem.appendChild(conan_item)
+            conan_item = PackageTreeItem([str(conan_ref)], self.rootItem)
+            self.rootItem.append_child(conan_item)
             infos = app.conan_api.get_local_pkgs_from_ref(conan_ref)
             for info in infos:
-                pkg_item = TreeItem([info], conan_item, PROFILE_TYPE)
-                conan_item.appendChild(pkg_item)
+                pkg_item = PackageTreeItem([info], conan_item, PROFILE_TYPE)
+                conan_item.append_child(pkg_item)
    
     def columnCount(self, parent):
         if parent.isValid():
             return parent.internalPointer().columnCount()
         else:
-            return self.rootItem.columnCount()
+            return self.rootItem.column_count()
 
 
     def index(self, row, column, parent):
@@ -139,7 +146,7 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
     def data(self, index: QtCore.QModelIndex, role):
         if not index.isValid():
             return None
-        item: TreeItem = index.internalPointer()
+        item: PackageTreeItem = index.internalPointer()
 
         if role == Qt.DecorationRole:
             if item.type == REF_TYPE:
@@ -172,7 +179,7 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
         else:
             parentItem = parent.internalPointer()
 
-        return parentItem.childCount()
+        return parentItem.child_count()
 
     def flags(self, index):
         if not index.isValid():

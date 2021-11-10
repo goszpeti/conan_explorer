@@ -35,11 +35,11 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     assert main_gui.ui.package_select_view.findChildren(QtCore.QObject)
     assert main_gui.ui.package_select_view.model().columnCount() == 1
 
-    model.rootItem.itemData[0] == "Packages"
-    model.rootItem.childCount() == main_gui.ui.package_select_view.model().rowCount()
+    model.rootItem.item_data[0] == "Packages"
+    model.rootItem.child_count() == main_gui.ui.package_select_view.model().rowCount()
 
     found_tst_pkg = False
-    for pkg in model.rootItem.childItems:
+    for pkg in model.rootItem.child_items:
         if pkg.itemData[0] == str(cfr):
             found_tst_pkg = True
             # check it's child
@@ -48,7 +48,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     # select package (ref, not profile)
     index = model.index(0, 0, QtCore.QModelIndex())
     item = index.internalPointer()
-    for i in range(model.rootItem.childCount()):
+    for i in range(model.rootItem.child_count()):
         index = model.index(i, 0, QtCore.QModelIndex())
         item = model.index(i, 0, QtCore.QModelIndex()).internalPointer()
         print(item.itemData[0])

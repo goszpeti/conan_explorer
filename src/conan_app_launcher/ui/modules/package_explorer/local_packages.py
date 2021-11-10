@@ -12,7 +12,7 @@ from conan_app_launcher.components.conan import ConanPkg
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 from conan_app_launcher.ui.data import UiAppLinkConfig
-from .model import PROFILE_TYPE, REF_TYPE, PackageFilter, PkgSelectModel, TreeItem
+from .model import PROFILE_TYPE, REF_TYPE, PackageFilter, PkgSelectModel, PackageTreeItem
 
 Qt = QtCore.Qt
 
@@ -60,13 +60,13 @@ class LocalConanPackageExplorer():
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
 
-    def get_selected_pkg_source_item(self) -> Optional[TreeItem]:
+    def get_selected_pkg_source_item(self) -> Optional[PackageTreeItem]:
         indexes = self._main_window.ui.package_select_view.selectedIndexes()
         if len(indexes) != 1:
             Logger().debug(f"Mismatch in selected items for context action: {str(len(indexes))}")
             return None
         view_index = self._main_window.ui.package_select_view.selectedIndexes()[0]
-        source_item: TreeItem = view_index.model().mapToSource(view_index).internalPointer()
+        source_item: PackageTreeItem = view_index.model().mapToSource(view_index).internalPointer()
         return source_item
 
     def get_selected_conan_ref(self) -> str:
@@ -77,13 +77,13 @@ class LocalConanPackageExplorer():
         conan_ref_item = source_item
         if source_item.type == PROFILE_TYPE:
             conan_ref_item = source_item.parent()
-        return conan_ref_item.itemData[0]
+        return conan_ref_item.item_data[0]
 
     def get_selected_conan_pkg_info(self) -> ConanPkg:
         source_item = self.get_selected_pkg_source_item()
         if not source_item or source_item.type == REF_TYPE:
             return {}
-        return source_item.itemData[0]
+        return source_item.item_data[0]
 
     def on_copy_ref_requested(self):
         conan_ref = self.get_selected_conan_ref()
@@ -153,7 +153,7 @@ class LocalConanPackageExplorer():
         pkg_path = app.conan_api.get_package_folder(
             ConanFileReference.loads(conan_ref), pkg_id)
         if not pkg_path.exists():
-            Logger().warning(f"Can't find package path for {conan_ref} and {str(source_item.itemData[0])}")
+            Logger().warning(f"Can't find package path for {conan_ref} and {str(source_item.item_data[0])}")
             return
         self.fs_model = QtWidgets.QFileSystemModel()
         self.fs_model.setReadOnly(False)  # TODO connect the edit checkbox
@@ -296,7 +296,7 @@ class LocalConanPackageExplorer():
         file_path = Path(self._get_selected_pkg_file())
         open_in_file_manager(file_path)
 
-    def _get_pkg_file_source_item(self) -> Optional[TreeItem]:
+    def _get_pkg_file_source_item(self) -> Optional[PackageTreeItem]:
         indexes = self._main_window.ui.package_file_view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug(f"No selected item for context action")
