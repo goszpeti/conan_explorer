@@ -4,6 +4,7 @@ using the whole application (standalone).
 """
 import os
 import platform
+import tempfile
 import sys
 from pathlib import Path
 from subprocess import check_output
@@ -135,13 +136,24 @@ def test_AppLink_open(base_fixture, qtbot):
         os.system("taskkill /PID " + pid)
 
 
-def test_AppLink_icon_update_from_executable():
+def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     """
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path. Use python executable for testing.
     """
-    # TODO
+    app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
+                                 is_console_application=True, executable=sys.executable)
+    app_model = UiAppLinkModel().load(app_config, None)
+    app_model.set_package_info(Path(sys.executable).parent)
 
+    root_obj = QtWidgets.QWidget()
+    root_obj.setObjectName("parent")
+    app_ui = AppLink(root_obj, app_model)
+
+    icon = app_ui.model.get_icon_path()
+    assert icon.is_relative_to(tempfile.gettempdir())
+    assert "python" in icon.name
+    assert not app_ui._app_button._greyed_out
 
 def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
     """
