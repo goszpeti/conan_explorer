@@ -3,9 +3,12 @@ import tempfile
 from pathlib import Path
 from shutil import copy
 
-import conan_app_launcher as app
-import conan_app_launcher.base as logger
+import conan_app_launcher.app as app
+from conan_app_launcher.components.conan import ConanApi
+from conan_app_launcher.components.conan_worker import ConanWorker
+import conan_app_launcher.logger as logger
 import pytest
+from conan_app_launcher import SETTINGS_FILE_NAME, asset_path, base_path, user_save_path
 from conan_app_launcher.settings import *
 
 
@@ -25,39 +28,46 @@ def base_fixture(request):
     Clean up all instances after the test.
     """
     paths = PathSetup()
-    app.base_path = paths.base_path / "src" / "conan_app_launcher"
-    app.asset_path: Path = app.base_path / "assets"
-    app.DEBUG_LEVEL = 1
+
+
+    app.conan_api = ConanApi()
+    app.conan_worker = ConanWorker(app.conan_api)
+    app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
+
     yield paths
 
     # teardown
-    app.DEBUG_LEVEL = 0
 
     if app.conan_worker:
         app.conan_worker.finish_working()
     # reset singletons
-    app.qt_app = None
 
     # delete cache file
-    if (app.base_path / app.CACHE_FILE_NAME).exists():
-        os.remove(app.base_path / app.CACHE_FILE_NAME)
+    # if (app.base_path / app.CACHE_FILE_NAME).exists():
+    #     os.remove(app.base_path / app.CACHE_FILE_NAME)
 
     logger.Logger._instance = None
-    app.base_path = None
     app.conan_worker = None
-    app.cache = None
+    app.conan_api = None
     app.active_settings = None
-    app.tab_configs = []
+
+
+def temp_ui_config(config_file_path: Path):
+    temp_config_file_path = copy(config_file_path, tempfile.gettempdir())
+    tmp_file = tempfile.mkstemp()
+    app.active_settings = settings_factory(SETTINGS_INI_TYPE, Path(tmp_file[1]))
+    app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
+    return Path(temp_config_file_path)
+
+@pytest.fixture
+def ui_config_fixture(base_fixture):
+    """ Use temporary default settings and config file based on testdata/app_config.json """
+    config_file_path = base_fixture.testdata_path / "app_config.json"
+    yield temp_ui_config(config_file_path)
 
 
 @pytest.fixture
-def settings_fixture(base_fixture):
-    """ Use temporary settings based on testdata/app_config.json """
-    temp_dir = tempfile.gettempdir()
-    temp_ini_path = os.path.join(temp_dir, "config.ini")
-
-    app.active_settings = Settings(ini_file=Path(temp_ini_path))
-    config_file_path = base_fixture.testdata_path / "app_config.json"
-    temp_config_file_path = copy(config_file_path, temp_dir)
-    app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
-    yield Path(temp_config_file_path)
+def ui_no_refs_config_fixture(base_fixture):
+    """ Use temporary default settings and config file based on testdata/app_config_empty_refs.json """
+    config_file_path = base_fixture.testdata_path / "app_config_empty_refs.json"
+    yield temp_ui_config(config_file_path)

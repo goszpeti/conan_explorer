@@ -6,9 +6,13 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/src/conan_app_launcher/__main__.py",
-            "console": "internalConsole",
-            "subProcess": false,
-            "justMyCode": true
+            "env": {
+                "CAL_DEBUG_LEVEL": "1"
+            },
+            "args": ["--debug"],
+            "console": "integratedTerminal",
+            "subProcess": true,
+            "justMyCode": false
         },
         {
             "name": "Python: Current File",
@@ -16,15 +20,18 @@
             "request": "launch",
             "program": "${file}",
             "console": "internalConsole",
-            "subProcess": true
-        },
-        {
-            "name": "Python: Testing",
-            "type": "python",
-            "request": "test",
-            "console": "internalConsole",
             "subProcess": true,
-            "justMyCode": false
         },
+        // {
+        //     "name": "Python: Testing",
+        //     "type": "python",
+        //     "request": "test",
+        //     "console": "internalConsole",
+        //     "subProcess": true,
+        //     "justMyCode": false,
+        //     "env": {
+        //         "CAL_DEBUG_LEVEL": "1"
+        //     },
+        // },
     ]
 }

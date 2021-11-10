@@ -21,3 +21,4 @@ x64 - https://icons8.com/icon/16981/x64
 android  -- https://icons8.com/icon/16011/android-os
 mac_os -- https://icons8.com/icon/16089/apple-logo
 default_box -- https://icons8.com/icon/16501/empty-box
+search database -- https://icons8.com/icon/PGmuOjfnnxLR/search-database

@@ -10,5 +10,5 @@ dist/**
 cov.xml
 .coverage
 htmlcov/*
-
+crash.log
 src/conan_app_launcher/cache.json

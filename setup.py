@@ -13,7 +13,7 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = 'conan-app-launcher'
-DESCRIPTION = 'App Launcher for quick starting applications with conan'
+DESCRIPTION = 'App Launcher and Package Explorer for Conan'
 URL = 'https://github.com/goszpeti/conan_app_launcher'
 AUTHOR = 'Peter Gosztolya'
 REQUIRES_PYTHON = '>=3.6.0'
@@ -38,9 +38,9 @@ try:
     temp = []
     if os.getenv("GITHUB_REF"):
         print(f"GITHUB_REF: {str(os.getenv('GITHUB_REF'))}")
-        branch = os.getenv("GITHUB_REF").split("refs/heads/")
+        branch = os.getenv("GITHUB_REF", "").split("refs/heads/")
         if len(branch) == 1:
-            branch = os.getenv("GITHUB_REF").split("tags")
+            branch = os.getenv("GITHUB_REF", "").split("tags")
         if len(branch) > 1:
             link = "conan_app_launcher/" + branch[1]
             master_link = "conan_app_launcher/master"
@@ -61,7 +61,7 @@ with open(os.path.join(here, "src", "conan_app_launcher", '__version__.py')) as 
 # Where the magic happens:
 setup(
     name=NAME,
-    version=about['VERSION'],
+    version=about['__version__'],
     description=DESCRIPTION,
     long_description=long_description,
     long_description_content_type='text/markdown',

@@ -112,5 +112,5 @@ IDE configuration is alwaylable for VsCode.
 * Using source code of modified ExtractIcon class from https://github.com/firodj/extract-icon-py, Copyright(c) 2015-2016 Fadhil Mandaga, MIT license
 * Using icons by https://icons8.com, Universal Multimedia Licensing
 Agreement for Icons8, https://icons8.com/vue-static/landings/pricing/icons8-license.pdf
-* Using Conan Package Manager Icon, Conan.io developpers, MIT <http://opensource.org/licenses/mit-license.php>, via Wikimedia Commons
+* Using Conan Package Manager Icon, Conan.io developers, MIT <http://opensource.org/licenses/mit-license.php>, via Wikimedia Commons
 
