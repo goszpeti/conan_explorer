@@ -109,10 +109,10 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
-        self.setupModelData()
+        self.setup_model_data()
 
 
-    def setupModelData(self):
+    def setup_model_data(self):
         for conan_ref in app.conan_api.get_all_local_refs():
             conan_item = PackageTreeItem([str(conan_ref)], self.root_item)
             self.root_item.append_child(conan_item)
@@ -121,14 +121,13 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
                 pkg_item = PackageTreeItem([info], conan_item, PROFILE_TYPE)
                 conan_item.append_child(pkg_item)
    
-    def columnCount(self, parent):
+    def columnCount(self, parent): # override
         if parent.isValid():
             return parent.internalPointer().column_count()
         else:
             return self.root_item.column_count()
 
-
-    def index(self, row, column, parent):
+    def index(self, row, column, parent):  # override
         if not self.hasIndex(row, column, parent):
             return QtCore.QModelIndex()
 
@@ -143,7 +142,7 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
         else:
             return QtCore.QModelIndex()
 
-    def data(self, index: QtCore.QModelIndex, role):
+    def data(self, index: QtCore.QModelIndex, role):  # override
         if not index.isValid():
             return None
         item: PackageTreeItem = index.internalPointer()
@@ -170,36 +169,36 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
             return item.data(index.column())
         return None
 
-    def rowCount(self, parent):
+    def rowCount(self, parent):  # override
         if parent.column() > 0:
             return 0
 
         if not parent.isValid():
-            parentItem = self.root_item
+            parent_item = self.root_item
         else:
-            parentItem = parent.internalPointer()
+            parent_item = parent.internalPointer()
 
-        return parentItem.child_count()
+        return parent_item.child_count()
 
-    def flags(self, index):
+    def flags(self, index):  # override
         if not index.isValid():
             return QtCore.Qt.NoItemFlags
 
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-    def parent(self, index):
+    def parent(self, index):  # override
         if not index.isValid():
             return QtCore.QModelIndex()
 
-        childItem = index.internalPointer()
-        parentItem = childItem.parent()
+        child_item = index.internalPointer()
+        parent_item = child_item.parent()
 
-        if parentItem == self.root_item:
+        if parent_item == self.root_item:
             return QtCore.QModelIndex()
 
-        return self.createIndex(parentItem.row(), 0, parentItem)
+        return self.createIndex(parent_item.row(), 0, parent_item)
 
-    def headerData(self, section, orientation, role):
+    def headerData(self, section, orientation, role):  # override
         if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
             return self.root_item.data(section)
 
