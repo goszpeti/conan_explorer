@@ -32,7 +32,6 @@ class LocalConanPackageExplorer():
         main_window.ui.package_select_view.customContextMenuRequested.connect(
             self.on_selection_context_menu_requested)
         self._init_selection_context_menu()
-
         main_window.ui.refresh_button.clicked.connect(self.on_refresh_clicked)
         main_window.ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
         main_window.ui.main_toolbox.currentChanged.connect(self.on_changed)
@@ -209,18 +208,21 @@ class LocalConanPackageExplorer():
 
         self.copy_action = QtWidgets.QAction("Copy", self._main_window)
         self.copy_action.setIcon(QtGui.QIcon(str(icons_path / "copy.png")))
+        self.copy_action.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_C))
         self.file_cntx_menu.addAction(self.copy_action)
         self.copy_action.triggered.connect(self.on_copy)
 
         self.paste_action = QtWidgets.QAction("Paste", self._main_window)
         self.paste_action.setIcon(QtGui.QIcon(str(icons_path / "paste.png")))
+        self.paste_action.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_V))
         self.file_cntx_menu.addAction(self.paste_action)
         self.paste_action.triggered.connect(self.on_paste)
 
-        self.paste_action = QtWidgets.QAction("Delete", self._main_window)
-        self.paste_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
-        self.file_cntx_menu.addAction(self.paste_action)
-        self.paste_action.triggered.connect(self.on_delete)
+        self.delete_action = QtWidgets.QAction("Delete", self._main_window)
+        self.delete_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
+        self.delete_action.setShortcut(QtGui.QKeySequence(Qt.Key_Delete))
+        self.file_cntx_menu.addAction(self.delete_action)
+        self.delete_action.triggered.connect(self.on_delete)
 
         self.file_cntx_menu.addSeparator()
 

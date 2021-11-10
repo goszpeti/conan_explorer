@@ -90,7 +90,7 @@ class ConanWorker():
                 self._conan_api.get_path_or_install(ConanFileReference.loads(conan_ref), conan_options)
             except Exception:
                 self._conan_install_queue.task_done()
-                return
+                continue
             # TODO emit signal/ callback
             Logger().debug("Finish working on " + conan_ref)
             self._conan_install_queue.task_done()
@@ -105,8 +105,12 @@ class ConanWorker():
         while not self._shutdown_requested and not self._conan_versions_queue.empty():
             conan_ref, signal = self._conan_versions_queue.get()
             # available versions will be in cache and retrievable for every item from there
-            available_refs = self._conan_api.search_recipe_in_remotes(
-                ConanFileReference.loads(conan_ref))
+            try:
+                available_refs = self._conan_api.search_recipe_in_remotes(
+                    ConanFileReference.loads(conan_ref))
+            except:
+                continue
+                # TODO log
             Logger().debug(f"Finished available package query for {str(conan_ref)}")
             if not available_refs:
                 continue

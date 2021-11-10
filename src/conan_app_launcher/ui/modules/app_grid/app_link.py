@@ -194,8 +194,8 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def update_with_conan_info(self):
         if self._app_channel_cbox.itemText(0) != self.model.INVALID_DESCR and \
-            len(self.model.versions) > 1 and self._app_version_cbox.count() != len(self.model.versions) or \
-                    len(self.model.channels) > 1 and self._app_channel_cbox.count() != len(self.model.channels):
+            len(self.model.versions) > 1 and self._app_version_cbox.count() < len(self.model.versions) or \
+                    len(self.model.channels) > 1 and self._app_channel_cbox.count() < len(self.model.channels):
                 # signals the cbox callback that we do not set new user values
                 self._app_version_cbox.setDisabled(True)
                 self._app_user_cbox.setDisabled(True)
@@ -258,6 +258,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         if self.model.version == self._app_version_cbox.currentText():  # no change
             return
         self._app_button.grey_icon()
+        self.model.lock_changes = True
         self.model.version = self._app_version_cbox.currentText()
         self._app_user_cbox.clear()  # reset cbox
         self._app_user_cbox.addItems(self.model.users)
@@ -273,6 +274,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         if self.model.user == self._app_user_cbox.currentText():
             return
         self._app_button.grey_icon()
+        self.model.lock_changes = True
         self.model.user = self._app_user_cbox.currentText()
 
         # update channels to match version
@@ -307,3 +309,4 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon_path())
         self.model.save()
+        self.model.lock_changes = False

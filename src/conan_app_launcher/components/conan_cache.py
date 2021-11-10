@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 from conan_app_launcher.logger import Logger
-
+from conan_app_launcher import INVALID_CONAN_REF
 from conans.model.ref import ConanFileReference
 
 class ConanInfoCache():
@@ -35,6 +35,9 @@ class ConanInfoCache():
     def get_local_package_path(self, conan_ref: ConanFileReference) -> Path:
         """ Return cached package path of a locally installed package. """
         conan_ref_str = str(conan_ref)
+        if not conan_ref_str or conan_ref_str == INVALID_CONAN_REF:
+            return Path("NULL")
+            
         pkg_path_str = self._local_packages.get(conan_ref_str, "")
         if not pkg_path_str:
             pkg_path = Path("NULL")

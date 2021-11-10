@@ -22,7 +22,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         self._remote_refs = app.conan_api.info_cache.get_all_remote_refs() # takes a while to get
         # setup range
         part_regex = r"[a-zA-Z0-9_][a-zA-Z0-9_\+\.-]{1,50}"
-        recipe_regex = f"{part_regex}/{part_regex}(@{part_regex}/{part_regex})?"
+        recipe_regex = f"{part_regex}/{part_regex}(@({part_regex}|_)/({part_regex}|_))?"
         self._validator.setRegExp(QtCore.QRegExp(recipe_regex))
         self.setCompleter(completer)
         combined_refs = set()

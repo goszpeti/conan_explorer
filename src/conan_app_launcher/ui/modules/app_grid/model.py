@@ -58,6 +58,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._available_refs: List[ConanFileReference] = []
         self._executable = ""
         self._icon: str = ""
+        self.lock_changes = True # values do not emit events. used when multiple changes are needed
         self.parent = UiTabModel("default")
         # can be registered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
@@ -65,7 +66,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         super().__init__(*args, **kwargs)  # empty init
 
     def load(self, config: UiAppLinkConfig, parent: UiTabModel) -> "UiAppLinkModel":
-        super().__init__(config.name, config.conan_ref, config.executable, config.args,
+        self.lock_changes = False
+        super().__init__(config.name, config.conan_ref, config.executable, config.icon,
                          config.is_console_application, config.args, config.conan_options)
         self.parent = parent
         return self
@@ -104,7 +106,8 @@ class UiAppLinkModel(UiAppLinkConfig):
             self._conan_file_reference = ConanFileReference.loads(new_value)
         except:
             return
-
+        if self.lock_changes:
+            return
         # add conan ref to worker
         if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
                 and self._conan_file_reference.version != self.INVALID_DESCR
@@ -221,17 +224,15 @@ class UiAppLinkModel(UiAppLinkConfig):
     @executable.setter
     def executable(self, new_value: str):
         self._executable = new_value
-        if not new_value:
-            Logger().debug(f"No file/executable specified for {str(self.name)}")
 
     def get_executable_path(self) -> Path:
-        if not self._executable:
+        if not self._executable or not self._package_folder.exists():
+            Logger().debug(f"No file/executable specified for {str(self.name)}")
             return Path("NULL")
         # adjust path on windows, if no file extension is given
         path = Path(self._executable)
         if platform.system() == "Windows" and not path.suffix:
             path = path.with_suffix(".exe")
-
         full_path = Path(self._package_folder / path)
         if self._package_folder.is_dir() and not full_path.is_file():
             Logger().error(
@@ -270,7 +271,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not self._icon_path.is_file():
             self._icon_path = asset_path / "icons" / "app.png"
             if self._icon and emit_warning:  # user input given -> warning
-                Logger().error(f"Can't find icon {str(self._icon)} for '{self.name}'")
+                Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
         else:
             self._icon_path = self._icon_path.resolve()
         return self._icon_path

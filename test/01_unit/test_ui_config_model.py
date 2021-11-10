@@ -40,7 +40,8 @@ def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
     copy_file(str(asset_path / "icons" / "app.png"), tmp_path)
 
     # relative to package with // notation - migrate from old setting
-    app_link = UiAppLinkModel("AppName", icon="//icon.ico")
+    app_config = UiAppLinkConfig("AppName", icon="//icon.ico")
+    app_link = UiAppLinkModel().load(app_config ,None)
     app_link.set_package_info(tmp_path)  # trigger set
     assert app_link.get_icon_path() == tmp_path / "icon.ico"
     assert app_link.icon == "./icon.ico"
@@ -60,13 +61,10 @@ def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
 
 
 def test_icon_eval_wrong_path(capfd, base_fixture, tmp_path):
-    """ Test, that a nonexistant path returns an error """
+    """ Test, that a nonexistant path sets to default (check for error removed) """
 
     app_link = UiAppLinkModel("AppName", icon=str(Path.home() / "nonexistant.png"), executable="abc")
     app_link.get_icon_path()  # eval
-    # wrong path
-    captured = capfd.readouterr()
-    assert "Can't find icon" in captured.err
     assert app_link.get_icon_path() == asset_path / "icons" / "app.png"
 
 
@@ -76,7 +74,8 @@ def test_official_release(base_fixture):
     Expects the same option name and value as given to the constructor.
     """
     conan_ref_short = str(CFR.loads(TEST_REF))
-    app_link = UiAppLinkModel("AppName", conan_ref=TEST_REF)
+    app_config = UiAppLinkConfig("AppName", conan_ref=TEST_REF)
+    app_link = UiAppLinkModel().load(app_config, None)
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
     # both formats are valid, so we accept the shortened one
     assert str(app_link.conan_file_reference) == conan_ref_short
