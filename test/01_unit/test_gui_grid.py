@@ -107,6 +107,8 @@ def test_AppLink_open(base_fixture, qtbot):
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                is_console_application=True, executable=sys.executable)
     app_model = UiAppLinkModel().load(app_config, None)
+    app_model.set_package_info(Path(sys.executable).parent)
+
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
     app_ui = AppLink(root_obj, app_model)

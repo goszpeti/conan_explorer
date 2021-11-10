@@ -54,7 +54,8 @@ def base_fixture(request):
 
 def temp_ui_config(config_file_path: Path):
     temp_config_file_path = copy(config_file_path, tempfile.gettempdir())
-    app.active_settings = settings_factory(SETTINGS_INI_TYPE, Path(tempfile.mktemp()))
+    tmp_file = tempfile.mkstemp()
+    app.active_settings = settings_factory(SETTINGS_INI_TYPE, Path(tmp_file[1]))
     app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
     return Path(temp_config_file_path)
 
