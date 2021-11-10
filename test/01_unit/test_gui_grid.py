@@ -149,11 +149,13 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
     app_ui = AppLink(root_obj, app_model)
+    app_ui.load()
 
     icon = app_ui.model.get_icon_path()
-    assert icon.is_relative_to(tempfile.gettempdir())
+    assert tempfile.gettempdir() in str(icon.parent)
     assert "python" in icon.name
     assert not app_ui._app_button._greyed_out
+
 
 def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
     """
