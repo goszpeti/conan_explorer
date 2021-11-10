@@ -54,25 +54,13 @@ class AppButton(QtWidgets.QPushButton):
             self._ic = QtGui.QIcon(icon)
             self.setIcon(self._ic)
 
-    def mousePressEvent(self, event):  # override QPushButton
-        """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
-        super().mousePressEvent(event)
-        # make the button a little bit smaller to emulate a "clicked" effect - only if ungreyed:
-        # if not self._greyed_out and event.button() == Qt.RightButton:
-        #    smaller_size = int(ICON_SIZE-(ICON_SIZE/32))
-        #    self.setPixmap(self.pixmap().scaled(smaller_size, smaller_size,
-        #                                        transformMode=Qt.SmoothTransformation))
+    # def mousePressEvent(self, event):  # override QPushButton
+    #     """ Callback to emitting the clicked signal, so "clicked" can be used to connect any function. """
+    #     super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):  # override QPushButton
         """ reset size of icon form mousePressEvent """
         super().mouseReleaseEvent(event)
-        # need to use the original image here, otherwise the quality degrades over multiple clicks
-        # if not self._greyed_out:
-        #    self.setPixmap(QtGui.QPixmap(str(self._image)).scaled(
-        #        ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation))
-
-        # if event.button() == Qt.RightButton:
-        #    self.menu.exec_(event.globalPos())
         if event.button() == Qt.LeftButton:
             self.clicked.emit()
         return super().mouseReleaseEvent(event)
