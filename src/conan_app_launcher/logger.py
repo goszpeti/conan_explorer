@@ -81,8 +81,6 @@ class Logger(logging.Logger):
         qt_handler = Logger.QtLogHandler(update_signal)
         qt_handler.set_name(cls.qt_handler_name)
         log_debug_level = logging.INFO
-        if DEBUG_LEVEL > 0:
-            log_debug_level = logging.DEBUG
         qt_handler.setLevel(log_debug_level)
         qt_handler.setFormatter(cls.formatter)
 

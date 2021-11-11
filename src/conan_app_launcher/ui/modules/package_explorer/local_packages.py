@@ -114,7 +114,10 @@ class LocalConanPackageExplorer():
             app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True, quiet=False)
             # Clear view, if this pkg is selected
             if self.fs_model:
-                self.fs_model.deleteLater()
+                try:
+                    self.fs_model.deleteLater()
+                except Exception:
+                    pass # sometimes this can crash...
                 self._main_window.ui.package_path_label.setText("")
             self.refresh_pkg_selection_view()
 
