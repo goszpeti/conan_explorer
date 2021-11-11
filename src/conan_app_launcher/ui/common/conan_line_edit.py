@@ -58,4 +58,5 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         if app.conan_api:
             app.conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
             self.completion_finished.emit()
-
+            self._remote_refs = app.conan_api.info_cache.get_all_remote_refs()  # takes a while to get
+            self.completer().model().setStringList(self._remote_refs)
