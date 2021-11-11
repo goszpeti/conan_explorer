@@ -139,7 +139,7 @@ class ConanApi():
         package = self.find_best_local_package(conan_ref, input_options)
         if package.get("id", ""):
             return self.get_package_folder(conan_ref, package.get("id", ""))
-        Logger().info(f"Package {conan_ref} with options {repr(input_options)} is not installed.")
+        Logger().info(f"'<b>{conan_ref}</b>' with options {repr(input_options)} is not installed.")
 
         packages: List[ConanPkg] = self.search_package_in_remotes(conan_ref, input_options)
         if not packages:
@@ -206,7 +206,7 @@ class ConanApi():
             packages = self.find_best_matching_packages(conan_ref, input_options, remote)
             if packages:
                 return packages
-        Logger().info(f"Can't find a matching package '{str(conan_ref)}' in the remotes")
+        Logger().info(f"Can't find a matching package '<b>{str(conan_ref)}</b>' in the remotes")
         return []
 
     def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> ConanPkg:
@@ -216,13 +216,13 @@ class ConanApi():
         if packages:
             if len(packages) > 1:
                 settings = packages[0].get("settings", {})
-                Logger().warning(f"Multiple matching packages found for {str(conan_ref)}!\n"
+                Logger().warning(f"Multiple matching packages found for '<b>{str(conan_ref)}</b>'!\n"
                                  f"Choosing this: {settings}.")
             # Update cache with this package
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
             return packages[0]
-        Logger().debug(f"No matching packages found for {str(conan_ref)}")
+        Logger().debug(f"No matching packages found for <b>{str(conan_ref)}</b>")
         return {"id": ""}
 
     def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
@@ -249,13 +249,13 @@ class ConanApi():
         options_list = _create_key_value_pair_list(package.get("options", {}))
         settings_list = _create_key_value_pair_list(package.get("settings", {}))
         Logger().info(
-            f"Installing '{str(conan_ref)}':{package_id} with settings: {str(settings_list)}, options: {str(options_list)}")
+            f"Installing '<b>{str(conan_ref)}</b>':{package_id} with settings: {str(settings_list)}, options: {str(options_list)}")
         try:
             self.conan.install_reference(conan_ref, update=True,
                                          settings=settings_list, options=options_list)
             return True
         except Exception as error:
-            Logger().error(f"Can't install package '{str(conan_ref)}': {str(error)}")
+            Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(error)}")
             return False
 
     def find_best_matching_packages(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {},
