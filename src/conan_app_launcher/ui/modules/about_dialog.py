@@ -19,10 +19,10 @@ class AboutDialog(QtWidgets.QDialog):
         super().__init__(parent)
         self.setWindowTitle("About")
         self.setModal(True)
-        self.resize(500, 350)
+        self.resize(400, 300)
 
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
-                                            QtWidgets.QSizePolicy.Preferred)
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                            QtWidgets.QSizePolicy.MinimumExpanding)
         self.setSizePolicy(size_policy)
 
         ok_button = QtWidgets.QDialogButtonBox.Ok
