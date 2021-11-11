@@ -71,13 +71,20 @@ class ConanWorker():
     def finish_working(self, timeout_s: int = None):
         """ Cancel, if worker is still not finished """
         self._shutdown_requested = True
-        if self._install_worker and self._install_worker.is_alive():
-            self._install_worker.join(timeout_s)
-        if self._version_worker and self._version_worker.is_alive():
-            self._version_worker.join(timeout_s)
+        try:
+            if self._install_worker and self._install_worker.is_alive():
+                self._install_worker.join(timeout_s)
+        except Exception:
+            return  # Conan threads can crash on join
+        try:
+            if self._version_worker and self._version_worker.is_alive():
+                self._version_worker.join(timeout_s)
+        except Exception:
+            return  # Conan threads can crash on join
         self._conan_install_queue = Queue(maxsize=0)
         self._install_worker = None  # reset thread for later instantiation
         self._shutdown_requested = False
+
 
     def _work_on_conan_install_queue(self):
         """ Call conan operations from queue """
