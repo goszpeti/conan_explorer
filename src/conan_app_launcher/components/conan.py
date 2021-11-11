@@ -55,6 +55,7 @@ class ConanApi():
         self.conan, _, _ = ConanAPIV1.factory()
         self.conan.create_app()
         self.user_io = self.conan.user_io
+        self.user_io.disable_input()
         if self.conan.app:
             self.client_cache = self.conan.app.cache
         else:
@@ -252,7 +253,7 @@ class ConanApi():
             f"Installing '<b>{str(conan_ref)}</b>':{package_id} with settings: {str(settings_list)}, options: {str(options_list)}")
         try:
             self.conan.install_reference(conan_ref, update=True,
-                                         settings=settings_list, options=options_list)
+                                                settings=settings_list, options=options_list)
             return True
         except Exception as error:
             Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(error)}")
