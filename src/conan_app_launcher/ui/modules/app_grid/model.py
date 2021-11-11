@@ -66,10 +66,11 @@ class UiAppLinkModel(UiAppLinkConfig):
         super().__init__(*args, **kwargs)  # empty init
 
     def load(self, config: UiAppLinkConfig, parent: UiTabModel) -> "UiAppLinkModel":
-        self.lock_changes = False
+        self.parent = parent
         super().__init__(config.name, config.conan_ref, config.executable, config.icon,
                          config.is_console_application, config.args, config.conan_options)
-        self.parent = parent
+        self.lock_changes = False # don't trigger updates to worker - will be done in batch
+
         return self
 
     def save(self):
@@ -106,8 +107,6 @@ class UiAppLinkModel(UiAppLinkConfig):
             self._conan_file_reference = ConanFileReference.loads(new_value)
         except Exception:  # invalid ref
             return
-        if self.lock_changes:
-            return
         # add conan ref to worker
         if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
                 and self._conan_file_reference.version != self.INVALID_DESCR
@@ -115,14 +114,18 @@ class UiAppLinkModel(UiAppLinkConfig):
             # invalidate old entries, which are dependent on the conan ref - only for none invalid refs
             self._conan_ref = new_value
             self.update_from_cache()
-            if self.parent and self.parent.parent:  # TODO
-                try:
-                    app.conan_worker.put_ref_in_install_queue(
-                        str(self._conan_ref), self.conan_options, self.parent.parent.conan_info_updated)
-                except Exception as error:
-                    # errors happen fairly often, keep going
-                    Logger().warning(f"Conan reference invalid {str(error)}")
+            if self.parent and self.parent.parent and not self.lock_changes:  # TODO
+                self.trigger_conan_update()
         self._conan_ref = new_value
+
+
+    def trigger_conan_update(self):
+        try:
+            app.conan_worker.put_ref_in_install_queue(
+                str(self._conan_ref), self.conan_options, self.parent.parent.conan_info_updated)
+        except Exception as error:
+            # errors happen fairly often, keep going
+            Logger().warning(f"Conan reference invalid {str(error)}")
 
     @property
     def version(self) -> str:
@@ -197,6 +200,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     def users(self) -> List[str]:
         """ All users (sorted) for the current name and verion """
         users = set()
+        #users.add(self.user)
         for ref in self._available_refs:
             if ref.version == self.version:
                 users.add(self.convert_to_disp_user(ref.user))
@@ -208,6 +212,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     def channels(self) -> List[str]:
         """ All channels (sorted) for the current version and user only """
         channels = set()
+        #channels.add(self.channel)
         for ref in self._available_refs:
             if ref.version == self.version and self.convert_to_disp_user(ref.user) == self.user:
                 channels.add(self.convert_to_disp_channel(ref.channel))
@@ -226,7 +231,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def get_executable_path(self) -> Path:
         if not self._executable or not self._package_folder.exists():
-            Logger().debug(f"No file/executable specified for {str(self.name)}")
+            # Logger().debug(f"No file/executable specified for {str(self.name)}")
             return Path("NULL")
         # adjust path on windows, if no file extension is given
         path = Path(self._executable)

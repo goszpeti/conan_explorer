@@ -1,7 +1,7 @@
 
 from typing import TYPE_CHECKING
 import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher import asset_path
+from conan_app_launcher import INVALID_CONAN_REF, asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (
                                            open_in_file_manager, run_file)
@@ -137,6 +137,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def delete(self):
         self._app_name_label.hide()
         self._app_version_cbox.hide()
+        self._app_user_cbox.hide()
         self._app_channel_cbox.hide()
         self._app_button.hide()
 
@@ -223,7 +224,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         for i in range(0, len(self.model.channels)):
             self._app_channel_cbox.setItemData(i, self.model.channels[i], Qt.ToolTipRole)
         if self.model.get_executable_path().is_file():
-            Logger().debug(f"Ungreying {str(self.model.__dict__)}")
+            Logger().debug(f"Ungreying {self.model.name}")
             self._app_button.set_icon(self.model.get_icon_path())
             self._app_button.ungrey_icon()
 
@@ -260,8 +261,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.grey_icon()
         self.model.lock_changes = True
         self.model.version = self._app_version_cbox.currentText()
-        self._app_user_cbox.clear()  # reset cbox
-        self._app_user_cbox.addItems(self.model.users)
+        self._eval_user()
+        self.model.lock_changes = False
 
 
     def on_user_selected(self, index):
@@ -273,9 +274,19 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         if self.model.user == self._app_user_cbox.currentText():
             return
+        self.model.user = self._app_user_cbox.currentText()
+        self._eval_user()
+
+    def _eval_user(self):
         self._app_button.grey_icon()
         self.model.lock_changes = True
-        self.model.user = self._app_user_cbox.currentText()
+        self.model.update_from_cache()
+        # update user to match version
+        self._app_user_cbox.clear()  # reset cbox
+        users = self.model.users
+        if not users:
+            users = "NA"
+        self._app_user_cbox.addItems(users)
 
         # update channels to match version
         self._app_channel_cbox.clear()  # reset cbox
@@ -287,10 +298,12 @@ class AppLink(QtWidgets.QVBoxLayout):
             # add tooltip for channels, in case it is too long
             for i in range(0, len(self.model.channels)):
                 self._app_channel_cbox.setItemData(i+1, self.model.channels[i], Qt.ToolTipRole)
-
         self._app_channel_cbox.setCurrentIndex(0)
         self._app_button.setToolTip(self.model.conan_ref)
+        if self.model.channel is not INVALID_CONAN_REF:
+            self.model.trigger_conan_update()
         self.model.save()
+        self.model.lock_changes = False
 
     def on_channel_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
@@ -308,5 +321,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.model.channel = self._app_channel_cbox.currentText()
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon_path())
+        if self.model.channel is not INVALID_CONAN_REF:
+            self.model.trigger_conan_update()
         self.model.save()
         self.model.lock_changes = False
