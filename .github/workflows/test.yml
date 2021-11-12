@@ -91,9 +91,10 @@ jobs:
         run: |
           pip install conan==${{ matrix.conan }}
       - name: Install own dependencies
+        # need -e because of coverage paths.
         run: |
           pip install pyqt5==5.14.2
-          pip install .
+          pip install -e .
       - name: Update remote
         run: |
           conan remote clean
@@ -104,8 +105,9 @@ jobs:
       - name: Execute integration with pytest
         run: |
           pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
-      - name: Execute system with pytest
+      - name: Execute system with pytest # Reinstall into site-packages to find install and pkg problems
         run: |
+          pip install .
           pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
       - uses: actions/upload-artifact@v2
         with:
