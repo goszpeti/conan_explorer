@@ -4,8 +4,7 @@ from pathlib import Path
 from shutil import copy
 
 import conan_app_launcher.app as app
-from conan_app_launcher.components.conan import ConanApi
-from conan_app_launcher.components.conan_worker import ConanWorker
+from conan_app_launcher.components import ConanApi, ConanWorker, ConanInfoCache
 import conan_app_launcher.logger as logger
 import pytest
 from conan_app_launcher import SETTINGS_FILE_NAME, asset_path, base_path, user_save_path
@@ -28,7 +27,6 @@ def base_fixture(request):
     Clean up all instances after the test.
     """
     paths = PathSetup()
-    logger.Logger.remove_qt_logger()
 
     app.conan_api = ConanApi()
     app.conan_worker = ConanWorker(app.conan_api)
@@ -43,8 +41,8 @@ def base_fixture(request):
     # reset singletons
 
     # delete cache file
-    # if (app.base_path / app.CACHE_FILE_NAME).exists():
-    #     os.remove(app.base_path / app.CACHE_FILE_NAME)
+    if (base_path / ConanInfoCache.CACHE_FILE_NAME).exists():
+        os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
 
     logger.Logger._instance = None
     app.conan_worker = None
