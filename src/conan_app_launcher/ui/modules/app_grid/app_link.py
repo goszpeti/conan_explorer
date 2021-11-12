@@ -1,5 +1,4 @@
 
-from types import resolve_bases
 from typing import TYPE_CHECKING
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import INVALID_CONAN_REF, asset_path
