@@ -59,14 +59,16 @@ class Logger(logging.Logger):
         def __init__(self, update_signal: pyqtBoundSignal):
             super().__init__(logging.DEBUG)
             self._update_signal = update_signal
-
         def emit(self, record):
             # don't access the qt object directly, since updates will only work
             # correctly in main loop, so instead send a PyQt Signal with the text to the Ui
             record = self.format(record)
             if record and self._lock:
                 with self._lock:
-                    self._update_signal.emit(record)
+                    try:
+                        self._update_signal.emit(record)
+                    except Exception:
+                        print("QT Logger errored") # don't log here with logger...
 
     @classmethod
     def init_qt_logger(cls, update_signal: pyqtBoundSignal):
@@ -90,7 +92,7 @@ class Logger(logging.Logger):
     def remove_qt_logger(cls) -> bool:
         """ Remove qt logger (to be called before gui closes) """
         if not cls._instance:
-            raise RuntimeError
+            return True # don't care, if it is not actually there
         logger = cls._instance
 
         for handler in logger.handlers:

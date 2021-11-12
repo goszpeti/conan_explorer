@@ -31,7 +31,7 @@ class UiTabModel(UiTabConfig):
         # load all submodels
         apps_model = []
         for app_config in self.apps:
-            apps_model.append(UiAppLinkModel().load(app_config, self))
+            apps_model.append(UiAppLinkModel().load(app_config, self, trigger_update=False))
         self.apps = apps_model
         return self
 
@@ -65,11 +65,13 @@ class UiAppLinkModel(UiAppLinkConfig):
         # calls public functions, every internal variable needs to initialitzed
         super().__init__(*args, **kwargs)  # empty init
 
-    def load(self, config: UiAppLinkConfig, parent: UiTabModel) -> "UiAppLinkModel":
+    def load(self, config: UiAppLinkConfig, parent: UiTabModel, trigger_update=True) -> "UiAppLinkModel":
         self.parent = parent
+        if trigger_update:
+            self.lock_changes = False  # don't trigger updates to worker - will be done in batch
+
         super().__init__(config.name, config.conan_ref, config.executable, config.icon,
                          config.is_console_application, config.args, config.conan_options)
-        self.lock_changes = False # don't trigger updates to worker - will be done in batch
 
         return self
 
@@ -90,6 +92,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             self.set_package_info(package_folder)
 
     def register_update_callback(self, update_func: Callable):
+        """ This callback can be used to update the gui after new conan info was received """
         self._update_cbk_func = update_func
 
     @property
@@ -212,7 +215,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     def channels(self) -> List[str]:
         """ All channels (sorted) for the current version and user only """
         channels = set()
-        #channels.add(self.channel)
+        channels.add(self.channel)
         for ref in self._available_refs:
             if ref.version == self.version and self.convert_to_disp_user(ref.user) == self.user:
                 channels.add(self.convert_to_disp_channel(ref.channel))

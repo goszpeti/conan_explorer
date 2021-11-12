@@ -94,7 +94,13 @@ def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
-    main_gui.app_grid.on_tab_remove(id_to_delete)
+    mocker.patch.object(QtWidgets.QMenu, 'exec_',
+                        return_value=None)
+    tab_rect = main_gui.ui.tab_bar.tabBar().tabRect(id_to_delete)
+    menu = main_gui.app_grid.on_tab_context_menu_requested(tab_rect.center())
+    actions = menu.actions()
+    delete_action = actions[1]
+    delete_action.trigger()
 
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
     assert main_gui.ui.tab_bar.tabBar().tabText(id_to_delete) != text
@@ -200,14 +206,16 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert len(config_tabs[0].apps) == prev_count - 1
 
 
-def test_add_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
+def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     app.active_settings.set(DISPLAY_APP_CHANNELS, False) # disable, to check if a new app uses it
     app.active_settings.set(DISPLAY_APP_VERSIONS, True)  # disable, to check if a new app uses it
+    # preinstall ref, to see if link updates paths
+    app.conan_api.get_path_or_install(ConanFileReference.loads(TEST_REF), {})
 
     from pytestqt.plugin import _qapp_instance
     main_gui = main_window.MainWindow()
     main_gui.show()
-    main_gui.load(ui_config_fixture)
+    main_gui.load(ui_no_refs_config_fixture)
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -218,8 +226,8 @@ def test_add_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     apps_model = tab_model.apps
     prev_count = len(apps_model)
     app_link: AppLink = tab.app_links[0]
-    app_config = UiAppLinkConfig(name="NewApp", conan_ref=CFR.loads(TEST_REF),
-                                 executable="bin/exe")
+    app_config = UiAppLinkConfig(name="NewApp", conan_ref=TEST_REF,
+                                 executable="conanmanifest.txt")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
 
     mocker.patch.object(EditAppDialog, 'exec_',
@@ -237,9 +245,11 @@ def test_add_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert new_app_link._app_name_label.text() == "NewApp"
     assert new_app_link._app_channel_cbox.isHidden()
     assert not new_app_link._app_version_cbox.isHidden()
+    assert new_app_link.model._package_folder.exists()
+
 
     # check, that the config file has updated
-    config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count + 1
     # this test sometimes errors in the ci on teardown

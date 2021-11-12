@@ -30,11 +30,14 @@ class AppGridView():
             self._main_window.ui.add_app_link_button.setGeometry(765, 452, 44, 44)
             self._main_window.ui.add_app_link_button.setIconSize(QtCore.QSize(44, 44))
             self._main_window.ui.add_app_link_button.clicked.connect(self.open_new_app_link_dialog)
+            self._main_window.ui.add_app_link_button.setIcon(QtGui.QIcon(str(self._icons_path / "add_link.png")))
+
         if ADD_TAB_BUTTON:
             self._main_window.ui.add_tab_button = QtWidgets.QPushButton(self._main_window)
             self._main_window.ui.add_tab_button.setGeometry(802, 50, 28, 28)
             self._main_window.ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
             self._main_window.ui.add_tab_button.clicked.connect(self.on_new_tab)
+            self._main_window.ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
 
         self._main_window.ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._main_window.ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
@@ -56,17 +59,17 @@ class AppGridView():
     def apply_display_versions_setting(self):
         for tab in self.get_tabs():
             for app_link in tab.app_links:
-                app_link.update_versions_cbox()
+                app_link.update_versions_cbox_visible()
 
     def apply_display_users_setting(self):
         for tab in self.get_tabs():
             for app_link in tab.app_links:
-                app_link.update_users_cbox()
+                app_link.update_users_cbox_visible()
     
     def apply_display_channels_setting(self):
         for tab in self.get_tabs():
             for app_link in tab.app_links:
-                app_link.update_channels_cbox()
+                app_link.update_channels_cbox_visible()
 
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add
@@ -102,7 +105,7 @@ class AppGridView():
         new_tab_action.triggered.connect(self.on_new_tab)
 
         menu.exec_(self._main_window.ui.tab_bar.tabBar().mapToGlobal(position))
-        self.menu = None
+        return self.menu # for testing
 
     def on_new_tab(self):
         # call tab on_app_link_add
@@ -113,11 +116,11 @@ class AppGridView():
             # do nothing on empty text
             if not text:
                 return
-            # TODO add to model (move to extra function in model?)
+            # update model
             tab_model = UiTabModel().load(UiTabConfig(text, apps=[UiAppLinkConfig()]), self.model)
             self.model.tabs.append(tab_model)
             self.model.save()
-            # add tab
+            # add tab in ui
             tab = TabGrid(self._main_window.ui.tab_bar,
                              max_columns=app.active_settings.get_int(GRID_COLUMNS),
                              max_rows=app.active_settings.get_int(GRID_ROWS), model=tab_model)

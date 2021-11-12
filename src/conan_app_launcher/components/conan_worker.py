@@ -98,10 +98,9 @@ class ConanWorker():
             except Exception:
                 self._conan_install_queue.task_done()
                 continue
-            # TODO emit signal/ callback
             Logger().debug("Finish working on " + conan_ref)
             self._conan_install_queue.task_done()
-        # TODO batch signal?
+        # batch emitting signal
         if signal:
             signal.emit(conan_ref)
 

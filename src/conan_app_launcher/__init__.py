@@ -19,8 +19,8 @@ DEFAULT_UI_CFG_FILE_NAME = "cal_ui.json"  # for legacy 0.X support
 TEMP_ICON_DIR_NAME = "cal_icons"
 
 # Feature flags
-ADD_TAB_BUTTON = False  # FIXME currently not working
-ADD_APP_LINK_BUTTON = False  # FIXME currently not working
+ADD_TAB_BUTTON = False
+ADD_APP_LINK_BUTTON = False
 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True
 USE_LOCAL_INTERNAL_CACHE = True
 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH = True
