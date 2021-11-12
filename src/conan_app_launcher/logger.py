@@ -90,7 +90,7 @@ class Logger(logging.Logger):
     def remove_qt_logger(cls) -> bool:
         """ Remove qt logger (to be called before gui closes) """
         if not cls._instance:
-            raise RuntimeError
+            return True # don't care, if it is not actually there
         logger = cls._instance
 
         for handler in logger.handlers:

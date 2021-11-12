@@ -28,7 +28,7 @@ def base_fixture(request):
     Clean up all instances after the test.
     """
     paths = PathSetup()
-    logger.Logger().remove_qt_logger()
+    logger.Logger.remove_qt_logger()
 
     app.conan_api = ConanApi()
     app.conan_worker = ConanWorker(app.conan_api)
