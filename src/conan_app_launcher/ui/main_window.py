@@ -188,10 +188,7 @@ class MainWindow(QtWidgets.QMainWindow):
         icon.addPixmap(QtGui.QPixmap(str(self._icons_path / "search_packages.png")),
                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.ui.main_toolbox.setItemIcon(self.TOOLBOX_PACKAGES_ITEM, icon)
-        if ADD_APP_LINK_BUTTON:
-            self.ui.add_app_link_button.setIcon(QtGui.QIcon(str(self._icons_path / "add_link.png")))
-        if ADD_TAB_BUTTON:
-            self.ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
+
         # menu
         self.ui.refresh_button.setIcon(QtGui.QIcon(str(self._icons_path / "refresh.png")))
         self.ui.menu_cleanup_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))

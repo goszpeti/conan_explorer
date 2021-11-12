@@ -30,11 +30,14 @@ class AppGridView():
             self._main_window.ui.add_app_link_button.setGeometry(765, 452, 44, 44)
             self._main_window.ui.add_app_link_button.setIconSize(QtCore.QSize(44, 44))
             self._main_window.ui.add_app_link_button.clicked.connect(self.open_new_app_link_dialog)
+            self._main_window.ui.add_app_link_button.setIcon(QtGui.QIcon(str(self._icons_path / "add_link.png")))
+
         if ADD_TAB_BUTTON:
             self._main_window.ui.add_tab_button = QtWidgets.QPushButton(self._main_window)
             self._main_window.ui.add_tab_button.setGeometry(802, 50, 28, 28)
             self._main_window.ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
             self._main_window.ui.add_tab_button.clicked.connect(self.on_new_tab)
+            self._main_window.ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
 
         self._main_window.ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._main_window.ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
