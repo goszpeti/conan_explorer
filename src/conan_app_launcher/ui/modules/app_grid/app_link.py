@@ -127,7 +127,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu.addSeparator()
 
         self.move_r = QtWidgets.QAction("Move Right", self)
-        self.move_r.setDisabled(True)  # TODO upcomng feature
+        self.move_r.setDisabled(True)  # TODO upcoming feature
         self.menu.addAction(self.move_r)
 
         self.move_l = QtWidgets.QAction("Move Left", self)
@@ -182,7 +182,12 @@ class AppLink(QtWidgets.QVBoxLayout):
     def remove(self):
         # last link can't be deleted! # TODO dialog
         if len(self.model.parent.apps) == 1:
-            return
+            msg = QtWidgets.QMessageBox(parent=self._parent_tab)
+            msg.setWindowTitle("Info")
+            msg.setText("Can't delete the last link!")
+            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msg.setIcon(QtWidgets.QMessageBox.Information)
+            msg.exec_()
 
         # confirmation dialog
         message_box = QtWidgets.QMessageBox(parent=self.parentWidget())

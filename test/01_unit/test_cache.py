@@ -23,7 +23,6 @@ def test_read_cache(base_fixture):
     temp_cache_path = Path(tempfile.mkdtemp()) / ConanInfoCache.CACHE_FILE_NAME
     copy_file(str(base_fixture.testdata_path / "cache" / "cache_read.json"), str(temp_cache_path))
 
-    # TODO where should the package come from???
     cache = ConanInfoCache(temp_cache_path.parent)
     assert cache._local_packages == {"my_package/1.0.0": "",
                                      "my_package/2.0.0": "C:\\.conan\\pkg"}

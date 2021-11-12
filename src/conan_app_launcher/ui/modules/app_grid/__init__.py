@@ -113,11 +113,11 @@ class AppGridView():
             # do nothing on empty text
             if not text:
                 return
-            # TODO add to model (move to extra function in model?)
+            # update model
             tab_model = UiTabModel().load(UiTabConfig(text, apps=[UiAppLinkConfig()]), self.model)
             self.model.tabs.append(tab_model)
             self.model.save()
-            # add tab
+            # add tab in ui
             tab = TabGrid(self._main_window.ui.tab_bar,
                              max_columns=app.active_settings.get_int(GRID_COLUMNS),
                              max_rows=app.active_settings.get_int(GRID_ROWS), model=tab_model)

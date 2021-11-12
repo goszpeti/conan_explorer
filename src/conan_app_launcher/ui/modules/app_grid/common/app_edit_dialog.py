@@ -3,6 +3,7 @@ from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from conan_app_launcher import asset_path
+from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 
 # define Qt so we can use it like the namespace in C++
@@ -48,7 +49,7 @@ class EditAppDialog(QtWidgets.QDialog):
     def save_data(self):
         # check all input validations
         if not self._ui.conan_ref_line_edit.hasAcceptableInput():
-            # TODO handle invalid input
+            # TODO handle invalid input and use QMessageBox
             pass
 
         # write back app info
@@ -66,6 +67,6 @@ class EditAppDialog(QtWidgets.QDialog):
             if len(split_values) == 2:
                 conan_options.update({split_values[0]: split_values[1]})
             else:
-                pass  # TODO warning
+                Logger().warning(f"Wrong format in option: {line}")
         self._model.conan_options = conan_options
         self._model.save()

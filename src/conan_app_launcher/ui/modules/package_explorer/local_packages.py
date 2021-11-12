@@ -159,7 +159,6 @@ class LocalConanPackageExplorer():
             Logger().warning(f"Can't find package path for {conan_ref} and {str(source_item.item_data[0])}")
             return
         self.fs_model = QtWidgets.QFileSystemModel()
-        self.fs_model.setReadOnly(False)  # TODO connect the edit checkbox
         self.fs_model.setRootPath(str(pkg_path))
         self.fs_model.sort(0, Qt.AscendingOrder)
         self.re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)

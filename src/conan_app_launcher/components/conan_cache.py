@@ -101,8 +101,11 @@ class ConanInfoCache():
             refs.append(str(ref))
         return refs
         
-    def search(self, query: str) -> Tuple[Set[str], Set[str]]: # TODO Unused?
-        """ Return cached info on available conan refs from a query """ 
+    def search(self, query: str) -> Tuple[Set[str], Set[str]]:
+        """
+        Return cached info on available conan refs from a query 
+        <Currently unsused!>
+        """ 
         remote_refs = set()
         local_refs = set()
 
