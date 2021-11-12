@@ -1,7 +1,6 @@
 import json
-import sys
 from dataclasses import asdict
-from distutils.version import StrictVersion
+from packaging.version import Version
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
@@ -19,7 +18,7 @@ else:
     except ImportError:
         from typing_extensions import TypedDict
 
-from conan_app_launcher import PathLike, asset_path, user_save_path
+from conan_app_launcher import PathLike, asset_path
 from conan_app_launcher.logger import Logger
 
 ### Internal represantation of JSON save format
@@ -124,7 +123,7 @@ class JsonUiConfig(UiConfigInterface):
 
     def migrate_to_0_3_0(self, app_config: JsonAppConfig):
         """ Compatiblity function to update schema version. """
-        if StrictVersion(app_config["version"]) >= StrictVersion("0.3.0"):
+        if Version(app_config["version"]) >= Version("0.3.0"):
             return
         for tab in app_config["tabs"]:
             for app in tab["apps"]:
@@ -134,7 +133,7 @@ class JsonUiConfig(UiConfigInterface):
 
     def migrate_to_0_4_0(self, app_config: JsonAppConfig):
         """ Compatiblity function to update schema version. """
-        if StrictVersion(app_config["version"]) >= StrictVersion("0.4.0"):
+        if Version(app_config["version"]) >= Version("0.4.0"):
             return
         for tab in app_config["tabs"]:
             for app in tab["apps"]:

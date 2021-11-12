@@ -105,7 +105,7 @@ class AppGridView():
         new_tab_action.triggered.connect(self.on_new_tab)
 
         menu.exec_(self._main_window.ui.tab_bar.tabBar().mapToGlobal(position))
-        self.menu = None
+        return self.menu # for testing
 
     def on_new_tab(self):
         # call tab on_app_link_add

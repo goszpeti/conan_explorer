@@ -94,7 +94,13 @@ def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
-    main_gui.app_grid.on_tab_remove(id_to_delete)
+    mocker.patch.object(QtWidgets.QMenu, 'exec_',
+                        return_value=None)
+    tab_rect = main_gui.ui.tab_bar.tabBar().tabRect(id_to_delete)
+    menu = main_gui.app_grid.on_tab_context_menu_requested(tab_rect.center())
+    actions = menu.actions()
+    delete_action = actions[1]
+    delete_action.trigger()
 
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
     assert main_gui.ui.tab_bar.tabBar().tabText(id_to_delete) != text

@@ -60,7 +60,10 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
         index), QtCore.QItemSelectionModel.ClearAndSelect)
     sel_model.currentIndex()
     assert not main_gui.local_package_explorer.fs_model  # view not changed
-
+    # selection_rect = main_gui.ui.package_select_view.visualRect(view_model.mapFromSource(
+    #     index))
+    # qtbot.mouseClick(main_gui.ui.package_select_view.viewport(),
+    #                  Qt.RightButton, Qt.NoModifier, selection_rect.center())
     # check right view initialized at the correct path and path got written in label
     main_gui.ui.package_select_view.expand(view_model.mapFromSource(index))
     chi = index.child(0, 0)
@@ -71,3 +74,5 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
 
     assert main_gui.local_package_explorer.fs_model  # view selected
     assert Path(main_gui.local_package_explorer.fs_model.rootPath()) == pkg_path
+
+
