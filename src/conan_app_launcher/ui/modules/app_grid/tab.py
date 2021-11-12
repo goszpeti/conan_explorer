@@ -93,6 +93,7 @@ class TabGrid(QtWidgets.QWidget):
             self._edit_app_dialog.save_data()
             app_link = AppLink(self, new_model)
             app_link.load()
+            app_link.model.update_from_cache()
             self.add_app_link_to_tab(app_link)
             self.model.save()  # TODO this should happen on apps.append
             return app_link  # for testing

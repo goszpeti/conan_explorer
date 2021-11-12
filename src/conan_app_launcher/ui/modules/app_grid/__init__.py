@@ -56,17 +56,17 @@ class AppGridView():
     def apply_display_versions_setting(self):
         for tab in self.get_tabs():
             for app_link in tab.app_links:
-                app_link.update_versions_cbox()
+                app_link.update_versions_cbox_visible()
 
     def apply_display_users_setting(self):
         for tab in self.get_tabs():
             for app_link in tab.app_links:
-                app_link.update_users_cbox()
+                app_link.update_users_cbox_visible()
     
     def apply_display_channels_setting(self):
         for tab in self.get_tabs():
             for app_link in tab.app_links:
-                app_link.update_channels_cbox()
+                app_link.update_channels_cbox_visible()
 
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add

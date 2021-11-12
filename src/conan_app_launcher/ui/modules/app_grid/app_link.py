@@ -1,10 +1,11 @@
 
+from types import resolve_bases
 from typing import TYPE_CHECKING
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import INVALID_CONAN_REF, asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (
-                                           open_in_file_manager, run_file)
+    open_in_file_manager, run_file)
 from conan_app_launcher.settings import DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 from .common.app_button import AppButton
@@ -28,10 +29,10 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def __init__(self, parent: "TabGrid", model: UiAppLinkModel):
         super().__init__()
-        self._parent_tab = parent # save parent - don't use qt signals ands slots
+        self._parent_tab = parent  # save parent - don't use qt signals ands slots
         self.model = model
+        self._lock_cboxes = False
         self._init_app_link()
-
 
     def _init_app_link(self):
         self._app_name_label = QtWidgets.QLabel(self._parent_tab)
@@ -81,12 +82,11 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         # connect signals
         self._app_button.clicked.connect(self.on_click)
-        self._app_version_cbox.currentIndexChanged.connect(self.on_version_selected)
-        self._app_user_cbox.currentIndexChanged.connect(self.on_user_selected)
-        self._app_channel_cbox.currentIndexChanged.connect(self.on_channel_selected)
+        self._app_version_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
+        self._app_user_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
+        self._app_channel_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
 
         self._init_menu()
-
 
     def load(self):
         self.model.register_update_callback(self.update_with_conan_info)
@@ -152,20 +152,23 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon_path())
 
+        self._lock_cboxes = True
         self._app_channel_cbox.clear()
         self._app_channel_cbox.addItem(self.model.channel)
         self._app_version_cbox.clear()
         self._app_version_cbox.addItem(self.model.version)
         self._app_user_cbox.clear()
         self._app_user_cbox.addItem(self.model.user)
-        self.update_versions_cbox()
-        self.update_users_cbox()
-        self.update_channels_cbox()
+        self._lock_cboxes = False
+
+        self.update_versions_cbox_visible()
+        self.update_users_cbox_visible()
+        self.update_channels_cbox_visible()
 
     def open_app_link_add_dialog(self):
         self._parent_tab.open_app_link_add_dialog()
 
-    def open_edit_dialog(self, model: UiAppLinkModel=None):
+    def open_edit_dialog(self, model: UiAppLinkModel = None):
         if model:
             self.model = model
         self._edit_app_dialog = EditAppDialog(self.model, parent=self.parentWidget())
@@ -194,31 +197,35 @@ class AppLink(QtWidgets.QVBoxLayout):
             self.model.save()
 
     def update_with_conan_info(self):
+        if self._lock_cboxes == True:
+            return
         if self._app_channel_cbox.itemText(0) != self.model.INVALID_DESCR and \
-            len(self.model.versions) > 1 and self._app_version_cbox.count() < len(self.model.versions) or \
-                    len(self.model.channels) > 1 and self._app_channel_cbox.count() < len(self.model.channels):
-                # signals the cbox callback that we do not set new user values
-                self._app_version_cbox.setDisabled(True)
-                self._app_user_cbox.setDisabled(True)
-                self._app_channel_cbox.setDisabled(True)
-                self._app_version_cbox.clear()
-                self._app_user_cbox.clear()
-                self._app_channel_cbox.clear()
-                self._app_version_cbox.addItems(self.model.versions)
-                self._app_user_cbox.addItems(self.model.users)
-                self._app_channel_cbox.addItems(self.model.channels)
-                try:  # try to set updated values
-                    self._app_version_cbox.setCurrentIndex(
-                        self.model.versions.index(self.model.version))
-                    self._app_user_cbox.setCurrentIndex(
-                        self.model.users.index(self.model.user))
-                    self._app_channel_cbox.setCurrentIndex(
-                        self.model.channels.index(self.model.channel))
-                except Exception:
-                    pass
-                self._app_version_cbox.setEnabled(True)
-                self._app_user_cbox.setEnabled(True)
-                self._app_channel_cbox.setEnabled(True)
+                len(self.model.versions) > 1 and self._app_version_cbox.count() < len(self.model.versions) or \
+                len(self.model.channels) > 1 and self._app_channel_cbox.count() < len(self.model.channels):
+            # signals the cbox callback that we do not set new user values
+            self._lock_cboxes = True
+            self._app_version_cbox.clear()
+            self._app_user_cbox.clear()
+            self._app_channel_cbox.clear()
+
+            self._app_version_cbox.addItems(self.model.versions)
+            self._app_user_cbox.addItems(self.model.users)
+            self._app_channel_cbox.addItems(self.model.channels)
+            try:  # try to set updated values
+                self._app_version_cbox.setCurrentIndex(
+                    self.model.versions.index(self.model.version))
+                self._app_user_cbox.setCurrentIndex(
+                    self.model.users.index(self.model.user))
+                self._app_channel_cbox.setCurrentIndex(
+                    self.model.channels.index(self.model.channel))
+            except Exception:
+                pass
+            # on first show
+            self._app_version_cbox.setEnabled(True)
+            self._app_user_cbox.setEnabled(True)
+            self._app_channel_cbox.setEnabled(True)
+
+            self._lock_cboxes = False
 
         # add tooltip for channels, in case it is too long
         for i in range(0, len(self.model.channels)):
@@ -228,20 +235,19 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_button.set_icon(self.model.get_icon_path())
             self._app_button.ungrey_icon()
 
-    def update_versions_cbox(self):
+    def update_versions_cbox_visible(self):
         if app.active_settings.get(DISPLAY_APP_VERSIONS):
             self._app_version_cbox.show()
         else:
             self._app_version_cbox.hide()
 
-
-    def update_users_cbox(self):
+    def update_users_cbox_visible(self):
         if app.active_settings.get(DISPLAY_APP_USERS):
             self._app_user_cbox.show()
         else:
             self._app_user_cbox.hide()
 
-    def update_channels_cbox(self):
+    def update_channels_cbox_visible(self):
         if app.active_settings.get(DISPLAY_APP_CHANNELS):
             self._app_channel_cbox.show()
         else:
@@ -250,6 +256,57 @@ class AppLink(QtWidgets.QVBoxLayout):
     def on_click(self):
         """ Callback for opening the executable on click """
         run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
+
+    def on_ref_cbox_selected(self, index: int):
+        if self._lock_cboxes:
+            return
+        if index == -1:  # on clear
+            return
+        self._lock_cboxes = True
+        re_eval_channel = False
+        self._app_button.grey_icon()
+        if self.model.version != self._app_version_cbox.currentText():
+            self.model.lock_changes = True
+            self.model.version = self._app_version_cbox.currentText()
+            self.model.user = self.model.INVALID_DESCR  # invalidate, must be evaluated again for new version
+        if self.model.user != self._app_user_cbox.currentText():
+            self.model.lock_changes = True
+            if self.model.user == self.model.INVALID_DESCR:
+                self.model.update_from_cache()
+                # update user to match version
+                self._app_user_cbox.clear()  # reset cbox
+                users = self.model.users
+                if not users:
+                    users = self.model.INVALID_DESCR
+                self._app_user_cbox.addItems(users)
+            re_eval_channel = True  # re-eval channel. can't use INVALID_DESCR, since it is also a valid user choice
+            self.model.user = self._app_user_cbox.currentText()
+        if self.model.channel != self._app_channel_cbox.currentText() or re_eval_channel:
+            self.model.lock_changes = True
+            if re_eval_channel:
+                self.model.channel = self.model.INVALID_DESCR # eval for channels
+                # update channels to match version
+                self._app_channel_cbox.clear()  # reset cbox
+                self._app_channel_cbox.addItems(self.model.channels)
+                # add tooltip for channels, in case it is too long
+                for i in range(0, len(self.model.channels)):
+                    self._app_channel_cbox.setItemData(i+1, self.model.channels[i], Qt.ToolTipRole)
+                self._app_channel_cbox.setCurrentIndex(0)
+            else:
+                # remove entry NA after setting something other - NA should always have index 0
+                if self._app_channel_cbox.itemText(0) == self.model.INVALID_DESCR:
+                    self._app_channel_cbox.removeItem(0)
+                # normal switch
+                self.model.lock_changes = False
+                self.model.channel = self._app_channel_cbox.currentText()
+                self._app_button.setToolTip(self.model.conan_ref)
+                self._app_button.set_icon(self.model.get_icon_path())
+                self.model.trigger_conan_update()
+                self._app_button.setToolTip(self.model.conan_ref)
+
+        self.model.save()
+        self.model.lock_changes = False
+        self._lock_cboxes = False
 
     def on_version_selected(self, index):
         if not self._app_version_cbox.isEnabled():
@@ -264,7 +321,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._eval_user()
         self.model.lock_changes = False
 
-
     def on_user_selected(self, index):
         """ This is callback is also called on cbox_add_items, so a workaround is needed"""
 
@@ -274,6 +330,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         if self.model.user == self._app_user_cbox.currentText():
             return
+        self.model.lock_changes = True
         self.model.user = self._app_user_cbox.currentText()
         self._eval_user()
 
@@ -300,7 +357,7 @@ class AppLink(QtWidgets.QVBoxLayout):
                 self._app_channel_cbox.setItemData(i+1, self.model.channels[i], Qt.ToolTipRole)
         self._app_channel_cbox.setCurrentIndex(0)
         self._app_button.setToolTip(self.model.conan_ref)
-        if self.model.channel is not INVALID_CONAN_REF:
+        if self.model.channel != "NA":
             self.model.trigger_conan_update()
         self.model.save()
         self.model.lock_changes = False
@@ -317,7 +374,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.grey_icon()
         # remove entry NA after setting something other - NA should always have index 0
         if index != 0 and self._app_channel_cbox.itemText(0) == self.model.INVALID_DESCR:
-           self._app_channel_cbox.removeItem(0)
+            self._app_channel_cbox.removeItem(0)
         self.model.channel = self._app_channel_cbox.currentText()
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon_path())
