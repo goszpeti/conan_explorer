@@ -203,6 +203,8 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     app.active_settings.set(DISPLAY_APP_CHANNELS, False) # disable, to check if a new app uses it
     app.active_settings.set(DISPLAY_APP_VERSIONS, True)  # disable, to check if a new app uses it
+    # preinstall ref, to see if link updates paths
+    app.conan_api.get_path_or_install(ConanFileReference.loads(TEST_REF), {})
 
     from pytestqt.plugin import _qapp_instance
     main_gui = main_window.MainWindow()
