@@ -252,8 +252,10 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count + 1
-    # this test sometimes errors in the ci on teardown
-    Logger.remove_qt_logger()
+    # wait until conan search finishes
+    vt = tab._edit_app_dialog._ui.conan_ref_line_edit._validator_thread
+    if vt and vt.is_alive():
+        vt.join()
 
 
 def test_multiple_apps_ungreying(base_fixture, qtbot):

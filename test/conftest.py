@@ -33,17 +33,19 @@ def base_fixture(request):
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
 
     yield paths
+    # Teardown
 
-    # teardown
-
+    # remove logger, so the logger doesn't log into nonexistant qt gui
+    logger.Logger.remove_qt_logger()
+    # finish worker - otherwise errors and crashes will occur!
     if app.conan_worker:
         app.conan_worker.finish_working()
-    # reset singletons
 
     # delete cache file
     if (base_path / ConanInfoCache.CACHE_FILE_NAME).exists():
         os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
 
+    # reset singletons
     logger.Logger._instance = None
     app.conan_worker = None
     app.conan_api = None

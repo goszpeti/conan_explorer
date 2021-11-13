@@ -104,6 +104,10 @@ def test_EditAppDialog_save_values(base_fixture, qtbot):
     for opt in model.conan_options:
         assert f"{opt}={model.conan_options[opt]}" in conan_options_text
 
+    vt = diag._ui.conan_ref_line_edit._validator_thread
+    if vt and vt.is_alive():
+        vt.join()
+
 def test_AppLink_open(base_fixture, qtbot):
     """
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
