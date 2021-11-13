@@ -724,7 +724,6 @@ p, li { white-space: pre-wrap; }
      <string>File</string>
     </property>
     <addaction name="menu_open_config_file"/>
-    <addaction name="menu_cleanup_cache"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -735,7 +734,15 @@ p, li { white-space: pre-wrap; }
     <addaction name="menu_toggle_display_channels"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuConan">
+    <property name="title">
+     <string>Conan</string>
+    </property>
+    <addaction name="menu_cleanup_cache"/>
+    <addaction name="menu_remove_locks"/>
+   </widget>
    <addaction name="menu_file"/>
+   <addaction name="menuConan"/>
    <addaction name="menuView"/>
    <addaction name="menu_help"/>
   </widget>
@@ -822,7 +829,7 @@ p, li { white-space: pre-wrap; }
     </layout>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="status_bar"/>
   <action name="menu_about_action">
    <property name="text">
     <string>About</string>
@@ -870,11 +877,6 @@ p, li { white-space: pre-wrap; }
     <string>Clean Local Cache</string>
    </property>
   </action>
-  <action name="menu_add_remove_conan_link">
-   <property name="text">
-    <string>Add/Remove Conan Link</string>
-   </property>
-  </action>
   <action name="menu_toggle_display_users">
    <property name="checkable">
     <bool>true</bool>
@@ -884,6 +886,11 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Display users dropdown</string>
+   </property>
+  </action>
+  <action name="menu_remove_locks">
+   <property name="text">
+    <string>Remove Locks</string>
    </property>
   </action>
  </widget>

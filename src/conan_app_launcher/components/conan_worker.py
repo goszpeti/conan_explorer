@@ -14,7 +14,7 @@ else:
     except ImportError:
         from typing_extensions import TypedDict
 
-from conan_app_launcher import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH
+from conan_app_launcher import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
 from conan_app_launcher.logger import Logger
 from conans.model.ref import ConanFileReference
 
@@ -41,7 +41,7 @@ class ConanWorker():
         """ Starts the worker for all given elements. Should be called at start. """
         # fill up queue
         for ref in conan_elements:
-            if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:
+            if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:
                 self._conan_install_queue.put((ref["reference"], ref["options"], info_signal))
             self._conan_versions_queue.put((ref["reference"], info_signal))
 

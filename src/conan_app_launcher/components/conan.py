@@ -4,6 +4,8 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List
 
+from conans.client.output import ConanOutput
+
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
 else:
@@ -23,7 +25,7 @@ try:
 except Exception:
     pass
 
-from conan_app_launcher import (INVALID_CONAN_REF,
+from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path)
 from .conan_cache import ConanInfoCache
 from conan_app_launcher.logger import Logger
@@ -39,13 +41,29 @@ class ConanPkg(TypedDict, total=False):
     outdated: bool
 
 
+class LoggerWriter:
+    """
+    Dummy stream to log directly to a logger object, when writing in the stream.
+    Used to redirect custom stream form Conan. Adds a prefix to do some custom formatting in the Logger.
+    """
+    def __init__(self, level, prefix: str):
+        self.level = level
+        self._prefix = prefix
+
+    def write(self, message: str):
+        if message != '\n':
+            self.level(self._prefix + message.strip("\n"))
+
+    def flush(self):
+        """ For interface compatiblity """
+        pass
+
 class ConanApi():
     """ Wrapper around ConanAPIV1 """
 
     def __init__(self):
         self.conan: ConanAPIV1
         self.client_cache: ClientCache
-        self.user_io: UserIO
         self.info_cache: ConanInfoCache
         self._short_path_root = Path("NULL")
         self.init_api()
@@ -53,14 +71,21 @@ class ConanApi():
     def init_api(self):
         """ Instantiate the api. In some cases it needs to be instatiated anew. """
         self.conan, _, _ = ConanAPIV1.factory()
+        self.conan.user_io = UserIO(out=ConanOutput(LoggerWriter(
+            Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
         self.conan.create_app()
-        self.user_io = self.conan.user_io
-        self.user_io.disable_input()
+        self.conan.user_io.disable_input() # error on inputs - nowhere to enter
         if self.conan.app:
             self.client_cache = self.conan.app.cache
         else:
             raise NotImplementedError
+        # don't hang on startup
+        self.remove_locks()
         self.info_cache = ConanInfoCache(base_path, self.get_all_local_refs())
+
+    def remove_locks(self):
+        self.conan.remove_locks()
+        Logger().info("Removed Conan cache locks.")
 
     def get_all_local_refs(self) -> List[ConanFileReference]:
         """ Returns all locally installed conan references """

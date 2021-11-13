@@ -4,7 +4,7 @@ from typing import Optional
 
 from PyQt5.QtCore import pyqtBoundSignal
 
-from conan_app_launcher import DEBUG_LEVEL, PKG_NAME
+from conan_app_launcher import CONAN_LOG_PREFIX, DEBUG_LEVEL, PKG_NAME
 
 
 class Logger(logging.Logger):
@@ -59,14 +59,20 @@ class Logger(logging.Logger):
         def __init__(self, update_signal: pyqtBoundSignal):
             super().__init__(logging.DEBUG)
             self._update_signal = update_signal
-        def emit(self, record):
+
+        def emit(self, record: logging.LogRecord):
             # don't access the qt object directly, since updates will only work
             # correctly in main loop, so instead send a PyQt Signal with the text to the Ui
-            record = self.format(record)
-            if record and self._lock:
+            
+            if not record.message.startswith(CONAN_LOG_PREFIX):
+                message = self.format(record)
+            else:
+                # remove log formatting for conan logs
+                message = record.message.replace(CONAN_LOG_PREFIX, "")
+            if message and self._lock:  # one log at a time
                 with self._lock:
                     try:
-                        self._update_signal.emit(record)
+                        self._update_signal.emit(message)
                     except Exception:
                         print("QT Logger errored") # don't log here with logger...
 
