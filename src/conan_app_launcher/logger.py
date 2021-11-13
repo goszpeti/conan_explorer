@@ -4,7 +4,7 @@ from typing import Optional
 
 from PyQt5.QtCore import pyqtBoundSignal
 
-from conan_app_launcher import DEBUG_LEVEL, PROG_NAME
+from conan_app_launcher import DEBUG_LEVEL, PKG_NAME
 
 
 class Logger(logging.Logger):
@@ -31,7 +31,7 @@ class Logger(logging.Logger):
         root = logging.getLogger()
         root.setLevel(logging.ERROR)
 
-        logger = logging.getLogger(PROG_NAME)
+        logger = logging.getLogger(PKG_NAME)
         logger.setLevel(logging.DEBUG)
         log_debug_level = logging.INFO
         if DEBUG_LEVEL > 0:

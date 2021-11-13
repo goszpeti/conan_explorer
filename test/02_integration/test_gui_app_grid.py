@@ -287,8 +287,6 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
             elif test_app.model.name in ["App1 wrong path", "App2"]:
                 assert test_app._app_button._greyed_out
 
-
-
 def test_open_file_explorer_on_AppLink(base_fixture, qtbot):
     # TODO
     pass

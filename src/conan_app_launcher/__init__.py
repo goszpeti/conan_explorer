@@ -3,15 +3,19 @@ Contains all basic constants used in the application.
 No imports from own modules allowed!
 """
 import os
+from importlib.metadata import distribution
 from pathlib import Path
 from typing import TypeVar
 
 PathLike = TypeVar("PathLike", str, Path)
 
 ### Global constants ###
-from .__version__ import __version__
+PKG_NAME = "conan_app_launcher"
+pkg_info = distribution(PKG_NAME)
+__version__ = pkg_info.version
+REPO_URL = pkg_info.metadata.get("home-page", "")
+AUTHOR = pkg_info.metadata.get("author", "")
 
-PROG_NAME = "conan_app_launcher"
 ICON_SIZE = 60
 INVALID_CONAN_REF = "Invalid/NA@NA/NA"
 SETTINGS_FILE_NAME = ".cal_config"

@@ -4,7 +4,7 @@ import sys
 import tempfile
 from typing import TYPE_CHECKING, Optional
 
-from conan_app_launcher import (PROG_NAME, SETTINGS_FILE_NAME, __version__,
+from conan_app_launcher import (PKG_NAME, SETTINGS_FILE_NAME, __version__,
                                 asset_path, user_save_path)
 from conan_app_launcher.components import ConanApi, ConanWorker
 from conan_app_launcher.settings import (SETTINGS_INI_TYPE,
@@ -51,7 +51,7 @@ def main():
     # otherwise conan will not work
     if sys.executable.endswith("pythonw.exe"):
         sys.stdout = open(os.devnull, "w")
-        sys.stderr = open(os.path.join(tempfile.gettempdir(), "stderr-" + PROG_NAME), "w")
+        sys.stderr = open(os.path.join(tempfile.gettempdir(), "stderr-" + PKG_NAME), "w")
 
     # apply Qt attributes (only at init possible)
     QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
@@ -70,5 +70,5 @@ def main():
     main_window.show()
 
     qt_app.exec_()
-    if conan_worker:  # cancel conan worker tasks on exit
-        conan_worker.finish_working()
+    if conan_worker:  # cancel conan worker tasks on exit - this can possibly cancel an ongoing install task
+        conan_worker.finish_working(10)

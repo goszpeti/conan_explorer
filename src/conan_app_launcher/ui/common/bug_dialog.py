@@ -6,7 +6,7 @@ import platform
 import sys
 import traceback
 
-from conan_app_launcher import __version__, base_path
+from conan_app_launcher import REPO_URL, __version__, base_path
 from PyQt5 import QtCore, QtWidgets
 
 bug_dialog_text = f"""
@@ -33,6 +33,28 @@ Add any other context about the problem here.
 """
 
 
+def bug_reporting_dialog(excvalue, tb):
+    import urllib.parse # late import hopefully we don't need this
+    title = urllib.parse.quote("Application Crash on <>")
+    body = urllib.parse.quote(f"{bug_dialog_text}\n**Stacktrace**:\n" +
+                              f"{excvalue}\n" +
+                              "\n".join(traceback.format_tb(tb, limit=None)))
+    new_issue_with_info_text = f"{REPO_URL}/issues/new?title={title}&body={body}&labels=bug"
+    html_crash_text = f'<html><head/><body><p> \
+        Oops, something went wrong!\
+        To help improve the program, please post a <a href="{new_issue_with_info_text}"> \
+        <span style=" text-decoration: underline color:  # 0000ff;" \
+        >new github issue</span></a> and describe, how the crash occured.'
+    dialog = QtWidgets.QMessageBox(parent=None)
+    dialog.setWindowTitle("Application Crash - Bug Report")
+    dialog.setText(html_crash_text)
+    dialog.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
+    dialog.setDetailedText("\n".join(traceback.format_tb(tb, limit=None)))
+    dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
+    dialog.setIcon(QtWidgets.QMessageBox.Warning)
+    dialog.exec_()
+    return dialog # for testing
+
 def show_bug_dialog_exc_hook(exctype, excvalue, tb):
     print("Application crashed")
     error_text = f"ERROR: {excvalue}"
@@ -43,23 +65,7 @@ def show_bug_dialog_exc_hook(exctype, excvalue, tb):
     print(error_text)
     traceback.print_tb(tb, limit=10)
     try:
-        import urllib.parse
-        title = urllib.parse.quote("Application Crash on <>")
-        body = urllib.parse.quote(f"{bug_dialog_text}\n**Stacktrace**:\n" +
-                                "\n".join(traceback.format_tb(tb, limit=None)))
-        new_issue_with_info_text = f"https://github.com/goszpeti/conan_app_launcher/issues/new?title={title}&body={body}&labels=bug"
-        html_crash_text = f'<html><head/><body><p> \
-        Oops, something went wrong!\
-        To help improve the program, please post a <a href="{new_issue_with_info_text}"><span style=" text-decoration: underline \
-        color:  # 0000ff;">new github issue</span></a> and describe, how the crash occured.'
-        msg = QtWidgets.QMessageBox(parent=None)
-        msg.setWindowTitle("Application Crash - Bug Report")
-        msg.setText(html_crash_text)
-        msg.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
-        msg.setDetailedText("\n".join(traceback.format_tb(tb, limit=None)))
-        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        msg.setIcon(QtWidgets.QMessageBox.Warning)
-        msg.exec_()
+        bug_reporting_dialog(excvalue, tb)
     except Exception:
         # gui does not work anymore - nothing to do
         sys.exit(2)
