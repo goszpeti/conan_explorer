@@ -129,7 +129,7 @@ class ConanInfoCache():
         """ Update the cache with the path of a local package path. """
         if self._local_packages.get(str(conan_ref)) == str(folder):
             return
-        self._local_packages.update({str(conan_ref): str(folder)})
+        self._local_packages.update({str(conan_ref): str(folder.as_posix())})
         self._save()
 
     def invalidate_remote_package(self, conan_ref: ConanFileReference):
