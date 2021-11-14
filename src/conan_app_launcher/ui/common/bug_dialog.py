@@ -35,10 +35,9 @@ Add any other context about the problem here.
 
 def bug_reporting_dialog(excvalue, tb):
     import urllib.parse # late import hopefully we don't need this
+    error_text = f"{excvalue}\n" + "\n".join(traceback.format_tb(tb, limit=None))
     title = urllib.parse.quote("Application Crash on <>")
-    body = urllib.parse.quote(f"{bug_dialog_text}\n**Stacktrace**:\n" +
-                              f"{excvalue}\n" +
-                              "\n".join(traceback.format_tb(tb, limit=None)))
+    body = urllib.parse.quote(f"{bug_dialog_text}\n**Stacktrace**:\n" + error_text)
     new_issue_with_info_text = f"{REPO_URL}/issues/new?title={title}&body={body}&labels=bug"
     html_crash_text = f'<html><head/><body><p> \
         Oops, something went wrong!\
@@ -49,7 +48,7 @@ def bug_reporting_dialog(excvalue, tb):
     dialog.setWindowTitle("Application Crash - Bug Report")
     dialog.setText(html_crash_text)
     dialog.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
-    dialog.setDetailedText("\n".join(traceback.format_tb(tb, limit=None)))
+    dialog.setDetailedText(error_text)
     dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
     dialog.setIcon(QtWidgets.QMessageBox.Warning)
     dialog.exec_()
