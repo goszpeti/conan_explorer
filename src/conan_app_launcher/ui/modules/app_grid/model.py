@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Callable, List, Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (INVALID_CONAN_REF, TEMP_ICON_DIR_NAME,
-                                USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH,
-                                USE_LOCAL_INTERNAL_CACHE, asset_path)
+                                USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
+                                USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH, asset_path)
 from conan_app_launcher.components.icon import extract_icon
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
@@ -85,9 +85,9 @@ class UiAppLinkModel(UiAppLinkConfig):
         # get all info from cache
         self.set_available_packages(app.conan_api.info_cache.get_similar_pkg_refs(
             self._conan_file_reference.name, user="*"))
-        if USE_LOCAL_INTERNAL_CACHE:
+        if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
             self.set_package_info(app.conan_api.info_cache.get_local_package_path(self._conan_file_reference))
-        elif not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH:  # last chance to get path
+        elif not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
             package_folder = app.conan_api.get_path_or_install(self._conan_file_reference, self.conan_options)
             self.set_package_info(package_folder)
 
@@ -291,7 +291,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         Usually to be called from conan worker.
         """
 
-        if USE_LOCAL_INTERNAL_CACHE:
+        if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
             if self._package_folder != package_folder:
                 app.conan_api.info_cache.update_local_package_path(self._conan_file_reference, package_folder)
         self._package_folder = package_folder

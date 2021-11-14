@@ -2,13 +2,11 @@ import os
 import platform
 import sys
 import tempfile
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from conan_app_launcher import (PKG_NAME, SETTINGS_FILE_NAME, __version__,
-                                asset_path, user_save_path)
+from conan_app_launcher import PKG_NAME, SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
 from conan_app_launcher.components import ConanApi, ConanWorker
-from conan_app_launcher.settings import (SETTINGS_INI_TYPE,
-                                         settings_factory, SettingsInterface)
+from conan_app_launcher.settings import SETTINGS_INI_TYPE, settings_factory, SettingsInterface
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import MainWindow
@@ -19,8 +17,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 
 try:
-    # this is a workaround for Windows, so that on the taskbar the
-    # correct icon will be shown (and not the default python icon)
+    # Workaround for Windows, so that on the taskbar the
+    # correct icon will be shown (and not the default python icon).
     from PyQt5.QtWinExtras import QtWin
     MY_APP_ID = 'ConanAppLauncher.' + __version__
     QtWin.setCurrentProcessExplicitAppUserModelID(MY_APP_ID)
@@ -35,9 +33,7 @@ active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, user_sa
 
 
 def main():
-    """
-    Start the Qt application and an all main components
-    """
+    """ Start the Qt application and an all main components """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
     from conan_app_launcher.ui.common.bug_dialog import \
         show_bug_dialog_exc_hook

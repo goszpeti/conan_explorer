@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
-
+from threading import Thread
 from conan_app_launcher import asset_path
 import conan_app_launcher.app as app  # using gobal module pattern
 
+from conan_app_launcher.ui.common import Worker
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (open_in_file_manager,
                                            run_file)
@@ -19,12 +20,13 @@ Qt = QtCore.Qt
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
 
-
-class LocalConanPackageExplorer():
+class LocalConanPackageExplorer(QtCore.QObject):
     def __init__(self, main_window: "MainWindow"):
+        super().__init__()
         self._main_window = main_window
         self.pkg_sel_model = None
         self.fs_model = None
+        self._init_model_thread = None
 
         main_window.ui.package_select_view.header().setVisible(True)
         main_window.ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
@@ -32,16 +34,11 @@ class LocalConanPackageExplorer():
         main_window.ui.package_select_view.customContextMenuRequested.connect(
             self.on_selection_context_menu_requested)
         self._init_selection_context_menu()
-        main_window.ui.refresh_button.clicked.connect(self.on_refresh_clicked)
+
+        main_window.ui.refresh_button.clicked.connect(self.on_pkg_refresh_clicked)
         main_window.ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
-        main_window.ui.main_toolbox.currentChanged.connect(self.on_changed)
+        main_window.ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
     # Selection view context menu
-
-    def on_changed(self, index):
-        self.refresh_pkg_selection_view(update=False)
-
-    def on_refresh_clicked(self):
-        self.refresh_pkg_selection_view(update=True)
 
     def _init_selection_context_menu(self):
         self.select_cntx_menu = QtWidgets.QMenu()
@@ -59,6 +56,12 @@ class LocalConanPackageExplorer():
 
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
+
+    def on_toolbox_changed(self, index):
+        self.refresh_pkg_selection_view(update=False)
+
+    def on_pkg_refresh_clicked(self):
+        self.refresh_pkg_selection_view(update=True)
 
     def get_selected_pkg_source_item(self) -> Optional[PackageTreeItem]:
         indexes = self._main_window.ui.package_select_view.selectedIndexes()
@@ -130,11 +133,37 @@ class LocalConanPackageExplorer():
         """
         if not update and self.pkg_sel_model: # loads only at first init
             return
-        self.pkg_sel_model = PkgSelectModel()
+        self.progress_dialog = QtWidgets.QProgressDialog(self._main_window)
+        self.progress_dialog.setLabelText("Reading Packages")
+        self.progress_dialog.setCancelButton(None)
+        #self.pg.setCancelButtonText("Abort")
+        self.progress_dialog.setRange(0,0)
+        self.progress_dialog.show()
+        self.worker = Worker(self.init_select_model)
+        if self._init_model_thread:
+           self._init_model_thread.exit()
+        self._init_model_thread = QtCore.QThread()
+        self.worker.moveToThread(self._init_model_thread)
+        self._init_model_thread.started.connect(self.worker.work)
+        self.worker.finished.connect(self.finish_select_model_init)
+        self.worker.finished.connect(self._init_model_thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self._init_model_thread.finished.connect(self._init_model_thread.deleteLater)
+        self._init_model_thread.start()
+
+    def finish_select_model_init(self):
         self.proxy_model = PackageFilter()
-        self.proxy_model.setSourceModel(self.pkg_sel_model)
-        self._main_window.ui.package_select_view.setModel(self.proxy_model)
-        self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
+        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        if self.pkg_sel_model:
+            self.proxy_model.setSourceModel(self.pkg_sel_model)
+            self._main_window.ui.package_select_view.setModel(self.proxy_model)
+            self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
+            self.progress_dialog.hide()
+        else:
+            Logger().error("Can't load local packages!")
+
+    def init_select_model(self):
+        self.pkg_sel_model = PkgSelectModel()
 
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace

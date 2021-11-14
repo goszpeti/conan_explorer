@@ -62,6 +62,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_toggle_display_users.triggered.connect(self.apply_display_users_setting_toggled)
         self.ui.menu_toggle_display_channels.triggered.connect(self.display_channels_setting_toggled)
         self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
+        self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
         self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
 
     def closeEvent(self, event):  # override QMainWindow
@@ -193,3 +194,4 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.refresh_button.setIcon(QtGui.QIcon(str(self._icons_path / "refresh.png")))
         self.ui.menu_cleanup_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
         self.ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))
+        self.ui.menu_remove_locks.setIcon(QtGui.QIcon(str(self._icons_path / "remove-lock.png")))
