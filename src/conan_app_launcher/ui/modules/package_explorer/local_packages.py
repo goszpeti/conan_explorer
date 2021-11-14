@@ -26,6 +26,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self._main_window = main_window
         self.pkg_sel_model = None
         self.fs_model = None
+        self._init_model_thread = None
 
         main_window.ui.package_select_view.header().setVisible(True)
         main_window.ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
@@ -33,6 +34,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         main_window.ui.package_select_view.customContextMenuRequested.connect(
             self.on_selection_context_menu_requested)
         self._init_selection_context_menu()
+
         main_window.ui.refresh_button.clicked.connect(self.on_pkg_refresh_clicked)
         main_window.ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
         main_window.ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
@@ -133,10 +135,13 @@ class LocalConanPackageExplorer(QtCore.QObject):
             return
         self.progress_dialog = QtWidgets.QProgressDialog(self._main_window)
         self.progress_dialog.setLabelText("Reading Packages")
+        self.progress_dialog.setCancelButton(None)
         #self.pg.setCancelButtonText("Abort")
         self.progress_dialog.setRange(0,0)
         self.progress_dialog.show()
         self.worker = Worker(self.init_select_model)
+        if self._init_model_thread:
+           self._init_model_thread.exit()
         self._init_model_thread = QtCore.QThread()
         self.worker.moveToThread(self._init_model_thread)
         self._init_model_thread.started.connect(self.worker.work)
