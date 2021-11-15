@@ -27,6 +27,9 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.pkg_sel_model = None
         self.fs_model = None
         self._init_model_thread = None
+        # TODO belongs in a model?
+        self._current_ref: Optional[str] = None # loaded conan ref
+        self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
 
         main_window.ui.package_select_view.header().setVisible(True)
         main_window.ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
@@ -179,6 +182,8 @@ class LocalConanPackageExplorer(QtCore.QObject):
         if source_item.type != PROFILE_TYPE:
             return
         conan_ref = self.get_selected_conan_ref()
+        self._current_ref = conan_ref
+        self._current_pkg = self.get_selected_conan_pkg_info()
         pkg_id = self.get_selected_conan_pkg_info().get("id", "")
         pkg_path = app.conan_api.get_package_folder(
             ConanFileReference.loads(conan_ref), pkg_id)
@@ -311,9 +316,9 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
     def on_add_app_link(self):
         file_path = Path(self._get_selected_pkg_file())
-        conan_ref = ConanFileReference.loads(self.get_selected_conan_ref())
+        conan_ref = ConanFileReference.loads(self._current_ref)
         # determine relpath from package
-        pkg_info = self.get_selected_conan_pkg_info()
+        pkg_info = self._current_pkg
         pkg_path = app.conan_api.get_package_folder(conan_ref, pkg_info.get("id", ""))
         rel_path = file_path.relative_to(pkg_path)
 
