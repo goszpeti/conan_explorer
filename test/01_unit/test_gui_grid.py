@@ -9,16 +9,16 @@ import tempfile
 from pathlib import Path
 from subprocess import check_output
 from time import sleep
-from conan_app_launcher import TEMP_ICON_DIR_NAME
 
 import conan_app_launcher.app as app
 import pytest
+from conan_app_launcher import TEMP_ICON_DIR_NAME
 from conan_app_launcher.settings import DISPLAY_APP_USERS
+from conan_app_launcher.ui.data import UiApplicationConfig, UiTabConfig
+from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
-from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
-    EditAppDialog
-from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkConfig,
-                                                          UiAppLinkModel)
+from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import EditAppDialog
+from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkConfig, UiAppLinkModel
 from conans.model.ref import ConanFileReference as CFR
 from PyQt5 import QtCore, QtWidgets
 
@@ -62,15 +62,22 @@ def test_EditAppDialog_display_values(base_fixture, qtbot):
     assert app_info.name == "test"
 
 
-def test_EditAppDialog_save_values(base_fixture, qtbot):
+def test_EditAppDialog_save_values(base_fixture, qtbot, mocker):
     """
     Test, if the entered data is written correctly.
     """
+
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico")
     app_info.executable = sys.executable
-    model = UiAppLinkModel().load(app_info, None)
+    
+    app_config = UiApplicationConfig(tabs=[UiTabConfig(apps=[app_info])])
+    from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
+
+    app_model = UiApplicationModel().load(app_config)
+
+    model = app_model.tabs[0].apps[0]
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
@@ -88,13 +95,19 @@ def test_EditAppDialog_save_values(base_fixture, qtbot):
     diag._ui.icon_line_edit.setText("//Myico.ico")
     diag._ui.args_line_edit.setText("--help -kw=value")
     diag._ui.conan_opts_text_edit.setText("a=b\nb=c")
+    app.conan_worker.finish_working()
 
     # the caller must call save_data manually
+
+    mock_version_func = mocker.patch(
+        'conan_app_launcher.components.conan_worker.ConanWorker.put_ref_in_version_queue')
+    mock_install_func = mocker.patch(
+        'conan_app_launcher.components.conan_worker.ConanWorker.put_ref_in_install_queue')
     diag.save_data()
 
     # assert that all infos where saved
     assert diag._ui.name_line_edit.text() == model.name
-    assert diag._ui.conan_ref_line_edit.text() == "zlib/1.2.11@_/_" # internal representation will strip @_/_
+    assert diag._ui.conan_ref_line_edit.text() == TEST_REF  # internal representation will strip @_/_
     assert diag._ui.exec_path_line_edit.text() == model.executable
     assert diag._ui.is_console_app_checkbox.isChecked() == model.is_console_application
     assert diag._ui.icon_line_edit.text() == model.icon
@@ -107,6 +120,12 @@ def test_EditAppDialog_save_values(base_fixture, qtbot):
     vt = diag._ui.conan_ref_line_edit._validator_thread
     if vt and vt.is_alive():
         vt.join()
+    app.conan_worker.finish_working()
+
+    # check, that the package info and the available versions are updated
+
+    mock_version_func.assert_called()
+    mock_install_func.assert_called()
 
 def test_AppLink_open(base_fixture, qtbot):
     """

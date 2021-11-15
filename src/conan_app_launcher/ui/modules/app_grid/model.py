@@ -72,7 +72,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         super().__init__(config.name, config.conan_ref, config.executable, config.icon,
                          config.is_console_application, config.args, config.conan_options)
-
+        self.lock_changes = False # unlock for futher use now that everything is loaded
         return self
 
     def save(self):
@@ -126,9 +126,12 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             app.conan_worker.put_ref_in_install_queue(
                 str(self._conan_ref), self.conan_options, self.parent.parent.conan_info_updated)
+            app.conan_worker.put_ref_in_version_queue(
+                str(self._conan_ref), self.parent.parent.conan_info_updated)
         except Exception as error:
             # errors happen fairly often, keep going
             Logger().warning(f"Conan reference invalid {str(error)}")
+        
 
     @property
     def version(self) -> str:

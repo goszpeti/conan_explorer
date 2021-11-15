@@ -231,13 +231,13 @@ def test_conan_worker(base_fixture, mocker):
     conan_refs: List[ConanWorkerElement] = [{"reference": "m4/1.4.19@_/_", "options": {}},
                 {"reference": "zlib/1.2.11@conan/stable", "options": {"shared": "True"}}]
 
-    mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
+    mock_func = mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
     conan_worker = ConanWorker(conan_api=ConanApi())
     conan_worker.update_all_info(conan_refs, None)
     time.sleep(3)
     conan_worker.finish_working()
 
-    conan_app_launcher.components.ConanApi.get_path_or_install.assert_called()
+    mock_func.assert_called()
 
     assert conan_worker._conan_install_queue.qsize() == 0
 

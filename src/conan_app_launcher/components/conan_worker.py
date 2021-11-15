@@ -49,8 +49,8 @@ class ConanWorker():
         self._start_install_worker()
         self._start_version_worker()
 
-    def put_ref_in_version_queue(self, conan_ref: str, versions_callback):
-        self._conan_versions_queue.put((conan_ref, versions_callback))
+    def put_ref_in_version_queue(self, conan_ref: str, info_signal: Optional[pyqtBoundSignal]):
+        self._conan_versions_queue.put((conan_ref, info_signal))
         self._start_version_worker()
 
     def put_ref_in_install_queue(self, conan_ref: str, conan_options: Dict[str, str], install_signal):

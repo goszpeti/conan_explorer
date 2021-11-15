@@ -1,5 +1,5 @@
 
-from typing import List
+from typing import List, Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, PathLike,
@@ -21,11 +21,10 @@ class UiApplicationModel(UiApplicationConfig, QtCore.QObject): # TODO needs to b
         UiApplicationConfig.__init__(self, *args, **kwargs)
         QtCore.QObject.__init__(self)
         self.tabs: List[UiTabModel]
-        self._ui_config_data: UiConfigInterface
+        self._ui_config_data: Optional[UiConfigInterface] = None
 
     def load(self, ui_config=UiApplicationConfig()) -> "UiApplicationModel":
         super().__init__(ui_config.tabs)
-
         # update conan info
         if app.conan_worker:
             app.conan_worker.finish_working(3)
@@ -39,7 +38,8 @@ class UiApplicationModel(UiApplicationConfig, QtCore.QObject): # TODO needs to b
         return self
 
     def save(self):
-        self._ui_config_data.save(self)
+        if self._ui_config_data:
+            self._ui_config_data.save(self)
 
     def loadf(self, config_source: str) -> "UiApplicationModel":
         # empty ui config, create it in user path
