@@ -135,13 +135,11 @@ class LocalConanPackageExplorer(QtCore.QObject):
             return
         self.progress_dialog = QtWidgets.QProgressDialog(self._main_window)
         self.progress_dialog.setLabelText("Reading Packages")
+        self.progress_dialog.setWindowTitle("Loading")
         self.progress_dialog.setCancelButton(None)
-        #self.pg.setCancelButtonText("Abort")
         self.progress_dialog.setRange(0,0)
         self.progress_dialog.show()
         self.worker = Worker(self.init_select_model)
-        if self._init_model_thread:
-           self._init_model_thread.exit()
         self._init_model_thread = QtCore.QThread()
         self.worker.moveToThread(self._init_model_thread)
         self._init_model_thread.started.connect(self.worker.work)
