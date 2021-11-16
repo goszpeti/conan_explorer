@@ -268,7 +268,10 @@ class UiAppLinkModel(UiAppLinkConfig):
             icon_path = self._package_folder / self._icon
         else:  # absolute path
             icon_path = Path(self._icon)
-        icon_path = icon_path.resolve()
+        try:
+            icon_path = icon_path.resolve()
+        except Exception as e:
+            Logger().debug(f"Can't reslolve path of {str(icon_path)}")
         return icon_path
 
     def get_icon(self) -> QIcon:
