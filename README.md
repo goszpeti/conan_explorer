@@ -38,6 +38,7 @@ App Grid:
 
 Local Package Explorer:
 - view for browsing through installed packages
+- understand package settings at a glance from a shortened representation, e.g. Linux_x64_ggc7
 - supports copy/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan workflow
 
 
@@ -70,7 +71,7 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 ## Toolchain
 
 This project uses Python with Qt as a frontend using the PyQt integration.
-IDE configuration is available for VsCode.
+An IDE configuration is available for VsCode.
 
 ## Licenses of used libraries and code
 
@@ -84,7 +85,7 @@ Agreement for Icons8](https://icons8.com/vue-static/landings/pricing/icons8-lice
 * Conan by JFrog LTD under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 * jsonschema by Julian Berman under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 
-##### PYpi backports for older Python versions
+##### PyPi backports for older Python versions
 * importlib-metadata by Jason R. Coombs under [ Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * typing-extensions by Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee under [Python Software Foundation License(PSF)](https://docs.python.org/3/license.html)
 * dataclasses by Eric V. Smith under [ Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
