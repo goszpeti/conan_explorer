@@ -1,15 +1,11 @@
-import os
-import platform
-import struct
 from pathlib import Path
-import sys
-from PyQt5.QtGui import QIcon, QPixmap
-import pefile
-from conan_app_launcher.logger import Logger
 
-from PyQt5.QtWidgets import QFileIconProvider
-from PyQt5.QtCore import QFileInfo, Qt
 from conan_app_launcher import ICON_SIZE
+from conan_app_launcher.logger import Logger
+from PyQt5.QtCore import QFileInfo, Qt
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import QFileIconProvider
+
 
 def get_icon_from_image_file(image_path: Path) -> QIcon:
     if image_path.suffix == ".ico":
@@ -19,6 +15,7 @@ def get_icon_from_image_file(image_path: Path) -> QIcon:
         icon = QPixmap.fromImage(pixmap).scaled(
             ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation)
         return QIcon(icon)
+
 
 def extract_icon(file_path: Path) -> QIcon:
     """
@@ -34,4 +31,3 @@ def extract_icon(file_path: Path) -> QIcon:
     else:
         Logger().debug("File for icon extraction does not exist.")
     return QIcon()
-
