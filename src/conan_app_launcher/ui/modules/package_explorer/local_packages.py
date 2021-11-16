@@ -117,7 +117,11 @@ class LocalConanPackageExplorer(QtCore.QObject):
         msg.setIcon(QtWidgets.QMessageBox.Question)
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True, quiet=False)
+            try:
+                app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True)
+            except Exception as e:
+                Logger().error(f"Error while removing package {conan_ref}: {str(e)}")
+
             # Clear view, if this pkg is selected
             if self.fs_model:
                 try:
@@ -319,6 +323,9 @@ class LocalConanPackageExplorer(QtCore.QObject):
         conan_ref = ConanFileReference.loads(self._current_ref)
         # determine relpath from package
         pkg_info = self._current_pkg
+        if not pkg_info:
+            Logger().error("Error on trying to adding Applink: No package info found.")
+            return
         pkg_path = app.conan_api.get_package_folder(conan_ref, pkg_info.get("id", ""))
         rel_path = file_path.relative_to(pkg_path)
 

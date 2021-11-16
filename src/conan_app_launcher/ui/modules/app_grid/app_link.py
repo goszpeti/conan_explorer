@@ -149,7 +149,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def _apply_new_config(self):
         self._app_name_label.setText(self.model.name)
         self._app_button.setToolTip(self.model.conan_ref)
-        self._app_button.set_icon(self.model.get_icon_path())
+        self._app_button.set_icon(self.model.get_icon())
 
         self._lock_cboxes = True
         self._app_channel_cbox.clear()
@@ -236,7 +236,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_channel_cbox.setItemData(i, self.model.channels[i], Qt.ToolTipRole)
         if self.model.get_executable_path().is_file():
             Logger().debug(f"Ungreying {self.model.name}")
-            self._app_button.set_icon(self.model.get_icon_path())
+            self._app_button.set_icon(self.model.get_icon())
             self._app_button.ungrey_icon()
 
     def update_versions_cbox_visible(self):
@@ -304,7 +304,7 @@ class AppLink(QtWidgets.QVBoxLayout):
                 self.model.lock_changes = False
                 self.model.channel = self._app_channel_cbox.currentText()
                 self._app_button.setToolTip(self.model.conan_ref)
-                self._app_button.set_icon(self.model.get_icon_path())
+                self._app_button.set_icon(self.model.get_icon())
                 self.model.trigger_conan_update()
                 self._app_button.setToolTip(self.model.conan_ref)
 

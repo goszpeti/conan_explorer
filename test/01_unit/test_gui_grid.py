@@ -5,24 +5,24 @@ using the whole application (standalone).
 import os
 import platform
 import sys
-import tempfile
 from pathlib import Path
 from subprocess import check_output
 from time import sleep
+import pytest
+from PyQt5 import QtCore, QtWidgets
+Qt = QtCore.Qt
 
 import conan_app_launcher.app as app
-import pytest
-from conan_app_launcher import TEMP_ICON_DIR_NAME
 from conan_app_launcher.settings import DISPLAY_APP_USERS
 from conan_app_launcher.ui.data import UiApplicationConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
-from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import EditAppDialog
-from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkConfig, UiAppLinkModel
+from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
+    EditAppDialog
+from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkConfig,
+                                                          UiAppLinkModel)
 from conans.model.ref import ConanFileReference as CFR
-from PyQt5 import QtCore, QtWidgets
 
-Qt = QtCore.Qt
 
 TEST_REF = "zlib/1.2.11@_/_"
 

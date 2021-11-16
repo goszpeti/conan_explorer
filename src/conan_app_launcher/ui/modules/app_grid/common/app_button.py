@@ -19,13 +19,12 @@ class AppButton(QtWidgets.QPushButton):
     def __init__(self, parent, image: Path = None, flags=Qt.WindowFlags()):
         super().__init__(parent=parent)
 
-        self._image = image
         self._greyed_out = True  # Must be ungreyed, when available
         self._grey_effect = QtWidgets.QGraphicsColorizeEffect()
         self._grey_effect.setColor(QtGui.QColor(128, 128, 128))
         self.setGraphicsEffect(self._grey_effect)
 
-        self.set_icon(image)
+        self.set_icon_from_file(image)
         self.setFlat(True)
         self.setIconSize(QtCore.QSize(ICON_SIZE, ICON_SIZE))
         self.grey_icon()
@@ -39,7 +38,10 @@ class AppButton(QtWidgets.QPushButton):
         self._greyed_out = True  # no context menu
         self._grey_effect.setEnabled(True)
 
-    def set_icon(self, image: Optional[Path]):
+    def set_icon(self, icon: QtGui.QIcon):
+        self.setIcon(icon)
+
+    def set_icon_from_file(self, image: Optional[Path]):
         Logger().debug("Setting icon to " + str(image))
         if not image or not image.exists():
             return
