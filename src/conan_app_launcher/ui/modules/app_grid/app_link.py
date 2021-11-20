@@ -236,6 +236,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         # add tooltip for channels, in case it is too long
         for i in range(0, len(self.model.channels)):
             self._app_channel_cbox.setItemData(i, self.model.channels[i], Qt.ToolTipRole)
+        self.update_icon()
+
+    def update_icon(self):
         if self.model.get_executable_path().is_file():
             Logger().debug(f"Ungreying {self.model.name}")
             self._app_button.set_icon(self.model.get_icon())
@@ -307,9 +310,9 @@ class AppLink(QtWidgets.QVBoxLayout):
                 self.model.channel = self._app_channel_cbox.currentText()
                 self._app_button.setToolTip(self.model.conan_ref)
                 self._app_button.set_icon(self.model.get_icon())
-                self.model.trigger_conan_update()
+                #self.model.trigger_conan_update()
                 self._app_button.setToolTip(self.model.conan_ref)
-
+        self.update_icon()
         self.model.save()
         self.model.lock_changes = False
         self._lock_cboxes = False

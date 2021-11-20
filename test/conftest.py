@@ -1,15 +1,45 @@
 import os
+import subprocess
 import tempfile
+import time
 from pathlib import Path
 from shutil import copy
-
+from threading import Thread
+import random
 import conan_app_launcher.app as app
-from conan_app_launcher.components import ConanApi, ConanWorker, ConanInfoCache
 import conan_app_launcher.logger as logger
 import pytest
-from conan_app_launcher import SETTINGS_FILE_NAME, asset_path, base_path, user_save_path
+from conan_app_launcher import (SETTINGS_FILE_NAME, asset_path, base_path,
+                                user_save_path)
+from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.settings import *
+import configparser
+conan_server_thread =  None
+# setup conan test server
+character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
 
+def run_conan_server():
+    proc = subprocess.Popen("conan_server")
+    proc.communicate()
+
+@pytest.fixture # (scope="session", autouse=True)
+def start_conan_server():
+    password = "".join(random.sample(character_string, 12))
+    # configre server config file
+    config_path = Path.home() / ".conan_server" / "server.conf"
+    cp = configparser.ConfigParser()
+    cp.read(str(config_path))
+    # add write permissions
+    cp["write_permissions"]["*/*@*/*"] = "*"
+    with config_path.open('w', encoding="utf8") as fd:
+        cp.write(fd)
+    global conan_server_thread
+    if not conan_server_thread:
+        conan_server_thread = Thread(name="ConanServer", daemon=True, target=run_conan_server)
+        conan_server_thread.start()
+    time.sleep(1)
+    os.system("conan remote add local http://0.0.0.0:9300/ false")
+    os.system("conan user demo -r local -p demo") # todo autogenerate and config
 
 class PathSetup():
     """ Get the important paths form the source repo. """
