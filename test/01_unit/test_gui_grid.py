@@ -225,6 +225,11 @@ def test_AppLink_cbox_switch(base_fixture, start_conan_server, qtbot):
 
     qtbot.waitExposed(root_obj)
 
+    # wait for version update
+    if app.conan_worker:
+        app.conan_worker.finish_working()
+    sleep(1)
+
     # check initial state
     assert app_link._app_version_cbox.count() == 2
     assert app_link._app_version_cbox.itemText(0) == "1.0.0"
@@ -257,6 +262,10 @@ def test_AppLink_cbox_switch(base_fixture, start_conan_server, qtbot):
 
     # change user
     app_link._app_channel_cbox.setCurrentIndex(1)
+    # wait for version update
+    if app.conan_worker:
+        app.conan_worker.finish_working()
+    sleep(1)
     # setting a channel removes NA entry and entry becomes -1
     assert app_link._app_channel_cbox.itemText(0) == "channel5"
     assert app_link._app_channel_cbox.itemText(1) == "channel6"
