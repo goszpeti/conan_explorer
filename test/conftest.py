@@ -24,9 +24,11 @@ def run_conan_server():
 
 @pytest.fixture # (scope="session", autouse=True)
 def start_conan_server():
-    password = "".join(random.sample(character_string, 12))
-    # configre server config file
     config_path = Path.home() / ".conan_server" / "server.conf"
+    os.makedirs(str(config_path.parent), exist_ok=True)
+    #password = "".join(random.sample(character_string, 12))
+    os.system("conan_server --migrate") # call server once to create a config file
+    # configre server config file
     cp = configparser.ConfigParser()
     cp.read(str(config_path))
     # add write permissions
