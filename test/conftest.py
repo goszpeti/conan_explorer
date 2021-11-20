@@ -25,7 +25,7 @@ character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567
 def run_conan_server():
     if platform.system() == "Windows":
         # alow server port for private connections
-        args=f' advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
+        args=f'advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
         ctypes.windll.shell32.ShellExecuteW(None, "runas", "netsh", args, None, 1)
 
     proc = subprocess.Popen("conan_server")

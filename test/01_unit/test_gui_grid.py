@@ -193,6 +193,8 @@ def test_AppLink_cbox_switch(base_fixture, start_conan_server, qtbot):
     """
     Test, that changing the version resets the channel and user correctly
     """
+    if platform.system() == "Windows": # TODO: conan server does not work on Windows, probably because of the firewall
+        pytest.skip()
     # all versions have different user and channel names, so we can distinguish them
     conanfile = str(base_fixture.testdata_path / "conan" / "multi" / "conanfile.py")
     create_packages = True

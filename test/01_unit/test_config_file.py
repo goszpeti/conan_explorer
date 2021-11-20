@@ -5,6 +5,7 @@ from pathlib import Path
 
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
 from conans.model.ref import ConanFileReference
+from tempfile import NamedTemporaryFile
 
 
 def test_new_filename_is_created(base_fixture):
@@ -12,10 +13,10 @@ def test_new_filename_is_created(base_fixture):
     Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
-    new_file_path = tempfile.mktemp()
+    new_file_path = Path(tempfile.gettempdir()) / "newfile.config"
     config = JsonUiConfig(new_file_path).load()
     assert config.tabs == []
-    assert Path(new_file_path).exists()
+    assert new_file_path.exists()
 
 
 def test_read_correct_file(base_fixture, ui_config_fixture):
