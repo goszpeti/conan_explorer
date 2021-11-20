@@ -30,6 +30,8 @@ def start_conan_server():
     cp = configparser.ConfigParser()
     cp.read(str(config_path))
     # add write permissions
+    if "write_permissions" not in cp:
+        cp.add_section("write_permissions")
     cp["write_permissions"]["*/*@*/*"] = "*"
     with config_path.open('w', encoding="utf8") as fd:
         cp.write(fd)

@@ -7,4 +7,3 @@ pytest-cov
 pytest-mock
 pytest-qt
 PyQt5-stubs
-conan-server
