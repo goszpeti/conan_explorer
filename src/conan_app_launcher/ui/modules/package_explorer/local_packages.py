@@ -144,6 +144,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.progress_dialog.setLabelText("Reading Packages")
         self.progress_dialog.setWindowTitle("Loading")
         self.progress_dialog.setCancelButton(None)
+        self.progress_dialog.setModal(True) # otherwise user can trigger it twice -> crash
         self.progress_dialog.setRange(0,0)
         self.progress_dialog.show()
         self.worker = Worker(self.init_select_model)

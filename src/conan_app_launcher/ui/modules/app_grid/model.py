@@ -220,6 +220,9 @@ class UiAppLinkModel(UiAppLinkConfig):
         for ref in self._available_refs:
             if ref.version == self.version and self._convert_to_disp_user(ref.user) == self.user:
                 channels.add(self.convert_to_disp_channel(ref.channel))
+        # extra handling for only one existing channel found
+        if len(channels) == 2 and self.INVALID_DESCR in channels:
+            channels.remove(self.INVALID_DESCR)
         channels_list = list(channels)
         channels_list.sort()
         return channels_list

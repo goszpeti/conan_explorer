@@ -174,9 +174,11 @@ class AppLink(QtWidgets.QVBoxLayout):
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
             self._edit_app_dialog.save_data()
-            self._apply_new_config()
+            # grey icon, so update from cache can ungrey it, if the path is correct
             self._app_button.grey_icon()
             self.model.update_from_cache()
+            # now apply gui config with resolved paths
+            self._apply_new_config()
 
     def remove(self):
         # last link can't be deleted! # TODO dialog
