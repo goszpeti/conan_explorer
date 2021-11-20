@@ -1,13 +1,14 @@
 import platform
-import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
 
+from PyQt5.QtGui import QIcon
+
 import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher import (INVALID_CONAN_REF, TEMP_ICON_DIR_NAME,
+from conan_app_launcher import (INVALID_CONAN_REF,
                                 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
                                 USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH, asset_path)
-from conan_app_launcher.components.icon import extract_icon
+from conan_app_launcher.ui.common.icon import extract_icon, get_icon_from_image_file
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
@@ -52,7 +53,6 @@ class UiAppLinkModel(UiAppLinkConfig):
         self.conan_options = {}
         self._package_folder = Path("NULL")
         self._executable_path = Path("NULL")
-        self._icon_path = Path("NULL")
         self._conan_ref = INVALID_CONAN_REF
         self._conan_file_reference = ConanFileReference.loads(self._conan_ref)
         self._available_refs: List[ConanFileReference] = []
@@ -72,7 +72,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         super().__init__(config.name, config.conan_ref, config.executable, config.icon,
                          config.is_console_application, config.args, config.conan_options)
-        self.lock_changes = False # unlock for futher use now that everything is loaded
+        self.lock_changes = False  # unlock for futher use now that everything is loaded
         return self
 
     def save(self):
@@ -121,7 +121,6 @@ class UiAppLinkModel(UiAppLinkConfig):
                 self.trigger_conan_update()
         self._conan_ref = new_value
 
-
     def trigger_conan_update(self):
         try:
             app.conan_worker.put_ref_in_install_queue(
@@ -131,7 +130,6 @@ class UiAppLinkModel(UiAppLinkConfig):
         except Exception as error:
             # errors happen fairly often, keep going
             Logger().warning(f"Conan reference invalid {str(error)}")
-        
 
     @property
     def version(self) -> str:
@@ -157,7 +155,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     @property
     def user(self) -> str:
         """ User, as specified in the conan ref """
-        return self.convert_to_disp_user(self._conan_file_reference.user)
+        return self._convert_to_disp_user(self._conan_file_reference.user)
 
     @user.setter
     def user(self, new_value: str):
@@ -171,7 +169,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             self._conan_file_reference.name, self._conan_file_reference.version, new_value, channel))
 
     @classmethod
-    def convert_to_disp_user(cls, user: str) -> str:
+    def _convert_to_disp_user(cls, user: str) -> str:
         """ Substitute _ for official user string """
         if not user:
             return cls.OFFICIAL_USER
@@ -206,10 +204,10 @@ class UiAppLinkModel(UiAppLinkConfig):
     def users(self) -> List[str]:
         """ All users (sorted) for the current name and verion """
         users = set()
-        #users.add(self.user)
+        # users.add(self.user)
         for ref in self._available_refs:
             if ref.version == self.version:
-                users.add(self.convert_to_disp_user(ref.user))
+                users.add(self._convert_to_disp_user(ref.user))
         users_list = list(users)
         users_list.sort()
         return users_list
@@ -220,8 +218,11 @@ class UiAppLinkModel(UiAppLinkConfig):
         channels = set()
         channels.add(self.channel)
         for ref in self._available_refs:
-            if ref.version == self.version and self.convert_to_disp_user(ref.user) == self.user:
+            if ref.version == self.version and self._convert_to_disp_user(ref.user) == self.user:
                 channels.add(self.convert_to_disp_channel(ref.channel))
+        # extra handling for only one existing channel found
+        if len(channels) == 2 and self.INVALID_DESCR in channels:
+            channels.remove(self.INVALID_DESCR)
         channels_list = list(channels)
         channels_list.sort()
         return channels_list
@@ -260,32 +261,39 @@ class UiAppLinkModel(UiAppLinkConfig):
     def icon(self, new_value: str):
         self._icon = new_value
 
-    def get_icon_path(self) -> Path:
-        # evaluate self.icon, so icon Path
-        # validate icon path
-        emit_warning = False
-
+    def _eval_icon_path(self) -> Path:
+        icon_path = Path("NULL")
         # relative to package - migrate from old setting
         # config path will be deprecated
         if self._icon.startswith("//"):
             self._icon = self._icon.replace("//", "./")
         if self._icon and not Path(self._icon).is_absolute():
-            self._icon_path = self._package_folder / self._icon
-            emit_warning = True
-        elif not self._icon:  # try to find icon in temp
-            self._icon_path = extract_icon(self.get_executable_path(), Path(
-                tempfile.gettempdir()) / TEMP_ICON_DIR_NAME)
+            icon_path = self._package_folder / self._icon
         else:  # absolute path
-            self._icon_path = Path(self._icon)
-            emit_warning = True
+            icon_path = Path(self._icon)
+        try:
+            icon_path = icon_path.resolve()
+        except Exception as e:
+            Logger().debug(f"Can't reslolve path of {str(icon_path)}")
+        return icon_path
+
+    def get_icon(self) -> QIcon:
+        """ Get an icon based on icon path """
+        emit_warning = False
+        icon = QIcon()
+
+        if not self._icon:
+            icon = extract_icon(self.get_executable_path())
+        else:
+            icon = get_icon_from_image_file(self._eval_icon_path())
+
         # default icon, until package path is updated
-        if not self._icon_path.is_file():
-            self._icon_path = asset_path / "icons" / "app.png"
+        if icon.isNull():
+            icon_path = asset_path / "icons" / "app.png"
+            icon = get_icon_from_image_file(icon_path)
             if self._icon and emit_warning:  # user input given -> warning
                 Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
-        else:
-            self._icon_path = self._icon_path.resolve()
-        return self._icon_path
+        return icon
 
     def set_package_info(self, package_folder: Path):
         """

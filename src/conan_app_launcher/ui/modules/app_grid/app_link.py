@@ -149,7 +149,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def _apply_new_config(self):
         self._app_name_label.setText(self.model.name)
         self._app_button.setToolTip(self.model.conan_ref)
-        self._app_button.set_icon(self.model.get_icon_path())
+        self._app_button.set_icon(self.model.get_icon())
 
         self._lock_cboxes = True
         self._app_channel_cbox.clear()
@@ -174,9 +174,11 @@ class AppLink(QtWidgets.QVBoxLayout):
         reply = self._edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
             self._edit_app_dialog.save_data()
-            self._apply_new_config()
+            # grey icon, so update from cache can ungrey it, if the path is correct
             self._app_button.grey_icon()
             self.model.update_from_cache()
+            # now apply gui config with resolved paths
+            self._apply_new_config()
 
     def remove(self):
         # last link can't be deleted! # TODO dialog
@@ -234,9 +236,12 @@ class AppLink(QtWidgets.QVBoxLayout):
         # add tooltip for channels, in case it is too long
         for i in range(0, len(self.model.channels)):
             self._app_channel_cbox.setItemData(i, self.model.channels[i], Qt.ToolTipRole)
+        self.update_icon()
+
+    def update_icon(self):
         if self.model.get_executable_path().is_file():
             Logger().debug(f"Ungreying {self.model.name}")
-            self._app_button.set_icon(self.model.get_icon_path())
+            self._app_button.set_icon(self.model.get_icon())
             self._app_button.ungrey_icon()
 
     def update_versions_cbox_visible(self):
@@ -304,10 +309,10 @@ class AppLink(QtWidgets.QVBoxLayout):
                 self.model.lock_changes = False
                 self.model.channel = self._app_channel_cbox.currentText()
                 self._app_button.setToolTip(self.model.conan_ref)
-                self._app_button.set_icon(self.model.get_icon_path())
-                self.model.trigger_conan_update()
+                self._app_button.set_icon(self.model.get_icon())
+                #self.model.trigger_conan_update()
                 self._app_button.setToolTip(self.model.conan_ref)
-
+        self.update_icon()
         self.model.save()
         self.model.lock_changes = False
         self._lock_cboxes = False

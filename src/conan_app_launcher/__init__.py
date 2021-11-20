@@ -26,7 +26,6 @@ ICON_SIZE = 60 # Icon size (width and height) in pixels on an Applink
 INVALID_CONAN_REF = "Invalid/NA@NA/NA" # used to indicate a conan reference is invalid
 SETTINGS_FILE_NAME = ".cal_config" # for storing application settings
 DEFAULT_UI_CFG_FILE_NAME = "cal_ui.json"  # for legacy 0.X support
-TEMP_ICON_DIR_NAME = "cal_icons" # cached icons are stored in this temp subfolder
 CONAN_LOG_PREFIX = "CONAN: " # logger uses this to indicate a log comes from Conan
 
 # Feature flags

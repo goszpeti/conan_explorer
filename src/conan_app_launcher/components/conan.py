@@ -80,7 +80,10 @@ class ConanApi():
         else:
             raise NotImplementedError
         # don't hang on startup
-        self.remove_locks()
+        try: # use try-except because of Conan 1.24 envvar errors in tests
+            self.remove_locks()
+        except Exception as error:
+            Logger().debug(str(error))
         self.info_cache = ConanInfoCache(base_path, self.get_all_local_refs())
 
     def remove_locks(self):

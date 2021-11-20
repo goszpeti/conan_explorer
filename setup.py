@@ -24,7 +24,6 @@ REQUIRED = [
     "PyQt5>=5.13.0",  # GPLv3
     "conan>=1.24",  # MIT License
     "jsonschema>=3.2.0",  # MIT License
-    "pefile==2021.9.3",  # MIT License
     'importlib-metadata>=4.8.2 ; python_version<"3.8"',  # Apache Software License (Apache)
     'typing-extensions>=3.10.0.2 ; python_version<"3.8"', # Python Software Foundation License(PSF)
     'dataclasses>=0.8 ; python_version<"3.7"'  # Apache Software License (Apache)
@@ -44,13 +43,16 @@ try:
         if len(branch) == 1:
             branch = os.getenv("GITHUB_REF", "").split("tags")
         if len(branch) > 1:
-            link = "conan_app_launcher/" + branch[1]
+            link = "conan_app_launcher" + branch[1].replace(" ", "")
             master_link = "conan_app_launcher/master"
             for line in long_description.splitlines():
                 if master_link in line:
-                    line.replace(master_link, link)
+                    line = line.replace(master_link, link)
+                    print(f"replaced {master_link} with {link}")
                 temp.append(line)
             long_description = "\n".join(temp)
+    else:
+        print("No GITHUB_REF envvar found!")
 except FileNotFoundError:
     long_description = DESCRIPTION
 

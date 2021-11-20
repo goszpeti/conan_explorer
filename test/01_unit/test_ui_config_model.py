@@ -3,16 +3,16 @@ import sys
 import tempfile
 from distutils.file_util import copy_file
 from pathlib import Path
+from PyQt5.QtGui import QIcon
 
 from conans.model.ref import ConanFileReference as CFR
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiAppLinkConfig
-from conan_app_launcher import TEMP_ICON_DIR_NAME, asset_path
-from conan_app_launcher.ui.data.json_file import JsonUiConfig
+from conan_app_launcher import asset_path
 
 TEST_REF = "zlib/1.2.11@_/_"
 
 
-def test_executable_eval(base_fixture, capfd):
+def test_executable_eval(base_fixture):
     """
     Tests, that the executable setter works on all cases.
     Expects correct file, error messoge on wrong file an error message on no file.
@@ -28,7 +28,7 @@ def test_executable_eval(base_fixture, capfd):
     app_link.executable = ""
     assert app_link.get_executable_path() == Path("NULL")
 
-def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
+def test_icon_eval(base_fixture, tmp_path, qtbot):
     """
     Tests, that the icon setter works on all cases.
     Expects package relative file, config-file rel. file, automaticaly extracted file,
@@ -43,30 +43,25 @@ def test_icon_eval(base_fixture, ui_config_fixture, tmp_path):
     app_config = UiAppLinkConfig("AppName", icon="//icon.ico")
     app_link = UiAppLinkModel().load(app_config ,None)
     app_link.set_package_info(tmp_path)  # trigger set
-    assert app_link.get_icon_path() == tmp_path / "icon.ico"
-    assert app_link.icon == "./icon.ico"
+    assert not app_link.get_icon().isNull()
+    assert str(app_link._eval_icon_path()) == str(tmp_path / "icon.ico")
 
     # absolute path
     app_link.icon = str(tmp_path / "icon.ico")
-    assert app_link.get_icon_path() == tmp_path / "icon.ico"
+    assert not app_link.get_icon().isNull()
+    assert str(app_link._eval_icon_path()) == str(tmp_path / "icon.ico")
 
     # extract icon
     app_link.icon = ""
-    if platform.system() == "Windows":
-        app_link.executable = sys.executable
-        icon_path = Path(tempfile.gettempdir()) / TEMP_ICON_DIR_NAME / \
-            (str(Path(sys.executable).name) + ".img")
-        assert app_link.get_icon_path() == icon_path.resolve()
-    elif platform.system() == "Linux":
-        assert app_link.get_icon_path() == asset_path / "icons" / "app.png"
+    assert not app_link.get_icon().isNull()
 
 
-def test_icon_eval_wrong_path(capfd, base_fixture, tmp_path):
+def test_icon_eval_wrong_path(base_fixture, tmp_path, qtbot):
     """ Test, that a nonexistant path sets to default (check for error removed) """
 
     app_link = UiAppLinkModel("AppName", icon=str(Path.home() / "nonexistant.png"), executable="abc")
-    app_link.get_icon_path()  # eval
-    assert app_link.get_icon_path() == asset_path / "icons" / "app.png"
+    assert not app_link.get_icon().isNull()
+    assert str(app_link._eval_icon_path()) == str(Path.home() / "nonexistant.png")
 
 
 def test_official_release(base_fixture):

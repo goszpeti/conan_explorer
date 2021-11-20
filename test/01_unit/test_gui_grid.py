@@ -5,24 +5,24 @@ using the whole application (standalone).
 import os
 import platform
 import sys
-import tempfile
 from pathlib import Path
 from subprocess import check_output
 from time import sleep
+import pytest
+from PyQt5 import QtCore, QtWidgets
+Qt = QtCore.Qt
 
 import conan_app_launcher.app as app
-import pytest
-from conan_app_launcher import TEMP_ICON_DIR_NAME
 from conan_app_launcher.settings import DISPLAY_APP_USERS
 from conan_app_launcher.ui.data import UiApplicationConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
-from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import EditAppDialog
-from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkConfig, UiAppLinkModel
+from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
+    EditAppDialog
+from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkConfig,
+                                                          UiAppLinkModel)
 from conans.model.ref import ConanFileReference as CFR
-from PyQt5 import QtCore, QtWidgets
 
-Qt = QtCore.Qt
 
 TEST_REF = "zlib/1.2.11@_/_"
 
@@ -180,27 +180,33 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     app_ui = AppLink(root_obj, app_model)
     app_ui.load()
 
-    icon = app_ui.model.get_icon_path()
-    # CI returns dos style short path, which I don't how to resolve... so workaround:
-    assert "temp/" + TEMP_ICON_DIR_NAME in str(icon.parent.as_posix()).lower()
-    assert "python" in icon.name
+    assert not app_ui.model.get_icon().isNull()
     assert not app_ui._app_button._greyed_out
 
 
-def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
+def create_and_upload(conanfile, ref):
+    os.system(f"conan create {conanfile} {ref}")
+    os.system(f"conan upload {ref} -r local")
+
+
+def test_AppLink_cbox_switch(base_fixture, start_conan_server, qtbot):
     """
     Test, that changing the version resets the channel and user correctly
     """
+    if platform.system() == "Windows": # TODO: conan server does not work on Windows, probably because of the firewall
+        pytest.skip()
     # all versions have different user and channel names, so we can distinguish them
-    conanfile = str(base_fixture.testdata_path / "conan" / "conanfile_custom.py")
-    os.system(f"conan create {conanfile} switch_test/1.0.0@user1/channel1")
-    os.system(f"conan create {conanfile} switch_test/1.0.0@user1/channel2")
-    os.system(f"conan create {conanfile} switch_test/1.0.0@user2/channel3")
-    os.system(f"conan create {conanfile} switch_test/1.0.0@user2/channel4")
-    os.system(f"conan create {conanfile} switch_test/2.0.0@user3/channel5")
-    os.system(f"conan create {conanfile} switch_test/2.0.0@user3/channel6")
-    os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel7")
-    os.system(f"conan create {conanfile} switch_test/2.0.0@user4/channel8")
+    conanfile = str(base_fixture.testdata_path / "conan" / "multi" / "conanfile.py")
+    create_packages = True
+    if create_packages:
+        create_and_upload(conanfile, "switch_test/1.0.0@user1/channel1")
+        create_and_upload(conanfile, "switch_test/1.0.0@user1/channel2")
+        create_and_upload(conanfile, "switch_test/1.0.0@user2/channel3")
+        create_and_upload(conanfile, "switch_test/1.0.0@user2/channel4")
+        create_and_upload(conanfile, "switch_test/2.0.0@user3/channel5")
+        create_and_upload(conanfile, "switch_test/2.0.0@user3/channel6")
+        create_and_upload(conanfile, "switch_test/2.0.0@user4/channel7")
+        create_and_upload(conanfile, "switch_test/2.0.0@user4/channel8")
 
     # loads it into cache
     app.conan_api.search_recipe_in_remotes(CFR.loads("switch_test/1.0.0@user1/channel1"))
@@ -220,6 +226,11 @@ def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
     root_obj.show()
 
     qtbot.waitExposed(root_obj)
+
+    # wait for version update
+    if app.conan_worker:
+        app.conan_worker.finish_working()
+    sleep(1)
 
     # check initial state
     assert app_link._app_version_cbox.count() == 2
@@ -253,6 +264,10 @@ def test_AppLink_cbox_switch(base_fixture, ui_config_fixture, qtbot):
 
     # change user
     app_link._app_channel_cbox.setCurrentIndex(1)
+    # wait for version update
+    if app.conan_worker:
+        app.conan_worker.finish_working()
+    sleep(1)
     # setting a channel removes NA entry and entry becomes -1
     assert app_link._app_channel_cbox.itemText(0) == "channel5"
     assert app_link._app_channel_cbox.itemText(1) == "channel6"

@@ -1,15 +1,58 @@
+import configparser
 import os
+import platform
+import subprocess
+import sys
 import tempfile
+import time
+import ctypes
 from pathlib import Path
 from shutil import copy
+from threading import Thread
 
 import conan_app_launcher.app as app
-from conan_app_launcher.components import ConanApi, ConanWorker, ConanInfoCache
 import conan_app_launcher.logger as logger
 import pytest
-from conan_app_launcher import SETTINGS_FILE_NAME, asset_path, base_path, user_save_path
+from conan_app_launcher import (SETTINGS_FILE_NAME, asset_path, base_path,
+                                user_save_path)
+from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.settings import *
 
+conan_server_thread =  None
+# setup conan test server
+character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
+
+def run_conan_server():
+    if platform.system() == "Windows":
+        # alow server port for private connections
+        args=f'advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", "netsh", args, None, 1)
+
+    proc = subprocess.Popen("conan_server")
+    proc.communicate()
+
+@pytest.fixture # (scope="session", autouse=True)
+def start_conan_server():
+    config_path = Path.home() / ".conan_server" / "server.conf"
+    os.makedirs(str(config_path.parent), exist_ok=True)
+    #password = "".join(random.sample(character_string, 12))
+    os.system("conan_server --migrate") # call server once to create a config file
+    # configre server config file
+    cp = configparser.ConfigParser()
+    cp.read(str(config_path))
+    # add write permissions
+    if "write_permissions" not in cp:
+        cp.add_section("write_permissions")
+    cp["write_permissions"]["*/*@*/*"] = "*"
+    with config_path.open('w', encoding="utf8") as fd:
+        cp.write(fd)
+    global conan_server_thread
+    if not conan_server_thread:
+        conan_server_thread = Thread(name="ConanServer", daemon=True, target=run_conan_server)
+        conan_server_thread.start()
+    time.sleep(1)
+    os.system("conan remote add local http://0.0.0.0:9300/ false")
+    os.system("conan user demo -r local -p demo") # todo autogenerate and config
 
 class PathSetup():
     """ Get the important paths form the source repo. """
