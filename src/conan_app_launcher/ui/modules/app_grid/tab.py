@@ -15,6 +15,7 @@ class TabGrid(QtWidgets.QWidget):
         super().__init__(parent)
         self.model = model
         self.app_links: List[AppLink] = []  # list of refs to app links
+        self.tab_scroll_area = None
 
     def init_app_grid(self):
         self.setObjectName("tab_" + self.model.name)
@@ -58,8 +59,13 @@ class TabGrid(QtWidgets.QWidget):
         self.tab_layout.addWidget(self.tab_scroll_area)
 
     def get_max_columns(self):
-        width = self.tab_scroll_area.geometry().width()
-        return int(width / (AppLink.MAX_WIDTH + 4))
+        if self.tab_scroll_area:
+            width = self.tab_scroll_area.geometry().width()
+            max_columns = int(width / (AppLink.MAX_WIDTH + 4))
+            if max_columns == 0:
+                max_columns = 1
+            return max_columns
+        return 1 # always enable one row
 
     def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
         super().resizeEvent(a0)
@@ -107,8 +113,8 @@ class TabGrid(QtWidgets.QWidget):
 
     def add_app_link_to_tab(self, app_link: AppLink):
         """ To be called from a child AppLink """
-        current_row = int(len(self.model.apps) / self.max_columns)  # count from 0
-        current_column = int(len(self.model.apps) % self.max_columns)  # count from 0 to count
+        current_row = int(len(self.model.apps) / self.get_max_columns())  # count from 0
+        current_column = int(len(self.model.apps) % self.get_max_columns())  # count from 0 to count
 
         self.app_links.append(app_link)
         self.model.apps.append(app_link.model)
