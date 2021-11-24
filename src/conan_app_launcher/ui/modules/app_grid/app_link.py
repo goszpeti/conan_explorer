@@ -24,7 +24,7 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 
 
 class AppLink(QtWidgets.QVBoxLayout):
-    MAX_WIDTH = 193
+    MAX_WIDTH = 190
 
     def __init__(self, parent: "TabGrid", model: UiAppLinkModel):
         super().__init__()
