@@ -126,7 +126,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu.addSeparator()
 
         self.move_r = QtWidgets.QAction("Move Right", self)
-        self.move_r.setDisabled(True)  # TODO upcoming feature
+        self.move_r.setDisabled(True)
+        #self.move_r.triggered.connect(self.move_right)
+
         self.menu.addAction(self.move_r)
 
         self.move_l = QtWidgets.QAction("Move Left", self)
@@ -139,6 +141,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_user_cbox.hide()
         self._app_channel_cbox.hide()
         self._app_button.hide()
+
+    # def move_right(self):
+    #     self._parent_tab.move_app_link(self, 1)
 
     def on_context_menu_requested(self, position):
         self.menu.exec_(self._app_button.mapToGlobal(position))
@@ -293,7 +298,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         if self.model.channel != self._app_channel_cbox.currentText() or re_eval_channel:
             self.model.lock_changes = True
             if re_eval_channel:
-                self.model.channel = self.model.INVALID_DESCR # eval for channels
+                self.model.channel = self.model.INVALID_DESCR  # eval for channels
                 # update channels to match version
                 self._app_channel_cbox.clear()  # reset cbox
                 self._app_channel_cbox.addItems(self.model.channels)
@@ -310,7 +315,7 @@ class AppLink(QtWidgets.QVBoxLayout):
                 self.model.channel = self._app_channel_cbox.currentText()
                 self._app_button.setToolTip(self.model.conan_ref)
                 self._app_button.set_icon(self.model.get_icon())
-                #self.model.trigger_conan_update()
+                # self.model.trigger_conan_update()
                 self._app_button.setToolTip(self.model.conan_ref)
         self.update_icon()
         self.model.save()

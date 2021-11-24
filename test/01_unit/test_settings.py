@@ -18,8 +18,7 @@ def test_read_from_file(base_fixture):
     assert sets.get_bool(DISPLAY_APP_CHANNELS) == False
     assert sets.get_bool(DISPLAY_APP_VERSIONS) == False
     assert sets.get_bool(DISPLAY_APP_USERS) == False
-    assert sets.get_int(GRID_COLUMNS) == 10
-    assert sets.get_int(GRID_ROWS) == 30
+
 
 def test_save_to_file(base_fixture):
     """
