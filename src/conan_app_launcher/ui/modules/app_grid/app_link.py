@@ -204,7 +204,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         reply = message_box.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
             self.delete()
-            self._parent_tab.remove_app_link_from_tab(self)
             self.model.save()
 
     def update_with_conan_info(self):
