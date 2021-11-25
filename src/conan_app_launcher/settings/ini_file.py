@@ -7,7 +7,7 @@ from conan_app_launcher import PathLike
 from conan_app_launcher.logger import Logger
 
 from . import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS,
-               GRID_COLUMNS, GRID_ROWS, LAST_CONFIG_FILE, SettingsInterface)
+               LAST_CONFIG_FILE, SettingsInterface)
 
 
 class IniSettings(SettingsInterface):
@@ -48,9 +48,7 @@ class IniSettings(SettingsInterface):
             self._VIEW_SECTION_NAME: {
                 DISPLAY_APP_CHANNELS: True,
                 DISPLAY_APP_USERS: False,
-                DISPLAY_APP_VERSIONS: True,
-                GRID_ROWS: 20,
-                GRID_COLUMNS: 4,
+                DISPLAY_APP_VERSIONS: True
             },
         }
 

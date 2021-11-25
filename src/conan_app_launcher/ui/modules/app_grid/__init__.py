@@ -1,13 +1,10 @@
 from typing import TYPE_CHECKING, List
 
 from conan_app_launcher import ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, asset_path
-import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher.settings import (GRID_COLUMNS, GRID_ROWS)
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
-
+from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkModel,
+                                                          UiTabModel)
 from PyQt5 import QtCore, QtGui, QtWidgets
-
-from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiTabModel
 
 Qt = QtCore.Qt
 
@@ -121,9 +118,7 @@ class AppGridView():
             self.model.tabs.append(tab_model)
             self.model.save()
             # add tab in ui
-            tab = TabGrid(self._main_window.ui.tab_bar,
-                             max_columns=app.active_settings.get_int(GRID_COLUMNS),
-                             max_rows=app.active_settings.get_int(GRID_ROWS), model=tab_model)
+            tab = TabGrid(self._main_window.ui.tab_bar, model=tab_model)
             tab.load()
             self._main_window.ui.tab_bar.addTab(tab, text)
 
@@ -163,8 +158,7 @@ class AppGridView():
         for tab_config in self.model.tabs:
             
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabGrid(parent=self._main_window.ui.tab_bar, max_columns=app.active_settings.get_int(GRID_COLUMNS),
-                             max_rows=app.active_settings.get_int(GRID_ROWS), model=tab_config)
+            tab = TabGrid(parent=self._main_window.ui.tab_bar, model=tab_config)
             self._main_window.ui.tab_bar.addTab(tab, tab_config.name)
             tab.load()
 

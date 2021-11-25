@@ -13,8 +13,6 @@ LAST_CONFIG_FILE = "last_config_file"
 DISPLAY_APP_VERSIONS = "disp_app_versions"
 DISPLAY_APP_USERS = "disp_app_users"
 DISPLAY_APP_CHANNELS = "disp_app_channels"
-GRID_ROWS = "grid_rows"
-GRID_COLUMNS = "grid_columns"
 
 # Implementation types fro factory
 SETTINGS_INI_TYPE = "ini"

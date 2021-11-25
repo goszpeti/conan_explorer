@@ -3,7 +3,7 @@ from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiTabMo
 
 from .common.app_edit_dialog import EditAppDialog
 from .app_link import AppLink
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -11,12 +11,11 @@ Qt = QtCore.Qt
 
 class TabGrid(QtWidgets.QWidget):
 
-    def __init__(self, parent: QtWidgets.QTabWidget, max_rows: int, max_columns: int, model: UiTabModel):
+    def __init__(self, parent: QtWidgets.QTabWidget, model: UiTabModel):
         super().__init__(parent)
         self.model = model
-        self.max_rows = max_rows  # TODO currently not handled correctly
-        self.max_columns = max_columns
         self.app_links: List[AppLink] = []  # list of refs to app links
+        self.tab_scroll_area = None
 
     def init_app_grid(self):
         self.setObjectName("tab_" + self.model.name)
@@ -36,7 +35,7 @@ class TabGrid(QtWidgets.QWidget):
         # set minimum on vertical is needed, so the app links very shrink,
         # when a dropdown is hidden
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                           QtWidgets.QSizePolicy.Minimum)
+                                            QtWidgets.QSizePolicy.Minimum)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
 
@@ -44,20 +43,14 @@ class TabGrid(QtWidgets.QWidget):
         self.tab_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
         self.tab_scroll_area.setSizePolicy(size_policy)
         self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.tab_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         self.tab_scroll_area.setAlignment(Qt.AlignTop)
         self.tab_scroll_area.setUpdatesEnabled(True)
         self.tab_scroll_area.setWidgetResizable(False)
         self.tab_scroll_area_widgets.setSizePolicy(size_policy)
         self.tab_scroll_area_widgets.setLayoutDirection(Qt.LeftToRight)
         self.tab_grid_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)  # SetMinimumSize needed!
-        self.tab_grid_layout.setColumnMinimumWidth(0, 193)
-        self.tab_grid_layout.setColumnMinimumWidth(1, 193)
-        self.tab_grid_layout.setColumnMinimumWidth(2, 193)
-        self.tab_grid_layout.setColumnMinimumWidth(3, 193)
-
-        self.tab_grid_layout.setRowMinimumHeight(0, 100)
-        self.tab_grid_layout.setRowMinimumHeight(1, 100)
-        self.tab_grid_layout.setRowMinimumHeight(2, 100)
 
         self.tab_grid_layout.setContentsMargins(8, 8, 8, 8)
         self.tab_grid_layout.setSpacing(4)
@@ -65,18 +58,37 @@ class TabGrid(QtWidgets.QWidget):
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.tab_layout.addWidget(self.tab_scroll_area)
 
+    def get_max_columns(self):
+        if self.tab_scroll_area:
+            width = self.tab_scroll_area.geometry().width()
+            max_columns = int(width / (AppLink.MAX_WIDTH))
+            if max_columns == 0:
+                max_columns = 1
+            return max_columns
+        return 1 # always enable one row
+
+    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+        super().resizeEvent(a0)
+        self.reset_grid()
+
     def load(self):
         self.init_app_grid()
+        self.load_apps_from_model()
+
+    def load_apps_from_model(self):
         row = 0
         column = 0
+        max_columns = self.get_max_columns()
+
         for app_model in self.model.apps:
             # add in order of occurence
             app_link = AppLink(self, app_model)
             app_link.load()
             self.app_links.append(app_link)
             self.tab_grid_layout.addLayout(app_link, row, column)
+            self.tab_grid_layout.setColumnMinimumWidth(column, AppLink.MAX_WIDTH - 8)
             column += 1
-            if column == self.max_columns:
+            if column == max_columns:
                 column = 0
                 row += 1
         # spacer for compressing app links, when hiding cboxes
@@ -101,27 +113,43 @@ class TabGrid(QtWidgets.QWidget):
 
     def add_app_link_to_tab(self, app_link: AppLink):
         """ To be called from a child AppLink """
-        current_row = int(len(self.model.apps) / self.max_columns)  # count from 0
-        current_column = len(self.model.apps) % self.max_columns  # count from 0 to 3
+        current_row = int(len(self.model.apps) / self.get_max_columns())  # count from 0
+        current_column = int(len(self.model.apps) % self.get_max_columns())  # count from 0 to count
 
         self.app_links.append(app_link)
         self.model.apps.append(app_link.model)
         self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
+        self.tab_grid_layout.setColumnMinimumWidth(current_column, AppLink.MAX_WIDTH - 8)
 
-    def reset_grid(self):
+    def remove_all_app_links(self):
         for app_link in self.app_links:
             self.tab_grid_layout.removeItem(app_link)
+
+    def reset_grid(self):
+        self.remove_all_app_links()
         row = 0
         column = 0
+        max_columns = self.get_max_columns()
         for app_link in self.app_links:
             self.tab_grid_layout.addLayout(app_link, row, column)
+            self.tab_grid_layout.setColumnMinimumWidth(column, AppLink.MAX_WIDTH - 8)
             column += 1
-            if column == self.max_columns:
+            if column == max_columns:
                 column = 0
                 row += 1
 
     def remove_app_link_from_tab(self, app_link: AppLink):
         """ To be called from a child AppLink """
         self.model.apps.remove(app_link.model)
-        self.app_links.remove(app_link)
-        self.reset_grid()
+        self.remove_all_app_links()
+        self.load_apps_from_model()
+        self.model.save()
+
+    # def move_app_link(self, app_link: AppLink, amount=1):
+    #     org_model = app_link.model
+    #     org_index = self.model.apps.index(org_model)
+    #     # switch out values
+    #     self.model.apps[org_index], self.model.apps[org_index + amount] = self.model.apps[org_index+amount], self.model.apps[org_index]
+    #     self.load_apps_from_model()
+    #     self.reset_grid()
+    #     self.model.save()
