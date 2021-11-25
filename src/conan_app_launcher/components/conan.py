@@ -269,6 +269,12 @@ class ConanApi():
             return Path(layout.export())
         return Path("NULL")
 
+    def get_conanfile_path(self, conan_ref: ConanFileReference) -> Path:
+        layout = self.client_cache.package_layout(conan_ref)
+        if layout:
+            return Path(layout.conanfile())
+        return Path("NULL")
+
     def install_package(self, conan_ref: ConanFileReference, package: ConanPkg) -> bool:
         """
         Try to install a conan package while guessing the mnost suitable package

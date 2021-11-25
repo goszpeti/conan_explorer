@@ -7,8 +7,7 @@ import conan_app_launcher.app as app  # using gobal module pattern
 
 from conan_app_launcher.ui.common import Worker
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.components import (open_in_file_manager,
-                                           run_file)
+from conan_app_launcher.components import (open_in_file_manager, run_file, open_file)
 from conan_app_launcher.components.conan import ConanPkg
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -52,10 +51,31 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self.on_copy_ref_requested)
 
+        self.open_export_action = QtWidgets.QAction("Open export Folder", self._main_window)
+        self.open_export_action.setIcon(QtGui.QIcon(str(icons_path / "opened_folder.png")))
+        self.select_cntx_menu.addAction(self.open_export_action)
+        self.open_export_action.triggered.connect(self.on_open_export_folder_requested)
+
+        self.show_conanfile_action = QtWidgets.QAction("Show conanfile", self._main_window)
+        self.show_conanfile_action.setIcon(QtGui.QIcon(str(icons_path / "file_preview.png")))
+        self.select_cntx_menu.addAction(self.show_conanfile_action)
+        self.show_conanfile_action.triggered.connect(self.on_show_conanfile_requested)
+
+
         self.remove_ref_action = QtWidgets.QAction("Remove package", self._main_window)
         self.remove_ref_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.select_cntx_menu.addAction(self.remove_ref_action)
         self.remove_ref_action.triggered.connect(self.on_remove_ref_requested)
+
+    def on_open_export_folder_requested(self):
+        conan_ref = self.get_selected_conan_ref()
+        conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
+        open_in_file_manager(conanfile)
+
+    def on_show_conanfile_requested(self):
+        conan_ref = self.get_selected_conan_ref()
+        conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
+        open_file(conanfile)
 
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
@@ -93,7 +113,6 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
     def on_copy_ref_requested(self):
         conan_ref = self.get_selected_conan_ref()
-
         QtWidgets.QApplication.clipboard().setText(conan_ref)
 
     def on_remove_ref_requested(self):
