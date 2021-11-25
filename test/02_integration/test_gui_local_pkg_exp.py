@@ -30,7 +30,8 @@ def wait_for_loading_pkgs(main_gui):
     while not main_gui.local_package_explorer._init_model_thread.isFinished():
         _qapp_instance.processEvents()
 
-def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot):
+
+def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     cfr = ConanFileReference.loads(TEST_REF)
     pkg_path = app.conan_api.get_path_or_install(cfr)
     main_gui = main_window.MainWindow()
@@ -73,20 +74,31 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot):
         index), QtCore.QItemSelectionModel.ClearAndSelect)
     sel_model.currentIndex()
     assert not main_gui.local_package_explorer.fs_model  # view not changed
-    # selection_rect = main_gui.ui.package_select_view.visualRect(view_model.mapFromSource(
-    #     index))
-    # qtbot.mouseClick(main_gui.ui.package_select_view.viewport(),
-    #                  Qt.RightButton, Qt.NoModifier, selection_rect.center())
+
     # check right view initialized at the correct path and path got written in label
     main_gui.ui.package_select_view.expand(view_model.mapFromSource(index))
     chi = index.child(0, 0)
     item = chi.internalPointer()
     sel_model.select(view_model.mapFromSource(chi), QtCore.QItemSelectionModel.ClearAndSelect)
-    main_gui.ui.package_select_view.selectionModel().currentRowChanged.emit(
-        index, chi)
-
+    main_gui.ui.package_select_view.selectionModel().currentRowChanged.emit(index, chi)
     assert main_gui.local_package_explorer.fs_model  # view selected
     assert Path(main_gui.local_package_explorer.fs_model.rootPath()) == pkg_path
+
+    # Test Context menu functions
+    # test copy ref
+    main_gui.local_package_explorer.on_copy_ref_requested()
+    assert QtWidgets.QApplication.clipboard().text() == str(cfr)
+    conanfile = app.conan_api.get_conanfile_path(cfr)
+    # test open export folder
+    import conan_app_launcher.ui.modules.package_explorer.local_packages as lp
+    mocker.patch.object(lp, 'open_in_file_manager')
+    main_gui.local_package_explorer.on_open_export_folder_requested()
+    lp.open_in_file_manager.assert_called_once_with(conanfile)
+    # test show conanfile
+    mocker.patch.object(lp, 'open_file')
+    main_gui.local_package_explorer.on_show_conanfile_requested()
+    lp.open_file.assert_called_once_with(conanfile)
+
 
 
 def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
@@ -135,4 +147,6 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
 # def test_refresh_pkg_list_button
 
-# def_test_add_app_link_from_local_explorer
+# def test_add_app_link_from_local_explorer
+
+# def test_file_in_pkg_cntx_menu
