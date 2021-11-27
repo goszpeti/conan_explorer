@@ -122,6 +122,7 @@ class TabGrid(QtWidgets.QWidget):
         self.tab_grid_layout.setColumnMinimumWidth(current_column, AppLink.MAX_WIDTH - 8)
 
     def remove_all_app_links(self):
+
         for app_link in self.app_links:
             self.tab_grid_layout.removeItem(app_link)
 
@@ -137,13 +138,6 @@ class TabGrid(QtWidgets.QWidget):
             if column == max_columns:
                 column = 0
                 row += 1
-
-    def remove_app_link_from_tab(self, app_link: AppLink):
-        """ To be called from a child AppLink """
-        self.model.apps.remove(app_link.model)
-        self.remove_all_app_links()
-        self.load_apps_from_model()
-        self.model.save()
 
     # def move_app_link(self, app_link: AppLink, amount=1):
     #     org_model = app_link.model
