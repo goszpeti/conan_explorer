@@ -99,7 +99,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.local_package_explorer.on_show_conanfile_requested()
     lp.open_file.assert_called_once_with(conanfile)
 
-    # select a file
+    # TODO select a file
 
 
 def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
