@@ -1,5 +1,6 @@
 
 from typing import TYPE_CHECKING
+from pathlib import Path
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import INVALID_CONAN_REF, asset_path
 from conan_app_launcher.logger import Logger
@@ -10,7 +11,7 @@ from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 from .common.app_button import AppButton
 from .common.app_edit_dialog import EditAppDialog
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 if TYPE_CHECKING:
     from.tab import TabGrid
@@ -21,6 +22,8 @@ Qt = QtCore.Qt
 
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"
+
+current_dir = Path(__file__).parent
 
 
 class AppLink(QtWidgets.QVBoxLayout):
@@ -125,15 +128,85 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self.menu.addSeparator()
 
-        self.move_r = QtWidgets.QAction("Move Right", self)
-        self.move_r.setDisabled(True)
-        #self.move_r.triggered.connect(self.move_right)
+        self.rearrange_action = QtWidgets.QAction("Rearrange App Links", self)
+        self.rearrange_action.setIcon(QtGui.QIcon(str(icons_path / "rearrange.png")))
+        self.rearrange_action.triggered.connect(self.on_move)
 
-        self.menu.addAction(self.move_r)
+        self.menu.addAction(self.rearrange_action)
 
-        self.move_l = QtWidgets.QAction("Move Left", self)
-        self.move_l.setDisabled(True)  # TODO upcoming feature
-        self.menu.addAction(self.move_l)
+    def on_move(self):
+        self.move_dialog = uic.loadUi(current_dir / "app_link_sort_dialog.ui")  # , baseinstance=self
+        model = QtCore.QStringListModel() # use this!
+        app_list = []
+        for app in self.model.parent.apps:
+            app_list.append(app.name)
+        model.setStringList(app_list)
+        self.move_dialog.list_view.setModel(model)
+
+        self.move_dialog.list_view.setUpdatesEnabled(True)
+        self.move_dialog.list_view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.move_dialog.list_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.move_dialog.move_up_button.clicked.connect(self.move_up)
+        self.move_dialog.move_down_button.clicked.connect(self.move_down)
+        self.move_dialog.exec()
+        # read back
+        reordered_app_list = model.stringList()
+        # reorder based on model:
+        new_app_list = []
+        for app_name in reordered_app_list:
+            app = self.model.parent.get_app_link(app_name)
+            new_app_list.append(app)
+        self.model.parent.apps = new_app_list
+        self.model.save()
+        # self._parent_tab.apps -> reorder
+        self._parent_tab.remove_all_app_links()
+        self._parent_tab.load_apps_from_model()
+
+    def move_up(self):
+        lvm = self.move_dialog.list_view
+        indexes = lvm.selectedIndexes()
+        if len(indexes) > 0:
+            try:
+                indexes.sort()
+                first_row = indexes[0].row() - 1
+                if first_row >= 0:
+                    for idx in indexes:
+                        if idx != None:
+                            txt = idx.data()
+                            row = idx.row()
+                            lvm.model().insertRow(row - 1)
+                            pre_idx = lvm.model().index(row - 1)
+                            lvm.model().removeRow(row + 1)
+                            lvm.model().setData(pre_idx, txt, Qt.EditRole)
+                            lvm.selectionModel().select(pre_idx, QtCore.QItemSelectionModel.Select)
+            except Exception as e:
+                print(e)
+        else:
+            print('Select at least one item from list!')
+  # Function to move down item
+
+    def move_down(self):
+        lvm = self.move_dialog.list_view
+        max_row = lvm.model().rowCount()
+        indexes = lvm.selectedIndexes()
+        if len(indexes) > 0:
+            try:
+                indexes.sort()
+                last_row = indexes[-1].row() + 1
+                if last_row < max_row:
+                    for idx in reversed(indexes):
+                        if idx != None:
+                            txt = idx.data()
+                            row = idx.row()
+                            lvm.model().insertRow(row + 2)
+                            post_idx = lvm.model().index(row + 2)
+                            lvm.model().setData(post_idx, txt, Qt.EditRole)
+                            lvm.selectionModel().select(post_idx, QtCore.QItemSelectionModel.Select)
+                            lvm.model().removeRow(row)
+            except Exception as e:
+                print(e)
+        else:
+            print('Select at least one item from list!')
 
     def delete(self):
         self._app_name_label.hide()
@@ -141,9 +214,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_user_cbox.hide()
         self._app_channel_cbox.hide()
         self._app_button.hide()
-
-    # def move_right(self):
-    #     self._parent_tab.move_app_link(self, 1)
 
     def on_context_menu_requested(self, position):
         self.menu.exec_(self._app_button.mapToGlobal(position))

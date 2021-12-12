@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
 
 from PyQt5.QtGui import QIcon
-
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (INVALID_CONAN_REF,
                                 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
@@ -12,6 +11,7 @@ from conan_app_launcher.ui.common.icon import extract_icon, get_icon_from_image_
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
+
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.model import UiApplicationModel
@@ -22,9 +22,13 @@ class UiTabModel(UiTabConfig):
 
     def __init__(self, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""
-        super().__init__(*args, **kwargs)
+        UiTabConfig.__init__(self, *args, **kwargs)
         self.apps: List[UiAppLinkModel]
-        self.parent = None
+
+    def get_app_link(self, name: str):
+        for app in self.apps:
+            if app.name == name:
+                return app
 
     def load(self, config: UiTabConfig, parent: "UiApplicationModel") -> "UiTabModel":
         super().__init__(config.name, config.apps)

@@ -41,7 +41,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 
-    main_gui.ui.main_toolbox.setCurrentIndex(1) # changes to local explorer page
+    main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
     wait_for_loading_pkgs(main_gui)
 
     model = main_gui.local_package_explorer.pkg_sel_model
@@ -99,6 +99,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.local_package_explorer.on_show_conanfile_requested()
     lp.open_file.assert_called_once_with(conanfile)
 
+    # select a file
 
 
 def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
