@@ -134,15 +134,6 @@ class TabGrid(QtWidgets.QWidget):
 
     def redraw_grid(self):
         """ Works only as long as the order does not change. Used for resizing the window. """
-        for app_link in self.app_links:
-            self.tab_grid_layout.removeItem(app_link)
-        row = 0
-        column = 0
-        max_columns = self.get_max_columns()
-        for app_link in self.app_links:
-            self.tab_grid_layout.addItem(app_link, row, column)
-            self.tab_grid_layout.setColumnMinimumWidth(column, AppLink.MAX_WIDTH - 8)
-            column += 1
-            if column == max_columns:
-                column = 0
-                row += 1
+        self.remove_all_app_links()
+        self.load_apps_from_model()
+
