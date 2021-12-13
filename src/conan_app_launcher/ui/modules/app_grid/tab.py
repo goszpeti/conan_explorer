@@ -134,6 +134,7 @@ class TabGrid(QtWidgets.QWidget):
 
     def redraw_grid(self):
         """ Works only as long as the order does not change. Used for resizing the window. """
-        self.remove_all_app_links()
-        self.load_apps_from_model()
+        if self.tab_scroll_area:  # don't call on init
+            self.remove_all_app_links()
+            self.load_apps_from_model()
 
