@@ -41,17 +41,21 @@ class AppButton(QtWidgets.QPushButton):
     def set_icon(self, icon: QtGui.QIcon):
         # convert biggest image to QPixmap and scale
         sizes = icon.availableSizes()
-        icon_pixmap = icon.pixmap(sizes[-1])
-        # embedded icons sometimes not scale up correctly, but only increase the canvas behind the icon,
-        #  which looks like crap.With opaqueArea.boundingRect we can query the size of
-        #  the non-opaque area - the real image
-        pixmap = QtWidgets.QGraphicsPixmapItem(icon_pixmap)
-        image_rect = pixmap.opaqueArea().boundingRect()
-        top_left = image_rect.topLeft()
-        # copy the smaller image (crop) - start from 0, this adds some margin
-        icon_pixmap = icon_pixmap.copy(0, 0, int(image_rect.width() + top_left.x()),
-                                       int(image_rect.height() + top_left.y()))
-        self._ic = QtGui.QIcon(icon_pixmap)
+        if len(sizes) > 0:
+            # TODO check list
+            icon_pixmap = icon.pixmap(sizes[-1])
+            # embedded icons sometimes not scale up correctly, but only increase the canvas behind the icon,
+            #  which looks like crap.With opaqueArea.boundingRect we can query the size of
+            #  the non-opaque area - the real image
+            pixmap = QtWidgets.QGraphicsPixmapItem(icon_pixmap)
+            image_rect = pixmap.opaqueArea().boundingRect()
+            top_left = image_rect.topLeft()
+            # copy the smaller image (crop) - start from 0, this adds some margin
+            icon_pixmap = icon_pixmap.copy(0, 0, int(image_rect.width() + top_left.x()),
+                                        int(image_rect.height() + top_left.y()))
+            self._ic = QtGui.QIcon(icon_pixmap)
+        else:
+            self._ic = icon
         self.setIcon(self._ic)
 
     def set_icon_from_file(self, image: Optional[Path]):
