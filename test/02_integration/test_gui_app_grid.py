@@ -12,6 +12,7 @@ from conan_app_launcher.settings.ini_file import IniSettings
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
+from conan_app_launcher.ui.modules.app_grid.common.move_dialog import MoveAppLinksDialog
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.modules.app_grid.tab import (AppLink, EditAppDialog,
                                                         TabGrid)
@@ -78,7 +79,6 @@ def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
 
 def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
-    from pytestqt.plugin import _qapp_instance
     main_gui = main_window.MainWindow()
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
@@ -204,6 +204,10 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert len(config_tabs[0].apps) == prev_count - 1
 
+    # press again - last link warning dialog must spawn and link not deleted
+    app_link = tabs[1].app_links[0]
+    app_link.remove()
+    assert len(apps) == 1
 
 def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     app.active_settings.set(DISPLAY_APP_CHANNELS, False) # disable, to check if a new app uses it
@@ -255,6 +259,42 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     vt = tab._edit_app_dialog._ui.conan_ref_line_edit._validator_thread
     if vt and vt.is_alive():
         vt.join()
+
+
+def test_move_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+    """ Test, that the move dialog works and correctly updates the AppGrid. There are 2 apps on the loaded tab. """
+    from pytestqt.plugin import _qapp_instance
+    main_gui = main_window.MainWindow()
+    main_gui.show()
+    main_gui.load(ui_no_refs_config_fixture)
+
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    tabs = main_gui.ui.tab_bar.findChildren(TabGrid)
+    tab: TabGrid = tabs[1]
+    tab_model = tab.model
+    apps_model = tab_model.apps
+    app = tab.app_links[0]
+    move_dialog = MoveAppLinksDialog(parent=main_gui, tab_ui_model=tab_model)
+    move_dialog.show()
+    sel_idx = tab_model.index(0, 0, QtCore.QModelIndex())
+    move_dialog.list_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.Select)
+    move_dialog.move_down_button.clicked.emit()
+    # check model
+    assert apps_model[1].name == app.model.name
+    # click down again - nothing should happen
+    move_dialog.move_down_button.clicked.emit()
+    assert apps_model[1].name == app.model.name
+    # now the element is deselcted - select the same element again (now row 1)
+    sel_idx = tab_model.index(1, 0, QtCore.QModelIndex())
+    move_dialog.list_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.Select)
+    # now move back
+    move_dialog.move_up_button.clicked.emit()
+    assert apps_model[0].name == app.model.name
+    # click up again - nothing should happen
+    move_dialog.move_up_button.clicked.emit()
+    assert apps_model[0].name == app.model.name
 
 
 def test_multiple_apps_ungreying(base_fixture, qtbot):

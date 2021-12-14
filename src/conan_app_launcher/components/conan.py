@@ -210,10 +210,15 @@ class ConanApi():
             # no query possible with pattern
             search_results: List = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
                                                              remote_name="all").get("results", None)
+        except Exception as e:
+            Logger().warning(str(e))
+            return []
+        try:
             if SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
                 local_results: List = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",
                                                                 remote_name=None).get("results", None)
-        except Exception:
+        except Exception as e:
+            Logger().warning(str(e))
             return []
 
         res_list: List[ConanFileReference] = []

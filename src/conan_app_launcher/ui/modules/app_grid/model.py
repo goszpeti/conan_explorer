@@ -1,9 +1,10 @@
 import platform
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
+from PyQt5.QtCore import QAbstractListModel, QModelIndex
+from PyQt5 import QtCore
 
 from PyQt5.QtGui import QIcon
-
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (INVALID_CONAN_REF,
                                 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
@@ -13,18 +14,20 @@ from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
 
+Qt = QtCore.Qt
+
 if TYPE_CHECKING:
     from conan_app_launcher.ui.model import UiApplicationModel
 
 
-class UiTabModel(UiTabConfig):
+class UiTabModel(UiTabConfig, QAbstractListModel):
     """ Representation of a tab entry of the config schema """
 
     def __init__(self, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""
-        super().__init__(*args, **kwargs)
+        UiTabConfig.__init__(self, *args, **kwargs)
+        QAbstractListModel.__init__(self)
         self.apps: List[UiAppLinkModel]
-        self.parent = None
 
     def load(self, config: UiTabConfig, parent: "UiApplicationModel") -> "UiTabModel":
         super().__init__(config.name, config.apps)
@@ -40,6 +43,37 @@ class UiTabModel(UiTabConfig):
         if self.parent:  # delegate to top
             self.parent.save()
 
+    # override QAbstractListModel methods
+    def data(self, index, role):
+        if role == Qt.DisplayRole:
+            return self.apps[index.row()].name
+        if role == Qt.UserRole:
+            return self.apps[index.row()]
+
+    def setData(self, index, value, role):
+        if role == Qt.UserRole:
+            self.apps[index.row()] = value
+
+    def rowCount(self, parent=None) -> int:
+        return len(self.apps)
+
+    def insertRow(self, row: int, parent=QModelIndex()) -> bool:
+        self.apps.insert(row, UiAppLinkModel())
+        return super().insertRow(row, parent=parent)
+
+    def removeRow(self, row: int, parent=QModelIndex()) -> bool:
+        self.apps.pop(row)
+        return super().removeRow(row, parent=parent)
+
+    def moveRow(self, sourceParent: QModelIndex, sourceRow: int, destinationParent: QModelIndex, destinationChild: int) -> bool:
+        app_to_move = self.apps[sourceRow]
+        #dest_row = destinationParent.row()
+        self.apps.insert(destinationChild, app_to_move)
+        if sourceRow < destinationChild:
+            self.apps.pop(sourceRow)
+        else:
+            self.apps.pop(sourceRow+1)
+        return super().moveRow(sourceParent, sourceRow, destinationParent, destinationChild)
 
 class UiAppLinkModel(UiAppLinkConfig):
     """ Representation of an app link entry of the config """

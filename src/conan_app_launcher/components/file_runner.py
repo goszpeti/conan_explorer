@@ -24,12 +24,13 @@ def open_in_file_manager(file_path: Path):
         os.system("xdg-open " + str(file_path))
     elif platform.system() == "Windows":
         # select switch for highlighting
+        # TODO: spawns an empty visible shell on some/slower? systems
         os.system("explorer /select," + str(file_path))
 
 
 def is_file_executable(file_path: Path) -> bool:
     """ Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
-     program has this flag. Use pathext env-var to determine executable file extensions. """
+     program has this flag. Use custom pathext lists to determine executable file extensions. """
     is_executable = False
     if platform.system() == "Linux":
         if os.access(str(file_path), os.X_OK):

@@ -65,11 +65,11 @@ class TabGrid(QtWidgets.QWidget):
             if max_columns == 0:
                 max_columns = 1
             return max_columns
-        return 1 # always enable one row
+        return 1  # always enable one row
 
     def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
         super().resizeEvent(a0)
-        self.reset_grid()
+        self.redraw_grid()
 
     def load(self):
         self.init_app_grid()
@@ -118,32 +118,23 @@ class TabGrid(QtWidgets.QWidget):
 
         self.app_links.append(app_link)
         self.model.apps.append(app_link.model)
-        self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
+        self.tab_grid_layout.addItem(app_link, current_row, current_column, 1, 1)
         self.tab_grid_layout.setColumnMinimumWidth(current_column, AppLink.MAX_WIDTH - 8)
+        self.tab_grid_layout.update()
 
     def remove_all_app_links(self):
-
+        """ 
+        Clears all AppLink by actually deleting them. Manipulating self.tab_grid_layout does not work!
+        Can then be reloaded with load_apps_from_model.
+        """
+        reverse_app_links = self.app_links
+        reverse_app_links.reverse()
         for app_link in self.app_links:
-            self.tab_grid_layout.removeItem(app_link)
+            app_link.delete()
 
-    def reset_grid(self):
-        self.remove_all_app_links()
-        row = 0
-        column = 0
-        max_columns = self.get_max_columns()
-        for app_link in self.app_links:
-            self.tab_grid_layout.addLayout(app_link, row, column)
-            self.tab_grid_layout.setColumnMinimumWidth(column, AppLink.MAX_WIDTH - 8)
-            column += 1
-            if column == max_columns:
-                column = 0
-                row += 1
+    def redraw_grid(self):
+        """ Works only as long as the order does not change. Used for resizing the window. """
+        if self.tab_scroll_area:  # don't call on init
+            self.remove_all_app_links()
+            self.load_apps_from_model()
 
-    # def move_app_link(self, app_link: AppLink, amount=1):
-    #     org_model = app_link.model
-    #     org_index = self.model.apps.index(org_model)
-    #     # switch out values
-    #     self.model.apps[org_index], self.model.apps[org_index + amount] = self.model.apps[org_index+amount], self.model.apps[org_index]
-    #     self.load_apps_from_model()
-    #     self.reset_grid()
-    #     self.model.save()

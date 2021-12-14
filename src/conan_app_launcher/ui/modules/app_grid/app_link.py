@@ -1,5 +1,6 @@
 
 from typing import TYPE_CHECKING
+from pathlib import Path
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import INVALID_CONAN_REF, asset_path
 from conan_app_launcher.logger import Logger
@@ -9,6 +10,7 @@ from conan_app_launcher.settings import DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS,
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 from .common.app_button import AppButton
 from .common.app_edit_dialog import EditAppDialog
+from .common.move_dialog import MoveAppLinksDialog
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -21,6 +23,8 @@ Qt = QtCore.Qt
 
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"
+
+current_dir = Path(__file__).parent
 
 
 class AppLink(QtWidgets.QVBoxLayout):
@@ -125,15 +129,19 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self.menu.addSeparator()
 
-        self.move_r = QtWidgets.QAction("Move Right", self)
-        self.move_r.setDisabled(True)
-        #self.move_r.triggered.connect(self.move_right)
+        self.rearrange_action = QtWidgets.QAction("Rearrange App Links", self)
+        self.rearrange_action.setIcon(QtGui.QIcon(str(icons_path / "rearrange.png")))
+        self.rearrange_action.triggered.connect(self.on_move)
 
-        self.menu.addAction(self.move_r)
+        self.menu.addAction(self.rearrange_action)
 
-        self.move_l = QtWidgets.QAction("Move Left", self)
-        self.move_l.setDisabled(True)  # TODO upcoming feature
-        self.menu.addAction(self.move_l)
+    def on_move(self):
+        move_dialog = MoveAppLinksDialog(parent=self.parentWidget(), tab_ui_model=self.model.parent)
+        ret = move_dialog.exec()
+        if ret == QtWidgets.QDialog.Accepted:
+            move_dialog.save()
+            self._parent_tab.remove_all_app_links()
+            self._parent_tab.load_apps_from_model()
 
     def delete(self):
         self._app_name_label.hide()
@@ -141,9 +149,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_user_cbox.hide()
         self._app_channel_cbox.hide()
         self._app_button.hide()
-
-    # def move_right(self):
-    #     self._parent_tab.move_app_link(self, 1)
 
     def on_context_menu_requested(self, position):
         self.menu.exec_(self._app_button.mapToGlobal(position))
@@ -186,7 +191,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._apply_new_config()
 
     def remove(self):
-        # last link can't be deleted! # TODO dialog
+        # last link can't be deleted!
         if len(self.model.parent.apps) == 1:
             msg = QtWidgets.QMessageBox(parent=self._parent_tab)
             msg.setWindowTitle("Info")
@@ -194,6 +199,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
             msg.setIcon(QtWidgets.QMessageBox.Information)
             msg.exec_()
+            return
 
         # confirmation dialog
         message_box = QtWidgets.QMessageBox(parent=self.parentWidget())
