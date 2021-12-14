@@ -191,7 +191,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._apply_new_config()
 
     def remove(self):
-        # last link can't be deleted! # TODO dialog
+        # last link can't be deleted!
         if len(self.model.parent.apps) == 1:
             msg = QtWidgets.QMessageBox(parent=self._parent_tab)
             msg.setWindowTitle("Info")
@@ -199,6 +199,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
             msg.setIcon(QtWidgets.QMessageBox.Information)
             msg.exec_()
+            return
 
         # confirmation dialog
         message_box = QtWidgets.QMessageBox(parent=self.parentWidget())

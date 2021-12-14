@@ -79,7 +79,6 @@ def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
 
 def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
-    from pytestqt.plugin import _qapp_instance
     main_gui = main_window.MainWindow()
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
@@ -205,6 +204,10 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert len(config_tabs[0].apps) == prev_count - 1
 
+    # press again - last link warning dialog must spawn and link not deleted
+    app_link = tabs[1].app_links[0]
+    app_link.remove()
+    assert len(apps) == 1
 
 def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     app.active_settings.set(DISPLAY_APP_CHANNELS, False) # disable, to check if a new app uses it
