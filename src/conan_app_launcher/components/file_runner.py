@@ -1,5 +1,6 @@
 import os
 import platform
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -21,12 +22,20 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
 
 def open_in_file_manager(file_path: Path):
     if platform.system() == "Linux":
-        os.system("xdg-open " + str(file_path))
+        os.system("x-terminal-emulator" + str(file_path))
     elif platform.system() == "Windows":
         # select switch for highlighting
         # TODO: spawns an empty visible shell on some/slower? systems
         os.system("explorer /select," + str(file_path))
 
+
+def open_cmd_in_path(file_path: Path):
+    if platform.system() == "Linux":
+        os.system(f'x-terminal-emulator -e "cd {str(file_path)} bash"')
+    elif platform.system() == "Windows":
+        cmd_path = shutil.which("cmd")
+        if cmd_path:
+            execute_app(Path(cmd_path), True, f"/k cd {str(file_path)}")
 
 def is_file_executable(file_path: Path) -> bool:
     """ Checking execution mode is ok on linux, but not enough on windows, since every file with an associated

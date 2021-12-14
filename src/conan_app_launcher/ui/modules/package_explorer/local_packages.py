@@ -7,7 +7,7 @@ import conan_app_launcher.app as app  # using gobal module pattern
 
 from conan_app_launcher.ui.common import Worker
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.components import (open_in_file_manager, run_file, open_file)
+from conan_app_launcher.components import (open_in_file_manager, run_file, open_file, open_cmd_in_path)
 from conan_app_launcher.components.conan import ConanPkg
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -262,6 +262,11 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.file_cntx_menu.addAction(self.paste_action)
         self.paste_action.triggered.connect(self.on_copy_as_path)
 
+        self.open_terminal_action = QtWidgets.QAction("Open terminal here", self._main_window)
+        self.open_terminal_action.setIcon(QtGui.QIcon(str(icons_path / "cmd.png")))
+        self.file_cntx_menu.addAction(self.open_terminal_action)
+        self.open_terminal_action.triggered.connect(self.on_open_terminal)
+
         self.file_cntx_menu.addSeparator()
 
         self.copy_action = QtWidgets.QAction("Copy", self._main_window)
@@ -295,6 +300,9 @@ class LocalConanPackageExplorer(QtCore.QObject):
     def on_copy_as_path(self):
         file = self._get_selected_pkg_file()
         QtWidgets.QApplication.clipboard().setText(file)
+
+    def on_open_terminal(self):
+        open_cmd_in_path(self.fs_model.rootPath())
 
     def on_delete(self):
         file = self._get_selected_pkg_file()
