@@ -99,7 +99,35 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.local_package_explorer.on_show_conanfile_requested()
     lp.open_file.assert_called_once_with(conanfile)
 
-    # TODO select a file
+    # Select a file
+    root_path = Path(main_gui.local_package_explorer.fs_model.rootPath())
+    file = root_path / "conaninfo.txt"
+    sel_idx = main_gui.local_package_explorer.fs_model.index(str(file), 0)  # (0, 0, QtCore.QModelIndex())
+    main_gui.ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.Select)
+
+    # Test right click menu functions
+    # Check copy as path
+    main_gui.ui.package_file_view.selectedIndexes()[0]
+    sel_file = sel_idx.model().fileInfo(sel_idx).absoluteFilePath()
+    cp = QtWidgets.QApplication.clipboard()
+    main_gui.local_package_explorer.on_copy_as_path()
+    text = cp.text()
+    assert Path(text) == file
+
+    # Check open terminal
+    # main_gui.local_package_explorer.on_open_terminal()
+    # # mock?
+    # assert True
+
+    # # Check copy paste
+    # main_gui.local_package_explorer.on_copy()
+    # main_gui.local_package_explorer.on_paste()
+
+    # # Check
+    # main_gui.local_package_explorer.on_open_in_file_manager()
+
+    # # Check Add AppLink to AppGrid
+    # main_gui.local_package_explorer.on_add_app_link()
 
 
 def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
@@ -145,9 +173,4 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     found_pkg = app.conan_api.find_best_local_package(cfr)
     assert not found_pkg.get("id", "")
 
-
 # def test_refresh_pkg_list_button
-
-# def test_add_app_link_from_local_explorer
-
-# def test_file_in_pkg_cntx_menu

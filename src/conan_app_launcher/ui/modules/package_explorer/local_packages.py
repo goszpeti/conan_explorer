@@ -233,7 +233,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self._main_window.ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
 
         self.re_register_signal(self._main_window.ui.package_file_view.customContextMenuRequested,
-                                self.on_pkg_context_menu_requested)
+                                self.on_file_context_menu_requested)
         self._init_pkg_context_menu()
 
     @classmethod
@@ -295,7 +295,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.file_cntx_menu.addAction(self.add_link_action)
         self.add_link_action.triggered.connect(self.on_add_app_link)
 
-    def on_pkg_context_menu_requested(self, position):
+    def on_file_context_menu_requested(self, position):
         self.file_cntx_menu.exec_(self._main_window.ui.package_file_view.mapToGlobal(position))
 
     def on_copy_as_path(self):
