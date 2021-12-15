@@ -184,6 +184,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
             self._main_window.ui.package_select_view.setModel(self.proxy_model)
             self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
             self.progress_dialog.hide()
+            self.set_filter_wildcard() # reapply package filter query
         else:
             Logger().error("Can't load local packages!")
 
@@ -302,7 +303,10 @@ class LocalConanPackageExplorer(QtCore.QObject):
         QtWidgets.QApplication.clipboard().setText(file)
 
     def on_open_terminal(self):
-        open_cmd_in_path(self.fs_model.rootPath())
+        selected_path = Path(self._get_selected_pkg_file())
+        if selected_path.is_file():
+            selected_path = selected_path.parent
+        open_cmd_in_path(selected_path)
 
     def on_delete(self):
         file = self._get_selected_pkg_file()
