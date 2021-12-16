@@ -1,4 +1,4 @@
-
+import pprint
 from typing import Dict, List, Union
 from conan_app_launcher.components import ConanApi
 import conan_app_launcher.app as app  # using gobal module pattern
@@ -12,6 +12,7 @@ PROFILE_TYPE = 1
 
 class PackageFilter(QtCore.QSortFilterProxyModel):
     """ Filter packages but always showing the parent (ref) of the packages """
+
     def __init__(self):
         super().__init__()
         self.setFilterKeyColumn(0)
@@ -30,7 +31,6 @@ class PackageFilter(QtCore.QSortFilterProxyModel):
         # Finally, check if any of the children match
         return self.has_accepted_children(row_num, source_parent)
 
-
     def filter_accepts_row_itself(self, row_num, parent):
         return super().filterAcceptsRow(row_num, parent)
 
@@ -44,7 +44,6 @@ class PackageFilter(QtCore.QSortFilterProxyModel):
                 return True
             parent = parent.parent()
         return False
-
 
     def has_accepted_children(self, row_num, parent):
         '''
@@ -60,11 +59,13 @@ class PackageFilter(QtCore.QSortFilterProxyModel):
                 return True
         return False
 
+
 class PackageTreeItem(object):
     """
     Represents a tree item of a Conan pkg.
     Implemented like the default QT example.  # TODO Should be refactored in the future
     """
+
     def __init__(self, data: List[Union[str, Dict]], parent=None, item_type=REF_TYPE):
         self.parent_item = parent
         self.item_data = data
@@ -83,13 +84,12 @@ class PackageTreeItem(object):
     def column_count(self):
         return len(self.item_data)
 
+    def get_dummy_profile_name(self, column):
+        if self.type == PROFILE_TYPE:
+            return ConanApi.build_conan_profile_name_alias(self.item_data[column].get("settings", {}))
+
     def data(self, column):
-        try:
-            if self.type == PROFILE_TYPE:
-                return ConanApi.build_conan_profile_name_alias(self.item_data[column].get("settings", {}))
-            return self.item_data[column]
-        except IndexError:
-            return None
+        return self.item_data[column]
 
     def parent(self):
         return self.parent_item
@@ -99,6 +99,7 @@ class PackageTreeItem(object):
             return self.parent_item.child_items.index(self)
 
         return 0
+
 
 class PkgSelectModel(QtCore.QAbstractItemModel):
 
@@ -111,7 +112,6 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
         self.proxy_model.setSourceModel(self)
         self.setup_model_data()
 
-
     def setup_model_data(self):
         for conan_ref in app.conan_api.get_all_local_refs():
             conan_item = PackageTreeItem([str(conan_ref)], self.root_item)
@@ -120,8 +120,8 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
             for info in infos:
                 pkg_item = PackageTreeItem([info], conan_item, PROFILE_TYPE)
                 conan_item.append_child(pkg_item)
-   
-    def columnCount(self, parent): # override
+
+    def columnCount(self, parent):  # override
         if parent.isValid():
             return parent.internalPointer().column_count()
         else:
@@ -146,12 +146,16 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
         if not index.isValid():
             return None
         item: PackageTreeItem = index.internalPointer()
-
+        if role == Qt.ToolTipRole:
+            if item.type == PROFILE_TYPE:
+                data = item.data(0)
+                # remove dict style print characters
+                return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
         if role == Qt.DecorationRole:
             if item.type == REF_TYPE:
                 return QtGui.QIcon(str(self._icons_path / "package.png"))
             if item.type == PROFILE_TYPE:
-                profile_name = item.data(0)
+                profile_name = item.get_dummy_profile_name(0)
                 if not profile_name:
                     return None
                 profile_name = profile_name.lower()
@@ -166,7 +170,11 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
                 elif "default" in profile_name:
                     return QtGui.QIcon(str(self._icons_path / "default_pkg.png"))
         if role == Qt.DisplayRole:
-            return item.data(index.column())
+            if item.type == REF_TYPE:
+                return item.data(index.column())
+            if item.type == PROFILE_TYPE:
+                return item.get_dummy_profile_name(0)
+
         return None
 
     def rowCount(self, parent):  # override
