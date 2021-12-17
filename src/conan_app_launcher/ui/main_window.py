@@ -158,21 +158,21 @@ class MainWindow(QtWidgets.QMainWindow):
         """ Reads the current menu setting, saves it and updates the gui """
         status = self.ui.menu_toggle_display_versions.isChecked()
         app.active_settings.set(DISPLAY_APP_VERSIONS, status)
-        self.app_grid.apply_display_versions_setting()
+        self.app_grid.re_init_all_app_links()
 
     @pyqtSlot()
     def apply_display_users_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         status = self.ui.menu_toggle_display_users.isChecked()
         app.active_settings.set(DISPLAY_APP_USERS, status)
-        self.app_grid.apply_display_users_setting()
+        self.app_grid.re_init_all_app_links()
 
     @pyqtSlot()
     def display_channels_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         status = self.ui.menu_toggle_display_channels.isChecked()
         app.active_settings.set(DISPLAY_APP_CHANNELS, status)
-        self.app_grid.apply_display_channels_setting()
+        self.app_grid.re_init_all_app_links()
 
 
     @pyqtSlot(str)

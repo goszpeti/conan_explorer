@@ -251,7 +251,6 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def update_icon(self):
         if self.model.get_executable_path().is_file():
-            Logger().debug(f"Ungreying {self.model.name}")
             self._app_button.set_icon(self.model.get_icon())
             self._app_button.ungrey_icon()
 
@@ -275,6 +274,9 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def on_click(self):
         """ Callback for opening the executable on click """
+        if not self.model.get_executable_path().is_file():
+            Logger().error(
+                f"Can't find file in package {self.model.conan_ref}:\n    {str(self.model.get_executable_path())}")
         run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
 
     def on_ref_cbox_selected(self, index: int):

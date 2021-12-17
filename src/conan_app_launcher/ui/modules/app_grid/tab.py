@@ -73,7 +73,7 @@ class TabGrid(QtWidgets.QWidget):
 
     def load(self):
         self.init_app_grid()
-        self.load_apps_from_model()
+        # no need to call load_apps_from_model - will be called by resize event on drawing the window
 
     def load_apps_from_model(self):
         row = 0

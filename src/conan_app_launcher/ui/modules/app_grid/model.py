@@ -280,7 +280,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             path = path.with_suffix(".exe")
         full_path = Path(self._package_folder / path)
         if self._package_folder.is_dir() and not full_path.is_file():
-            Logger().error(
+            Logger().debug(
                 f"Can't find file in package {self.conan_ref}:\n    {str(full_path)}")
         self._executable_path = full_path
 
