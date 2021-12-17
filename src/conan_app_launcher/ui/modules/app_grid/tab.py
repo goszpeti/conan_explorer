@@ -127,6 +127,8 @@ class TabGrid(QtWidgets.QWidget):
         Clears all AppLink by actually deleting them. Manipulating self.tab_grid_layout does not work!
         Can then be reloaded with load_apps_from_model.
         """
+        # remove spacer - needed so, the layout can be resized correctly, if layout shifts
+        self.tab_grid_layout.removeItem(self._v_spacer)
         reverse_app_links = self.app_links
         reverse_app_links.reverse()
         for app_link in self.app_links:
