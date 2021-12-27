@@ -59,7 +59,7 @@ jobs:
           - name: "ubuntu-py310-conan1.28.0"
             python: "3.10"
             os: ubuntu-latest
-            conan: "1.28.0"
+            conan: "1.28.2"
             use_coverage: true
 
     env:
