@@ -64,6 +64,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
         cmd = [str(executable)]
         if args:
             cmd += args.strip().split(" ")
+        if platform.system() == "Windows":
             return execute_cmd(cmd, is_console_app)
         elif platform.system() == "Linux":
             if is_console_app:

@@ -15,7 +15,7 @@ from conans import __version__
 from conans.model.ref import ConanFileReference
 from packaging import version
 
-TEST_REF = "zlib/1.2.11@_/_"
+TEST_REF = "zlib/1.2.8@_/_"
 
 def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
