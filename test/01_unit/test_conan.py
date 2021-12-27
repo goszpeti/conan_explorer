@@ -155,8 +155,9 @@ def test_install_with_any_settings(mocker, capfd):
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
 
-    assert conan.install_package(ConanFileReference.loads(TEST_REF), 
-        {'id': '6cc50b139b9c3d27b3e9042d5f5372d327b3a9f7', 'options': {}, 'settings': {
+    assert conan.install_package(
+        ConanFileReference.loads(TEST_REF), 
+        {'id': '3fb49604f9c2f729b85ba3115852006824e72cab', 'options': {}, 'settings': {
         'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
