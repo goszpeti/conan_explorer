@@ -23,7 +23,7 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
 
 def open_in_file_manager(file_path: Path):
     if platform.system() == "Linux":
-        os.system("x-terminal-emulator" + str(file_path))
+        return # TODO how to implement this?
     elif platform.system() == "Windows":
         # select switch for highlighting
         # TODO: spawns an empty visible shell on some/slower? systems
@@ -32,7 +32,7 @@ def open_in_file_manager(file_path: Path):
 
 def open_cmd_in_path(file_path: Path) -> int:
     if platform.system() == "Linux":
-        return execute_cmd(["cd", f"{str(file_path)}", "bash"], True)
+        return execute_cmd(["x-terminal-emulator", "-e", "cd", f"{str(file_path)}", "bash"], True)
     elif platform.system() == "Windows":
         cmd_path = shutil.which("cmd")
         if cmd_path:
