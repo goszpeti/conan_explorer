@@ -118,7 +118,7 @@ class TabGrid(QtWidgets.QWidget):
 
         self.app_links.append(app_link)
         self.model.apps.append(app_link.model)
-        self.tab_grid_layout.addItem(app_link, current_row, current_column, 1, 1)
+        self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
         self.tab_grid_layout.setColumnMinimumWidth(current_column, AppLink.MAX_WIDTH - 8)
         self.tab_grid_layout.update()
 
@@ -133,6 +133,7 @@ class TabGrid(QtWidgets.QWidget):
         reverse_app_links.reverse()
         for app_link in self.app_links:
             app_link.delete()
+        self.app_links = []
 
     def redraw_grid(self):
         """ Works only as long as the order does not change. Used for resizing the window. """

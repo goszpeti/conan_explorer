@@ -22,7 +22,7 @@ from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
-TEST_REF = "zlib/1.2.11@_/_"
+TEST_REF = "zlib/1.2.8@_/_"
 
 
 def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
@@ -247,7 +247,6 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert new_app_link.model.name == "NewApp"
     assert new_app_link._app_name_label.text() == "NewApp"
     assert new_app_link._app_channel_cbox.isHidden()
-    assert not new_app_link._app_version_cbox.isHidden()
     assert new_app_link.model._package_folder.exists()
 
 

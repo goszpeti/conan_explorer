@@ -42,7 +42,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_version_cbox = QtWidgets.QComboBox(self._parent_tab)
         self._app_user_cbox = QtWidgets.QComboBox(self._parent_tab)
         self._app_channel_cbox = QtWidgets.QComboBox(self._parent_tab)
-        self._app_button = AppButton(self._parent_tab)
+        self._app_button = AppButton(self._parent_tab, asset_path / "icons" / "app.png")
 
         # size policies
         self.setSpacing(3)

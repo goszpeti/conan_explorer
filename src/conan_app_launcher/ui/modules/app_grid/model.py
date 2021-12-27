@@ -313,7 +313,6 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def get_icon(self) -> QIcon:
         """ Get an icon based on icon path """
-        emit_warning = False
         icon = QIcon()
 
         if not self._icon:
@@ -325,7 +324,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if icon.isNull():
             icon_path = asset_path / "icons" / "app.png"
             icon = get_icon_from_image_file(icon_path)
-            if self._icon and emit_warning:  # user input given -> warning
+            if self._icon:  # user input given -> warning
                 Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
         return icon
 

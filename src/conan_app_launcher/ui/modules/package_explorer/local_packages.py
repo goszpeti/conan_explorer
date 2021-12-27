@@ -302,11 +302,11 @@ class LocalConanPackageExplorer(QtCore.QObject):
         file = self._get_selected_pkg_file()
         QtWidgets.QApplication.clipboard().setText(file)
 
-    def on_open_terminal(self):
+    def on_open_terminal(self) -> int:
         selected_path = Path(self._get_selected_pkg_file())
         if selected_path.is_file():
             selected_path = selected_path.parent
-        open_cmd_in_path(selected_path)
+        return open_cmd_in_path(selected_path)
 
     def on_delete(self):
         file = self._get_selected_pkg_file()
@@ -344,7 +344,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
                 continue
             file = self._get_selected_pkg_file()
             if os.path.isfile(file):
-                directory = os.path.basename(file)
+                directory = os.path.dirname(file)
             else:
                 directory = file
             new_path = os.path.join(directory, url.fileName())
