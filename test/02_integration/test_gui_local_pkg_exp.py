@@ -59,7 +59,8 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
         if pkg.item_data[0] == str(cfr):
             found_tst_pkg = True
             # check it's child
-            assert pkg.child(0).data(0) in ["Windows_x64_vs16_release", "Linux_x64_gcc9_release"]
+            assert pkg.child(0).get_dummy_profile_name(0) in [
+                "Windows_x64_vs16_release", "Linux_x64_gcc9_release"]
     assert found_tst_pkg
     # select package (ref, not profile)
     index = model.index(0, 0, QtCore.QModelIndex())
