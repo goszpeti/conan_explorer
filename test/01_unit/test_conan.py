@@ -77,7 +77,7 @@ def test_conan_find_remote_pkg(base_fixture):
     default_settings = dict(conan.client_cache.default_profile.settings)
 
     pkgs = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
-    assert len(pkgs) == 2
+    assert len(pkgs) >= 1
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
 
