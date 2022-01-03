@@ -175,7 +175,8 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count
-
+    if app.conan_worker: # manual wait for worker
+        app.conan_worker.finish_working()
 
 def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
