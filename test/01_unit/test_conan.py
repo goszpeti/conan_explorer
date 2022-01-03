@@ -102,7 +102,7 @@ def test_conan_find_local_pkg(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    os.system(f"conan install {TEST_REF}")
+    os.system(f"conan install {TEST_REF} -u")
     conan = ConanApi()
     pkgs = conan.find_best_matching_packages(ConanFileReference.loads(TEST_REF))
     assert len(pkgs) == 1
