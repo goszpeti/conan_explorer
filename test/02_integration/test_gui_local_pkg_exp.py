@@ -151,7 +151,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     # assert that the link has been created
     last_app_link = main_gui.app_grid.model.tabs[0].apps[-1]
     assert last_app_link.executable == "conaninfo.txt"
-    assert last_app_link.conan_file_reference == cfr
+    assert str(last_app_link.conan_file_reference) == str(cfr)
 
     # Check Delete
     sel_idx = main_gui.local_package_explorer.fs_model.index(
