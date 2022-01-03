@@ -180,15 +180,16 @@ class AppLink(QtWidgets.QVBoxLayout):
     def open_edit_dialog(self, model: UiAppLinkModel = None):
         if model:
             self.model = model
-        self._edit_app_dialog = EditAppDialog(self.model, parent=self.parentWidget())
-        reply = self._edit_app_dialog.exec_()
+        edit_app_dialog = EditAppDialog(self.model, parent=self.parentWidget())
+        reply = edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
-            self._edit_app_dialog.save_data()
+            edit_app_dialog.save_data()
             # grey icon, so update from cache can ungrey it, if the path is correct
             self._app_button.grey_icon()
             self.model.update_from_cache()
             # now apply gui config with resolved paths
             self._apply_new_config()
+        del edit_app_dialog # call delete manually for faster thread cleanup
 
     def remove(self):
         # last link can't be deleted!

@@ -31,6 +31,10 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         self.completer().model().setStringList(list(combined_refs))
         self.textChanged.connect(self.validate_text)
 
+    def __del__(self):
+        if self._validator_thread:
+            self._validator_thread.join(1)
+
     def set_loading_callback(self, loading_cbk: Callable):
         self._loading_cbk = loading_cbk
 
