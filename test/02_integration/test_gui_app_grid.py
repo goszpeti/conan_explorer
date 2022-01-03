@@ -22,7 +22,7 @@ from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
-TEST_REF = "zlib/1.2.8@_/_"
+TEST_REF = "zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
 
 
 def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
