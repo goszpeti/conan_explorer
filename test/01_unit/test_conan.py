@@ -15,7 +15,7 @@ from conans import __version__
 from conans.model.ref import ConanFileReference
 from packaging import version
 
-TEST_REF = "zlib/1.2.11@_/_"
+TEST_REF = "zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
 
 def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
@@ -77,7 +77,7 @@ def test_conan_find_remote_pkg(base_fixture):
     default_settings = dict(conan.client_cache.default_profile.settings)
 
     pkgs = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
-    assert len(pkgs) == 2
+    assert len(pkgs) >= 1
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
 
@@ -102,7 +102,7 @@ def test_conan_find_local_pkg(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    os.system(f"conan install {TEST_REF}")
+    os.system(f"conan install {TEST_REF} -u")
     conan = ConanApi()
     pkgs = conan.find_best_matching_packages(ConanFileReference.loads(TEST_REF))
     assert len(pkgs) == 1
@@ -155,8 +155,9 @@ def test_install_with_any_settings(mocker, capfd):
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
 
-    assert conan.install_package(ConanFileReference.loads(TEST_REF), 
-        {'id': '6cc50b139b9c3d27b3e9042d5f5372d327b3a9f7', 'options': {}, 'settings': {
+    assert conan.install_package(
+        ConanFileReference.loads(TEST_REF), 
+        {'id': '3fb49604f9c2f729b85ba3115852006824e72cab', 'options': {}, 'settings': {
         'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err

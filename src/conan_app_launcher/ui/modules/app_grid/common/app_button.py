@@ -59,9 +59,9 @@ class AppButton(QtWidgets.QPushButton):
         self.setIcon(self._ic)
 
     def set_icon_from_file(self, image: Optional[Path]):
-        Logger().debug("Setting icon to " + str(image))
         if not image or not image.exists():
             return
+        Logger().debug("Setting icon to " + str(image))
         self._image = image
         if self._image.suffix == ".ico":
             self._ic = QtGui.QIcon(str(self._image))

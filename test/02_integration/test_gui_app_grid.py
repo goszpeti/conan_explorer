@@ -22,7 +22,7 @@ from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
-TEST_REF = "zlib/1.2.11@_/_"
+TEST_REF = "zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
 
 
 def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
@@ -168,14 +168,15 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert len(app_link._parent_tab.app_links) == prev_count
     assert app_link.model.name == "NewApp"
     assert app_link._app_name_label.text() == "NewApp"
-    assert app_link._app_version_cbox.currentText() == "1.2.11"
+    assert app_link._app_version_cbox.currentText() == "1.2.8"
     assert app_link._app_channel_cbox.currentText() == UiAppLinkModel.OFFICIAL_RELEASE
 
     # check, that the config file has updated
     config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count
-
+    if app.conan_worker: # manual wait for worker
+        app.conan_worker.finish_working()
 
 def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
@@ -247,7 +248,6 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert new_app_link.model.name == "NewApp"
     assert new_app_link._app_name_label.text() == "NewApp"
     assert new_app_link._app_channel_cbox.isHidden()
-    assert not new_app_link._app_version_cbox.isHidden()
     assert new_app_link.model._package_folder.exists()
 
 

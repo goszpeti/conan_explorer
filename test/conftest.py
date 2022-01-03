@@ -70,7 +70,7 @@ def base_fixture(request):
     Clean up all instances after the test.
     """
     paths = PathSetup()
-
+    os.environ["CONAN_REVISIONS_ENABLED"] = "1"
     app.conan_api = ConanApi()
     app.conan_worker = ConanWorker(app.conan_api)
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
@@ -82,7 +82,7 @@ def base_fixture(request):
     logger.Logger.remove_qt_logger()
     # finish worker - otherwise errors and crashes will occur!
     if app.conan_worker:
-        app.conan_worker.finish_working()
+        app.conan_worker.finish_working(3)
 
     # delete cache file
     if (base_path / ConanInfoCache.CACHE_FILE_NAME).exists():

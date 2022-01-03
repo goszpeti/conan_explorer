@@ -7,7 +7,7 @@ import conan_app_launcher.app as app  # using gobal module pattern
 
 from conan_app_launcher.ui.common import Worker
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.components import (open_in_file_manager, run_file, open_file)
+from conan_app_launcher.components import (open_in_file_manager, run_file, open_file, open_cmd_in_path)
 from conan_app_launcher.components.conan import ConanPkg
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -184,6 +184,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
             self._main_window.ui.package_select_view.setModel(self.proxy_model)
             self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
             self.progress_dialog.hide()
+            self.set_filter_wildcard() # reapply package filter query
         else:
             Logger().error("Can't load local packages!")
 
@@ -232,7 +233,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self._main_window.ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
 
         self.re_register_signal(self._main_window.ui.package_file_view.customContextMenuRequested,
-                                self.on_pkg_context_menu_requested)
+                                self.on_file_context_menu_requested)
         self._init_pkg_context_menu()
 
     @classmethod
@@ -262,6 +263,11 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.file_cntx_menu.addAction(self.paste_action)
         self.paste_action.triggered.connect(self.on_copy_as_path)
 
+        self.open_terminal_action = QtWidgets.QAction("Open terminal here", self._main_window)
+        self.open_terminal_action.setIcon(QtGui.QIcon(str(icons_path / "cmd.png")))
+        self.file_cntx_menu.addAction(self.open_terminal_action)
+        self.open_terminal_action.triggered.connect(self.on_open_terminal)
+
         self.file_cntx_menu.addSeparator()
 
         self.copy_action = QtWidgets.QAction("Copy", self._main_window)
@@ -289,12 +295,18 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.file_cntx_menu.addAction(self.add_link_action)
         self.add_link_action.triggered.connect(self.on_add_app_link)
 
-    def on_pkg_context_menu_requested(self, position):
+    def on_file_context_menu_requested(self, position):
         self.file_cntx_menu.exec_(self._main_window.ui.package_file_view.mapToGlobal(position))
 
     def on_copy_as_path(self):
         file = self._get_selected_pkg_file()
         QtWidgets.QApplication.clipboard().setText(file)
+
+    def on_open_terminal(self) -> int:
+        selected_path = Path(self._get_selected_pkg_file())
+        if selected_path.is_file():
+            selected_path = selected_path.parent
+        return open_cmd_in_path(selected_path)
 
     def on_delete(self):
         file = self._get_selected_pkg_file()
@@ -332,7 +344,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
                 continue
             file = self._get_selected_pkg_file()
             if os.path.isfile(file):
-                directory = os.path.basename(file)
+                directory = os.path.dirname(file)
             else:
                 directory = file
             new_path = os.path.join(directory, url.fileName())

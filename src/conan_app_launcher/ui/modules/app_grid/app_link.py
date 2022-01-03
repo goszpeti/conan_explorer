@@ -42,7 +42,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_version_cbox = QtWidgets.QComboBox(self._parent_tab)
         self._app_user_cbox = QtWidgets.QComboBox(self._parent_tab)
         self._app_channel_cbox = QtWidgets.QComboBox(self._parent_tab)
-        self._app_button = AppButton(self._parent_tab)
+        self._app_button = AppButton(self._parent_tab, asset_path / "icons" / "app.png")
 
         # size policies
         self.setSpacing(3)
@@ -180,15 +180,16 @@ class AppLink(QtWidgets.QVBoxLayout):
     def open_edit_dialog(self, model: UiAppLinkModel = None):
         if model:
             self.model = model
-        self._edit_app_dialog = EditAppDialog(self.model, parent=self.parentWidget())
-        reply = self._edit_app_dialog.exec_()
+        edit_app_dialog = EditAppDialog(self.model, parent=self.parentWidget())
+        reply = edit_app_dialog.exec_()
         if reply == EditAppDialog.Accepted:
-            self._edit_app_dialog.save_data()
+            edit_app_dialog.save_data()
             # grey icon, so update from cache can ungrey it, if the path is correct
             self._app_button.grey_icon()
             self.model.update_from_cache()
             # now apply gui config with resolved paths
             self._apply_new_config()
+        del edit_app_dialog # call delete manually for faster thread cleanup
 
     def remove(self):
         # last link can't be deleted!
@@ -251,7 +252,6 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def update_icon(self):
         if self.model.get_executable_path().is_file():
-            Logger().debug(f"Ungreying {self.model.name}")
             self._app_button.set_icon(self.model.get_icon())
             self._app_button.ungrey_icon()
 
@@ -275,6 +275,9 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def on_click(self):
         """ Callback for opening the executable on click """
+        if not self.model.get_executable_path().is_file():
+            Logger().error(
+                f"Can't find file in package {self.model.conan_ref}:\n    {str(self.model.get_executable_path())}")
         run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
 
     def on_ref_cbox_selected(self, index: int):

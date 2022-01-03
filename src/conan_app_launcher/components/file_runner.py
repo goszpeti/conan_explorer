@@ -1,7 +1,9 @@
 import os
 import platform
+import shutil
 import subprocess
 from pathlib import Path
+from typing import List
 
 from conan_app_launcher.logger import Logger
 
@@ -21,12 +23,21 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
 
 def open_in_file_manager(file_path: Path):
     if platform.system() == "Linux":
-        os.system("xdg-open " + str(file_path))
+        return # TODO how to implement this?
     elif platform.system() == "Windows":
         # select switch for highlighting
         # TODO: spawns an empty visible shell on some/slower? systems
         os.system("explorer /select," + str(file_path))
 
+
+def open_cmd_in_path(file_path: Path) -> int:
+    if platform.system() == "Linux":
+        return execute_cmd(["x-terminal-emulator", "-e", "cd", f"{str(file_path)}", "bash"], True)
+    elif platform.system() == "Windows":
+        cmd_path = shutil.which("cmd")
+        if cmd_path:
+            return execute_app(Path(cmd_path), True, f"/k cd {str(file_path)}")
+    return 0
 
 def is_file_executable(file_path: Path) -> bool:
     """ Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
@@ -51,16 +62,10 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     """
     if executable.absolute().is_file():
         cmd = [str(executable)]
-        # Linux call errors on creationflags argument, so the calls must be separated
+        if args:
+            cmd += args.strip().split(" ")
         if platform.system() == "Windows":
-            creationflags = 0
-            if is_console_app:
-                creationflags = subprocess.CREATE_NEW_CONSOLE
-            if args:
-                cmd += args.strip().split(" ")
-                # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
-            proc = subprocess.Popen(cmd, creationflags=creationflags)
-            return proc.pid
+            return execute_cmd(cmd, is_console_app)
         elif platform.system() == "Linux":
             if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal emulators available
@@ -73,6 +78,20 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
             proc = subprocess.Popen(cmd)
             return proc.pid
     Logger().warning(f"No executable {str(executable)} to start.")
+    return 0
+
+def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
+    # Linux call errors on creationflags argument, so the calls must be separated
+    if platform.system() == "Windows":
+        creationflags = 0
+        if is_console_app:
+            creationflags = subprocess.CREATE_NEW_CONSOLE
+        # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
+        proc = subprocess.Popen(cmd, creationflags=creationflags)
+        return proc.pid
+    elif platform.system() == "Linux":
+        proc = subprocess.Popen(cmd)
+        return proc.pid
     return 0
 
 def open_file(file: Path):

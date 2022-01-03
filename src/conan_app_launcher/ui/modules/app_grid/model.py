@@ -280,7 +280,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             path = path.with_suffix(".exe")
         full_path = Path(self._package_folder / path)
         if self._package_folder.is_dir() and not full_path.is_file():
-            Logger().error(
+            Logger().debug(
                 f"Can't find file in package {self.conan_ref}:\n    {str(full_path)}")
         self._executable_path = full_path
 
@@ -313,7 +313,6 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def get_icon(self) -> QIcon:
         """ Get an icon based on icon path """
-        emit_warning = False
         icon = QIcon()
 
         if not self._icon:
@@ -325,7 +324,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if icon.isNull():
             icon_path = asset_path / "icons" / "app.png"
             icon = get_icon_from_image_file(icon_path)
-            if self._icon and emit_warning:  # user input given -> warning
+            if self._icon:  # user input given -> warning
                 Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
         return icon
 

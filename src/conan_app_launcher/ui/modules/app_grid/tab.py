@@ -73,7 +73,7 @@ class TabGrid(QtWidgets.QWidget):
 
     def load(self):
         self.init_app_grid()
-        self.load_apps_from_model()
+        # no need to call load_apps_from_model - will be called by resize event on drawing the window
 
     def load_apps_from_model(self):
         row = 0
@@ -118,7 +118,7 @@ class TabGrid(QtWidgets.QWidget):
 
         self.app_links.append(app_link)
         self.model.apps.append(app_link.model)
-        self.tab_grid_layout.addItem(app_link, current_row, current_column, 1, 1)
+        self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
         self.tab_grid_layout.setColumnMinimumWidth(current_column, AppLink.MAX_WIDTH - 8)
         self.tab_grid_layout.update()
 
@@ -127,10 +127,13 @@ class TabGrid(QtWidgets.QWidget):
         Clears all AppLink by actually deleting them. Manipulating self.tab_grid_layout does not work!
         Can then be reloaded with load_apps_from_model.
         """
+        # remove spacer - needed so, the layout can be resized correctly, if layout shifts
+        self.tab_grid_layout.removeItem(self._v_spacer)
         reverse_app_links = self.app_links
         reverse_app_links.reverse()
         for app_link in self.app_links:
             app_link.delete()
+        self.app_links = []
 
     def redraw_grid(self):
         """ Works only as long as the order does not change. Used for resizing the window. """
