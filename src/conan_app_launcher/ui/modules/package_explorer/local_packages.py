@@ -250,7 +250,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         run_file(file_path, True, args="")
 
     def _init_pkg_context_menu(self):
-        self.file_cntx_menu = QtWidgets.QMenu()
+        self.file_cntx_menu = QtWidgets.QMenu(self._main_window)
         icons_path = asset_path / "icons"
 
         self.open_fm_action = QtWidgets.QAction("Show in File Manager", self._main_window)
@@ -258,10 +258,10 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.file_cntx_menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
 
-        self.paste_action = QtWidgets.QAction("Copy as Path", self._main_window)
-        self.paste_action.setIcon(QtGui.QIcon(str(icons_path / "copy_to_clipboard.png")))
-        self.file_cntx_menu.addAction(self.paste_action)
-        self.paste_action.triggered.connect(self.on_copy_as_path)
+        self.copy_as_path_action = QtWidgets.QAction("Copy as Path", self._main_window)
+        self.copy_as_path_action.setIcon(QtGui.QIcon(str(icons_path / "copy_to_clipboard.png")))
+        self.file_cntx_menu.addAction(self.copy_as_path_action)
+        self.copy_as_path_action.triggered.connect(self.on_copy_as_path)
 
         self.open_terminal_action = QtWidgets.QAction("Open terminal here", self._main_window)
         self.open_terminal_action.setIcon(QtGui.QIcon(str(icons_path / "cmd.png")))
@@ -274,11 +274,15 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.copy_action.setIcon(QtGui.QIcon(str(icons_path / "copy.png")))
         self.copy_action.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_C))
         self.file_cntx_menu.addAction(self.copy_action)
+        # for the shortcut to work, the action has to be added to a higher level widget
+        self._main_window.addAction(self.copy_action)
         self.copy_action.triggered.connect(self.on_copy)
 
         self.paste_action = QtWidgets.QAction("Paste", self._main_window)
         self.paste_action.setIcon(QtGui.QIcon(str(icons_path / "paste.png")))
-        self.paste_action.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_V))
+        self.paste_action.setShortcut(QtGui.QKeySequence("Ctrl+v")) #Qt.CTRL + Qt.Key_V))
+        self.paste_action.setShortcutContext(Qt.ApplicationShortcut)
+        self._main_window.addAction(self.paste_action)
         self.file_cntx_menu.addAction(self.paste_action)
         self.paste_action.triggered.connect(self.on_paste)
 
@@ -286,6 +290,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.delete_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
         self.delete_action.setShortcut(QtGui.QKeySequence(Qt.Key_Delete))
         self.file_cntx_menu.addAction(self.delete_action)
+        self._main_window.addAction(self.delete_action)
         self.delete_action.triggered.connect(self.on_delete)
 
         self.file_cntx_menu.addSeparator()
@@ -325,6 +330,8 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
     def on_copy(self):
         file = self._get_selected_pkg_file()
+        if not file:
+            return
         data = QtCore.QMimeData()
         url = QtCore.QUrl.fromLocalFile(file)
         data.setUrls([url])
@@ -343,10 +350,13 @@ class LocalConanPackageExplorer(QtCore.QObject):
             if not url.isLocalFile():
                 continue
             file = self._get_selected_pkg_file()
+            if not file:
+                return
             if os.path.isfile(file):
                 directory = os.path.dirname(file)
             else:
                 directory = file
+            # if nothing selected -> root
             new_path = os.path.join(directory, url.fileName())
             QtCore.QFile(url.toLocalFile()).copy(new_path)
 
@@ -379,5 +389,8 @@ class LocalConanPackageExplorer(QtCore.QObject):
     def _get_selected_pkg_file(self) -> str:
         file_view_index = self._get_pkg_file_source_item()
         if not file_view_index:
-            return self.fs_model.rootPath()
+            if self.fs_model:
+                return self.fs_model.rootPath()
+            else:
+                return ""
         return file_view_index.model().fileInfo(file_view_index).absoluteFilePath()
