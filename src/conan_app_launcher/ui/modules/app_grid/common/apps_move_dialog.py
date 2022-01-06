@@ -12,11 +12,11 @@ Qt = QtCore.Qt
 current_dir = Path(__file__).parent
 
 
-class MoveAppLinksDialog(QtWidgets.QDialog):
+class AppsMoveDialog(QtWidgets.QDialog):
 
     def __init__(self,  tab_ui_model: UiTabModel, parent: QtWidgets.QWidget, flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
-        self._ui = uic.loadUi(current_dir / "app_link_sort_dialog.ui", baseinstance=self)
+        self._ui = uic.loadUi(current_dir / "apps_move_dialog.ui", baseinstance=self)
         self.setWindowIcon(QtGui.QIcon(str(asset_path / "icons" / "rearrange.png")))
 
         self._ui.list_view.setModel(tab_ui_model)

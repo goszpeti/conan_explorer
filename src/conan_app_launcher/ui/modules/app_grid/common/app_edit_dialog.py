@@ -9,15 +9,16 @@ from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
-current_dir = Path(__file__).parent
 
-class EditAppDialog(QtWidgets.QDialog):
+class AppEditDialog(QtWidgets.QDialog):
 
     def __init__(self,  model: UiAppLinkModel, parent: QtWidgets.QWidget, flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
         self._model = model
+
         # without baseinstance, dialog would further needed to be configured
-        self._ui = uic.loadUi(current_dir / "app_edit.ui", baseinstance=self)
+        current_dir = Path(__file__).parent
+        self._ui = uic.loadUi(current_dir / "app_edit_dialog.ui", baseinstance=self)
 
         self.setModal(True)
         self.setWindowTitle("Edit App Link")

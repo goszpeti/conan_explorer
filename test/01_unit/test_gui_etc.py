@@ -4,11 +4,32 @@ using the whole application (standalone).
 """
 import traceback
 import pytest
+from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
 from conan_app_launcher.ui.modules.about_dialog import AboutDialog
 from conan_app_launcher.ui.common.bug_dialog import show_bug_dialog_exc_hook, bug_reporting_dialog
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
+
+
+def test_edit_line_conan():
+    """ Test, that the line edit validates on edit 
+    and displays the local packages instantly and the remote ones after a delay
+    """
+    # TODO
+
+
+def test_conan_search_dialog(base_fixture, qtbot):
+    root_obj = QtWidgets.QWidget()
+    widget = ConanSearchDialog(root_obj)
+
+    qtbot.addWidget(root_obj)
+    widget.show()
+    qtbot.waitExposed(widget)
+    from pytestqt.plugin import _qapp_instance
+    while True:
+       _qapp_instance.processEvents()
+
 
 def test_about_dialog(base_fixture, qtbot):
     """
@@ -53,10 +74,4 @@ def test_bug_dialog(base_fixture, qtbot, mocker):
     dialog = bug_reporting_dialog(exc_info[1], exc_info[2])
     assert dialog.text()
     assert "\n".join(traceback.format_tb(exc_info[2], limit=None)) in dialog.detailedText()
-
-def test_edit_line_conan():
-    """ Test, that the line edit validates on edit 
-    and displays the local packages instantly and the remote ones after a delay
-    """
-    # TODO
 

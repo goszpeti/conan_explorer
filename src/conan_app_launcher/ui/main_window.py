@@ -14,6 +14,8 @@ from conan_app_launcher.ui.model import UiApplicationModel
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
 
+from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
+
 from .modules.about_dialog import AboutDialog
 from .modules.app_grid import AppGridView
 from .modules.package_explorer import LocalConanPackageExplorer
@@ -35,7 +37,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.model = UiApplicationModel()
-        self.ui = uic.loadUi(base_path / "ui" / "main.ui", baseinstance=self)
+        current_dir = Path(__file__).parent
+        self.ui = uic.loadUi(current_dir / "main.ui", baseinstance=self)
 
         self._icons_path = asset_path / "icons"
         self._about_dialog = AboutDialog(self)
@@ -58,6 +61,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.ui.menu_about_action.triggered.connect(self._about_dialog.show)
         self.ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
+        self.ui.menu_search_in_remotes.triggered.connect(self.open_conan_search_dialog)
         self.ui.menu_toggle_display_versions.triggered.connect(self.display_versions_setting_toggled)
         self.ui.menu_toggle_display_users.triggered.connect(self.apply_display_users_setting_toggled)
         self.ui.menu_toggle_display_channels.triggered.connect(self.display_channels_setting_toggled)
@@ -109,6 +113,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.add_app_link_button.show()
             if ADD_TAB_BUTTON:
                 self.ui.add_tab_button.show()
+
+    @ pyqtSlot()
+    def open_conan_search_dialog(self):
+        dialog = ConanSearchDialog(self)
+        dialog.show()
 
     @ pyqtSlot()
     def open_cleanup_cache_dialog(self):
@@ -181,6 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.console.append(text)
 
     def load_icons(self):
+        """ Load icons for main toolbox and menu """
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(str(self._icons_path / "grid.png")),
                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -191,7 +201,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.main_toolbox.setItemIcon(self.TOOLBOX_PACKAGES_ITEM, icon)
 
         # menu
-        self.ui.refresh_button.setIcon(QtGui.QIcon(str(self._icons_path / "refresh.png")))
         self.ui.menu_cleanup_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
         self.ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))
         self.ui.menu_remove_locks.setIcon(QtGui.QIcon(str(self._icons_path / "remove-lock.png")))
+        self.ui.menu_search_in_remotes.setIcon(QtGui.QIcon(str(self._icons_path / "search_packages.png")))

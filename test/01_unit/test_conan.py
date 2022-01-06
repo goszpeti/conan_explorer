@@ -76,7 +76,7 @@ def test_conan_find_remote_pkg(base_fixture):
     conan = ConanApi()
     default_settings = dict(conan.client_cache.default_profile.settings)
 
-    pkgs = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
+    pkgs = conan.get_matching_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
     assert len(pkgs) >= 1
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
@@ -93,7 +93,7 @@ def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
-    pkg = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"BogusOption": "True"})
+    pkg = conan.get_matching_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"BogusOption": "True"})
     assert not pkg
 
 

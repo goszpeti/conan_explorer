@@ -3,6 +3,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List
+from conans.client.cache.remote_registry import Remote
 
 from conans.client.output import ConanOutput
 
@@ -39,7 +40,6 @@ class ConanPkg(TypedDict, total=False):
     settings: Dict[str, str]
     requires: List
     outdated: bool
-
 
 class LoggerWriter:
     """
@@ -89,6 +89,16 @@ class ConanApi():
     def remove_locks(self):
         self.conan.remove_locks()
         Logger().info("Removed Conan cache locks.")
+
+    def remotes(self) -> List[Remote]:
+        remotes = []
+        try:
+            remotes = self.client_cache.registry.load_remotes().values()
+        except Exception as e:
+            Logger().error(f"Error while reading remotes file: {str(e)}")
+        # if not isinstance(remote, str) and len(remote) > 0:  # only check for len, can be an object or a list
+        #     remote = remote[0]  # for old apis
+        return remotes
 
     def get_all_local_refs(self) -> List[ConanFileReference]:
         """ Returns all locally installed conan references """
@@ -170,7 +180,7 @@ class ConanApi():
             return self.get_package_folder(conan_ref, package.get("id", ""))
         Logger().info(f"'<b>{conan_ref}</b>' with options {repr(input_options)} is not installed.")
 
-        packages: List[ConanPkg] = self.search_package_in_remotes(conan_ref, input_options)
+        packages: List[ConanPkg] = self.get_matching_package_in_remotes(conan_ref, input_options)
         if not packages:
             self.info_cache.invalidate_remote_package(conan_ref)
             return Path("NULL")
@@ -183,13 +193,13 @@ class ConanApi():
             return self.get_package_folder(conan_ref, package.get("id", ""))
         return Path("NULL")
 
-    def search_query_in_remotes(self, query: str) -> List[ConanFileReference]:
+    def search_query_in_remotes(self, query: str, remote="all") -> List[ConanFileReference]:
         """ Search in all remotes for a specific query. """
         res_list = []
         search_results = []
         try:
             # no query possible with pattern
-            search_results = self.conan.search_recipes(query, remote_name="all").get("results", None)
+            search_results = self.conan.search_recipes(query, remote_name=remote, case_sensitive=False).get("results", None)
         except Exception:
             return []
         if not search_results:
@@ -231,13 +241,24 @@ class ConanApi():
         self.info_cache.update_remote_package_list(res_list)
         return res_list
 
-    def search_package_in_remotes(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> List[ConanPkg]:
+    def get_packages_in_remote(self, conan_ref: ConanFileReference, remote, query=None) -> List[ConanPkg]:
+        found_pkgs: List[ConanPkg] = []
+        try:
+            search_results = self.conan.search_packages(str(conan_ref), query=query,
+                                                        remote_name=remote).get("results", None)
+            if search_results:
+                found_pkgs = search_results[0].get("items")[0].get("packages")
+            Logger().debug(str(found_pkgs))
+        except Exception:  # no problem, next
+            return []
+        return found_pkgs
+
+    def get_matching_package_in_remotes(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> List[ConanPkg]:
         """ Find a package with options in the remotes """
-        remotes = self.client_cache.registry.load_remotes()
-        for remote in remotes.items():
-            if not isinstance(remote, str) and len(remote) > 0:  # only check for len, can be an object or a list
-                remote = remote[0]  # for old apis
-            packages = self.find_best_matching_packages(conan_ref, input_options, remote)
+        for remote in self.remotes():
+            # if not isinstance(remote, str) and len(remote) > 0:  # only check for len, can be an object or a list
+            #     remote = remote[0]  # for old apis
+            packages = self.find_best_matching_packages(conan_ref, input_options, remote.name)
             if packages:
                 return packages
         Logger().info(f"Can't find a matching package '<b>{str(conan_ref)}</b>' in the remotes")
@@ -257,7 +278,8 @@ class ConanApi():
                 conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
             return packages[0]
         Logger().debug(f"No matching packages found for <b>{str(conan_ref)}</b>")
-        return {"id": ""}
+        
+        return ConanPkg.update({"id": ""})
 
     def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """
@@ -316,11 +338,7 @@ class ConanApi():
                     f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"\
                     f" AND (os_build=None OR os_build={default_settings.get('os_build')})"
-            search_results = self.conan.search_packages(str(conan_ref), query=query,
-                                                        remote_name=remote).get("results", None)
-            if search_results:
-                found_pkgs = search_results[0].get("items")[0].get("packages")
-            Logger().debug(str(found_pkgs))
+            found_pkgs = self.get_packages_in_remote(conan_ref, remote, query)
         except Exception:  # no problem, next
             return []
 

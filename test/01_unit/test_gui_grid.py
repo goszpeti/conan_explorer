@@ -18,7 +18,7 @@ from conan_app_launcher.ui.data import UiApplicationConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
 from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
-    EditAppDialog
+    AppEditDialog
 from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkConfig,
                                                           UiAppLinkModel)
 from conans.model.ref import ConanFileReference as CFR
@@ -27,7 +27,7 @@ from conans.model.ref import ConanFileReference as CFR
 TEST_REF = "zlib/1.2.11@_/_"
 
 
-def test_EditAppDialog_display_values(base_fixture, qtbot):
+def test_AppEditDialog_display_values(base_fixture, qtbot):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
@@ -37,7 +37,7 @@ def test_EditAppDialog_display_values(base_fixture, qtbot):
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    diag = EditAppDialog(app_info, root_obj)
+    diag = AppEditDialog(app_info, root_obj)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
@@ -62,7 +62,7 @@ def test_EditAppDialog_display_values(base_fixture, qtbot):
     assert app_info.name == "test"
 
 
-def test_EditAppDialog_save_values(base_fixture, qtbot, mocker):
+def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
     """
     Test, if the entered data is written correctly.
     """
@@ -81,7 +81,7 @@ def test_EditAppDialog_save_values(base_fixture, qtbot, mocker):
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    diag = EditAppDialog(model, root_obj)
+    diag = AppEditDialog(model, root_obj)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 

@@ -8,9 +8,9 @@ from conan_app_launcher.components import (
     open_in_file_manager, run_file)
 from conan_app_launcher.settings import DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
-from .common.app_button import AppButton
-from .common.app_edit_dialog import EditAppDialog
-from .common.move_dialog import MoveAppLinksDialog
+from .common import AppButton
+from .common import AppEditDialog
+from .common import AppsMoveDialog
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -136,7 +136,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu.addAction(self.rearrange_action)
 
     def on_move(self):
-        move_dialog = MoveAppLinksDialog(parent=self.parentWidget(), tab_ui_model=self.model.parent)
+        move_dialog = AppsMoveDialog(parent=self.parentWidget(), tab_ui_model=self.model.parent)
         ret = move_dialog.exec()
         if ret == QtWidgets.QDialog.Accepted:
             move_dialog.save()
@@ -180,9 +180,9 @@ class AppLink(QtWidgets.QVBoxLayout):
     def open_edit_dialog(self, model: UiAppLinkModel = None):
         if model:
             self.model = model
-        edit_app_dialog = EditAppDialog(self.model, parent=self.parentWidget())
+        edit_app_dialog = AppEditDialog(self.model, parent=self.parentWidget())
         reply = edit_app_dialog.exec_()
-        if reply == EditAppDialog.Accepted:
+        if reply == AppEditDialog.Accepted:
             edit_app_dialog.save_data()
             # grey icon, so update from cache can ungrey it, if the path is correct
             self._app_button.grey_icon()

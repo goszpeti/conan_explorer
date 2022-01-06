@@ -1,6 +1,6 @@
 """ Common ui classes and functions """
-from PyQt5 import QtCore
-from typing import Tuple
+from PyQt5 import QtCore, QtWidgets
+from typing import Optional, Tuple, Callable
 class Worker(QtCore.QObject):
     """ Generic worker for Qt, which can call any function with args """
     finished = QtCore.pyqtSignal()
@@ -13,3 +13,32 @@ class Worker(QtCore.QObject):
     def work(self):
         self.func(*self.args)
         self.finished.emit()
+
+
+class QtLoaderObject(QtCore.QObject):
+    def __init__(self) -> None:
+        self.progress_dialog: Optional[QtWidgets.QProgressDialog] = None
+        self.worker: Optional[Worker] = None
+        self.init_model_thread: Optional[QtCore.QThread] = None
+
+    def async_loading(self, parent, work_task: Callable, finish_task: Callable, loading_text: str):
+        # TODO check if init_model_thread exists and wait for join
+        self.progress_dialog = QtWidgets.QProgressDialog(parent)
+        self.progress_dialog.setLabelText(loading_text)
+        self.progress_dialog.setWindowTitle("Loading")
+        self.progress_dialog.setCancelButton(None)
+        self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
+        self.progress_dialog.setRange(0, 0)
+        self.progress_dialog.show()
+        self.worker = Worker(work_task)
+        self.init_model_thread = QtCore.QThread()
+        self.worker.moveToThread(self.init_model_thread)
+        self.init_model_thread.started.connect(self.worker.work)
+
+        self.worker.finished.connect(finish_task)
+        self.worker.finished.connect(self.init_model_thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+
+        self.init_model_thread.finished.connect(self.init_model_thread.deleteLater)
+        self.init_model_thread.finished.connect(self.progress_dialog.hide)
+        self.init_model_thread.start()

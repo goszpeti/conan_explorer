@@ -738,8 +738,10 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>Conan</string>
     </property>
+    <addaction name="menu_search_in_remotes"/>
     <addaction name="menu_cleanup_cache"/>
     <addaction name="menu_remove_locks"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menuConan"/>
@@ -891,6 +893,16 @@ p, li { white-space: pre-wrap; }
   <action name="menu_remove_locks">
    <property name="text">
     <string>Remove Locks</string>
+   </property>
+  </action>
+  <action name="menu_search_in_remotes">
+   <property name="text">
+    <string>Search in Remotes</string>
+   </property>
+  </action>
+  <action name="actionConan_Settings">
+   <property name="text">
+    <string>Conan Settings</string>
    </property>
   </action>
  </widget>

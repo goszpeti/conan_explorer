@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from conan_app_launcher import ICON_SIZE
+from conan_app_launcher import ICON_SIZE, asset_path
 from conan_app_launcher.logger import Logger
 from PyQt5.QtCore import QFileInfo, Qt
 from PyQt5.QtGui import QIcon, QPixmap
@@ -29,5 +29,20 @@ def extract_icon(file_path: Path) -> QIcon:
         icon = icon_provider.icon(file_info)
         return icon
     else:
-        Logger().debug("File for icon extraction does not exist.")
+        Logger().debug(f"File {str(file_path)} for icon extraction does not exist.")
     return QIcon()
+
+
+def get_platform_icon(profile_name) -> QIcon:
+    icons_path = asset_path / "icons"
+    profile_name = profile_name.lower()
+    if "windows" in profile_name:
+        return QIcon(str(icons_path / "windows.png"))
+    elif "linux" in profile_name:
+        return QIcon(str(icons_path / "linux.png"))
+    elif "android" in profile_name:
+        return QIcon(str(icons_path / "android.png"))
+    elif "macos" in profile_name:
+        return QIcon(str(icons_path / "mac_os.png"))
+    else:
+        return QIcon(str(icons_path / "default_pkg.png"))

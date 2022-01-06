@@ -1,9 +1,15 @@
 import pprint
 from typing import Dict, List, Union
-from conan_app_launcher.components import ConanApi
+
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
+from conan_app_launcher.components import ConanApi
+from conan_app_launcher.components.conan import ConanPkg
+from conan_app_launcher.ui.common.icon import get_platform_icon
+from conan_app_launcher.ui.common.model import TreeModel, TreeModelItem
+
 from PyQt5 import QtCore, QtGui
+
 Qt = QtCore.Qt
 
 REF_TYPE = 0
@@ -60,51 +66,17 @@ class PackageFilter(QtCore.QSortFilterProxyModel):
         return False
 
 
-class PackageTreeItem(object):
-    """
-    Represents a tree item of a Conan pkg.
-    Implemented like the default QT example.  # TODO Should be refactored in the future
-    """
+class PackageTreeItem(TreeModelItem):
+    """ Represents a tree item of a Conan pkg. To be used for the parent (ref) and the child (Profile)"""
 
-    def __init__(self, data: List[Union[str, Dict]], parent=None, item_type=REF_TYPE):
-        self.parent_item = parent
-        self.item_data = data
+    def __init__(self, data: List[Union[str, ConanPkg]], parent=None, item_type=REF_TYPE):
+        super().__init__(data, parent)
         self.type = item_type
-        self.child_items = []
 
-    def append_child(self, item):
-        self.child_items.append(item)
-
-    def child(self, row):
-        return self.child_items[row]
-
-    def child_count(self):
-        return len(self.child_items)
-
-    def column_count(self):
-        return len(self.item_data)
-
-    def get_dummy_profile_name(self, column):
-        if self.type == PROFILE_TYPE:
-            return ConanApi.build_conan_profile_name_alias(self.item_data[column].get("settings", {}))
-
-    def data(self, column):
-        return self.item_data[column]
-
-    def parent(self):
-        return self.parent_item
-
-    def row(self):
-        if self.parent_item:
-            return self.parent_item.child_items.index(self)
-
-        return 0
-
-
-class PkgSelectModel(QtCore.QAbstractItemModel):
+class PkgSelectModel(TreeModel):
 
     def __init__(self, *args, **kwargs):
-        super(PkgSelectModel, self).__init__(*args, **kwargs)
+        super(TreeModel, self).__init__(*args, **kwargs)
         self._icons_path = asset_path / "icons"
         self.root_item = PackageTreeItem(["Packages"])
         self.proxy_model = PackageFilter()
@@ -121,27 +93,6 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
                 pkg_item = PackageTreeItem([info], conan_item, PROFILE_TYPE)
                 conan_item.append_child(pkg_item)
 
-    def columnCount(self, parent):  # override
-        if parent.isValid():
-            return parent.internalPointer().column_count()
-        else:
-            return self.root_item.column_count()
-
-    def index(self, row, column, parent):  # override
-        if not self.hasIndex(row, column, parent):
-            return QtCore.QModelIndex()
-
-        if not parent.isValid():
-            parent_item = self.root_item
-        else:
-            parent_item = parent.internalPointer()
-
-        child_item = parent_item.child(row)
-        if child_item:
-            return self.createIndex(row, column, child_item)
-        else:
-            return QtCore.QModelIndex()
-
     def data(self, index: QtCore.QModelIndex, role):  # override
         if not index.isValid():
             return None
@@ -155,59 +106,15 @@ class PkgSelectModel(QtCore.QAbstractItemModel):
             if item.type == REF_TYPE:
                 return QtGui.QIcon(str(self._icons_path / "package.png"))
             if item.type == PROFILE_TYPE:
-                profile_name = item.get_dummy_profile_name(0)
-                if not profile_name:
-                    return None
-                profile_name = profile_name.lower()
-                if "windows" in profile_name:
-                    return QtGui.QIcon(str(self._icons_path / "windows.png"))
-                elif "linux" in profile_name:
-                    return QtGui.QIcon(str(self._icons_path / "linux.png"))
-                elif "android" in profile_name:
-                    return QtGui.QIcon(str(self._icons_path / "android.png"))
-                elif "macos" in profile_name:
-                    return QtGui.QIcon(str(self._icons_path / "mac_os.png"))
-                elif "default" in profile_name:
-                    return QtGui.QIcon(str(self._icons_path / "default_pkg.png"))
+                profile_name = self.get_generated_profile_name(item)
+                return get_platform_icon(profile_name)
         if role == Qt.DisplayRole:
             if item.type == REF_TYPE:
                 return item.data(index.column())
             if item.type == PROFILE_TYPE:
-                return item.get_dummy_profile_name(0)
+                return self.get_generated_profile_name(item)
 
         return None
 
-    def rowCount(self, parent):  # override
-        if parent.column() > 0:
-            return 0
-
-        if not parent.isValid():
-            parent_item = self.root_item
-        else:
-            parent_item = parent.internalPointer()
-
-        return parent_item.child_count()
-
-    def flags(self, index):  # override
-        if not index.isValid():
-            return QtCore.Qt.NoItemFlags
-
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
-
-    def parent(self, index):  # override
-        if not index.isValid():
-            return QtCore.QModelIndex()
-
-        child_item = index.internalPointer()
-        parent_item = child_item.parent()
-
-        if parent_item == self.root_item:
-            return QtCore.QModelIndex()
-
-        return self.createIndex(parent_item.row(), 0, parent_item)
-
-    def headerData(self, section, orientation, role):  # override
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self.root_item.data(section)
-
-        return None
+    def get_generated_profile_name(self, item) -> str:
+        return ConanApi.build_conan_profile_name_alias(item.data(0).get("settings", {}))

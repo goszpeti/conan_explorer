@@ -12,9 +12,9 @@ from conan_app_launcher.settings.ini_file import IniSettings
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
-from conan_app_launcher.ui.modules.app_grid.common.move_dialog import MoveAppLinksDialog
+from conan_app_launcher.ui.modules.app_grid.common.move_dialog import AppsMoveDialog
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
-from conan_app_launcher.ui.modules.app_grid.tab import (AppLink, EditAppDialog,
+from conan_app_launcher.ui.modules.app_grid.tab import (AppLink, AppEditDialog,
                                                         TabGrid)
 from conans.model.ref import ConanFileReference
 from conans.model.ref import ConanFileReference as CFR
@@ -150,7 +150,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     app_link: AppLink = tabs[1].app_links[0]
 
     ### check that no changes happens on cancel
-    mocker.patch.object(EditAppDialog, 'exec_',
+    mocker.patch.object(AppEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Rejected)
     app_link.open_edit_dialog()
     config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
@@ -161,7 +161,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     app_config = UiAppLinkConfig(name="NewApp", conan_ref=TEST_REF,
                                  executable="bin/exe")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
-    mocker.patch.object(EditAppDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(AppEditDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
     app_link.open_edit_dialog(app_model)
 
     # check that the gui has updated
@@ -234,7 +234,7 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
                                  executable="conanmanifest.txt")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
 
-    mocker.patch.object(EditAppDialog, 'exec_',
+    mocker.patch.object(AppEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
     new_app_link = tab.open_app_link_add_dialog(app_model)
     assert new_app_link
@@ -276,7 +276,7 @@ def test_move_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     tab_model = tab.model
     apps_model = tab_model.apps
     app = tab.app_links[0]
-    move_dialog = MoveAppLinksDialog(parent=main_gui, tab_ui_model=tab_model)
+    move_dialog = AppsMoveDialog(parent=main_gui, tab_ui_model=tab_model)
     move_dialog.show()
     sel_idx = tab_model.index(0, 0, QtCore.QModelIndex())
     move_dialog.list_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.Select)

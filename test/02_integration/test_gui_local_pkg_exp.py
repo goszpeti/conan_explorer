@@ -10,7 +10,7 @@ import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.ui import main_window
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
-from conan_app_launcher.ui.modules.app_grid.tab import EditAppDialog
+from conan_app_launcher.ui.modules.app_grid.tab import AppEditDialog
 
 Qt = QtCore.Qt
 TEST_REF = "zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
@@ -113,18 +113,18 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.ui.package_file_view.selectedIndexes()[0]
     sel_file = sel_idx.model().fileInfo(sel_idx).absoluteFilePath()
     cp = QtWidgets.QApplication.clipboard()
-    main_gui.local_package_explorer.on_copy_as_path()
+    main_gui.local_package_explorer.on_copy_file_as_path()
     cp_text = cp.text()
     assert Path(cp_text) == file
 
     # Check open terminal
-    pid = main_gui.local_package_explorer.on_open_terminal()
+    pid = main_gui.local_package_explorer.on_open_terminal_in_dir()
     assert pid > 0
     import signal
     # TODO check pid is running
     os.kill(pid, signal.SIGTERM)
     # Check copy
-    main_gui.local_package_explorer.on_copy()
+    main_gui.local_package_explorer.on_file_copy()
     assert "file://" in cp.text() and cp_text in cp.text()
 
     # Check paste
@@ -133,11 +133,11 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     url = QtCore.QUrl.fromLocalFile(str(config_path))
     data.setUrls([url])
     cp.setMimeData(data)
-    main_gui.local_package_explorer.on_paste()  # check new file
+    main_gui.local_package_explorer.on_file_paste()  # check new file
     assert (root_path / config_path.name).exists()
 
     # Check open in file manager
-    main_gui.local_package_explorer.on_open_in_file_manager(None)
+    main_gui.local_package_explorer.on_open_file_in_file_manager(None)
     lp.open_in_file_manager.assert_called_with(Path(cp_text))
 
     # Check Add AppLink to AppGrid
@@ -145,9 +145,9 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
                         return_value=QtWidgets.QInputDialog.Accepted)
     mocker.patch.object(QtWidgets.QInputDialog, 'textValue',
                         return_value="Basics")   
-    mocker.patch.object(EditAppDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(AppEditDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
 
-    main_gui.local_package_explorer.on_add_app_link()
+    main_gui.local_package_explorer.on_add_app_link_from_file()
     # assert that the link has been created
     last_app_link = main_gui.app_grid.model.tabs[0].apps[-1]
     assert last_app_link.executable == "conaninfo.txt"
@@ -159,7 +159,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
-    main_gui.local_package_explorer.on_delete()  # check new file?
+    main_gui.local_package_explorer.on_file_delete()  # check new file?
     assert not (root_path / config_path.name).exists()
 
 

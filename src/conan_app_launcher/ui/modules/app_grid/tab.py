@@ -1,9 +1,11 @@
 from typing import List
-from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiTabModel
 
-from .common.app_edit_dialog import EditAppDialog
+from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkModel,
+                                                          UiTabModel)
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 from .app_link import AppLink
-from PyQt5 import QtCore, QtWidgets, QtGui
+from .common import AppEditDialog
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -99,9 +101,9 @@ class TabGrid(QtWidgets.QWidget):
             new_model = UiAppLinkModel()
             new_model.parent = self.model
         # save for testing
-        self._edit_app_dialog = EditAppDialog(new_model, parent=self.parentWidget())
+        self._edit_app_dialog = AppEditDialog(new_model, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
-        if reply == EditAppDialog.Accepted:
+        if reply == AppEditDialog.Accepted:
             self._edit_app_dialog.save_data()
             app_link = AppLink(self, new_model)
             app_link.load()

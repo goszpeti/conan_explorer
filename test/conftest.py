@@ -17,6 +17,7 @@ from conan_app_launcher import (SETTINGS_FILE_NAME, asset_path, base_path,
                                 user_save_path)
 from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.settings import *
+from PyQt5 import QtWidgets, QtCore
 
 conan_server_thread =  None
 # setup conan test server
@@ -74,6 +75,8 @@ def base_fixture(request):
     app.conan_api = ConanApi()
     app.conan_worker = ConanWorker(app.conan_api)
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
 
     yield paths
     # Teardown
