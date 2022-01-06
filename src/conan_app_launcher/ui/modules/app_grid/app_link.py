@@ -105,10 +105,10 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
 
-        self.show_in_pkg_exp_action = QtWidgets.QAction("Show in Package Explorer", self)
-        self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(str(icons_path / "search_packages.png")))
-        self.menu.addAction(self.show_in_pkg_exp_action)
-        self.show_in_pkg_exp_action.setDisabled(True)  # TODO upcoming feature
+        # self.show_in_pkg_exp_action = QtWidgets.QAction("Show in Package Explorer", self)
+        # self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(str(icons_path / "search_packages.png")))
+        # self.menu.addAction(self.show_in_pkg_exp_action)
+        # self.show_in_pkg_exp_action.setDisabled(True)  # TODO upcoming feature
 
         self.menu.addSeparator()
 

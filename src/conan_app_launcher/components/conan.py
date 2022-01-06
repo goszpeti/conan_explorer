@@ -278,8 +278,7 @@ class ConanApi():
                 conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
             return packages[0]
         Logger().debug(f"No matching packages found for <b>{str(conan_ref)}</b>")
-        
-        return ConanPkg.update({"id": ""})
+        return {"id": ""}
 
     def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """
