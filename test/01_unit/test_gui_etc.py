@@ -26,9 +26,9 @@ def test_conan_search_dialog(base_fixture, qtbot):
     qtbot.addWidget(root_obj)
     widget.show()
     qtbot.waitExposed(widget)
-    from pytestqt.plugin import _qapp_instance
-    while True:
-       _qapp_instance.processEvents()
+    # from pytestqt.plugin import _qapp_instance
+    # while True:
+    #    _qapp_instance.processEvents()
 
 
 def test_about_dialog(base_fixture, qtbot):
