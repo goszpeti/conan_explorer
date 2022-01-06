@@ -21,14 +21,14 @@ TEST_REF = "zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
 #    _qapp_instance.processEvents()
 
 
-def wait_for_loading_pkgs(main_gui):
+def wait_for_loading_pkgs(main_gui: main_window.MainWindow):
     from pytestqt.plugin import _qapp_instance
 
     # wait for loading thread
-    main_gui.local_package_explorer._init_model_thread
-    while not main_gui.local_package_explorer._init_model_thread:
+    main_gui.local_package_explorer._fs_model_loader.load_thread
+    while not main_gui.local_package_explorer._fs_model_loader.load_thread:
         time.sleep(1)
-    while not main_gui.local_package_explorer._init_model_thread.isFinished():
+    while not main_gui.local_package_explorer._fs_model_loader.load_thread.isFinished():
         _qapp_instance.processEvents()
 
 
@@ -59,7 +59,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
         if pkg.item_data[0] == str(cfr):
             found_tst_pkg = True
             # check it's child
-            assert pkg.child(0).get_dummy_profile_name(0) in [
+            assert model.get_quick_profile_name(pkg.child(0)) in [
                 "Windows_x64_vs16_release", "Linux_x64_gcc9_release"]
     assert found_tst_pkg
     # select package (ref, not profile)
@@ -128,7 +128,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     assert "file://" in cp.text() and cp_text in cp.text()
 
     # Check paste
-    config_path: Path = ui_no_refs_config_fixture # use the config file as test data to be pasted
+    config_path: Path = ui_no_refs_config_fixture  # use the config file as test data to be pasted
     data = QtCore.QMimeData()
     url = QtCore.QUrl.fromLocalFile(str(config_path))
     data.setUrls([url])
@@ -144,7 +144,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     mocker.patch.object(QtWidgets.QInputDialog, 'exec_',
                         return_value=QtWidgets.QInputDialog.Accepted)
     mocker.patch.object(QtWidgets.QInputDialog, 'textValue',
-                        return_value="Basics")   
+                        return_value="Basics")
     mocker.patch.object(AppEditDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
 
     main_gui.local_package_explorer.on_add_app_link_from_file()

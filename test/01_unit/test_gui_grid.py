@@ -117,7 +117,7 @@ def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
     for opt in model.conan_options:
         assert f"{opt}={model.conan_options[opt]}" in conan_options_text
 
-    vt = diag._ui.conan_ref_line_edit._validator_thread
+    vt = diag._ui.conan_ref_line_edit._completion_thread
     if vt and vt.is_alive():
         vt.join()
     app.conan_worker.finish_working()

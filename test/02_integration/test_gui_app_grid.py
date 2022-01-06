@@ -255,7 +255,7 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count + 1
     # wait until conan search finishes
-    vt = tab._edit_app_dialog._ui.conan_ref_line_edit._validator_thread
+    vt = tab._edit_app_dialog._ui.conan_ref_line_edit._completion_thread
     if vt and vt.is_alive():
         vt.join()
 
