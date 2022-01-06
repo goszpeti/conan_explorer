@@ -106,15 +106,15 @@ class PkgSelectModel(TreeModel):
             if item.type == REF_TYPE:
                 return QtGui.QIcon(str(self._icons_path / "package.png"))
             if item.type == PROFILE_TYPE:
-                profile_name = self.get_generated_profile_name(item)
+                profile_name = self.get_quick_profile_name(item)
                 return get_platform_icon(profile_name)
         if role == Qt.DisplayRole:
             if item.type == REF_TYPE:
                 return item.data(index.column())
             if item.type == PROFILE_TYPE:
-                return self.get_generated_profile_name(item)
+                return self.get_quick_profile_name(item)
 
         return None
 
-    def get_generated_profile_name(self, item) -> str:
+    def get_quick_profile_name(self, item) -> str:
         return ConanApi.build_conan_profile_name_alias(item.data(0).get("settings", {}))

@@ -19,7 +19,7 @@ class QtLoaderObject(QtCore.QObject):
     def __init__(self) -> None:
         self.progress_dialog: Optional[QtWidgets.QProgressDialog] = None
         self.worker: Optional[Worker] = None
-        self.init_model_thread: Optional[QtCore.QThread] = None
+        self.load_thread: Optional[QtCore.QThread] = None
 
     def async_loading(self, parent, work_task: Callable, finish_task: Callable, loading_text: str):
         # TODO check if init_model_thread exists and wait for join
@@ -31,14 +31,14 @@ class QtLoaderObject(QtCore.QObject):
         self.progress_dialog.setRange(0, 0)
         self.progress_dialog.show()
         self.worker = Worker(work_task)
-        self.init_model_thread = QtCore.QThread()
-        self.worker.moveToThread(self.init_model_thread)
-        self.init_model_thread.started.connect(self.worker.work)
+        self.load_thread = QtCore.QThread()
+        self.worker.moveToThread(self.load_thread)
+        self.load_thread.started.connect(self.worker.work)
 
         self.worker.finished.connect(finish_task)
-        self.worker.finished.connect(self.init_model_thread.quit)
+        self.worker.finished.connect(self.load_thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
 
-        self.init_model_thread.finished.connect(self.init_model_thread.deleteLater)
-        self.init_model_thread.finished.connect(self.progress_dialog.hide)
-        self.init_model_thread.start()
+        self.load_thread.finished.connect(self.load_thread.deleteLater)
+        self.load_thread.finished.connect(self.progress_dialog.hide)
+        self.load_thread.start()

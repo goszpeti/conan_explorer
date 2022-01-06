@@ -255,11 +255,6 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.file_cntx_menu.addAction(self.open_terminal_action)
         self.open_terminal_action.triggered.connect(self.on_open_terminal_in_dir)
 
-        self.open_terminal_action = QtWidgets.QAction("Open terminal here", self._main_window)
-        self.open_terminal_action.setIcon(QtGui.QIcon(str(icons_path / "cmd.png")))
-        self.file_cntx_menu.addAction(self.open_terminal_action)
-        self.open_terminal_action.triggered.connect(self.on_open_terminal)
-
         self.file_cntx_menu.addSeparator()
 
         self.copy_action = QtWidgets.QAction("Copy", self._main_window)
