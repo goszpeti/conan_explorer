@@ -1,5 +1,5 @@
 import pprint
-from typing import Dict, List, Union
+from typing import List, Union
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path

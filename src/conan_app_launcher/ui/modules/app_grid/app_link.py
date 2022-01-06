@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING
 from pathlib import Path
 import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher import INVALID_CONAN_REF, asset_path
+from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (
     open_in_file_manager, run_file)

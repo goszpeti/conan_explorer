@@ -4,7 +4,7 @@ from typing import Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, PathLike,
-                                asset_path, base_path, user_save_path)
+                                asset_path, user_save_path)
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,

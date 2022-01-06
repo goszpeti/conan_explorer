@@ -1,9 +1,6 @@
-import platform
 import sys
-import tempfile
 from distutils.file_util import copy_file
 from pathlib import Path
-from PyQt5.QtGui import QIcon
 
 from conans.model.ref import ConanFileReference as CFR
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiAppLinkConfig

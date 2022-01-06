@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Callable, List, Optional
 from conan_app_launcher import asset_path
 import conan_app_launcher.app as app  # using gobal module pattern
 
-from conan_app_launcher.ui.common import Worker
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (open_in_file_manager, run_file, open_file, open_cmd_in_path)
 from conan_app_launcher.components.conan import ConanPkg

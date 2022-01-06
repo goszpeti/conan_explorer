@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Optional
 
 from conan_app_launcher import ICON_SIZE
-from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt

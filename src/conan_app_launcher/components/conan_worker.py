@@ -2,7 +2,7 @@
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 from PyQt5.QtCore import pyqtBoundSignal
 
 if TYPE_CHECKING:  # pragma: no cover

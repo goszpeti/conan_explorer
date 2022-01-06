@@ -17,7 +17,6 @@ from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.modules.app_grid.tab import (AppLink, AppEditDialog,
                                                         TabGrid)
 from conans.model.ref import ConanFileReference
-from conans.model.ref import ConanFileReference as CFR
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
