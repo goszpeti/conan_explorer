@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
 from conan_app_launcher import asset_path
 import conan_app_launcher.app as app  # using gobal module pattern
-
+from time import sleep
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (open_in_file_manager, run_file, open_file, open_cmd_in_path)
 from conan_app_launcher.components.conan import ConanPkg
@@ -23,8 +23,10 @@ class LocalConanPackageExplorer(QtCore.QObject):
         super().__init__()
         self._main_window = main_window
         self.pkg_sel_model = None
+        self._pkg_sel_model_loader = QtLoaderObject()
+        self._pkg_sel_model_loaded = False
         self.fs_model = None
-        self._fs_model_loader = QtLoaderObject()
+
         # TODO belongs in a model?
         self._current_ref: Optional[str] = None # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
@@ -60,7 +62,6 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.show_conanfile_action.setIcon(QtGui.QIcon(str(icons_path / "file_preview.png")))
         self.select_cntx_menu.addAction(self.show_conanfile_action)
         self.show_conanfile_action.triggered.connect(self.on_show_conanfile_requested)
-
 
         self.remove_ref_action = QtWidgets.QAction("Remove package", self._main_window)
         self.remove_ref_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
@@ -129,7 +130,6 @@ class LocalConanPackageExplorer(QtCore.QObject):
             pkg_ids = ([pkg_id] if pkg_id else None)
         self.delete_conan_package_dialog(conan_ref, pkg_ids)
 
-
     def delete_conan_package_dialog(self, conan_ref: str, pkg_ids: Optional[List[str]]):
         msg = QtWidgets.QMessageBox(parent=self._main_window)
         msg.setWindowTitle("Delete package")
@@ -161,7 +161,8 @@ class LocalConanPackageExplorer(QtCore.QObject):
         """
         if not update and self.pkg_sel_model: # loads only at first init
             return
-        self._fs_model_loader.async_loading(
+        self._pkg_sel_model_loaded = False
+        self._pkg_sel_model_loader.async_loading(
             self._main_window, self.init_select_model, self.finish_select_model_init, "Reading Packages")
 
     def finish_select_model_init(self):
@@ -174,14 +175,62 @@ class LocalConanPackageExplorer(QtCore.QObject):
             self.set_filter_wildcard() # reapply package filter query
         else:
             Logger().error("Can't load local packages!")
+        self._pkg_sel_model_loaded = True
 
     def init_select_model(self):
         self.pkg_sel_model = PkgSelectModel()
+
+    def wait_for_loading_pkgs(self):
+        # wait for loading thread
+        while not self._pkg_sel_model_loaded:
+            QtWidgets.QApplication.processEvents()
 
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace
         text = self._main_window.ui.package_filter_edit.toPlainText().strip()
         self.proxy_model.setFilterWildcard(text)
+
+    def select_local_package_from_ref(self, conan_ref: str):
+        self._main_window.raise_() # TODO does not work
+        self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page
+        self.wait_for_loading_pkgs()
+        # if not self.pkg_sel_model:  # if not initalized
+        #     self.refresh_pkg_selection_view()
+
+        # # wait for model to be loaded
+        # self.wait_for_loading_pkgs()
+        # TODO cancel on timeout
+
+        split_ref = conan_ref.split(":")
+        id = ""
+        if len(split_ref) > 1:
+            conan_ref = split_ref[0]
+            id = split_ref[1]
+
+        ref_row = 0
+        for ref_row in range(self.pkg_sel_model.root_item.child_count()):
+            item = self.pkg_sel_model.root_item.child_items[ref_row]
+            if item.item_data[0] == conan_ref:
+                break
+        if not ref_row:
+            return
+
+        index = self.pkg_sel_model.index(ref_row, 0, QtCore.QModelIndex())
+        sel_model = self._main_window.package_select_view.selectionModel()
+
+        # map to package view model
+        view_model = self._main_window.ui.package_select_view.model()
+        self._main_window.ui.package_select_view.expand(view_model.mapFromSource(index))
+
+        if id:
+            item: PackageTreeItem = index.internalPointer()
+            i = 0
+            for i in range(len(item.child_items)):
+                if item.child_items[i].item_data[0].get("id", "") == id:
+                    break
+            child_index = index.child(i, 0)
+            sel_model.select(view_model.mapFromSource(child_index), QtCore.QItemSelectionModel.ClearAndSelect)
+            self._main_window.ui.package_select_view.selectionModel().currentRowChanged.emit(index, child_index)
 
     # Package file view init and functions
 

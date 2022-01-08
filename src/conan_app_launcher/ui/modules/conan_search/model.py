@@ -22,19 +22,28 @@ class SearchedPackageTreeItem(TreeModelItem):
     1. ref/id 2. remote 3. quick profile
     """
 
-    def __init__(self, data: List[Union[str, str, str]], parent=None, pkg_data: Optional[ConanPkg] = None, item_type=REF_TYPE, lazy_loading=False):
+    def __init__(self, data: List[Union[str, str, str]], parent=None, pkg_data: Optional[ConanPkg] = None,
+                 item_type=REF_TYPE, lazy_loading=False, installed=False):
         super().__init__(data, parent, lazy_loading=lazy_loading)
         self.type = item_type
         self.pkg_data = pkg_data
+        self.is_installed = installed
 
     def load_children(self):
         self.child_items = []
         for remote in self.data(1).split(","):
             recipe = self.data(0)
+            # cross reference with installed packages
+            infos = app.conan_api.get_local_pkgs_from_ref(recipe)
+            installed_ids = [info.get("id") for info in infos]
             packages = app.conan_api.get_packages_in_remote(ConanFileReference.loads(recipe), remote)
             for pkg in packages:
+                id = pkg.get("id")
+                installed = False
+                if id in installed_ids:
+                    installed = True
                 self.child_items.append(SearchedPackageTreeItem(
-                    [pkg.get("id"), remote,  ConanApi.build_conan_profile_name_alias(pkg.get("settings", {}))], self, pkg, PROFILE_TYPE))
+                    [id, remote,  ConanApi.build_conan_profile_name_alias(pkg.get("settings", {}))], self, pkg, PROFILE_TYPE, installed=installed))
         if not self.child_items:
             self.child_items.append(SearchedPackageTreeItem(
                 ["No package found", "",  ""], self, {}, PROFILE_TYPE))
@@ -46,6 +55,11 @@ class SearchedPackageTreeItem(TreeModelItem):
         elif self.type == PROFILE_TYPE:
             return 0  # no child
 
+    def get_conan_ref(self) -> str:
+        if self.type == REF_TYPE:
+            return self.data(0)
+        elif self.type == PROFILE_TYPE:
+            return self.parent().data(0) + ":" + self.data(0)
 
 class PkgSearchModel(TreeModel):
 
@@ -92,7 +106,25 @@ class PkgSearchModel(TreeModel):
             if item.type == PROFILE_TYPE:
                 profile_name = item.data(2)
                 return get_platform_icon(profile_name)
-        if role == Qt.DisplayRole:
+        elif role == Qt.DisplayRole:
             return item.data(index.column())
+        elif role == Qt.FontRole:
+            if item.type == PROFILE_TYPE and item.is_installed:
+                font = QtGui.QFont()
+                font.setBold(True)
+                return font
+
+        
+            # if item.type == PROFILE_TYPE and item.installed:
+            #     self.root_item
+            # return data
+            # if (role == Qt: : FontRole & & index.column() == 0) {// First column items are bold.
+            #                                                       QFont font;
+            #                                                       font.setBold(true);
+            #                                                       return font;     } 
+            # else if (role == Qt: : ForegroundRole & & index.column() == 0) {
+            #     return QColor(Qt: : red);         } else {
+            #     [..]
+
 
         return None
