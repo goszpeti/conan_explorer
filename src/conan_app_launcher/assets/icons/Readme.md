@@ -24,3 +24,4 @@ default_box -- https://icons8.com/icon/16501/empty-box
 search database -- https://icons8.com/icon/PGmuOjfnnxLR/search-database
 rearrange --  https://icons8.com/icon/Oep8qSu1uwxZ/rearrange
 cmd -- https://icons8.com/icon/16133/console
+download_pkg - https://icons8.com/icon/22789/downloads
