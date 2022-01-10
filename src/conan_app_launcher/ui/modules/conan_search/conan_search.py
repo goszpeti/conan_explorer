@@ -2,11 +2,13 @@ import pprint
 from pathlib import Path
 from typing import List, Optional, TYPE_CHECKING
 
+from conans.model.ref import ConanFileReference
+
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from conan_app_launcher.ui.common import QtLoaderObject
-
+from conan_app_launcher.components import open_file
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
 Qt = QtCore.Qt
@@ -42,7 +44,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self.search_action.triggered.connect(self.on_search)
 
         # init remotes list
-        remotes = app.conan_api.remotes()
+        remotes = app.conan_api.get_remotes()
         for remote in remotes:
             item = QtWidgets.QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
@@ -83,6 +85,8 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self.install_pkg_action.setIcon(QtGui.QIcon(str(icons_path / "download_pkg.png")))
         self.select_cntx_menu.addAction(self.install_pkg_action)
         self.install_pkg_action.triggered.connect(self.on_install_pkg_requested)
+        self.install_pkg_action.setEnabled(False)
+
 
         self.show_in_pkg_exp_action = QtWidgets.QAction("Show in Package Explorer", self)
         self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(str(icons_path / "search_packages.png")))
@@ -100,10 +104,10 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self.select_cntx_menu.exec_(self._ui.search_results_tree_view.mapToGlobal(position))
 
     def on_search(self):
-        self._load_search_model()
-        self._finish_load_search_model()
-        # self._pkg_result_loader.async_loading(
-        #     self, self._load_search_model, self._finish_load_search_model, "Searching for packages...")
+        #self._load_search_model()
+        #self._finish_load_search_model()
+        self._pkg_result_loader.async_loading(
+             self, self._load_search_model, self._finish_load_search_model, "Searching for packages...")
 
     def on_show_in_pkg_exp(self):
         if not self._local_package_explorer:
@@ -155,6 +159,18 @@ class ConanSearchDialog(QtWidgets.QDialog):
             if item.checkState() == Qt.Checked:
                 selected_remotes.append(item.text())
         return selected_remotes
+
+    def get_selected_conan_ref(self) -> str:
+        # no need to map from postition, since rightclick selects a single item
+        source_item = self.get_selected_source_item(self._ui.search_results_tree_view)
+        if not source_item:
+            return ""
+        conan_ref_item = source_item
+        if source_item.type == PROFILE_TYPE:
+            conan_ref_item = source_item.parent()
+        if not conan_ref_item:
+            return ""
+        return conan_ref_item.item_data[0]
 
     def get_selected_source_item(self, view) -> Optional[SearchedPackageTreeItem]:
         indexes = view.selectedIndexes()

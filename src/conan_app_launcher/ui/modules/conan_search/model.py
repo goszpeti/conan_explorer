@@ -34,7 +34,8 @@ class SearchedPackageTreeItem(TreeModelItem):
         for remote in self.data(1).split(","):
             recipe = self.data(0)
             # cross reference with installed packages
-            infos = app.conan_api.get_local_pkgs_from_ref(recipe)
+            # TODO store as CFR?
+            infos = app.conan_api.get_local_pkgs_from_ref(ConanFileReference.loads(recipe))
             installed_ids = [info.get("id") for info in infos]
             packages = app.conan_api.get_packages_in_remote(ConanFileReference.loads(recipe), remote)
             for pkg in packages:

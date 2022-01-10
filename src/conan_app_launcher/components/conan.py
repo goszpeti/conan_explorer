@@ -90,7 +90,12 @@ class ConanApi():
         self.conan.remove_locks()
         Logger().info("Removed Conan cache locks.")
 
-    def remotes(self) -> List[Remote]:
+    def generate_canonical_ref(self, conan_ref: ConanFileReference) -> str:
+        if conan_ref.user is None and conan_ref.channel is None:
+            return str(conan_ref) + "@_/_"
+        return str(conan_ref)
+
+    def get_remotes(self) -> List[Remote]:
         remotes = []
         try:
             remotes = self.client_cache.registry.load_remotes().values()
@@ -109,8 +114,12 @@ class ConanApi():
         # Experimental fast search - Conan search_packages is VERY slow
         # HACK: Removed the  @api_method decorator by getting the original function from the closure attribute
         search_packages = self.conan.search_packages.__closure__[0].cell_contents
-        response = search_packages(self.conan, str(conan_ref))
         result: List[ConanPkg] = [{"id": ""}]
+        try:
+            response = search_packages(self.conan, self.generate_canonical_ref(conan_ref))
+        except Exception as error:
+            Logger().debug(f"{str(error)}")
+            return result
         if not response.get("error"):
             try:
                 result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
@@ -255,7 +264,7 @@ class ConanApi():
 
     def get_matching_package_in_remotes(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> List[ConanPkg]:
         """ Find a package with options in the remotes """
-        for remote in self.remotes():
+        for remote in self.get_remotes():
             # if not isinstance(remote, str) and len(remote) > 0:  # only check for len, can be an object or a list
             #     remote = remote[0]  # for old apis
             packages = self.find_best_matching_packages(conan_ref, input_options, remote.name)
@@ -296,6 +305,8 @@ class ConanApi():
         return Path("NULL")
 
     def get_conanfile_path(self, conan_ref: ConanFileReference) -> Path:
+        if not conan_ref in self.get_all_local_refs():
+            self.conan.info(self.generate_canonical_ref(conan_ref))
         layout = self.client_cache.package_layout(conan_ref)
         if layout:
             return Path(layout.conanfile())
