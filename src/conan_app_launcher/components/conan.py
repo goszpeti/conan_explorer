@@ -181,9 +181,10 @@ class ConanApi():
                     Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")
         return del_list
 
-    def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Path:
+    def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}, update=False) -> Path:
         """ Return the package folder of a conan reference and install it, if it is not available """
 
+        # TODO Check for update or divide in two fncs
         package = self.find_best_local_package(conan_ref, input_options)
         if package.get("id", ""):
             return self.get_package_folder(conan_ref, package.get("id", ""))
@@ -194,7 +195,7 @@ class ConanApi():
             self.info_cache.invalidate_remote_package(conan_ref)
             return Path("NULL")
 
-        if self.install_package(conan_ref, packages[0]):
+        if self.install_package(conan_ref, packages[0], update):
             package = self.find_best_local_package(conan_ref, input_options)
             pkg_info = package.get("id", "")
             if not pkg_info:
@@ -250,10 +251,10 @@ class ConanApi():
         self.info_cache.update_remote_package_list(res_list)
         return res_list
 
-    def get_packages_in_remote(self, conan_ref: ConanFileReference, remote, query=None) -> List[ConanPkg]:
+    def get_packages_in_remote(self, conan_ref: ConanFileReference, remote:str, query=None) -> List[ConanPkg]:
         found_pkgs: List[ConanPkg] = []
         try:
-            search_results = self.conan.search_packages(str(conan_ref), query=query,
+            search_results = self.conan.search_packages(conan_ref.full_str(), query=query,
                                                         remote_name=remote).get("results", None)
             if search_results:
                 found_pkgs = search_results[0].get("items")[0].get("packages")
@@ -312,10 +313,10 @@ class ConanApi():
             return Path(layout.conanfile())
         return Path("NULL")
 
-    def install_package(self, conan_ref: ConanFileReference, package: ConanPkg) -> bool:
+    def install_package(self, conan_ref: ConanFileReference, package: ConanPkg, update=True) -> bool:
         """
-        Try to install a conan package while guessing the mnost suitable package
-        for the current platform.
+        Try to install a conan package with the provided extra information.
+        TODO simply use the id???
         """
         package_id = package.get("id", "")
         options_list = _create_key_value_pair_list(package.get("options", {}))
@@ -323,7 +324,7 @@ class ConanApi():
         Logger().info(
             f"Installing '<b>{str(conan_ref)}</b>':{package_id} with settings: {str(settings_list)}, options: {str(options_list)}")
         try:
-            self.conan.install_reference(conan_ref, update=True,
+            self.conan.install_reference(conan_ref, update=update,
                                          settings=settings_list, options=options_list)
             return True
         except Exception as error:

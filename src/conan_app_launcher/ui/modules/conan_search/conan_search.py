@@ -9,6 +9,7 @@ from conan_app_launcher import asset_path
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from conan_app_launcher.ui.common import QtLoaderObject
 from conan_app_launcher.components import open_file
+from conan_app_launcher.ui.modules.conan_install import ConanInstallDialog
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
 Qt = QtCore.Qt
@@ -23,7 +24,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
     # TODO local remote?
     # TODO Open Package folder of installed package
 
-    def __init__(self, parent=Optional[QtWidgets.QWidget], local_package_explorer: "LocalConanPackageExplorer"=None):
+    def __init__(self, parent:Optional[QtWidgets.QWidget], local_package_explorer: "LocalConanPackageExplorer"=None):
         super().__init__(parent)
         self._local_package_explorer = local_package_explorer
         current_dir = Path(__file__).parent
@@ -85,8 +86,6 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self.install_pkg_action.setIcon(QtGui.QIcon(str(icons_path / "download_pkg.png")))
         self.select_cntx_menu.addAction(self.install_pkg_action)
         self.install_pkg_action.triggered.connect(self.on_install_pkg_requested)
-        self.install_pkg_action.setEnabled(False)
-
 
         self.show_in_pkg_exp_action = QtWidgets.QAction("Show in Package Explorer", self)
         self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(str(icons_path / "search_packages.png")))
@@ -149,8 +148,8 @@ class ConanSearchDialog(QtWidgets.QDialog):
 
     def on_install_pkg_requested(self):
         conan_ref = self.get_selected_conan_ref()
-        conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
-
+        dialog = ConanInstallDialog(self, conan_ref)
+        dialog.exec_()
 
     def get_selected_remotes(self) -> List[str]:
         selected_remotes = []
@@ -166,11 +165,13 @@ class ConanSearchDialog(QtWidgets.QDialog):
         if not source_item:
             return ""
         conan_ref_item = source_item
+        id_str = ""
         if source_item.type == PROFILE_TYPE:
             conan_ref_item = source_item.parent()
+            id_str = ":" + source_item.pkg_data.get("id", "")
         if not conan_ref_item:
             return ""
-        return conan_ref_item.item_data[0]
+        return conan_ref_item.item_data[0] + id_str
 
     def get_selected_source_item(self, view) -> Optional[SearchedPackageTreeItem]:
         indexes = view.selectedIndexes()
