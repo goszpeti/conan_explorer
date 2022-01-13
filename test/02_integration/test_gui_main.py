@@ -120,9 +120,9 @@ def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker)
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
     except Exception:
         pass
-    # shortpaths is enbaled in conanfile
+    # shortpaths is enabled in conanfile
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
-    os.system(f"conan create {conanfile} user/testing")
+    os.system(f"conan create {conanfile} {ref}")
     pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
     assert pkg["id"]
     pkg_dir_to_delete = conan.get_package_folder(ConanFileReference.loads(ref), pkg["id"])
@@ -140,7 +140,7 @@ def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker)
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
     except Exception:
         pass
-    os.system(f"conan create {conanfile} user/orphan")
+    os.system(f"conan create {conanfile} {ref}")
 
     exp_folder = conan.get_export_folder(ConanFileReference.loads(ref))
     conan = ConanApi()

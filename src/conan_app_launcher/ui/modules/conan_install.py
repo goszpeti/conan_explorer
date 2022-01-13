@@ -21,9 +21,9 @@ class ConanInstallDialog(QtWidgets.QDialog):
 
         self.conan_ref_line_edit.setText(conan_ref)
         # init search bar
-        #icon = QtGui.QIcon(str(asset_path / "icons" / "search_packages.png"))
-        #self._ui.search_icon.setPixmap(icon.pixmap(20, 20))
-        #self._ui.search_line.validator_enabled = False
+        icon = QtGui.QIcon(str(asset_path / "icons" / "download_pkg.png"))
+        self._ui.install_icon.setPixmap(icon.pixmap(20, 20))
+        self._ui.install_icon.validator_enabled = False
         self.button_box.accepted.connect(self.on_install)
 
     def on_install(self):
@@ -47,4 +47,6 @@ class ConanInstallDialog(QtWidgets.QDialog):
         if self.auto_install_check_box.checkState() == Qt.Checked:
             auto_install_checked = True
         if auto_install_checked:
-            app.conan_api.get_path_or_install(conan_ref.ref, update=update_check_state)
+            app.conan_api.install_best_matching_package(conan_ref.ref, update=update_check_state)
+        else:
+            app.conan_api.conan.install_reference(conan_ref.ref, update=update_check_state)

@@ -11,7 +11,6 @@ class Example(ConanFile):
     #default_channel = "very_long_channel_name_you_should_not_do_this"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
-    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     short_paths = True
 

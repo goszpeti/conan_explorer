@@ -9,7 +9,9 @@ import ctypes
 from pathlib import Path
 from shutil import copy
 from threading import Thread
+from subprocess import check_output
 
+from conans.model.ref import ConanFileReference
 import conan_app_launcher.app as app
 import conan_app_launcher.logger as logger
 import pytest
@@ -18,24 +20,62 @@ from conan_app_launcher import (SETTINGS_FILE_NAME, asset_path, base_path,
 from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.settings import *
 from PyQt5 import QtWidgets, QtCore
+import psutil
 
 conan_server_thread =  None
+
 # setup conan test server
-character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
+TEST_REF =  "example/9.9.9@local/testing" #"zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
+TEST_REF_OFFICIAL = "example/1.0.0@_/_"
+
+class PathSetup():
+    """ Get the important paths form the source repo. """
+    def __init__(self):
+        self.test_path = Path(os.path.dirname(__file__))
+        self.base_path = self.test_path.parent
+        self.testdata_path = self.test_path / "testdata"
+
+def check_if_process_running(process_name):
+    for process in psutil.process_iter():
+        try:
+            if process_name.lower() in process.name().lower():
+                return True
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return False
+
+def create_test_ref(ref, paths, create_params=[""], update=False):
+    native_ref = ConanFileReference.loads(ref).full_str()
+    pkgs = app.conan_api.search_query_in_remotes(native_ref)
+
+    if not update:
+        for pkg in pkgs:
+            if pkg.full_str() == native_ref:
+                return
+    conanfile = str(paths.testdata_path / "conan" / "conanfile.py")
+    for param in create_params:
+        conan_create_and_upload(conanfile, ref, param)
+
+def conan_create_and_upload(conanfile:str, ref:str, create_params=""):
+    os.system(f"conan create {conanfile} {ref} {create_params}")
+    os.system(f"conan upload {ref} -r local --force --all")
 
 def run_conan_server():
     if platform.system() == "Windows":
-        # alow server port for private connections
-        args=f'advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", "netsh", args, None, 1)
+        # hcek if firewall was set:
+        out = check_output("netsh advfirewall firewall show rule conan_server").decode("cp850")
+        if not "Enabled" in out:
+            # allow server port for private connections
+            args=f'advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", "netsh", args, None, 1)
 
     proc = subprocess.Popen("conan_server")
     proc.communicate()
 
-@pytest.fixture # (scope="session", autouse=True)
 def start_conan_server():
     config_path = Path.home() / ".conan_server" / "server.conf"
     os.makedirs(str(config_path.parent), exist_ok=True)
+    character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
     #password = "".join(random.sample(character_string, 12))
     os.system("conan_server --migrate") # call server once to create a config file
     # configre server config file
@@ -52,19 +92,34 @@ def start_conan_server():
         conan_server_thread = Thread(name="ConanServer", daemon=True, target=run_conan_server)
         conan_server_thread.start()
     time.sleep(1)
-    os.system("conan remote add local http://0.0.0.0:9300/ false")
-    os.system("conan user demo -r local -p demo") # todo autogenerate and config
+    os.system("conan remote add local http://127.0.0.1:9300/ false")
+    os.system("conan user demo -r local -p demo")  # todo autogenerate and config
 
-class PathSetup():
-    """ Get the important paths form the source repo. """
-    def __init__(self):
-        self.test_path = Path(os.path.dirname(__file__))
-        self.base_path = self.test_path.parent
-        self.testdata_path = self.test_path / "testdata"
+
+@pytest.fixture(scope="session", autouse=True)
+def ConanServer():
+    if not check_if_process_running("conan_server"):
+        start_conan_server()
+
+    paths = PathSetup()
+    profiles_path = paths.testdata_path / "conan" / "profile"
+    for profile in ["windows", "linux"]:
+        profile_path = profiles_path / profile
+        create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
+                        f"-o shared=False -pr {str(profile_path)}"], update=False)
+        create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=False)
+
+
+        #os.system("conan remote add conan-center https://center.conan.io false")
+        # download default test package
+        #os.system(f"conan install {TEST_REF}")
+        #os.system(f"conan upload {TEST_REF} -r local")
+        # remove remote and backup remote
+        #os.system("conan remote remove conan-center")
 
 
 @pytest.fixture
-def base_fixture(request):
+def base_fixture(request):  # TODO , autouse=True?
     """
     Set up the global variables to be able to start the application.
     Needs to be used, if the tested component uses the global Logger.

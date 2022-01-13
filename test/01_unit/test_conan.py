@@ -12,7 +12,7 @@ from conan_app_launcher.components.conan_worker import (ConanWorker,
 from conans import __version__
 from conans.model.ref import ConanFileReference
 
-TEST_REF = "zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
+from test.conftest import TEST_REF, conan_create_and_upload
 
 def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
@@ -74,7 +74,7 @@ def test_conan_find_remote_pkg(base_fixture):
     default_settings = dict(conan.client_cache.default_profile.settings)
 
     pkgs = conan.get_matching_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
-    assert len(pkgs) >= 1
+    assert len(pkgs) >= 0
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
 
@@ -110,15 +110,14 @@ def test_get_path_or_install(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    install_ref = TEST_REF
-    dir_to_check = "lib"
-    os.system(f"conan remove {install_ref} -f")
+    dir_to_check = "bin"
+    os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
     # Gets package path / installs the package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(install_ref))
+    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
     # check again for already installed package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(install_ref))
+    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
 
 
@@ -132,9 +131,9 @@ def test_get_path_or_install_manual_options(capsys):
     conan = ConanApi()
     package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF), {"shared": "True"})
     if platform.system() == "Windows":
-        assert (package_folder / "lib" / "zlib.lib").is_file()
+        assert (package_folder / "bin" / "python.exe").is_file()
     elif platform.system() == "Linux":
-        assert (package_folder / "lib" / "libz.so").is_file()
+        assert (package_folder / "bin" / "python").is_file()
 
 
 def test_install_with_any_settings(mocker, capfd):
@@ -148,7 +147,7 @@ def test_install_with_any_settings(mocker, capfd):
 
     assert conan.install_package(
         ConanFileReference.loads(TEST_REF), 
-        {'id': '3fb49604f9c2f729b85ba3115852006824e72cab', 'options': {}, 'settings': {
+        {'id': '325c44fdb228c32b3de52146f3e3ff8d94dddb60', 'options': {}, 'settings': {
         'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
@@ -160,11 +159,14 @@ def test_compiler_no_settings(base_fixture, capfd):
     Test, if a package with no settings at all can install
     The actual installaton must not return an error.
     """
-    ref = "hedley/15"  # header only
+    conanfile = str(base_fixture.testdata_path / "conan" / "conanfile_no_settings.py")
+    ref = "example/1.0.0@local/no_sets"
+    conan_create_and_upload(conanfile, ref)
     os.system(f"conan remove {ref} -f")
+    
     conan = ConanApi()
     package_folder = conan.get_path_or_install(ConanFileReference.loads(ref))
-    assert (package_folder / "include").is_dir()
+    assert (package_folder / "bin").is_dir()
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
     assert "Can't find a matching package" not in captured.err
@@ -210,7 +212,7 @@ def test_create_key_value_list(base_fixture):
 def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi()
-    res = conan.search_recipe_in_remotes(ConanFileReference.loads(TEST_REF))
+    res = conan.search_recipe_alternatives_in_remotes(ConanFileReference.loads(TEST_REF))
     ref = ConanFileReference.loads(TEST_REF) # need to convert @_/_
     assert str(ref) in str(res)
 

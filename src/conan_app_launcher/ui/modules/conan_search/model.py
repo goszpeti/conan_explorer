@@ -114,18 +114,4 @@ class PkgSearchModel(TreeModel):
                 font = QtGui.QFont()
                 font.setBold(True)
                 return font
-
-        
-            # if item.type == PROFILE_TYPE and item.installed:
-            #     self.root_item
-            # return data
-            # if (role == Qt: : FontRole & & index.column() == 0) {// First column items are bold.
-            #                                                       QFont font;
-            #                                                       font.setBold(true);
-            #                                                       return font;     } 
-            # else if (role == Qt: : ForegroundRole & & index.column() == 0) {
-            #     return QColor(Qt: : red);         } else {
-            #     [..]
-
-
         return None

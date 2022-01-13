@@ -3,6 +3,7 @@ from typing import Callable
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from PyQt5 import QtCore, QtGui, QtWidgets
+from conans.model.ref import ConanFileReference, PackageReference
 
 Qt = QtCore.Qt
 
@@ -17,14 +18,14 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         self.validator_enabled = validator_enabled
         completer = QtWidgets.QCompleter([], self)
         completer.setCaseSensitivity(Qt.CaseInsensitive)
-        self._validator = QtGui.QRegExpValidator(self)
+        #self._validator = QtGui.QRegExpValidator(self)
         self._completion_thread = None
         self._loading_cbk = None
         self._remote_refs = app.conan_api.info_cache.get_all_remote_refs() # takes a while to get
         # setup range
-        part_regex = r"[a-zA-Z0-9_][a-zA-Z0-9_\+\.-]{1,50}"
-        recipe_regex = f"{part_regex}/{part_regex}(@({part_regex}|_)/({part_regex}|_))?"
-        self._validator.setRegExp(QtCore.QRegExp(recipe_regex))
+        # part_regex = r"[a-zA-Z0-9_][a-zA-Z0-9_\+\.-]{1,50}"
+        # recipe_regex = f"{part_regex}/{part_regex}(@({part_regex}|_)/({part_regex}|_))?(#{part_regex})?"
+        # self._validator.setRegExp(QtCore.QRegExp(recipe_regex))
         self.setCompleter(completer)
         combined_refs = set()
         combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
@@ -42,11 +43,15 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
     def validate_text(self, text):
         valid = False
         if self.validator_enabled:
-            if self._validator.validate(text, 0)[0] < self._validator.Acceptable:
-                self.setStyleSheet("background: LightCoral;")
-            else:
+            try:
+                if ":" in text:
+                    PackageReference.loads(text)
+                else:
+                    ConanFileReference.loads(text)
                 valid = True
                 self.setStyleSheet("background: PaleGreen;")
+            except:
+                self.setStyleSheet("background: LightCoral;")
         
         if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip seraching for such broad terms
             return

@@ -115,7 +115,7 @@ class ConanWorker():
             conan_ref, signal = self._conan_versions_queue.get()
             # available versions will be in cache and retrievable for every item from there
             try:
-                available_refs = self._conan_api.search_recipe_in_remotes(
+                available_refs = self._conan_api.search_recipe_alternatives_in_remotes(
                     ConanFileReference.loads(conan_ref))
             except Exception as e:
                 Logger().debug(f"ERROR in searching for {conan_ref}: {str(e)}")

@@ -2,6 +2,7 @@
 These test starts the application but not with the main function,
 so the qtbot is usable to inspect gui objects.
 """
+from test.conftest import TEST_REF
 import os
 import tempfile
 from pathlib import Path
@@ -20,8 +21,6 @@ from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
-
-TEST_REF = "zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
 
 
 def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):

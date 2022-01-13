@@ -27,15 +27,15 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
     tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert tab0_entries[0].conan_ref == "m4/1.4.19@_/_"
-    assert tab0_entries[0].executable == "bin/m4"
+    assert tab0_entries[0].conan_ref == "example/9.9.9/local/testing"
+    assert tab0_entries[0].executable == "bin/python"
     assert tab0_entries[0].icon == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
     assert tab0_entries[0].is_console_application
     assert tab0_entries[0].args == "-n name"
 
-    assert tab0_entries[1].conan_ref == "zlib/1.2.11@conan/stable"
-    assert tab0_entries[1].executable == "bin/app2"
+    assert tab0_entries[1].conan_ref == "example/1.0.0@_/_"
+    assert tab0_entries[1].executable == "bin/python"
     assert tab0_entries[1].icon == "icon.ico"
     assert tab0_entries[1].name == "App2"
     assert not tab0_entries[1].is_console_application  # default

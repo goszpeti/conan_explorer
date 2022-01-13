@@ -2,6 +2,7 @@
 Test the self written qt gui components, which can be instantiated without
 using the whole application (standalone).
 """
+from test.conftest import TEST_REF
 from PyQt5 import QtWidgets
 from pathlib import Path
 import os
@@ -13,8 +14,6 @@ from PyQt5 import QtCore, QtWidgets
 from conan_app_launcher.ui.modules.app_grid.tab import AppEditDialog
 
 Qt = QtCore.Qt
-TEST_REF = "zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
-
 # For debug:
 # from pytestqt.plugin import _qapp_instance
 # while True:
@@ -25,10 +24,10 @@ def wait_for_loading_pkgs(main_gui: main_window.MainWindow):
     from pytestqt.plugin import _qapp_instance
 
     # wait for loading thread
-    main_gui.local_package_explorer._fs_model_loader.load_thread
-    while not main_gui.local_package_explorer._fs_model_loader.load_thread:
+    main_gui.local_package_explorer._pkg_sel_model_loader.load_thread
+    while not main_gui.local_package_explorer._pkg_sel_model_loader.load_thread:
         time.sleep(1)
-    while not main_gui.local_package_explorer._fs_model_loader.load_thread.isFinished():
+    while not main_gui.local_package_explorer._pkg_sel_model_loader.load_thread.isFinished():
         _qapp_instance.processEvents()
 
 
@@ -42,6 +41,9 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
+
+    main_gui.local_package_explorer.select_local_package_from_ref(
+        TEST_REF + ":127af201a4cdf8111e2e08540525c245c9b3b99e")
 
     main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
     wait_for_loading_pkgs(main_gui)

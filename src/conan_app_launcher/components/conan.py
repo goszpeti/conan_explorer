@@ -114,7 +114,7 @@ class ConanApi():
         # Experimental fast search - Conan search_packages is VERY slow
         # HACK: Removed the  @api_method decorator by getting the original function from the closure attribute
         search_packages = self.conan.search_packages.__closure__[0].cell_contents
-        result: List[ConanPkg] = [{"id": ""}]
+        result: List[ConanPkg] = []  # {"id": ""}
         try:
             response = search_packages(self.conan, self.generate_canonical_ref(conan_ref))
         except Exception as error:
@@ -181,7 +181,7 @@ class ConanApi():
                     Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")
         return del_list
 
-    def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}, update=False) -> Path:
+    def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Path:
         """ Return the package folder of a conan reference and install it, if it is not available """
 
         # TODO Check for update or divide in two fncs
@@ -190,6 +190,9 @@ class ConanApi():
             return self.get_package_folder(conan_ref, package.get("id", ""))
         Logger().info(f"'<b>{conan_ref}</b>' with options {repr(input_options)} is not installed.")
 
+        return self.install_best_matching_package(conan_ref, input_options)
+
+    def install_best_matching_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}, update=False) -> Path:
         packages: List[ConanPkg] = self.get_matching_package_in_remotes(conan_ref, input_options)
         if not packages:
             self.info_cache.invalidate_remote_package(conan_ref)
@@ -222,7 +225,7 @@ class ConanApi():
         res_list.sort()
         return res_list
 
-    def search_recipe_in_remotes(self, conan_ref: ConanFileReference) -> List[ConanFileReference]:
+    def search_recipe_alternatives_in_remotes(self, conan_ref: ConanFileReference) -> List[ConanFileReference]:
         """ Search in all remotes for all versions of a conan ref """
         search_results = []
         local_results = []
@@ -259,7 +262,7 @@ class ConanApi():
             if search_results:
                 found_pkgs = search_results[0].get("items")[0].get("packages")
             Logger().debug(str(found_pkgs))
-        except Exception:  # no problem, next
+        except Exception:  # no problem, next # TODO catch correct exception
             return []
         return found_pkgs
 
@@ -316,7 +319,6 @@ class ConanApi():
     def install_package(self, conan_ref: ConanFileReference, package: ConanPkg, update=True) -> bool:
         """
         Try to install a conan package with the provided extra information.
-        TODO simply use the id???
         """
         package_id = package.get("id", "")
         options_list = _create_key_value_pair_list(package.get("options", {}))
