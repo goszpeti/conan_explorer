@@ -109,15 +109,6 @@ def ConanServer():
                         f"-o shared=False -pr {str(profile_path)}"], update=False)
         create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=False)
 
-
-        #os.system("conan remote add conan-center https://center.conan.io false")
-        # download default test package
-        #os.system(f"conan install {TEST_REF}")
-        #os.system(f"conan upload {TEST_REF} -r local")
-        # remove remote and backup remote
-        #os.system("conan remote remove conan-center")
-
-
 @pytest.fixture
 def base_fixture(request):  # TODO , autouse=True?
     """

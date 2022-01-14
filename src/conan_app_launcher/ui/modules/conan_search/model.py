@@ -85,6 +85,9 @@ class PkgSearchModel(TreeModel):
                 else:  # element 0
                     recipes_with_remotes[str(recipe)] = remote
 
+        #
+        #  TODO unique ids for multi remote packages!
+        #
         if not recipes_with_remotes:
             self.root_item.append_child(SearchedPackageTreeItem(
                 ["No package found!", "", ""], self.root_item, None, PROFILE_TYPE))

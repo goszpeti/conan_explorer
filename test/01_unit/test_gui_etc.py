@@ -55,7 +55,7 @@ def test_conan_install_dialog(base_fixture, qtbot):
     #    _qapp_instance.processEvents()
 
 
-def test_conan_search_dialog(base_fixture, qtbot, start_conan_server):
+def test_conan_search_dialog(base_fixture, qtbot):
     from pytestqt.plugin import _qapp_instance
     root_obj = QtWidgets.QWidget()
     widget = ConanSearchDialog(root_obj)
@@ -75,10 +75,10 @@ def test_conan_search_dialog(base_fixture, qtbot, start_conan_server):
     model = widget._pkg_result_model
     assert model
     assert widget._ui.search_results_tree_view.findChildren(QtCore.QObject)
-    assert widget._ui.search_results_tree_view.model().columnCount() == 1
+    assert widget._ui.search_results_tree_view.model().columnCount() == 3
 
-    model.root_item.item_data[0] == "Packages"
-    model.root_item.child_count() == widget._ui.package_select_view.model().rowCount()
+    #model.root_item.item_data[0] == "Packages"
+    #model.root_item.child_count() == widget._ui.package_select_view.model().rowCount()
 
     found_tst_pkg = False
     for pkg in model.root_item.child_items:

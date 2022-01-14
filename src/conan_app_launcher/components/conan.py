@@ -2,7 +2,7 @@ import platform
 import shutil
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 from conans.client.cache.remote_registry import Remote
 
 from conans.client.output import ConanOutput
@@ -41,11 +41,13 @@ class ConanPkg(TypedDict, total=False):
     requires: List
     outdated: bool
 
+
 class LoggerWriter:
     """
     Dummy stream to log directly to a logger object, when writing in the stream.
     Used to redirect custom stream form Conan. Adds a prefix to do some custom formatting in the Logger.
     """
+
     def __init__(self, level, prefix: str):
         self.level = level
         self._prefix = prefix
@@ -57,6 +59,7 @@ class LoggerWriter:
     def flush(self):
         """ For interface compatiblity """
         pass
+
 
 class ConanApi():
     """ Wrapper around ConanAPIV1 """
@@ -74,13 +77,13 @@ class ConanApi():
         self.conan.user_io = UserIO(out=ConanOutput(LoggerWriter(
             Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
         self.conan.create_app()
-        self.conan.user_io.disable_input() # error on inputs - nowhere to enter
+        self.conan.user_io.disable_input()  # error on inputs - nowhere to enter
         if self.conan.app:
             self.client_cache = self.conan.app.cache
         else:
             raise NotImplementedError
         # don't hang on startup
-        try: # use try-except because of Conan 1.24 envvar errors in tests
+        try:  # use try-except because of Conan 1.24 envvar errors in tests
             self.remove_locks()
         except Exception as error:
             Logger().debug(str(error))
@@ -190,21 +193,23 @@ class ConanApi():
             return self.get_package_folder(conan_ref, package.get("id", ""))
         Logger().info(f"'<b>{conan_ref}</b>' with options {repr(input_options)} is not installed.")
 
-        return self.install_best_matching_package(conan_ref, input_options)
+        _, path = self.install_best_matching_package(conan_ref, input_options)
+        return path
 
-    def install_best_matching_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}, update=False) -> Path:
+    def install_best_matching_package(self, conan_ref: ConanFileReference, 
+                                      input_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
         packages: List[ConanPkg] = self.get_matching_package_in_remotes(conan_ref, input_options)
         if not packages:
             self.info_cache.invalidate_remote_package(conan_ref)
-            return Path("NULL")
+            return ("", Path("NULL"))
 
         if self.install_package(conan_ref, packages[0], update):
             package = self.find_best_local_package(conan_ref, input_options)
-            pkg_info = package.get("id", "")
-            if not pkg_info:
-                return Path("NULL")
-            return self.get_package_folder(conan_ref, package.get("id", ""))
-        return Path("NULL")
+            pkg_id = package.get("id", "")
+            if not pkg_id:
+                return (pkg_id, Path("NULL"))
+            return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
+        return (pkg_id, Path("NULL"))
 
     def search_query_in_remotes(self, query: str, remote="all") -> List[ConanFileReference]:
         """ Search in all remotes for a specific query. """
@@ -212,7 +217,8 @@ class ConanApi():
         search_results = []
         try:
             # no query possible with pattern
-            search_results = self.conan.search_recipes(query, remote_name=remote, case_sensitive=False).get("results", None)
+            search_results = self.conan.search_recipes(
+                query, remote_name=remote, case_sensitive=False).get("results", None)
         except Exception:
             return []
         if not search_results:
@@ -254,7 +260,7 @@ class ConanApi():
         self.info_cache.update_remote_package_list(res_list)
         return res_list
 
-    def get_packages_in_remote(self, conan_ref: ConanFileReference, remote:str, query=None) -> List[ConanPkg]:
+    def get_packages_in_remote(self, conan_ref: ConanFileReference, remote: str, query=None) -> List[ConanPkg]:
         found_pkgs: List[ConanPkg] = []
         try:
             search_results = self.conan.search_packages(conan_ref.full_str(), query=query,

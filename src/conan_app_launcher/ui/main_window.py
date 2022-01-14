@@ -116,7 +116,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @ pyqtSlot()
     def open_conan_search_dialog(self):
-        dialog = ConanSearchDialog(self, local_package_explorer=self.local_package_explorer)
+        # parent=None enables to hide the dialog behind the application window
+        dialog = ConanSearchDialog(None, self.local_package_explorer)
         dialog.show()
 
     @ pyqtSlot()

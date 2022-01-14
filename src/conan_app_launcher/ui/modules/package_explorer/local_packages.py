@@ -190,30 +190,26 @@ class LocalConanPackageExplorer(QtCore.QObject):
         text = self._main_window.ui.package_filter_edit.toPlainText().strip()
         self.proxy_model.setFilterWildcard(text)
 
-    def select_local_package_from_ref(self, conan_ref: str):
+    def select_local_package_from_ref(self, conan_ref: str) -> bool:
         self._main_window.raise_() # TODO does not work
-        self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page
-        self.wait_for_loading_pkgs()
-        # if not self.pkg_sel_model:  # if not initalized
-        #     self.refresh_pkg_selection_view()
+        self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
 
-        # # wait for model to be loaded
-        # self.wait_for_loading_pkgs()
-        # TODO cancel on timeout
+        # wait for model to be loaded
+        self.wait_for_loading_pkgs()
 
         split_ref = conan_ref.split(":")
         id = ""
-        if len(split_ref) > 1:
+        if len(split_ref) > 1: # has id
             conan_ref = split_ref[0]
             id = split_ref[1]
 
-        ref_row = 0
+        ref_row = 0 # find the row with the matching reference
         for ref_row in range(self.pkg_sel_model.root_item.child_count()):
             item = self.pkg_sel_model.root_item.child_items[ref_row]
             if item.item_data[0] == conan_ref:
                 break
         if not ref_row:
-            return
+            return False
 
         index = self.pkg_sel_model.index(ref_row, 0, QtCore.QModelIndex())
         sel_model = self._main_window.package_select_view.selectionModel()
@@ -228,9 +224,15 @@ class LocalConanPackageExplorer(QtCore.QObject):
             for i in range(len(item.child_items)):
                 if item.child_items[i].item_data[0].get("id", "") == id:
                     break
-            child_index = index.child(i, 0)
-            sel_model.select(view_model.mapFromSource(child_index), QtCore.QItemSelectionModel.ClearAndSelect)
-            self._main_window.ui.package_select_view.selectionModel().currentRowChanged.emit(index, child_index)
+            selection_index = index.child(i, 0)
+           
+            return True
+        else:
+            selection_index = index
+            pass
+        sel_model.select(view_model.mapFromSource(selection_index), QtCore.QItemSelectionModel.ClearAndSelect)
+        sel_model.currentRowChanged.emit(index, selection_index)
+        return True
 
     # Package file view init and functions
 
@@ -339,9 +341,10 @@ class LocalConanPackageExplorer(QtCore.QObject):
     def on_file_context_menu_requested(self, position):
         self.file_cntx_menu.exec_(self._main_window.ui.package_file_view.mapToGlobal(position))
 
-    def on_copy_file_as_path(self):
+    def on_copy_file_as_path(self) -> str:
         file = self._get_selected_pkg_file()
         QtWidgets.QApplication.clipboard().setText(file)
+        return file
 
     def on_open_terminal_in_dir(self) -> int:
         selected_path = Path(self._get_selected_pkg_file())

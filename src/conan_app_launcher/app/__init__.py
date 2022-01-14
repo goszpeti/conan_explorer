@@ -32,7 +32,7 @@ conan_worker = ConanWorker(conan_api)
 active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
 
 
-def main():
+def main(conan_search=False):
     """ Start the Qt application and an all main components """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
     from conan_app_launcher.ui.common.bug_dialog import \
@@ -58,10 +58,15 @@ def main():
 
     app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
 
-    from conan_app_launcher.ui.main_window import MainWindow
-    main_window = MainWindow()
-    # load tabs needs the pyqt signals - constructor has to be finished
-    main_window.load()
+    if conan_search:
+        from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
+        main_window = ConanSearchDialog()
+    else:
+        from conan_app_launcher.ui.main_window import MainWindow
+        main_window = MainWindow()
+        # load tabs needs the pyqt signals - constructor has to be finished
+        main_window.load()
+
     main_window.setWindowIcon(app_icon)
     main_window.show()
 

@@ -166,8 +166,8 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert len(app_link._parent_tab.app_links) == prev_count
     assert app_link.model.name == "NewApp"
     assert app_link._app_name_label.text() == "NewApp"
-    assert app_link._app_version_cbox.currentText() == "1.2.8"
-    assert app_link._app_channel_cbox.currentText() == UiAppLinkModel.OFFICIAL_RELEASE
+    assert app_link._app_version_cbox.currentText() == ConanFileReference.loads(TEST_REF).version
+    assert app_link._app_channel_cbox.currentText() == ConanFileReference.loads(TEST_REF).channel
 
     # check, that the config file has updated
     config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
