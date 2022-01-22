@@ -18,6 +18,7 @@ class TabGrid(QtWidgets.QWidget):
         self.model = model
         self.app_links: List[AppLink] = []  # list of refs to app links
         self.tab_scroll_area = None
+        self._columns_count = 0
 
     def init_app_grid(self):
         self.setObjectName("tab_" + self.model.name)
@@ -70,7 +71,8 @@ class TabGrid(QtWidgets.QWidget):
         return 1  # always enable one row
 
     def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
-        super().resizeEvent(a0)
+        if a0.oldSize().width() == -1: # initial resize - can be skipped # TODO verify!
+            return
         self.redraw_grid()
 
     def load(self):
@@ -81,7 +83,7 @@ class TabGrid(QtWidgets.QWidget):
         row = 0
         column = 0
         max_columns = self.get_max_columns()
-
+        self._columns_count = max_columns
         for app_model in self.model.apps:
             # add in order of occurence
             app_link = AppLink(self, app_model)
@@ -139,6 +141,10 @@ class TabGrid(QtWidgets.QWidget):
 
     def redraw_grid(self):
         """ Works only as long as the order does not change. Used for resizing the window. """
+        # only if coloumnsize changes
+        max_columns = self.get_max_columns()
+        if max_columns == self._columns_count:
+            return
         if self.tab_scroll_area:  # don't call on init
             self.remove_all_app_links()
             self.load_apps_from_model()
