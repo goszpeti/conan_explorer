@@ -2,7 +2,7 @@
 from typing import TYPE_CHECKING
 from pathlib import Path
 import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher import asset_path
+from conan_app_launcher import ENABLE_APP_COMBO_BOXES, asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import (
     open_in_file_manager, run_file)
@@ -38,11 +38,20 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._init_app_link()
 
     def _init_app_link(self):
-        self._app_name_label = QtWidgets.QLabel(self._parent_tab)
-        self._app_version_cbox = QtWidgets.QComboBox(self._parent_tab)
-        self._app_user_cbox = QtWidgets.QComboBox(self._parent_tab)
-        self._app_channel_cbox = QtWidgets.QComboBox(self._parent_tab)
         self._app_button = AppButton(self._parent_tab, asset_path / "icons" / "app.png")
+        self._app_name_label = QtWidgets.QLabel(self._parent_tab)
+
+        if ENABLE_APP_COMBO_BOXES:
+            self._app_version_cbox = QtWidgets.QComboBox(self._parent_tab)
+            self._app_user_cbox = QtWidgets.QComboBox(self._parent_tab)
+            self._app_channel_cbox = QtWidgets.QComboBox(self._parent_tab)
+        else:
+            self._app_version_cbox = QtWidgets.QLabel(self._parent_tab)
+            self._app_user_cbox = QtWidgets.QLabel(self._parent_tab)
+            self._app_channel_cbox = QtWidgets.QLabel(self._parent_tab)
+            self._app_version_cbox.setAlignment(Qt.AlignHCenter)
+            self._app_user_cbox.setAlignment(Qt.AlignHCenter)
+            self._app_channel_cbox.setAlignment(Qt.AlignHCenter)
 
         # size policies
         self.setSpacing(3)
@@ -60,21 +69,24 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setText(self.model.name)
         self.addWidget(self._app_name_label)
-
-        self._app_version_cbox.setDisabled(True)
-        self._app_version_cbox.setDuplicatesEnabled(False)
+        
+        if ENABLE_APP_COMBO_BOXES:
+            self._app_version_cbox.setDisabled(True)
+            self._app_version_cbox.setDuplicatesEnabled(False)
         self._app_version_cbox.setSizePolicy(size_policy)
         self._app_version_cbox.setMaximumWidth(self.MAX_WIDTH)
         self.addWidget(self._app_version_cbox)
 
-        self._app_user_cbox.setDisabled(True)
-        self._app_user_cbox.setDuplicatesEnabled(False)
+        if ENABLE_APP_COMBO_BOXES:
+            self._app_user_cbox.setDisabled(True)
+            self._app_user_cbox.setDuplicatesEnabled(False)
         self._app_user_cbox.setSizePolicy(size_policy)
         self._app_user_cbox.setMaximumWidth(self.MAX_WIDTH)
         self.addWidget(self._app_user_cbox)
 
-        self._app_channel_cbox.setDisabled(True)
-        self._app_channel_cbox.setDuplicatesEnabled(False)
+        if ENABLE_APP_COMBO_BOXES:
+            self._app_channel_cbox.setDisabled(True)
+            self._app_channel_cbox.setDuplicatesEnabled(False)
         self._app_channel_cbox.setSizePolicy(size_policy)
         self._app_channel_cbox.setMaximumWidth(self.MAX_WIDTH)
         self.addWidget(self._app_channel_cbox)
@@ -85,9 +97,10 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         # connect signals
         self._app_button.clicked.connect(self.on_click)
-        self._app_version_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
-        self._app_user_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
-        self._app_channel_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
+        if ENABLE_APP_COMBO_BOXES:
+            self._app_version_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
+            self._app_user_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
+            self._app_channel_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
 
         self._init_menu()
 
@@ -144,11 +157,11 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._parent_tab.load_apps_from_model()
 
     def delete(self):
-        self._app_name_label.hide()
-        self._app_version_cbox.hide()
-        self._app_user_cbox.hide()
-        self._app_channel_cbox.hide()
-        self._app_button.hide()
+        self._app_name_label.close()
+        self._app_version_cbox.close()
+        self._app_user_cbox.close()
+        self._app_channel_cbox.close()
+        self._app_button.close()
 
     def on_context_menu_requested(self, position):
         self.menu.exec_(self._app_button.mapToGlobal(position))
@@ -161,14 +174,15 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon())
 
-        self._lock_cboxes = True
-        self._app_channel_cbox.clear()
-        self._app_channel_cbox.addItem(self.model.channel)
-        self._app_version_cbox.clear()
-        self._app_version_cbox.addItem(self.model.version)
-        self._app_user_cbox.clear()
-        self._app_user_cbox.addItem(self.model.user)
-        self._lock_cboxes = False
+        if ENABLE_APP_COMBO_BOXES:
+            self._lock_cboxes = True
+            self._app_channel_cbox.clear()
+            self._app_channel_cbox.addItem(self.model.channel)
+            self._app_version_cbox.clear()
+            self._app_version_cbox.addItem(self.model.version)
+            self._app_user_cbox.clear()
+            self._app_user_cbox.addItem(self.model.user)
+            self._lock_cboxes = False
 
         self.update_versions_cbox_visible()
         self.update_users_cbox_visible()
@@ -215,6 +229,12 @@ class AppLink(QtWidgets.QVBoxLayout):
             self.model.save()
 
     def update_with_conan_info(self):
+        """ Update combo boxes with only query data """
+        if not ENABLE_APP_COMBO_BOXES: # set text instead
+            self._app_version_cbox.setText(self.model.version)
+            self._app_user_cbox.setText(self.model.user)
+            self._app_channel_cbox.setText(self.model.channel)
+            return
         if self._lock_cboxes == True:
             return
         if self._app_channel_cbox.itemText(0) != self.model.INVALID_DESCR and \
@@ -281,6 +301,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
 
     def on_ref_cbox_selected(self, index: int):
+        """ Update combo boxes """
         if self._lock_cboxes:
             return
         if index == -1:  # on clear

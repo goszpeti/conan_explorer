@@ -35,6 +35,8 @@ SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True # get versions directly from the custo
 USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH = True  # get pkg paths directly from the custom cache
 # use conan worker to also search for the package path - works in a addition to USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH and also installs
 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL = True
+# enable comboboc for app user/channel/version
+ENABLE_APP_COMBO_BOXES = False
 
 # From ennvar DEBUG - 0: No debug, 1 = debug logging on
 DEBUG_LEVEL = int(os.getenv("CAL_DEBUG_LEVEL", "0"))
