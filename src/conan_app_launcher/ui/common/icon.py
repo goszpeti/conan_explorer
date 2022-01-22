@@ -3,9 +3,20 @@ from pathlib import Path
 from conan_app_launcher import ICON_SIZE, asset_path
 from conan_app_launcher.logger import Logger
 from PyQt5.QtCore import QFileInfo, Qt
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QImage
 from PyQt5.QtWidgets import QFileIconProvider
 
+
+def get_inverted_asset_image(image_path: Path):
+    """ Inverts a given image and saves it beside the original one with _inv in the name.
+    To be used for icons to switch between light and dark mode themes. """
+    inverted_img_path = image_path.parent / ((image_path.with_suffix('').name + "_inv") + image_path.suffix)
+
+    if not inverted_img_path.exists():
+        img = QImage(str(image_path))
+        img.invertPixels()
+        img.save(str(inverted_img_path))
+    return inverted_img_path
 
 def get_icon_from_image_file(image_path: Path) -> QIcon:
     if image_path.suffix == ".ico":
