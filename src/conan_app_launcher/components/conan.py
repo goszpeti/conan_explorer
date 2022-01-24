@@ -209,7 +209,7 @@ class ConanApi():
             if not pkg_id:
                 return (pkg_id, Path("NULL"))
             return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
-        return (pkg_id, Path("NULL"))
+        return ("", Path("NULL"))
 
     def search_query_in_remotes(self, query: str, remote="all") -> List[ConanFileReference]:
         """ Search in all remotes for a specific query. """
@@ -334,6 +334,9 @@ class ConanApi():
         try:
             self.conan.install_reference(conan_ref, update=update,
                                          settings=settings_list, options=options_list)
+            # Update cache with this package
+            self.info_cache.update_local_package_path(
+                conan_ref, self.get_package_folder(conan_ref, package.get("id", "")))
             return True
         except Exception as error:
             Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(error)}")

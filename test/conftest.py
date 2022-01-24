@@ -75,7 +75,7 @@ def run_conan_server():
 def start_conan_server():
     config_path = Path.home() / ".conan_server" / "server.conf"
     os.makedirs(str(config_path.parent), exist_ok=True)
-    character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
+    #character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
     #password = "".join(random.sample(character_string, 12))
     os.system("conan_server --migrate") # call server once to create a config file
     # configre server config file
@@ -93,6 +93,8 @@ def start_conan_server():
         conan_server_thread.start()
     time.sleep(1)
     os.system("conan remote add local http://127.0.0.1:9300/ false")
+    # add the same remote twice to be able to test multiremote views
+    os.system("conan remote add local2 http://127.0.0.1:9300/ false")
     os.system("conan user demo -r local -p demo")  # todo autogenerate and config
 
 

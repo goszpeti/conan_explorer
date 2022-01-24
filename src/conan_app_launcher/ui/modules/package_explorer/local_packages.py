@@ -191,6 +191,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.proxy_model.setFilterWildcard(text)
 
     def select_local_package_from_ref(self, conan_ref: str) -> bool:
+        """ Selects a reference:id pkg in the left pane and opens the file view"""
         self._main_window.raise_() # TODO does not work
         self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
 
@@ -225,8 +226,6 @@ class LocalConanPackageExplorer(QtCore.QObject):
                 if item.child_items[i].item_data[0].get("id", "") == id:
                     break
             selection_index = index.child(i, 0)
-           
-            return True
         else:
             selection_index = index
             pass

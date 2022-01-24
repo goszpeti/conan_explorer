@@ -19,10 +19,6 @@ if TYPE_CHECKING:
 
 
 class ConanSearchDialog(QtWidgets.QDialog):
-    """  """
-
-    # TODO local remote?
-    # TODO Open Package folder of installed package
 
     def __init__(self, parent:Optional[QtWidgets.QWidget] = None, local_package_explorer: "LocalConanPackageExplorer"=None):
         super().__init__(parent)
@@ -106,6 +102,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self.select_cntx_menu.exec_(self._ui.search_results_tree_view.mapToGlobal(position))
 
     def on_search(self):
+        self._load_search_model()
         self._pkg_result_loader.async_loading(
              self, self._load_search_model, self._finish_load_search_model, "Searching for packages...")
         # reset info text
@@ -156,19 +153,18 @@ class ConanSearchDialog(QtWidgets.QDialog):
         item = self.get_selected_source_item(self._ui.search_results_tree_view)
         dialog = ConanInstallDialog(self, combined_ref)
         dialog.exec_()
-        if dialog.pkg_installed:
-            if not item:
-                return
-            if item.type == REF_TYPE:
-                # TODO: based on which type, get the correct id
-                id = dialog.pkg_installed
-                pkg_items = item.child_items
-                for pkg_item in pkg_items:
-                    if pkg_item.pkg_data.get("id", "") == id:
-                        pkg_item.is_installed = True
-                        break
-            elif item.type ==  PROFILE_TYPE:
-                item.is_installed = True
+        id = dialog.pkg_installed
+        # TODO move to model
+        if not dialog.pkg_installed or not item:
+            return
+        if item.type == REF_TYPE:
+            pkg_items = item.child_items
+            for pkg_item in pkg_items:
+                if pkg_item.pkg_data.get("id", "") == id:
+                    pkg_item.is_installed = True
+                    break
+        elif item.type ==  PROFILE_TYPE:
+            item.is_installed = True
 
     def get_selected_remotes(self) -> List[str]:
         selected_remotes = []

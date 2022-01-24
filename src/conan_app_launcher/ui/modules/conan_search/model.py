@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
@@ -31,20 +31,27 @@ class SearchedPackageTreeItem(TreeModelItem):
 
     def load_children(self):
         self.child_items = []
+
+        pkgs_to_be_added: Dict[str, SearchedPackageTreeItem] = {}
         for remote in self.data(1).split(","):
-            recipe = self.data(0)
+            recipe_ref = self.data(0)
             # cross reference with installed packages
-            # TODO store as CFR?
-            infos = app.conan_api.get_local_pkgs_from_ref(ConanFileReference.loads(recipe))
+            infos = app.conan_api.get_local_pkgs_from_ref(ConanFileReference.loads(recipe_ref))
             installed_ids = [info.get("id") for info in infos]
-            packages = app.conan_api.get_packages_in_remote(ConanFileReference.loads(recipe), remote)
+            packages = app.conan_api.get_packages_in_remote(ConanFileReference.loads(recipe_ref), remote)
             for pkg in packages:
-                id = pkg.get("id")
+                id = pkg.get("id", "")
+                if id in pkgs_to_be_added.keys(): # package already found in another remote
+                    pkgs_to_be_added[id].item_data[1] += "," + remote
+                    continue
                 installed = False
                 if id in installed_ids:
                     installed = True
-                self.child_items.append(SearchedPackageTreeItem(
-                    [id, remote,  ConanApi.build_conan_profile_name_alias(pkg.get("settings", {}))], self, pkg, PROFILE_TYPE, installed=installed))
+                pkgs_to_be_added[id] = SearchedPackageTreeItem(
+                    [id, remote,  ConanApi.build_conan_profile_name_alias(pkg.get("settings", {}))],
+                     self, pkg, PROFILE_TYPE, False, installed)
+        for pkg in pkgs_to_be_added.values():
+            self.child_items.append(pkg)
         if not self.child_items:
             self.child_items.append(SearchedPackageTreeItem(
                 ["No package found", "",  ""], self, {}, PROFILE_TYPE))
@@ -61,6 +68,7 @@ class SearchedPackageTreeItem(TreeModelItem):
             return self.data(0)
         elif self.type == PROFILE_TYPE:
             return self.parent().data(0) + ":" + self.data(0)
+        return ""
 
 class PkgSearchModel(TreeModel):
 
@@ -73,7 +81,7 @@ class PkgSearchModel(TreeModel):
         self.proxy_model.setSourceModel(self)
 
     def setup_model_data(self, search_query, remotes=[]):
-        recipes_with_remotes = {}
+        recipes_with_remotes: Dict[ConanFileReference, str] = {}
         for remote in remotes:
             # todo case insensitive
             recipe_list = (app.conan_api.search_query_in_remotes(
@@ -81,21 +89,23 @@ class PkgSearchModel(TreeModel):
             for recipe in recipe_list:
                 current_value = recipes_with_remotes.get(str(recipe), "")
                 if current_value:
-                    recipes_with_remotes[str(recipe)] = current_value + "," + remote
+                    recipes_with_remotes[recipe] = current_value + "," + remote
                 else:  # element 0
-                    recipes_with_remotes[str(recipe)] = remote
+                    recipes_with_remotes[recipe] = remote
 
-        #
-        #  TODO unique ids for multi remote packages!
-        #
         if not recipes_with_remotes:
             self.root_item.append_child(SearchedPackageTreeItem(
                 ["No package found!", "", ""], self.root_item, None, PROFILE_TYPE))
+            return
 
+        installed_refs = app.conan_api.get_all_local_refs()
         for recipe in recipes_with_remotes:
             remotes = recipes_with_remotes.get(recipe, "")
+            installed = False
+            if recipe in installed_refs:
+                installed = True
             conan_item = SearchedPackageTreeItem(
-                [str(recipe), remotes, ""], self.root_item, None, REF_TYPE, lazy_loading=True)
+                [str(recipe), remotes, ""], self.root_item, None, REF_TYPE, lazy_loading=True, installed=installed)
             self.root_item.append_child(conan_item)
 
     def data(self, index: QtCore.QModelIndex, role):  # override
@@ -113,7 +123,7 @@ class PkgSearchModel(TreeModel):
         elif role == Qt.DisplayRole:
             return item.data(index.column())
         elif role == Qt.FontRole:
-            if item.type == PROFILE_TYPE and item.is_installed:
+            if item.is_installed:
                 font = QtGui.QFont()
                 font.setBold(True)
                 return font
