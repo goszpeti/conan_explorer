@@ -57,7 +57,6 @@ class AppGridView():
         for tab in self.get_tabs():
             tab.redraw_grid(force=True)
 
-
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add
         current_tab = self._main_window.ui.tab_bar.widget(self._main_window.ui.tab_bar.currentIndex())

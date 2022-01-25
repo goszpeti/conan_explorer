@@ -15,8 +15,8 @@ from conans.model.ref import ConanFileReference
 import conan_app_launcher.app as app
 import conan_app_launcher.logger as logger
 import pytest
-from conan_app_launcher import (SETTINGS_FILE_NAME, asset_path, base_path,
-                                user_save_path)
+import conan_app_launcher
+from conan_app_launcher import (SETTINGS_FILE_NAME, base_path, user_save_path)
 from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.settings import *
 from PyQt5 import QtWidgets, QtCore
@@ -27,7 +27,7 @@ conan_server_thread =  None
 # setup conan test server
 TEST_REF =  "example/9.9.9@local/testing" #"zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
 TEST_REF_OFFICIAL = "example/1.0.0@_/_"
-
+SETUP_TEST_DATA = True
 class PathSetup():
     """ Get the important paths form the source repo. """
     def __init__(self):
@@ -96,6 +96,7 @@ def start_conan_server():
     # add the same remote twice to be able to test multiremote views
     os.system("conan remote add local2 http://127.0.0.1:9300/ false")
     os.system("conan user demo -r local -p demo")  # todo autogenerate and config
+    os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -103,13 +104,14 @@ def ConanServer():
     if not check_if_process_running("conan_server"):
         start_conan_server()
 
-    paths = PathSetup()
-    profiles_path = paths.testdata_path / "conan" / "profile"
-    for profile in ["windows", "linux"]:
-        profile_path = profiles_path / profile
-        create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
-                        f"-o shared=False -pr {str(profile_path)}"], update=False)
-        create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=False)
+    if SETUP_TEST_DATA:
+        paths = PathSetup()
+        profiles_path = paths.testdata_path / "conan" / "profile"
+        for profile in ["windows", "linux"]:
+            profile_path = profiles_path / profile
+            create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
+                            f"-o shared=False -pr {str(profile_path)}"], update=False)
+            create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=False)
 
 @pytest.fixture
 def base_fixture(request):  # TODO , autouse=True?
@@ -118,6 +120,7 @@ def base_fixture(request):  # TODO , autouse=True?
     Needs to be used, if the tested component uses the global Logger.
     Clean up all instances after the test.
     """
+    conan_app_launcher.ENABLE_APP_COMBO_BOXES = True
     paths = PathSetup()
     os.environ["CONAN_REVISIONS_ENABLED"] = "1"
     app.conan_api = ConanApi()

@@ -50,6 +50,7 @@ def test_conan_install_dialog(base_fixture, qtbot):
     qtbot.addWidget(root_obj)
     widget.show()
     qtbot.waitExposed(widget)
+    # TODO mock away conan calls
     # from pytestqt.plugin import _qapp_instance
     # while True:
     #    _qapp_instance.processEvents()
@@ -80,13 +81,13 @@ def test_conan_search_dialog(base_fixture, qtbot):
     #model.root_item.item_data[0] == "Packages"
     #model.root_item.child_count() == widget._ui.package_select_view.model().rowCount()
 
-    found_tst_pkg = False
-    for pkg in model.root_item.child_items:
-        if pkg.item_data[0] == str(cfr):
-            found_tst_pkg = True
-            # check it's child
-            assert model.get_quick_profile_name(pkg.child(0)) in [
-                "Windows_x64_vs16_release", "Linux_x64_gcc9_release"]
+    # found_tst_pkg = False
+    # for pkg in model.root_item.child_items:
+    #     if pkg.item_data[0] == str(cfr):
+    #         found_tst_pkg = True
+    #         # check it's child
+    #         assert model.get_quick_profile_name(pkg.child(0)) in [
+    #             "Windows_x64_vs16_release", "Linux_x64_gcc9_release"]
     # from pytestqt.plugin import _qapp_instance
     # while True:
     #    _qapp_instance.processEvents()
