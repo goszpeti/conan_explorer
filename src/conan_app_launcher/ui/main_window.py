@@ -53,6 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # load app grid
         self.app_grid = AppGridView(self, self.model)
         self.local_package_explorer = LocalConanPackageExplorer(self)
+        self.search_dialog: Optional[ConanSearchDialog] = None
 
         # initialize view user settings
         self.ui.menu_toggle_display_versions.setChecked(app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
@@ -117,8 +118,8 @@ class MainWindow(QtWidgets.QMainWindow):
     @ pyqtSlot()
     def open_conan_search_dialog(self):
         # parent=None enables to hide the dialog behind the application window
-        dialog = ConanSearchDialog(None, self.local_package_explorer)
-        dialog.show()
+        self.search_dialog = ConanSearchDialog(None, self.local_package_explorer)
+        self.search_dialog.show()
 
     @ pyqtSlot()
     def open_cleanup_cache_dialog(self):

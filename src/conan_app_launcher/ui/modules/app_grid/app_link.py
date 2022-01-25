@@ -230,6 +230,8 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def update_with_conan_info(self):
         """ Update combo boxes with only query data """
+        self.update_icon()
+
         if not ENABLE_APP_COMBO_BOXES: # set text instead
             self._app_version_cbox.setText(self.model.version)
             self._app_user_cbox.setText(self.model.user)
@@ -268,7 +270,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         # add tooltip for channels, in case it is too long
         for i in range(0, len(self.model.channels)):
             self._app_channel_cbox.setItemData(i, self.model.channels[i], Qt.ToolTipRole)
-        self.update_icon()
 
     def update_icon(self):
         if self.model.get_executable_path().is_file():

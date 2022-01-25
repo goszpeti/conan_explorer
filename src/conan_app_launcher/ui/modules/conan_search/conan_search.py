@@ -102,7 +102,6 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self.select_cntx_menu.exec_(self._ui.search_results_tree_view.mapToGlobal(position))
 
     def on_search(self):
-        self._load_search_model()
         self._pkg_result_loader.async_loading(
              self, self._load_search_model, self._finish_load_search_model, "Searching for packages...")
         # reset info text
