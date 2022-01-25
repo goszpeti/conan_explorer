@@ -35,8 +35,7 @@ active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, user_sa
 def main(conan_search=False):
     """ Start the Qt application and an all main components """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
-    from conan_app_launcher.ui.common.bug_dialog import \
-        show_bug_dialog_exc_hook
+    from conan_app_launcher.ui.common.bug_dialog import show_bug_dialog_exc_hook
     sys.excepthook = show_bug_dialog_exc_hook
 
     if platform.system() == "Darwin":
@@ -64,11 +63,11 @@ def main(conan_search=False):
     else:
         from conan_app_launcher.ui.main_window import MainWindow
         main_window = MainWindow()
-        # load tabs needs the pyqt signals - constructor has to be finished
-        main_window.load()
 
     main_window.setWindowIcon(app_icon)
-    main_window.show()
+    main_window.show() # show first, then load appsgrid with progress bar
+    # load tabs needs the pyqt signals - constructor has to be finished
+    main_window.load()
 
     qt_app.exec_()
     if conan_worker:  # cancel conan worker tasks on exit - this can possibly cancel an ongoing install task
