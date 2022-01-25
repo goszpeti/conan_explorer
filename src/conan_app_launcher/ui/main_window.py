@@ -83,19 +83,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def load(self, config_source: Optional[PathLike]=None):
         config_source_str = str(config_source)
         if not config_source:
-           config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
+            config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
 
         # model loads incrementally
         self.model.loadf(config_source_str)
 
         # conan works, model can be loaded
         self.app_grid.load()
-        self.apply_view_settings()
-
-    def apply_view_settings(self):
-        self.display_versions_setting_toggled()
-        self.apply_display_users_setting_toggled()
-        self.display_channels_setting_toggled()
 
     # Menu callbacks #
 
@@ -184,7 +178,6 @@ class MainWindow(QtWidgets.QMainWindow):
         status = self.ui.menu_toggle_display_channels.isChecked()
         app.active_settings.set(DISPLAY_APP_CHANNELS, status)
         self.app_grid.re_init_all_app_links()
-
 
     @pyqtSlot(str)
     def write_log(self, text):

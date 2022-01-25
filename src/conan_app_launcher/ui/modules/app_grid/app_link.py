@@ -26,9 +26,10 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 
 current_dir = Path(__file__).parent
 
-
 class AppLink(QtWidgets.QVBoxLayout):
-    MAX_WIDTH = 190
+    max_width = 140
+    if ENABLE_APP_COMBO_BOXES:
+        max_width = 190
 
     def __init__(self, parent: "TabGrid", model: UiAppLinkModel):
         super().__init__()
@@ -40,7 +41,6 @@ class AppLink(QtWidgets.QVBoxLayout):
     def _init_app_link(self):
         self._app_button = AppButton(self._parent_tab, asset_path / "icons" / "app.png")
         self._app_name_label = QtWidgets.QLabel(self._parent_tab)
-
         if ENABLE_APP_COMBO_BOXES:
             self._app_version_cbox = QtWidgets.QComboBox(self._parent_tab)
             self._app_user_cbox = QtWidgets.QComboBox(self._parent_tab)
@@ -56,7 +56,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         # size policies
         self.setSpacing(3)
         self.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                                             QtWidgets.QSizePolicy.Fixed)
         # add sub widgets
 
@@ -74,21 +74,21 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_version_cbox.setDisabled(True)
             self._app_version_cbox.setDuplicatesEnabled(False)
         self._app_version_cbox.setSizePolicy(size_policy)
-        self._app_version_cbox.setMaximumWidth(self.MAX_WIDTH)
+        self._app_version_cbox.setMaximumWidth(self.max_width)
         self.addWidget(self._app_version_cbox)
 
         if ENABLE_APP_COMBO_BOXES:
             self._app_user_cbox.setDisabled(True)
             self._app_user_cbox.setDuplicatesEnabled(False)
         self._app_user_cbox.setSizePolicy(size_policy)
-        self._app_user_cbox.setMaximumWidth(self.MAX_WIDTH)
+        self._app_user_cbox.setMaximumWidth(self.max_width)
         self.addWidget(self._app_user_cbox)
 
         if ENABLE_APP_COMBO_BOXES:
             self._app_channel_cbox.setDisabled(True)
             self._app_channel_cbox.setDuplicatesEnabled(False)
         self._app_channel_cbox.setSizePolicy(size_policy)
-        self._app_channel_cbox.setMaximumWidth(self.MAX_WIDTH)
+        self._app_channel_cbox.setMaximumWidth(self.max_width)
         self.addWidget(self._app_channel_cbox)
 
         self._v_spacer = QtWidgets.QSpacerItem(
@@ -184,9 +184,9 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_user_cbox.addItem(self.model.user)
             self._lock_cboxes = False
 
-        self.update_versions_cbox_visible()
-        self.update_users_cbox_visible()
-        self.update_channels_cbox_visible()
+        self.update_versions_info_visible()
+        self.update_users_info_visible()
+        self.update_channels_info_visible()
 
     def open_app_link_add_dialog(self):
         self._parent_tab.open_app_link_add_dialog()
@@ -276,23 +276,23 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_button.set_icon(self.model.get_icon())
             self._app_button.ungrey_icon()
 
-    def update_versions_cbox_visible(self):
+    def update_versions_info_visible(self):
         if app.active_settings.get(DISPLAY_APP_VERSIONS):
             self._app_version_cbox.show()
         else:
-            self._app_version_cbox.hide()
+            self._app_version_cbox.setHidden(True)
 
-    def update_users_cbox_visible(self):
+    def update_users_info_visible(self):
         if app.active_settings.get(DISPLAY_APP_USERS):
             self._app_user_cbox.show()
         else:
-            self._app_user_cbox.hide()
+            self._app_user_cbox.setHidden(True)
 
-    def update_channels_cbox_visible(self):
+    def update_channels_info_visible(self):
         if app.active_settings.get(DISPLAY_APP_CHANNELS):
             self._app_channel_cbox.show()
         else:
-            self._app_channel_cbox.hide()
+            self._app_channel_cbox.setHidden(True)
 
     def on_click(self):
         """ Callback for opening the executable on click """

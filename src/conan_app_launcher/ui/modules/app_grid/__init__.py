@@ -55,7 +55,7 @@ class AppGridView():
 
     def re_init_all_app_links(self):
         for tab in self.get_tabs():
-            tab.redraw_grid()
+            tab.redraw_grid(force=True)
 
 
     def open_new_app_link_dialog(self):
