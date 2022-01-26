@@ -3,10 +3,14 @@ from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+
+import conan_app_launcher.app as app  # using gobal module pattern
+from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES
 from PyQt5.QtCore import pyqtBoundSignal
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
+
     from .conan import ConanApi
 else:
     try:
@@ -14,7 +18,7 @@ else:
     except ImportError:
         from typing_extensions import TypedDict
 
-from conan_app_launcher import ENABLE_APP_COMBO_BOXES, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
+from conan_app_launcher import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
 from conan_app_launcher.logger import Logger
 from conans.model.ref import ConanFileReference
 
@@ -47,12 +51,12 @@ class ConanWorker():
 
         # start getting versions info in a separate thread in a bundled way to get better performance
         self._start_install_worker()
-        if ENABLE_APP_COMBO_BOXES:
+        if app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES):
             self._start_version_worker()
 
     def put_ref_in_version_queue(self, conan_ref: str, info_signal: Optional[pyqtBoundSignal]):
         self._conan_versions_queue.put((conan_ref, info_signal))
-        if ENABLE_APP_COMBO_BOXES:
+        if app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES):
             self._start_version_worker()
 
     def put_ref_in_install_queue(self, conan_ref: str, conan_options: Dict[str, str], install_signal):

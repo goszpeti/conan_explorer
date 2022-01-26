@@ -15,7 +15,6 @@ from conans.model.ref import ConanFileReference
 import conan_app_launcher.app as app
 import conan_app_launcher.logger as logger
 import pytest
-import conan_app_launcher
 from conan_app_launcher import (SETTINGS_FILE_NAME, base_path, user_save_path)
 from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.settings import *
@@ -64,6 +63,7 @@ def run_conan_server():
     if platform.system() == "Windows":
         # check if firewall was set
         out = check_output("netsh advfirewall firewall show rule conan_server").decode("cp850")
+        print(out)
         if not "Enabled" in out:
             # allow server port for private connections
             args=f'advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
@@ -119,12 +119,12 @@ def base_fixture(request):  # TODO , autouse=True?
     Needs to be used, if the tested component uses the global Logger.
     Clean up all instances after the test.
     """
-    conan_app_launcher.ENABLE_APP_COMBO_BOXES = True
     paths = PathSetup()
     os.environ["CONAN_REVISIONS_ENABLED"] = "1"
     app.conan_api = ConanApi()
     app.conan_worker = ConanWorker(app.conan_api)
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
+    app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
 

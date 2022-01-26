@@ -92,7 +92,7 @@ class TabGrid(QtWidgets.QWidget):
             app_link.load()
             self.app_links.append(app_link)
             self.tab_grid_layout.addLayout(app_link, row, column)
-            self.tab_grid_layout.setColumnMinimumWidth(column, AppLink.max_width - (2 * self.SPACING))
+            self.tab_grid_layout.setColumnMinimumWidth(column, app_link.max_width - (2 * self.SPACING))
             column += 1
             if column == max_columns:
                 column = 0

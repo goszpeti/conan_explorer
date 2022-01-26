@@ -2,11 +2,11 @@
 from typing import TYPE_CHECKING
 from pathlib import Path
 import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher import ENABLE_APP_COMBO_BOXES, asset_path
+from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.components import (
-    open_in_file_manager, run_file)
-from conan_app_launcher.settings import DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS
+from conan_app_launcher.components import open_in_file_manager, run_file
+from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, 
+                                        ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
 from .common import AppButton
 from .common import AppEditDialog
@@ -26,9 +26,12 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 
 current_dir = Path(__file__).parent
 
+
 class AppLink(QtWidgets.QVBoxLayout):
+    enable_combo_boxes = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
+
     max_width = 140
-    if ENABLE_APP_COMBO_BOXES:
+    if enable_combo_boxes:
         max_width = 190
 
     def __init__(self, parent: "TabGrid", model: UiAppLinkModel):
@@ -41,7 +44,8 @@ class AppLink(QtWidgets.QVBoxLayout):
     def _init_app_link(self):
         self._app_button = AppButton(self._parent_tab, asset_path / "icons" / "app.png")
         self._app_name_label = QtWidgets.QLabel(self._parent_tab)
-        if ENABLE_APP_COMBO_BOXES:
+    
+        if self.enable_combo_boxes:
             self._app_version_cbox = QtWidgets.QComboBox(self._parent_tab)
             self._app_user_cbox = QtWidgets.QComboBox(self._parent_tab)
             self._app_channel_cbox = QtWidgets.QComboBox(self._parent_tab)
@@ -69,22 +73,22 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setText(self.model.name)
         self.addWidget(self._app_name_label)
-        
-        if ENABLE_APP_COMBO_BOXES:
+
+        if self.enable_combo_boxes:
             self._app_version_cbox.setDisabled(True)
             self._app_version_cbox.setDuplicatesEnabled(False)
         self._app_version_cbox.setSizePolicy(size_policy)
         self._app_version_cbox.setMaximumWidth(self.max_width)
         self.addWidget(self._app_version_cbox)
 
-        if ENABLE_APP_COMBO_BOXES:
+        if self.enable_combo_boxes:
             self._app_user_cbox.setDisabled(True)
             self._app_user_cbox.setDuplicatesEnabled(False)
         self._app_user_cbox.setSizePolicy(size_policy)
         self._app_user_cbox.setMaximumWidth(self.max_width)
         self.addWidget(self._app_user_cbox)
 
-        if ENABLE_APP_COMBO_BOXES:
+        if self.enable_combo_boxes:
             self._app_channel_cbox.setDisabled(True)
             self._app_channel_cbox.setDuplicatesEnabled(False)
         self._app_channel_cbox.setSizePolicy(size_policy)
@@ -97,7 +101,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         # connect signals
         self._app_button.clicked.connect(self.on_click)
-        if ENABLE_APP_COMBO_BOXES:
+        if self.enable_combo_boxes:
             self._app_version_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
             self._app_user_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
             self._app_channel_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
@@ -174,7 +178,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon())
 
-        if ENABLE_APP_COMBO_BOXES:
+        if self.enable_combo_boxes:
             self._lock_cboxes = True
             self._app_channel_cbox.clear()
             self._app_channel_cbox.addItem(self.model.channel)
@@ -203,7 +207,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             self.model.update_from_cache()
             # now apply gui config with resolved paths
             self._apply_new_config()
-        del edit_app_dialog # call delete manually for faster thread cleanup
+        del edit_app_dialog  # call delete manually for faster thread cleanup
 
     def remove(self):
         # last link can't be deleted!
@@ -232,7 +236,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         """ Update combo boxes with only query data """
         self.update_icon()
 
-        if not ENABLE_APP_COMBO_BOXES: # set text instead
+        if not self.enable_combo_boxes:  # set text instead
             self._app_version_cbox.setText(self.model.version)
             self._app_user_cbox.setText(self.model.user)
             self._app_channel_cbox.setText(self.model.channel)

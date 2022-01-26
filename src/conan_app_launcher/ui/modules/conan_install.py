@@ -1,6 +1,5 @@
-import pprint
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING
+from typing import Optional
 
 from conans.model.ref import ConanFileReference, PackageReference
 
