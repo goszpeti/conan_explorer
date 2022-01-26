@@ -99,7 +99,7 @@ jobs:
       - name: Update remote
         run: |
           conan remote clean
-          conan remote add conancenter https://center.conan.io false
+        # conan remote add conancenter https://center.conan.io false
       - name: Execute unitests with pytest
         run: |
           pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no

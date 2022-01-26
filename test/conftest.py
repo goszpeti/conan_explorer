@@ -93,10 +93,10 @@ def start_conan_server():
         conan_server_thread.start()
         time.sleep(3)
     os.system("conan remote add local http://127.0.0.1:9300/ false")
-    # add the same remote twice to be able to test multiremote views
-    os.system("conan remote add local2 http://127.0.0.1:9300/ false")
+    # add the same remote twice to be able to test multiremote views - TODO does not work
+#    os.system("conan remote add local2 http://127.0.0.1:9300/ false")
     os.system("conan user demo -r local -p demo")  # todo autogenerate and config
-    os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
+#    os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
 
     if SETUP_TEST_DATA:
         paths = PathSetup()
@@ -104,8 +104,8 @@ def start_conan_server():
         for profile in ["windows", "linux"]:
             profile_path = profiles_path / profile
             create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
-                            f"-o shared=False -pr {str(profile_path)}"], update=False)
-            create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=False)
+                            f"-o shared=False -pr {str(profile_path)}"], update=True)
+            create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=True)
 
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():
