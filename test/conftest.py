@@ -62,13 +62,13 @@ def conan_create_and_upload(conanfile:str, ref:str, create_params=""):
 
 def run_conan_server():
     if platform.system() == "Windows":
-        # hcek if firewall was set:
+        # check if firewall was set
         out = check_output("netsh advfirewall firewall show rule conan_server").decode("cp850")
         if not "Enabled" in out:
             # allow server port for private connections
             args=f'advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
             ctypes.windll.shell32.ShellExecuteW(None, "runas", "netsh", args, None, 1)
-
+            print("Adding firewall rule for conan_server")
     proc = subprocess.Popen("conan_server")
     proc.communicate()
 
@@ -91,18 +91,12 @@ def start_conan_server():
     if not conan_server_thread:
         conan_server_thread = Thread(name="ConanServer", daemon=True, target=run_conan_server)
         conan_server_thread.start()
-    time.sleep(1)
+        time.sleep(3)
     os.system("conan remote add local http://127.0.0.1:9300/ false")
     # add the same remote twice to be able to test multiremote views
     os.system("conan remote add local2 http://127.0.0.1:9300/ false")
     os.system("conan user demo -r local -p demo")  # todo autogenerate and config
     os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
-
-
-@pytest.fixture(scope="session", autouse=True)
-def ConanServer():
-    if not check_if_process_running("conan_server"):
-        start_conan_server()
 
     if SETUP_TEST_DATA:
         paths = PathSetup()
@@ -112,6 +106,11 @@ def ConanServer():
             create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
                             f"-o shared=False -pr {str(profile_path)}"], update=False)
             create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=False)
+
+@pytest.fixture(scope="session", autouse=True)
+def ConanServer():
+    if not check_if_process_running("conan_server"):
+        start_conan_server()
 
 @pytest.fixture
 def base_fixture(request):  # TODO , autouse=True?
