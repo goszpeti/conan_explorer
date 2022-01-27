@@ -34,10 +34,12 @@ class PathSetup():
         self.base_path = self.test_path.parent
         self.testdata_path = self.test_path / "testdata"
 
-def check_if_process_running(process_name):
+def check_if_process_running(process_name, kill=False):
     for process in psutil.process_iter():
         try:
             if process_name.lower() in process.name().lower():
+                if kill:
+                    process.kill()
                 return True
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
@@ -45,7 +47,7 @@ def check_if_process_running(process_name):
 
 def create_test_ref(ref, paths, create_params=[""], update=False):
     native_ref = ConanFileReference.loads(ref).full_str()
-    pkgs = ConanApi().conan_api.search_query_in_remotes(native_ref)
+    pkgs = ConanApi().search_query_in_remotes(native_ref)
 
     if not update:
         for pkg in pkgs:
@@ -84,7 +86,7 @@ def start_conan_server():
     paths = PathSetup()
     profiles_path = paths.testdata_path / "conan" / "profile"
     conan = ConanApi()
-    os.makedirs(conan.client_cache.profiles_path)
+    os.makedirs(conan.client_cache.profiles_path, exist_ok=True)
     shutil.copy(str(profiles_path / platform.system().lower()),  conan.client_cache.default_profile_path)
 
     # Add to firewall
@@ -120,8 +122,14 @@ def start_conan_server():
 
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():
+    started = False
     if not check_if_process_running("conan_server"):
+        started = True
         start_conan_server()
+    yield
+    if started:
+        check_if_process_running("conan_server", kill=True)
+
 
 @pytest.fixture
 def base_fixture(request):  # TODO , autouse=True?
@@ -134,10 +142,10 @@ def base_fixture(request):  # TODO , autouse=True?
     os.environ["CONAN_REVISIONS_ENABLED"] = "1"
     import conan_app_launcher.app as app
 
-    app.conan_api = ConanApi()
-    app.conan_worker = ConanWorker(app.conan_api)
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
     app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
+    app.conan_api = ConanApi()
+    app.conan_worker = ConanWorker(app.conan_api, app.active_settings)
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
 

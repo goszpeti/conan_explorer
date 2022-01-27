@@ -143,8 +143,8 @@ def test_install_with_any_settings(mocker, capfd):
     """
     # mock the remote response
     os.system(f"conan remove {TEST_REF} -f")
+    # TODO: Create the any package
     conan = ConanApi()
-
     assert conan.install_package(
         ConanFileReference.loads(TEST_REF), 
         {'id': '325c44fdb228c32b3de52146f3e3ff8d94dddb60', 'options': {}, 'settings': {
@@ -226,7 +226,9 @@ def test_conan_worker(base_fixture, mocker):
                 {"reference": "zlib/1.2.11@conan/stable", "options": {"shared": "True"}}]
 
     mock_func = mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
-    conan_worker = ConanWorker(conan_api=ConanApi())
+    import conan_app_launcher.app as app
+
+    conan_worker = ConanWorker(ConanApi(), app.active_settings)
     conan_worker.update_all_info(conan_refs, None)
     time.sleep(3)
     conan_worker.finish_working()

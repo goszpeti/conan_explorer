@@ -26,10 +26,9 @@ except ImportError:
     pass
 
 ### Global variables ###
-
-conan_api = ConanApi()
-conan_worker = ConanWorker(conan_api)
 active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
+conan_api = ConanApi()
+conan_worker = ConanWorker(conan_api, active_settings)
 
 
 def main(conan_search=False):

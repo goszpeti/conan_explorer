@@ -4,8 +4,7 @@ from threading import Thread
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES
+from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES, SettingsInterface
 from PyQt5.QtCore import pyqtBoundSignal
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -31,7 +30,7 @@ class ConanWorkerElement(TypedDict):
 class ConanWorker():
     """ Sequential worker with a queue to execute conan commands and get info on packages """
 
-    def __init__(self, conan_api: "ConanApi"):
+    def __init__(self, conan_api: "ConanApi", settings: SettingsInterface):
         self._conan_api = conan_api
         self._conan_install_queue: Queue[Tuple[str, Dict[str, str],
                                                Optional[pyqtBoundSignal]]] = Queue(maxsize=0)
@@ -39,6 +38,8 @@ class ConanWorker():
         self._version_worker: Optional[Thread] = None
         self._install_worker: Optional[Thread] = None
         self._shutdown_requested = False
+        self._settings = settings
+
 
     def update_all_info(self, conan_elements: List[ConanWorkerElement],
                         info_signal: Optional[pyqtBoundSignal]):
@@ -51,12 +52,12 @@ class ConanWorker():
 
         # start getting versions info in a separate thread in a bundled way to get better performance
         self._start_install_worker()
-        if app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES):
+        if self._settings.get_bool(ENABLE_APP_COMBO_BOXES):
             self._start_version_worker()
 
     def put_ref_in_version_queue(self, conan_ref: str, info_signal: Optional[pyqtBoundSignal]):
         self._conan_versions_queue.put((conan_ref, info_signal))
-        if app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES):
+        if self._settings.get_bool(ENABLE_APP_COMBO_BOXES):
             self._start_version_worker()
 
     def put_ref_in_install_queue(self, conan_ref: str, conan_options: Dict[str, str], install_signal):
