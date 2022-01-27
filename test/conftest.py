@@ -1,25 +1,24 @@
 import configparser
+import ctypes
 import os
 import platform
-import subprocess
 import sys
 import tempfile
 import time
-import ctypes
 from pathlib import Path
 from shutil import copy
-from threading import Thread
 from subprocess import check_output
+from threading import Thread
 
-from conans.model.ref import ConanFileReference
 import conan_app_launcher.app as app
 import conan_app_launcher.logger as logger
+import psutil
 import pytest
-from conan_app_launcher import (SETTINGS_FILE_NAME, base_path, user_save_path)
+from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path
 from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.settings import *
-from PyQt5 import QtWidgets, QtCore
-import psutil
+from conans.model.ref import ConanFileReference
+from PyQt5 import QtCore, QtWidgets
 
 conan_server_thread =  None
 
@@ -69,8 +68,9 @@ def run_conan_server():
             args=f'advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
             ctypes.windll.shell32.ShellExecuteW(None, "runas", "netsh", args, None, 1)
             print("Adding firewall rule for conan_server")
-    proc = subprocess.Popen("conan_server")
-    proc.communicate()
+    os.system("conan_server")
+    #proc = subprocess.Popen()
+    #proc.communicate()
 
 def start_conan_server():
     config_path = Path.home() / ".conan_server" / "server.conf"
@@ -85,6 +85,7 @@ def start_conan_server():
     if "write_permissions" not in cp:
         cp.add_section("write_permissions")
     cp["write_permissions"]["*/*@*/*"] = "*"
+    cp["read_permissions"]["*/*@*/*"] = "*"
     with config_path.open('w', encoding="utf8") as fd:
         cp.write(fd)
     global conan_server_thread
