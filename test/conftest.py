@@ -7,7 +7,7 @@ import tempfile
 import time
 from pathlib import Path
 from shutil import copy
-from subprocess import check_output
+from subprocess import CalledProcessError, check_output
 from threading import Thread
 
 import conan_app_launcher.app as app
@@ -59,18 +59,7 @@ def conan_create_and_upload(conanfile:str, ref:str, create_params=""):
     os.system(f"conan upload {ref} -r local --force --all")
 
 def run_conan_server():
-    if platform.system() == "Windows":
-        # check if firewall was set
-        out = check_output("netsh advfirewall firewall show rule conan_server").decode("cp850")
-        print(out)
-        if not "Enabled" in out:
-            # allow server port for private connections
-            args=f'advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", "netsh", args, None, 1)
-            print("Adding firewall rule for conan_server")
     os.system("conan_server")
-    #proc = subprocess.Popen()
-    #proc.communicate()
 
 def start_conan_server():
     config_path = Path.home() / ".conan_server" / "server.conf"
@@ -88,6 +77,17 @@ def start_conan_server():
     cp["read_permissions"]["*/*@*/*"] = "*"
     with config_path.open('w', encoding="utf8") as fd:
         cp.write(fd)
+
+    if platform.system() == "Windows":
+        # check if firewall was set
+        try:
+            check_output("netsh advfirewall firewall show rule conan_server").decode("cp850")
+        except CalledProcessError:
+            # allow server port for private connections
+            args = f'advfirewall firewall add rule name="conan_server" program="{sys.executable}" dir= in action=allow protocol=TCP localport=9300'
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", "netsh", args, None, 1)
+            print("Adding firewall rule for conan_server")
+
     global conan_server_thread
     if not conan_server_thread:
         conan_server_thread = Thread(name="ConanServer", daemon=True, target=run_conan_server)
