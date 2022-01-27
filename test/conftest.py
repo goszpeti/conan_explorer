@@ -12,7 +12,6 @@ from shutil import copy
 from subprocess import CalledProcessError, check_output
 from threading import Thread
 
-import conan_app_launcher.app as app
 import conan_app_launcher.logger as logger
 import psutil
 import pytest
@@ -46,7 +45,7 @@ def check_if_process_running(process_name):
 
 def create_test_ref(ref, paths, create_params=[""], update=False):
     native_ref = ConanFileReference.loads(ref).full_str()
-    pkgs = app.conan_api.search_query_in_remotes(native_ref)
+    pkgs = ConanApi().conan_api.search_query_in_remotes(native_ref)
 
     if not update:
         for pkg in pkgs:
@@ -85,6 +84,7 @@ def start_conan_server():
     paths = PathSetup()
     profiles_path = paths.testdata_path / "conan" / "profile"
     conan = ConanApi()
+    os.makedirs(conan.client_cache.profiles_path)
     shutil.copy(str(profiles_path / platform.system().lower()),  conan.client_cache.default_profile_path)
 
     # Add to firewall
@@ -132,6 +132,8 @@ def base_fixture(request):  # TODO , autouse=True?
     """
     paths = PathSetup()
     os.environ["CONAN_REVISIONS_ENABLED"] = "1"
+    import conan_app_launcher.app as app
+
     app.conan_api = ConanApi()
     app.conan_worker = ConanWorker(app.conan_api)
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
@@ -162,6 +164,8 @@ def base_fixture(request):  # TODO , autouse=True?
 def temp_ui_config(config_file_path: Path):
     temp_config_file_path = copy(config_file_path, tempfile.gettempdir())
     tmp_file = tempfile.mkstemp()
+    import conan_app_launcher.app as app
+
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, Path(tmp_file[1]))
     app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
     return Path(temp_config_file_path)
