@@ -49,11 +49,21 @@ Conan Search View
 ## How to install?
 
 ### Prerequisites on Linux
-Qt for Python must be installed with the native package manager, like:
+
+Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04.
+
+1. Qt for Python must be installed with the native package manager, like:
 
     sudo apt install python3-pyqt5
 
+2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type "x-terminal-emulator" to get a list of available terminals.
+
+3. To open files with its associated program xdg-open is used:
+
+    sudo apt install xdg-utils
+
 Ubuntu 16.04 is not supported due to its native Python version (3.5).
+
 
 ### With pip from PyPi
 `pip install conan-app-launcher`
