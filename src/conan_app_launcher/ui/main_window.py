@@ -90,8 +90,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # conan works, model can be loaded
         self.app_grid.load()
-
-    # Menu callbacks #
+        # needed, because the resizeEvent is only called for the active (first) tab
+        self.app_grid.re_init_all_app_links()
 
     @pyqtSlot()
     def on_main_view_changed(self):
@@ -156,7 +156,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # conan works, model can be loaded
             self.app_grid.re_init(self.model)  # loads tabs
-            self.apply_view_settings()  # now view settings can be applied
+            #self.apply_view_settings()  # now view settings can be applied
 
     @pyqtSlot()
     def display_versions_setting_toggled(self):
