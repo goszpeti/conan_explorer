@@ -2,9 +2,11 @@ import configparser
 import ctypes
 import os
 import platform
+import shutil
 import sys
 import tempfile
 import time
+
 from pathlib import Path
 from shutil import copy
 from subprocess import CalledProcessError, check_output
@@ -62,6 +64,7 @@ def run_conan_server():
     os.system("conan_server")
 
 def start_conan_server():
+    ## Setup Server config
     config_path = Path.home() / ".conan_server" / "server.conf"
     os.makedirs(str(config_path.parent), exist_ok=True)
     #character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
@@ -78,6 +81,13 @@ def start_conan_server():
     with config_path.open('w', encoding="utf8") as fd:
         cp.write(fd)
 
+    # Setup default profile
+    paths = PathSetup()
+    profiles_path = paths.testdata_path / "conan" / "profile"
+    conan = ConanApi()
+    shutil.copy(str(profiles_path / platform.system().lower()),  conan.client_cache.default_profile_path)
+
+    # Add to firewall
     if platform.system() == "Windows":
         # check if firewall was set
         try:
@@ -88,6 +98,7 @@ def start_conan_server():
             ctypes.windll.shell32.ShellExecuteW(None, "runas", "netsh", args, None, 1)
             print("Adding firewall rule for conan_server")
 
+    # Start Server
     global conan_server_thread
     if not conan_server_thread:
         conan_server_thread = Thread(name="ConanServer", daemon=True, target=run_conan_server)
@@ -99,9 +110,8 @@ def start_conan_server():
     os.system("conan user demo -r local -p demo")  # todo autogenerate and config
 #    os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
 
+    # Create test data
     if SETUP_TEST_DATA:
-        paths = PathSetup()
-        profiles_path = paths.testdata_path / "conan" / "profile"
         for profile in ["windows", "linux"]:
             profile_path = profiles_path / profile
             create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
