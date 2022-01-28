@@ -166,8 +166,8 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert len(app_link._parent_tab.app_links) == prev_count
     assert app_link.model.name == "NewApp"
     assert app_link._app_name_label.text() == "NewApp"
-    assert app_link._app_version_cbox.currentText() == ConanFileReference.loads(TEST_REF).version
-    assert app_link._app_channel_cbox.currentText() == ConanFileReference.loads(TEST_REF).channel
+    assert app_link._app_version_cbox.text() == ConanFileReference.loads(TEST_REF).version
+    assert app_link._app_channel_cbox.text() == ConanFileReference.loads(TEST_REF).channel
 
     # check, that the config file has updated
     config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
@@ -306,6 +306,7 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     app.active_settings = IniSettings(Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
+    app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     # load path into local cache
     app.conan_api.get_path_or_install(ConanFileReference.loads("fft/cci.20061228@_/_"), {})
     

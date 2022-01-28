@@ -195,6 +195,10 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_user_cbox.clear()
             self._app_user_cbox.addItem(self.model.user)
             self._lock_cboxes = False
+        else:
+            self._app_channel_cbox.setText(self.model.channel)
+            self._app_version_cbox.setText(self.model.version)
+            self._app_user_cbox.setText(self.model.user)
 
         self.update_versions_info_visible()
         self.update_users_info_visible()
