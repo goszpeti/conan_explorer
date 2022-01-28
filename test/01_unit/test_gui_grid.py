@@ -15,8 +15,7 @@ from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
-import conan_app_launcher.app as app
-from conan_app_launcher.settings import DISPLAY_APP_USERS
+from conan_app_launcher.settings import DISPLAY_APP_USERS, ENABLE_APP_COMBO_BOXES
 from conan_app_launcher.ui.data import UiApplicationConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
@@ -67,6 +66,7 @@ def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
     """
     Test, if the entered data is written correctly.
     """
+    import conan_app_launcher.app as app
 
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
@@ -188,8 +188,8 @@ def test_AppLink_cbox_switch(base_fixture, qtbot):
     """
     Test, that changing the version resets the channel and user correctly
     """
-    #if platform.system() == "Windows": # TODO: conan server does not work on Windows, probably because of the firewall
-    #    pytest.skip()
+    import conan_app_launcher.app as app
+
     # all versions have different user and channel names, so we can distinguish them
     conanfile = str(base_fixture.testdata_path / "conan" / "multi" / "conanfile.py")
     create_packages = True
@@ -207,7 +207,7 @@ def test_AppLink_cbox_switch(base_fixture, qtbot):
     app.conan_api.search_recipe_alternatives_in_remotes(CFR.loads("switch_test/1.0.0@user1/channel1"))
     # need cache
     app.active_settings.set(DISPLAY_APP_USERS, True)
-
+    app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     #app_info._executable = Path(sys.executable)
     app_config = UiAppLinkConfig(name="test", conan_ref="switch_test/1.0.0@user1/channel1",
                                  is_console_application=True, executable="")

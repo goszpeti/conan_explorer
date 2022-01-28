@@ -66,7 +66,7 @@ class TabGrid(QtWidgets.QWidget):
     def get_max_columns(self):
         if self.tab_scroll_area:
             width = self.parent().width()
-            max_columns = int(width / (AppLink.max_width - self.SPACING))
+            max_columns = int(width / (AppLink.max_width() - self.SPACING))
             if max_columns == 0:
                 max_columns = 1
             return max_columns
@@ -92,7 +92,7 @@ class TabGrid(QtWidgets.QWidget):
             app_link.load()
             self.app_links.append(app_link)
             self.tab_grid_layout.addLayout(app_link, row, column)
-            self.tab_grid_layout.setColumnMinimumWidth(column, app_link.max_width - (2 * self.SPACING))
+            self.tab_grid_layout.setColumnMinimumWidth(column, app_link.max_width() - (2 * self.SPACING))
             column += 1
             if column == max_columns:
                 column = 0
@@ -125,7 +125,7 @@ class TabGrid(QtWidgets.QWidget):
         self.app_links.append(app_link)
         self.model.apps.append(app_link.model)
         self.tab_grid_layout.addLayout(app_link, current_row, current_column, 1, 1)
-        self.tab_grid_layout.setColumnMinimumWidth(current_column, AppLink.max_width - 8)
+        self.tab_grid_layout.setColumnMinimumWidth(current_column, AppLink.max_width() - 8)
         self.tab_grid_layout.update()
 
     def remove_all_app_links(self):

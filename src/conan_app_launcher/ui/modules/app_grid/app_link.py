@@ -28,24 +28,31 @@ current_dir = Path(__file__).parent
 
 
 class AppLink(QtWidgets.QVBoxLayout):
-    enable_combo_boxes = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
-
-    max_width = 140
-    if enable_combo_boxes:
-        max_width = 190
 
     def __init__(self, parent: "TabGrid", model: UiAppLinkModel):
         super().__init__()
         self._parent_tab = parent  # save parent - don't use qt signals ands slots
-        self.model = model
         self._lock_cboxes = False
+        self._enable_combo_boxes = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
+
+        self.model = model
         self._init_app_link()
+
+
+    @staticmethod
+    def max_width() -> int:
+        """ Max width depending on cbox (needed for tab to precalculate full width) """
+        enable_combo_boxes = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
+        max_width = 140
+        if enable_combo_boxes:
+            max_width = 190
+        return max_width
 
     def _init_app_link(self):
         self._app_button = AppButton(self._parent_tab, asset_path / "icons" / "app.png")
         self._app_name_label = QtWidgets.QLabel(self._parent_tab)
     
-        if self.enable_combo_boxes:
+        if self._enable_combo_boxes:
             self._app_version_cbox = QtWidgets.QComboBox(self._parent_tab)
             self._app_user_cbox = QtWidgets.QComboBox(self._parent_tab)
             self._app_channel_cbox = QtWidgets.QComboBox(self._parent_tab)
@@ -74,25 +81,26 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_name_label.setText(self.model.name)
         self.addWidget(self._app_name_label)
 
-        if self.enable_combo_boxes:
+        max_width = self.max_width()
+        if self._enable_combo_boxes:
             self._app_version_cbox.setDisabled(True)
             self._app_version_cbox.setDuplicatesEnabled(False)
         self._app_version_cbox.setSizePolicy(size_policy)
-        self._app_version_cbox.setMaximumWidth(self.max_width)
+        self._app_version_cbox.setMaximumWidth(max_width)
         self.addWidget(self._app_version_cbox)
 
-        if self.enable_combo_boxes:
+        if self._enable_combo_boxes:
             self._app_user_cbox.setDisabled(True)
             self._app_user_cbox.setDuplicatesEnabled(False)
         self._app_user_cbox.setSizePolicy(size_policy)
-        self._app_user_cbox.setMaximumWidth(self.max_width)
+        self._app_user_cbox.setMaximumWidth(max_width)
         self.addWidget(self._app_user_cbox)
 
-        if self.enable_combo_boxes:
+        if self._enable_combo_boxes:
             self._app_channel_cbox.setDisabled(True)
             self._app_channel_cbox.setDuplicatesEnabled(False)
         self._app_channel_cbox.setSizePolicy(size_policy)
-        self._app_channel_cbox.setMaximumWidth(self.max_width)
+        self._app_channel_cbox.setMaximumWidth(max_width)
         self.addWidget(self._app_channel_cbox)
 
         self._v_spacer = QtWidgets.QSpacerItem(
@@ -101,7 +109,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         # connect signals
         self._app_button.clicked.connect(self.on_click)
-        if self.enable_combo_boxes:
+        if self._enable_combo_boxes:
             self._app_version_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
             self._app_user_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
             self._app_channel_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
@@ -178,7 +186,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon())
 
-        if self.enable_combo_boxes:
+        if self._enable_combo_boxes:
             self._lock_cboxes = True
             self._app_channel_cbox.clear()
             self._app_channel_cbox.addItem(self.model.channel)
@@ -236,7 +244,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         """ Update combo boxes with only query data """
         self.update_icon()
 
-        if not self.enable_combo_boxes:  # set text instead
+        if not self._enable_combo_boxes:  # set text instead
             self._app_version_cbox.setText(self.model.version)
             self._app_user_cbox.setText(self.model.user)
             self._app_channel_cbox.setText(self.model.channel)

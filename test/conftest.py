@@ -6,7 +6,7 @@ import shutil
 import sys
 import tempfile
 import time
-
+from distutils.util import strtobool
 from pathlib import Path
 from shutil import copy
 from subprocess import CalledProcessError, check_output
@@ -21,18 +21,22 @@ from conan_app_launcher.settings import *
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
-conan_server_thread =  None
+conan_server_thread = None
 
 # setup conan test server
-TEST_REF =  "example/9.9.9@local/testing" #"zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
+TEST_REF = "example/9.9.9@local/testing"
 TEST_REF_OFFICIAL = "example/1.0.0@_/_"
-SETUP_TEST_DATA = True
+SKIP_CREATE_CONAN_TEST_DATA = strtobool(os.getenv("SKIP_CREATE_CONAN_TEST_DATA", "False"))
+
+
 class PathSetup():
     """ Get the important paths form the source repo. """
+
     def __init__(self):
         self.test_path = Path(os.path.dirname(__file__))
         self.base_path = self.test_path.parent
         self.testdata_path = self.test_path / "testdata"
+
 
 def check_if_process_running(process_name, kill=False):
     for process in psutil.process_iter():
@@ -44,6 +48,7 @@ def check_if_process_running(process_name, kill=False):
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
     return False
+
 
 def create_test_ref(ref, paths, create_params=[""], update=False):
     native_ref = ConanFileReference.loads(ref).full_str()
@@ -57,20 +62,23 @@ def create_test_ref(ref, paths, create_params=[""], update=False):
     for param in create_params:
         conan_create_and_upload(conanfile, ref, param)
 
-def conan_create_and_upload(conanfile:str, ref:str, create_params=""):
+
+def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
     os.system(f"conan create {conanfile} {ref} {create_params}")
     os.system(f"conan upload {ref} -r local --force --all")
+
 
 def run_conan_server():
     os.system("conan_server")
 
+
 def start_conan_server():
-    ## Setup Server config
+    # Setup Server config
     config_path = Path.home() / ".conan_server" / "server.conf"
     os.makedirs(str(config_path.parent), exist_ok=True)
-    #character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
+    # character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
     #password = "".join(random.sample(character_string, 12))
-    os.system("conan_server --migrate") # call server once to create a config file
+    os.system("conan_server --migrate")  # call server once to create a config file
     # configre server config file
     cp = configparser.ConfigParser()
     cp.read(str(config_path))
@@ -113,12 +121,14 @@ def start_conan_server():
 #    os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
 
     # Create test data
-    if SETUP_TEST_DATA:
-        for profile in ["windows", "linux"]:
-            profile_path = profiles_path / profile
-            create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
-                            f"-o shared=False -pr {str(profile_path)}"], update=True)
-            create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=True)
+    if SKIP_CREATE_CONAN_TEST_DATA:
+        return
+    for profile in ["windows", "linux"]:
+        profile_path = profiles_path / profile
+        create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
+                        f"-o shared=False -pr {str(profile_path)}"], update=True)
+        create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=True)
+
 
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():
@@ -143,7 +153,6 @@ def base_fixture(request):  # TODO , autouse=True?
     import conan_app_launcher.app as app
 
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
-    app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     app.conan_api = ConanApi()
     app.conan_worker = ConanWorker(app.conan_api, app.active_settings)
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
@@ -177,6 +186,7 @@ def temp_ui_config(config_file_path: Path):
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, Path(tmp_file[1]))
     app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
     return Path(temp_config_file_path)
+
 
 @pytest.fixture
 def ui_config_fixture(base_fixture):
