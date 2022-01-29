@@ -78,7 +78,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt install gnome-terminal
-          sudo apt install dbus-x11, at-spi2-core
+          sudo apt install dbus-x11 at-spi2-core
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v1
         with:
