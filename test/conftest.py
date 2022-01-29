@@ -120,6 +120,7 @@ def start_conan_server():
         conan_server_thread = Thread(name="ConanServer", daemon=True, target=run_conan_server)
         conan_server_thread.start()
         time.sleep(3)
+        print("ADDING CONAN REMOTE")
         os.system("conan remote add local http://127.0.0.1:9300/ false")
         # add the same remote twice to be able to test multiremote views - TODO does not work
     #    os.system("conan remote add local2 http://127.0.0.1:9300/ false")
@@ -129,6 +130,7 @@ def start_conan_server():
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
         return
+    print("CREATING TESTDATA FOR LOCAL CONAN SERVER")
     for profile in ["windows", "linux"]:
         profile_path = profiles_path / profile
         create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
@@ -141,9 +143,11 @@ def ConanServer():
     started = False
     if not check_if_process_running("conan_server"):
         started = True
+        print("STARTING CONAN SERVER")
         start_conan_server()
     yield
     if started:
+        print("KILLING CONAN SERVER")
         check_if_process_running("conan_server", kill=True)
 
 

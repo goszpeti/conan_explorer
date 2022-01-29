@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 from typing import List
 
-from conan_app_launcher.components.conan import (ConanApi,
+from conan_app_launcher.components.conan import (ConanApi, ConanCleanup,
                                                  _create_key_value_pair_list)
 from conan_app_launcher.components.conan_worker import (ConanWorker,
                                                         ConanWorkerElement)
@@ -13,6 +13,7 @@ from conans import __version__
 from conans.model.ref import ConanFileReference
 
 from test.conftest import TEST_REF, conan_create_and_upload
+
 
 def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
@@ -31,9 +32,9 @@ def test_conan_profile_name_alias_builder():
     profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Windows_x64_vs16_v142_release"
 
-
     # check linux
-    settings = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 'compiler.version': '7.4', 'build_type': 'Debug'}
+    settings = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc',
+                'compiler.version': '7.4', 'build_type': 'Debug'}
     profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
@@ -49,6 +50,7 @@ def test_conan_short_path_root():
         assert not conan.get_short_path_root().exists()
     os.environ.pop("CONAN_USER_HOME_SHORT")
 
+
 def test_empty_cleanup_cache(base_fixture):
     """
     Test, if a clean cache returns no dirs. Actual functionality is tested with gui.
@@ -56,8 +58,7 @@ def test_empty_cleanup_cache(base_fixture):
     """
     os.environ["CONAN_USER_HOME"] = str(Path(tempfile.gettempdir()) / "._myconan_home")
     os.environ["CONAN_USER_HOME_SHORT"] = str(Path(tempfile.gettempdir()) / "._myconan_short")
-    conan = ConanApi()
-    paths = conan.get_cleanup_cache_paths()
+    paths = ConanCleanup(ConanApi()).get_cleanup_cache_paths()
     assert not paths
     os.environ.pop("CONAN_USER_HOME")
     os.environ.pop("CONAN_USER_HOME_SHORT")
@@ -146,9 +147,9 @@ def test_install_with_any_settings(mocker, capfd):
     # TODO: Create the any package
     conan = ConanApi()
     assert conan.install_package(
-        ConanFileReference.loads(TEST_REF), 
+        ConanFileReference.loads(TEST_REF),
         {'id': '325c44fdb228c32b3de52146f3e3ff8d94dddb60', 'options': {}, 'settings': {
-        'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
+            'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
     assert "Cannot install package" not in captured.err
@@ -163,7 +164,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     ref = "example/1.0.0@local/no_sets"
     conan_create_and_upload(conanfile, ref)
     os.system(f"conan remove {ref} -f")
-    
+
     conan = ConanApi()
     package_folder = conan.get_path_or_install(ConanFileReference.loads(ref))
     assert (package_folder / "bin").is_dir()
@@ -213,7 +214,7 @@ def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi()
     res = conan.search_recipe_alternatives_in_remotes(ConanFileReference.loads(TEST_REF))
-    ref = ConanFileReference.loads(TEST_REF) # need to convert @_/_
+    ref = ConanFileReference.loads(TEST_REF)  # need to convert @_/_
     assert str(ref) in str(res)
 
 
@@ -223,7 +224,7 @@ def test_conan_worker(base_fixture, mocker):
     It is expected,that the queue size decreases over time.
     """
     conan_refs: List[ConanWorkerElement] = [{"reference": "m4/1.4.19@_/_", "options": {}},
-                {"reference": "zlib/1.2.11@conan/stable", "options": {"shared": "True"}}]
+                                            {"reference": "zlib/1.2.11@conan/stable", "options": {"shared": "True"}}]
 
     mock_func = mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
     import conan_app_launcher.app as app
