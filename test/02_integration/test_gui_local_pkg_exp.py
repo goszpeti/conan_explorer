@@ -68,22 +68,20 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
         if item.item_data[0] == str(cfr):
             break
     view_model = main_gui.ui.package_select_view.model()
-    sel_model = main_gui.ui.package_select_view.selectionModel()
 
     main_gui.local_package_explorer.select_local_package_from_ref(
-        TEST_REF) 
+        TEST_REF)
     assert not main_gui.local_package_explorer.fs_model  # view not changed
 
-    # Select pkg to check file view initalizes at the correct path and path got written in label
+    # select pkg to check file view initalizes at the correct path and path got written in label
     main_gui.ui.package_select_view.expand(view_model.mapFromSource(index))
-    chi = index.child(0, 0)
-    item = chi.internalPointer()
-    sel_model.select(view_model.mapFromSource(chi), QtCore.QItemSelectionModel.ClearAndSelect)
-    main_gui.ui.package_select_view.selectionModel().currentRowChanged.emit(index, chi)
-    assert main_gui.local_package_explorer.fs_model  # view selected
+    # ensure, that we select the pkg with the correct options
+    main_gui.local_package_explorer.select_local_package_from_ref(
+        TEST_REF + ":" + pkg_path.name)
+    assert main_gui.local_package_explorer.fs_model  # view selected -> fs_model is set
     assert Path(main_gui.local_package_explorer.fs_model.rootPath()) == pkg_path
 
-    # Test Context menu functions
+    ### Test pkg reference context menu functions ###
     # test copy ref
     main_gui.local_package_explorer.on_copy_ref_requested()
     assert QtWidgets.QApplication.clipboard().text() == str(cfr)
@@ -98,18 +96,18 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.local_package_explorer.on_show_conanfile_requested()
     lp.open_file.assert_called_once_with(conanfile)
 
-    # Select a file
+    #### Test file context menu functions ###
+    # select a file
     root_path = Path(main_gui.local_package_explorer.fs_model.rootPath())
     file = root_path / "conaninfo.txt"
     sel_idx = main_gui.local_package_explorer.fs_model.index(str(file), 0)
     main_gui.ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
 
-    # Test right click menu functions
-    # Check copy as path
+    # check copy as path
     cp_text = main_gui.local_package_explorer.on_copy_file_as_path()
     assert Path(cp_text) == file
 
-    # Check open terminal
+    # check open terminal
     pid = main_gui.local_package_explorer.on_open_terminal_in_dir()
     assert pid > 0
     import signal
@@ -120,7 +118,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     # tODO mock call
     assert "file://" in QtWidgets.QApplication.clipboard().text() and cp_text in QtWidgets.QApplication.clipboard().text()
 
-    # Check paste
+    # check paste
     config_path: Path = ui_no_refs_config_fixture  # use the config file as test data to be pasted
     data = QtCore.QMimeData()
     url = QtCore.QUrl.fromLocalFile(str(config_path))
@@ -129,11 +127,11 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.local_package_explorer.on_file_paste()  # check new file
     assert (root_path / config_path.name).exists()
 
-    # Check open in file manager
+    # check "open in file manager"
     main_gui.local_package_explorer.on_open_file_in_file_manager(None)
     lp.open_in_file_manager.assert_called_with(Path(cp_text))
 
-    # Check Add AppLink to AppGrid
+    # check "Add AppLink to AppGrid"
     mocker.patch.object(QtWidgets.QInputDialog, 'exec_',
                         return_value=QtWidgets.QInputDialog.Accepted)
     mocker.patch.object(QtWidgets.QInputDialog, 'textValue',
@@ -146,7 +144,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     assert last_app_link.executable == "conaninfo.txt"
     assert str(last_app_link.conan_file_reference) == str(cfr)
 
-    # Check Delete
+    # check delete
     sel_idx = main_gui.local_package_explorer.fs_model.index(
         str(root_path / config_path.name), 0)  # (0, 0, QtCore.QModelIndex())
     main_gui.ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
