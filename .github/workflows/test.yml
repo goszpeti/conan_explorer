@@ -78,8 +78,8 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt install gnome-terminal
-          sudo apt install dbus-x11
-      - name: Set up Python  ${{ matrix.python }}
+          sudo apt install dbus-x11, at-spi2-core
+      - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python }}
@@ -99,7 +99,6 @@ jobs:
       - name: Update remote
         run: |
           conan remote clean
-        # conan remote add conancenter https://center.conan.io false
       - name: Execute unitests with pytest
         run: |
           pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no

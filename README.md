@@ -87,6 +87,8 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 This project uses Python with Qt as a frontend using the PyQt integration.
 An IDE configuration is available for VsCode.
 
+See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for Static Code Analysis.
+
 ## Licenses of used libraries and code
 
 #### Resources
