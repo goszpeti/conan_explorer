@@ -76,12 +76,7 @@ def run_conan_server():
 
 
 def start_conan_server():
-    # Add current Python folder to PATH (just to be sure that conan_server can be called)
-    # os.environ["PATH"] = os.path.basename(sys.executable) + "" +  os.getenv("PATH")
-    # os.path.extsep
     # Setup Server config
-    # character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
-    #password = "".join(random.sample(character_string, 12))
     os.system("conan_server --migrate")  # call server once to create a config file
     config_path = Path.home() / ".conan_server" / "server.conf"
     os.makedirs(str(config_path.parent), exist_ok=True)
@@ -125,11 +120,11 @@ def start_conan_server():
         conan_server_thread = Thread(name="ConanServer", daemon=True, target=run_conan_server)
         conan_server_thread.start()
         time.sleep(3)
-    os.system("conan remote add local http://127.0.0.1:9300/ false")
-    # add the same remote twice to be able to test multiremote views - TODO does not work
-#    os.system("conan remote add local2 http://127.0.0.1:9300/ false")
-    os.system("conan user demo -r local -p demo")  # todo autogenerate and config
-#    os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
+        os.system("conan remote add local http://127.0.0.1:9300/ false")
+        # add the same remote twice to be able to test multiremote views - TODO does not work
+    #    os.system("conan remote add local2 http://127.0.0.1:9300/ false")
+        os.system("conan user demo -r local -p demo")  # todo autogenerate and config
+    #    os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
 
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:

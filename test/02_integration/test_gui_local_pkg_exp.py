@@ -34,7 +34,7 @@ def wait_for_loading_pkgs(main_gui: main_window.MainWindow):
 def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     from pytestqt.plugin import _qapp_instance
     cfr = ConanFileReference.loads(TEST_REF)
-    pkg_path = app.conan_api.get_path_or_install(cfr)
+    id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     main_gui = main_window.MainWindow()
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
@@ -77,7 +77,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.ui.package_select_view.expand(view_model.mapFromSource(index))
     # ensure, that we select the pkg with the correct options
     main_gui.local_package_explorer.select_local_package_from_ref(
-        TEST_REF + ":" + pkg_path.name)
+        TEST_REF + ":" + id)
     assert main_gui.local_package_explorer.fs_model  # view selected -> fs_model is set
     assert Path(main_gui.local_package_explorer.fs_model.rootPath()) == pkg_path
 
