@@ -32,7 +32,7 @@ def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
-    
+
     new_text = "My Text"
 
     mocker.patch.object(QtWidgets.QInputDialog, 'getText',
@@ -123,10 +123,10 @@ def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
     qtbot.waitExposed(main_gui, timeout=3000)
 
     assert main_gui.ui.tab_bar.tabBar().tabText(0) == "Basics"
-    main_gui.ui.tab_bar.tabBar().moveTab(0,1) # move basics to the right
+    main_gui.ui.tab_bar.tabBar().moveTab(0, 1)  # move basics to the right
 
     assert main_gui.ui.tab_bar.tabBar().tabText(1) == "Basics"
-    
+
     # re-read config
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
     assert config_tabs[0].name == "Extra"
@@ -147,7 +147,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     prev_count = len(apps_model)
     app_link: AppLink = tabs[1].app_links[0]
 
-    ### check that no changes happens on cancel
+    # check that no changes happens on cancel
     mocker.patch.object(AppEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Rejected)
     app_link.open_edit_dialog()
@@ -155,7 +155,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert config_tabs[0].name == tab_model.name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count
 
-    ### check, that changing something has the change in the saved config and we the same number of elements
+    # check, that changing something has the change in the saved config and we the same number of elements
     app_config = UiAppLinkConfig(name="NewApp", conan_ref=TEST_REF,
                                  executable="bin/exe")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
@@ -173,8 +173,9 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count
-    if app.conan_worker: # manual wait for worker
+    if app.conan_worker:  # manual wait for worker
         app.conan_worker.finish_working()
+
 
 def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     main_gui = main_window.MainWindow()
@@ -208,8 +209,9 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     app_link.remove()
     assert len(apps) == 1
 
+
 def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
-    app.active_settings.set(DISPLAY_APP_CHANNELS, False) # disable, to check if a new app uses it
+    app.active_settings.set(DISPLAY_APP_CHANNELS, False)  # disable, to check if a new app uses it
     app.active_settings.set(DISPLAY_APP_VERSIONS, True)  # disable, to check if a new app uses it
     # preinstall ref, to see if link updates paths
     app.conan_api.get_path_or_install(ConanFileReference.loads(TEST_REF), {})
@@ -238,8 +240,8 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert new_app_link
     assert tab._edit_app_dialog._ui.name_line_edit.text()
 
-    _qapp_instance.processEvents() # call event loop once, so the hide/show attributes are refreshed
-    
+    _qapp_instance.processEvents()  # call event loop once, so the hide/show attributes are refreshed
+
     # check that the gui has updated
     apps = tab_model.apps
     assert len(apps) == prev_count + 1
@@ -247,7 +249,6 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert new_app_link._app_name_label.text() == "NewApp"
     assert new_app_link._app_channel_cbox.isHidden()
     assert new_app_link.model._package_folder.exists()
-
 
     # check, that the config file has updated
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
@@ -308,8 +309,7 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
     app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     # load path into local cache
-    app.conan_api.get_path_or_install(ConanFileReference.loads("fft/cci.20061228@_/_"), {})
-    
+    app.conan_api.get_path_or_install(ConanFileReference.loads(TEST_REF), {})
 
     main_gui = main_window.MainWindow()
     main_gui.show()
@@ -325,7 +325,7 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
             elif test_app.model.name in ["App1 wrong path", "App2"]:
                 assert test_app._app_button._greyed_out
 
+
 def test_open_file_explorer_on_AppLink(base_fixture, qtbot):
     # TODO
     pass
-

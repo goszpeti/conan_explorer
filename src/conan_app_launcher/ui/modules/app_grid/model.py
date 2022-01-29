@@ -75,6 +75,7 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
             self.apps.pop(sourceRow+1)
         return super().moveRow(sourceParent, sourceRow, destinationParent, destinationChild)
 
+
 class UiAppLinkModel(UiAppLinkConfig):
     """ Representation of an app link entry of the config """
     INVALID_DESCR = "NA"
@@ -143,6 +144,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             self._conan_file_reference = ConanFileReference.loads(new_value)
         except Exception:  # invalid ref
+            Logger().debug(f"Invalid ref: {new_value}")
             return
         # add conan ref to worker
         if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF

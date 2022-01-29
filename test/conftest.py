@@ -28,6 +28,9 @@ TEST_REF = "example/9.9.9@local/testing"
 TEST_REF_OFFICIAL = "example/1.0.0@_/_"
 SKIP_CREATE_CONAN_TEST_DATA = strtobool(os.getenv("SKIP_CREATE_CONAN_TEST_DATA", "False"))
 
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
+
 
 class PathSetup():
     """ Get the important paths form the source repo. """
@@ -73,12 +76,15 @@ def run_conan_server():
 
 
 def start_conan_server():
+    # Add current Python folder to PATH (just to be sure that conan_server can be called)
+    # os.environ["PATH"] = os.path.basename(sys.executable) + "" +  os.getenv("PATH")
+    # os.path.extsep
     # Setup Server config
-    config_path = Path.home() / ".conan_server" / "server.conf"
-    os.makedirs(str(config_path.parent), exist_ok=True)
     # character_string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
     #password = "".join(random.sample(character_string, 12))
     os.system("conan_server --migrate")  # call server once to create a config file
+    config_path = Path.home() / ".conan_server" / "server.conf"
+    os.makedirs(str(config_path.parent), exist_ok=True)
     # configre server config file
     cp = configparser.ConfigParser()
     cp.read(str(config_path))
@@ -86,7 +92,12 @@ def start_conan_server():
     if "write_permissions" not in cp:
         cp.add_section("write_permissions")
     cp["write_permissions"]["*/*@*/*"] = "*"
-    cp["read_permissions"]["*/*@*/*"] = "*"
+    # if "read_permissions" not in cp:
+    #     cp.add_section("read_permissions")
+    # cp["read_permissions"]["*/*@*/*"] = "*"
+    # if "users" not in cp:
+    #     cp.add_section("read_permissions")
+    # cp["read_permissions"]["*/*@*/*"] = "*"
     with config_path.open('w', encoding="utf8") as fd:
         cp.write(fd)
 
@@ -155,8 +166,6 @@ def base_fixture(request):  # TODO , autouse=True?
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
     app.conan_api = ConanApi()
     app.conan_worker = ConanWorker(app.conan_api, app.active_settings)
-    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
 
     yield paths
     # Teardown

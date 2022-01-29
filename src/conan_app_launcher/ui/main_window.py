@@ -80,7 +80,8 @@ class MainWindow(QtWidgets.QMainWindow):
         Logger.remove_qt_logger()
         super().closeEvent(event)
 
-    def load(self, config_source: Optional[PathLike]=None):
+    def load(self, config_source: Optional[PathLike] = None):
+        """ Load all application gui elements specified in the GUI config (file) """
         config_source_str = str(config_source)
         if not config_source:
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
@@ -88,10 +89,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # model loads incrementally
         self.model.loadf(config_source_str)
 
-        # conan works, model can be loaded
+        # model loaded, now load the gui elements, which have a static model
         self.app_grid.load()
-        # needed, because the resizeEvent is only called for the active (first) tab
-        self.app_grid.re_init_all_app_links()
+
+        # TODO: Other modules are currently loaded on demand. A window and view restoration would be nice and
+        # should be called from here
 
     @pyqtSlot()
     def on_main_view_changed(self):
@@ -156,7 +158,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # conan works, model can be loaded
             self.app_grid.re_init(self.model)  # loads tabs
-            #self.apply_view_settings()  # now view settings can be applied
+            # self.apply_view_settings()  # now view settings can be applied
 
     @pyqtSlot()
     def display_versions_setting_toggled(self):

@@ -1,3 +1,4 @@
+from .tab import TabGrid
 from typing import TYPE_CHECKING, List
 
 from conan_app_launcher import ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, asset_path
@@ -8,11 +9,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
 
-from .tab import TabGrid
 
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
     from conan_app_launcher.ui.modules.app_grid.model import UiApplicationModel
+
 
 class AppGridView():
 
@@ -27,7 +28,8 @@ class AppGridView():
             self._main_window.ui.add_app_link_button.setGeometry(765, 452, 44, 44)
             self._main_window.ui.add_app_link_button.setIconSize(QtCore.QSize(44, 44))
             self._main_window.ui.add_app_link_button.clicked.connect(self.open_new_app_link_dialog)
-            self._main_window.ui.add_app_link_button.setIcon(QtGui.QIcon(str(self._icons_path / "add_link.png")))
+            self._main_window.ui.add_app_link_button.setIcon(
+                QtGui.QIcon(str(self._icons_path / "add_link.png")))
 
         if ADD_TAB_BUTTON:
             self._main_window.ui.add_tab_button = QtWidgets.QPushButton(self._main_window)
@@ -49,7 +51,7 @@ class AppGridView():
         self.model = model
         # delete all tabs
         tab_count = self._main_window.ui.tab_bar.count()
-        for i in range(tab_count, 0, -1): 
+        for i in range(tab_count, 0, -1):
             self._main_window.ui.tab_bar.removeTab(i-1)
         self.load()
 
@@ -91,7 +93,7 @@ class AppGridView():
         new_tab_action.triggered.connect(self.on_new_tab)
 
         menu.exec_(self._main_window.ui.tab_bar.tabBar().mapToGlobal(position))
-        return self.menu # for testing
+        return self.menu  # for testing
 
     def on_new_tab(self):
         # call tab on_app_link_add
@@ -110,7 +112,6 @@ class AppGridView():
             tab = TabGrid(self._main_window.ui.tab_bar, model=tab_model)
             tab.load()
             self._main_window.ui.tab_bar.addTab(tab, text)
-
 
     def on_tab_rename(self, index):
         tab: TabGrid = self._main_window.ui.tab_bar.widget(index)
@@ -143,9 +144,9 @@ class AppGridView():
 
     def load(self):
         """ Creates new layout """
-            
+
         for tab_config in self.model.tabs:
-            
+
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             tab = TabGrid(parent=self._main_window.ui.tab_bar, model=tab_config)
             self._main_window.ui.tab_bar.addTab(tab, tab_config.name)
@@ -153,6 +154,8 @@ class AppGridView():
 
         # always show the first tab first
         self._main_window.ui.tab_bar.setCurrentIndex(0)
+        # needed, because the resizeEvent is only called for the active (first) tab
+        self.re_init_all_app_links()
 
     def open_new_app_dialog_from_extern(self, app_config: UiAppLinkConfig):
         """ Called from pacakge explorer, where tab is unknown"""
