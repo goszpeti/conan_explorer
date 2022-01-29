@@ -12,7 +12,7 @@ Qt = QtCore.Qt
 
 
 class ConanInstallDialog(QtWidgets.QDialog):
-    def __init__(self, parent:Optional[QtWidgets.QWidget], conan_ref: str):
+    def __init__(self, parent: Optional[QtWidgets.QWidget], conan_ref: str):
         """ conan_ref can be in full ref format with <ref>:<id> """
         super().__init__(parent)
         current_dir = Path(__file__).parent
@@ -33,17 +33,13 @@ class ConanInstallDialog(QtWidgets.QDialog):
             update_check_state = True
 
         ref_text = self.conan_ref_line_edit.text()
-        if ":" in ref_text: # pkg ref
-            conan_ref = PackageReference.loads(ref_text)
-            package = None
-            for remote in app.conan_api.get_remotes():
-                packages = app.conan_api.get_packages_in_remote(conan_ref.ref, remote.name)
-                for package in packages:
-                    if package.get("id", "") == conan_ref.id:
-                        app.conan_api.install_package(conan_ref.ref, package, update_check_state)
-                        self.pkg_installed = conan_ref.id
-                        return
-        else: # recipe ref
+        if ":" in ref_text:  # pkg ref
+            pkg_ref = PackageReference.loads(ref_text)
+            package = app.conan_api.get_remote_pkg_from_id(pkg_ref)
+            app.conan_api.install_package(pkg_ref.ref, package, update_check_state)
+            self.pkg_installed = pkg_ref.id
+            return
+        else:  # recipe ref
             conan_ref = ConanFileReference.loads(ref_text)
             auto_install_checked = False
             if self.auto_install_check_box.checkState() == Qt.Checked:

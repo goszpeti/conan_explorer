@@ -5,6 +5,7 @@ from typing import Optional
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, PathLike,
                                 asset_path, user_save_path)
+from conan_app_launcher.components.conan import ConanCleanup
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
@@ -120,7 +121,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @ pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
-        paths = app.conan_api.get_cleanup_cache_paths()
+        paths = ConanCleanup(app.conan_api).get_cleanup_cache_paths()
         if not paths:
             self.write_log("INFO: Nothing found in cache to clean up.")
             return

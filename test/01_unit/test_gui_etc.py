@@ -2,10 +2,14 @@
 Test the self written qt gui components, which can be instantiated without
 using the whole application (standalone).
 """
+from test.conftest import TEST_REF
 from time import time
 import traceback
 import pytest
 import os
+import conan_app_launcher  # for mocker
+import conan_app_launcher.app as app
+from conans.model.ref import ConanFileReference
 
 from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
 from conan_app_launcher.ui.modules.about_dialog import AboutDialog
@@ -15,10 +19,10 @@ from conan_app_launcher.ui.common.bug_dialog import show_bug_dialog_exc_hook, bu
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
-from test.conftest import TEST_REF
+
 
 def test_edit_line_conan(base_fixture, qtbot):
-    """ Test, that the line edit validates on edit 
+    """ Test, that the line edit validates on edit
     and displays the local packages instantly and the remote ones after a delay
     """
     os.system(f"conan remove {TEST_REF} -f")
@@ -44,16 +48,50 @@ def test_edit_line_conan(base_fixture, qtbot):
     widget._completion_thread.join()
     assert TEST_REF in widget._remote_refs
 
-def test_conan_install_dialog(base_fixture, qtbot):
+
+def test_conan_install_dialog(base_fixture, qtbot, mocker):
     root_obj = QtWidgets.QWidget()
-    widget = ConanInstallDialog(root_obj, TEST_REF + ":127af201a4cdf8111e2e08540525c245c9b3b99e")
+    cfr = ConanFileReference.loads(TEST_REF)
+
+    # first with ref + id in constructor
+    id, pkg_path = app.conan_api.install_best_matching_package(cfr)
+
+    widget = ConanInstallDialog(root_obj, TEST_REF + ":" + id)
     qtbot.addWidget(root_obj)
     widget.show()
     qtbot.waitExposed(widget)
     # TODO mock away conan calls
-    # from pytestqt.plugin import _qapp_instance
-    # while True:
-    #    _qapp_instance.processEvents()
+
+    # with update flag
+    widget.update_check_box.setCheckState(Qt.Checked)
+    mocker.patch('conan_app_launcher.components.conan.ConanApi.install_package')
+    widget.button_box.accepted.emit()
+
+    conan_app_launcher.components.conan.ConanApi.install_package.assert_called_once()
+    assert widget.pkg_installed == id
+
+    # check only ref
+
+    widget.pkg_installed = ""
+    widget.conan_ref_line_edit.setText(TEST_REF)
+
+    import conans
+    mocker.patch('conans.client.conan_api.ConanAPIV1.install_reference', return_value={
+                 "error": False, "installed": [{"packages": [{"id": id}]}]})
+    widget.button_box.accepted.emit()
+    conans.client.conan_api.ConanAPIV1.install_reference.assert_called_once_with(
+        cfr, update=True)
+    assert widget.pkg_installed == id
+
+    # check ref with autoupdate
+    widget.pkg_installed = ""
+    widget.auto_install_check_box.setCheckState(Qt.Checked)
+    mocker.patch('conan_app_launcher.components.conan.ConanApi.install_best_matching_package',
+                 return_value=(id, pkg_path))
+    widget.button_box.accepted.emit()
+    conan_app_launcher.components.conan.ConanApi.install_best_matching_package.assert_called_once_with(
+        cfr, update=True)
+    assert widget.pkg_installed == id
 
 
 def test_conan_search_dialog(base_fixture, qtbot):
@@ -71,15 +109,15 @@ def test_conan_search_dialog(base_fixture, qtbot):
     while not widget._pkg_result_loader.load_thread:
         time.sleep(1)
     while not widget._pkg_result_loader.load_thread.isFinished():
-       _qapp_instance.processEvents()
+        _qapp_instance.processEvents()
 
     model = widget._pkg_result_model
     assert model
     assert widget._ui.search_results_tree_view.findChildren(QtCore.QObject)
     assert widget._ui.search_results_tree_view.model().columnCount() == 3
 
-    #model.root_item.item_data[0] == "Packages"
-    #model.root_item.child_count() == widget._ui.package_select_view.model().rowCount()
+    # model.root_item.item_data[0] == "Packages"
+    # model.root_item.child_count() == widget._ui.package_select_view.model().rowCount()
 
     # found_tst_pkg = False
     # for pkg in model.root_item.child_items:
@@ -136,4 +174,3 @@ def test_bug_dialog(base_fixture, qtbot, mocker):
     dialog = bug_reporting_dialog(exc_info[1], exc_info[2])
     assert dialog.text()
     assert "\n".join(traceback.format_tb(exc_info[2], limit=None)) in dialog.detailedText()
-
