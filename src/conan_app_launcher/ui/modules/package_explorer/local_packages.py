@@ -138,6 +138,9 @@ class LocalConanPackageExplorer(QtCore.QObject):
         msg.setIcon(QtWidgets.QMessageBox.Question)
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
+            #clear file view if this pkg is selected
+            if self._current_ref == conan_ref:
+                self.close_files_view()
             try:
                 app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True)
             except Exception as e:
@@ -274,6 +277,14 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.re_register_signal(self._main_window.ui.package_file_view.customContextMenuRequested,
                                 self.on_file_context_menu_requested)
         self._init_pkg_file_context_menu()
+
+    def close_files_view(self):
+        self.fs_model = None
+        self._current_ref = ""
+        self._current_pkg = None
+        self._main_window.ui.package_path_label.setText("")
+        self._main_window.ui.package_file_view.setModel(None)
+
 
     @classmethod
     def re_register_signal(cls, signal: QtCore.pyqtBoundSignal, slot: Callable):
