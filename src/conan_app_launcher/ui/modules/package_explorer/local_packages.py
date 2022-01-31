@@ -211,26 +211,28 @@ class LocalConanPackageExplorer(QtCore.QObject):
                 break
         if not ref_row:
             return False
-
-        index = self.pkg_sel_model.index(ref_row, 0, QtCore.QModelIndex())
+        # TODO add force refresh flag: we know that the ref intalled, so the model needs to be reloaded if not found
+        proxy_index = self.pkg_sel_model.index(ref_row, 0, QtCore.QModelIndex())
         sel_model = self._main_window.package_select_view.selectionModel()
 
         # map to package view model
         view_model = self._main_window.ui.package_select_view.model()
-        self._main_window.ui.package_select_view.expand(view_model.mapFromSource(index))
+        self._main_window.ui.package_select_view.expand(view_model.mapFromSource(proxy_index))
 
         if id:
-            item: PackageTreeItem = index.internalPointer()
+            item: PackageTreeItem = proxy_index.internalPointer()
             i = 0
             for i in range(len(item.child_items)):
                 if item.child_items[i].item_data[0].get("id", "") == id:
                     break
-            selection_index = index.child(i, 0)
+            internal_sel_index = proxy_index.child(i, 0)
         else:
-            selection_index = index
+            internal_sel_index = proxy_index
             pass
-        sel_model.select(view_model.mapFromSource(selection_index), QtCore.QItemSelectionModel.ClearAndSelect)
-        sel_model.currentRowChanged.emit(index, selection_index)
+        view_index = view_model.mapFromSource(internal_sel_index)
+        self._main_window.ui.package_select_view.scrollTo(view_index)
+        sel_model.select(view_index, QtCore.QItemSelectionModel.ClearAndSelect)
+        sel_model.currentRowChanged.emit(proxy_index, internal_sel_index)
         return True
 
     # Package file view init and functions

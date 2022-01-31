@@ -60,7 +60,6 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
     qtbot.addWidget(root_obj)
     widget.show()
     qtbot.waitExposed(widget)
-    # TODO mock away conan calls
 
     # with update flag
     widget.update_check_box.setCheckState(Qt.Checked)
@@ -114,10 +113,26 @@ def test_conan_search_dialog(base_fixture, qtbot):
     model = widget._pkg_result_model
     assert model
     assert widget._ui.search_results_tree_view.findChildren(QtCore.QObject)
-    assert widget._ui.search_results_tree_view.model().columnCount() == 3
+    assert widget._ui.search_results_tree_view.model().columnCount() == 3 # fixed 3 coloumns
 
     # model.root_item.item_data[0] == "Packages"
     # model.root_item.child_count() == widget._ui.package_select_view.model().rowCount()
+
+    # enter short search term -> search button disabled
+
+    # enter only package name
+    # example -> 2 versions
+
+    # expand package -> assert number of packages and itemdata
+    # check installed pkg ist highlited
+
+    # check context menu actions
+    # check copy recipe ref
+    # check copy id ref
+    # check install
+    # check show conanfile
+    # check check open in local pkg explorer
+
 
     # found_tst_pkg = False
     # for pkg in model.root_item.child_items:
