@@ -18,6 +18,7 @@ Qt = QtCore.Qt
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
 
+
 class LocalConanPackageExplorer(QtCore.QObject):
     def __init__(self, main_window: "MainWindow"):
         super().__init__()
@@ -28,7 +29,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.fs_model = None
 
         # TODO belongs in a model?
-        self._current_ref: Optional[str] = None # loaded conan ref
+        self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
         main_window.ui.refresh_button.setIcon(QtGui.QIcon(str(asset_path / "icons" / "refresh.png")))
 
@@ -138,7 +139,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         msg.setIcon(QtWidgets.QMessageBox.Question)
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            #clear file view if this pkg is selected
+            # clear file view if this pkg is selected
             if self._current_ref == conan_ref:
                 self.close_files_view()
             try:
@@ -151,7 +152,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
                 try:
                     self.fs_model.deleteLater()
                 except Exception:
-                    pass # sometimes this can crash...
+                    pass  # sometimes this can crash...
                 self._main_window.ui.package_path_label.setText("")
             self.refresh_pkg_selection_view()
 
@@ -162,7 +163,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         Refresh all packages by reading it from local drive. Can take a while.
         Update flag can be used for enabling and disabling it. 
         """
-        if not update and self.pkg_sel_model: # loads only at first init
+        if not update and self.pkg_sel_model:  # loads only at first init
             return
         self._pkg_sel_model_loaded = False
         self._pkg_sel_model_loader.async_loading(
@@ -175,7 +176,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
             self.proxy_model.setSourceModel(self.pkg_sel_model)
             self._main_window.ui.package_select_view.setModel(self.proxy_model)
             self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
-            self.set_filter_wildcard() # reapply package filter query
+            self.set_filter_wildcard()  # reapply package filter query
         else:
             Logger().error("Can't load local packages!")
         self._pkg_sel_model_loaded = True
@@ -195,7 +196,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
     def select_local_package_from_ref(self, conan_ref: str) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
-        self._main_window.raise_() # TODO does not work
+        self._main_window.raise_()  # TODO does not work
         self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
 
         # wait for model to be loaded
@@ -203,11 +204,11 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
         split_ref = conan_ref.split(":")
         id = ""
-        if len(split_ref) > 1: # has id
+        if len(split_ref) > 1:  # has id
             conan_ref = split_ref[0]
             id = split_ref[1]
 
-        ref_row = 0 # find the row with the matching reference
+        ref_row = 0  # find the row with the matching reference
         for ref_row in range(self.pkg_sel_model.root_item.child_count()):
             item = self.pkg_sel_model.root_item.child_items[ref_row]
             if item.item_data[0] == conan_ref:
@@ -285,7 +286,6 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self._main_window.ui.package_path_label.setText("")
         self._main_window.ui.package_file_view.setModel(None)
 
-
     @classmethod
     def re_register_signal(cls, signal: QtCore.pyqtBoundSignal, slot: Callable):
         try:  # need to be removed, otherwise will be called multiple times
@@ -330,7 +330,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
         self.paste_action = QtWidgets.QAction("Paste", self._main_window)
         self.paste_action.setIcon(QtGui.QIcon(str(icons_path / "paste.png")))
-        self.paste_action.setShortcut(QtGui.QKeySequence("Ctrl+v")) #Qt.CTRL + Qt.Key_V))
+        self.paste_action.setShortcut(QtGui.QKeySequence("Ctrl+v"))  # Qt.CTRL + Qt.Key_V))
         self.paste_action.setShortcutContext(Qt.ApplicationShortcut)
         self._main_window.addAction(self.paste_action)
         self.file_cntx_menu.addAction(self.paste_action)

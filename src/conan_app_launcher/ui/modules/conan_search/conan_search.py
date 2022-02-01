@@ -29,6 +29,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
 
         # init search bar
         icon = QtGui.QIcon(str(asset_path / "icons" / "search_packages.png"))
+        self.setWindowIcon(icon)
         self._ui.search_icon.setPixmap(icon.pixmap(20, 20))
         self._ui.search_button.clicked.connect(self.on_search)
         self._ui.search_button.setEnabled(False)

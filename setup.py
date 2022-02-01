@@ -17,7 +17,7 @@ VERSION = "1.2.0"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
-REQUIRES_PYTHON = ">=3.6.0"
+REQUIRES_PYTHON = ">=3.6.0" # still support Ubuntu 18
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -93,8 +93,8 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         "gui_scripts": [
-            "conan_app_launcher=conan_app_launcher.__main__:main",
-            "conan_searcher=conan_app_launcher.__main__:main_conan_search"
+            "conan_app_launcher=conan_app_launcher.__main__:run_conan_app_launcher",
+            "conan_searcher=conan_app_launcher.__main__:run_conan_searcher"
         ]
     },
 )

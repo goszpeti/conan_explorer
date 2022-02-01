@@ -2,10 +2,10 @@
 Entrypoint of Conan App Launcher
 """
 
-from conan_app_launcher.app import run_application
+from conan_app_launcher.app import run_application as run_conan_app_launcher
 # use main with conan_search=True as a function alias for conan_searcher entrypoint
 from functools import partial
-main_conan_search = partial(run_application, True)
+run_conan_searcher = partial(run_conan_app_launcher, True)
 
 if __name__ == "__main__":
-    run_application()
+    run_conan_app_launcher()
