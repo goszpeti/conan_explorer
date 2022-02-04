@@ -6,6 +6,15 @@ from PyQt5.QtCore import QFileInfo, Qt
 from PyQt5.QtGui import QIcon, QPixmap, QImage
 from PyQt5.QtWidgets import QFileIconProvider
 
+import conan_app_launcher.app as app
+from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using gobal module pattern
+
+
+def get_themed_asset_image(image_rel_path: str) -> str:
+    if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
+        return get_inverted_asset_image(app.asset_path / image_rel_path)
+    return str(app.asset_path / image_rel_path)
+
 
 def get_inverted_asset_image(image_path: Path):
     """ Inverts a given image and saves it beside the original one with _inv in the name.
@@ -16,7 +25,7 @@ def get_inverted_asset_image(image_path: Path):
         img = QImage(str(image_path))
         img.invertPixels()
         img.save(str(inverted_img_path))
-    return inverted_img_path
+    return str(inverted_img_path)
 
 def get_icon_from_image_file(image_path: Path) -> QIcon:
     if image_path.suffix == ".ico":
@@ -45,15 +54,14 @@ def extract_icon(file_path: Path) -> QIcon:
 
 
 def get_platform_icon(profile_name) -> QIcon:
-    icons_path = asset_path / "icons"
     profile_name = profile_name.lower()
     if "windows" in profile_name:
-        return QIcon(str(icons_path / "windows.png"))
+        return QIcon(get_themed_asset_image("icons/windows.png"))
     elif "linux" in profile_name:
-        return QIcon(str(icons_path / "linux.png"))
+        return QIcon(get_themed_asset_image("icons/linux.png"))
     elif "android" in profile_name:
-        return QIcon(str(icons_path / "android.png"))
+        return QIcon(get_themed_asset_image("icons/android.png"))
     elif "macos" in profile_name:
-        return QIcon(str(icons_path / "mac_os.png"))
+        return QIcon(get_themed_asset_image("icons/mac_os.png"))
     else:
-        return QIcon(str(icons_path / "default_pkg.png"))
+        return QIcon(get_themed_asset_image("icons/default_pkg.png"))

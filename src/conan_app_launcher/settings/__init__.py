@@ -15,6 +15,10 @@ DISPLAY_APP_USERS = "disp_app_users"
 DISPLAY_APP_CHANNELS = "disp_app_channels"
 # enable combobox for app user/channel/version
 ENABLE_APP_COMBO_BOXES = "enable_app_link_combo_boxes"
+GUI_STYLE = "style"
+
+GUI_STYLE_DARK = "dark"
+GUI_STYLE_LIGHT = "light"
 
 # Implementation types fro factory
 SETTINGS_INI_TYPE = "ini"

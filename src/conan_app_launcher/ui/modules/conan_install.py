@@ -6,7 +6,6 @@ from conans.model.ref import ConanFileReference, PackageReference
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from conan_app_launcher.components import conan
 
 Qt = QtCore.Qt
 

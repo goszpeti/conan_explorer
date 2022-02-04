@@ -6,6 +6,8 @@ from typing import Optional
 from conan_app_launcher import ICON_SIZE
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from conan_app_launcher.ui.common.icon import get_themed_asset_image
+
 Qt = QtCore.Qt
 
 
@@ -21,7 +23,7 @@ class AppButton(QtWidgets.QPushButton):
         self._greyed_out = True  # Must be ungreyed, when available
         self._grey_effect = QtWidgets.QGraphicsColorizeEffect()
         self._grey_effect.setColor(QtGui.QColor(128, 128, 128))
-        self.setGraphicsEffect(self._grey_effect)
+        #self.setGraphicsEffect(self._grey_effect)
 
         self.set_icon_from_file(image)
         self.setFlat(True)
@@ -31,11 +33,12 @@ class AppButton(QtWidgets.QPushButton):
 
     def ungrey_icon(self):
         self._greyed_out = False
-        self._grey_effect.setEnabled(False)
+        #self._grey_effect.setEnabled(False)
 
     def grey_icon(self):
         self._greyed_out = True  # no context menu
-        self._grey_effect.setEnabled(True)
+        self.set_icon(QtGui.QIcon(get_themed_asset_image("icons/no-access.png")))
+        #self._grey_effect.setEnabled(True)
 
     def set_icon(self, icon: QtGui.QIcon):
         # convert biggest image to QPixmap and scale

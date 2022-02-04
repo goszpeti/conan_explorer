@@ -12,6 +12,8 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS,
                                          LAST_CONFIG_FILE)
 from conan_app_launcher.ui.model import UiApplicationModel
+from conan_app_launcher.ui.common.icon import get_themed_asset_image
+
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
 
@@ -41,7 +43,6 @@ class MainWindow(QtWidgets.QMainWindow):
         current_dir = Path(__file__).parent
         self.ui = uic.loadUi(current_dir / "main.ui", baseinstance=self)
 
-        self._icons_path = asset_path / "icons"
         self._about_dialog = AboutDialog(self)
 
         self.load_icons()
@@ -151,7 +152,7 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog = QtWidgets.QFileDialog(parent=self, caption="Select JSON Config File",
                                        directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+        if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
             new_file = dialog.selectedFiles()[0]
             app.active_settings.set(LAST_CONFIG_FILE, new_file)
             # model loads incrementally
@@ -190,16 +191,16 @@ class MainWindow(QtWidgets.QMainWindow):
     def load_icons(self):
         """ Load icons for main toolbox and menu """
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(str(self._icons_path / "grid.png")),
+        icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/grid.png")),
                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.ui.main_toolbox.setItemIcon(self.TOOLBOX_GRID_ITEM, icon)
 
-        icon.addPixmap(QtGui.QPixmap(str(self._icons_path / "search_packages.png")),
+        icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/search_packages.png")),
                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.ui.main_toolbox.setItemIcon(self.TOOLBOX_PACKAGES_ITEM, icon)
 
         # menu
-        self.ui.menu_cleanup_cache.setIcon(QtGui.QIcon(str(self._icons_path / "cleanup.png")))
-        self.ui.menu_about_action.setIcon(QtGui.QIcon(str(self._icons_path / "about.png")))
-        self.ui.menu_remove_locks.setIcon(QtGui.QIcon(str(self._icons_path / "remove-lock.png")))
-        self.ui.menu_search_in_remotes.setIcon(QtGui.QIcon(str(self._icons_path / "search_packages.png")))
+        self.ui.menu_cleanup_cache.setIcon(QtGui.QIcon(get_themed_asset_image("icons/cleanup.png")))
+        self.ui.menu_about_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/about.png")))
+        self.ui.menu_remove_locks.setIcon(QtGui.QIcon(get_themed_asset_image("icons/remove-lock.png")))
+        self.ui.menu_search_in_remotes.setIcon(QtGui.QIcon(get_themed_asset_image("icons/search_packages.png")))

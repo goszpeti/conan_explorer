@@ -5,7 +5,7 @@ import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
 from conan_app_launcher.components import ConanApi
 from conan_app_launcher.components.conan import ConanPkg
-from conan_app_launcher.ui.common.icon import get_platform_icon
+from conan_app_launcher.ui.common.icon import get_platform_icon, get_themed_asset_image
 from conan_app_launcher.ui.common.model import TreeModel, TreeModelItem
 
 from PyQt5 import QtCore, QtGui
@@ -77,7 +77,6 @@ class PkgSelectModel(TreeModel):
 
     def __init__(self, *args, **kwargs):
         super(TreeModel, self).__init__(*args, **kwargs)
-        self._icons_path = asset_path / "icons"
         self.root_item = PackageTreeItem(["Packages"])
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
@@ -104,7 +103,7 @@ class PkgSelectModel(TreeModel):
                 return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
         if role == Qt.DecorationRole:
             if item.type == REF_TYPE:
-                return QtGui.QIcon(str(self._icons_path / "package.png"))
+                return QtGui.QIcon(get_themed_asset_image("icons/package.png"))
             if item.type == PROFILE_TYPE:
                 profile_name = self.get_quick_profile_name(item)
                 return get_platform_icon(profile_name)

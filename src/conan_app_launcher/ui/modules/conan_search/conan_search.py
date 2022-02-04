@@ -5,10 +5,10 @@ from typing import List, Optional, TYPE_CHECKING
 from conans.model.ref import ConanFileReference
 
 import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher import asset_path
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from conan_app_launcher.ui.common import QtLoaderObject
 from conan_app_launcher.components import open_file
+from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.modules.conan_install import ConanInstallDialog
 from .model import PROFILE_TYPE, REF_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
@@ -28,8 +28,9 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self.setMinimumSize(650, 550)
 
         # init search bar
-        icon = QtGui.QIcon(str(asset_path / "icons" / "search_packages.png"))
+        icon = QtGui.QIcon(str(app.asset_path / "icons/icon.ico"))
         self.setWindowIcon(icon)
+        icon = QtGui.QIcon(get_themed_asset_image("icons/search_packages.png"))
         self._ui.search_icon.setPixmap(icon.pixmap(20, 20))
         self._ui.search_button.clicked.connect(self.on_search)
         self._ui.search_button.setEnabled(False)
@@ -58,6 +59,8 @@ class ConanSearchDialog(QtWidgets.QDialog):
             self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
 
+    def load(self): # TODO define interface for entrypoints
+        pass
 
     def _enable_search_button(self):
         """ Enable search button from minimum 3 characters onwards"""
@@ -68,26 +71,25 @@ class ConanSearchDialog(QtWidgets.QDialog):
 
     def _init_pkg_context_menu(self):
         self.select_cntx_menu = QtWidgets.QMenu()
-        icons_path = asset_path / "icons"
 
         self.copy_ref_action = QtWidgets.QAction("Copy reference", self)
-        self.copy_ref_action.setIcon(QtGui.QIcon(str(icons_path / "copy_link.png")))
+        self.copy_ref_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/copy_link.png")))
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self.on_copy_ref_requested)
 
         self.show_conanfile_action = QtWidgets.QAction("Show conanfile", self)
-        self.show_conanfile_action.setIcon(QtGui.QIcon(str(icons_path / "file_preview.png")))
+        self.show_conanfile_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/file_preview.png")))
         self.select_cntx_menu.addAction(self.show_conanfile_action)
         self.show_conanfile_action.triggered.connect(self.on_show_conanfile_requested)
 
         self.install_pkg_action = QtWidgets.QAction("Install package", self)
-        self.install_pkg_action.setIcon(QtGui.QIcon(str(icons_path / "download_pkg.png")))
+        self.install_pkg_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/download_pkg.png")))
         self.select_cntx_menu.addAction(self.install_pkg_action)
         self.install_pkg_action.triggered.connect(self.on_install_pkg_requested)
 
         if self._local_package_explorer:
             self.show_in_pkg_exp_action = QtWidgets.QAction("Show in Package Explorer", self)
-            self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(str(icons_path / "search_packages.png")))
+            self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/search_packages.png")))
             self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
             self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 

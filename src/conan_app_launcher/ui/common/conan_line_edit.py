@@ -49,7 +49,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
                 else:
                     ConanFileReference.loads(text)
                 valid = True
-                self.setStyleSheet("background: PaleGreen;")
+                self.setStyleSheet("background: #37efba;")
             except:
                 self.setStyleSheet("background: LightCoral;")
         

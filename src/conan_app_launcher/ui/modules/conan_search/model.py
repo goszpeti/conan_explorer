@@ -1,10 +1,9 @@
 from typing import Dict, List, Optional, Union
 
 import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher import asset_path
 from conan_app_launcher.components import ConanApi
 from conan_app_launcher.components.conan import ConanPkg
-from conan_app_launcher.ui.common.icon import get_platform_icon
+from conan_app_launcher.ui.common.icon import get_platform_icon, get_themed_asset_image
 from conan_app_launcher.ui.common.model import TreeModel, TreeModelItem
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui
@@ -74,7 +73,6 @@ class PkgSearchModel(TreeModel):
 
     def __init__(self, *args, **kwargs):
         super(PkgSearchModel, self).__init__(*args, **kwargs)
-        self._icons_path = asset_path / "icons"
         self.root_item = SearchedPackageTreeItem(["Packages", "Remote(s)", "Quick Profile"])
         self.proxy_model = QtCore.QSortFilterProxyModel()  # for sorting
         self.proxy_model.setDynamicSortFilter(True)
@@ -116,7 +114,7 @@ class PkgSearchModel(TreeModel):
             if index.column() != 0:  # only display icon for first column
                 return
             if item.type == REF_TYPE:
-                return QtGui.QIcon(str(self._icons_path / "package.png"))
+                return QtGui.QIcon(get_themed_asset_image("icons/package.png"))
             if item.type == PROFILE_TYPE:
                 profile_name = item.data(2)
                 return get_platform_icon(profile_name)

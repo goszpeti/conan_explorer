@@ -5,6 +5,8 @@ from conan_app_launcher import ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, asset_path
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkModel,
                                                           UiTabModel)
+from conan_app_launcher.ui.common.icon import get_themed_asset_image
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
@@ -20,7 +22,6 @@ class AppGridView():
     def __init__(self, main_window: "MainWindow", model: "UiApplicationModel"):
         self._main_window = main_window
         self.model = model
-        self._icons_path = asset_path / "icons"
         self.model.conan_info_updated.connect(self.update_conan_info)
 
         if ADD_APP_LINK_BUTTON:
@@ -29,14 +30,14 @@ class AppGridView():
             self._main_window.ui.add_app_link_button.setIconSize(QtCore.QSize(44, 44))
             self._main_window.ui.add_app_link_button.clicked.connect(self.open_new_app_link_dialog)
             self._main_window.ui.add_app_link_button.setIcon(
-                QtGui.QIcon(str(self._icons_path / "add_link.png")))
+                QtGui.QIcon(get_themed_asset_image("icons/add_link.png")))
 
         if ADD_TAB_BUTTON:
             self._main_window.ui.add_tab_button = QtWidgets.QPushButton(self._main_window)
             self._main_window.ui.add_tab_button.setGeometry(802, 50, 28, 28)
             self._main_window.ui.add_tab_button.setIconSize(QtCore.QSize(28, 28))
             self._main_window.ui.add_tab_button.clicked.connect(self.on_new_tab)
-            self._main_window.ui.add_tab_button.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
+            self._main_window.ui.add_tab_button.setIcon(QtGui.QIcon(get_themed_asset_image("icons/plus.png")))
 
         self._main_window.ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self._main_window.ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
@@ -78,17 +79,17 @@ class AppGridView():
         self.menu = menu
 
         rename_action = QtWidgets.QAction("Rename", self._main_window)
-        rename_action.setIcon(QtGui.QIcon(str(self._icons_path / "rename.png")))
+        rename_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/rename.png")))
         menu.addAction(rename_action)
         rename_action.triggered.connect(lambda: self.on_tab_rename(index))
 
         remove_action = QtWidgets.QAction("Remove", self._main_window)
-        remove_action.setIcon(QtGui.QIcon(str(self._icons_path / "delete.png")))
+        remove_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/delete.png")))
         menu.addAction(remove_action)
         remove_action.triggered.connect(lambda: self.on_tab_remove(index))
 
         new_tab_action = QtWidgets.QAction("Add new tab", self._main_window)
-        new_tab_action.setIcon(QtGui.QIcon(str(self._icons_path / "plus.png")))
+        new_tab_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/plus.png")))
         menu.addAction(new_tab_action)
         new_tab_action.triggered.connect(self.on_new_tab)
 
@@ -164,7 +165,7 @@ class AppGridView():
         model = UiAppLinkModel()
         dialog.setComboBoxItems(tab_list)
         dialog.setWindowTitle("Choose a tab!")
-        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+        if dialog.exec_() == QtWidgets.QInputDialog.Accepted:
             answer = dialog.textValue()
             for tab in self.get_tabs():
                 if answer == tab.model.name:

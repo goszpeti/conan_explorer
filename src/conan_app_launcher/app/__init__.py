@@ -4,9 +4,9 @@ import sys
 import tempfile
 from typing import TYPE_CHECKING
 
-from conan_app_launcher import PKG_NAME, SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
+from conan_app_launcher import PKG_NAME, SETTINGS_FILE_NAME, __version__, asset_path, base_path, user_save_path
 from conan_app_launcher.components import ConanApi, ConanWorker
-from conan_app_launcher.settings import SETTINGS_INI_TYPE, settings_factory, SettingsInterface
+from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK, SETTINGS_INI_TYPE, settings_factory, SettingsInterface
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import MainWindow
@@ -62,6 +62,14 @@ def run_application(conan_search=False):
     else:
         from conan_app_launcher.ui.main_window import MainWindow
         main_window = MainWindow()
+
+    style_file = "light_style.qss"
+    if active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
+        style_file = "dark_style.qss"
+
+    with open(base_path / "ui" / style_file) as fd:
+        style_sheet = fd.read()
+        qt_app.setStyleSheet(style_sheet)
 
     main_window.setWindowIcon(app_icon)
     main_window.show() # show first, then load appsgrid with progress bar

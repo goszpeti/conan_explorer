@@ -5,6 +5,7 @@ import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.components import open_in_file_manager, run_file
+from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, 
                                         ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
@@ -123,39 +124,38 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def _init_menu(self):
         self.menu = QtWidgets.QMenu()
-        icons_path = asset_path / "icons"
 
         self.open_fm_action = QtWidgets.QAction("Show in File Manager", self)
-        self.open_fm_action.setIcon(QtGui.QIcon(str(icons_path / "file-explorer.png")))
+        self.open_fm_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/file-explorer.png")))
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
 
         # self.show_in_pkg_exp_action = QtWidgets.QAction("Show in Package Explorer", self)
-        # self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(str(icons_path / "search_packages.png")))
+        # self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(get_asset_image("icons/search_packages.png")))
         # self.menu.addAction(self.show_in_pkg_exp_action)
         # self.show_in_pkg_exp_action.setDisabled(True)  # TODO upcoming feature
 
         self.menu.addSeparator()
 
         self.add_action = QtWidgets.QAction("Add new App Link", self)
-        self.add_action.setIcon(QtGui.QIcon(str(icons_path / "add_link.png")))
+        self.add_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/add_link.png")))
         self.menu.addAction(self.add_action)
         self.add_action.triggered.connect(self.open_app_link_add_dialog)
 
         self.edit_action = QtWidgets.QAction("Edit", self)
-        self.edit_action.setIcon(QtGui.QIcon(str(icons_path / "edit.png")))
+        self.edit_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/edit.png")))
         self.menu.addAction(self.edit_action)
         self.edit_action.triggered.connect(self.open_edit_dialog)
 
         self.remove_action = QtWidgets.QAction("Remove App Link", self)
-        self.remove_action.setIcon(QtGui.QIcon(str(icons_path / "delete.png")))
+        self.remove_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/delete.png")))
         self.menu.addAction(self.remove_action)
         self.remove_action.triggered.connect(self.remove)
 
         self.menu.addSeparator()
 
         self.rearrange_action = QtWidgets.QAction("Rearrange App Links", self)
-        self.rearrange_action.setIcon(QtGui.QIcon(str(icons_path / "rearrange.png")))
+        self.rearrange_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/rearrange.png")))
         self.rearrange_action.triggered.connect(self.on_move)
 
         self.menu.addAction(self.rearrange_action)

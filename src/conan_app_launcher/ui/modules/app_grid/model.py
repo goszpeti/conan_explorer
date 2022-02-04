@@ -9,7 +9,7 @@ import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (INVALID_CONAN_REF,
                                 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
                                 USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH, asset_path)
-from conan_app_launcher.ui.common.icon import extract_icon, get_icon_from_image_file
+from conan_app_launcher.ui.common.icon import extract_icon, get_icon_from_image_file, get_themed_asset_image
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
@@ -324,8 +324,8 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         # default icon, until package path is updated
         if icon.isNull():
-            icon_path = asset_path / "icons" / "app.png"
-            icon = get_icon_from_image_file(icon_path)
+            icon_path = get_themed_asset_image("icons/no-access.png")
+            icon = get_icon_from_image_file(Path(icon_path))
             if self._icon:  # user input given -> warning
                 Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
         return icon

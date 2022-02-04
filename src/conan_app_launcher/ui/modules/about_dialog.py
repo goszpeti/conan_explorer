@@ -32,7 +32,6 @@ class AboutDialog(QtWidgets.QDialog):
         self._text.setOpenExternalLinks(True)
         self._text.setSizePolicy(size_policy)
         self._text.setTextFormat(QtCore.Qt.RichText)
-        self._text.setStyleSheet("background-color: #F0F0F0;")
         self._text.setText(self.html_content)
         self._text.setFrameShape(QtWidgets.QFrame.NoFrame)
 

@@ -6,8 +6,8 @@ from typing import Any, Dict, Optional, Union
 from conan_app_launcher import PathLike
 from conan_app_launcher.logger import Logger
 
-from . import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, ENABLE_APP_COMBO_BOXES,
-               LAST_CONFIG_FILE, SettingsInterface)
+from . import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, ENABLE_APP_COMBO_BOXES, GUI_STYLE_LIGHT,
+               LAST_CONFIG_FILE, GUI_STYLE, SettingsInterface)
 
 
 class IniSettings(SettingsInterface):
@@ -46,6 +46,7 @@ class IniSettings(SettingsInterface):
                 LAST_CONFIG_FILE: "",
             },
             self._VIEW_SECTION_NAME: {
+                GUI_STYLE: GUI_STYLE_LIGHT,
                 ENABLE_APP_COMBO_BOXES: False,
                 DISPLAY_APP_CHANNELS: True,
                 DISPLAY_APP_USERS: False,

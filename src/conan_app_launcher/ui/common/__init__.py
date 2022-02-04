@@ -4,6 +4,7 @@ from typing import Optional, Tuple, Callable
 
 from PyQt5.QtCore import Qt
 
+
 class Worker(QtCore.QObject):
     """ Generic worker for Qt, which can call any function with args """
     finished = QtCore.pyqtSignal()
