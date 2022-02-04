@@ -5,9 +5,9 @@ import time
 from pathlib import Path
 from typing import List
 
-from conan_app_launcher.components.conan import (ConanApi, ConanCleanup,
+from conan_app_launcher.core.conan import (ConanApi, ConanCleanup,
                                                  _create_key_value_pair_list)
-from conan_app_launcher.components.conan_worker import (ConanWorker,
+from conan_app_launcher.core.conan_worker import (ConanWorker,
                                                         ConanWorkerElement)
 from conans import __version__
 from conans.model.ref import ConanFileReference
@@ -226,7 +226,7 @@ def test_conan_worker(base_fixture, mocker):
     conan_refs: List[ConanWorkerElement] = [{"reference": "m4/1.4.19@_/_", "options": {}},
                                             {"reference": "zlib/1.2.11@conan/stable", "options": {"shared": "True"}}]
 
-    mock_func = mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
+    mock_func = mocker.patch('conan_app_launcher.core.ConanApi.get_path_or_install')
     import conan_app_launcher.app as app
 
     conan_worker = ConanWorker(ConanApi(), app.active_settings)

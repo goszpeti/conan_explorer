@@ -5,7 +5,7 @@ import tempfile
 from typing import TYPE_CHECKING
 
 from conan_app_launcher import PKG_NAME, SETTINGS_FILE_NAME, __version__, asset_path, base_path, user_save_path
-from conan_app_launcher.components import ConanApi, ConanWorker
+from conan_app_launcher.core import ConanApi, ConanWorker
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK, SETTINGS_INI_TYPE, settings_factory, SettingsInterface
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ conan_worker = ConanWorker(conan_api, active_settings)
 
 
 def run_application(conan_search=False):
-    """ Start the Qt application and an all main components """
+    """ Start the Qt application and an all main base """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
     from conan_app_launcher.ui.common.bug_dialog import show_bug_dialog_exc_hook
     sys.excepthook = show_bug_dialog_exc_hook

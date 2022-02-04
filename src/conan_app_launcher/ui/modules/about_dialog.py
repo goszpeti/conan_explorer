@@ -14,6 +14,7 @@ class AboutDialog(QtWidgets.QDialog):
     <p>Icons by <a href="https://icons8.com"><span style="text-decoration: underline; color:#0000ff;">https://icons8.com</span></a>.</p>
     </body></html>
     """
+    #TODO COLOR
 
     def __init__(self, parent):
         super().__init__(parent)

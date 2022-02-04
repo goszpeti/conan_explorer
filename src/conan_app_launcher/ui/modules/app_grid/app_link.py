@@ -4,7 +4,7 @@ from pathlib import Path
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.components import open_in_file_manager, run_file
+from conan_app_launcher.core import open_in_file_manager, run_file
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, 
                                         ENABLE_APP_COMBO_BOXES)
@@ -79,7 +79,16 @@ class AppLink(QtWidgets.QVBoxLayout):
 
         self._app_name_label.setAlignment(Qt.AlignCenter)
         self._app_name_label.setSizePolicy(size_policy)
-        self._app_name_label.setText(self.model.name)
+        # autobreak after 25 chars
+        split_name = self.model.name.split(" ")
+        name = ""
+        for word in split_name:
+            if len(word) > 24:
+                word = word[:24] + " " + word[24:-1]
+            
+            name += " " + word if name else word
+        self._app_name_label.setWordWrap(True)
+        self._app_name_label.setText(name)
         self.addWidget(self._app_name_label)
 
         max_width = self.max_width()
@@ -182,7 +191,16 @@ class AppLink(QtWidgets.QVBoxLayout):
         open_in_file_manager(self.model.get_executable_path().parent)
 
     def _apply_new_config(self):
-        self._app_name_label.setText(self.model.name)
+        split_name = self.model.name.split(" ")
+        name = ""
+        for word in split_name:
+            if len(word) > 24:
+                word = word[:24] + " " + word[24:-1]
+
+            name += " " + word if name else word
+        self._app_name_label.setWordWrap(True)
+        self._app_name_label.setText(name)
+        self._app_name_label.setText(name)
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon())
 

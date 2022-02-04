@@ -4,20 +4,19 @@ from typing import Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, PathLike,
-                                asset_path, user_save_path)
-from conan_app_launcher.components.conan import ConanCleanup
+                                user_save_path)
+from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
                                          LAST_CONFIG_FILE)
-from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.common.icon import get_themed_asset_image
 
+from conan_app_launcher.ui.common.icon import get_themed_asset_image
+from conan_app_launcher.ui.model import UiApplicationModel
+from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
-
-from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
 
 from .modules.about_dialog import AboutDialog
 from .modules.app_grid import AppGridView

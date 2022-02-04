@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
 import jsonschema
-from conans.model.ref import ConanFileReference
 
 from . import (UiApplicationConfig, UiAppLinkConfig, UiConfigInterface,
                UiTabConfig)
@@ -25,7 +24,7 @@ from conan_app_launcher.logger import Logger
 
 class JsonAppConfig(TypedDict):
     version: str
-    tabs: List[Dict] # same as ConfogTypes, but as dict
+    tabs: List[Dict] # same as ConfigTypes, but as dict
 
 class ConanOptionConfig(TypedDict):
     name: str
@@ -46,6 +45,10 @@ class JsonUiConfig(UiConfigInterface):
     T = TypeVar('T', bound=Union[UiTabConfig, UiAppLinkConfig])
     @staticmethod
     def _convert_to_config_type(dict: Dict[str, Any], config_type: Type[T]) -> T:
+        """ Convert the dict to the class representations. 
+        The matching is 1-to-1 except the conan_options and that Apps
+        must instantiate the appropriate class
+        """
         result_config = config_type()
         for key in dict.keys(): # matches 1-1
             value = dict[key]

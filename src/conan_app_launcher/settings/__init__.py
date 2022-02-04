@@ -40,7 +40,7 @@ def settings_factory(type: str, source: PathLike) -> "SettingsInterface":
 class SettingsInterface(ABC):
     """
     Abstract Class to implement settings mechanisms.
-    Source artefact is passed by constructor an and not changeable.
+    Source artefact location is passed by constructor and not changeable.
     """
 
     @abstractmethod

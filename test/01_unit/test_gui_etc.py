@@ -1,5 +1,5 @@
 """
-Test the self written qt gui components, which can be instantiated without
+Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
 from test.conftest import TEST_REF
@@ -63,10 +63,10 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
 
     # with update flag
     widget.update_check_box.setCheckState(Qt.Checked)
-    mocker.patch('conan_app_launcher.components.conan.ConanApi.install_package')
+    mocker.patch('conan_app_launcher.core.conan.ConanApi.install_package')
     widget.button_box.accepted.emit()
 
-    conan_app_launcher.components.conan.ConanApi.install_package.assert_called_once()
+    conan_app_launcher.core.conan.ConanApi.install_package.assert_called_once()
     assert widget.pkg_installed == id
 
     # check only ref
@@ -85,10 +85,10 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
     # check ref with autoupdate
     widget.pkg_installed = ""
     widget.auto_install_check_box.setCheckState(Qt.Checked)
-    mocker.patch('conan_app_launcher.components.conan.ConanApi.install_best_matching_package',
+    mocker.patch('conan_app_launcher.core.conan.ConanApi.install_best_matching_package',
                  return_value=(id, pkg_path))
     widget.button_box.accepted.emit()
-    conan_app_launcher.components.conan.ConanApi.install_best_matching_package.assert_called_once_with(
+    conan_app_launcher.core.conan.ConanApi.install_best_matching_package.assert_called_once_with(
         cfr, update=True)
     assert widget.pkg_installed == id
 

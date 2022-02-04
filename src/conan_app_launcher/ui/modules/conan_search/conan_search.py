@@ -7,7 +7,7 @@ from conans.model.ref import ConanFileReference
 import conan_app_launcher.app as app  # using gobal module pattern
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from conan_app_launcher.ui.common import QtLoaderObject
-from conan_app_launcher.components import open_file
+from conan_app_launcher.core import open_file
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.modules.conan_install import ConanInstallDialog
 from .model import PROFILE_TYPE, REF_TYPE, PkgSearchModel, SearchedPackageTreeItem

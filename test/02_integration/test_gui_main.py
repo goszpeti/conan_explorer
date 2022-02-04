@@ -10,8 +10,8 @@ from pathlib import Path
 from shutil import rmtree
 
 from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, app, user_save_path
-from conan_app_launcher.components import ConanApi
-from conan_app_launcher.components.conan import ConanCleanup
+from conan_app_launcher.core import ConanApi
+from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window

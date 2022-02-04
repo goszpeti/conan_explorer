@@ -8,7 +8,7 @@ from pathlib import Path
 from subprocess import check_output
 
 import conan_app_launcher  # for mocker
-from conan_app_launcher.components.file_runner import (execute_app, open_file,
+from conan_app_launcher.core.file_runner import (execute_app, open_file,
                                                        run_file)
 
 
@@ -18,14 +18,14 @@ def test_choose_run_file(base_fixture, tmp_path, mocker):
     Existing path with a filesize > 0 expected
     """
     # Mock away the calls
-    mocker.patch('conan_app_launcher.components.file_runner.open_file')
+    mocker.patch('conan_app_launcher.core.file_runner.open_file')
     test_file = Path(tmp_path) / "test.txt"
     with open(test_file, "w") as f:
         f.write("test")
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.components.file_runner.open_file.assert_called_once_with(test_file)
+    conan_app_launcher.core.file_runner.open_file.assert_called_once_with(test_file)
 
 
 def test_choose_run_script(base_fixture, tmp_path, mocker):
@@ -36,7 +36,7 @@ def test_choose_run_script(base_fixture, tmp_path, mocker):
     if platform.system() != "Windows":
         return
     # Mock away the calls
-    mocker.patch('conan_app_launcher.components.file_runner.execute_app')
+    mocker.patch('conan_app_launcher.core.file_runner.execute_app')
 
     test_file = Path(tmp_path) / "test.bat"
     with open(test_file, "w") as f:
@@ -44,7 +44,7 @@ def test_choose_run_script(base_fixture, tmp_path, mocker):
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
+    conan_app_launcher.core.file_runner.execute_app.assert_called_once_with(test_file, False, "")
 
 
 def test_choose_run_exe(base_fixture, tmp_path, mocker):
@@ -52,7 +52,7 @@ def test_choose_run_exe(base_fixture, tmp_path, mocker):
     Test, that run_file will call execute_app with the correct argumnenst.
     Mock away the actual calls.
     """
-    mocker.patch('conan_app_launcher.components.file_runner.execute_app')
+    mocker.patch('conan_app_launcher.core.file_runner.execute_app')
     test_file = Path()
     if platform.system() == "Linux":
         test_file = Path(tmp_path) / "test"
@@ -68,7 +68,7 @@ def test_choose_run_exe(base_fixture, tmp_path, mocker):
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
+    conan_app_launcher.core.file_runner.execute_app.assert_called_once_with(test_file, False, "")
 
 
 def test_start_cli_option_app(base_fixture):

@@ -3,8 +3,8 @@ from typing import List, Union
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
-from conan_app_launcher.components import ConanApi
-from conan_app_launcher.components.conan import ConanPkg
+from conan_app_launcher.core import ConanApi
+from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.ui.common.icon import get_platform_icon, get_themed_asset_image
 from conan_app_launcher.ui.common.model import TreeModel, TreeModelItem
 

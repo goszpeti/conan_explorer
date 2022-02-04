@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, user_save_path)
-from conan_app_launcher.components.conan_worker import ConanWorkerElement
+from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiAppLinkConfig,
                                         UiApplicationConfig, ui_config_factory,

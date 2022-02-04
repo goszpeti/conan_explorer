@@ -16,7 +16,7 @@ import conan_app_launcher.logger as logger
 import psutil
 import pytest
 from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path
-from conan_app_launcher.components import ConanApi, ConanInfoCache, ConanWorker
+from conan_app_launcher.core import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.settings import *
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
@@ -37,7 +37,7 @@ class PathSetup():
 
     def __init__(self):
         self.test_path = Path(os.path.dirname(__file__))
-        self.base_path = self.test_path.parent
+        self.core_path = self.test_path.parent
         self.testdata_path = self.test_path / "testdata"
 
 

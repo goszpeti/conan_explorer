@@ -12,9 +12,13 @@ selectables: #5c5c5c TODO Menu and TitleBar!
 accent colour: #6699CC
 dark accent: 
 editable: #1e1d23
-
 conan-dark: 6699CC
 conan-light AFD4E5
+OK:
+green-light: #37efba
+green-dark: #007b50
+NOK:
+red
 */
 QHeaderView::section
 {
@@ -169,7 +173,7 @@ QLineEdit {
     border-style: inset;
     padding: 0 8px;
     background-color: #1e1d23;
-    selection-background-color:#007b50;
+    selection-background-color:#808086;
     selection-color: #f8f8ff;
 }
 QLabel {

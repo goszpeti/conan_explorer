@@ -49,8 +49,8 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
                 else:
                     ConanFileReference.loads(text)
                 valid = True
-                self.setStyleSheet("background: #37efba;")
-            except:
+                self.setStyleSheet("background: #007b50;")
+            except: # if it does error it's invalid format, thus red
                 self.setStyleSheet("background: LightCoral;")
         
         if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip seraching for such broad terms

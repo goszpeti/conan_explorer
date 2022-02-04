@@ -1,5 +1,5 @@
 """
-Test the self written qt gui components, which can be instantiated without
+Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
 from test.conftest import TEST_REF

@@ -1,5 +1,5 @@
 """
-Test the self written qt gui components, which can be instantiated without
+Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
 from test.conftest import TEST_REF, conan_create_and_upload
@@ -101,9 +101,9 @@ def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
     # the caller must call save_data manually
 
     mock_version_func = mocker.patch(
-        'conan_app_launcher.components.conan_worker.ConanWorker.put_ref_in_version_queue')
+        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_version_queue')
     mock_install_func = mocker.patch(
-        'conan_app_launcher.components.conan_worker.ConanWorker.put_ref_in_install_queue')
+        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_install_queue')
     diag.save_data()
 
     # assert that all infos where saved

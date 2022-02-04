@@ -1,10 +1,9 @@
 
-from typing import Type, TypeVar, Union
-from conans.model.ref import ConanFileReference
+from typing import Union
 from conan_app_launcher import INVALID_CONAN_REF, PathLike
 from abc import ABC, abstractmethod
 
-from typing import Dict, List, TYPE_CHECKING, Optional
+from typing import Dict, List, TYPE_CHECKING
 from dataclasses import dataclass, field
 
 UI_CONFIG_JSON_TYPE = "json"
