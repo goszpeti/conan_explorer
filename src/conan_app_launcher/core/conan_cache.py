@@ -9,7 +9,7 @@ from conans.model.ref import ConanFileReference
 
 class ConanInfoCache():
     """
-    This is a cache to accelerate calls which need Remote access.
+    This is a cache to accelerate calls which need remote access.
     It also has an option to store the local package path.
     """
 

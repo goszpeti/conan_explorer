@@ -76,22 +76,14 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_button.setContextMenuPolicy(Qt.CustomContextMenu)
         self._app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
         self.addWidget(self._app_button)
+        max_width = self.max_width()
 
         self._app_name_label.setAlignment(Qt.AlignCenter)
         self._app_name_label.setSizePolicy(size_policy)
-        # autobreak after 25 chars
-        split_name = self.model.name.split(" ")
-        name = ""
-        for word in split_name:
-            if len(word) > 24:
-                word = word[:24] + " " + word[24:-1]
-            
-            name += " " + word if name else word
         self._app_name_label.setWordWrap(True)
-        self._app_name_label.setText(name)
+        self._app_name_label.setMaximumWidth(max_width)
         self.addWidget(self._app_name_label)
 
-        max_width = self.max_width()
         if self._enable_combo_boxes:
             self._app_version_cbox.setDisabled(True)
             self._app_version_cbox.setDuplicatesEnabled(False)

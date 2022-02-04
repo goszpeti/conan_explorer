@@ -48,7 +48,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self.new_message_logged)
-        self.ui.console.setFontPointSize(10)
         self.new_message_logged.connect(self.write_log)
 
         # load app grid
