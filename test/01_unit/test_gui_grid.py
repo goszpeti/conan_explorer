@@ -2,6 +2,15 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
+from conans.model.ref import ConanFileReference as CFR
+from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkConfig,
+                                                          UiAppLinkModel)
+from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
+    AppEditDialog
+from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
+from conan_app_launcher.ui.model import UiApplicationModel
+from conan_app_launcher.ui.data import UiApplicationConfig, UiTabConfig
+from conan_app_launcher.settings import DISPLAY_APP_USERS, ENABLE_APP_COMBO_BOXES
 from test.conftest import TEST_REF, conan_create_and_upload
 import os
 import platform
@@ -15,24 +24,13 @@ from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
-from conan_app_launcher.settings import DISPLAY_APP_USERS, ENABLE_APP_COMBO_BOXES
-from conan_app_launcher.ui.data import UiApplicationConfig, UiTabConfig
-from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
-from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
-    AppEditDialog
-from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkConfig,
-                                                          UiAppLinkModel)
-from conans.model.ref import ConanFileReference as CFR
-
-
 
 def test_AppEditDialog_display_values(base_fixture, qtbot):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
-                               executable = "bin/myexec", is_console_application=True,
+                               executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico", conan_options={"a": "b", "c": "True", "d": "10"})
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
@@ -72,7 +70,7 @@ def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
                                executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico")
     app_info.executable = sys.executable
-    
+
     app_config = UiApplicationConfig(tabs=[UiTabConfig(apps=[app_info])])
     from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
 
@@ -128,13 +126,14 @@ def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
     mock_version_func.assert_called()
     mock_install_func.assert_called()
 
+
 def test_AppLink_open(base_fixture, qtbot):
     """
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
-                               is_console_application=True, executable=sys.executable)
+                                 is_console_application=True, executable=sys.executable)
     app_model = UiAppLinkModel().load(app_config, None)
     app_model.set_package_info(Path(sys.executable).parent)
 
@@ -170,8 +169,7 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path. Use python executable for testing.
     """
-    if not platform.system() == "Windows":
-        pytest.skip()
+
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable=sys.executable)
     app_model = UiAppLinkModel().load(app_config, None)
@@ -184,6 +182,7 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
 
     assert not app_ui.model.get_icon().isNull()
     assert not app_ui._app_button._greyed_out
+
 
 def test_AppLink_cbox_switch(base_fixture, qtbot):
     """
