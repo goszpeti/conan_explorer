@@ -66,6 +66,7 @@ jobs:
       DISPLAY: ":99.0"
       LC_ALL: "en_US.UTF-8"
       CONAN_REVISIONS_ENABLED: 1
+      CAL_DEBUG_LEVEL: 1
     steps:
       - uses: actions/checkout@v2
       - name: Set up a display for gui in Linux

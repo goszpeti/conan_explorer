@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Callable, List, Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
-                                           open_in_file_manager, run_file)
+                                     open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.common import QtLoaderObject
@@ -202,32 +202,37 @@ class LocalConanPackageExplorer(QtCore.QObject):
         text = self._main_window.ui.package_filter_edit.toPlainText().strip()
         self.proxy_model.setFilterWildcard(text)
 
-    def select_local_package_from_ref(self, conan_ref: str) -> bool:
+    def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
-        self._main_window.raise_()  # TODO does not work
+        self._main_window.raise_()
         self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
+
+        if refresh:
+            self.refresh_pkg_selection_view()
 
         # wait for model to be loaded
         self.wait_for_loading_pkgs()
 
+        # find out if we need to find a ref or or a package
         split_ref = conan_ref.split(":")
         id = ""
         if len(split_ref) > 1:  # has id
             conan_ref = split_ref[0]
             id = split_ref[1]
 
-        ref_row = 0  # find the row with the matching reference
+        # find the row with the matching reference
+        ref_row = 0
         for ref_row in range(self.pkg_sel_model.root_item.child_count()):
             item = self.pkg_sel_model.root_item.child_items[ref_row]
             if item.item_data[0] == conan_ref:
                 break
         if not ref_row:
+            Logger().debug(f"Cannot find {conan_ref} in Local Package Explorer for selection")
             return False
-        # TODO add force refresh flag: we know that the ref intalled, so the model needs to be reloaded if not found
-        proxy_index = self.pkg_sel_model.index(ref_row, 0, QtCore.QModelIndex())
-        sel_model = self._main_window.package_select_view.selectionModel()
 
         # map to package view model
+        proxy_index = self.pkg_sel_model.index(ref_row, 0, QtCore.QModelIndex())
+        sel_model = self._main_window.package_select_view.selectionModel()
         view_model = self._main_window.ui.package_select_view.model()
         self._main_window.ui.package_select_view.expand(view_model.mapFromSource(proxy_index))
 
@@ -241,10 +246,13 @@ class LocalConanPackageExplorer(QtCore.QObject):
         else:
             internal_sel_index = proxy_index
             pass
+
         view_index = view_model.mapFromSource(internal_sel_index)
         self._main_window.ui.package_select_view.scrollTo(view_index)
         sel_model.select(view_index, QtCore.QItemSelectionModel.ClearAndSelect)
         sel_model.currentRowChanged.emit(proxy_index, internal_sel_index)
+        Logger().debug(f"Selecting {view_index.data()} in Local Package Explorer")
+
         return True
 
     # Package file view init and functions
@@ -264,7 +272,8 @@ class LocalConanPackageExplorer(QtCore.QObject):
         pkg_path = app.conan_api.get_package_folder(
             ConanFileReference.loads(conan_ref), pkg_id)
         if not pkg_path.exists():
-            Logger().warning(f"Can't find package path for {conan_ref} and {str(source_item.item_data[0])}")
+            Logger().warning(
+                f"Can't find package path for {conan_ref} and {str(source_item.item_data[0])} for File View")
             return
         self.fs_model = QtWidgets.QFileSystemModel()
         self.fs_model.setRootPath(str(pkg_path))

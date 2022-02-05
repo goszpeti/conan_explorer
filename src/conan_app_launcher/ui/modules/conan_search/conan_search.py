@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 class ConanSearchDialog(QtWidgets.QDialog):
 
-    def __init__(self, parent:Optional[QtWidgets.QWidget] = None, local_package_explorer: "LocalConanPackageExplorer"=None):
+    def __init__(self, parent: Optional[QtWidgets.QWidget] = None, local_package_explorer: "LocalConanPackageExplorer" = None):
         super().__init__(parent)
         self._local_package_explorer = local_package_explorer
         current_dir = Path(__file__).parent
@@ -59,7 +59,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
             self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
 
-    def load(self): # TODO define interface for entrypoints
+    def load(self):  # TODO define interface for entrypoints
         pass
 
     def _enable_search_button(self):
@@ -89,7 +89,8 @@ class ConanSearchDialog(QtWidgets.QDialog):
 
         if self._local_package_explorer:
             self.show_in_pkg_exp_action = QtWidgets.QAction("Show in Package Explorer", self)
-            self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/search_packages.png")))
+            self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(
+                get_themed_asset_image("icons/search_packages.png")))
             self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
             self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 
@@ -108,7 +109,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
 
     def on_search(self):
         self._pkg_result_loader.async_loading(
-             self, self._load_search_model, self._finish_load_search_model, "Searching for packages...")
+            self, self._load_search_model, self._finish_load_search_model, "Searching for packages...")
         # reset info text
         self._ui.package_info_text.setText("")
 
@@ -118,15 +119,15 @@ class ConanSearchDialog(QtWidgets.QDialog):
         item = self.get_selected_source_item(self._ui.search_results_tree_view)
         if not item:
             return
-        self._local_package_explorer.select_local_package_from_ref(item.get_conan_ref())
-    
+        self._local_package_explorer.select_local_package_from_ref(item.get_conan_ref(), refresh=True)
+
     def _load_search_model(self):
         self._pkg_result_model = PkgSearchModel()
         self._pkg_result_model.setup_model_data(self._ui.search_line.text(), self.get_selected_remotes())
 
     def _finish_load_search_model(self):
         self._ui.search_results_tree_view.setModel(self._pkg_result_model.proxy_model)
-        #self._ui.search_results_tree_view.resizeColumnToContents(0)
+        # self._ui.search_results_tree_view.resizeColumnToContents(0)
         self._ui.search_results_tree_view.setColumnWidth(0, 320)
         self._ui.search_results_tree_view.sortByColumn(1, Qt.AscendingOrder)  # sort by remote at default
         self._ui.search_results_tree_view.selectionModel().selectionChanged.connect(self.on_package_selected)
@@ -168,7 +169,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
                 if pkg_item.pkg_data.get("id", "") == id:
                     pkg_item.is_installed = True
                     break
-        elif item.type ==  PROFILE_TYPE:
+        elif item.type == PROFILE_TYPE:
             item.is_installed = True
 
     def get_selected_remotes(self) -> List[str]:
