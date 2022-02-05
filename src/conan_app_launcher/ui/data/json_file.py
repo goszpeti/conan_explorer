@@ -20,21 +20,26 @@ else:
 from conan_app_launcher import PathLike, asset_path
 from conan_app_launcher.logger import Logger
 
-### Internal represantation of JSON save format
+# Internal represantation of JSON save format
+
 
 class JsonAppConfig(TypedDict):
+    """ Internal representation of json file format"""
     version: str
-    tabs: List[Dict] # same as ConfigTypes, but as dict
+    tabs: List[Dict]  # same as ConfigTypes, but as dict
+
 
 class ConanOptionConfig(TypedDict):
+    """ Internal representation of conan options in json file format"""
     name: str
     value: str
+
 
 class JsonUiConfig(UiConfigInterface):
 
     def __init__(self, json_file_path: PathLike):
         self._json_file_path = Path(json_file_path)
-        
+
         # create file, if not available for first start
         if not self._json_file_path.is_file():
             Logger().info('UiConfig: Creating json file')
@@ -43,6 +48,7 @@ class JsonUiConfig(UiConfigInterface):
             Logger().info(f'UiConfig: Using {self._json_file_path}')
 
     T = TypeVar('T', bound=Union[UiTabConfig, UiAppLinkConfig])
+
     @staticmethod
     def _convert_to_config_type(dict: Dict[str, Any], config_type: Type[T]) -> T:
         """ Convert the dict to the class representations. 
@@ -50,7 +56,7 @@ class JsonUiConfig(UiConfigInterface):
         must instantiate the appropriate class
         """
         result_config = config_type()
-        for key in dict.keys(): # matches 1-1
+        for key in dict.keys():  # matches 1-1
             value = dict[key]
             if key == "apps":
                 value = []

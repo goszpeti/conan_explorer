@@ -17,7 +17,7 @@ VERSION = "1.2.0"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
-REQUIRES_PYTHON = ">=3.6.0" # still support Ubuntu 18
+REQUIRES_PYTHON = ">=3.6.0"  # still support Ubuntu 18
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -25,13 +25,15 @@ REQUIRED = [
     "conan>=1.24",  # MIT License
     "jsonschema>=3.2.0",  # MIT License
     'importlib-metadata>=4.8.2 ; python_version<"3.8"',  # Apache Software License (Apache)
-    'typing-extensions>=3.10.0.2 ; python_version<"3.8"', # Python Software Foundation License(PSF)
-    'dataclasses>=0.8 ; python_version<"3.7"'  # Apache Software License (Apache)
+    'typing-extensions>=3.10.0.2 ; python_version<"3.8"',  # Python Software Foundation License(PSF)
+    'dataclasses>=0.8 ; python_version<"3.7"',  # Apache Software License (Apache)
+    "packaging"  # use the built-in, or get latest if there is some issue with pip
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
 
 # Import the README and use it as the long-description.
+# Replace image links at release to point to this tag instead of master, so they do not change with new releases
 try:
     with io.open(os.path.join(here, "README.md"), encoding="utf-8") as f:
         long_description = "\n" + f.read()
