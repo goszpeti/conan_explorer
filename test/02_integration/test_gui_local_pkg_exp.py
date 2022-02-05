@@ -31,7 +31,7 @@ def wait_for_loading_pkgs(main_gui: main_window.MainWindow):
         _qapp_instance.processEvents()
 
 
-def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
+def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     from pytestqt.plugin import _qapp_instance
     cfr = ConanFileReference.loads(TEST_REF)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
@@ -52,7 +52,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     # check, that the ref + pkg is in the list
     found_tst_pkg = False
     for pkg in model.root_item.child_items:
-        if pkg.item_data[0] == str(cfr):
+        if pkg.item_data[0] == TEST_REF:
             found_tst_pkg = True
             # check it's child
             assert model.get_quick_profile_name(pkg.child(0)) in [
@@ -60,6 +60,12 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     assert found_tst_pkg
 
     # select package (ref, not profile)
+    print(app.conan_api.get_all_local_refs())
+    assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF, refresh=True)
+    assert not main_gui.local_package_explorer.fs_model  # view not changed
+
+    # select pkg to check file view initalizes at the correct path and path got written in label
+    view_model = main_gui.ui.package_select_view.model()
     index = model.index(0, 0, QtCore.QModelIndex())
     item = index.internalPointer()
     for i in range(model.root_item.child_count()):
@@ -67,12 +73,6 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
         item = model.index(i, 0, QtCore.QModelIndex()).internalPointer()
         if item.item_data[0] == str(cfr):
             break
-    view_model = main_gui.ui.package_select_view.model()
-
-    assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF, refresh=True)
-    assert not main_gui.local_package_explorer.fs_model  # view not changed
-
-    # select pkg to check file view initalizes at the correct path and path got written in label
     main_gui.ui.package_select_view.expand(view_model.mapFromSource(index))
     # ensure, that we select the pkg with the correct options
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF + ":" + id, refresh=True)

@@ -213,6 +213,9 @@ class LocalConanPackageExplorer(QtCore.QObject):
         # wait for model to be loaded
         self.wait_for_loading_pkgs()
 
+        if not self.pkg_sel_model:  # guard
+            return False
+
         # find out if we need to find a ref or or a package
         split_ref = conan_ref.split(":")
         id = ""
@@ -221,12 +224,13 @@ class LocalConanPackageExplorer(QtCore.QObject):
             id = split_ref[1]
 
         # find the row with the matching reference
-        ref_row = 0
+        ref_row = -1
         for ref_row in range(self.pkg_sel_model.root_item.child_count()):
             item = self.pkg_sel_model.root_item.child_items[ref_row]
             if item.item_data[0] == conan_ref:
+                Logger().debug(f"Found {conan_ref}@{str(ref_row)} in Local Package Explorer for selection")
                 break
-        if not ref_row:
+        if ref_row == -1:
             Logger().debug(f"Cannot find {conan_ref} in Local Package Explorer for selection")
             return False
 
