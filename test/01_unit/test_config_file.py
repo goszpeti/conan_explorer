@@ -27,7 +27,7 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
     tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert tab0_entries[0].conan_ref == "example/9.9.9/local/testing"
+    assert tab0_entries[0].conan_ref == "example/9.9.9/local@testing"
     assert tab0_entries[0].executable == "bin/python"
     assert tab0_entries[0].icon == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
@@ -74,6 +74,7 @@ def test_update(base_fixture):
     assert read_obj.get("tabs")[0].get("apps")[0].get("is_console_application") is True
     assert read_obj.get("tabs")[0].get("apps")[0].get("console_application") is None
 
+
 def test_read_invalid_version(base_fixture, capfd):
     """
     Tests, that reading a config file with the wrong version will print an error.
@@ -110,7 +111,7 @@ def check_config(ref_dict, test_dict):
                 check_config(ref_dict.get(key), test_dict.get(key))
                 continue
             else:
-                try: # test if it is conanref in string form. 
+                try:  # test if it is conanref in string form.
                     # We don't care if it is written differently, as long as it is the same object
                     ConanFileReference.loads(test_dict.get(
                         key)) == ConanFileReference.loads(ref_dict.get(key))

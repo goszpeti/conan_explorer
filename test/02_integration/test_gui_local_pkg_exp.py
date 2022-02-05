@@ -69,7 +69,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
             break
     view_model = main_gui.ui.package_select_view.model()
 
-    assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF)
+    assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF, refresh=True)
     assert not main_gui.local_package_explorer.fs_model  # view not changed
 
     # select pkg to check file view initalizes at the correct path and path got written in label

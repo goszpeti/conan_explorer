@@ -6,7 +6,7 @@
             "apps": [
                 {
                     "name": "App1 with spaces",
-                    "conan_ref": "example/9.9.9/local/testing",
+                    "conan_ref": "example/9.9.9/local@testing",
                     "executable": "bin/python",
                     "icon": "NonExistantIcon.png",
                     "args": "-n name",
