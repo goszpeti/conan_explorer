@@ -429,7 +429,7 @@
          <x>0</x>
          <y>0</y>
          <width>837</width>
-         <height>474</height>
+         <height>480</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -515,7 +515,7 @@
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="handleWidth">
-             <number>10</number>
+             <number>5</number>
             </property>
             <property name="childrenCollapsible">
              <bool>false</bool>
@@ -728,6 +728,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="menu_toggle_display_users"/>
     <addaction name="menu_toggle_display_channels"/>
     <addaction name="separator"/>
+    <addaction name="menu_enable_dark_mode"/>
    </widget>
    <widget class="QMenu" name="menuConan">
     <property name="title">
@@ -898,6 +899,14 @@ p, li { white-space: pre-wrap; }
   <action name="actionConan_Settings">
    <property name="text">
     <string>Conan Settings</string>
+   </property>
+  </action>
+  <action name="menu_enable_dark_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable Dark Mode</string>
    </property>
   </action>
  </widget>

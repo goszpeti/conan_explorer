@@ -2,8 +2,10 @@ from threading import Thread
 from typing import Callable
 
 import conan_app_launcher.app as app  # using gobal module pattern
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from conans.model.ref import ConanFileReference, PackageReference
+
+from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
 
 Qt = QtCore.Qt
 
@@ -49,7 +51,11 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
                 else:
                     ConanFileReference.loads(text)
                 valid = True
-                self.setStyleSheet("background: #007b50;")
+                
+                if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
+                    self.setStyleSheet("background: #007b50;") # dark green
+                else:
+                    self.setStyleSheet("background: #37efba;") # light green
             except: # if it does error it's invalid format, thus red
                 self.setStyleSheet("background: LightCoral;")
         

@@ -22,11 +22,12 @@ class SearchedPackageTreeItem(TreeModelItem):
     """
 
     def __init__(self, data: List[Union[str, str, str]], parent=None, pkg_data: Optional[ConanPkg] = None,
-                 item_type=REF_TYPE, lazy_loading=False, installed=False):
+                 item_type=REF_TYPE, lazy_loading=False, installed=False, empty=False):
         super().__init__(data, parent, lazy_loading=lazy_loading)
         self.type = item_type
         self.pkg_data = pkg_data
         self.is_installed = installed
+        self.empty = empty # indicates a "no result" item, which must be handled separately 
 
     def load_children(self):
         self.child_items = []
@@ -53,7 +54,7 @@ class SearchedPackageTreeItem(TreeModelItem):
             self.child_items.append(pkg)
         if not self.child_items:
             self.child_items.append(SearchedPackageTreeItem(
-                ["No package found", "",  ""], self, {}, PROFILE_TYPE))
+                ["No package found", "",  ""], self, {}, PROFILE_TYPE, empty=True))
         self.is_loaded = True
 
     def child_count(self):
@@ -93,7 +94,7 @@ class PkgSearchModel(TreeModel):
 
         if not recipes_with_remotes:
             self.root_item.append_child(SearchedPackageTreeItem(
-                ["No package found!", "", ""], self.root_item, None, PROFILE_TYPE))
+                ["No package found!", "", ""], self.root_item, None, PROFILE_TYPE, empty=True))
             return
 
         installed_refs = app.conan_api.get_all_local_refs()

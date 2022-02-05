@@ -50,6 +50,7 @@ def run_application(conan_search=False):
     # apply Qt attributes (only at init possible)
     QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QtWidgets.QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
 
     # start Qt app and ui
     qt_app = QtWidgets.QApplication([])
@@ -61,7 +62,7 @@ def run_application(conan_search=False):
         main_window = ConanSearchDialog()
     else:
         from conan_app_launcher.ui.main_window import MainWindow
-        main_window = MainWindow()
+        main_window = MainWindow(qt_app)
 
     style_file = "light_style.qss"
     if active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:

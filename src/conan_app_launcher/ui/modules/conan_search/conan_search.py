@@ -97,6 +97,8 @@ class ConanSearchDialog(QtWidgets.QDialog):
         item = self.get_selected_source_item(self._ui.search_results_tree_view)
         if not item:
             return
+        if item.empty:
+            return
         if self._local_package_explorer:
             if item.is_installed:
                 self.show_in_pkg_exp_action.setEnabled(True)
@@ -154,6 +156,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         combined_ref = self.get_selected_combined_ref()
         item = self.get_selected_source_item(self._ui.search_results_tree_view)
         dialog = ConanInstallDialog(self, combined_ref)
+
         dialog.exec_()
         id = dialog.pkg_installed
         # TODO move to model

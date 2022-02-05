@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>162</height>
+    <width>274</width>
+    <height>116</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>400</width>
+    <width>200</width>
     <height>100</height>
+   </size>
+  </property>
+  <property name="sizeIncrement">
+   <size>
+    <width>0</width>
+    <height>0</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -29,8 +35,14 @@
    <bool>false</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetMinAndMaxSize</enum>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMinAndMaxSize</enum>
+     </property>
      <item>
       <widget class="QLabel" name="install_icon">
        <property name="sizePolicy">
@@ -57,26 +69,72 @@
       </widget>
      </item>
      <item>
-      <widget class="ConanRefLineEdit" name="conan_ref_line_edit"/>
+      <widget class="ConanRefLineEdit" name="conan_ref_line_edit">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1024</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="maxLength">
+        <number>1024</number>
+       </property>
+       <property name="frame">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
    <item>
     <widget class="QCheckBox" name="auto_install_check_box">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
-      <string>   Automatically determine best matching package</string>
+      <string>Automatically determine best matching package</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="update_check_box">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
-      <string>  Update (-u)</string>
+      <string>Update (-u)</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="button_box">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>

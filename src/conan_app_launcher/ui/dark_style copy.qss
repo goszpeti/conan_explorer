@@ -55,7 +55,7 @@ QTreeView::branch::closed::has-children {
 }
 
 QTreeView::branch::open::has-children {
-    image: url(icons:expand_w.png);
+    image: url(icons:expand.png);
 }
 
 QListView::item:alternate {

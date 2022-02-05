@@ -4,12 +4,12 @@ from typing import Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, PathLike,
-                                user_save_path)
+                                user_save_path, base_path)
 from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
-                                         DISPLAY_APP_VERSIONS,
+                                         DISPLAY_APP_VERSIONS, GUI_STYLE, GUI_STYLE_DARK, GUI_STYLE_LIGHT,
                                          LAST_CONFIG_FILE)
 
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
@@ -36,14 +36,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
 
-    def __init__(self):
+    def __init__(self, qt_app):
         super().__init__()
         self.model = UiApplicationModel()
         current_dir = Path(__file__).parent
         self.ui = uic.loadUi(current_dir / "main.ui", baseinstance=self)
-
         self._about_dialog = AboutDialog(self)
-
+        self._qt_app = qt_app
         self.load_icons()
 
         # connect logger to console widget to log possible errors at init
@@ -59,6 +58,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_toggle_display_versions.setChecked(app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
         self.ui.menu_toggle_display_users.setChecked(app.active_settings.get_bool(DISPLAY_APP_USERS))
         self.ui.menu_toggle_display_channels.setChecked(app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
+        dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
+        self.ui.menu_enable_dark_mode.setChecked(dark_mode_enabled)
 
         self.ui.menu_about_action.triggered.connect(self._about_dialog.show)
         self.ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
@@ -66,6 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_toggle_display_versions.triggered.connect(self.display_versions_setting_toggled)
         self.ui.menu_toggle_display_users.triggered.connect(self.apply_display_users_setting_toggled)
         self.ui.menu_toggle_display_channels.triggered.connect(self.display_channels_setting_toggled)
+        self.ui.menu_enable_dark_mode.triggered.connect(self.on_theme_changed)
         self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
         self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
         self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
@@ -94,6 +96,24 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # TODO: Other modules are currently loaded on demand. A window and view restoration would be nice and
         # should be called from here
+
+    @pyqtSlot()
+    def on_theme_changed(self):
+        if self.ui.menu_enable_dark_mode.isChecked():
+            app.active_settings.set(GUI_STYLE, GUI_STYLE_DARK)
+            style_file = "dark_style.qss"
+        else:
+            style_file = "light_style.qss"
+            app.active_settings.set(GUI_STYLE, GUI_STYLE_LIGHT)
+
+        with open(base_path / "ui" / style_file) as fd:
+            style_sheet = fd.read()
+            self._qt_app.setStyleSheet(style_sheet)
+
+        # all icons must be reloaded
+        self.load_icons()
+        self.local_package_explorer.refresh_theme()
+        self.app_grid.re_init(self.model)  # needs a whole reload because models need to be reinitialized
 
     @pyqtSlot()
     def on_main_view_changed(self):
