@@ -47,7 +47,7 @@ def run_application(conan_search=False):
         sys.stdout = open(os.devnull, "w")
         sys.stderr = open(os.path.join(tempfile.gettempdir(), "stderr-" + PKG_NAME), "w")
 
-    # apply Qt attributes (only at init possible)
+    # apply Qt attributes (only possible before QApplication is created)
     QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QtWidgets.QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
@@ -73,7 +73,7 @@ def run_application(conan_search=False):
         qt_app.setStyleSheet(style_sheet)
 
     main_window.setWindowIcon(app_icon)
-    main_window.show() # show first, then load appsgrid with progress bar
+    main_window.show()  # show first, then load appsgrid with progress bar
     # load tabs needs the pyqt signals - constructor has to be finished
     main_window.load()
 
