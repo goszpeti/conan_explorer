@@ -25,8 +25,9 @@ Qt = QtCore.Qt
 
 def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     """ Test, that rename dialog change the guis"""
+    from pytestqt.plugin import _qapp_instance
 
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
@@ -49,7 +50,9 @@ def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
 def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     """ """
-    main_gui = main_window.MainWindow()
+    from pytestqt.plugin import _qapp_instance
+
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
@@ -77,7 +80,9 @@ def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
 
 def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
-    main_gui = main_window.MainWindow()
+    from pytestqt.plugin import _qapp_instance
+
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
@@ -115,7 +120,9 @@ def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
 def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
     """ Test, that the config file is saved, when the tab is moved. """
-    main_gui = main_window.MainWindow()
+    from pytestqt.plugin import _qapp_instance
+
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
@@ -134,7 +141,9 @@ def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
 
 
 def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
-    main_gui = main_window.MainWindow()
+    from pytestqt.plugin import _qapp_instance
+
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_config_fixture)
 
@@ -178,7 +187,9 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
 
 
 def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
-    main_gui = main_window.MainWindow()
+    from pytestqt.plugin import _qapp_instance
+
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
@@ -211,13 +222,15 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
 
 def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+    from pytestqt.plugin import _qapp_instance
+
     app.active_settings.set(DISPLAY_APP_CHANNELS, False)  # disable, to check if a new app uses it
     app.active_settings.set(DISPLAY_APP_VERSIONS, True)  # disable, to check if a new app uses it
     # preinstall ref, to see if link updates paths
     app.conan_api.get_path_or_install(ConanFileReference.loads(TEST_REF), {})
 
     from pytestqt.plugin import _qapp_instance
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
@@ -263,7 +276,7 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 def test_move_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     """ Test, that the move dialog works and correctly updates the AppGrid. There are 2 apps on the loaded tab. """
     from pytestqt.plugin import _qapp_instance
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
@@ -301,6 +314,8 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     Test, that apps ungrey, after their packages are loaded.
     Set greyed attribute of the underlying app button expected.
     """
+    from pytestqt.plugin import _qapp_instance
+
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
 
@@ -311,7 +326,7 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     # load path into local cache
     app.conan_api.get_path_or_install(ConanFileReference.loads(TEST_REF), {})
 
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load()
 
@@ -324,6 +339,8 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
                 assert not test_app._app_button._greyed_out, repr(test_app.model.__dict__)
             elif test_app.model.name in ["App1 wrong path", "App2"]:
                 assert test_app._app_button._greyed_out
+
+    main_gui.close() # cleanup
 
 
 def test_open_file_explorer_on_AppLink(base_fixture, qtbot):

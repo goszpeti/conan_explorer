@@ -14,26 +14,27 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
     """ Adds completions for Conan references and a validator. """
     completion_finished = QtCore.pyqtSignal()
     MINIMUM_CHARS_FOR_QUERY = 4
+    INVALID_COLOR = "LightCoral"
+    VALID_COLOR_LIGHT = "#37efba"  # light green
+    VALID_COLOR_DARK = "#007b50"  # dark green
 
     def __init__(self, parent, validator_enabled=True):
         super().__init__(parent)
         self.validator_enabled = validator_enabled
         completer = QtWidgets.QCompleter([], self)
         completer.setCaseSensitivity(Qt.CaseInsensitive)
-        #self._validator = QtGui.QRegExpValidator(self)
+
         self._completion_thread = None
         self._loading_cbk = None
         self._remote_refs = app.conan_api.info_cache.get_all_remote_refs() # takes a while to get
-        # setup range
-        # part_regex = r"[a-zA-Z0-9_][a-zA-Z0-9_\+\.-]{1,50}"
-        # recipe_regex = f"{part_regex}/{part_regex}(@({part_regex}|_)/({part_regex}|_))?(#{part_regex})?"
-        # self._validator.setRegExp(QtCore.QRegExp(recipe_regex))
+
         self.setCompleter(completer)
         combined_refs = set()
         combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
         combined_refs.update(self._remote_refs)
         self.completer().model().setStringList(list(combined_refs))
         self.textChanged.connect(self.validate_text)
+
 
     def __del__(self):
         if self._completion_thread:
@@ -43,7 +44,6 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         self._loading_cbk = loading_cbk
 
     def validate_text(self, text):
-        valid = False
         if self.validator_enabled:
             try:
                 if ":" in text:
@@ -51,13 +51,16 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
                 else:
                     ConanFileReference.loads(text)
                 valid = True
-                
+            except:
+                valid = False
+
+            if valid:
                 if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
-                    self.setStyleSheet("background: #007b50;") # dark green
+                    self.setStyleSheet(f"background: {self.VALID_COLOR_DARK};")
                 else:
-                    self.setStyleSheet("background: #37efba;") # light green
-            except: # if it does error it's invalid format, thus red
-                self.setStyleSheet("background: LightCoral;")
+                    self.setStyleSheet(f"background: {self.VALID_COLOR_LIGHT};") 
+            else: # if it does error it's invalid format, thus red
+                self.setStyleSheet(f"background: {self.INVALID_COLOR};")
         
         if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip seraching for such broad terms
             return

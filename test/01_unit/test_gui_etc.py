@@ -21,7 +21,7 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-def test_edit_line_conan(base_fixture, qtbot):
+def test_edit_line_conan(base_fixture, light_theme_fixture, qtbot):
     """ Test, that the line edit validates on edit
     and displays the local packages instantly and the remote ones after a delay
     """
@@ -33,17 +33,17 @@ def test_edit_line_conan(base_fixture, qtbot):
     qtbot.waitExposed(widget)
     # test recipe ref without revision
     widget.setText(TEST_REF)
-    assert "Green" in widget.styleSheet()
+    assert ConanRefLineEdit.VALID_COLOR_LIGHT in widget.styleSheet()
     # test package ref with revision
     widget.setText(TEST_REF + ":127af201a4cdf8111e2e08540525c245c9b3b99e")
-    assert "Green" in widget.styleSheet()
+    assert ConanRefLineEdit.VALID_COLOR_LIGHT in widget.styleSheet()
     # test wrong recipe
     widget.setText("zlib/1.2.8@@")
-    assert "Coral" in widget.styleSheet()
+    assert ConanRefLineEdit.INVALID_COLOR in widget.styleSheet()
     # test validator disabled - color doesn't change on correct
     widget.validator_enabled = False
     widget.setText("zlib/1.2.8")
-    assert "Coral" in widget.styleSheet()
+    assert ConanRefLineEdit.INVALID_COLOR in widget.styleSheet()
     # test autocompletion (very implicit)
     widget._completion_thread.join()
     assert TEST_REF in widget._remote_refs

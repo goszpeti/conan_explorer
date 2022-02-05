@@ -74,7 +74,6 @@ def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
 def run_conan_server():
     os.system("conan_server")
 
-
 def start_conan_server():
     # Setup Server config
     os.system("conan_server --migrate")  # call server once to create a config file
@@ -184,6 +183,12 @@ def base_fixture(request):  # TODO , autouse=True?
     app.conan_worker = None
     app.conan_api = None
     app.active_settings = None
+
+
+@pytest.fixture
+def light_theme_fixture(base_fixture):
+    import conan_app_launcher.app as app
+    app.active_settings.set(GUI_STYLE, GUI_STYLE_LIGHT)
 
 
 def temp_ui_config(config_file_path: Path):

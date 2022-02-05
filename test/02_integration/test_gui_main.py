@@ -25,6 +25,7 @@ Qt = QtCore.Qt
 def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
     """ Test, that when no condig file is set, 
     a new tab with a new default app is automatically added."""
+    from pytestqt.plugin import _qapp_instance
 
     # TEST SETUP
     # no settings entry
@@ -36,7 +37,7 @@ def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
 
     # TEST ACTION
     # init config file and parse
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     qtbot.addWidget(main_gui)
     main_gui.load()
     main_gui.show()
@@ -55,8 +56,10 @@ def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixt
     Test, that loading a config file and opening the about menu, and clicking on OK
     The about dialog showing is expected.
     """
+    from pytestqt.plugin import _qapp_instance
+
     # TEST SETUP
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     qtbot.addWidget(main_gui)
     main_gui.load()
 
@@ -80,9 +83,11 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
     Test, that clicking on on open config file and selecting a file writes it back to settings.
     Same file as selected expected in settings.
     """
+    from pytestqt.plugin import _qapp_instance
+
     # TEST SETUP
 
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
 
     qtbot.addWidget(main_gui)
@@ -156,7 +161,8 @@ def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker)
     assert str(pkg_dir_to_delete.parent) in paths_to_delete
 
     # TEST ACTION
-    main_gui = main_window.MainWindow()
+    from pytestqt.plugin import _qapp_instance
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
@@ -177,8 +183,10 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
     Test, if the previously loaded tabs are deleted, when a new file is loaded
     The same tab number ist expected, as before.
     """
+    from pytestqt.plugin import _qapp_instance
+
     # TEST SETUP
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load()
 
@@ -203,12 +211,14 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     Test the view menu entries.
     Check, that activating the entry set the hide flag is set on the widget.
     """
+    from pytestqt.plugin import _qapp_instance
+
     # deactivate all settings
     app.active_settings.set(DISPLAY_APP_CHANNELS, False)
     app.active_settings.set(DISPLAY_APP_VERSIONS, False)
     app.active_settings.set(DISPLAY_APP_USERS, False)
 
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load()
     qtbot.addWidget(main_gui)

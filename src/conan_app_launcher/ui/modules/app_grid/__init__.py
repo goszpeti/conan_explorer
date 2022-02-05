@@ -172,6 +172,8 @@ class AppGridView():
                     tab.open_app_link_add_dialog(model.load(app_config, tab.model))
 
     def update_conan_info(self, conan_ref: str):
+        if self._main_window.isHidden(): # the gui is about to shut down
+            return
         # call update on every entry which has this ref
         for tab in self.get_tabs():
             for app in tab.app_links:

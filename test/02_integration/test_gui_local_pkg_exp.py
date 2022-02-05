@@ -35,7 +35,7 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
     from pytestqt.plugin import _qapp_instance
     cfr = ConanFileReference.loads(TEST_REF)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
@@ -157,6 +157,8 @@ def test_pkgs_sel_view(ui_no_refs_config_fixture, qtbot, mocker):
 def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     """ Test, that the delete package dialog deletes a reference with id, 
     without id and cancel does nothing"""
+    from pytestqt.plugin import _qapp_instance
+
     cfr = ConanFileReference.loads(TEST_REF)
     os.system(f"conan install {TEST_REF}")
 
@@ -164,7 +166,7 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     found_pkg = app.conan_api.get_local_pkgs_from_ref(cfr)
     assert found_pkg
 
-    main_gui = main_window.MainWindow()
+    main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.load()
     main_gui.show()
     qtbot.addWidget(main_gui)

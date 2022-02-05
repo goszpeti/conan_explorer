@@ -156,6 +156,7 @@ def test_AppLink_open(base_fixture, qtbot):
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         # check windowname of process - default shell spawns with path as windowname
+        # DOES NOT WORK with Windows Terminal in 11 -> has no title
         ret = check_output(f'tasklist /fi "WINDOWTITLE eq {str(sys.executable)}"')
         assert "python.exe" in ret.decode("utf-8")
         lines = ret.decode("utf-8").splitlines()
