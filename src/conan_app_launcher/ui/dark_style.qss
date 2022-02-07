@@ -1,6 +1,6 @@
 * {
     color: #f8f8ff;
-    font-size: 14px;
+    font-size: 12px;
     background-color:#202020;
 }
 
@@ -50,12 +50,20 @@ QTreeView::item:selected:active{
 QTreeView::item:selected:!active {
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);
 }
-QTreeView::branch::closed::has-children {
+QTreeView::branch:closed:has-children {
     image: url(icons:forward_w.png);
 }
 
-QTreeView::branch::open::has-children {
+QTreeView::branch:open:has-children {
     image: url(icons:expand_w.png);
+}
+
+QTreeView::branch:hover:closed:has-children {
+    image: url(icons:forward_b.png);
+}
+
+QTreeView::branch:hover:open:has-children:hover {
+    image: url(icons:expand_b.png);
 }
 
 QListView::item:alternate {
