@@ -44,6 +44,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         self._loading_cbk = loading_cbk
 
     def validate_text(self, text):
+        valid = False
         if self.validator_enabled:
             try:
                 if ":" in text:
@@ -62,7 +63,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
             else: # if it does error it's invalid format, thus red
                 self.setStyleSheet(f"background: {self.INVALID_COLOR};")
         
-        if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip seraching for such broad terms
+        if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip searching for such broad terms
             return
 
         if not any([entry.startswith(text) for entry in self._remote_refs]) or not valid:
