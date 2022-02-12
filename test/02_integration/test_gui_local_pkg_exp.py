@@ -33,6 +33,8 @@ def wait_for_loading_pkgs(main_gui: main_window.MainWindow):
 
 def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     from pytestqt.plugin import _qapp_instance
+    from conan_app_launcher.logger import Logger
+
     cfr = ConanFileReference.loads(TEST_REF)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     main_gui = main_window.MainWindow(_qapp_instance)
@@ -62,6 +64,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     # select package (ref, not profile)
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF, refresh=True)
+    Logger().debug("Selected ref")
     assert not main_gui.local_package_explorer.fs_model  # view not changed
     # TODO crash is around here
     # select pkg to check file view initalizes at the correct path and path got written in label
@@ -76,7 +79,10 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     #         break
     # main_gui.ui.package_select_view.expand(view_model.mapFromSource(index))
     # ensure, that we select the pkg with the correct options
+    Logger().debug("Select pkg")
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF + ":" + id, refresh=True)
+    Logger().debug("Selected pkg")
+
     assert main_gui.local_package_explorer.fs_model  # view selected -> fs_model is set
     assert Path(main_gui.local_package_explorer.fs_model.rootPath()) == pkg_path
 
