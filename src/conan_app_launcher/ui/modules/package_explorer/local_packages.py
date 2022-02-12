@@ -175,7 +175,6 @@ class LocalConanPackageExplorer(QtCore.QObject):
         if not update and self.pkg_sel_model:  # loads only at first init
             return
         self._pkg_sel_model_loaded = False
-        self._pkg_sel_model_loader = QtLoaderObject()
         self._pkg_sel_model_loader.async_loading(
             self._main_window, self.init_select_model, self.finish_select_model_init, "Reading Packages")
 
@@ -196,6 +195,8 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
     def wait_for_loading_pkgs(self):
         Logger().debug("wait for loading thread")
+        # execute once
+        QtWidgets.QApplication.processEvents()
         # wait for loading thread
         while not self._pkg_sel_model_loaded:
             QtWidgets.QApplication.processEvents()

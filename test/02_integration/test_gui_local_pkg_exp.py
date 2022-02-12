@@ -194,6 +194,3 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
                         return_value=QtWidgets.QMessageBox.Yes)
     main_gui.local_package_explorer.on_file_delete()  # check new file?
     assert not (root_path / config_path.name).exists()
-
-
-# def test_refresh_pkg_list_button
