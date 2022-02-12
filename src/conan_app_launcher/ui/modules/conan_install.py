@@ -59,7 +59,10 @@ class ConanInstallDialog(QtWidgets.QDialog):
                 if pkg_path.is_dir():
                     self.pkg_installed = pkg_id
             else:
-                infos = app.conan_api.conan.install_reference(conan_ref, update=update_check_state)
-                if not infos.get("error", True):
-                    id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
-                    self.pkg_installed = id
+                #infos = app.conan_api.conan.install_reference(conan_ref, update=update_check_state)
+                app.conan_worker.put_ref_in_install_queue(
+                    str(conan_ref), self.conan_options, self.parent.parent.conan_info_updated)
+
+                # if not infos.get("error", True):
+                #     id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
+                #     self.pkg_installed = id

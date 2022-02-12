@@ -22,8 +22,9 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
 
 
 def open_in_file_manager(file_path: Path):
+    """ Show file in file manager. """
     if platform.system() == "Linux":
-        return # TODO how to implement this?
+        return  # TODO how to implement this? -> Use show-in-file-manager package
     elif platform.system() == "Windows":
         # select switch for highlighting
         # TODO: spawns an empty visible shell on some/slower? systems
@@ -31,6 +32,7 @@ def open_in_file_manager(file_path: Path):
 
 
 def open_cmd_in_path(file_path: Path) -> int:
+    """ Open a terminal in the selected folder. """
     if platform.system() == "Linux":
         return execute_cmd(["x-terminal-emulator", "-e", "cd", f"{str(file_path)}", "bash"], True)
     elif platform.system() == "Windows":
@@ -38,6 +40,7 @@ def open_cmd_in_path(file_path: Path) -> int:
         if cmd_path:
             return execute_app(Path(cmd_path), True, f"/k cd {str(file_path)}")
     return 0
+
 
 def is_file_executable(file_path: Path) -> bool:
     """ Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
@@ -80,7 +83,9 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     Logger().warning(f"No executable {str(executable)} to start.")
     return 0
 
+
 def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
+    """ Generic process execute method. Returns pid. """
     # Linux call errors on creationflags argument, so the calls must be separated
     if platform.system() == "Windows":
         creationflags = 0
@@ -93,6 +98,7 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
         proc = subprocess.Popen(cmd)
         return proc.pid
     return 0
+
 
 def open_file(file: Path):
     """ Open files with their associated programs """

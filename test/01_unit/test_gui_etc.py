@@ -102,26 +102,30 @@ def test_conan_search_dialog(base_fixture, qtbot):
     widget.show()
     qtbot.waitExposed(widget)
 
-    widget._ui.search_line.setText("zlib")
+    # enter short search term -> search button disabled
+    widget._ui.search_line.setText("ex")
+    assert not widget._ui.search_button.isEnabled()
+
+    # search for the test ref name: example -> 2 versions
+
+    widget._ui.search_line.setText("example")
+    assert widget._ui.search_button.isEnabled()
     widget._ui.search_button.clicked.emit()
 
+    # wait for loading
     while not widget._pkg_result_loader.load_thread:
         time.sleep(1)
     while not widget._pkg_result_loader.load_thread.isFinished():
         _qapp_instance.processEvents()
 
+    # assert basic view
     model = widget._pkg_result_model
     assert model
     assert widget._ui.search_results_tree_view.findChildren(QtCore.QObject)
-    assert widget._ui.search_results_tree_view.model().columnCount() == 3 # fixed 3 coloumns
+    assert widget._ui.search_results_tree_view.model().columnCount() == 3  # fixed 3 coloumns
 
-    # model.root_item.item_data[0] == "Packages"
-    # model.root_item.child_count() == widget._ui.package_select_view.model().rowCount()
-
-    # enter short search term -> search button disabled
-
-    # enter only package name
-    # example -> 2 versions
+    assert model.root_item.item_data[0] == "Packages"
+    assert model.root_item.child_count() == 3
 
     # expand package -> assert number of packages and itemdata
     # check installed pkg ist highlited
@@ -132,7 +136,6 @@ def test_conan_search_dialog(base_fixture, qtbot):
     # check install
     # check show conanfile
     # check check open in local pkg explorer
-
 
     # found_tst_pkg = False
     # for pkg in model.root_item.child_items:

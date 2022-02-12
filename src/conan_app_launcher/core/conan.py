@@ -161,17 +161,17 @@ class ConanApi():
             Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(error)}")
             return False
 
-    def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Path:
+    def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Tuple[str, Path]:
         """ Return the package folder of a conan reference and install it, if it is not available """
 
-        # TODO Check for update or divide in two fncs
+        pkg_id = ""
         package = self.find_best_local_package(conan_ref, input_options)
         if package.get("id", ""):
-            return self.get_package_folder(conan_ref, package.get("id", ""))
+            return pkg_id, self.get_package_folder(conan_ref, package.get("id", ""))
         Logger().info(f"'<b>{conan_ref}</b>' with options {repr(input_options)} is not installed.")
 
-        _, path = self.install_best_matching_package(conan_ref, input_options)
-        return path
+        pkg_id, path = self.install_best_matching_package(conan_ref, input_options)
+        return pkg_id, path
 
     def install_best_matching_package(self, conan_ref: ConanFileReference,
                                       input_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:

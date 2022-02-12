@@ -13,7 +13,7 @@ from PyQt5 import QtCore
 
 class UiApplicationModel(UiApplicationConfig, QtCore.QObject):  # TODO needs to be sliced in an extra AppgridModel
     CONFIG_TYPE = UI_CONFIG_JSON_TYPE
-    conan_info_updated = QtCore.pyqtSignal(str)  # str is conan_ref
+    conan_pkg_installed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
 
     def __init__(self, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""
@@ -27,7 +27,7 @@ class UiApplicationModel(UiApplicationConfig, QtCore.QObject):  # TODO needs to 
         # update conan info
         if app.conan_worker:
             app.conan_worker.finish_working(3)
-            app.conan_worker.update_all_info(self.get_all_conan_refs(), self.conan_info_updated)
+            app.conan_worker.update_all_info(self.get_all_conan_refs(), self.conan_pkg_installed)
 
         # load all submodels
         tabs_model = []

@@ -3,6 +3,7 @@ from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from conan_app_launcher.core.conan import ConanPkg
 
 from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES, SettingsInterface
 from PyQt5.QtCore import pyqtBoundSignal
@@ -32,7 +33,7 @@ class ConanWorker():
 
     def __init__(self, conan_api: "ConanApi", settings: SettingsInterface):
         self._conan_api = conan_api
-        self._conan_install_queue: Queue[Tuple[str, Dict[str, str],
+        self._conan_install_queue: Queue[Tuple[str, Dict[str, str], Optional[ConanPkg], bool,
                                                Optional[pyqtBoundSignal]]] = Queue(maxsize=0)
         self._conan_versions_queue: Queue[Tuple[str, Optional[pyqtBoundSignal]]] = Queue(maxsize=0)
         self._version_worker: Optional[Thread] = None
@@ -40,14 +41,13 @@ class ConanWorker():
         self._shutdown_requested = False
         self._settings = settings
 
-
     def update_all_info(self, conan_elements: List[ConanWorkerElement],
                         info_signal: Optional[pyqtBoundSignal]):
         """ Starts the worker for all given elements. Should be called at start. """
         # fill up queue
         for ref in conan_elements:
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:
-                self._conan_install_queue.put((ref["reference"], ref["options"], info_signal))
+                self._conan_install_queue.put((ref["reference"], ref["options"], None, False, info_signal))
             self._conan_versions_queue.put((ref["reference"], info_signal))
 
         # start getting versions info in a separate thread in a bundled way to get better performance
@@ -60,9 +60,10 @@ class ConanWorker():
         if self._settings.get_bool(ENABLE_APP_COMBO_BOXES):
             self._start_version_worker()
 
-    def put_ref_in_install_queue(self, conan_ref: str, conan_options: Dict[str, str], install_signal):
+    def put_ref_in_install_queue(self, conan_ref: str, conan_options: Dict[str, str], package: Optional[ConanPkg],
+                                 update: bool, install_signal: Optional[pyqtBoundSignal]):
         """ Add a new entry to work on """
-        self._conan_install_queue.put((conan_ref, conan_options, install_signal))
+        self._conan_install_queue.put((conan_ref, conan_options, package, update, install_signal))
         self._start_install_worker()
 
     def _start_install_worker(self):
@@ -100,11 +101,12 @@ class ConanWorker():
         """ Call conan operations from queue """
         signal = None
         conan_ref = ""
+        pkg_id = ""
         while not self._shutdown_requested and not self._conan_install_queue.empty():
-            conan_ref, conan_options, signal = self._conan_install_queue.get()
-            # package path wwill be updated in conan cache
-            try:
-                self._conan_api.get_path_or_install(ConanFileReference.loads(conan_ref), conan_options)
+            conan_ref, conan_options, package, update, signal = self._conan_install_queue.get()
+            # package path will be updated in conan cache
+            try:  # TODO switch from args
+                pkg_id, _ = self._conan_api.get_path_or_install(ConanFileReference.loads(conan_ref), conan_options)
             except Exception:
                 self._conan_install_queue.task_done()
                 continue
@@ -112,7 +114,7 @@ class ConanWorker():
             self._conan_install_queue.task_done()
         # batch emitting signal
         if signal:
-            signal.emit(conan_ref)
+            signal.emit(conan_ref, pkg_id)
 
     def _work_on_conan_versions_queue(self):
         """ Get all version and channel combination of a package from all remotes. """

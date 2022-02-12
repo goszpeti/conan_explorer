@@ -2,16 +2,15 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
-from test.conftest import TEST_REF, TEST_REF_OFFICIAL
-from PyQt5 import QtWidgets
-from pathlib import Path
 import os
-import time
+from pathlib import Path
+from test.conftest import TEST_REF, TEST_REF_OFFICIAL
+
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.modules.app_grid.tab import AppEditDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
-from conan_app_launcher.ui.modules.app_grid.tab import AppEditDialog
 
 Qt = QtCore.Qt
 # For debug:
@@ -70,8 +69,8 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
 
 def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
-    from pytestqt.plugin import _qapp_instance
     from conan_app_launcher.logger import Logger
+    from pytestqt.plugin import _qapp_instance
 
     cfr = ConanFileReference.loads(TEST_REF)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
@@ -150,6 +149,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     pid = main_gui.local_package_explorer.on_open_terminal_in_dir()
     assert pid > 0
     import signal
+
     # TODO check pid is running
     os.kill(pid, signal.SIGTERM)
     # Check copy

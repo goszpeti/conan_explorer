@@ -13,7 +13,7 @@ Qt = QtCore.Qt
 
 class TabGrid(QtWidgets.QWidget):
     SPACING = 4
-    MARGIN = 8 
+    MARGIN = 8
 
     def __init__(self, parent: QtWidgets.QStackedWidget, model: UiTabModel):
         super().__init__(parent)
@@ -73,7 +73,7 @@ class TabGrid(QtWidgets.QWidget):
         return 1  # always enable one row
 
     def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
-        if a0.oldSize().width() == -1: # initial resize - can be skipped # TODO verify!
+        if a0.oldSize().width() == -1:  # initial resize - can be skipped
             return
         self.redraw_grid()
 
@@ -145,9 +145,8 @@ class TabGrid(QtWidgets.QWidget):
         """ Works only as long as the order does not change. Used for resizing the window. """
         # only if coloumnsize changes
         max_columns = self.get_max_columns()
-        if max_columns in [self._columns_count, 1] and not force: # already correct -> 1 means this is still not real width
+        if max_columns in [self._columns_count, 1] and not force:  # already correct -> 1 means this is still not real width
             return
         if self.tab_scroll_area:  # don't call on init
             self.remove_all_app_links()
             self.load_apps_from_model()
-

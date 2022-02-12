@@ -153,7 +153,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             # invalidate old entries, which are dependent on the conan ref - only for none invalid refs
             self._conan_ref = new_value
             self.update_from_cache()
-            if self.parent and self.parent.parent and not self.lock_changes:  # TODO
+            if self.parent and self.parent.parent and not self.lock_changes:
                 self.trigger_conan_update()
         self._conan_ref = new_value
 
