@@ -176,6 +176,10 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 
+    main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
+    wait_for_loading_pkgs(main_gui)
+    app.conan_worker.finish_working()
+
     # check cancel does nothing
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Cancel)

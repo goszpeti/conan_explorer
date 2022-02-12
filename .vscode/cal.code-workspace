@@ -30,6 +30,9 @@
             "--no-cov" // no coverage while debugging
         ],
         "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "python.terminal.activateEnvironment": true,
         "editor.rulers": [
             120
         ],
