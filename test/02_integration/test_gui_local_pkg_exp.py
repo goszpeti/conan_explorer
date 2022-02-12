@@ -41,6 +41,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
+    print("TEST: Changes to local explorer page")
 
     main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
     wait_for_loading_pkgs(main_gui)
@@ -60,11 +61,13 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert found_tst_pkg
 
     # select package (ref, not profile)
-    print(app.conan_api.get_all_local_refs())
+    print("TEST: Select package (ref, not profile)")
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF, refresh=True)
     assert not main_gui.local_package_explorer.fs_model  # view not changed
 
     # select pkg to check file view initalizes at the correct path and path got written in label
+    print("TEST: Select package")
+
     view_model = main_gui.ui.package_select_view.model()
     index = model.index(0, 0, QtCore.QModelIndex())
     item = index.internalPointer()
@@ -81,21 +84,27 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     ### Test pkg reference context menu functions ###
     # test copy ref
+    print("TEST: copy ref")
     main_gui.local_package_explorer.on_copy_ref_requested()
     assert QtWidgets.QApplication.clipboard().text() == str(cfr)
     conanfile = app.conan_api.get_conanfile_path(cfr)
     # test open export folder
+    print("TEST: open export folder")
     import conan_app_launcher.ui.modules.package_explorer.local_packages as lp
     mocker.patch.object(lp, 'open_in_file_manager')
     main_gui.local_package_explorer.on_open_export_folder_requested()
     lp.open_in_file_manager.assert_called_once_with(conanfile)
     # test show conanfile
+    print("TEST: show conanfile")
+
     mocker.patch.object(lp, 'open_file')
     main_gui.local_package_explorer.on_show_conanfile_requested()
     lp.open_file.assert_called_once_with(conanfile)
 
     #### Test file context menu functions ###
     # select a file
+    print("TEST: select a file")
+
     root_path = Path(main_gui.local_package_explorer.fs_model.rootPath())
     file = root_path / "conaninfo.txt"
     sel_idx = main_gui.local_package_explorer.fs_model.index(str(file), 0)
