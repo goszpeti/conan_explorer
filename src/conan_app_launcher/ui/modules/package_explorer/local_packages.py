@@ -151,6 +151,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
             if self._current_ref == conan_ref:
                 self.close_files_view()
             try:
+                Logger().info(f"Deleting {conan_ref} {pkg_ids}")
                 app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True)
             except Exception as e:
                 Logger().error(f"Error while removing package {conan_ref}: {str(e)}")

@@ -147,7 +147,7 @@ def ConanServer():
         start_conan_server()
     yield
     if started:
-        print("KILLING CONAN SERVER")
+        print("\nKILLING CONAN SERVER\n ")
         check_if_process_running("conan_server", kill=True)
 
 

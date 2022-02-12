@@ -2,7 +2,7 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
-from test.conftest import TEST_REF
+from test.conftest import TEST_REF, TEST_REF_OFFICIAL
 from PyQt5 import QtWidgets
 from pathlib import Path
 import os
@@ -20,15 +20,53 @@ Qt = QtCore.Qt
 #    _qapp_instance.processEvents()
 
 
-def wait_for_loading_pkgs(main_gui: main_window.MainWindow):
+def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
+    """ Test, that the delete package dialog deletes a reference with id, 
+    without id and cancel does nothing"""
     from pytestqt.plugin import _qapp_instance
 
-    # wait for loading thread
-    main_gui.local_package_explorer._pkg_sel_model_loader.load_thread
-    while not main_gui.local_package_explorer._pkg_sel_model_loader.load_thread:
-        time.sleep(1)
-    while not main_gui.local_package_explorer._pkg_sel_model_loader.load_thread.isFinished():
-        _qapp_instance.processEvents()
+    cfr = ConanFileReference.loads(TEST_REF_OFFICIAL)
+    os.system(f"conan install {TEST_REF_OFFICIAL}")
+
+    # precheck, that the package is found
+    found_pkg = app.conan_api.get_local_pkgs_from_ref(cfr)
+    assert found_pkg
+
+    main_gui = main_window.MainWindow(_qapp_instance)
+    main_gui.load()
+    main_gui.show()
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
+    main_gui.local_package_explorer.wait_for_loading_pkgs()
+    app.conan_worker.finish_working()
+
+    # check cancel does nothing
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec_', return_value=QtWidgets.QMessageBox.Cancel)
+    main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF_OFFICIAL, None)
+    found_pkg = app.conan_api.find_best_local_package(cfr)
+    assert found_pkg.get("id", "")
+
+    # check without pkg id
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+                        return_value=QtWidgets.QMessageBox.Yes)
+    main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF_OFFICIAL, None)
+
+    main_gui.local_package_explorer.wait_for_loading_pkgs()
+
+    # check, that the package is deleted
+    found_pkg = app.conan_api.find_best_local_package(cfr)
+    assert not found_pkg.get("id", "")
+
+    # check with pkg id
+    os.system(f"conan install {TEST_REF_OFFICIAL}")
+    main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF_OFFICIAL, None)
+
+    main_gui.local_package_explorer.wait_for_loading_pkgs()
+
+    found_pkg = app.conan_api.find_best_local_package(cfr)
+    assert not found_pkg.get("id", "")
 
 
 def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
@@ -45,7 +83,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     qtbot.waitExposed(main_gui, timeout=3000)
 
     main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
-    wait_for_loading_pkgs(main_gui)
+    main_gui.local_package_explorer.wait_for_loading_pkgs()
 
     pkg_sel_model = main_gui.local_package_explorer.pkg_sel_model
     assert pkg_sel_model
@@ -157,54 +195,5 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.local_package_explorer.on_file_delete()  # check new file?
     assert not (root_path / config_path.name).exists()
 
-
-def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
-    """ Test, that the delete package dialog deletes a reference with id, 
-    without id and cancel does nothing"""
-    from pytestqt.plugin import _qapp_instance
-
-    cfr = ConanFileReference.loads(TEST_REF)
-    os.system(f"conan install {TEST_REF}")
-
-    # precheck, that the package is found
-    found_pkg = app.conan_api.get_local_pkgs_from_ref(cfr)
-    assert found_pkg
-
-    main_gui = main_window.MainWindow(_qapp_instance)
-    main_gui.load()
-    main_gui.show()
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
-
-    main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
-    wait_for_loading_pkgs(main_gui)
-    app.conan_worker.finish_working()
-
-    # check cancel does nothing
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Cancel)
-    main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF, None)
-    found_pkg = app.conan_api.find_best_local_package(cfr)
-    assert found_pkg.get("id", "")
-
-    # check without pkg id
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Yes)
-    main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF, None)
-
-    wait_for_loading_pkgs(main_gui)
-
-    # check, that the package is deleted
-    found_pkg = app.conan_api.find_best_local_package(cfr)
-    assert not found_pkg.get("id", "")
-
-    # check with pkg id
-    os.system(f"conan install {TEST_REF}")
-    main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF, None)
-
-    wait_for_loading_pkgs(main_gui)
-
-    found_pkg = app.conan_api.find_best_local_package(cfr)
-    assert not found_pkg.get("id", "")
 
 # def test_refresh_pkg_list_button
