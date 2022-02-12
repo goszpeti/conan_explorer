@@ -69,29 +69,33 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     # ensure, that we select the pkg with the correct options
     Logger().debug("Select pkg")
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF + ":" + id, refresh=True)
-    Logger().debug("Selected pkg")
 
     assert main_gui.local_package_explorer.fs_model  # view selected -> fs_model is set
     assert Path(main_gui.local_package_explorer.fs_model.rootPath()) == pkg_path
 
     ### Test pkg reference context menu functions ###
     # test copy ref
+    Logger().debug("test copy ref")
     main_gui.local_package_explorer.on_copy_ref_requested()
     assert QtWidgets.QApplication.clipboard().text() == str(cfr)
     conanfile = app.conan_api.get_conanfile_path(cfr)
+
     # test open export folder
+    Logger().debug("open export folder")
     import conan_app_launcher.ui.modules.package_explorer.local_packages as lp
     mocker.patch.object(lp, 'open_in_file_manager')
     main_gui.local_package_explorer.on_open_export_folder_requested()
     lp.open_in_file_manager.assert_called_once_with(conanfile)
-    # test show conanfile
 
+    # test show conanfile
+    Logger().debug("open show conanfile")
     mocker.patch.object(lp, 'open_file')
     main_gui.local_package_explorer.on_show_conanfile_requested()
     lp.open_file.assert_called_once_with(conanfile)
 
     #### Test file context menu functions ###
     # select a file
+    Logger().debug("select a file")
 
     root_path = Path(main_gui.local_package_explorer.fs_model.rootPath())
     file = root_path / "conaninfo.txt"
@@ -103,6 +107,8 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert Path(cp_text) == file
 
     # check open terminal
+    Logger().debug("open terminal")
+
     pid = main_gui.local_package_explorer.on_open_terminal_in_dir()
     assert pid > 0
     import signal
@@ -114,6 +120,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert "file://" in QtWidgets.QApplication.clipboard().text() and cp_text in QtWidgets.QApplication.clipboard().text()
 
     # check paste
+    Logger().debug("check paste")
     config_path: Path = ui_no_refs_config_fixture  # use the config file as test data to be pasted
     data = QtCore.QMimeData()
     url = QtCore.QUrl.fromLocalFile(str(config_path))
@@ -123,6 +130,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert (root_path / config_path.name).exists()
 
     # check "open in file manager"
+    Logger().debug("open in file manager")
     main_gui.local_package_explorer.on_open_file_in_file_manager(None)
     lp.open_in_file_manager.assert_called_with(Path(cp_text))
 
@@ -140,6 +148,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert str(last_app_link.conan_file_reference) == str(cfr)
 
     # check delete
+    Logger().debug("delete")
     sel_idx = main_gui.local_package_explorer.fs_model.index(
         str(root_path / config_path.name), 0)  # (0, 0, QtCore.QModelIndex())
     main_gui.ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
