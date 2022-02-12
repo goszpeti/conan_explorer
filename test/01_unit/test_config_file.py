@@ -27,7 +27,7 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
     tabs = JsonUiConfig(ui_config_fixture).load().tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert tab0_entries[0].conan_ref == "example/9.9.9/local@testing"
+    assert tab0_entries[0].conan_ref == "example/9.9.9@local/testing"
     assert tab0_entries[0].executable == "bin/python"
     assert tab0_entries[0].icon == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
