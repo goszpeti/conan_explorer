@@ -46,37 +46,35 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
     wait_for_loading_pkgs(main_gui)
 
-    model = main_gui.local_package_explorer.pkg_sel_model
-    assert model
+    pkg_sel_model = main_gui.local_package_explorer.pkg_sel_model
+    assert pkg_sel_model
     assert main_gui.ui.package_select_view.model().columnCount() == 1
 
     # check, that the ref + pkg is in the list
     found_tst_pkg = False
-    for pkg in model.root_item.child_items:
+    for pkg in pkg_sel_model.root_item.child_items:
         if pkg.item_data[0] == TEST_REF:
             found_tst_pkg = True
             # check it's child
-            assert model.get_quick_profile_name(pkg.child(0)) in [
+            assert pkg_sel_model.get_quick_profile_name(pkg.child(0)) in [
                 "Windows_x64_vs16_release", "Linux_x64_gcc9_release"]
     assert found_tst_pkg
 
     # select package (ref, not profile)
-    print("TEST: Select package (ref, not profile)")
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF, refresh=True)
     assert not main_gui.local_package_explorer.fs_model  # view not changed
     # TODO crash is around here
     # select pkg to check file view initalizes at the correct path and path got written in label
-    print("TEST: Select package")
 
-    view_model = main_gui.ui.package_select_view.model()
-    index = model.index(0, 0, QtCore.QModelIndex())
-    item = index.internalPointer()
-    for i in range(model.root_item.child_count()):
-        index = model.index(i, 0, QtCore.QModelIndex())
-        item = model.index(i, 0, QtCore.QModelIndex()).internalPointer()
-        if item.item_data[0] == str(cfr):
-            break
-    main_gui.ui.package_select_view.expand(view_model.mapFromSource(index))
+    # view_model = main_gui.ui.package_select_view.model()
+    # index = pkg_sel_model.index(0, 0, QtCore.QModelIndex())
+    # item = index.internalPointer()
+    # for i in range(pkg_sel_model.root_item.child_count()):
+    #     index = pkg_sel_model.index(i, 0, QtCore.QModelIndex())
+    #     item = pkg_sel_model.index(i, 0, QtCore.QModelIndex()).internalPointer()
+    #     if item.item_data[0] == str(cfr):
+    #         break
+    # main_gui.ui.package_select_view.expand(view_model.mapFromSource(index))
     # ensure, that we select the pkg with the correct options
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF + ":" + id, refresh=True)
     assert main_gui.local_package_explorer.fs_model  # view selected -> fs_model is set
@@ -84,18 +82,15 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     ### Test pkg reference context menu functions ###
     # test copy ref
-    print("TEST: copy ref")
     main_gui.local_package_explorer.on_copy_ref_requested()
     assert QtWidgets.QApplication.clipboard().text() == str(cfr)
     conanfile = app.conan_api.get_conanfile_path(cfr)
     # test open export folder
-    print("TEST: open export folder")
     import conan_app_launcher.ui.modules.package_explorer.local_packages as lp
     mocker.patch.object(lp, 'open_in_file_manager')
     main_gui.local_package_explorer.on_open_export_folder_requested()
     lp.open_in_file_manager.assert_called_once_with(conanfile)
     # test show conanfile
-    print("TEST: show conanfile")
 
     mocker.patch.object(lp, 'open_file')
     main_gui.local_package_explorer.on_show_conanfile_requested()
@@ -103,7 +98,6 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     #### Test file context menu functions ###
     # select a file
-    print("TEST: select a file")
 
     root_path = Path(main_gui.local_package_explorer.fs_model.rootPath())
     file = root_path / "conaninfo.txt"

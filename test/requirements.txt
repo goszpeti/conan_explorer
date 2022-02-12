@@ -6,6 +6,6 @@ autopep8
 rope
 pytest==6.2.5
 pytest-cov==3.0.0
-pytest-mock==3.7.0
+pytest-mock==3.6.1
 pytest-qt==4.0.2
 PyQt5-stubs
