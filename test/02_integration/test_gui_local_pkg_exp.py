@@ -43,7 +43,6 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
-    print("TEST: Changes to local explorer page")
 
     main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
     wait_for_loading_pkgs(main_gui)
@@ -66,18 +65,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF, refresh=True)
     Logger().debug("Selected ref")
     assert not main_gui.local_package_explorer.fs_model  # view not changed
-    # TODO crash is around here
-    # select pkg to check file view initalizes at the correct path and path got written in label
 
-    # view_model = main_gui.ui.package_select_view.model()
-    # index = pkg_sel_model.index(0, 0, QtCore.QModelIndex())
-    # item = index.internalPointer()
-    # for i in range(pkg_sel_model.root_item.child_count()):
-    #     index = pkg_sel_model.index(i, 0, QtCore.QModelIndex())
-    #     item = pkg_sel_model.index(i, 0, QtCore.QModelIndex()).internalPointer()
-    #     if item.item_data[0] == str(cfr):
-    #         break
-    # main_gui.ui.package_select_view.expand(view_model.mapFromSource(index))
     # ensure, that we select the pkg with the correct options
     Logger().debug("Select pkg")
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF + ":" + id, refresh=True)
