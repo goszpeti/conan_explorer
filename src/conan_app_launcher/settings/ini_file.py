@@ -6,8 +6,8 @@ from typing import Any, Dict, Optional, Union
 from conan_app_launcher import PathLike
 from conan_app_launcher.logger import Logger
 
-from . import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, ENABLE_APP_COMBO_BOXES, GUI_STYLE_LIGHT,
-               LAST_CONFIG_FILE, GUI_STYLE, SettingsInterface)
+from . import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, ENABLE_APP_COMBO_BOXES,
+               FONT_SIZE, GUI_STYLE_LIGHT, LAST_CONFIG_FILE, GUI_STYLE, SettingsInterface)
 
 
 class IniSettings(SettingsInterface):
@@ -46,6 +46,7 @@ class IniSettings(SettingsInterface):
                 LAST_CONFIG_FILE: "",
             },
             self._VIEW_SECTION_NAME: {
+                FONT_SIZE: 12,
                 GUI_STYLE: GUI_STYLE_LIGHT,
                 ENABLE_APP_COMBO_BOXES: False,
                 DISPLAY_APP_CHANNELS: True,
@@ -115,7 +116,7 @@ class IniSettings(SettingsInterface):
         except Exception as e:
             Logger().error(
                 f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
-            os.remove(str(self._ini_file_path)) # let an exeception to the user, file can't be deleted
+            os.remove(str(self._ini_file_path))  # let an exeception to the user, file can't be deleted
 
         # write file - to record defaults, if missing
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:

@@ -6,10 +6,13 @@
         {
             "label": "Install package in editable mode",
             "type": "shell",
-           "command": "${config:python.pythonPath}",
+            "command": "${config:python.pythonPath}",
             "args": [
-                "-m", "pip",
-                "install", "-e", "."
+                "-m",
+                "pip",
+                "install",
+                "-e",
+                "."
             ],
             "problemMatcher": []
         },
@@ -18,11 +21,18 @@
             "type": "shell",
             "command": "${config:python.pythonPath}",
             "args": [
-                "-m", "pip",
-                "install", "--upgrade", "pip",
+                "-m",
+                "pip",
+                "install",
+                "--upgrade",
+                "pip",
                 "&&",
-                "${config:python.pythonPath}", "-m", "pip",
-                "install", "-r", "test/requirements.txt"
+                "${config:python.pythonPath}",
+                "-m",
+                "pip",
+                "install",
+                "-r",
+                "test/requirements.txt"
             ],
             "problemMatcher": []
         },

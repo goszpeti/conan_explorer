@@ -104,8 +104,8 @@ jobs:
         run: |
           pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
       - name: Execute integration with pytest
-        run: |
-          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
+        run: | 
+          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
       - name: Execute system with pytest # Reinstall into site-packages to find install and pkg problems
         run: |
           pip install .

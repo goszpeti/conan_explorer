@@ -5,15 +5,15 @@ import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, user_save_path)
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import LAST_CONFIG_FILE
-from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiAppLinkConfig,
-                                        UiApplicationConfig, ui_config_factory,
-                                        UiConfigInterface, UiTabConfig)
-from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiTabModel
+from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiAppLinkConfig, UiApplicationConfig,
+                                        ui_config_factory, UiConfigInterface, UiTabConfig)
+from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
 from PyQt5 import QtCore
 
-class UiApplicationModel(UiApplicationConfig, QtCore.QObject): # TODO needs to be sliced in an extra AppgridModel
+
+class UiApplicationModel(UiApplicationConfig, QtCore.QObject):  # TODO needs to be sliced in an extra AppgridModel
     CONFIG_TYPE = UI_CONFIG_JSON_TYPE
-    conan_info_updated = QtCore.pyqtSignal(str) # str is conan_ref
+    conan_info_updated = QtCore.pyqtSignal(str)  # str is conan_ref
 
     def __init__(self, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""

@@ -27,7 +27,8 @@ REQUIRED = [
     'importlib-metadata>=4.8.2 ; python_version<"3.8"',  # Apache Software License (Apache)
     'typing-extensions>=3.10.0.2 ; python_version<"3.8"',  # Python Software Foundation License(PSF)
     'dataclasses>=0.8 ; python_version<"3.7"',  # Apache Software License (Apache)
-    "packaging"  # use the built-in, or get latest if there is some issue with pip
+    "packaging",  # use the built-in, or get latest if there is some issue with pip
+    "Jinja2>=2.3"  # BSD License (BSD-3-Clause) (restriction from conan 1.24, since it is included there)
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
