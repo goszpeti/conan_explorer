@@ -174,6 +174,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         if not update and self.pkg_sel_model:  # loads only at first init
             return
         self._pkg_sel_model_loaded = False
+        self._pkg_sel_model_loader = QtLoaderObject()
         self._pkg_sel_model_loader.async_loading(
             self._main_window, self.init_select_model, self.finish_select_model_init, "Reading Packages")
 
@@ -205,8 +206,9 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
     def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
-        self._main_window.raise_()
+
         self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
+        self.wait_for_loading_pkgs()  # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
 
         if refresh:
             self.refresh_pkg_selection_view()

@@ -1,8 +1,10 @@
 """ Common ui classes and functions """
+from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore, QtWidgets
 from typing import Optional, Tuple, Callable
 
 from PyQt5.QtCore import Qt
+ASYNC_LOADING = True  # For debug purposes: errors in Qt Threads are not debuggable
 
 
 class Worker(QtCore.QObject):
@@ -37,16 +39,24 @@ class QtLoaderObject(QtCore.QObject):
         self.progress_dialog.setRange(0, 0)
         self.progress_dialog.setMinimumDuration(1000)
         self.progress_dialog.show()
-        self.worker = Worker(work_task)
-        self.load_thread = QtCore.QThread()
-        self.worker.moveToThread(self.load_thread)
-        self.load_thread.started.connect(self.worker.work)
 
-        if finish_task:
-            self.worker.finished.connect(finish_task)
-        self.worker.finished.connect(self.load_thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
+        if ASYNC_LOADING:
+            self.worker = Worker(work_task)
+            self.load_thread = QtCore.QThread()
+            self.worker.moveToThread(self.load_thread)
+            self.load_thread.started.connect(self.worker.work)
 
-        self.load_thread.finished.connect(self.load_thread.deleteLater)
-        self.load_thread.finished.connect(self.progress_dialog.hide)
-        self.load_thread.start()
+            if finish_task:
+                self.worker.finished.connect(finish_task)
+            self.worker.finished.connect(self.worker.deleteLater)
+            self.worker.finished.connect(self.load_thread.quit)
+
+            self.load_thread.finished.connect(self.load_thread.deleteLater)
+            self.load_thread.finished.connect(self.progress_dialog.hide)
+            Logger().debug(f"Start async loading thread for {str(work_task)}")
+            self.load_thread.start()
+        else:
+            work_task()
+            if finish_task:
+                finish_task()
+                self.progress_dialog.hide()

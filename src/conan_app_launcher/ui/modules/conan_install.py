@@ -32,8 +32,8 @@ class ConanInstallDialog(QtWidgets.QDialog):
         self._ui.conan_ref_line_edit.adjustSize()
         self.adjustSize()
         h_offset = (self.size() - self.conan_ref_line_edit.size()).width()
-        width= self._ui.conan_ref_line_edit.fontMetrics().boundingRect(self._ui.conan_ref_line_edit.text()).width()
-        self.resize(QtCore.QSize(width + h_offset + 5, self.height())) # 5 margin
+        width = self._ui.conan_ref_line_edit.fontMetrics().boundingRect(self._ui.conan_ref_line_edit.text()).width()
+        self.resize(QtCore.QSize(width + h_offset + 5, self.height()))  # 5 margin
 
     def on_install(self):
         update_check_state = False
@@ -52,6 +52,7 @@ class ConanInstallDialog(QtWidgets.QDialog):
             auto_install_checked = False
             if self.auto_install_check_box.checkState() == Qt.Checked:
                 auto_install_checked = True
+            # TODO do in thread!
             if auto_install_checked:
                 pkg_id, pkg_path = app.conan_api.install_best_matching_package(
                     conan_ref, update=update_check_state)
