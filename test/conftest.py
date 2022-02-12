@@ -74,6 +74,7 @@ def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
 def run_conan_server():
     os.system("conan_server")
 
+
 def start_conan_server():
     # Setup Server config
     os.system("conan_server --migrate")  # call server once to create a config file
@@ -146,7 +147,7 @@ def ConanServer():
         start_conan_server()
     yield
     if started:
-        print("KILLING CONAN SERVER")
+        print("\nKILLING CONAN SERVER\n ")
         check_if_process_running("conan_server", kill=True)
 
 
@@ -179,7 +180,7 @@ def base_fixture(request):  # TODO , autouse=True?
         os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
 
     # reset singletons
-    logger.Logger._instance = None
+    #logger.Logger._instance = None
     app.conan_worker = None
     app.conan_api = None
     app.active_settings = None

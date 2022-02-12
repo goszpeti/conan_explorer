@@ -22,12 +22,13 @@ REQUIRES_PYTHON = ">=3.6.0"  # still support Ubuntu 18
 # What packages are required for this module to be executed?
 REQUIRED = [
     "PyQt5>=5.13.0",  # GPLv3
-    "conan>=1.24",  # MIT License
+    "conan>=1.24, <2",  # MIT License
     "jsonschema>=3.2.0",  # MIT License
     'importlib-metadata>=4.8.2 ; python_version<"3.8"',  # Apache Software License (Apache)
     'typing-extensions>=3.10.0.2 ; python_version<"3.8"',  # Python Software Foundation License(PSF)
     'dataclasses>=0.8 ; python_version<"3.7"',  # Apache Software License (Apache)
-    "packaging"  # use the built-in, or get latest if there is some issue with pip
+    "packaging",  # use the built-in, or get latest if there is some issue with pip
+    "Jinja2>=2.3"  # BSD License (BSD-3-Clause) (restriction from conan 1.24, since it is included there)
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

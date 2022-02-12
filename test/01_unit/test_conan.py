@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import List
 
 from conan_app_launcher.core.conan import (ConanApi, ConanCleanup,
-                                                 _create_key_value_pair_list)
+                                           _create_key_value_pair_list)
 from conan_app_launcher.core.conan_worker import (ConanWorker,
-                                                        ConanWorkerElement)
+                                                  ConanWorkerElement)
 from conans import __version__
 from conans.model.ref import ConanFileReference
 
@@ -171,6 +171,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
     assert "Can't find a matching package" not in captured.err
+    os.system(f"conan remove {ref} -f")
 
 
 def test_resolve_default_options(base_fixture):

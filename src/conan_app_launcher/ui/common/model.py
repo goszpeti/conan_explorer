@@ -7,7 +7,7 @@ class TreeModelItem(object):
     Implemented like the default QT example.
     """
 
-    def __init__(self, data = [], parent=None, lazy_loading=False):
+    def __init__(self, data=[], parent=None, lazy_loading=False):
         self.parent_item = parent
         self.item_data = data
         self.child_items = []
@@ -17,7 +17,10 @@ class TreeModelItem(object):
         self.child_items.append(item)
 
     def child(self, row):
-        return self.child_items[row]
+        try:
+            return self.child_items[row]
+        except:
+            return None
 
     def child_count(self):
         return len(self.child_items)

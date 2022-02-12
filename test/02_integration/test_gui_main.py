@@ -23,7 +23,7 @@ Qt = QtCore.Qt
 
 
 def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
-    """ Test, that when no condig file is set, 
+    """ Test, that when no condig file is set,
     a new tab with a new default app is automatically added."""
     from pytestqt.plugin import _qapp_instance
 

@@ -23,7 +23,7 @@ class AppButton(QtWidgets.QPushButton):
         self._greyed_out = True  # Must be ungreyed, when available
         self._grey_effect = QtWidgets.QGraphicsColorizeEffect()
         self._grey_effect.setColor(QtGui.QColor(128, 128, 128))
-        #self.setGraphicsEffect(self._grey_effect)
+        # self.setGraphicsEffect(self._grey_effect)
 
         self.set_icon_from_file(image)
         self.setFlat(True)
@@ -33,18 +33,17 @@ class AppButton(QtWidgets.QPushButton):
 
     def ungrey_icon(self):
         self._greyed_out = False
-        #self._grey_effect.setEnabled(False)
+        # self._grey_effect.setEnabled(False)
 
     def grey_icon(self):
         self._greyed_out = True  # no context menu
         self.set_icon(QtGui.QIcon(get_themed_asset_image("icons/no-access.png")))
-        #self._grey_effect.setEnabled(True)
+        # self._grey_effect.setEnabled(True)
 
     def set_icon(self, icon: QtGui.QIcon):
         # convert biggest image to QPixmap and scale
         sizes = icon.availableSizes()
         if len(sizes) > 0:
-            # TODO check list
             icon_pixmap = icon.pixmap(sizes[-1])
             # embedded icons sometimes not scale up correctly, but only increase the canvas behind the icon,
             #  which looks like crap.With opaqueArea.boundingRect we can query the size of
@@ -54,7 +53,7 @@ class AppButton(QtWidgets.QPushButton):
             top_left = image_rect.topLeft()
             # copy the smaller image (crop) - start from 0, this adds some margin
             icon_pixmap = icon_pixmap.copy(0, 0, int(image_rect.width() + top_left.x()),
-                                        int(image_rect.height() + top_left.y()))
+                                           int(image_rect.height() + top_left.y()))
             self._ic = QtGui.QIcon(icon_pixmap)
         else:
             self._ic = icon

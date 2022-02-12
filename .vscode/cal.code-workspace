@@ -12,20 +12,12 @@
     "settings": {
         "pyqt-integration.pyuic.compile.filepath": "${ui_name}.py",
         "python.formatting.provider": "autopep8",
-        "python.formatting.autopep8Args": [
-            "--max-line-length=110"
-        ],
         "editor.formatOnPaste": true,
         "git.autofetch": true,
         "python.analysis.typeCheckingMode": "basic",
-        "python.linting.enabled": false,
-        "python.linting.pylintEnabled": true,
-        "python.linting.mypyEnabled": true,
         "python.linting.lintOnSave": true,
         "python.linting.pylintCategorySeverity.refactor": "Information",
         "python.testing.pytestEnabled": true,
-        "coverage-gutters.showLineCoverage": true,
-        "coverage-gutters.showRulerCoverage": true,
         "python.testing.pytestArgs": [
             "-v",
             "--junit-xml=${workspaceFolder}/result.xml",
@@ -37,11 +29,12 @@
             "--capture=no", // print output
             "--no-cov" // no coverage while debugging
         ],
-        "python.linting.pylintArgs": [
-            "--init-hook",
-            "import sys;sys.path.append('${workspaceFolder}/test/mock/');sys.path.append('${workspaceFolder}/src/')"
-        ],
         "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
-        "pyqt-integration.qtdesigner.path": "designer",
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "python.terminal.activateEnvironment": true,
+        "editor.rulers": [
+            120
+        ],
     }
 }

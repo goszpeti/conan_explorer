@@ -151,6 +151,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
             if self._current_ref == conan_ref:
                 self.close_files_view()
             try:
+                Logger().info(f"Deleting {conan_ref} {pkg_ids}")
                 app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True)
             except Exception as e:
                 Logger().error(f"Error while removing package {conan_ref}: {str(e)}")
@@ -193,6 +194,9 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.pkg_sel_model = PkgSelectModel()
 
     def wait_for_loading_pkgs(self):
+        Logger().debug("wait for loading thread")
+        # execute once
+        QtWidgets.QApplication.processEvents()
         # wait for loading thread
         while not self._pkg_sel_model_loaded:
             QtWidgets.QApplication.processEvents()
@@ -204,8 +208,9 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
     def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
-        self._main_window.raise_()
+
         self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
+        self.wait_for_loading_pkgs()  # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
 
         if refresh:
             self.refresh_pkg_selection_view()

@@ -4,17 +4,18 @@ from typing import Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, PathLike,
-                                user_save_path, base_path)
+                                user_save_path)
 from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
-                                         DISPLAY_APP_VERSIONS, GUI_STYLE, GUI_STYLE_DARK, GUI_STYLE_LIGHT,
-                                         LAST_CONFIG_FILE)
-
+                                         DISPLAY_APP_VERSIONS, FONT_SIZE,
+                                         GUI_STYLE, GUI_STYLE_DARK,
+                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
+from conan_app_launcher.ui.theming import activate_theme
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
 
@@ -68,6 +69,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_toggle_display_users.triggered.connect(self.apply_display_users_setting_toggled)
         self.ui.menu_toggle_display_channels.triggered.connect(self.display_channels_setting_toggled)
         self.ui.menu_enable_dark_mode.triggered.connect(self.on_theme_changed)
+        self.ui.menu_increase_font_size.triggered.connect(self.on_font_size_increased)
+        self.ui.menu_decrease_font_size.triggered.connect(self.on_font_size_decreased)
+
         self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
         self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
         self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
@@ -98,17 +102,31 @@ class MainWindow(QtWidgets.QMainWindow):
         # should be called from here
 
     @pyqtSlot()
+    def on_font_size_increased(self):
+        """ Increase font size by 2. Ignore if font gets too large. """
+        new_size = app.active_settings.get_int(FONT_SIZE) + 2
+        if new_size > 24:
+            return
+        app.active_settings.set(FONT_SIZE, new_size)
+        activate_theme(self._qt_app)
+
+    @pyqtSlot()
+    def on_font_size_decreased(self):
+        """ Decrease font size by 2. Ignore if font gets too small. """
+        new_size = app.active_settings.get_int(FONT_SIZE) - 2
+        if new_size < 8:
+            return
+        app.active_settings.set(FONT_SIZE, new_size)
+        activate_theme(self._qt_app)
+
+    @pyqtSlot()
     def on_theme_changed(self):
         if self.ui.menu_enable_dark_mode.isChecked():
             app.active_settings.set(GUI_STYLE, GUI_STYLE_DARK)
-            style_file = "dark_style.qss"
         else:
-            style_file = "light_style.qss"
             app.active_settings.set(GUI_STYLE, GUI_STYLE_LIGHT)
 
-        with open(base_path / "ui" / style_file) as fd:
-            style_sheet = fd.read()
-            self._qt_app.setStyleSheet(style_sheet)
+        activate_theme(self._qt_app)
 
         # all icons must be reloaded
         self.load_icons()
@@ -222,3 +240,5 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_about_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/about.png")))
         self.ui.menu_remove_locks.setIcon(QtGui.QIcon(get_themed_asset_image("icons/remove-lock.png")))
         self.ui.menu_search_in_remotes.setIcon(QtGui.QIcon(get_themed_asset_image("icons/search_packages.png")))
+        self.ui.menu_increase_font_size.setIcon(QtGui.QIcon(get_themed_asset_image("icons/increase_font.png")))
+        self.ui.menu_decrease_font_size.setIcon(QtGui.QIcon(get_themed_asset_image("icons/decrease_font.png")))

@@ -27,7 +27,7 @@ class SearchedPackageTreeItem(TreeModelItem):
         self.type = item_type
         self.pkg_data = pkg_data
         self.is_installed = installed
-        self.empty = empty # indicates a "no result" item, which must be handled separately 
+        self.empty = empty  # indicates a "no result" item, which must be handled separately
 
     def load_children(self):
         self.child_items = []
@@ -41,7 +41,7 @@ class SearchedPackageTreeItem(TreeModelItem):
             packages = app.conan_api.get_packages_in_remote(ConanFileReference.loads(recipe_ref), remote)
             for pkg in packages:
                 id = pkg.get("id", "")
-                if id in pkgs_to_be_added.keys(): # package already found in another remote
+                if id in pkgs_to_be_added.keys():  # package already found in another remote
                     pkgs_to_be_added[id].item_data[1] += "," + remote
                     continue
                 installed = False
@@ -49,7 +49,7 @@ class SearchedPackageTreeItem(TreeModelItem):
                     installed = True
                 pkgs_to_be_added[id] = SearchedPackageTreeItem(
                     [id, remote,  ConanApi.build_conan_profile_name_alias(pkg.get("settings", {}))],
-                     self, pkg, PROFILE_TYPE, False, installed)
+                    self, pkg, PROFILE_TYPE, False, installed)
         for pkg in pkgs_to_be_added.values():
             self.child_items.append(pkg)
         if not self.child_items:
@@ -70,7 +70,9 @@ class SearchedPackageTreeItem(TreeModelItem):
             return self.parent().data(0) + ":" + self.data(0)
         return ""
 
+
 class PkgSearchModel(TreeModel):
+    conan_pkg_installed = QtCore.pyqtSignal(str, str)
 
     def __init__(self, *args, **kwargs):
         super(PkgSearchModel, self).__init__(*args, **kwargs)
@@ -78,11 +80,11 @@ class PkgSearchModel(TreeModel):
         self.proxy_model = QtCore.QSortFilterProxyModel()  # for sorting
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
+        self.conan_pkg_installed.connect(self.update_conan_info)
 
     def setup_model_data(self, search_query, remotes=[]):
         recipes_with_remotes: Dict[ConanFileReference, str] = {}
         for remote in remotes:
-            # todo case insensitive
             recipe_list = (app.conan_api.search_query_in_remotes(
                 f"{search_query}*", remote=remote))
             for recipe in recipe_list:
@@ -127,3 +129,21 @@ class PkgSearchModel(TreeModel):
                 font.setBold(True)
                 return font
         return None
+
+    def get_index_from_ref(conan_ref: str):
+        found_tst_pkg = False
+        for pkg in pkg_sel_model.root_item.child_items:
+            if pkg.item_data[0] == TEST_REF:
+                found_tst_pkg = True
+
+    def update_conan_info(self, conan_ref: str, pkg_id: str):
+        # TODO get index for conan_ref
+
+        if item.type == REF_TYPE:
+            pkg_items = item.child_items
+            for pkg_item in pkg_items:
+                if pkg_item.pkg_data.get("id", "") == pkg_id:
+                    pkg_item.is_installed = True
+                    break
+        elif item.type == PROFILE_TYPE:
+            item.is_installed = True

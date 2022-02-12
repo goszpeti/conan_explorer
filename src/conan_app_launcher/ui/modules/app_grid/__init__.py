@@ -22,7 +22,7 @@ class AppGridView():
     def __init__(self, main_window: "MainWindow", model: "UiApplicationModel"):
         self._main_window = main_window
         self.model = model
-        self.model.conan_info_updated.connect(self.update_conan_info)
+        self.model.conan_pkg_installed.connect(self.update_conan_info)
 
         if ADD_APP_LINK_BUTTON:
             self._main_window.ui.add_app_link_button = QtWidgets.QPushButton(self._main_window)
@@ -171,7 +171,7 @@ class AppGridView():
                 if answer == tab.model.name:
                     tab.open_app_link_add_dialog(model.load(app_config, tab.model))
 
-    def update_conan_info(self, conan_ref: str):
+    def update_conan_info(self, conan_ref: str, pkg_id: str):
         if self._main_window.isHidden(): # the gui is about to shut down
             return
         # call update on every entry which has this ref

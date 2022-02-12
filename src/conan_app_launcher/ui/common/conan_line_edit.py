@@ -26,7 +26,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
 
         self._completion_thread = None
         self._loading_cbk = None
-        self._remote_refs = app.conan_api.info_cache.get_all_remote_refs() # takes a while to get
+        self._remote_refs = app.conan_api.info_cache.get_all_remote_refs()  # takes a while to get
 
         self.setCompleter(completer)
         combined_refs = set()
@@ -34,7 +34,6 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         combined_refs.update(self._remote_refs)
         self.completer().model().setStringList(list(combined_refs))
         self.textChanged.connect(self.validate_text)
-
 
     def __del__(self):
         if self._completion_thread:
@@ -59,15 +58,15 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
                 if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
                     self.setStyleSheet(f"background: {self.VALID_COLOR_DARK};")
                 else:
-                    self.setStyleSheet(f"background: {self.VALID_COLOR_LIGHT};") 
-            else: # if it does error it's invalid format, thus red
+                    self.setStyleSheet(f"background: {self.VALID_COLOR_LIGHT};")
+            else:  # if it does error it's invalid format, thus red
                 self.setStyleSheet(f"background: {self.INVALID_COLOR};")
-        
-        if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip searching for such broad terms
+
+        if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip seraching for such broad terms
             return
 
         if not any([entry.startswith(text) for entry in self._remote_refs]) or not valid:
-            if self._completion_thread and self._completion_thread.is_alive(): # one query at a time
+            if self._completion_thread and self._completion_thread.is_alive():  # one query at a time
                 return
             self._completion_thread = Thread(target=self.load_completion, args=[text, ])
             self._completion_thread.start()
@@ -75,7 +74,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
                 self._loading_cbk()
 
     def load_completion(self, text: str):
-        recipes = app.conan_api.search_query_in_remotes(f"{text}*") # can take very long time
+        recipes = app.conan_api.search_query_in_remotes(f"{text}*")  # can take very long time
         if app.conan_api:
             app.conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
             self.completion_finished.emit()
