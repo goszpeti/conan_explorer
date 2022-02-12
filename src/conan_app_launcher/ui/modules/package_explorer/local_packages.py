@@ -193,6 +193,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.pkg_sel_model = PkgSelectModel()
 
     def wait_for_loading_pkgs(self):
+        Logger().debug("wait for loading thread")
         # wait for loading thread
         while not self._pkg_sel_model_loaded:
             QtWidgets.QApplication.processEvents()

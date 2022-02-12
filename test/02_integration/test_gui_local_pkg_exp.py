@@ -64,7 +64,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     print("TEST: Select package (ref, not profile)")
     assert main_gui.local_package_explorer.select_local_package_from_ref(TEST_REF, refresh=True)
     assert not main_gui.local_package_explorer.fs_model  # view not changed
-
+    # TODO crash is around here
     # select pkg to check file view initalizes at the correct path and path got written in label
     print("TEST: Select package")
 
