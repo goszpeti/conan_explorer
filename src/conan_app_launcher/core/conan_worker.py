@@ -88,9 +88,7 @@ class ConanWorker():
             self._version_worker.start()
 
     def _work_on_conan_install_queue(self):
-        """ Call conan install from queue 
-
-        """
+        """ Call conan install from queue """
         signal = None
         conan_ref = None
         pkg_id = ""
@@ -98,7 +96,7 @@ class ConanWorker():
             worker_element, signal = self._conan_install_queue.get()
             ref_pkg_id = worker_element.get("ref_pkg_id", "")
             conan_options = worker_element.get("options", {})
-            conan_settings = worker_element.get("options", {})
+            conan_settings = worker_element.get("settings", {})
             pkg_id = ""
             update = worker_element.get("update", False)
             auto_install = worker_element.get("auto_install", True)
@@ -116,8 +114,7 @@ class ConanWorker():
                     if auto_install:
                         pkg_id, _ = self._conan_api.get_path_or_auto_install(conan_ref, conan_options, update)
                     else:
-                        # TODO options and settings
-                        pkg_id, _ = self._conan_api.install_reference(conan_ref, update=update)
+                        pkg_id, _ = self._conan_api.install_reference(conan_ref, conan_settings, conan_options, update=update)
             except Exception:
                 self._conan_install_queue.task_done()
                 continue
