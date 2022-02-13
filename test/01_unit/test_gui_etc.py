@@ -19,7 +19,7 @@ from conan_app_launcher.ui.modules.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
-import PyQt5
+
 Qt = QtCore.Qt
 
 
@@ -137,7 +137,7 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     widget._ui.search_results_tree_view.expand(ref_view_index)
 
     while not ref_item.child_items:
-       _qapp_instance.processEvents()
+        _qapp_instance.processEvents()
     # check in child items that installed pkg id is highlighted
     pkg_found = False
     for child_item in ref_item.child_items:

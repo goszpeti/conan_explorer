@@ -2,24 +2,25 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
-from conans.model.ref import ConanFileReference as CFR
-from conan_app_launcher.ui.modules.app_grid.model import (UiAppGridModel, UiAppLinkConfig,
-                                                          UiAppLinkModel)
-from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
-    AppEditDialog
-from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
-from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
-from conan_app_launcher.settings import DISPLAY_APP_USERS, ENABLE_APP_COMBO_BOXES
-from test.conftest import TEST_REF, conan_create_and_upload
 import os
 import platform
 import sys
 from pathlib import Path
 from subprocess import check_output
+from test.conftest import TEST_REF, conan_create_and_upload
 from time import sleep
 
-import pytest
+from conan_app_launcher.settings import (DISPLAY_APP_USERS,
+                                         ENABLE_APP_COMBO_BOXES)
+from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
+from conan_app_launcher.ui.model import UiApplicationModel
+from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
+from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
+    AppEditDialog
+from conan_app_launcher.ui.modules.app_grid.model import (UiAppGridModel,
+                                                          UiAppLinkConfig,
+                                                          UiAppLinkModel)
+from conans.model.ref import ConanFileReference as CFR
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt

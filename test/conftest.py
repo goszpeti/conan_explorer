@@ -12,6 +12,7 @@ from shutil import copy
 from subprocess import CalledProcessError, check_output
 from threading import Thread
 from unittest import mock
+
 import conan_app_launcher.logger as logger
 import psutil
 import pytest

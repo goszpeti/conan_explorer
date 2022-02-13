@@ -3,6 +3,7 @@ import platform
 import tempfile
 import time
 from pathlib import Path
+from test.conftest import TEST_REF, conan_create_and_upload
 from typing import List
 
 from conan_app_launcher.core.conan import (ConanApi, ConanCleanup,
@@ -11,8 +12,6 @@ from conan_app_launcher.core.conan_worker import (ConanWorker,
                                                   ConanWorkerElement)
 from conans import __version__
 from conans.model.ref import ConanFileReference
-
-from test.conftest import TEST_REF, conan_create_and_upload
 
 
 def test_conan_profile_name_alias_builder():
@@ -224,11 +223,11 @@ def test_conan_worker(base_fixture, mocker):
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
-    conan_refs: List[ConanWorkerElement] = [{"ref_pkg_id": "m4/1.4.19@_/_", "options": {}, 
+    conan_refs: List[ConanWorkerElement] = [{"ref_pkg_id": "m4/1.4.19@_/_", "options": {},
                                             "settings": {}, "update": False,  "auto_install": True},
                                             {"ref_pkg_id": "zlib/1.2.11@conan/stable", "options": {"shared": "True"},
                                              "settings": {}, "update": False,  "auto_install": True}
-                                           ]
+                                            ]
 
     mock_func = mocker.patch('conan_app_launcher.core.ConanApi.get_path_or_auto_install')
     import conan_app_launcher.app as app
@@ -241,11 +240,3 @@ def test_conan_worker(base_fixture, mocker):
     mock_func.assert_called()
 
     assert conan_worker._conan_install_queue.qsize() == 0
-
-# conan_server
-# conan remote add private http://localhost:9300/
-# conan upload example/1.0.0@myself/testing -r private
-# conan user -r private -p demo demo
-# .conan_server
-# [write_permissions]
-# */*@*/*: *

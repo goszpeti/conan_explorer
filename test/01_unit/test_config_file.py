@@ -5,7 +5,6 @@ from pathlib import Path
 
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
 from conans.model.ref import ConanFileReference
-from tempfile import NamedTemporaryFile
 
 
 def test_new_filename_is_created(base_fixture):
@@ -15,7 +14,7 @@ def test_new_filename_is_created(base_fixture):
     """
     new_file_path = Path(tempfile.gettempdir()) / "newfile.config"
     config = JsonUiConfig(new_file_path).load()
-    assert len(config.app_grid.tabs) == 1 # default tab
+    assert len(config.app_grid.tabs) == 1  # default tab
     assert new_file_path.exists()
 
 

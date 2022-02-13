@@ -1,6 +1,4 @@
-from typing import Optional
 from conans import ConanFile
-import platform
 import sys
 import os
 from pathlib import Path

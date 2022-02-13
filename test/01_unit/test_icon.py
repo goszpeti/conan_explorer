@@ -3,6 +3,7 @@ from pathlib import Path
 
 from conan_app_launcher.ui.common.icon import extract_icon
 
+
 def test_extract_icon_from_exe(tmp_path, qtbot):
     """
     Tests, that an icon is extracted from different file types
@@ -22,4 +23,3 @@ def test_extract_icon_from_exe(tmp_path, qtbot):
     # non existant file -> null pointer icon
     icon = extract_icon(Path(tmp_path) / "nonexistant")
     assert icon.isNull()
-
