@@ -10,6 +10,9 @@
         ]
     },
     "settings": {
+        "files.associations": {
+            "*.qss": "qss"
+        },
         "pyqt-integration.pyuic.compile.filepath": "${ui_name}.py",
         "python.formatting.provider": "autopep8",
         "editor.formatOnPaste": true,

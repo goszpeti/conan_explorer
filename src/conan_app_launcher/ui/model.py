@@ -1,46 +1,46 @@
 
-from typing import List, Optional
+from abc import ABC
+from typing import List, Optional, TypeVar
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, user_save_path)
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import LAST_CONFIG_FILE
-from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiAppLinkConfig, UiApplicationConfig,
+from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiAppLinkConfig, UiAppGridConfig, UiConfig,
                                         ui_config_factory, UiConfigInterface, UiTabConfig)
-from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
+from conan_app_launcher.ui.modules.app_grid.model import UiAppGridModel, UiTabModel
 from PyQt5 import QtCore
 
 
-class UiApplicationModel(UiApplicationConfig, QtCore.QObject):  # TODO needs to be sliced in an extra AppgridModel
+class UiApplicationModel(UiConfig):  # TODO needs to be sliced in an extra
     CONFIG_TYPE = UI_CONFIG_JSON_TYPE
-    conan_pkg_installed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, conan_pkg_installed=None, conan_pkg_removed=None, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""
-        UiApplicationConfig.__init__(self, *args, **kwargs)
-        QtCore.QObject.__init__(self)
-        self.tabs: List[UiTabModel]
+        UiConfig.__init__(self, *args, **kwargs)
+        self.app_grid: UiAppGridModel
         self._ui_config_data: Optional[UiConfigInterface] = None
 
-    def load(self, ui_config=UiApplicationConfig()) -> "UiApplicationModel":
-        super().__init__(ui_config.tabs)
-        # update conan info
-        if app.conan_worker:
-            app.conan_worker.finish_working(3)
-            app.conan_worker.update_all_info(self.get_all_conan_refs(), self.conan_pkg_installed)
-
-        # load all submodels
-        tabs_model = []
-        for tab_config in self.tabs:
-            tabs_model.append(UiTabModel().load(tab_config, self))
-        self.tabs = tabs_model
-        return self
+        self.conan_pkg_installed = conan_pkg_installed
+        self.conan_pkg_removed = conan_pkg_removed
 
     def save(self):
         if self._ui_config_data:
             self._ui_config_data.save(self)
 
+    def load(self, ui_config: UiConfig) -> "UiApplicationModel":
+        """ Load the model and submodels from the config object """
+        # update conan info
+        self.app_grid = UiAppGridModel()
+        self.app_grid.load(ui_config.app_grid, self)
+        if app.conan_worker:
+            app.conan_worker.finish_working(3)
+            app.conan_worker.update_all_info(self.app_grid.get_all_conan_worker_elements(), self.conan_pkg_installed)
+    
+        return self
+
     def loadf(self, config_source: str) -> "UiApplicationModel":
+        """ Load model and submodels from specified file source """
         # empty ui config, create it in user path
         default_config_file_path = user_save_path / DEFAULT_UI_CFG_FILE_NAME
         if not config_source or not default_config_file_path.exists():
@@ -50,20 +50,6 @@ class UiApplicationModel(UiApplicationConfig, QtCore.QObject):  # TODO needs to 
         self._ui_config_data = ui_config_factory(self.CONFIG_TYPE, config_source)
         ui_config = self._ui_config_data.load()
 
-        # add default tab and link
-        if not ui_config.tabs:
-            ui_config.tabs.append(UiTabConfig())
-            ui_config.tabs[0].apps.append(UiAppLinkConfig())
-
         self.load(ui_config)
         return self
 
-    def get_all_conan_refs(self):
-        conan_refs: List[ConanWorkerElement] = []
-        for tab in self.tabs:
-            for app in tab.apps:
-                ref_dict: ConanWorkerElement = {"reference": app.conan_ref,
-                                                "options": app.conan_options}
-                if ref_dict not in conan_refs:
-                    conan_refs.append(ref_dict)
-        return conan_refs

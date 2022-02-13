@@ -141,9 +141,28 @@ class ConanApi():
 
     ### Install related methods ###
 
+    def install_reference(self, conan_ref: ConanFileReference, conan_settings:  Dict[str, str] = {},
+                          conan_options: Dict[str, str] = {}, update=True) -> Tuple[str, Path]:
+        """
+        Try to install a conan reference (without id) with the provided extra information.
+        Uses plain conan install (No auto determination of best matching package)
+        Returns the actual pkg_id and the package path.
+        """
+        pkg_id = ""
+        try:
+            infos = self.conan.install_reference(str(conan_ref), settings=conan_settings, options=conan_options, update=update)
+            if not infos.get("error", True):
+                pkg_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
+            return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
+        except Exception as error:
+            Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
+            return (pkg_id, Path("NULL"))
+
+
     def install_package(self, conan_ref: ConanFileReference, package: ConanPkg, update=True) -> bool:
         """
-        Try to install a conan package with the provided extra information.
+        Try to install a conan package (id) with the provided extra information.
+        Returns True, if installation was succesfull.
         """
         package_id = package.get("id", "")
         options_list = _create_key_value_pair_list(package.get("options", {}))
@@ -161,27 +180,28 @@ class ConanApi():
             Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(error)}")
             return False
 
-    def get_path_or_install(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> Tuple[str, Path]:
-        """ Return the package folder of a conan reference and install it, if it is not available """
+    def get_path_or_auto_install(self, conan_ref: ConanFileReference, conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
+        """ Return the pkg_id and package folder of a conan reference 
+        and auto-install it with the best matching package, if it is not available """
 
         pkg_id = ""
-        package = self.find_best_local_package(conan_ref, input_options)
+        package = self.find_best_local_package(conan_ref, conan_options)
         if package.get("id", ""):
             return pkg_id, self.get_package_folder(conan_ref, package.get("id", ""))
-        Logger().info(f"'<b>{conan_ref}</b>' with options {repr(input_options)} is not installed.")
+        Logger().info(f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed.")
 
-        pkg_id, path = self.install_best_matching_package(conan_ref, input_options)
+        pkg_id, path = self.install_best_matching_package(conan_ref, conan_options, update=update)
         return pkg_id, path
 
     def install_best_matching_package(self, conan_ref: ConanFileReference,
-                                      input_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
-        packages: List[ConanPkg] = self.get_matching_package_in_remotes(conan_ref, input_options)
+                                      conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
+        packages: List[ConanPkg] = self.get_matching_package_in_remotes(conan_ref, conan_options)
         if not packages:
             self.info_cache.invalidate_remote_package(conan_ref)
             return ("", Path("NULL"))
 
         if self.install_package(conan_ref, packages[0], update):
-            package = self.find_best_local_package(conan_ref, input_options)
+            package = self.find_best_local_package(conan_ref, conan_options)
             pkg_id = package.get("id", "")
             if not pkg_id:
                 return (pkg_id, Path("NULL"))

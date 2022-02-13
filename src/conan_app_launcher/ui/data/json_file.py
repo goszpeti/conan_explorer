@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
 import jsonschema
 
-from . import (UiApplicationConfig, UiAppLinkConfig, UiConfigInterface,
+from . import (UiAppGridConfig, UiAppLinkConfig, UiConfig, UiConfigInterface,
                UiTabConfig)
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -71,7 +71,7 @@ class JsonUiConfig(UiConfigInterface):
             setattr(result_config, key, value)
         return result_config
 
-    def load(self) -> UiApplicationConfig:
+    def load(self) -> UiConfig:
         """ Parse the json config file, validate and convert to object structure """
         json_app_config: JsonAppConfig = {"version": "0.0.0", "tabs": []}
         Logger().debug(f"UiConfig: Loading file '{self._json_file_path}'...")
@@ -87,7 +87,7 @@ class JsonUiConfig(UiConfigInterface):
                     jsonschema.validate(instance=json_app_config, schema=json_schema)
                 except Exception as error:
                     Logger().error(f"Config file:\n{str(error)}")
-                    return UiApplicationConfig()
+                    return UiConfig()
 
         # implement subsequent migration functions
         self.migrate_to_0_3_0(json_app_config)
@@ -105,11 +105,11 @@ class JsonUiConfig(UiConfigInterface):
         # write it back with updates
         with open(str(self._json_file_path), "w") as config_file:
             json.dump(json_app_config, config_file, indent=4)
-        return UiApplicationConfig(tabs=tabs_result)
+        return UiConfig(UiAppGridConfig(tabs=tabs_result))
 
-    def save(self, app_config: UiApplicationConfig):
+    def save(self, app_config: UiConfig):
         """ Create json dict from model and write it to path. """
-        tabs = app_config.tabs
+        tabs = app_config.app_grid.tabs
         tabs_data = []
         for tab in tabs:
             tab_dict = asdict(tab)

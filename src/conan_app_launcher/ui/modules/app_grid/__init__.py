@@ -14,15 +14,16 @@ Qt = QtCore.Qt
 
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
-    from conan_app_launcher.ui.modules.app_grid.model import UiApplicationModel
+    from conan_app_launcher.ui.modules.app_grid.model import UiAppGridModel
 
 
 class AppGridView():
 
-    def __init__(self, main_window: "MainWindow", model: "UiApplicationModel"):
+    def __init__(self, main_window: "MainWindow", model: "UiAppGridModel"):
         self._main_window = main_window
         self.model = model
-        self.model.conan_pkg_installed.connect(self.update_conan_info)
+        self.conan_pkg_installed = main_window.conan_pkg_installed
+        self.conan_pkg_installed.connect(self.update_conan_info)
 
         if ADD_APP_LINK_BUTTON:
             self._main_window.ui.add_app_link_button = QtWidgets.QPushButton(self._main_window)
@@ -47,7 +48,7 @@ class AppGridView():
         if self._main_window.ui.tab_bar.count() > 0:  # remove the default tab
             self._main_window.ui.tab_bar.removeTab(0)
 
-    def re_init(self, model):
+    def re_init(self, model: "UiAppGridModel"):
         """ To be called, when a new config file is loaded """
         self.model = model
         # delete all tabs
@@ -145,7 +146,6 @@ class AppGridView():
 
     def load(self):
         """ Creates new layout """
-
         for tab_config in self.model.tabs:
 
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer

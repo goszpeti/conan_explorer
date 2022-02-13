@@ -174,9 +174,10 @@ class LocalConanPackageExplorer(QtCore.QObject):
         """
         if not update and self.pkg_sel_model:  # loads only at first init
             return
+        self.pkg_sel_model = PkgSelectModel()
         self._pkg_sel_model_loaded = False
         self._pkg_sel_model_loader.async_loading(
-            self._main_window, self.init_select_model, self.finish_select_model_init, "Reading Packages")
+            self._main_window, self.pkg_sel_model.setup_model_data, self.finish_select_model_init, "Reading Packages")
 
     def finish_select_model_init(self):
         self.proxy_model = PackageFilter()
@@ -189,9 +190,6 @@ class LocalConanPackageExplorer(QtCore.QObject):
         else:
             Logger().error("Can't load local packages!")
         self._pkg_sel_model_loaded = True
-
-    def init_select_model(self):
-        self.pkg_sel_model = PkgSelectModel()
 
     def wait_for_loading_pkgs(self):
         Logger().debug("wait for loading thread")

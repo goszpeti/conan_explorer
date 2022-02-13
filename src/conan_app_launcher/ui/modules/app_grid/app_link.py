@@ -29,11 +29,25 @@ current_dir = Path(__file__).parent
 
 
 class AppLink(QtWidgets.QVBoxLayout):
+    """ Represents a clickable button + info or combo box for an executable in a conan package.
+    |- Button with Icon (clickable to start executable)
+    |- Package version(s)
+    |- Package user(s)
+    |- Package channel(s)
+    |- Vertical Spacer (to enforce vertical size)
+    Hovering shows the Conan reference.
+    Rightclick context menu has the following elements:
+    - Show in File Manager
+    - Add new App Link
+    - Edit
+    - Remove App Link
+    - Rearrange App Links
+    """
 
     def __init__(self, parent: "TabGrid", model: UiAppLinkModel):
         super().__init__()
         self._parent_tab = parent  # save parent - don't use qt signals ands slots
-        self._lock_cboxes = False
+        self._lock_cboxes = False # lock combo boxes to ignore changes of conanref
         self._enable_combo_boxes = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
 
         self.model = model
@@ -50,6 +64,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         return max_width
 
     def _init_app_link(self):
+        """ Initalize all subwidgets with default values. """
         self._app_button = AppButton(self._parent_tab, asset_path / "icons" / "app.png")
         self._app_name_label = QtWidgets.QLabel(self._parent_tab)
     
@@ -116,14 +131,10 @@ class AppLink(QtWidgets.QVBoxLayout):
             self._app_user_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
             self._app_channel_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
 
-        self._init_menu()
+        self._init_context_menu()
 
-    def load(self):
-        self.model.register_update_callback(self.update_with_conan_info)
-        self._apply_new_config()
-        self.update_with_conan_info()
-
-    def _init_menu(self):
+    def _init_context_menu(self):
+        """ Setup context menu. """
         self.menu = QtWidgets.QMenu()
 
         self.open_fm_action = QtWidgets.QAction("Show in File Manager", self)
@@ -160,6 +171,11 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.rearrange_action.triggered.connect(self.on_move)
 
         self.menu.addAction(self.rearrange_action)
+
+    def load(self):
+        self.model.register_update_callback(self.update_with_conan_info)
+        self._apply_new_config()
+        self.update_with_conan_info() # TODO?
 
     def on_move(self):
         move_dialog = AppsMoveDialog(parent=self.parentWidget(), tab_ui_model=self.model.parent)

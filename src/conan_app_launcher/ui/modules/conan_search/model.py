@@ -7,6 +7,8 @@ from conan_app_launcher.ui.common.icon import get_platform_icon, get_themed_asse
 from conan_app_launcher.ui.common.model import TreeModel, TreeModelItem
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import pyqtSlot
+from conan_app_launcher.logger import Logger
 
 Qt = QtCore.Qt
 
@@ -72,15 +74,17 @@ class SearchedPackageTreeItem(TreeModelItem):
 
 
 class PkgSearchModel(TreeModel):
-    conan_pkg_installed = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, conan_pkg_installed=None, conan_pkg_removed=None, *args, **kwargs):  # Optional[pyQtBoundSignal]
         super(PkgSearchModel, self).__init__(*args, **kwargs)
         self.root_item = SearchedPackageTreeItem(["Packages", "Remote(s)", "Quick Profile"])
         self.proxy_model = QtCore.QSortFilterProxyModel()  # for sorting
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
-        self.conan_pkg_installed.connect(self.update_conan_info)
+        if conan_pkg_installed:
+            conan_pkg_installed.connect(self.mark_pkg_as_installed)
+        if conan_pkg_removed:
+            conan_pkg_removed.connect(self.mark_pkg_as_not_installed)
 
     def setup_model_data(self, search_query, remotes=[]):
         recipes_with_remotes: Dict[ConanFileReference, str] = {}
@@ -130,20 +134,28 @@ class PkgSearchModel(TreeModel):
                 return font
         return None
 
-    def get_index_from_ref(conan_ref: str):
-        found_tst_pkg = False
-        for pkg in pkg_sel_model.root_item.child_items:
-            if pkg.item_data[0] == TEST_REF:
-                found_tst_pkg = True
+    def get_item_from_ref(self, conan_ref: str) -> Optional[SearchedPackageTreeItem]:
+        for item in self.root_item.child_items:
+            if item.item_data[0] == conan_ref:
+                return item
+        return None
 
-    def update_conan_info(self, conan_ref: str, pkg_id: str):
+    @pyqtSlot(str, str)
+    def mark_pkg_as_installed(self, conan_ref: str, pkg_id: str):
+        Logger().debug(f"Start update_conan_info for search list")
         # TODO get index for conan_ref
+        item = self.get_item_from_ref(conan_ref)
+        if not item:
+            return
+        # if item.type == REF_TYPE:
+        item.is_installed = True
+        pkg_items = item.child_items
+        for pkg_item in pkg_items:
+            if pkg_item.pkg_data.get("id", "") == pkg_id:
+                Logger().debug(f"Set {pkg_id} as installed")
+                pkg_item.is_installed = True
+                break
 
-        if item.type == REF_TYPE:
-            pkg_items = item.child_items
-            for pkg_item in pkg_items:
-                if pkg_item.pkg_data.get("id", "") == pkg_id:
-                    pkg_item.is_installed = True
-                    break
-        elif item.type == PROFILE_TYPE:
-            item.is_installed = True
+    @pyqtSlot(str, str)
+    def mark_pkg_as_not_installed(self, conan_ref: str, pkg_id: str):
+        pass

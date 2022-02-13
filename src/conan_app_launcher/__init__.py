@@ -46,3 +46,4 @@ base_path = Path(__file__).absolute().parent
 asset_path = base_path / "assets"
 # to be used for all default paths of configuration files, which will be used for multiple versions
 user_save_path = Path().home()
+

@@ -67,14 +67,14 @@ def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count + 1
     assert main_gui.ui.tab_bar.tabBar().tabText(prev_count) == new_text
 
-    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert len(config_tabs) == prev_count + 1
 
     # press cancel - count must still be original + 1
     mocker.patch.object(QtWidgets.QInputDialog, 'getText',
                         return_value=["OtherText", False])
     main_gui.app_grid.on_tab_rename(0)
-    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count + 1
     assert len(config_tabs) == prev_count + 1
 
@@ -106,14 +106,14 @@ def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
     assert main_gui.ui.tab_bar.tabBar().tabText(id_to_delete) != text
-    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert len(config_tabs) == prev_count - 1
 
     # press no
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.No)
     main_gui.app_grid.on_tab_remove(0)
-    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert main_gui.ui.tab_bar.tabBar().count() == prev_count - 1
     assert len(config_tabs) == prev_count - 1
 
@@ -135,7 +135,7 @@ def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
     assert main_gui.ui.tab_bar.tabBar().tabText(1) == "Basics"
 
     # re-read config
-    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert config_tabs[0].name == "Extra"
     assert config_tabs[1].name == "Basics"
 
@@ -160,7 +160,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     mocker.patch.object(AppEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Rejected)
     app_link.open_edit_dialog()
-    config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_config_fixture).load().app_grid.tabs
     assert config_tabs[0].name == tab_model.name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count
 
@@ -179,7 +179,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert app_link._app_channel_cbox.text() == ConanFileReference.loads(TEST_REF).channel
 
     # check, that the config file has updated
-    config_tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_config_fixture).load().app_grid.tabs
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count
     if app.conan_worker:  # manual wait for worker
@@ -212,7 +212,7 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     # check, that the config file has updated
 
-    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert len(config_tabs[0].apps) == prev_count - 1
 
     # press again - last link warning dialog must spawn and link not deleted
@@ -227,7 +227,7 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     app.active_settings.set(DISPLAY_APP_CHANNELS, False)  # disable, to check if a new app uses it
     app.active_settings.set(DISPLAY_APP_VERSIONS, True)  # disable, to check if a new app uses it
     # preinstall ref, to see if link updates paths
-    app.conan_api.get_path_or_install(ConanFileReference.loads(TEST_REF), {})
+    app.conan_api.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {})
 
     from pytestqt.plugin import _qapp_instance
     main_gui = main_window.MainWindow(_qapp_instance)
@@ -264,7 +264,7 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert new_app_link.model._package_folder.exists()
 
     # check, that the config file has updated
-    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().tabs
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
     assert len(config_tabs[0].apps) == prev_count + 1
     # wait until conan search finishes
@@ -324,7 +324,7 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
     app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     # load path into local cache
-    app.conan_api.get_path_or_install(ConanFileReference.loads(TEST_REF), {})
+    app.conan_api.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {})
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()

@@ -1,16 +1,18 @@
 from pathlib import Path
 from typing import Optional
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app
+from conan_app_launcher.core.conan_worker import ConanWorkerElement  # using gobal module pattern
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conans.model.ref import ConanFileReference, PackageReference
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtCore import pyqtBoundSignal
 
 Qt = QtCore.Qt
 
 
 class ConanInstallDialog(QtWidgets.QDialog):
-    def __init__(self, parent: Optional[QtWidgets.QWidget], conan_ref: str):
+    def __init__(self, parent: Optional[QtWidgets.QWidget], conan_ref: str, pkg_installed_signal: Optional[pyqtBoundSignal]=None):
         """ conan_ref can be in full ref format with <ref>:<id> """
         super().__init__(parent)
         current_dir = Path(__file__).parent
@@ -24,6 +26,7 @@ class ConanInstallDialog(QtWidgets.QDialog):
         self.button_box.accepted.connect(self.on_install)
         self.pkg_installed = ""
         self.adjust_to_size()
+        self.pkg_installed_signal = pkg_installed_signal
 
     def adjust_to_size(self):
         """ Expands the dialog to the length of the install ref text.
@@ -39,30 +42,11 @@ class ConanInstallDialog(QtWidgets.QDialog):
         update_check_state = False
         if self.update_check_box.checkState() == Qt.Checked:
             update_check_state = True
-
+        auto_install_checked = False
+        if self.auto_install_check_box.checkState() == Qt.Checked:
+            auto_install_checked = True
         ref_text = self.conan_ref_line_edit.text()
-        if ":" in ref_text:  # pkg ref
-            pkg_ref = PackageReference.loads(ref_text)
-            package = app.conan_api.get_remote_pkg_from_id(pkg_ref)
-            app.conan_api.install_package(pkg_ref.ref, package, update_check_state)
-            self.pkg_installed = pkg_ref.id
-            return
-        else:  # recipe ref
-            conan_ref = ConanFileReference.loads(ref_text)
-            auto_install_checked = False
-            if self.auto_install_check_box.checkState() == Qt.Checked:
-                auto_install_checked = True
-            # TODO do in thread!
-            if auto_install_checked:
-                pkg_id, pkg_path = app.conan_api.install_best_matching_package(
-                    conan_ref, update=update_check_state)
-                if pkg_path.is_dir():
-                    self.pkg_installed = pkg_id
-            else:
-                #infos = app.conan_api.conan.install_reference(conan_ref, update=update_check_state)
-                app.conan_worker.put_ref_in_install_queue(
-                    str(conan_ref), self.conan_options, self.parent.parent.conan_info_updated)
+        conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": {},
+            "options": {}, "update": update_check_state, "auto_install": auto_install_checked}
 
-                # if not infos.get("error", True):
-                #     id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
-                #     self.pkg_installed = id
+        app.conan_worker.put_ref_in_install_queue(conan_worker_element, self.pkg_installed_signal)

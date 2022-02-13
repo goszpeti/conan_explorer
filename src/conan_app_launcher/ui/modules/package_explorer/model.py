@@ -81,7 +81,6 @@ class PkgSelectModel(TreeModel):
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
-        self.setup_model_data()
 
     def setup_model_data(self):
         for conan_ref in app.conan_api.get_all_local_refs():

@@ -9,16 +9,53 @@ import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (INVALID_CONAN_REF,
                                 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
                                 USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
+from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common.icon import extract_icon, get_icon_from_image_file, get_themed_asset_image
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
+from conan_app_launcher.ui.data import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
 
 Qt = QtCore.Qt
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.model import UiApplicationModel
+5
 
+class UiAppGridModel(UiAppGridConfig, QtCore.QObject):
+
+    def __init__(self, *args, **kwargs):
+        UiAppGridConfig.__init__(self, *args, **kwargs)
+        QtCore.QObject.__init__(self)
+        self.tabs: List[UiTabModel]
+
+    def save(self):
+        if self.parent:
+            self.parent.save()
+
+    def load(self, ui_config: UiAppGridConfig, parent) -> "UiAppGridModel":
+        super().__init__(ui_config.tabs)
+        self.parent = parent
+        # add default tab and link
+        # if not ui_config.tabs:
+        #     ui_config.tabs.append(UiTabConfig())
+        #     ui_config.tabs[0].apps.append(UiAppLinkConfig())
+        # load all submodels
+        tabs_model = []
+        for tab_config in self.tabs:
+            tabs_model.append(UiTabModel().load(tab_config, self))
+        self.tabs = tabs_model
+        return self
+
+    def get_all_conan_worker_elements(self) -> List[ConanWorkerElement]:
+        """ Helper function to generate a unique list of all ConanWorkerElements """
+        conan_refs: List[ConanWorkerElement] = []
+        for tab in self.tabs:
+            for app in tab.apps:
+                conan_worker_element: ConanWorkerElement = {"ref_pkg_id": app.conan_ref, "settings": {},
+                                                            "options": app.conan_options, "update": False, "auto_install": True}
+                if conan_worker_element not in conan_refs:
+                    conan_refs.append(conan_worker_element)
+        return conan_refs
 
 class UiTabModel(UiTabConfig, QAbstractListModel):
     """ Representation of a tab entry of the config schema """
@@ -27,9 +64,10 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
         """ Create an empty AppModel on init, so we can load it later"""
         UiTabConfig.__init__(self, *args, **kwargs)
         QAbstractListModel.__init__(self)
+        self.parent: UiAppGridModel
         self.apps: List[UiAppLinkModel]
 
-    def load(self, config: UiTabConfig, parent: "UiApplicationModel") -> "UiTabModel":
+    def load(self, config: UiTabConfig, parent: "UiAppGridModel") -> "UiTabModel":
         super().__init__(config.name, config.apps)
         self.parent = parent
         # load all submodels
@@ -43,7 +81,7 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
         if self.parent:  # delegate to top
             self.parent.save()
 
-    # override QAbstractListModel methods
+    # override QAbstractListModel methods - used for rearrange functions
     def data(self, index, role):
         if role == Qt.DisplayRole:
             return self.apps[index.row()].name
@@ -123,7 +161,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
             self.set_package_info(app.conan_api.info_cache.get_local_package_path(self._conan_file_reference))
         elif not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
-            package_folder = app.conan_api.get_path_or_install(self._conan_file_reference, self.conan_options)
+            _, package_folder = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
             self.set_package_info(package_folder)
 
     def register_update_callback(self, update_func: Callable):
@@ -159,10 +197,11 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def trigger_conan_update(self):
         try:
-            app.conan_worker.put_ref_in_install_queue(
-                str(self._conan_ref), self.conan_options, self.parent.parent.conan_info_updated)
+            conan_worker_element: ConanWorkerElement = {"ref_pkg_id": str(self._conan_ref), "settings": {},
+                                                        "options": self.conan_options, "update": True, "auto_install": True}
+            app.conan_worker.put_ref_in_install_queue(conan_worker_element, self.parent.parent.parent.conan_pkg_installed)
             app.conan_worker.put_ref_in_version_queue(
-                str(self._conan_ref), self.parent.parent.conan_info_updated)
+                conan_worker_element,  self.parent.parent.parent.conan_pkg_installed)
         except Exception as error:
             # errors happen fairly often, keep going
             Logger().warning(f"Conan reference invalid {str(error)}")

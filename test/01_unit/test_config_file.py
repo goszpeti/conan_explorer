@@ -15,7 +15,7 @@ def test_new_filename_is_created(base_fixture):
     """
     new_file_path = Path(tempfile.gettempdir()) / "newfile.config"
     config = JsonUiConfig(new_file_path).load()
-    assert config.tabs == []
+    assert config.app_grid.tabs == []
     assert new_file_path.exists()
 
 
@@ -24,7 +24,7 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
     Tests reading a correct config json with 2 tabs.
     Expects the same values as in the file.
     """
-    tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    tabs = JsonUiConfig(ui_config_fixture).load().app_grid.tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
     assert tab0_entries[0].conan_ref == "example/9.9.9@local/testing"
@@ -55,7 +55,7 @@ def test_update(base_fixture):
     temp_file = Path(tempfile.gettempdir()) / "update.json"
     copy_file(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
 
-    tabs = JsonUiConfig(temp_file).load().tabs
+    tabs = JsonUiConfig(temp_file).load().app_grid.tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
     assert tab0_entries[0].conan_ref == "m4/1.4.19@_/_"
@@ -81,7 +81,7 @@ def test_read_invalid_version(base_fixture, capfd):
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     config = JsonUiConfig(base_fixture.testdata_path / "config_file" / "wrong_version.json").load()
-    assert config.tabs == []
+    assert config.app_grid.tabs == []
     captured = capfd.readouterr()
     assert "Failed validating" in captured.err
     assert "version" in captured.err
@@ -93,7 +93,7 @@ def test_read_invalid_content(base_fixture, capfd):
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     config = JsonUiConfig(base_fixture.testdata_path / "config_file" / "invalid_syntax.json").load()
-    assert config.tabs == []
+    assert config.app_grid.tabs == []
     captured = capfd.readouterr()
     assert "Expecting property name" in captured.err
 

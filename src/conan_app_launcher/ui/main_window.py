@@ -30,6 +30,8 @@ class MainWindow(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
     TOOLBOX_GRID_ITEM = 0
     TOOLBOX_PACKAGES_ITEM = 1
+    conan_pkg_installed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
+    conan_pkg_removed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
 
     display_versions_changed = QtCore.pyqtSignal()
     display_channels_changed = QtCore.pyqtSignal()
@@ -39,7 +41,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, qt_app):
         super().__init__()
-        self.model = UiApplicationModel()
+        self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
         current_dir = Path(__file__).parent
         self.ui = uic.loadUi(current_dir / "main.ui", baseinstance=self)
         self._about_dialog = AboutDialog(self)
@@ -51,7 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.new_message_logged.connect(self.write_log)
 
         # load app grid
-        self.app_grid = AppGridView(self, self.model)
+        self.app_grid = AppGridView(self, self.model.app_grid)
         self.local_package_explorer = LocalConanPackageExplorer(self)
         self.search_dialog: Optional[ConanSearchDialog] = None
 
@@ -96,7 +98,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.model.loadf(config_source_str)
 
         # model loaded, now load the gui elements, which have a static model
-        self.app_grid.load()
+        self.app_grid.re_init(self.model.app_grid)
 
         # TODO: Other modules are currently loaded on demand. A window and view restoration would be nice and
         # should be called from here
@@ -131,7 +133,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # all icons must be reloaded
         self.load_icons()
         self.local_package_explorer.refresh_theme()
-        self.app_grid.re_init(self.model)  # needs a whole reload because models need to be reinitialized
+        self.app_grid.re_init(self.model.app_grid)  # needs a whole reload because models need to be reinitialized
 
     @pyqtSlot()
     def on_main_view_changed(self):
@@ -152,7 +154,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @ pyqtSlot()
     def open_conan_search_dialog(self):
         # parent=None enables to hide the dialog behind the application window
-        self.search_dialog = ConanSearchDialog(None, self.local_package_explorer)
+        self.search_dialog = ConanSearchDialog(None, self)
         self.search_dialog.show()
 
     @ pyqtSlot()
@@ -195,7 +197,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.model.loadf(new_file)
 
             # conan works, model can be loaded
-            self.app_grid.re_init(self.model)  # loads tabs
+            self.app_grid.re_init(self.model.app_grid)  # loads tabs
             # self.apply_view_settings()  # now view settings can be applied
 
     @pyqtSlot()

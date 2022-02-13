@@ -115,10 +115,10 @@ def test_get_path_or_install(base_fixture):
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
     # Gets package path / installs the package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF))
+    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
     # check again for already installed package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF))
+    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
 
 
@@ -130,7 +130,7 @@ def test_get_path_or_install_manual_options(capsys):
     # This package has an option "shared" and is fairly small.
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF), {"shared": "True"})
+    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {"shared": "True"})
     if platform.system() == "Windows":
         assert (package_folder / "bin" / "python.exe").is_file()
     elif platform.system() == "Linux":
@@ -166,7 +166,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     os.system(f"conan remove {ref} -f")
 
     conan = ConanApi()
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(ref))
+    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(ref))
     assert (package_folder / "bin").is_dir()
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
@@ -224,10 +224,13 @@ def test_conan_worker(base_fixture, mocker):
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
-    conan_refs: List[ConanWorkerElement] = [{"reference": "m4/1.4.19@_/_", "options": {}},
-                                            {"reference": "zlib/1.2.11@conan/stable", "options": {"shared": "True"}}]
+    conan_refs: List[ConanWorkerElement] = [{"ref_pkg_id": "m4/1.4.19@_/_", "options": {}, 
+                                            "settings": {}, "update": False,  "auto_install": True},
+                                            {"ref_pkg_id": "zlib/1.2.11@conan/stable", "options": {"shared": "True"},
+                                             "settings": {}, "update": False,  "auto_install": True}
+                                           ]
 
-    mock_func = mocker.patch('conan_app_launcher.core.ConanApi.get_path_or_install')
+    mock_func = mocker.patch('conan_app_launcher.core.ConanApi.get_path_or_auto_install')
     import conan_app_launcher.app as app
 
     conan_worker = ConanWorker(ConanApi(), app.active_settings)
