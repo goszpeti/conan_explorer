@@ -1,13 +1,13 @@
-from .tab import TabGrid
 from typing import TYPE_CHECKING, List
 
 from conan_app_launcher import ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, asset_path
+from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkModel,
                                                           UiTabModel)
-from conan_app_launcher.ui.common.icon import get_themed_asset_image
-
 from PyQt5 import QtCore, QtGui, QtWidgets
+
+from .tab import TabGrid
 
 Qt = QtCore.Qt
 
@@ -172,7 +172,7 @@ class AppGridView():
                     tab.open_app_link_add_dialog(model.load(app_config, tab.model))
 
     def update_conan_info(self, conan_ref: str, pkg_id: str):
-        if self._main_window.isHidden(): # the gui is about to shut down
+        if self._main_window.isHidden():  # the gui is about to shut down
             return
         # call update on every entry which has this ref
         for tab in self.get_tabs():

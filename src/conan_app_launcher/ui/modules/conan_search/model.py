@@ -148,7 +148,7 @@ class PkgSearchModel(TreeModel):
         ref_row = 0
         for ref_row in range(self.root_item.child_count()):
             current_item = self.root_item.child_items[ref_row]
-            for child_row in range(len(current_item.child_items)): # always has one dummy child count
+            for child_row in range(len(current_item.child_items)):  # always has one dummy child count
                 current_child_item = current_item.child_items[child_row]
                 if current_child_item == item:
                     found_item = True
@@ -161,7 +161,6 @@ class PkgSearchModel(TreeModel):
             Logger().debug(f"Cannot find {str(item)} in search model")
             return QtCore.QModelIndex()
         return self.index(ref_row, 0, QtCore.QModelIndex())
-
 
     @pyqtSlot(str, str)
     def mark_pkg_as_installed(self, conan_ref: str, pkg_id: str):

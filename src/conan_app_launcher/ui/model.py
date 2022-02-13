@@ -1,18 +1,15 @@
 
-from abc import ABC
-from typing import List, Optional, TypeVar
+from typing import Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, user_save_path)
-from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import LAST_CONFIG_FILE
-from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiAppLinkConfig, UiAppGridConfig, UiConfig,
-                                        ui_config_factory, UiConfigInterface, UiTabConfig)
-from conan_app_launcher.ui.modules.app_grid.model import UiAppGridModel, UiTabModel
-from PyQt5 import QtCore
+from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiConfig,
+                                        ui_config_factory, UiConfigInterface)
+from conan_app_launcher.ui.modules.app_grid.model import UiAppGridModel
 
 
-class UiApplicationModel(UiConfig):  # TODO needs to be sliced in an extra
+class UiApplicationModel(UiConfig):
     CONFIG_TYPE = UI_CONFIG_JSON_TYPE
 
     def __init__(self, conan_pkg_installed=None, conan_pkg_removed=None, *args, **kwargs):
@@ -25,6 +22,7 @@ class UiApplicationModel(UiConfig):  # TODO needs to be sliced in an extra
         self.conan_pkg_removed = conan_pkg_removed
 
     def save(self):
+        """ Save configuration """
         if self._ui_config_data:
             self._ui_config_data.save(self)
 

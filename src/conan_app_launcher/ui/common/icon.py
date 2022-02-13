@@ -27,6 +27,7 @@ def get_inverted_asset_image(image_path: Path):
         img.save(str(inverted_img_path))
     return str(inverted_img_path)
 
+
 def get_icon_from_image_file(image_path: Path) -> QIcon:
     if image_path.suffix == ".ico":
         return QIcon(str(image_path))

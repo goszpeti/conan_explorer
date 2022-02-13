@@ -1,6 +1,7 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from conan_app_launcher import asset_path, __version__, REPO_URL, AUTHOR
 
+
 class AboutDialog(QtWidgets.QDialog):
     """ Defines Help->About Dialog """
     html_content = f"""

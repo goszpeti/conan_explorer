@@ -1,10 +1,10 @@
 
 from pathlib import Path
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt

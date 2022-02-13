@@ -3,9 +3,10 @@ import os
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-from conan_app_launcher.logger import Logger
 from conan_app_launcher import INVALID_CONAN_REF
+from conan_app_launcher.logger import Logger
 from conans.model.ref import ConanFileReference
+
 
 class ConanInfoCache():
     """
@@ -15,7 +16,7 @@ class ConanInfoCache():
 
     CACHE_FILE_NAME = "cache.json"
 
-    def __init__(self, cache_dir: Path, local_refs: List[ConanFileReference]=None):
+    def __init__(self, cache_dir: Path, local_refs: List[ConanFileReference] = None):
         if not local_refs:
             local_refs = []
         self._cache_file = cache_dir / self.CACHE_FILE_NAME
@@ -37,7 +38,7 @@ class ConanInfoCache():
         conan_ref_str = str(conan_ref)
         if not conan_ref_str or conan_ref_str == INVALID_CONAN_REF:
             return Path("NULL")
-            
+
         pkg_path_str = self._local_packages.get(conan_ref_str, "")
         if not pkg_path_str:
             pkg_path = Path("NULL")
@@ -55,10 +56,10 @@ class ConanInfoCache():
 
     def get_similar_remote_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
         """ Return cached info on remotely available conan refs from the same ref name and user. """
-        if not user: # official pkgs have no user, substituted by _
+        if not user:  # official pkgs have no user, substituted by _
             user = "_"
         refs: List[ConanFileReference] = []
-        if user == "*": # find all refs with same name
+        if user == "*":  # find all refs with same name
             name_pkgs = self._remote_packages.get(name, {})
             for user in name_pkgs:
                 for version_channel in self._remote_packages.get(name, {}).get(user, []):
@@ -77,7 +78,7 @@ class ConanInfoCache():
         for ref in self._all_local_refs:
             if ref.name == name:
                 if user != "*" and ref.user != user:
-                    continue # doe not match user
+                    continue  # doe not match user
                 refs.append(ref)
         return refs
 
@@ -100,12 +101,12 @@ class ConanInfoCache():
         for ref in self._all_local_refs:
             refs.append(str(ref))
         return refs
-        
+
     def search(self, query: str) -> Tuple[Set[str], Set[str]]:
         """
         Return cached info on available conan refs from a query 
         <Currently unsused!>
-        """ 
+        """
         remote_refs = set()
         local_refs = set()
 

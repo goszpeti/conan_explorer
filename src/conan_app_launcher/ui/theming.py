@@ -1,9 +1,9 @@
 from pathlib import Path
-from jinja2 import Template
 
 import conan_app_launcher.app as app
 from conan_app_launcher import base_path
 from conan_app_launcher.settings import FONT_SIZE, GUI_STYLE, GUI_STYLE_DARK
+from jinja2 import Template
 from PyQt5 import QtWidgets
 
 

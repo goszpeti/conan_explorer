@@ -1,10 +1,10 @@
 
 from pathlib import Path
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -46,7 +46,7 @@ class AppEditDialog(QtWidgets.QDialog):
 
     def loading_finished(self):
         self._ui.conan_ref_label.setText("Conan Reference (query finished)")
-  
+
     def save_data(self):
         # check all input validations
         if not self._ui.conan_ref_line_edit.hasAcceptableInput():

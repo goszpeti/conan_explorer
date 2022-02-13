@@ -3,11 +3,11 @@ import typing
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, Callable
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from conan_app_launcher.settings import (ENABLE_APP_COMBO_BOXES,
                                          SettingsInterface)
-from PyQt5.QtCore import pyqtBoundSignal, pyqtSignal
+from PyQt5.QtCore import pyqtBoundSignal
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
@@ -25,11 +25,11 @@ from conans.model.ref import ConanFileReference, PackageReference
 
 
 class ConanWorkerElement(TypedDict):
-    ref_pkg_id: str # format in <ref>:<id>. Id is optional. If id is used options, settings and auto_isntall is ignored
-    options: Dict[str, str] # conan options with key-value pairs
+    ref_pkg_id: str  # format in <ref>:<id>. Id is optional. If id is used options, settings and auto_isntall is ignored
+    options: Dict[str, str]  # conan options with key-value pairs
     settings: Dict[str, str]  # conan settings with key-value pairs
-    update: bool # use -u flag for install
-    auto_install: bool # automatically determine best matching package.
+    update: bool  # use -u flag for install
+    auto_install: bool  # automatically determine best matching package.
 
 
 class ConanWorker():
@@ -41,7 +41,7 @@ class ConanWorker():
         self._conan_versions_queue: Queue[Tuple[ConanWorkerElement, Optional[pyqtBoundSignal]]] = Queue(maxsize=0)
         self._version_worker: Optional[Thread] = None
         self._install_worker: Optional[Thread] = None
-        self._shutdown_requested = False # internal flag to cancel worker on shutdown
+        self._shutdown_requested = False  # internal flag to cancel worker on shutdown
         self._settings = settings
 
     def update_all_info(self, conan_elements: List[ConanWorkerElement],
@@ -89,7 +89,7 @@ class ConanWorker():
 
     def _work_on_conan_install_queue(self):
         """ Call conan install from queue 
-        
+
         """
         signal = None
         conan_ref = None
@@ -104,7 +104,7 @@ class ConanWorker():
             auto_install = worker_element.get("auto_install", True)
             # package path will be updated in conan cache
             try:
-                if ":" in ref_pkg_id: # pkg ref
+                if ":" in ref_pkg_id:  # pkg ref
                     pkg_ref = PackageReference.loads(ref_pkg_id)
                     conan_ref = pkg_ref.ref
                     pkg_id = pkg_ref.id

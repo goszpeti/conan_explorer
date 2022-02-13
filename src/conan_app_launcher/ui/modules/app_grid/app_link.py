@@ -1,19 +1,20 @@
 
-from typing import TYPE_CHECKING
 from pathlib import Path
+from typing import TYPE_CHECKING
+
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher import asset_path
-from conan_app_launcher.logger import Logger
 from conan_app_launcher.core import open_in_file_manager, run_file
+from conan_app_launcher.logger import Logger
+from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
+                                         DISPLAY_APP_USERS,
+                                         DISPLAY_APP_VERSIONS,
+                                         ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
-from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, 
-                                        ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
-from .common import AppButton
-from .common import AppEditDialog
-from .common import AppsMoveDialog
-
 from PyQt5 import QtCore, QtGui, QtWidgets
+
+from .common import AppButton, AppEditDialog, AppsMoveDialog
 
 if TYPE_CHECKING:
     from.tab import TabGrid
@@ -47,12 +48,11 @@ class AppLink(QtWidgets.QVBoxLayout):
     def __init__(self, parent: "TabGrid", model: UiAppLinkModel):
         super().__init__()
         self._parent_tab = parent  # save parent - don't use qt signals ands slots
-        self._lock_cboxes = False # lock combo boxes to ignore changes of conanref
+        self._lock_cboxes = False  # lock combo boxes to ignore changes of conanref
         self._enable_combo_boxes = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
 
         self.model = model
         self._init_app_link()
-
 
     @staticmethod
     def max_width() -> int:
@@ -67,7 +67,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         """ Initalize all subwidgets with default values. """
         self._app_button = AppButton(self._parent_tab, asset_path / "icons" / "app.png")
         self._app_name_label = QtWidgets.QLabel(self._parent_tab)
-    
+
         if self._enable_combo_boxes:
             self._app_version_cbox = QtWidgets.QComboBox(self._parent_tab)
             self._app_user_cbox = QtWidgets.QComboBox(self._parent_tab)
@@ -175,7 +175,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def load(self):
         self.model.register_update_callback(self.update_with_conan_info)
         self._apply_new_config()
-        self.update_with_conan_info() # TODO?
+        self.update_with_conan_info()  # TODO?
 
     def on_move(self):
         move_dialog = AppsMoveDialog(parent=self.parentWidget(), tab_ui_model=self.model.parent)

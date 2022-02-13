@@ -1,10 +1,9 @@
 from pathlib import Path
 from typing import Optional
 
-import conan_app_launcher.app as app
-from conan_app_launcher.core.conan_worker import ConanWorkerElement  # using gobal module pattern
+import conan_app_launcher.app as app  # using gobal module pattern
+from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
-from conans.model.ref import ConanFileReference, PackageReference
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtBoundSignal
 
@@ -12,7 +11,7 @@ Qt = QtCore.Qt
 
 
 class ConanInstallDialog(QtWidgets.QDialog):
-    def __init__(self, parent: Optional[QtWidgets.QWidget], conan_ref: str, pkg_installed_signal: Optional[pyqtBoundSignal]=None):
+    def __init__(self, parent: Optional[QtWidgets.QWidget], conan_ref: str, pkg_installed_signal: Optional[pyqtBoundSignal] = None):
         """ conan_ref can be in full ref format with <ref>:<id> """
         super().__init__(parent)
         current_dir = Path(__file__).parent
@@ -46,6 +45,6 @@ class ConanInstallDialog(QtWidgets.QDialog):
             auto_install_checked = True
         ref_text = self.conan_ref_line_edit.text()
         conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": {},
-            "options": {}, "update": update_check_state, "auto_install": auto_install_checked}
+                                                    "options": {}, "update": update_check_state, "auto_install": auto_install_checked}
 
         app.conan_worker.put_ref_in_install_queue(conan_worker_element, self.pkg_installed_signal)

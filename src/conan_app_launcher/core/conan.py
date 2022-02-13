@@ -3,8 +3,8 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
-from conans.client.cache.remote_registry import Remote
 
+from conans.client.cache.remote_registry import Remote
 from conans.client.output import ConanOutput
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -28,8 +28,9 @@ except Exception:
 
 from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path)
-from .conan_cache import ConanInfoCache
 from conan_app_launcher.logger import Logger
+
+from .conan_cache import ConanInfoCache
 
 
 class ConanPkg(TypedDict, total=False):
@@ -153,14 +154,14 @@ class ConanApi():
         """
         pkg_id = ""
         try:
-            infos = self.conan.install_reference(str(conan_ref), settings=conan_settings, options=conan_options, update=update)
+            infos = self.conan.install_reference(
+                str(conan_ref), settings=conan_settings, options=conan_options, update=update)
             if not infos.get("error", True):
                 pkg_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
             return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
         except Exception as error:
             Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return (pkg_id, Path("NULL"))
-
 
     def install_package(self, conan_ref: ConanFileReference, package: ConanPkg, update=True) -> bool:
         """

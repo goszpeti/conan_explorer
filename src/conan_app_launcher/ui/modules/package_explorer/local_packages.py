@@ -14,8 +14,7 @@ from conan_app_launcher.ui.data import UiAppLinkConfig
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .model import (PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem,
-                    PkgSelectModel)
+from .model import PROFILE_TYPE, REF_TYPE, PackageTreeItem, PkgSelectModel
 
 Qt = QtCore.Qt
 
@@ -92,7 +91,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
 
     def on_toolbox_changed(self, index):
-        self.refresh_pkg_selection_view(update=False) # only update the first time
+        self.refresh_pkg_selection_view(update=False)  # only update the first time
 
     def on_pkg_refresh_clicked(self):
         self.refresh_pkg_selection_view(update=True)

@@ -2,10 +2,9 @@ from threading import Thread
 from typing import Callable
 
 import conan_app_launcher.app as app  # using gobal module pattern
-from PyQt5 import QtCore, QtWidgets
-from conans.model.ref import ConanFileReference, PackageReference
-
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
+from conans.model.ref import ConanFileReference, PackageReference
+from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 

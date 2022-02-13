@@ -1,16 +1,17 @@
 import pprint
 from pathlib import Path
-from typing import List, Optional, TYPE_CHECKING
-
-from conans.model.ref import ConanFileReference
+from typing import TYPE_CHECKING, List, Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from conan_app_launcher.ui.common import QtLoaderObject
 from conan_app_launcher.core import open_file
+from conan_app_launcher.ui.common import QtLoaderObject
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.modules.conan_install import ConanInstallDialog
+from conans.model.ref import ConanFileReference
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
+
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
+
 Qt = QtCore.Qt
 
 if TYPE_CHECKING:
@@ -24,7 +25,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
     def __init__(self, parent: Optional[QtWidgets.QWidget] = None, main_window: Optional["MainWindow"] = None):
         super().__init__(parent)
         if main_window:
-            self._main_window = main_window # needed for signals and local pkg explorer, if started from main window
+            self._main_window = main_window  # needed for signals and local pkg explorer, if started from main window
         else:
             self._main_window = self
         current_dir = Path(__file__).parent

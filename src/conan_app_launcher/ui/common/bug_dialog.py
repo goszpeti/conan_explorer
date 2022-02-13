@@ -34,7 +34,7 @@ Add any other context about the problem here.
 
 
 def bug_reporting_dialog(excvalue, tb):
-    import urllib.parse # late import hopefully we don't need this
+    import urllib.parse  # late import hopefully we don't need this
     error_text = f"{excvalue}\n" + "\n".join(traceback.format_tb(tb, limit=None))
     title = urllib.parse.quote("Application Crash on <>")
     body = urllib.parse.quote(f"{bug_dialog_text}\n**Stacktrace**:\n" + error_text)
@@ -52,7 +52,8 @@ def bug_reporting_dialog(excvalue, tb):
     dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
     dialog.setIcon(QtWidgets.QMessageBox.Warning)
     dialog.exec_()
-    return dialog # for testing
+    return dialog  # for testing
+
 
 def show_bug_dialog_exc_hook(exctype, excvalue, tb):
     print("Application crashed")

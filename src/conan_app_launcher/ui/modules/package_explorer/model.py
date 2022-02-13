@@ -1,14 +1,12 @@
 import pprint
-from time import sleep
 from typing import List, Union
 
 import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher import asset_path
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.ui.common.icon import get_platform_icon, get_themed_asset_image
+from conan_app_launcher.ui.common.icon import (get_platform_icon,
+                                               get_themed_asset_image)
 from conan_app_launcher.ui.common.model import TreeModel, TreeModelItem
-
 from PyQt5 import QtCore, QtGui
 
 Qt = QtCore.Qt
@@ -74,6 +72,7 @@ class PackageTreeItem(TreeModelItem):
         super().__init__(data, parent)
         self.type = item_type
 
+
 class PkgSelectModel(TreeModel):
 
     def __init__(self, *args, **kwargs):
@@ -84,14 +83,13 @@ class PkgSelectModel(TreeModel):
         self.proxy_model.setSourceModel(self)
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
 
-
     def setup_model_data(self):
         for conan_ref in app.conan_api.get_all_local_refs():
             conan_item = PackageTreeItem([str(conan_ref)], self.root_item)
             infos = app.conan_api.get_local_pkgs_from_ref(conan_ref)
             for info in infos:
-               pkg_item = PackageTreeItem([info], conan_item, PROFILE_TYPE)
-               conan_item.append_child(pkg_item)
+                pkg_item = PackageTreeItem([info], conan_item, PROFILE_TYPE)
+                conan_item.append_child(pkg_item)
             self.root_item.append_child(conan_item)
 
     def data(self, index: QtCore.QModelIndex, role):  # override

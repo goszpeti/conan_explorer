@@ -4,9 +4,8 @@ from pathlib import Path
 from typing import Optional
 
 from conan_app_launcher import ICON_SIZE
-from PyQt5 import QtCore, QtGui, QtWidgets
-
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
 

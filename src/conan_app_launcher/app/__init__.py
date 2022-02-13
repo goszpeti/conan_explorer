@@ -4,9 +4,11 @@ import sys
 import tempfile
 from typing import TYPE_CHECKING
 
-from conan_app_launcher import PKG_NAME, SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
+from conan_app_launcher import (PKG_NAME, SETTINGS_FILE_NAME, __version__,
+                                asset_path, user_save_path)
 from conan_app_launcher.core import ConanApi, ConanWorker
-from conan_app_launcher.settings import SETTINGS_INI_TYPE, settings_factory, SettingsInterface
+from conan_app_launcher.settings import (SETTINGS_INI_TYPE, SettingsInterface,
+                                         settings_factory)
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import MainWindow
@@ -34,7 +36,8 @@ conan_worker = ConanWorker(conan_api, active_settings)
 def run_application(conan_search=False):
     """ Start the Qt application and an all main base """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
-    from conan_app_launcher.ui.common.bug_dialog import show_bug_dialog_exc_hook
+    from conan_app_launcher.ui.common.bug_dialog import \
+        show_bug_dialog_exc_hook
     from conan_app_launcher.ui.theming import activate_theme
     sys.excepthook = show_bug_dialog_exc_hook
 
@@ -60,7 +63,8 @@ def run_application(conan_search=False):
     app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
 
     if conan_search:
-        from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
+        from conan_app_launcher.ui.modules.conan_search import \
+            ConanSearchDialog
         main_window = ConanSearchDialog()
     else:
         from conan_app_launcher.ui.main_window import MainWindow

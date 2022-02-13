@@ -1,25 +1,29 @@
 import platform
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable, List, Optional
-from PyQt5.QtCore import QAbstractListModel, QModelIndex
-from PyQt5 import QtCore
 
-from PyQt5.QtGui import QIcon
 import conan_app_launcher.app as app  # using gobal module pattern
-from conan_app_launcher import (INVALID_CONAN_REF,
-                                USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
-                                USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
+from conan_app_launcher import (
+    INVALID_CONAN_REF, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
+    USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
-from conan_app_launcher.ui.common.icon import extract_icon, get_icon_from_image_file, get_themed_asset_image
 from conan_app_launcher.logger import Logger
-from conan_app_launcher.ui.data import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
+from conan_app_launcher.ui.common.icon import (extract_icon,
+                                               get_icon_from_image_file,
+                                               get_themed_asset_image)
+from conan_app_launcher.ui.data import (UiAppGridConfig, UiAppLinkConfig,
+                                        UiTabConfig)
 from conans.model.ref import ConanFileReference
+from PyQt5 import QtCore
+from PyQt5.QtCore import QAbstractListModel, QModelIndex
+from PyQt5.QtGui import QIcon
 
 Qt = QtCore.Qt
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.model import UiApplicationModel
 5
+
 
 class UiAppGridModel(UiAppGridConfig, QtCore.QObject):
 
@@ -56,6 +60,7 @@ class UiAppGridModel(UiAppGridConfig, QtCore.QObject):
                 if conan_worker_element not in conan_refs:
                     conan_refs.append(conan_worker_element)
         return conan_refs
+
 
 class UiTabModel(UiTabConfig, QAbstractListModel):
     """ Representation of a tab entry of the config schema """
@@ -199,7 +204,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             conan_worker_element: ConanWorkerElement = {"ref_pkg_id": str(self._conan_ref), "settings": {},
                                                         "options": self.conan_options, "update": True, "auto_install": True}
-            app.conan_worker.put_ref_in_install_queue(conan_worker_element, self.parent.parent.parent.conan_pkg_installed)
+            app.conan_worker.put_ref_in_install_queue(
+                conan_worker_element, self.parent.parent.parent.conan_pkg_installed)
             app.conan_worker.put_ref_in_version_queue(
                 conan_worker_element,  self.parent.parent.parent.conan_pkg_installed)
         except Exception as error:

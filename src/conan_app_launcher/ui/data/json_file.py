@@ -1,10 +1,10 @@
 import json
 from dataclasses import asdict
-from packaging.version import Version
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
 import jsonschema
+from packaging.version import Version
 
 from . import (UiAppGridConfig, UiAppLinkConfig, UiConfig, UiConfigInterface,
                UiTabConfig)
