@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from time import sleep
 from typing import TYPE_CHECKING, Callable, List, Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
@@ -27,8 +28,8 @@ class LocalConanPackageExplorer(QtCore.QObject):
         super().__init__()
         self._main_window = main_window
         self.pkg_sel_model = None
-        self._pkg_sel_model_loader = QtLoaderObject()
-        self._pkg_sel_model_loaded = False
+        self._pkg_sel_model_loader = QtLoaderObject(self)
+        self._pkg_sel_model_loaded = True
         self.fs_model = None
 
         # TODO belongs in a model?
@@ -91,7 +92,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
 
     def on_toolbox_changed(self, index):
-        self.refresh_pkg_selection_view(update=False)
+        self.refresh_pkg_selection_view(update=False) # only update the first time
 
     def on_pkg_refresh_clicked(self):
         self.refresh_pkg_selection_view(update=True)
@@ -180,29 +181,28 @@ class LocalConanPackageExplorer(QtCore.QObject):
             self._main_window, self.pkg_sel_model.setup_model_data, self.finish_select_model_init, "Reading Packages")
 
     def finish_select_model_init(self):
-        self.proxy_model = PackageFilter()
-        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
         if self.pkg_sel_model:
-            self.proxy_model.setSourceModel(self.pkg_sel_model)
-            self._main_window.ui.package_select_view.setModel(self.proxy_model)
+
+            self._main_window.ui.package_select_view.setModel(self.pkg_sel_model.proxy_model)
             self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
             self.set_filter_wildcard()  # reapply package filter query
         else:
             Logger().error("Can't load local packages!")
-        self._pkg_sel_model_loaded = True
 
     def wait_for_loading_pkgs(self):
         Logger().debug("wait for loading thread")
         # execute once
         QtWidgets.QApplication.processEvents()
-        # wait for loading thread
-        while not self._pkg_sel_model_loaded:
+        while not self._pkg_sel_model_loader.progress_dialog:
+            sleep(1)
+        while not self._pkg_sel_model_loader.progress_dialog.isHidden():
             QtWidgets.QApplication.processEvents()
 
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace
         text = self._main_window.ui.package_filter_edit.toPlainText().strip()
-        self.proxy_model.setFilterWildcard(text)
+        if self.pkg_sel_model:
+            self.pkg_sel_model.proxy_model.setFilterWildcard(text)
 
     def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
@@ -402,15 +402,16 @@ class LocalConanPackageExplorer(QtCore.QObject):
         except Exception as e:
             Logger().warning(f"Can't delete {file}: {str(e)}")
 
-    def on_file_copy(self):
+    def on_file_copy(self) -> Optional[QtCore.QUrl]:
         file = self._get_selected_pkg_file()
         if not file:
-            return
+            return None
         data = QtCore.QMimeData()
         url = QtCore.QUrl.fromLocalFile(file)
         data.setUrls([url])
 
         QtWidgets.QApplication.clipboard().setMimeData(data)
+        return url
 
     def on_file_paste(self):
         data = QtWidgets.QApplication.clipboard().mimeData()

@@ -82,6 +82,9 @@ class ConanApi():
             self.client_cache = self.conan.app.cache
         else:
             raise NotImplementedError
+        # Experimental fast search - Conan search_packages is VERY slow
+        # HACK: Removed the  @api_method decorator by getting the original function from the closure attribute
+        self.search_packages = self.conan.search_packages.__closure__[0].cell_contents
         # don't hang on startup
         try:  # use try-except because of Conan 1.24 envvar errors in tests
             self.remove_locks()
@@ -216,16 +219,14 @@ class ConanApi():
 
     def get_local_pkgs_from_ref(self, conan_ref: ConanFileReference) -> List[ConanPkg]:
         """ Returns all installed pkg ids for a reference. """
-        # Experimental fast search - Conan search_packages is VERY slow
-        # HACK: Removed the  @api_method decorator by getting the original function from the closure attribute
-        search_packages = self.conan.search_packages.__closure__[0].cell_contents
         result: List[ConanPkg] = []
+        response = {}
         try:
-            response = search_packages(self.conan, self.generate_canonical_ref(conan_ref))
+            response = self.search_packages(self.conan, self.generate_canonical_ref(conan_ref))
         except Exception as error:
             Logger().debug(f"{str(error)}")
             return result
-        if not response.get("error"):
+        if not response.get("error", True):
             try:
                 result = response.get("results", [{}])[0].get("items", [{}])[0].get("packages", [{}])
             except Exception:

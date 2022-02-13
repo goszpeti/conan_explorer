@@ -22,13 +22,13 @@ class Worker(QtCore.QObject):
 
 
 class QtLoaderObject(QtCore.QObject):
-    def __init__(self) -> None:
+    def __init__(self, parent) -> None:
+        super().__init__(parent)
         self.progress_dialog: Optional[QtWidgets.QProgressDialog] = None
         self.worker: Optional[Worker] = None
         self.load_thread: Optional[QtCore.QThread] = None
 
     def async_loading(self, parent, work_task: Callable, finish_task: Optional[Callable], loading_text: str):
-        # TODO check if init_model_thread exists and wait for join
         self.progress_dialog = QtWidgets.QProgressDialog(parent)
         self.progress_dialog.setLabelText(loading_text)
         # Window flags to disable close button

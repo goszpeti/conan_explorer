@@ -56,7 +56,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self._ui.remote_list.adjustSize()
 
         self._pkg_result_model = PkgSearchModel()
-        self._pkg_result_loader = QtLoaderObject()
+        self._pkg_result_loader = QtLoaderObject(self)
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()

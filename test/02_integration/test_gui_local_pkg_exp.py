@@ -80,8 +80,13 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
+    app.conan_worker.finish_working()
 
     main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
+    main_gui.local_package_explorer.wait_for_loading_pkgs()
+
+    # restart reload (check for thread safety)
+    main_gui.ui.refresh_button.clicked.emit()
     main_gui.local_package_explorer.wait_for_loading_pkgs()
 
     pkg_sel_model = main_gui.local_package_explorer.pkg_sel_model
@@ -139,7 +144,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     sel_idx = main_gui.local_package_explorer.fs_model.index(str(file), 0)
     main_gui.ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
 
-    # check copy as path
+    # check copy as path - don't check the clipboard, it has issues in windows with qtbot
     cp_text = main_gui.local_package_explorer.on_copy_file_as_path()
     assert Path(cp_text) == file
 
@@ -149,23 +154,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     pid = main_gui.local_package_explorer.on_open_terminal_in_dir()
     assert pid > 0
     import signal
-
-    # TODO check pid is running
     os.kill(pid, signal.SIGTERM)
-    # Check copy
-    main_gui.local_package_explorer.on_file_copy()
-    # tODO mock call
-    assert "file://" in QtWidgets.QApplication.clipboard().text() and cp_text in QtWidgets.QApplication.clipboard().text()
-
-    # check paste
-    Logger().debug("check paste")
-    config_path: Path = ui_no_refs_config_fixture  # use the config file as test data to be pasted
-    data = QtCore.QMimeData()
-    url = QtCore.QUrl.fromLocalFile(str(config_path))
-    data.setUrls([url])
-    QtWidgets.QApplication.clipboard().setMimeData(data)
-    main_gui.local_package_explorer.on_file_paste()  # check new file
-    assert (root_path / config_path.name).exists()
 
     # check "open in file manager"
     Logger().debug("open in file manager")
@@ -184,6 +173,21 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     last_app_link = main_gui.app_grid.model.tabs[0].apps[-1]
     assert last_app_link.executable == "conaninfo.txt"
     assert str(last_app_link.conan_file_reference) == str(cfr)
+
+    # Check copy
+    mime_file = main_gui.local_package_explorer.on_file_copy()
+    mime_file_text = mime_file.toString()
+    assert "file://" in mime_file_text and cp_text in mime_file_text
+
+    # check paste
+    Logger().debug("check paste")
+    config_path: Path = ui_no_refs_config_fixture  # use the config file as test data to be pasted
+    data = QtCore.QMimeData()
+    url = QtCore.QUrl.fromLocalFile(str(config_path))
+    data.setUrls([url])
+    _qapp_instance.clipboard().setMimeData(data)
+    main_gui.local_package_explorer.on_file_paste()  # check new file
+    assert (root_path / config_path.name).exists()
 
     # check delete
     Logger().debug("delete")

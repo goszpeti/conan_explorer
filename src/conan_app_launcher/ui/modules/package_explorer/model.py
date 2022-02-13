@@ -1,4 +1,5 @@
 import pprint
+from time import sleep
 from typing import List, Union
 
 import conan_app_launcher.app as app  # using gobal module pattern
@@ -81,15 +82,17 @@ class PkgSelectModel(TreeModel):
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
+        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+
 
     def setup_model_data(self):
         for conan_ref in app.conan_api.get_all_local_refs():
             conan_item = PackageTreeItem([str(conan_ref)], self.root_item)
-            self.root_item.append_child(conan_item)
             infos = app.conan_api.get_local_pkgs_from_ref(conan_ref)
             for info in infos:
-                pkg_item = PackageTreeItem([info], conan_item, PROFILE_TYPE)
-                conan_item.append_child(pkg_item)
+               pkg_item = PackageTreeItem([info], conan_item, PROFILE_TYPE)
+               conan_item.append_child(pkg_item)
+            self.root_item.append_child(conan_item)
 
     def data(self, index: QtCore.QModelIndex, role):  # override
         if not index.isValid():
