@@ -227,13 +227,14 @@ class LocalConanPackageExplorer(QtCore.QObject):
             id = split_ref[1]
 
         # find the row with the matching reference
-        ref_row = -1
+        found_item = False
         for ref_row in range(self.pkg_sel_model.root_item.child_count()):
             item = self.pkg_sel_model.root_item.child_items[ref_row]
             if item.item_data[0] == conan_ref:
                 Logger().debug(f"Found {conan_ref}@{str(ref_row)} in Local Package Explorer for selection")
+                found_item = True
                 break
-        if ref_row == -1:
+        if not found_item:
             Logger().debug(f"Cannot find {conan_ref} in Local Package Explorer for selection")
             return False
 

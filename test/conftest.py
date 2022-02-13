@@ -11,7 +11,7 @@ from pathlib import Path
 from shutil import copy
 from subprocess import CalledProcessError, check_output
 from threading import Thread
-
+from unittest import mock
 import conan_app_launcher.logger as logger
 import psutil
 import pytest
@@ -214,3 +214,13 @@ def ui_no_refs_config_fixture(base_fixture):
     """ Use temporary default settings and config file based on testdata/app_config_empty_refs.json """
     config_file_path = base_fixture.testdata_path / "app_config_empty_refs.json"
     yield temp_ui_config(config_file_path)
+
+
+@pytest.fixture
+def mock_clipboard(mocker):
+    from PyQt5.QtWidgets import QApplication
+    mocker.patch.object(QApplication, 'clipboard')
+    clipboard = mock.MagicMock()
+    clipboard.supportsSelection.return_value = True
+    QApplication.clipboard.return_value = clipboard
+    return clipboard

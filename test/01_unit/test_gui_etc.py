@@ -19,7 +19,7 @@ from conan_app_launcher.ui.modules.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
-
+import PyQt5
 Qt = QtCore.Qt
 
 
@@ -88,7 +88,10 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
                                                 "options": {}, "update": True, "auto_install": True}
 
 
-def test_conan_search_dialog(base_fixture, qtbot):
+def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
+    cfr = ConanFileReference.loads(TEST_REF)
+    # first with ref + id in constructor
+    id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     from pytestqt.plugin import _qapp_instance
     root_obj = QtWidgets.QWidget()
     widget = ConanSearchDialog(root_obj)
@@ -121,28 +124,52 @@ def test_conan_search_dialog(base_fixture, qtbot):
 
     assert model.root_item.item_data[0] == "Packages"
     assert model.root_item.child_count() == 3
-    widget.hide()
 
     # expand package -> assert number of packages and itemdata
-    # check installed pkg ist highlited
+    # check installed ref ist highlighted
+
+    ref_item = model.get_item_from_ref(TEST_REF)
+    assert ref_item
+    assert ref_item.is_installed
+    index = model.get_index_from_item(ref_item)
+    proxy_view_model = widget._ui.search_results_tree_view.model()
+    ref_view_index = proxy_view_model.mapFromSource(index)
+    widget._ui.search_results_tree_view.expand(ref_view_index)
+
+    while not ref_item.child_items:
+       _qapp_instance.processEvents()
+    # check in child items that installed pkg id is highlighted
+    pkg_found = False
+    for child_item in ref_item.child_items:
+        if child_item.get_conan_ref() == TEST_REF + ":" + id:
+            pkg_found = True
+            assert child_item.is_installed
+            break
+    assert pkg_found
+    pkg_view_index = proxy_view_model.mapFromSource(model.get_index_from_item(child_item))
 
     # check context menu actions
     # check copy recipe ref
+    # select ref
+    sel_model = widget._ui.search_results_tree_view.selectionModel()
+    sel_model.select(ref_view_index, QtCore.QItemSelectionModel.ClearAndSelect)
+    widget.on_copy_ref_requested()
+    mock_clipboard.setText.assert_called_with(TEST_REF)
+
     # check copy id ref
+    # select id
+    sel_model.select(pkg_view_index, QtCore.QItemSelectionModel.ClearAndSelect)
+    widget.on_copy_ref_requested()
+    mock_clipboard.setText.assert_called_with(TEST_REF + ":" + id)
+
     # check install
     # check show conanfile
     # check check open in local pkg explorer
 
-    # found_tst_pkg = False
-    # for pkg in model.root_item.child_items:
-    #     if pkg.item_data[0] == str(cfr):
-    #         found_tst_pkg = True
-    #         # check it's child
-    #         assert model.get_quick_profile_name(pkg.child(0)) in [
-    #             "Windows_x64_vs16_release", "Linux_x64_gcc9_release"]
     # from pytestqt.plugin import _qapp_instance
     # while True:
     #    _qapp_instance.processEvents()
+    widget.hide()
 
 
 def test_about_dialog(base_fixture, qtbot):
