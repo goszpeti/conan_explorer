@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 class ConanSearchDialog(QtWidgets.QDialog):
     conan_pkg_installed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
+    conan_pkg_removed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
 
     def __init__(self, parent: Optional[QtWidgets.QWidget] = None, main_window: Optional["MainWindow"] = None):
         super().__init__(parent)

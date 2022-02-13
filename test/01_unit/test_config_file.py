@@ -15,7 +15,7 @@ def test_new_filename_is_created(base_fixture):
     """
     new_file_path = Path(tempfile.gettempdir()) / "newfile.config"
     config = JsonUiConfig(new_file_path).load()
-    assert config.app_grid.tabs == []
+    assert len(config.app_grid.tabs) == 1 # default tab
     assert new_file_path.exists()
 
 
@@ -81,7 +81,7 @@ def test_read_invalid_version(base_fixture, capfd):
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     config = JsonUiConfig(base_fixture.testdata_path / "config_file" / "wrong_version.json").load()
-    assert config.app_grid.tabs == []
+    assert len(config.app_grid.tabs) == 1
     captured = capfd.readouterr()
     assert "Failed validating" in captured.err
     assert "version" in captured.err
@@ -93,7 +93,7 @@ def test_read_invalid_content(base_fixture, capfd):
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     config = JsonUiConfig(base_fixture.testdata_path / "config_file" / "invalid_syntax.json").load()
-    assert config.app_grid.tabs == []
+    assert len(config.app_grid.tabs) == 1
     captured = capfd.readouterr()
     assert "Expecting property name" in captured.err
 

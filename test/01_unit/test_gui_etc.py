@@ -2,20 +2,22 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
-from test.conftest import TEST_REF
-from time import time
-import traceback
-import pytest
 import os
+import traceback
+from test.conftest import TEST_REF
+from time import sleep
+
 import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
-from conans.model.ref import ConanFileReference
-
-from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
+import pytest
+from conan_app_launcher.core.conan_worker import ConanWorkerElement
+from conan_app_launcher.ui.common.bug_dialog import (bug_reporting_dialog,
+                                                     show_bug_dialog_exc_hook)
+from conan_app_launcher.ui.common.conan_line_edit import ConanRefLineEdit
 from conan_app_launcher.ui.modules.about_dialog import AboutDialog
 from conan_app_launcher.ui.modules.conan_install import ConanInstallDialog
-from conan_app_launcher.ui.common.conan_line_edit import ConanRefLineEdit
-from conan_app_launcher.ui.common.bug_dialog import show_bug_dialog_exc_hook, bug_reporting_dialog
+from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
+from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -63,34 +65,27 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
 
     # with update flag
     widget.update_check_box.setCheckState(Qt.Checked)
-    mocker.patch('conan_app_launcher.core.conan.ConanApi.install_package')
+    mock_install_func = mocker.patch(
+        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_install_queue')
     widget.button_box.accepted.emit()
+    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, "settings": {},
+                                                "options": {}, "update": True, "auto_install": False}
 
-    conan_app_launcher.core.conan.ConanApi.install_package.assert_called_once()
-    assert widget.pkg_installed == id
+    mock_install_func.assert_called_with(conan_worker_element, None)
 
     # check only ref
 
-    widget.pkg_installed = ""
     widget.conan_ref_line_edit.setText(TEST_REF)
-
-    import conans
-    mocker.patch('conans.client.conan_api.ConanAPIV1.install_reference', return_value={
-                 "error": False, "installed": [{"packages": [{"id": id}]}]})
     widget.button_box.accepted.emit()
-    conans.client.conan_api.ConanAPIV1.install_reference.assert_called_once_with(
-        cfr, update=True)
-    assert widget.pkg_installed == id
+    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
+                                                "options": {}, "update": True, "auto_install": False}
+    mock_install_func.assert_called_with(conan_worker_element, None)
 
     # check ref with autoupdate
-    widget.pkg_installed = ""
     widget.auto_install_check_box.setCheckState(Qt.Checked)
-    mocker.patch('conan_app_launcher.core.conan.ConanApi.install_best_matching_package',
-                 return_value=(id, pkg_path))
     widget.button_box.accepted.emit()
-    conan_app_launcher.core.conan.ConanApi.install_best_matching_package.assert_called_once_with(
-        cfr, update=True)
-    assert widget.pkg_installed == id
+    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
+                                                "options": {}, "update": True, "auto_install": True}
 
 
 def test_conan_search_dialog(base_fixture, qtbot):
@@ -114,7 +109,7 @@ def test_conan_search_dialog(base_fixture, qtbot):
 
     # wait for loading
     while not widget._pkg_result_loader.load_thread:
-        time.sleep(1)
+        sleep(1)
     while not widget._pkg_result_loader.load_thread.isFinished():
         _qapp_instance.processEvents()
 
@@ -126,6 +121,7 @@ def test_conan_search_dialog(base_fixture, qtbot):
 
     assert model.root_item.item_data[0] == "Packages"
     assert model.root_item.child_count() == 3
+    widget.hide()
 
     # expand package -> assert number of packages and itemdata
     # check installed pkg ist highlited

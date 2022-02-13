@@ -24,7 +24,6 @@ class ConanInstallDialog(QtWidgets.QDialog):
         self._ui.install_icon.setPixmap(icon.pixmap(20, 20))
         self._ui.conan_ref_line_edit.validator_enabled = False
         self.button_box.accepted.connect(self.on_install)
-        self.pkg_installed = ""
         self.adjust_to_size()
         self.pkg_installed_signal = pkg_installed_signal
 
