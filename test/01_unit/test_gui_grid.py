@@ -192,7 +192,7 @@ def test_AppLink_cbox_switch(base_fixture, qtbot):
 
     # all versions have different user and channel names, so we can distinguish them
     conanfile = str(base_fixture.testdata_path / "conan" / "multi" / "conanfile.py")
-    create_packages = False
+    create_packages = True
     if create_packages:
         conan_create_and_upload(conanfile, "switch_test/1.0.0@user1/channel1")
         conan_create_and_upload(conanfile, "switch_test/1.0.0@user1/channel2")
