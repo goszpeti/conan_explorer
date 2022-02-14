@@ -5,7 +5,7 @@ from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 
-ASYNC_LOADING = False  # For debug purposes: errors in Qt Threads are not debuggable
+ASYNC_LOADING = True  # For debug purposes: errors in Qt Threads are not debuggable
 
 
 class Worker(QtCore.QObject):

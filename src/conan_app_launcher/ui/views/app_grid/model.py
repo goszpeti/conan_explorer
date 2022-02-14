@@ -204,7 +204,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             conan_worker_element: ConanWorkerElement = {"ref_pkg_id": str(self._conan_ref), "settings": {},
                                                         "options": self.conan_options, "update": True, "auto_install": True}
-            app.conan_worker.put_ref_in_install_queue(
+            app.conan_worker.put_ref_in_install_queue( # TODO pass down directly?
                 conan_worker_element, self.parent.parent.parent.conan_pkg_installed)
             app.conan_worker.put_ref_in_version_queue(
                 conan_worker_element,  self.parent.parent.parent.conan_pkg_installed)

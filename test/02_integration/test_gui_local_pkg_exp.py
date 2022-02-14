@@ -8,6 +8,7 @@ from test.conftest import TEST_REF, TEST_REF_OFFICIAL
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
@@ -42,16 +43,15 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     app.conan_worker.finish_working()
 
     # check cancel does nothing
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_', return_value=QtWidgets.QMessageBox.Cancel)
-    main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF_OFFICIAL, None)
+    dialog = ConanRemoveDialog(None, TEST_REF_OFFICIAL, "", None)
+    dialog.show()
+    dialog.button(dialog.Cancel).clicked.emit()
+
     found_pkg = app.conan_api.find_best_local_package(cfr)
     assert found_pkg.get("id", "")
 
     # check without pkg id
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Yes)
-    main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF_OFFICIAL, None)
-
+    dialog.button(dialog.Yes).clicked.emit()
     main_gui.local_package_explorer.wait_for_loading_pkgs()
 
     # check, that the package is deleted
@@ -60,7 +60,9 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
     # check with pkg id
     os.system(f"conan install {TEST_REF_OFFICIAL}")
-    main_gui.local_package_explorer.delete_conan_package_dialog(TEST_REF_OFFICIAL, None)
+    dialog = ConanRemoveDialog(None, TEST_REF_OFFICIAL, found_pkg.get("id", ""), None)
+    dialog.show()
+    dialog.button(dialog.Yes).clicked.emit()
 
     main_gui.local_package_explorer.wait_for_loading_pkgs()
 

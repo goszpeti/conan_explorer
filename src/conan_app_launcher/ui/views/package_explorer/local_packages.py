@@ -11,6 +11,7 @@ from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.common import QtLoaderObject
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig
+from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -46,6 +47,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         main_window.ui.refresh_button.clicked.connect(self.on_pkg_refresh_clicked)
         main_window.ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
         main_window.ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
+        main_window.conan_pkg_removed.connect(self.on_conan_pkg_removed)
 
     def apply_theme(self):
         self._main_window.ui.refresh_button.setIcon(QtGui.QIcon(get_themed_asset_image("icons/refresh.png")))
@@ -133,39 +135,18 @@ class LocalConanPackageExplorer(QtCore.QObject):
             return
         conan_ref = self.get_selected_conan_ref()
         pkg_info = self.get_selected_conan_pkg_info()
-        pkg_ids = []
+        pkg_id = ""
         if pkg_info:
-            pkg_id = pkg_info.get("id")
-            pkg_ids = ([pkg_id] if pkg_id else [])
-        self.delete_conan_package_dialog(conan_ref, pkg_ids)
+            pkg_id = pkg_info.get("id", "")
+        dialog = ConanRemoveDialog(self._main_window, conan_ref, pkg_id, self._main_window.conan_pkg_removed)
+        dialog.show()
 
-    def delete_conan_package_dialog(self, conan_ref: str, pkg_ids: List[str]):
-        msg = QtWidgets.QMessageBox(parent=self._main_window)
-        msg.setWindowTitle("Delete package")
-        msg.setText("Are you sure, you want to delete this package?")
-        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
-        msg.setIcon(QtWidgets.QMessageBox.Question)
-        reply = msg.exec_()
-        if reply == QtWidgets.QMessageBox.Yes:
-            # clear file view if this pkg is selected
-            if self._current_ref == conan_ref:
-                self.close_files_view()
-            try:
-                Logger().info(f"Deleting {conan_ref} {pkg_ids}")
-                app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True)
-                for pkg_id in pkg_ids:
-                    self._main_window.conan_pkg_removed.emit(conan_ref, pkg_id)
-            except Exception as e:
-                Logger().error(f"Error while removing package {conan_ref}: {str(e)}")
-
-            # Clear view, if this pkg is selected
-            if self.fs_model:
-                try:
-                    self.fs_model.deleteLater()
-                except Exception:
-                    pass  # sometimes this can crash...
-                self._main_window.ui.package_path_label.setText("")
-            self.refresh_pkg_selection_view()
+    def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
+        # clear file view if this pkg is selected
+        if self._current_ref == conan_ref:
+            self.close_files_view()
+        # TODO this can be done cheaper?
+        self.refresh_pkg_selection_view()
 
     # Global pane and cross connection slots
 
@@ -217,7 +198,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
     def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
-
+        self._main_window.activateWindow()
         self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
         self.wait_for_loading_pkgs()  # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
 
@@ -314,6 +295,11 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self._current_pkg = None
         self._main_window.ui.package_path_label.setText("")
         self._main_window.ui.package_file_view.setModel(None)
+        try:
+            self.fs_model.deleteLater()
+        except Exception:
+            pass  # sometimes this can crash...
+        self._main_window.ui.package_path_label.setText("")
 
     @classmethod
     def re_register_signal(cls, signal: QtCore.pyqtBoundSignal, slot: Callable):

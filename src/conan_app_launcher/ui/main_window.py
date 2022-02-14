@@ -155,6 +155,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @ pyqtSlot()
     def open_conan_search_dialog(self):
+        """ Opens a Conan Search dialog. Only one allowed. """
+        if self.search_dialog:
+            self.search_dialog.activateWindow()
+            return
         # parent=None enables to hide the dialog behind the application window
         self.search_dialog = ConanSearchDialog(None, self)
         self.search_dialog.show()

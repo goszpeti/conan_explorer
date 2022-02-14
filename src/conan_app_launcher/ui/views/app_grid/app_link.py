@@ -175,7 +175,6 @@ class AppLink(QtWidgets.QVBoxLayout):
     def load(self):
         self.model.register_update_callback(self.update_with_conan_info)
         self._apply_new_config()
-        #self.update_with_conan_info()
 
     def on_move(self):
         move_dialog = AppsMoveDialog(parent=self.parentWidget(), tab_ui_model=self.model.parent)
@@ -230,6 +229,9 @@ class AppLink(QtWidgets.QVBoxLayout):
         self.update_users_info_visible()
         self.update_channels_info_visible()
 
+        self.update_with_conan_info()  # initial update with offline information
+
+
     def open_app_link_add_dialog(self):
         self._parent_tab.open_app_link_add_dialog()
 
@@ -271,7 +273,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             self.model.save()
 
     def update_with_conan_info(self):
-        """ Update combo boxes with only query data """
+        """ Update combo boxes with new conan data """
         self.update_icon()
 
         if not self._enable_combo_boxes:  # set text instead
@@ -281,6 +283,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
         if self._lock_cboxes == True:
             return
+
         if self._app_channel_cbox.itemText(0) != self.model.INVALID_DESCR and \
                 len(self.model.versions) > 1 and self._app_version_cbox.count() < len(self.model.versions) or \
                 len(self.model.channels) > 1 and self._app_channel_cbox.count() < len(self.model.channels):

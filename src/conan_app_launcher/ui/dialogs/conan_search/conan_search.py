@@ -190,7 +190,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         combined_ref = self.get_selected_combined_ref()
         dialog = ConanInstallDialog(
             self, combined_ref, self._main_window.conan_pkg_installed)
-        dialog.exec_()
+        dialog.show()
 
     def get_selected_remotes(self) -> List[str]:
         """ Returns the user selected remotes """
