@@ -14,14 +14,14 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
-from conan_app_launcher.ui.theming import activate_theme
+from conan_app_launcher.ui.dialogs.conan_search import ConanSearchDialog
+from conan_app_launcher.ui.common.theming import activate_theme
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
 
-from .modules.about_dialog import AboutDialog
-from .modules.app_grid import AppGridView
-from .modules.package_explorer import LocalConanPackageExplorer
+from .dialogs.about_dialog import AboutDialog
+from .views.app_grid import AppGridView
+from .views.package_explorer import LocalConanPackageExplorer
 
 Qt = QtCore.Qt
 
@@ -43,7 +43,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
         current_dir = Path(__file__).parent
-        self.ui = uic.loadUi(current_dir / "main.ui", baseinstance=self)
+        self.ui = uic.loadUi(current_dir / "main_window.ui", baseinstance=self)
         self._about_dialog = AboutDialog(self)
         self._qt_app = qt_app
         self.load_icons()

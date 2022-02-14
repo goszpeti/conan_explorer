@@ -292,7 +292,7 @@
   <customwidget>
    <class>ConanRefLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>conan_app_launcher.ui.common.conan_line_edit.h</header>
+   <header>conan_app_launcher.ui.widgets.conan_line_edit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

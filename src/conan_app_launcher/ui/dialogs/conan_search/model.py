@@ -89,16 +89,17 @@ class PkgSearchModel(TreeModel):
             conan_pkg_removed.connect(self.mark_pkg_as_not_installed)
 
     def setup_model_data(self, search_query, remotes=[]):
-        recipes_with_remotes: Dict[str, str] = {}
+        # needs to be ConanFileReference, so we can check with get_all_local_refs directly
+        recipes_with_remotes: Dict[ConanFileReference, str] = {}
         for remote in remotes:
             recipe_list = (app.conan_api.search_query_in_remotes(
                 f"{search_query}*", remote=remote))
             for recipe in recipe_list:
-                current_value = recipes_with_remotes.get(str(recipe), "")
+                current_value = recipes_with_remotes.get(recipe, "")
                 if current_value:
-                    recipes_with_remotes[str(recipe)] = current_value + "," + remote
+                    recipes_with_remotes[recipe] = current_value + "," + remote
                 else:  # element 0
-                    recipes_with_remotes[str(recipe)] = remote
+                    recipes_with_remotes[recipe] = remote
 
         if not recipes_with_remotes:
             self.root_item.append_child(SearchedPackageTreeItem(

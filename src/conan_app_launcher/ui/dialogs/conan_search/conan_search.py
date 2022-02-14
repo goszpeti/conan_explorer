@@ -6,9 +6,10 @@ import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.core import open_file
 from conan_app_launcher.ui.common import QtLoaderObject
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
-from conan_app_launcher.ui.modules.conan_install import ConanInstallDialog
+from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtCore import pyqtSlot
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
@@ -102,7 +103,8 @@ class ConanSearchDialog(QtWidgets.QDialog):
             self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
             self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 
-    def on_pkg_context_menu_requested(self, position):
+    @pyqtSlot(QtCore.QPoint)
+    def on_pkg_context_menu_requested(self, position: QtCore.QPoint):
         """ 
         Executes, when context menu is requested. 
         This is done to dynamically grey out some options depending on the item type.
@@ -119,6 +121,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
                 self.show_in_pkg_exp_action.setEnabled(False)
         self.select_cntx_menu.exec_(self._ui.search_results_tree_view.mapToGlobal(position))
 
+    @pyqtSlot()
     def on_search(self):
         """ Search for the user entered text by re-initing the model"""
         # IMPORTANT! if put in async loading, the pyqt signal of the model will be created in another Qt thread
@@ -133,6 +136,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         # reset info text
         self._ui.package_info_text.setText("")
 
+    @pyqtSlot()
     def on_show_in_pkg_exp(self):
         """ Switch to the main gui and select the item (ref or pkg) in the Local Package Epxlorer. """
         if not self._main_window:
@@ -154,6 +158,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self._ui.search_results_tree_view.sortByColumn(1, Qt.AscendingOrder)  # sort by remote at default
         self._ui.search_results_tree_view.selectionModel().selectionChanged.connect(self.on_package_selected)
 
+    @pyqtSlot()
     def on_package_selected(self):
         """ Display package info only for pkg ref"""
         item = self.get_selected_source_item(self._ui.search_results_tree_view)
@@ -165,11 +170,13 @@ class ConanSearchDialog(QtWidgets.QDialog):
             {ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
         self._ui.package_info_text.setText(pkg_info)
 
+    @pyqtSlot()
     def on_copy_ref_requested(self):
         """ Copy the selected reference to the clipboard """
         combined_ref = self.get_selected_combined_ref()
         QtWidgets.QApplication.clipboard().setText(combined_ref)
 
+    @pyqtSlot()
     def on_show_conanfile_requested(self):
         """ Show the conanfile by downloading and opening with the associated program """
         combined_ref = self.get_selected_combined_ref()
@@ -177,6 +184,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
         open_file(conanfile)
 
+    @pyqtSlot()
     def on_install_pkg_requested(self):
         """ Spawn the Conan install dialog """
         combined_ref = self.get_selected_combined_ref()

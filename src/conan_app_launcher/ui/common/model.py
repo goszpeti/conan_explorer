@@ -124,7 +124,7 @@ class TreeModel(QtCore.QAbstractItemModel):
         if not index.isValid():
             return False
         item = index.internalPointer()
-        return not item.is_loaded
+        return not item.is_loaded # enabled, if lazy loading is enabled
 
     def fetchMore(self, index):
         item = index.internalPointer()

@@ -11,12 +11,12 @@ import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
 import pytest
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
-from conan_app_launcher.ui.common.bug_dialog import (bug_reporting_dialog,
+from conan_app_launcher.ui.dialogs.bug_dialog import (bug_reporting_dialog,
                                                      show_bug_dialog_exc_hook)
-from conan_app_launcher.ui.common.conan_line_edit import ConanRefLineEdit
-from conan_app_launcher.ui.modules.about_dialog import AboutDialog
-from conan_app_launcher.ui.modules.conan_install import ConanInstallDialog
-from conan_app_launcher.ui.modules.conan_search import ConanSearchDialog
+from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
+from conan_app_launcher.ui.dialogs.about_dialog import AboutDialog
+from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
+from conan_app_launcher.ui.dialogs.conan_search import ConanSearchDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 

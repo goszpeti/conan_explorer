@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, List
 from conan_app_launcher import ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, asset_path
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
-from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkModel,
+from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkModel,
                                                           UiTabModel)
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -14,7 +14,7 @@ Qt = QtCore.Qt
 
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
-    from conan_app_launcher.ui.modules.app_grid.model import UiAppGridModel
+    from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
 
 
 class AppGridView():

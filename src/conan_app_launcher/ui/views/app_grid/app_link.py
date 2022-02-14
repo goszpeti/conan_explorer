@@ -11,10 +11,10 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
-from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel
+from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .common import AppButton, AppEditDialog, AppsMoveDialog
+from .widgets import ClickableIcon, AppEditDialog, AppsMoveDialog
 
 if TYPE_CHECKING:
     from.tab import TabGrid
@@ -65,7 +65,7 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def _init_app_link(self):
         """ Initalize all subwidgets with default values. """
-        self._app_button = AppButton(self._parent_tab, asset_path / "icons" / "app.png")
+        self._app_button = ClickableIcon(self._parent_tab, asset_path / "icons" / "app.png")
         self._app_name_label = QtWidgets.QLabel(self._parent_tab)
 
         if self._enable_combo_boxes:
@@ -175,7 +175,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def load(self):
         self.model.register_update_callback(self.update_with_conan_info)
         self._apply_new_config()
-        self.update_with_conan_info()  # TODO?
+        #self.update_with_conan_info()
 
     def on_move(self):
         move_dialog = AppsMoveDialog(parent=self.parentWidget(), tab_ui_model=self.model.parent)

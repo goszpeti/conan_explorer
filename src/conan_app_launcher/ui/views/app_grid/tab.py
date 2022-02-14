@@ -1,11 +1,11 @@
 from typing import List
 
-from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkModel,
+from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkModel,
                                                           UiTabModel)
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .app_link import AppLink
-from .common import AppEditDialog
+from .widgets import AppEditDialog
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt

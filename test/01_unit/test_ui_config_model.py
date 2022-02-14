@@ -4,7 +4,7 @@ from pathlib import Path
 from test.conftest import TEST_REF_OFFICIAL
 
 from conan_app_launcher import asset_path
-from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkConfig,
+from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
                                                           UiAppLinkModel)
 from conans.model.ref import ConanFileReference as CFR
 

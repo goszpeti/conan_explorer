@@ -36,9 +36,8 @@ conan_worker = ConanWorker(conan_api, active_settings)
 def run_application(conan_search=False):
     """ Start the Qt application and an all main base """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
-    from conan_app_launcher.ui.common.bug_dialog import \
-        show_bug_dialog_exc_hook
-    from conan_app_launcher.ui.theming import activate_theme
+    from conan_app_launcher.ui.dialogs.bug_dialog import show_bug_dialog_exc_hook
+    from conan_app_launcher.ui.common.theming import activate_theme
     sys.excepthook = show_bug_dialog_exc_hook
 
     if platform.system() == "Darwin":
@@ -63,7 +62,7 @@ def run_application(conan_search=False):
     app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
 
     if conan_search:
-        from conan_app_launcher.ui.modules.conan_search import \
+        from conan_app_launcher.ui.widgets.conan_search import \
             ConanSearchDialog
         main_window = ConanSearchDialog()
     else:

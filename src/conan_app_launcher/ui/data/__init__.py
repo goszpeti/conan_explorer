@@ -1,17 +1,17 @@
 
-from typing import Union
-from conan_app_launcher import INVALID_CONAN_REF, PathLike
-from abc import ABC, abstractmethod
+# classes representing the ui config (Data Transfer Objects) - this is a bit overblown for this usecase,
+# but ot is worth an experiment
 
-from typing import Dict, List, TYPE_CHECKING
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Dict, List, Union
+
+from conan_app_launcher import INVALID_CONAN_REF, PathLike
 
 UI_CONFIG_JSON_TYPE = "json"
 
-# classes representing the ui config (Data Transfer Objects) - this is a bit overblown for this usecase,
-# but ot is worth an experiment
 if TYPE_CHECKING:  # pragma: no cover
-    from ..modules.app_grid.model import UiAppLinkModel, UiTabModel
+    from ..views.app_grid.model import UiAppLinkModel, UiTabModel
 
 
 @dataclass

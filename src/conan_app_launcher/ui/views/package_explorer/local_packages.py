@@ -133,13 +133,13 @@ class LocalConanPackageExplorer(QtCore.QObject):
             return
         conan_ref = self.get_selected_conan_ref()
         pkg_info = self.get_selected_conan_pkg_info()
-        pkg_ids = None
+        pkg_ids = []
         if pkg_info:
             pkg_id = pkg_info.get("id")
-            pkg_ids = ([pkg_id] if pkg_id else None)
+            pkg_ids = ([pkg_id] if pkg_id else [])
         self.delete_conan_package_dialog(conan_ref, pkg_ids)
 
-    def delete_conan_package_dialog(self, conan_ref: str, pkg_ids: Optional[List[str]]):
+    def delete_conan_package_dialog(self, conan_ref: str, pkg_ids: List[str]):
         msg = QtWidgets.QMessageBox(parent=self._main_window)
         msg.setWindowTitle("Delete package")
         msg.setText("Are you sure, you want to delete this package?")
@@ -153,6 +153,8 @@ class LocalConanPackageExplorer(QtCore.QObject):
             try:
                 Logger().info(f"Deleting {conan_ref} {pkg_ids}")
                 app.conan_api.conan.remove(conan_ref, packages=pkg_ids, force=True)
+                for pkg_id in pkg_ids:
+                    self._main_window.conan_pkg_removed.emit(conan_ref, pkg_id)
             except Exception as e:
                 Logger().error(f"Error while removing package {conan_ref}: {str(e)}")
 
@@ -203,17 +205,21 @@ class LocalConanPackageExplorer(QtCore.QObject):
         if self.pkg_sel_model:
             self.pkg_sel_model.proxy_model.setFilterWildcard(text)
 
+    def find_item_in_pkg_sel_model(self, conan_ref: str) -> int:
+        # find the row with the matching reference
+        if not self.pkg_sel_model:
+            return False
+        for ref_row in range(self.pkg_sel_model.root_item.child_count()):
+            item = self.pkg_sel_model.root_item.child_items[ref_row]
+            if item.item_data[0] == conan_ref:
+                return ref_row
+        return -1
+
     def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
 
         self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
         self.wait_for_loading_pkgs()  # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
-
-        if refresh:
-            self.refresh_pkg_selection_view()
-
-        # wait for model to be loaded
-        self.wait_for_loading_pkgs()
 
         if not self.pkg_sel_model:  # guard
             return False
@@ -225,17 +231,16 @@ class LocalConanPackageExplorer(QtCore.QObject):
             conan_ref = split_ref[0]
             id = split_ref[1]
 
-        # find the row with the matching reference
-        found_item = False
-        for ref_row in range(self.pkg_sel_model.root_item.child_count()):
-            item = self.pkg_sel_model.root_item.child_items[ref_row]
-            if item.item_data[0] == conan_ref:
-                Logger().debug(f"Found {conan_ref}@{str(ref_row)} in Local Package Explorer for selection")
-                found_item = True
-                break
-        if not found_item:
+        if not self.find_item_in_pkg_sel_model(conan_ref):
+            self.refresh_pkg_selection_view()
+
+        # wait for model to be loaded
+        self.wait_for_loading_pkgs()
+        ref_row = self.find_item_in_pkg_sel_model(conan_ref)
+        if not ref_row:
             Logger().debug(f"Cannot find {conan_ref} in Local Package Explorer for selection")
             return False
+        Logger().debug(f"Found {conan_ref}@{str(ref_row)} in Local Package Explorer for selection")
 
         # map to package view model
         proxy_index = self.pkg_sel_model.index(ref_row, 0, QtCore.QModelIndex())

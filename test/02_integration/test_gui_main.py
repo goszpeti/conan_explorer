@@ -15,7 +15,7 @@ from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.modules.app_grid.tab import TabGrid
+from conan_app_launcher.ui.views.app_grid.tab import TabGrid
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 

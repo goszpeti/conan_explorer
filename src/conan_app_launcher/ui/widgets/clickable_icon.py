@@ -10,9 +10,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 Qt = QtCore.Qt
 
 
-class AppButton(QtWidgets.QPushButton):
+class ClickableIcon(QtWidgets.QPushButton):
 
-    """ Qt label, which can react on a mouse click """
+    """ Qt QPushButton with greyable icon, which can react on a mouse click.
+    Has advanced icon handling fir displaying the best matching icon.
+     """
     # this signal is used to connect to backend functions.
     clicked = QtCore.pyqtSignal()
 
@@ -21,8 +23,8 @@ class AppButton(QtWidgets.QPushButton):
 
         self._greyed_out = True  # Must be ungreyed, when available
         self._grey_effect = QtWidgets.QGraphicsColorizeEffect()
-        self._grey_effect.setColor(QtGui.QColor(128, 128, 128))
-        # self.setGraphicsEffect(self._grey_effect)
+        self._grey_effect.setColor(QtGui.QColor(128, 128, 128, 128))
+        self.setGraphicsEffect(self._grey_effect)
 
         self.set_icon_from_file(image)
         self.setFlat(True)
@@ -32,12 +34,11 @@ class AppButton(QtWidgets.QPushButton):
 
     def ungrey_icon(self):
         self._greyed_out = False
-        # self._grey_effect.setEnabled(False)
+        self._grey_effect.setEnabled(False)
 
     def grey_icon(self):
-        self._greyed_out = True  # no context menu
-        self.set_icon(QtGui.QIcon(get_themed_asset_image("icons/no-access.png")))
-        # self._grey_effect.setEnabled(True)
+        self._greyed_out = True
+        self._grey_effect.setEnabled(True)
 
     def set_icon(self, icon: QtGui.QIcon):
         # convert biggest image to QPixmap and scale
@@ -45,7 +46,7 @@ class AppButton(QtWidgets.QPushButton):
         if len(sizes) > 0:
             icon_pixmap = icon.pixmap(sizes[-1])
             # embedded icons sometimes not scale up correctly, but only increase the canvas behind the icon,
-            #  which looks like crap.With opaqueArea.boundingRect we can query the size of
+            #  which looks like crap. With opaqueArea.boundingRect we can query the size of
             #  the non-opaque area - the real image
             pixmap = QtWidgets.QGraphicsPixmapItem(icon_pixmap)
             image_rect = pixmap.opaqueArea().boundingRect()
@@ -73,9 +74,7 @@ class AppButton(QtWidgets.QPushButton):
             self._ic = QtGui.QIcon(icon)
             self.setIcon(self._ic)
 
-    def mouseReleaseEvent(self, event):  # override QPushButton
-        """ reset size of icon form mousePressEvent """
-        super().mouseReleaseEvent(event)
+    def mouseReleaseEvent(self, event):  # override QPushButton to allow the clicked event
         if event.button() == Qt.LeftButton:
             self.clicked.emit()
         return super().mouseReleaseEvent(event)

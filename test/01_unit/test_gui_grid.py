@@ -14,10 +14,10 @@ from conan_app_launcher.settings import (DISPLAY_APP_USERS,
                                          ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
-from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
+from conan_app_launcher.ui.views.app_grid.app_link import AppLink
+from conan_app_launcher.ui.views.app_grid.widgets.app_edit_dialog import \
     AppEditDialog
-from conan_app_launcher.ui.modules.app_grid.model import (UiAppGridModel,
+from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
                                                           UiAppLinkConfig,
                                                           UiAppLinkModel)
 from conans.model.ref import ConanFileReference as CFR

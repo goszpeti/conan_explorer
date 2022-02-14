@@ -8,7 +8,7 @@ from test.conftest import TEST_REF, TEST_REF_OFFICIAL
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.modules.app_grid.tab import AppEditDialog
+from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
@@ -124,7 +124,7 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     # test open export folder
     Logger().debug("open export folder")
-    import conan_app_launcher.ui.modules.package_explorer.local_packages as lp
+    import conan_app_launcher.ui.views.package_explorer.local_packages as lp
     mocker.patch.object(lp, 'open_in_file_manager')
     main_gui.local_package_explorer.on_open_export_folder_requested()
     lp.open_in_file_manager.assert_called_once_with(conanfile)
