@@ -132,8 +132,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # all icons must be reloaded
         self.load_icons()
-        self.local_package_explorer.refresh_theme()
+        self.local_package_explorer.apply_theme()
         self.app_grid.re_init(self.model.app_grid)  # needs a whole reload because models need to be reinitialized
+        if self.search_dialog:
+            self.search_dialog.apply_theme()
 
     @pyqtSlot()
     def on_main_view_changed(self):

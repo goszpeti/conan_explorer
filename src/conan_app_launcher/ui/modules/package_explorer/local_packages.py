@@ -47,7 +47,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         main_window.ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
         main_window.ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
 
-    def refresh_theme(self):
+    def apply_theme(self):
         self._main_window.ui.refresh_button.setIcon(QtGui.QIcon(get_themed_asset_image("icons/refresh.png")))
         self._init_selection_context_menu()
         self._init_pkg_file_context_menu()
