@@ -16,15 +16,19 @@ class ConanInstallDialog(QtWidgets.QDialog):
         super().__init__(parent)
         current_dir = Path(__file__).parent
         self._ui = uic.loadUi(current_dir / "conan_install.ui", baseinstance=self)
-        self.conan_ref_line_edit.setText(conan_ref)
+        self._ui.conan_ref_line_edit.setText(conan_ref)
+        self.pkg_installed_signal = pkg_installed_signal
+
         # init search bar
         icon = QtGui.QIcon(get_themed_asset_image("icons/download_pkg.png"))
         self.setWindowIcon(icon)
         self._ui.install_icon.setPixmap(icon.pixmap(20, 20))
         self._ui.conan_ref_line_edit.validator_enabled = False
-        self.button_box.accepted.connect(self.on_install)
+        self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_auto_install_on_pkg_ref)
+        self._ui.button_box.accepted.connect(self.on_install)
+
         self.adjust_to_size()
-        self.pkg_installed_signal = pkg_installed_signal
+        self.toggle_auto_install_on_pkg_ref(self._ui.conan_ref_line_edit.text()) # initial evaluation
 
     def adjust_to_size(self):
         """ Expands the dialog to the length of the install ref text.
@@ -34,7 +38,13 @@ class ConanInstallDialog(QtWidgets.QDialog):
         self.adjustSize()
         h_offset = (self.size() - self.conan_ref_line_edit.size()).width()
         width = self._ui.conan_ref_line_edit.fontMetrics().boundingRect(self._ui.conan_ref_line_edit.text()).width()
-        self.resize(QtCore.QSize(width + h_offset + 5, self.height()))  # 5 margin
+        self.resize(QtCore.QSize(width + h_offset + 15, self.height()))  # 15 margin
+
+    def toggle_auto_install_on_pkg_ref(self, text: str):
+        if ":" in text: # if a package id is given, auto install does not make sense
+            self.auto_install_check_box.setEnabled(False)
+        else:
+            self.auto_install_check_box.setEnabled(True)
 
     def on_install(self):
         update_check_state = False
