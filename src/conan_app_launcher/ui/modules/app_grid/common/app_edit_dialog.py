@@ -40,6 +40,8 @@ class AppEditDialog(QtWidgets.QDialog):
         self._ui.conan_opts_text_edit.setText(conan_options_text)
         # for some reason OK is not connected at default
         self._ui.button_box.accepted.connect(self.accept)
+        self.adjustSize()
+
 
     def loading_started(self):
         self._ui.conan_ref_label.setText("Conan Reference (query in progress)")
