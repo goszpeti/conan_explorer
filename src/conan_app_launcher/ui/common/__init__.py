@@ -1,6 +1,6 @@
 """ Common ui classes, and functions """
 
-from typing import Callable, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple
 from conan_app_launcher import DEBUG_LEVEL
 
 from conan_app_launcher.logger import Logger
@@ -14,7 +14,7 @@ class Worker(QtCore.QObject):
     """ Generic worker for Qt, which can call any function with args """
     finished = QtCore.pyqtSignal()
 
-    def __init__(self, func, args: Tuple = ()):
+    def __init__(self, func, args: Tuple[Any, ...]=()):
         super().__init__()
         self.func = func
         self.args = args
@@ -36,7 +36,7 @@ class QtLoaderObject(QtCore.QObject):
         self.load_thread: Optional[QtCore.QThread] = None
         self.finished = False
 
-    def async_loading(self, dialog_parent: QtWidgets.QWidget, work_task: Callable, worker_args: Tuple = (),
+    def async_loading(self, dialog_parent: QtWidgets.QWidget, work_task: Callable, worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,
                       loading_text: str = "Loading"):
         self.finished = False

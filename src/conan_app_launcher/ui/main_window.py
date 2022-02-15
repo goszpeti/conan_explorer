@@ -12,10 +12,11 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
+from conan_app_launcher.ui.common import QtLoaderObject
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
-from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.dialogs.conan_search import ConanSearchDialog
 from conan_app_launcher.ui.common.theming import activate_theme
+from conan_app_launcher.ui.dialogs.conan_search import ConanSearchDialog
+from conan_app_launcher.ui.model import UiApplicationModel
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtSlot
 
@@ -101,7 +102,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # model loads incrementally
         # TODO add async loading
-        self.model.loadf(config_source_str)
+        loader = QtLoaderObject(self)
+        loader.async_loading(self, self.model.loadf, (config_source_str,))
+        loader.wait_for_finished()
 
         # model loaded, now load the gui elements, which have a static model
         self.app_grid.re_init(self.model.app_grid)
