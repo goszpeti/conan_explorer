@@ -1,12 +1,15 @@
 """ Common ui classes, and functions """
 
 from typing import Callable, Optional, Tuple
+from conan_app_launcher import DEBUG_LEVEL
 
 from conan_app_launcher.logger import Logger
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 
 QtCore.QSysInfo
+
+
 class Worker(QtCore.QObject):
     """ Generic worker for Qt, which can call any function with args """
     finished = QtCore.pyqtSignal()
@@ -17,14 +20,15 @@ class Worker(QtCore.QObject):
         self.args = args
 
     def work(self):
-        #import debugpy  # - debug with this the Qt Thread
-        #debugpy.debug_this_thread()
+        if DEBUG_LEVEL > 1:  # pragma: no cover
+            import debugpy  # - debug with this the Qt Thread
+            debugpy.debug_this_thread()
         self.func(*self.args)
         self.finished.emit()
 
 
 class QtLoaderObject(QtCore.QObject):
-    
+
     def __init__(self, parent: QtCore.QObject):
         super().__init__(parent)
         self.progress_dialog: Optional[QtWidgets.QProgressDialog] = None
@@ -33,9 +37,9 @@ class QtLoaderObject(QtCore.QObject):
         self.finished = False
 
     def async_loading(self, dialog_parent: QtWidgets.QWidget, work_task: Callable, worker_args: Tuple = (),
-                        finish_task: Optional[Callable] = None,
-                        loading_text: str = "Loading"):
-        self.finished = True
+                      finish_task: Optional[Callable] = None,
+                      loading_text: str = "Loading"):
+        self.finished = False
 
         self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
         self.progress_dialog.setLabelText(loading_text)
@@ -69,9 +73,8 @@ class QtLoaderObject(QtCore.QObject):
     def thread_finished(self):
         self.finished = True
 
-    def wait_for_finished(self): # TODO timeout + cancel
+    def wait_for_finished(self):  # TODO timeout + cancel
         Logger().debug("wait for loading thread")
         # execute once
         while not self.finished:
             QtWidgets.QApplication.processEvents()
-

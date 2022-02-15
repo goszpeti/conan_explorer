@@ -111,10 +111,7 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     widget._ui.search_button.clicked.emit()
 
     # wait for loading
-    while not widget._pkg_result_loader.load_thread:
-        sleep(1)
-    while not widget._pkg_result_loader.load_thread.isFinished():
-        _qapp_instance.processEvents()
+    widget._pkg_result_loader.wait_for_finished()
 
     # assert basic view
     model = widget._pkg_result_model

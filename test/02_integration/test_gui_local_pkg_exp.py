@@ -39,7 +39,7 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     qtbot.waitExposed(main_gui, timeout=3000)
 
     main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
-    main_gui.local_package_explorer.wait_for_loading_pkgs()
+    main_gui.local_package_explorer._pkg_sel_model_loader.wait_for_finished()
     app.conan_worker.finish_working()
 
     # check cancel does nothing
@@ -52,7 +52,7 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
     # check without pkg id
     dialog.button(dialog.Yes).clicked.emit()
-    main_gui.local_package_explorer.wait_for_loading_pkgs()
+    main_gui.local_package_explorer._pkg_sel_model_loader.wait_for_finished()
 
     # check, that the package is deleted
     found_pkg = app.conan_api.find_best_local_package(cfr)
@@ -64,7 +64,8 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     dialog.show()
     dialog.button(dialog.Yes).clicked.emit()
 
-    main_gui.local_package_explorer.wait_for_loading_pkgs()
+    main_gui.local_package_explorer._pkg_sel_model_loader.wait_for_finished()
+
 
     found_pkg = app.conan_api.find_best_local_package(cfr)
     assert not found_pkg.get("id", "")
@@ -85,11 +86,11 @@ def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     app.conan_worker.finish_working()
 
     main_gui.ui.main_toolbox.setCurrentIndex(1)  # changes to local explorer page
-    main_gui.local_package_explorer.wait_for_loading_pkgs()
+    main_gui.local_package_explorer._pkg_sel_model_loader.wait_for_finished()
 
     # restart reload (check for thread safety)
     main_gui.ui.refresh_button.clicked.emit()
-    main_gui.local_package_explorer.wait_for_loading_pkgs()
+    main_gui.local_package_explorer._pkg_sel_model_loader.wait_for_finished()
 
     pkg_sel_model = main_gui.local_package_explorer.pkg_sel_model
     assert pkg_sel_model

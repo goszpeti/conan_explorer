@@ -33,7 +33,7 @@
             "justMyCode": false,
             "python": "${command:python.interpreterPath}",
             "env": {
-                "CAL_DEBUG_LEVEL": "1",
+                "CAL_DEBUG_LEVEL": "2",
                 "SKIP_CREATE_CONAN_TEST_DATA": "True"
             },
         },

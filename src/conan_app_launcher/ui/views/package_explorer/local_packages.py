@@ -171,15 +171,6 @@ class LocalConanPackageExplorer(QtCore.QObject):
         else:
             Logger().error("Can't load local packages!")
 
-    # def wait_for_loading_pkgs(self):
-    #     Logger().debug("wait for loading thread")
-    #     # execute once
-    #     QtWidgets.QApplication.processEvents()
-    #     while not self._pkg_sel_model_loader.progress_dialog:
-    #         sleep(1)
-    #     while not self._pkg_sel_model_loader.progress_dialog.isHidden():
-    #         QtWidgets.QApplication.processEvents()
-
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace
         text = self._main_window.ui.package_filter_edit.toPlainText().strip()

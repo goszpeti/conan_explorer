@@ -148,8 +148,6 @@ class ConanSearchDialog(QtWidgets.QDialog):
 
     def _load_search_model(self):
         """ Initialize tree view model by searching in conan """
-        # import debugpy
-        # debugpy.debug_this_thread()
         self._pkg_result_model.setup_model_data(self._ui.search_line.text(), self.get_selected_remotes())
 
     def _finish_load_search_model(self):
