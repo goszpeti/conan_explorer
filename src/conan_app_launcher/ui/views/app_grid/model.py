@@ -106,7 +106,6 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
 
     def moveRow(self, sourceParent: QModelIndex, sourceRow: int, destinationParent: QModelIndex, destinationChild: int) -> bool:
         app_to_move = self.apps[sourceRow]
-        #dest_row = destinationParent.row()
         self.apps.insert(destinationChild, app_to_move)
         if sourceRow < destinationChild:
             self.apps.pop(sourceRow)
@@ -351,12 +350,12 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             icon_path = icon_path.resolve()
         except Exception as e:
-            Logger().debug(f"Can't reslolve path of {str(icon_path)}")
+            Logger().debug(f"Can't reslolve path of {str(icon_path)}: {str(e)}")
         return icon_path
 
     def get_icon(self) -> QIcon:
         """ Get an icon based on icon path """
-        icon = QIcon()
+        icon = None
 
         if not self._icon:
             icon = extract_icon(self.get_executable_path())

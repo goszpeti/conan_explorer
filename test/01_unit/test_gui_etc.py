@@ -163,12 +163,14 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     mock_clipboard.setText.assert_called_with(TEST_REF + ":" + id)
 
     # check install
-    # check show conanfile
-    # check check open in local pkg explorer
+    # TODO
 
-    # from pytestqt.plugin import _qapp_instance
-    # while True:
-    #    _qapp_instance.processEvents()
+    # check show conanfile
+    # TODO
+
+    # check check open in local pkg explorer
+    # TODO
+
     widget.hide()
 
 

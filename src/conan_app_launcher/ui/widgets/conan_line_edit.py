@@ -50,7 +50,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
                 else:
                     ConanFileReference.loads(text)
                 valid = True
-            except:
+            except Exception:
                 valid = False
 
             if valid:

@@ -43,15 +43,15 @@ class SearchedPackageTreeItem(TreeModelItem):
             installed_ids = [info.get("id") for info in infos]
             packages = app.conan_api.get_packages_in_remote(ConanFileReference.loads(recipe_ref), remote)
             for pkg in packages:
-                id = pkg.get("id", "")
-                if id in pkgs_to_be_added.keys():  # package already found in another remote
-                    pkgs_to_be_added[id].item_data[1] += "," + remote
+                pkg_id = pkg.get("id", "")
+                if pkg_id in pkgs_to_be_added.keys():  # package already found in another remote
+                    pkgs_to_be_added[pkg_id].item_data[1] += "," + remote
                     continue
                 installed = False
-                if id in installed_ids:
+                if pkg_id in installed_ids:
                     installed = True
-                pkgs_to_be_added[id] = SearchedPackageTreeItem(
-                    [id, remote,  ConanApi.build_conan_profile_name_alias(pkg.get("settings", {}))],
+                pkgs_to_be_added[pkg_id] = SearchedPackageTreeItem(
+                    [pkg_id, remote,  ConanApi.build_conan_profile_name_alias(pkg.get("settings", {}))],
                     self, pkg, PROFILE_TYPE, False, installed)
         for pkg in pkgs_to_be_added.values():
             self.child_items.append(pkg)
@@ -130,11 +130,10 @@ class PkgSearchModel(TreeModel):
                 return get_platform_icon(profile_name)
         elif role == Qt.DisplayRole:
             return item.data(index.column())
-        elif role == Qt.FontRole:
-            if item.is_installed:
-                font = QtGui.QFont()
-                font.setBold(True)
-                return font
+        elif role == Qt.FontRole and item.is_installed:
+            font = QtGui.QFont()
+            font.setBold(True)
+            return font
         return None
 
     def get_item_from_ref(self, conan_ref: str) -> Optional[SearchedPackageTreeItem]:

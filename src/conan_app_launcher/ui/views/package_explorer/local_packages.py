@@ -207,10 +207,10 @@ class LocalConanPackageExplorer(QtCore.QObject):
 
         # find out if we need to find a ref or or a package
         split_ref = conan_ref.split(":")
-        id = ""
+        pkg_id = ""
         if len(split_ref) > 1:  # has id
             conan_ref = split_ref[0]
-            id = split_ref[1]
+            pkg_id = split_ref[1]
 
         if not self.find_item_in_pkg_sel_model(conan_ref):
             self.refresh_pkg_selection_view()
@@ -229,16 +229,15 @@ class LocalConanPackageExplorer(QtCore.QObject):
         view_model = self._main_window.ui.package_select_view.model()
         self._main_window.ui.package_select_view.expand(view_model.mapFromSource(proxy_index))
 
-        if id:
+        if pkg_id:
             item: PackageTreeItem = proxy_index.internalPointer()
             i = 0
             for i in range(len(item.child_items)):
-                if item.child_items[i].item_data[0].get("id", "") == id:
+                if item.child_items[i].item_data[0].get("id", "") == pkg_id:
                     break
             internal_sel_index = proxy_index.child(i, 0)
         else:
             internal_sel_index = proxy_index
-            pass
 
         view_index = view_model.mapFromSource(internal_sel_index)
         self._main_window.ui.package_select_view.scrollTo(view_index)

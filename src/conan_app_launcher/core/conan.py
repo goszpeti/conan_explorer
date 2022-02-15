@@ -105,8 +105,6 @@ class ConanApi():
             remotes = self.client_cache.registry.load_remotes().values()
         except Exception as e:
             Logger().error(f"Error while reading remotes file: {str(e)}")
-        # if not isinstance(remote, str) and len(remote) > 0:  # only check for len, can be an object or a list
-        #     remote = remote[0]  # for old apis
         return remotes
 
     def get_short_path_root(self) -> Path:
@@ -335,8 +333,6 @@ class ConanApi():
     def get_matching_package_in_remotes(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> List[ConanPkg]:
         """ Find a package with options in the remotes """
         for remote in self.get_remotes():
-            # if not isinstance(remote, str) and len(remote) > 0:  # only check for len, can be an object or a list
-            #     remote = remote[0]  # for old apis
             packages = self.find_best_matching_packages(conan_ref, input_options, remote.name)
             if packages:
                 return packages

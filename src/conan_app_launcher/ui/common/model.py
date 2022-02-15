@@ -19,7 +19,7 @@ class TreeModelItem(object):
     def child(self, row):
         try:
             return self.child_items[row]
-        except:
+        except Exception:
             return None
 
     def child_count(self):
@@ -42,16 +42,6 @@ class TreeModelItem(object):
     def load_children(self):
         self.child_items = []
         self.is_loaded = True
-
-    def canFetchMore(self, index):
-        if not index.isValid():
-            return False
-        item = index.internalPointer()
-        return not item.is_loaded
-
-    def fetchMore(self, index):
-        item = index.internalPointer()
-        item.load_children()
 
 
 class TreeModel(QtCore.QAbstractItemModel):
@@ -83,7 +73,7 @@ class TreeModel(QtCore.QAbstractItemModel):
             return QtCore.QModelIndex()
 
     def data(self, index: QtCore.QModelIndex, role):  # override
-        pass
+        raise NotImplementedError
 
     def rowCount(self, parent):  # override
         if parent.column() > 0:

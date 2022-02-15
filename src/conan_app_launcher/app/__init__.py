@@ -2,7 +2,6 @@ import os
 import platform
 import sys
 import tempfile
-from typing import TYPE_CHECKING
 
 from conan_app_launcher import (PKG_NAME, SETTINGS_FILE_NAME, __version__,
                                 asset_path, user_save_path)
@@ -15,14 +14,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
 
-try:
+if platform.system() == "Windows":
     # Workaround for Windows, so that on the taskbar the
     # correct icon will be shown (and not the default python icon).
     from PyQt5.QtWinExtras import QtWin
     MY_APP_ID = 'ConanAppLauncher.' + __version__
     QtWin.setCurrentProcessExplicitAppUserModelID(MY_APP_ID)
-except ImportError:
-    pass
 
 ### Global variables ###
 active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
