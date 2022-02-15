@@ -88,6 +88,11 @@ class MainWindow(QtWidgets.QMainWindow):
         Logger.remove_qt_logger()
         super().closeEvent(event)
 
+    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+        if a0.oldSize().width() == -1:  # initial resize - can be skipped
+            return
+        self.app_grid.re_init_all_app_links()
+
     def load(self, config_source: Optional[PathLike] = None):
         """ Load all application gui elements specified in the GUI config (file) """
         config_source_str = str(config_source)
@@ -95,6 +100,7 @@ class MainWindow(QtWidgets.QMainWindow):
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
 
         # model loads incrementally
+        # TODO add async loading
         self.model.loadf(config_source_str)
 
         # model loaded, now load the gui elements, which have a static model

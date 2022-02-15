@@ -5,7 +5,7 @@ from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkModel,
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .app_link import AppLink
-from .widgets import AppEditDialog
+from .dialogs import AppEditDialog
 
 # define Qt so we can use it like the namespace in C++
 Qt = QtCore.Qt
@@ -71,11 +71,6 @@ class TabGrid(QtWidgets.QWidget):
                 max_columns = 1
             return max_columns
         return 1  # always enable one row
-
-    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
-        if a0.oldSize().width() == -1:  # initial resize - can be skipped
-            return
-        self.redraw_grid()
 
     def load(self):
         self.init_app_grid()

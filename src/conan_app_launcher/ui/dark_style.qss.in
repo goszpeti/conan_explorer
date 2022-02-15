@@ -217,7 +217,7 @@ QProgressBar::chunk {
 }
 QMenuBar {
     background-color: #323233;
-    font-size: {{MAIN_FONT_SIZE + 1 }}pt;
+    /* font-size: {{MAIN_FONT_SIZE + 1 }}pt; */
 }
 QMenuBar::item {
       spacing: 3px;
@@ -230,7 +230,7 @@ QMenuBar::item:selected {
 
 QMenu{
     background-color: #323233;
-    font-size: {{MAIN_FONT_SIZE + 1 }}pt;
+    /* font-size: {{MAIN_FONT_SIZE + 1 }}pt; */
 }
 QMenu::item:selected {
     border-style: solid;
@@ -422,7 +422,7 @@ QToolBox::tab:hover {
 }
 QToolBox::tab:selected {
     background-color: #202020;
-    font-size: 13px;
+    font-size: {{MAIN_FONT_SIZE}}pt;
 }
 QScrollArea {
     background-color: #202020;

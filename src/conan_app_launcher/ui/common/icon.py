@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from conan_app_launcher import ICON_SIZE, asset_path
+from conan_app_launcher import ICON_SIZE
 from conan_app_launcher.logger import Logger
 from PyQt5.QtCore import QFileInfo, Qt
 from PyQt5.QtGui import QIcon, QPixmap, QImage

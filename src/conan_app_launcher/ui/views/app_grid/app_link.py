@@ -14,7 +14,7 @@ from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .widgets import ClickableIcon, AppEditDialog, AppsMoveDialog
+from .dialogs import ClickableIcon, AppEditDialog, AppsMoveDialog
 
 if TYPE_CHECKING:  # pragma: no cover
     from.tab import TabGrid

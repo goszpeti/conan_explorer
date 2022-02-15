@@ -11,7 +11,7 @@
     },
     "settings": {
         "files.associations": {
-            "*.qss": "qss"
+            "*.qss.in": "qss"
         },
         "pyqt-integration.pyuic.compile.filepath": "${ui_name}.py",
         "python.formatting.provider": "autopep8",

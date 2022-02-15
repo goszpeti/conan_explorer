@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>512</width>
+    <width>612</width>
     <height>428</height>
    </rect>
   </property>
@@ -170,7 +170,7 @@ p, li { white-space: pre-wrap; }
       <widget class="ConanRefLineEdit" name="conan_ref_line_edit">
        <property name="minimumSize">
         <size>
-         <width>300</width>
+         <width>400</width>
          <height>0</height>
         </size>
        </property>

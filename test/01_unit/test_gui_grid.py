@@ -15,7 +15,7 @@ from conan_app_launcher.settings import (DISPLAY_APP_USERS,
 from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.views.app_grid.app_link import AppLink
-from conan_app_launcher.ui.views.app_grid.widgets.app_edit_dialog import \
+from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
     AppEditDialog
 from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
                                                           UiAppLinkConfig,

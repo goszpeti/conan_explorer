@@ -132,7 +132,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
 
         self._pkg_result_model = PkgSearchModel(self._main_window.conan_pkg_installed, conan_pkg_removed_signal)
         self._pkg_result_loader.async_loading(
-            self, self._load_search_model, self._finish_load_search_model, "Searching for packages...")
+            self, self._load_search_model, (), self._finish_load_search_model, "Searching for packages...")
         # reset info text
         self._ui.package_info_text.setText("")
 
@@ -148,12 +148,13 @@ class ConanSearchDialog(QtWidgets.QDialog):
 
     def _load_search_model(self):
         """ Initialize tree view model by searching in conan """
+        # import debugpy
+        # debugpy.debug_this_thread()
         self._pkg_result_model.setup_model_data(self._ui.search_line.text(), self.get_selected_remotes())
 
     def _finish_load_search_model(self):
         """ After conan search adjust the view """
         self._ui.search_results_tree_view.setModel(self._pkg_result_model.proxy_model)
-        # self._ui.search_results_tree_view.resizeColumnToContents(0)
         self._ui.search_results_tree_view.setColumnWidth(0, 320)
         self._ui.search_results_tree_view.sortByColumn(1, Qt.AscendingOrder)  # sort by remote at default
         self._ui.search_results_tree_view.selectionModel().selectionChanged.connect(self.on_package_selected)

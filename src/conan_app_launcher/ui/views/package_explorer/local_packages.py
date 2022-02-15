@@ -160,7 +160,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.pkg_sel_model = PkgSelectModel()
         self._pkg_sel_model_loaded = False
         self._pkg_sel_model_loader.async_loading(
-            self._main_window, self.pkg_sel_model.setup_model_data, self.finish_select_model_init, "Reading Packages")
+            self._main_window, self.pkg_sel_model.setup_model_data, (), self.finish_select_model_init, "Reading Packages")
 
     def finish_select_model_init(self):
         if self.pkg_sel_model:
@@ -171,14 +171,14 @@ class LocalConanPackageExplorer(QtCore.QObject):
         else:
             Logger().error("Can't load local packages!")
 
-    def wait_for_loading_pkgs(self):
-        Logger().debug("wait for loading thread")
-        # execute once
-        QtWidgets.QApplication.processEvents()
-        while not self._pkg_sel_model_loader.progress_dialog:
-            sleep(1)
-        while not self._pkg_sel_model_loader.progress_dialog.isHidden():
-            QtWidgets.QApplication.processEvents()
+    # def wait_for_loading_pkgs(self):
+    #     Logger().debug("wait for loading thread")
+    #     # execute once
+    #     QtWidgets.QApplication.processEvents()
+    #     while not self._pkg_sel_model_loader.progress_dialog:
+    #         sleep(1)
+    #     while not self._pkg_sel_model_loader.progress_dialog.isHidden():
+    #         QtWidgets.QApplication.processEvents()
 
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace
@@ -200,10 +200,14 @@ class LocalConanPackageExplorer(QtCore.QObject):
         """ Selects a reference:id pkg in the left pane and opens the file view"""
         self._main_window.activateWindow()
         self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
-        self.wait_for_loading_pkgs()  # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
+       # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
+        self._pkg_sel_model_loader.wait_for_finished()
 
         if not self.pkg_sel_model:  # guard
             return False
+
+        # Reset filter, otherwise the element to be shown could be hidden
+        self._main_window.ui.package_filter_edit.setText("*")
 
         # find out if we need to find a ref or or a package
         split_ref = conan_ref.split(":")
@@ -216,7 +220,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
             self.refresh_pkg_selection_view()
 
         # wait for model to be loaded
-        self.wait_for_loading_pkgs()
+        self._pkg_sel_model_loader.wait_for_finished()
         ref_row = self.find_item_in_pkg_sel_model(conan_ref)
         if ref_row == -1:
             Logger().debug(f"Cannot find {conan_ref} in Local Package Explorer for selection")
@@ -289,15 +293,17 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self._init_pkg_file_context_menu()
 
     def close_files_view(self):
+        if self.fs_model:
+            self.fs_model.deleteLater()
         self.fs_model = None
         self._current_ref = ""
         self._current_pkg = None
         self._main_window.ui.package_path_label.setText("")
         self._main_window.ui.package_file_view.setModel(None)
-        try:
-            self.fs_model.deleteLater()
-        except Exception:
-            pass  # sometimes this can crash...
+        # try:
+        #     self.fs_model.deleteLater()
+        # except Exception:
+        #     pass  # sometimes this can crash...
         self._main_window.ui.package_path_label.setText("")
 
     @classmethod
