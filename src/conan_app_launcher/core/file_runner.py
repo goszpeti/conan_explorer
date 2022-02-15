@@ -24,11 +24,14 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
 def open_in_file_manager(file_path: Path):
     """ Show file in file manager. """
     if platform.system() == "Linux":
-        return  # TODO how to implement this? -> Use show-in-file-manager package
+        # no standardized select functionailty.
+        # However xdg-open on a dir will open the folder in the default file explorer.
+        dir_to_view = file_path.parent if file_path.is_file() else file_path
+        subprocess.call(("xdg-open", str(dir_to_view)))
     elif platform.system() == "Windows":
         # select switch for highlighting
         # TODO: spawns an empty visible shell on some/slower? systems
-        os.system("explorer /select," + str(file_path))
+        subprocess.call("explorer /select," + str(file_path))
 
 
 def open_cmd_in_path(file_path: Path) -> int:
@@ -106,4 +109,4 @@ def open_file(file: Path):
         if platform.system() == 'Windows':
             os.startfile(str(file))
         elif platform.system() == "Linux":
-            subprocess.call(('xdg-open', str(file)))
+            subprocess.call(("xdg-open", str(file)))
