@@ -10,9 +10,6 @@ from conan_app_launcher.core import ConanApi, ConanWorker
 from conan_app_launcher.settings import (SETTINGS_INI_TYPE, SettingsInterface,
                                          settings_factory)
 
-if TYPE_CHECKING:
-    from conan_app_launcher.ui.main_window import MainWindow
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 # define Qt so we can use it like the namespace in C++
@@ -62,8 +59,7 @@ def run_application(conan_search=False):
     app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
 
     if conan_search:
-        from conan_app_launcher.ui.widgets.conan_search import \
-            ConanSearchDialog
+        from conan_app_launcher.ui.dialogs.conan_search import ConanSearchDialog
         main_window = ConanSearchDialog()
     else:
         from conan_app_launcher.ui.main_window import MainWindow

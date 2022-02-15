@@ -16,7 +16,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .widgets import ClickableIcon, AppEditDialog, AppsMoveDialog
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from.tab import TabGrid
 
 

@@ -15,7 +15,7 @@ from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
 Qt = QtCore.Qt
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
 
 
