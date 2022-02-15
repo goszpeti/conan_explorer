@@ -187,8 +187,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
     def on_install_pkg_requested(self):
         """ Spawn the Conan install dialog """
         combined_ref = self.get_selected_combined_ref()
-        dialog = ConanInstallDialog(
-            self, combined_ref, self._main_window.conan_pkg_installed)
+        dialog = ConanInstallDialog(self, combined_ref, self._main_window.conan_pkg_installed)
         dialog.show()
 
     def get_selected_remotes(self) -> List[str]:

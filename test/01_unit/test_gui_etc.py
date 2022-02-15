@@ -4,6 +4,7 @@ using the whole application (standalone).
 """
 import os
 import traceback
+from conan_app_launcher.ui.main_window import MainWindow
 from test.conftest import TEST_REF
 from time import sleep
 
@@ -58,16 +59,16 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
 
-    widget = ConanInstallDialog(root_obj, TEST_REF + ":" + id)
+    conan_install_dialog = ConanInstallDialog(root_obj, TEST_REF + ":" + id)
     qtbot.addWidget(root_obj)
-    widget.show()
-    qtbot.waitExposed(widget)
+    conan_install_dialog.show()
+    qtbot.waitExposed(conan_install_dialog)
 
     # with update flag
-    widget.update_check_box.setCheckState(Qt.Checked)
+    conan_install_dialog.update_check_box.setCheckState(Qt.Checked)
     mock_install_func = mocker.patch(
         'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_install_queue')
-    widget.button_box.accepted.emit()
+    conan_install_dialog.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, "settings": {},
                                                 "options": {}, "update": True, "auto_install": False}
 
@@ -75,15 +76,15 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
 
     # check only ref
 
-    widget.conan_ref_line_edit.setText(TEST_REF)
-    widget.button_box.accepted.emit()
+    conan_install_dialog.conan_ref_line_edit.setText(TEST_REF)
+    conan_install_dialog.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
                                                 "options": {}, "update": True, "auto_install": False}
     mock_install_func.assert_called_with(conan_worker_element, None)
 
     # check ref with autoupdate
-    widget.auto_install_check_box.setCheckState(Qt.Checked)
-    widget.button_box.accepted.emit()
+    conan_install_dialog.auto_install_check_box.setCheckState(Qt.Checked)
+    conan_install_dialog.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
                                                 "options": {}, "update": True, "auto_install": True}
 
@@ -94,30 +95,30 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     from pytestqt.plugin import _qapp_instance
     root_obj = QtWidgets.QWidget()
-    widget = ConanSearchDialog(root_obj)
+    search_dialog = ConanSearchDialog(root_obj, MainWindow(_qapp_instance))
 
     qtbot.addWidget(root_obj)
-    widget.show()
-    qtbot.waitExposed(widget)
+    search_dialog.show()
+    qtbot.waitExposed(search_dialog)
 
     # enter short search term -> search button disabled
-    widget._ui.search_line.setText("ex")
-    assert not widget._ui.search_button.isEnabled()
+    search_dialog._ui.search_line.setText("ex")
+    assert not search_dialog._ui.search_button.isEnabled()
 
     # search for the test ref name: example -> 2 versions
 
-    widget._ui.search_line.setText("example")
-    assert widget._ui.search_button.isEnabled()
-    widget._ui.search_button.clicked.emit()
+    search_dialog._ui.search_line.setText("example")
+    assert search_dialog._ui.search_button.isEnabled()
+    search_dialog._ui.search_button.clicked.emit()
 
     # wait for loading
-    widget._pkg_result_loader.wait_for_finished()
+    search_dialog._pkg_result_loader.wait_for_finished()
 
     # assert basic view
-    model = widget._pkg_result_model
+    model = search_dialog._pkg_result_model
     assert model
-    assert widget._ui.search_results_tree_view.findChildren(QtCore.QObject)
-    assert widget._ui.search_results_tree_view.model().columnCount() == 3  # fixed 3 coloumns
+    assert search_dialog._ui.search_results_tree_view.findChildren(QtCore.QObject)
+    assert search_dialog._ui.search_results_tree_view.model().columnCount() == 3  # fixed 3 coloumns
 
     assert model.root_item.item_data[0] == "Packages"
     assert model.root_item.child_count() == 3
@@ -129,9 +130,9 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     assert ref_item
     assert ref_item.is_installed
     index = model.get_index_from_item(ref_item)
-    proxy_view_model = widget._ui.search_results_tree_view.model()
+    proxy_view_model = search_dialog._ui.search_results_tree_view.model()
     ref_view_index = proxy_view_model.mapFromSource(index)
-    widget._ui.search_results_tree_view.expand(ref_view_index)
+    search_dialog._ui.search_results_tree_view.expand(ref_view_index)
 
     while not ref_item.child_items:
         _qapp_instance.processEvents()
@@ -148,27 +149,35 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     # check context menu actions
     # check copy recipe ref
     # select ref
-    sel_model = widget._ui.search_results_tree_view.selectionModel()
+    sel_model = search_dialog._ui.search_results_tree_view.selectionModel()
     sel_model.select(ref_view_index, QtCore.QItemSelectionModel.ClearAndSelect)
-    widget.on_copy_ref_requested()
+    search_dialog.on_copy_ref_requested()
     mock_clipboard.setText.assert_called_with(TEST_REF)
 
     # check copy id ref
     # select id
     sel_model.select(pkg_view_index, QtCore.QItemSelectionModel.ClearAndSelect)
-    widget.on_copy_ref_requested()
+    search_dialog.on_copy_ref_requested()
     mock_clipboard.setText.assert_called_with(TEST_REF + ":" + id)
 
     # check install
-    # TODO
+    mock_install_dialog = mocker.patch(
+        "conan_app_launcher.ui.dialogs.conan_search.conan_search.ConanInstallDialog")
+    search_dialog.on_install_pkg_requested()
+    mock_install_dialog.assert_called_with(search_dialog, TEST_REF + ":" + id, search_dialog._main_window.conan_pkg_installed)
 
     # check show conanfile
-    # TODO
+    mock_open_file = mocker.patch(
+        "conan_app_launcher.ui.dialogs.conan_search.conan_search.open_file")
+    search_dialog.on_show_conanfile_requested()
+    conanfile = app.conan_api.get_export_folder(cfr) / "conanfile.py"
+    mock_open_file.assert_called_with(conanfile)
 
     # check check open in local pkg explorer
-    # TODO
+    search_dialog.on_show_in_pkg_exp()
+    assert id == search_dialog._main_window.local_package_explorer.get_selected_conan_pkg_info().get("id", "")
 
-    widget.hide()
+    search_dialog.hide()
 
 
 def test_about_dialog(base_fixture, qtbot):

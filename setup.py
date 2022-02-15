@@ -35,7 +35,8 @@ TEST_REQUIRES = [
     "pytest==6.2.5",
     "pytest-cov==3.0.0",
     "pytest-mock==3.6.1",
-    "pytest-qt==4.0.2"
+    "pytest-qt==4.0.2",
+    "psutil"
 ]
 
 DEV_REQUIRES = [
