@@ -218,7 +218,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         # wait for model to be loaded
         self.wait_for_loading_pkgs()
         ref_row = self.find_item_in_pkg_sel_model(conan_ref)
-        if not ref_row:
+        if ref_row == -1:
             Logger().debug(f"Cannot find {conan_ref} in Local Package Explorer for selection")
             return False
         Logger().debug(f"Found {conan_ref}@{str(ref_row)} in Local Package Explorer for selection")
