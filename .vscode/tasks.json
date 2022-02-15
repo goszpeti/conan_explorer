@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Install package in editable mode",
+            "label": "Install package in editable mode with dev and test deps ",
             "type": "shell",
             "command": "${config:python.pythonPath}",
             "args": [
@@ -12,29 +12,9 @@
                 "pip",
                 "install",
                 "-e",
-                "."
+                ".[dev]"
             ],
             "problemMatcher": []
-        },
-        {
-            "label": "Install dev and test dependencies",
-            "type": "shell",
-            "command": "${config:python.pythonPath}",
-            "args": [
-                "-m",
-                "pip",
-                "install",
-                "--upgrade",
-                "pip",
-                "&&",
-                "${config:python.pythonPath}",
-                "-m",
-                "pip",
-                "install",
-                "-r",
-                "test/requirements.txt"
-            ],
-            "problemMatcher": []
-        },
+        }
     ]
 }

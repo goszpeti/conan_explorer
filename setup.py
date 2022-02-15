@@ -17,11 +17,11 @@ VERSION = "1.2.0"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
-REQUIRES_PYTHON = ">=3.6.0"  # still support Ubuntu 18
+PYTHON_REQUIRES = ">=3.6.0"  # still support Ubuntu 18
 
 # What packages are required for this module to be executed?
-REQUIRED = [
-    "PyQt5>=5.13.0",  # GPLv3
+REQUIRES = [
+    "PyQt5>=5.13.0",  # GPLv3 (Windows and Ubuntu 20.04 use 5.14 minimally)
     "conan>=1.24, <2",  # MIT License
     "jsonschema>=3.2.0",  # MIT License
     'importlib-metadata>=4.8.2 ; python_version<"3.8"',  # Apache Software License (Apache)
@@ -29,6 +29,22 @@ REQUIRED = [
     'dataclasses>=0.8 ; python_version<"3.7"',  # Apache Software License (Apache)
     "packaging",  # use the built-in, or get latest if there is some issue with pip
     "Jinja2>=2.3"  # BSD License (BSD-3-Clause) (restriction from conan 1.24, since it is included there)
+]
+
+TEST_REQUIRES = [
+    "pytest==6.2.5",
+    "pytest-cov==3.0.0",
+    "pytest-mock==3.6.1",
+    "pytest-qt==4.0.2"
+]
+
+DEV_REQUIRES = [
+    "autopep8", # formatter
+    #"pylint" - currently using VsCode language server
+    #"mypy"
+    "rope", # refactoring
+    "debugpy", # Qt thread debugging
+    "PyQt5-stubs" # type hints
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -68,12 +84,16 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author=AUTHOR,
-    python_requires=REQUIRES_PYTHON,
+    python_requires=PYTHON_REQUIRES,
     url=URL,
     packages=find_packages("src"),
     package_dir={"": "src"},
     py_modules=[splitext(basename(path))[0] for path in glob("src/*.py")],
-    install_requires=REQUIRED,
+    install_requires=REQUIRES,
+    extras_require={
+        "dev": DEV_REQUIRES + TEST_REQUIRES,
+        "test": TEST_REQUIRES
+    },
     include_package_data=True,
     license="MIT",
     classifiers=[
