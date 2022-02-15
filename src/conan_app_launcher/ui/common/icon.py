@@ -3,8 +3,29 @@ from pathlib import Path
 from conan_app_launcher import ICON_SIZE
 from conan_app_launcher.logger import Logger
 from PyQt5.QtCore import QFileInfo, Qt
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QImage
 from PyQt5.QtWidgets import QFileIconProvider
+
+import conan_app_launcher.app as app
+from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using gobal module pattern
+
+
+def get_themed_asset_image(image_rel_path: str) -> str:
+    if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
+        return get_inverted_asset_image(app.asset_path / image_rel_path)
+    return str(app.asset_path / image_rel_path)
+
+
+def get_inverted_asset_image(image_path: Path):
+    """ Inverts a given image and saves it beside the original one with _inv in the name.
+    To be used for icons to switch between light and dark mode themes. """
+    inverted_img_path = image_path.parent / ((image_path.with_suffix('').name + "_inv") + image_path.suffix)
+
+    if not inverted_img_path.exists():
+        img = QImage(str(image_path))
+        img.invertPixels()
+        img.save(str(inverted_img_path))
+    return str(inverted_img_path)
 
 
 def get_icon_from_image_file(image_path: Path) -> QIcon:
@@ -29,5 +50,19 @@ def extract_icon(file_path: Path) -> QIcon:
         icon = icon_provider.icon(file_info)
         return icon
     else:
-        Logger().debug("File for icon extraction does not exist.")
+        Logger().debug(f"File {str(file_path)} for icon extraction does not exist.")
     return QIcon()
+
+
+def get_platform_icon(profile_name) -> QIcon:
+    profile_name = profile_name.lower()
+    if "windows" in profile_name:
+        return QIcon(get_themed_asset_image("icons/windows.png"))
+    elif "linux" in profile_name:
+        return QIcon(get_themed_asset_image("icons/linux.png"))
+    elif "android" in profile_name:
+        return QIcon(get_themed_asset_image("icons/android.png"))
+    elif "macos" in profile_name:
+        return QIcon(get_themed_asset_image("icons/mac_os.png"))
+    else:
+        return QIcon(get_themed_asset_image("icons/default_pkg.png"))

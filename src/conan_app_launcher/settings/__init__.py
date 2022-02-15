@@ -13,10 +13,18 @@ LAST_CONFIG_FILE = "last_config_file"
 DISPLAY_APP_VERSIONS = "disp_app_versions"
 DISPLAY_APP_USERS = "disp_app_users"
 DISPLAY_APP_CHANNELS = "disp_app_channels"
+# enable combobox for app user/channel/version
+ENABLE_APP_COMBO_BOXES = "enable_app_link_combo_boxes"
+FONT_SIZE = "font_size"
+GUI_STYLE = "style"
+
+GUI_STYLE_DARK = "dark"
+GUI_STYLE_LIGHT = "light"
 
 # Implementation types fro factory
 SETTINGS_INI_TYPE = "ini"
-SETTINGS_QT_TYPE = "qt" # TODO try this out, see issue #56
+SETTINGS_QT_TYPE = "qt"  # TODO try this out, see issue #56
+
 
 def settings_factory(type: str, source: PathLike) -> "SettingsInterface":
 
@@ -31,10 +39,11 @@ def settings_factory(type: str, source: PathLike) -> "SettingsInterface":
 
 # Interface for Settings to implement
 
+
 class SettingsInterface(ABC):
     """
     Abstract Class to implement settings mechanisms.
-    Source artefact is passed by constructor an and not changeable.
+    Source artefact location is passed by constructor and not changeable.
     """
 
     @abstractmethod

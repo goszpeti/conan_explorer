@@ -1,0 +1,12 @@
+/*
+QSS template
+Usable Macros with Jinja2 syntax:
+ - MAIN_FONT_SIZE (in pt)
+*/
+
+* {
+    font-size: {{MAIN_FONT_SIZE}}pt;
+}
+QMenuBar {
+    font-size: {{MAIN_FONT_SIZE + 1 }}pt;
+}

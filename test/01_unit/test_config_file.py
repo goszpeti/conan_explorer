@@ -5,7 +5,6 @@ from pathlib import Path
 
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
 from conans.model.ref import ConanFileReference
-from tempfile import NamedTemporaryFile
 
 
 def test_new_filename_is_created(base_fixture):
@@ -15,7 +14,7 @@ def test_new_filename_is_created(base_fixture):
     """
     new_file_path = Path(tempfile.gettempdir()) / "newfile.config"
     config = JsonUiConfig(new_file_path).load()
-    assert config.tabs == []
+    assert len(config.app_grid.tabs) == 1  # default tab
     assert new_file_path.exists()
 
 
@@ -24,18 +23,18 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
     Tests reading a correct config json with 2 tabs.
     Expects the same values as in the file.
     """
-    tabs = JsonUiConfig(ui_config_fixture).load().tabs
+    tabs = JsonUiConfig(ui_config_fixture).load().app_grid.tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
-    assert tab0_entries[0].conan_ref == "m4/1.4.19@_/_"
-    assert tab0_entries[0].executable == "bin/m4"
+    assert tab0_entries[0].conan_ref == "example/9.9.9@local/testing"
+    assert tab0_entries[0].executable == "bin/python"
     assert tab0_entries[0].icon == "NonExistantIcon.png"
     assert tab0_entries[0].name == "App1 with spaces"
     assert tab0_entries[0].is_console_application
     assert tab0_entries[0].args == "-n name"
 
-    assert tab0_entries[1].conan_ref == "zlib/1.2.11@conan/stable"
-    assert tab0_entries[1].executable == "bin/app2"
+    assert tab0_entries[1].conan_ref == "example/1.0.0@_/_"
+    assert tab0_entries[1].executable == "bin/python"
     assert tab0_entries[1].icon == "icon.ico"
     assert tab0_entries[1].name == "App2"
     assert not tab0_entries[1].is_console_application  # default
@@ -55,7 +54,7 @@ def test_update(base_fixture):
     temp_file = Path(tempfile.gettempdir()) / "update.json"
     copy_file(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
 
-    tabs = JsonUiConfig(temp_file).load().tabs
+    tabs = JsonUiConfig(temp_file).load().app_grid.tabs
     assert tabs[0].name == "Basics"
     tab0_entries = tabs[0].apps
     assert tab0_entries[0].conan_ref == "m4/1.4.19@_/_"
@@ -74,13 +73,14 @@ def test_update(base_fixture):
     assert read_obj.get("tabs")[0].get("apps")[0].get("is_console_application") is True
     assert read_obj.get("tabs")[0].get("apps")[0].get("console_application") is None
 
+
 def test_read_invalid_version(base_fixture, capfd):
     """
     Tests, that reading a config file with the wrong version will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     config = JsonUiConfig(base_fixture.testdata_path / "config_file" / "wrong_version.json").load()
-    assert config.tabs == []
+    assert len(config.app_grid.tabs) == 1
     captured = capfd.readouterr()
     assert "Failed validating" in captured.err
     assert "version" in captured.err
@@ -92,7 +92,7 @@ def test_read_invalid_content(base_fixture, capfd):
     Expects the sdterr to contain the error level(ERROR) and the error cause.
     """
     config = JsonUiConfig(base_fixture.testdata_path / "config_file" / "invalid_syntax.json").load()
-    assert config.tabs == []
+    assert len(config.app_grid.tabs) == 1
     captured = capfd.readouterr()
     assert "Expecting property name" in captured.err
 
@@ -110,7 +110,7 @@ def check_config(ref_dict, test_dict):
                 check_config(ref_dict.get(key), test_dict.get(key))
                 continue
             else:
-                try: # test if it is conanref in string form. 
+                try:  # test if it is conanref in string form.
                     # We don't care if it is written differently, as long as it is the same object
                     ConanFileReference.loads(test_dict.get(
                         key)) == ConanFileReference.loads(ref_dict.get(key))

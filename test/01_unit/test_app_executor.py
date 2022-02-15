@@ -8,8 +8,8 @@ from pathlib import Path
 from subprocess import check_output
 
 import conan_app_launcher  # for mocker
-from conan_app_launcher.components.file_runner import (execute_app, open_file,
-                                                       run_file)
+from conan_app_launcher.core.file_runner import (execute_app, open_file,
+                                                 run_file)
 
 
 def test_choose_run_file(base_fixture, tmp_path, mocker):
@@ -18,14 +18,14 @@ def test_choose_run_file(base_fixture, tmp_path, mocker):
     Existing path with a filesize > 0 expected
     """
     # Mock away the calls
-    mocker.patch('conan_app_launcher.components.file_runner.open_file')
+    mocker.patch('conan_app_launcher.core.file_runner.open_file')
     test_file = Path(tmp_path) / "test.txt"
     with open(test_file, "w") as f:
         f.write("test")
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.components.file_runner.open_file.assert_called_once_with(test_file)
+    conan_app_launcher.core.file_runner.open_file.assert_called_once_with(test_file)
 
 
 def test_choose_run_script(base_fixture, tmp_path, mocker):
@@ -33,18 +33,25 @@ def test_choose_run_script(base_fixture, tmp_path, mocker):
     Tests, that the function call is propagated correctly
     Existing path with a filesize > 0 expected
     """
-    if platform.system() != "Windows":
-        return
-    # Mock away the calls
-    mocker.patch('conan_app_launcher.components.file_runner.execute_app')
 
-    test_file = Path(tmp_path) / "test.bat"
+    # Mock away the calls
+    mocker.patch('conan_app_launcher.core.file_runner.execute_app')
+
+    if platform.system() == "Windows":
+        test_file = Path(tmp_path) / "test.bat"
+    else:
+        test_file = Path(tmp_path) / "test.sh"
+
     with open(test_file, "w") as f:
         f.write("test")
 
+    if platform.system() == "Linux":
+        st = os.stat(str(test_file))
+        os.chmod(str(test_file), st.st_mode | stat.S_IEXEC)
+
     run_file(test_file, False, "")
 
-    conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
+    conan_app_launcher.core.file_runner.execute_app.assert_called_once_with(test_file, False, "")
 
 
 def test_choose_run_exe(base_fixture, tmp_path, mocker):
@@ -52,7 +59,7 @@ def test_choose_run_exe(base_fixture, tmp_path, mocker):
     Test, that run_file will call execute_app with the correct argumnenst.
     Mock away the actual calls.
     """
-    mocker.patch('conan_app_launcher.components.file_runner.execute_app')
+    mocker.patch('conan_app_launcher.core.file_runner.execute_app')
     test_file = Path()
     if platform.system() == "Linux":
         test_file = Path(tmp_path) / "test"
@@ -68,7 +75,7 @@ def test_choose_run_exe(base_fixture, tmp_path, mocker):
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.components.file_runner.execute_app.assert_called_once_with(test_file, False, "")
+    conan_app_launcher.core.file_runner.execute_app.assert_called_once_with(test_file, False, "")
 
 
 def test_start_cli_option_app(base_fixture):
@@ -79,7 +86,7 @@ def test_start_cli_option_app(base_fixture):
     executable = Path(sys.executable)
     is_console_app = True
     test_file = Path(tempfile.gettempdir(), "test.txt")
-    args = "" # no args os it stays open
+    args = ""  # no args os it stays open
     pid = execute_app(executable, is_console_app, args)
 
     if platform.system() == "Linux":
@@ -94,6 +101,7 @@ def test_start_cli_option_app(base_fixture):
         ret = check_output(f'tasklist /fi "PID eq {str(pid)}"')
         assert "python.exe" in ret.decode("utf-8")
         os.system("taskkill /PID " + str(pid))
+
 
 def test_start_app_with_args_non_cli(base_fixture):
     """

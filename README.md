@@ -4,17 +4,16 @@
 
 ![https://pypi.org/project/conan-app-launcher/](https://img.shields.io/pypi/v/conan-app-launcher)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
-![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/9)
+![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/10)
 ![Python tests](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
 ![Alerts](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_app_launcher&metric=alert_status)
-![Violations](https://img.shields.io/sonar/violations/goszpeti_conan_app_launcher?server=https%3A%2F%2Fsonarcloud.io)
 ![Downloads](https://img.shields.io/pypi/dm/conan_app_launcher)
 
 ## Quick Overview
 
-The goal of this project is to provide a frontend to start executables contained in packages of the package manager [Conan](https://conan.io/). It also contains a local package explorer view, which is handy on Windows to browse short paths annd navigate quickly.
+The goal of this project is to provide a frontend to start executables contained in packages of the package manager [Conan](https://conan.io/). It also contains a local package explorer view, which is handy on Windows to browse short paths and navigate quickly. A Search Dialog for browsing packages is also integrated.
 
-It is more end-user oriented and focuses on using packages. It can be used on Windows and Linux x64 platforms.
+It is end-user oriented and focuses on using packages, rather then developing them. It can be used on Windows and Linux x64 platforms.
 
 #### Application Link Grid:
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="1024">
@@ -28,7 +27,7 @@ It is more end-user oriented and focuses on using packages. It can be used on Wi
 - integrated console for information an packages and config file
 - installable with pip
 
-App Grid:
+App Grid
 - configurable layout (tabs and applications) in the GUI
 - can also open files with their associated default program
 - installs all referenced packages automatically
@@ -36,20 +35,35 @@ App Grid:
 - uses the default icons of files or can be configured to use custom ones
 - quick controls to switch between versions and channels
 
-Local Package Explorer:
+Local Package Explorer
 - view for browsing through installed packages
 - understand package settings at a glance from a shortened representation, e.g. Linux_x64_ggc7
 - supports copy/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan workflow
 
+Conan Search View
+- search for references in selected remotes
+- show all existing packages for a reference and their infos
+- install package directly via right-click menu
+
 
 ## How to install?
 
-### Prequisites on Linux
-Qt for Python must be installed with the native package manager, like:
+### Prerequisites on Linux
+
+Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04.
+
+1. Qt for Python must be installed with the native package manager, like:
 
     sudo apt install python3-pyqt5
 
+2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type "x-terminal-emulator" to get a list of available terminals.
+
+3. To open files with its associated program xdg-open is used:
+
+    sudo apt install xdg-utils
+
 Ubuntu 16.04 is not supported due to its native Python version (3.5).
+
 
 ### With pip from PyPi
 `pip install conan-app-launcher`
@@ -72,6 +86,8 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 
 This project uses Python with Qt as a frontend using the PyQt integration.
 An IDE configuration is available for VsCode.
+
+See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for Static Code Analysis.
 
 ## Licenses of used libraries and code
 

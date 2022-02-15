@@ -3,7 +3,7 @@ import tempfile
 from distutils.file_util import copy_file
 from pathlib import Path
 
-from conan_app_launcher.components import ConanInfoCache
+from conan_app_launcher.core import ConanInfoCache
 from conans.model.ref import ConanFileReference as CFR
 
 
@@ -27,7 +27,7 @@ def test_read_cache(base_fixture):
     assert cache._local_packages == {"my_package/1.0.0": "",
                                      "my_package/2.0.0": "C:\\.conan\\pkg"}
     assert cache._remote_packages == {
-        "my_package": {"_" : [
+        "my_package": {"_": [
             "1.0.0/_",
             "2.0.0/_"]
         },
@@ -90,7 +90,6 @@ def test_update_cache(base_fixture):
     assert len(remote_pkgs) == 3
     remote_pkgs = cache.get_similar_remote_pkg_refs("other_package", "*")
     assert len(remote_pkgs) == 4
-
 
     cache.update_remote_package_list(add_packages, invalidate=True)
     remote_pkgs = cache.get_similar_remote_pkg_refs("new_pkg", "me")

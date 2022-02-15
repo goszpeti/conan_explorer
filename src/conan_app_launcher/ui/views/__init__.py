@@ -1,0 +1,1 @@
+""" Main views of the the Application (without opening a new dialog) """

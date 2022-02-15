@@ -1,5 +1,5 @@
 """
-Test the self written qt gui components, which can be instantiated without
+Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
 import os
@@ -7,37 +7,36 @@ import platform
 import sys
 from pathlib import Path
 from subprocess import check_output
+from test.conftest import TEST_REF, conan_create_and_upload
 from time import sleep
-import pytest
-from PyQt5 import QtCore, QtWidgets
-Qt = QtCore.Qt
 
-import conan_app_launcher.app as app
-from conan_app_launcher.settings import DISPLAY_APP_USERS
-from conan_app_launcher.ui.data import UiApplicationConfig, UiTabConfig
+from conan_app_launcher.settings import (DISPLAY_APP_USERS,
+                                         ENABLE_APP_COMBO_BOXES)
+from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.modules.app_grid.app_link import AppLink
-from conan_app_launcher.ui.modules.app_grid.common.app_edit_dialog import \
-    EditAppDialog
-from conan_app_launcher.ui.modules.app_grid.model import (UiAppLinkConfig,
+from conan_app_launcher.ui.views.app_grid.app_link import AppLink
+from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
+    AppEditDialog
+from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
+                                                          UiAppLinkConfig,
                                                           UiAppLinkModel)
 from conans.model.ref import ConanFileReference as CFR
+from PyQt5 import QtCore, QtWidgets
+
+Qt = QtCore.Qt
 
 
-TEST_REF = "zlib/1.2.11@_/_"
-
-
-def test_EditAppDialog_display_values(base_fixture, qtbot):
+def test_AppEditDialog_display_values(base_fixture, qtbot):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
-                               executable = "bin/myexec", is_console_application=True,
+                               executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico", conan_options={"a": "b", "c": "True", "d": "10"})
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    diag = EditAppDialog(app_info, root_obj)
+    diag = AppEditDialog(app_info, root_obj)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
@@ -62,26 +61,26 @@ def test_EditAppDialog_display_values(base_fixture, qtbot):
     assert app_info.name == "test"
 
 
-def test_EditAppDialog_save_values(base_fixture, qtbot, mocker):
+def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
     """
     Test, if the entered data is written correctly.
     """
+    import conan_app_launcher.app as app
 
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico")
     app_info.executable = sys.executable
-    
-    app_config = UiApplicationConfig(tabs=[UiTabConfig(apps=[app_info])])
-    from conan_app_launcher.ui.modules.app_grid.model import UiTabModel
 
-    app_model = UiApplicationModel().load(app_config)
+    app_config = UiAppGridConfig(tabs=[UiTabConfig(apps=[app_info])])
+
+    app_model = UiAppGridModel().load(app_config, UiApplicationModel())
 
     model = app_model.tabs[0].apps[0]
     root_obj = QtWidgets.QWidget()
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    diag = EditAppDialog(model, root_obj)
+    diag = AppEditDialog(model, root_obj)
     root_obj.setFixedSize(100, 200)
     root_obj.show()
 
@@ -100,9 +99,9 @@ def test_EditAppDialog_save_values(base_fixture, qtbot, mocker):
     # the caller must call save_data manually
 
     mock_version_func = mocker.patch(
-        'conan_app_launcher.components.conan_worker.ConanWorker.put_ref_in_version_queue')
+        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_version_queue')
     mock_install_func = mocker.patch(
-        'conan_app_launcher.components.conan_worker.ConanWorker.put_ref_in_install_queue')
+        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_install_queue')
     diag.save_data()
 
     # assert that all infos where saved
@@ -117,7 +116,7 @@ def test_EditAppDialog_save_values(base_fixture, qtbot, mocker):
     for opt in model.conan_options:
         assert f"{opt}={model.conan_options[opt]}" in conan_options_text
 
-    vt = diag._ui.conan_ref_line_edit._validator_thread
+    vt = diag._ui.conan_ref_line_edit._completion_thread
     if vt and vt.is_alive():
         vt.join()
     app.conan_worker.finish_working()
@@ -127,13 +126,14 @@ def test_EditAppDialog_save_values(base_fixture, qtbot, mocker):
     mock_version_func.assert_called()
     mock_install_func.assert_called()
 
+
 def test_AppLink_open(base_fixture, qtbot):
     """
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
-                               is_console_application=True, executable=sys.executable)
+                                 is_console_application=True, executable=sys.executable)
     app_model = UiAppLinkModel().load(app_config, None)
     app_model.set_package_info(Path(sys.executable).parent)
 
@@ -155,6 +155,7 @@ def test_AppLink_open(base_fixture, qtbot):
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         # check windowname of process - default shell spawns with path as windowname
+        # DOES NOT WORK with Windows Terminal in 11 -> has no title
         ret = check_output(f'tasklist /fi "WINDOWTITLE eq {str(sys.executable)}"')
         assert "python.exe" in ret.decode("utf-8")
         lines = ret.decode("utf-8").splitlines()
@@ -168,8 +169,7 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path. Use python executable for testing.
     """
-    if not platform.system() == "Windows":
-        pytest.skip()
+
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable=sys.executable)
     app_model = UiAppLinkModel().load(app_config, None)
@@ -184,35 +184,30 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     assert not app_ui._app_button._greyed_out
 
 
-def create_and_upload(conanfile, ref):
-    os.system(f"conan create {conanfile} {ref}")
-    os.system(f"conan upload {ref} -r local")
-
-
-def test_AppLink_cbox_switch(base_fixture, start_conan_server, qtbot):
+def test_AppLink_cbox_switch(base_fixture, qtbot):
     """
     Test, that changing the version resets the channel and user correctly
     """
-    if platform.system() == "Windows": # TODO: conan server does not work on Windows, probably because of the firewall
-        pytest.skip()
+    import conan_app_launcher.app as app
+
     # all versions have different user and channel names, so we can distinguish them
     conanfile = str(base_fixture.testdata_path / "conan" / "multi" / "conanfile.py")
     create_packages = True
     if create_packages:
-        create_and_upload(conanfile, "switch_test/1.0.0@user1/channel1")
-        create_and_upload(conanfile, "switch_test/1.0.0@user1/channel2")
-        create_and_upload(conanfile, "switch_test/1.0.0@user2/channel3")
-        create_and_upload(conanfile, "switch_test/1.0.0@user2/channel4")
-        create_and_upload(conanfile, "switch_test/2.0.0@user3/channel5")
-        create_and_upload(conanfile, "switch_test/2.0.0@user3/channel6")
-        create_and_upload(conanfile, "switch_test/2.0.0@user4/channel7")
-        create_and_upload(conanfile, "switch_test/2.0.0@user4/channel8")
+        conan_create_and_upload(conanfile, "switch_test/1.0.0@user1/channel1")
+        conan_create_and_upload(conanfile, "switch_test/1.0.0@user1/channel2")
+        conan_create_and_upload(conanfile, "switch_test/1.0.0@user2/channel3")
+        conan_create_and_upload(conanfile, "switch_test/1.0.0@user2/channel4")
+        conan_create_and_upload(conanfile, "switch_test/2.0.0@user3/channel5")
+        conan_create_and_upload(conanfile, "switch_test/2.0.0@user3/channel6")
+        conan_create_and_upload(conanfile, "switch_test/2.0.0@user4/channel7")
+        conan_create_and_upload(conanfile, "switch_test/2.0.0@user4/channel8")
 
     # loads it into cache
-    app.conan_api.search_recipe_in_remotes(CFR.loads("switch_test/1.0.0@user1/channel1"))
+    app.conan_api.search_recipe_alternatives_in_remotes(CFR.loads("switch_test/1.0.0@user1/channel1"))
     # need cache
     app.active_settings.set(DISPLAY_APP_USERS, True)
-
+    app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     #app_info._executable = Path(sys.executable)
     app_config = UiAppLinkConfig(name="test", conan_ref="switch_test/1.0.0@user1/channel1",
                                  is_console_application=True, executable="")

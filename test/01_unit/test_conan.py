@@ -3,19 +3,16 @@ import platform
 import tempfile
 import time
 from pathlib import Path
+from test.conftest import TEST_REF, conan_create_and_upload
 from typing import List
 
-import conan_app_launcher
-import pytest
-from conan_app_launcher.components.conan import (ConanApi,
-                                                 _create_key_value_pair_list)
-from conan_app_launcher.components.conan_worker import (ConanWorker,
-                                                        ConanWorkerElement)
+from conan_app_launcher.core.conan import (ConanApi, ConanCleanup,
+                                           _create_key_value_pair_list)
+from conan_app_launcher.core.conan_worker import (ConanWorker,
+                                                  ConanWorkerElement)
 from conans import __version__
 from conans.model.ref import ConanFileReference
-from packaging import version
 
-TEST_REF = "zlib/1.2.8@_/_#74ce22a7946b98eda72c5f8b5da3c937"
 
 def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
@@ -34,9 +31,9 @@ def test_conan_profile_name_alias_builder():
     profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Windows_x64_vs16_v142_release"
 
-
     # check linux
-    settings = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 'compiler.version': '7.4', 'build_type': 'Debug'}
+    settings = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc',
+                'compiler.version': '7.4', 'build_type': 'Debug'}
     profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
@@ -52,6 +49,7 @@ def test_conan_short_path_root():
         assert not conan.get_short_path_root().exists()
     os.environ.pop("CONAN_USER_HOME_SHORT")
 
+
 def test_empty_cleanup_cache(base_fixture):
     """
     Test, if a clean cache returns no dirs. Actual functionality is tested with gui.
@@ -59,8 +57,7 @@ def test_empty_cleanup_cache(base_fixture):
     """
     os.environ["CONAN_USER_HOME"] = str(Path(tempfile.gettempdir()) / "._myconan_home")
     os.environ["CONAN_USER_HOME_SHORT"] = str(Path(tempfile.gettempdir()) / "._myconan_short")
-    conan = ConanApi()
-    paths = conan.get_cleanup_cache_paths()
+    paths = ConanCleanup(ConanApi()).get_cleanup_cache_paths()
     assert not paths
     os.environ.pop("CONAN_USER_HOME")
     os.environ.pop("CONAN_USER_HOME_SHORT")
@@ -76,8 +73,8 @@ def test_conan_find_remote_pkg(base_fixture):
     conan = ConanApi()
     default_settings = dict(conan.client_cache.default_profile.settings)
 
-    pkgs = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
-    assert len(pkgs) >= 1
+    pkgs = conan.get_matching_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
+    assert len(pkgs) > 0
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
 
@@ -93,7 +90,7 @@ def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
-    pkg = conan.search_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"BogusOption": "True"})
+    pkg = conan.get_matching_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"BogusOption": "True"})
     assert not pkg
 
 
@@ -113,18 +110,14 @@ def test_get_path_or_install(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    # can't find a package on conan-center which works with conan version lower then 1.33
-    if version.parse(__version__) < version.parse("1.33"):
-        pytest.skip()
-    install_ref = TEST_REF
-    dir_to_check = "lib"
-    os.system(f"conan remove {install_ref} -f")
+    dir_to_check = "bin"
+    os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
     # Gets package path / installs the package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(install_ref))
+    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
     # check again for already installed package
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(install_ref))
+    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
 
 
@@ -133,17 +126,14 @@ def test_get_path_or_install_manual_options(capsys):
     Test, if a package with options can install.
     The actual installaton must not return an error and non given options be merged with default options.
     """
-    # can't find a package on conan-center which works with conan version lower then 1.33
-    if version.parse(__version__) < version.parse("1.33"):
-        pytest.skip()
     # This package has an option "shared" and is fairly small.
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi()
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(TEST_REF), {"shared": "True"})
+    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {"shared": "True"})
     if platform.system() == "Windows":
-        assert (package_folder / "lib" / "zlib.lib").is_file()
+        assert (package_folder / "bin" / "python.exe").is_file()
     elif platform.system() == "Linux":
-        assert (package_folder / "lib" / "libz.so").is_file()
+        assert (package_folder / "bin" / "python").is_file()
 
 
 def test_install_with_any_settings(mocker, capfd):
@@ -153,12 +143,12 @@ def test_install_with_any_settings(mocker, capfd):
     """
     # mock the remote response
     os.system(f"conan remove {TEST_REF} -f")
+    # TODO: Create the any package
     conan = ConanApi()
-
     assert conan.install_package(
-        ConanFileReference.loads(TEST_REF), 
-        {'id': '3fb49604f9c2f729b85ba3115852006824e72cab', 'options': {}, 'settings': {
-        'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
+        ConanFileReference.loads(TEST_REF),
+        {'id': '325c44fdb228c32b3de52146f3e3ff8d94dddb60', 'options': {}, 'settings': {
+            'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
     assert "Cannot install package" not in captured.err
@@ -169,14 +159,18 @@ def test_compiler_no_settings(base_fixture, capfd):
     Test, if a package with no settings at all can install
     The actual installaton must not return an error.
     """
-    ref = "hedley/15"  # header only
+    conanfile = str(base_fixture.testdata_path / "conan" / "conanfile_no_settings.py")
+    ref = "example/1.0.0@local/no_sets"
+    conan_create_and_upload(conanfile, ref)
     os.system(f"conan remove {ref} -f")
+
     conan = ConanApi()
-    package_folder = conan.get_path_or_install(ConanFileReference.loads(ref))
-    assert (package_folder / "include").is_dir()
+    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(ref))
+    assert (package_folder / "bin").is_dir()
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
     assert "Can't find a matching package" not in captured.err
+    os.system(f"conan remove {ref} -f")
 
 
 def test_resolve_default_options(base_fixture):
@@ -219,8 +213,8 @@ def test_create_key_value_list(base_fixture):
 def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi()
-    res = conan.search_recipe_in_remotes(ConanFileReference.loads(TEST_REF))
-    ref = ConanFileReference.loads(TEST_REF) # need to convert @_/_
+    res = conan.search_recipe_alternatives_in_remotes(ConanFileReference.loads(TEST_REF))
+    ref = ConanFileReference.loads(TEST_REF)  # need to convert @_/_
     assert str(ref) in str(res)
 
 
@@ -229,11 +223,16 @@ def test_conan_worker(base_fixture, mocker):
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
-    conan_refs: List[ConanWorkerElement] = [{"reference": "m4/1.4.19@_/_", "options": {}},
-                {"reference": "zlib/1.2.11@conan/stable", "options": {"shared": "True"}}]
+    conan_refs: List[ConanWorkerElement] = [{"ref_pkg_id": "m4/1.4.19@_/_", "options": {},
+                                            "settings": {}, "update": False,  "auto_install": True},
+                                            {"ref_pkg_id": "zlib/1.2.11@conan/stable", "options": {"shared": "True"},
+                                             "settings": {}, "update": False,  "auto_install": True}
+                                            ]
 
-    mock_func = mocker.patch('conan_app_launcher.components.ConanApi.get_path_or_install')
-    conan_worker = ConanWorker(conan_api=ConanApi())
+    mock_func = mocker.patch('conan_app_launcher.core.ConanApi.get_path_or_auto_install')
+    import conan_app_launcher.app as app
+
+    conan_worker = ConanWorker(ConanApi(), app.active_settings)
     conan_worker.update_all_info(conan_refs, None)
     time.sleep(3)
     conan_worker.finish_working()
@@ -241,11 +240,3 @@ def test_conan_worker(base_fixture, mocker):
     mock_func.assert_called()
 
     assert conan_worker._conan_install_queue.qsize() == 0
-
-# conan_server
-# conan remote add private http://localhost:9300/
-# conan upload example/1.0.0@myself/testing -r private
-# conan user -r private -p demo demo
-# .conan_server
-# [write_permissions]
-# */*@*/*: *

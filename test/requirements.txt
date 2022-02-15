@@ -1,9 +1,0 @@
-# python requirements for the tests for CT
-pylint
-mypy
-rope
-pytest
-pytest-cov
-pytest-mock
-pytest-qt
-PyQt5-stubs

@@ -2,6 +2,7 @@
 .vscode/tags
 .venv*
 
+**/*_inv.png
 **/__pycache__/**
 *.egg-info
 build/**

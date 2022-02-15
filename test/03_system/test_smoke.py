@@ -26,7 +26,7 @@ def test_main_loop_mock(base_fixture, mocker):
     # delayed import necessary, so the mocker can patch the object before
     from conan_app_launcher import __main__
 
-    __main__.main()
+    __main__.run_conan_app_launcher()
     time.sleep(2)
 
     main_ui_mock.assert_called_once()

@@ -9,7 +9,9 @@
             "env": {
                 "CAL_DEBUG_LEVEL": "1"
             },
-            "args": ["--debug"],
+            "args": [
+                "--debug"
+            ],
             "console": "integratedTerminal",
             "subProcess": true,
             "justMyCode": false
@@ -19,19 +21,21 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "console": "internalConsole",
+            "console": "integratedTerminal",
             "subProcess": true,
         },
-        // {
-        //     "name": "Python: Testing",
-        //     "type": "python",
-        //     "request": "test",
-        //     "console": "internalConsole",
-        //     "subProcess": true,
-        //     "justMyCode": false,
-        //     "env": {
-        //         "CAL_DEBUG_LEVEL": "1"
-        //     },
-        // },
+        {
+            "name": "Python: Testing",
+            "type": "python",
+            "request": "test",
+            "console": "integratedTerminal", // needed, so that venv activates
+            "subProcess": true,
+            "justMyCode": false,
+            "python": "${command:python.interpreterPath}",
+            "env": {
+                "CAL_DEBUG_LEVEL": "2",
+                "SKIP_CREATE_CONAN_TEST_DATA": "True"
+            },
+        },
     ]
 }

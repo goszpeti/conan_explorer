@@ -1,15 +1,12 @@
-import platform
 import sys
-import tempfile
 from distutils.file_util import copy_file
 from pathlib import Path
-from PyQt5.QtGui import QIcon
+from test.conftest import TEST_REF_OFFICIAL
 
-from conans.model.ref import ConanFileReference as CFR
-from conan_app_launcher.ui.modules.app_grid.model import UiAppLinkModel, UiAppLinkConfig
 from conan_app_launcher import asset_path
-
-TEST_REF = "zlib/1.2.11@_/_"
+from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
+                                                          UiAppLinkModel)
+from conans.model.ref import ConanFileReference as CFR
 
 
 def test_executable_eval(base_fixture):
@@ -28,6 +25,7 @@ def test_executable_eval(base_fixture):
     app_link.executable = ""
     assert app_link.get_executable_path() == Path("NULL")
 
+
 def test_icon_eval(base_fixture, tmp_path, qtbot):
     """
     Tests, that the icon setter works on all cases.
@@ -41,7 +39,7 @@ def test_icon_eval(base_fixture, tmp_path, qtbot):
 
     # relative to package with // notation - migrate from old setting
     app_config = UiAppLinkConfig("AppName", icon="//icon.ico")
-    app_link = UiAppLinkModel().load(app_config ,None)
+    app_link = UiAppLinkModel().load(app_config, None)
     app_link.set_package_info(tmp_path)  # trigger set
     assert not app_link.get_icon().isNull()
     assert str(app_link._eval_icon_path()) == str(tmp_path / "icon.ico")
@@ -69,8 +67,8 @@ def test_official_release(base_fixture):
     Test, if an official reference in the format name/1.0.0@_/_ works correctly.
     Expects the same option name and value as given to the constructor.
     """
-    conan_ref_short = str(CFR.loads(TEST_REF))
-    app_config = UiAppLinkConfig("AppName", conan_ref=TEST_REF)
+    conan_ref_short = str(CFR.loads(TEST_REF_OFFICIAL))
+    app_config = UiAppLinkConfig("AppName", conan_ref=TEST_REF_OFFICIAL)
     app_link = UiAppLinkModel().load(app_config, None)
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
     # both formats are valid, so we accept the shortened one
@@ -88,8 +86,8 @@ def test_official_release(base_fixture):
     assert app_link.channel == "NA"
 
     # check, that changing the version does not invalidate the channel or user
-    app_link.conan_ref = "zlib/1.2.12@_/_"
-    assert str(app_link.conan_file_reference) == "zlib/1.2.12"
-    app_link.version = "1.0.0"
+    app_link.conan_ref = "example/1.1.0@_/_"
+    assert str(app_link.conan_file_reference) == "example/1.1.0"
+    app_link.version = "1.1.0"
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
     assert app_link.conan_file_reference.user is None

@@ -1,13 +1,12 @@
 import json
 from dataclasses import asdict
-from packaging.version import Version
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
 
 import jsonschema
-from conans.model.ref import ConanFileReference
+from packaging.version import Version
 
-from . import (UiApplicationConfig, UiAppLinkConfig, UiConfigInterface,
+from . import (UiAppGridConfig, UiAppLinkConfig, UiConfig, UiConfigInterface,
                UiTabConfig)
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -21,21 +20,26 @@ else:
 from conan_app_launcher import PathLike, asset_path
 from conan_app_launcher.logger import Logger
 
-### Internal represantation of JSON save format
+# Internal represantation of JSON save format
+
 
 class JsonAppConfig(TypedDict):
+    """ Internal representation of json file format"""
     version: str
-    tabs: List[Dict] # same as ConfogTypes, but as dict
+    tabs: List[Dict]  # same as ConfigTypes, but as dict
+
 
 class ConanOptionConfig(TypedDict):
+    """ Internal representation of conan options in json file format"""
     name: str
     value: str
+
 
 class JsonUiConfig(UiConfigInterface):
 
     def __init__(self, json_file_path: PathLike):
         self._json_file_path = Path(json_file_path)
-        
+
         # create file, if not available for first start
         if not self._json_file_path.is_file():
             Logger().info('UiConfig: Creating json file')
@@ -44,10 +48,15 @@ class JsonUiConfig(UiConfigInterface):
             Logger().info(f'UiConfig: Using {self._json_file_path}')
 
     T = TypeVar('T', bound=Union[UiTabConfig, UiAppLinkConfig])
+
     @staticmethod
     def _convert_to_config_type(dict: Dict[str, Any], config_type: Type[T]) -> T:
+        """ Convert the dict to the class representations. 
+        The matching is 1-to-1 except the conan_options and that Apps
+        must instantiate the appropriate class
+        """
         result_config = config_type()
-        for key in dict.keys(): # matches 1-1
+        for key in dict.keys():  # matches 1-1
             value = dict[key]
             if key == "apps":
                 value = []
@@ -62,7 +71,7 @@ class JsonUiConfig(UiConfigInterface):
             setattr(result_config, key, value)
         return result_config
 
-    def load(self) -> UiApplicationConfig:
+    def load(self) -> UiConfig:
         """ Parse the json config file, validate and convert to object structure """
         json_app_config: JsonAppConfig = {"version": "0.0.0", "tabs": []}
         Logger().debug(f"UiConfig: Loading file '{self._json_file_path}'...")
@@ -78,7 +87,7 @@ class JsonUiConfig(UiConfigInterface):
                     jsonschema.validate(instance=json_app_config, schema=json_schema)
                 except Exception as error:
                     Logger().error(f"Config file:\n{str(error)}")
-                    return UiApplicationConfig()
+                    return UiConfig()
 
         # implement subsequent migration functions
         self.migrate_to_0_3_0(json_app_config)
@@ -96,11 +105,11 @@ class JsonUiConfig(UiConfigInterface):
         # write it back with updates
         with open(str(self._json_file_path), "w") as config_file:
             json.dump(json_app_config, config_file, indent=4)
-        return UiApplicationConfig(tabs=tabs_result)
+        return UiConfig(UiAppGridConfig(tabs=tabs_result))
 
-    def save(self, app_config: UiApplicationConfig):
+    def save(self, app_config: UiConfig):
         """ Create json dict from model and write it to path. """
-        tabs = app_config.tabs
+        tabs = app_config.app_grid.tabs
         tabs_data = []
         for tab in tabs:
             tab_dict = asdict(tab)

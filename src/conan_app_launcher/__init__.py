@@ -1,6 +1,6 @@
 """
 Contains all basic constants used in the application.
-No imports from own modules allowed!
+No imports from own modules allowed! This done to resolve circular dependencies.
 """
 import os
 try: # from Python 3.8
@@ -46,3 +46,4 @@ base_path = Path(__file__).absolute().parent
 asset_path = base_path / "assets"
 # to be used for all default paths of configuration files, which will be used for multiple versions
 user_save_path = Path().home()
+
