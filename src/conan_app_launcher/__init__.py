@@ -5,7 +5,7 @@ No imports from own modules allowed! This done to resolve circular dependencies.
 import os
 try: # from Python 3.8
     from importlib.metadata import distribution
-except:
+except ImportError:
     from importlib_metadata import distribution
 
 from pathlib import Path

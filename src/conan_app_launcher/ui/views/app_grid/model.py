@@ -104,14 +104,14 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
         self.apps.pop(row)
         return super().removeRow(row, parent=parent)
 
-    def moveRow(self, sourceParent: QModelIndex, sourceRow: int, destinationParent: QModelIndex, destinationChild: int) -> bool:
-        app_to_move = self.apps[sourceRow]
-        self.apps.insert(destinationChild, app_to_move)
-        if sourceRow < destinationChild:
-            self.apps.pop(sourceRow)
+    def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
+        app_to_move = self.apps[source_row]
+        self.apps.insert(destination_child, app_to_move)
+        if source_row < destination_child:
+            self.apps.pop(source_row)
         else:
-            self.apps.pop(sourceRow+1)
-        return super().moveRow(sourceParent, sourceRow, destinationParent, destinationChild)
+            self.apps.pop(source_row+1)
+        return super().moveRow(source_parent, source_row, destination_parent, destination_child)
 
 
 class UiAppLinkModel(UiAppLinkConfig):

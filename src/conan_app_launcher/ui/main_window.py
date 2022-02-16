@@ -101,7 +101,6 @@ class MainWindow(QtWidgets.QMainWindow):
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
 
         # model loads incrementally
-        # TODO add async loading
         loader = QtLoaderObject(self)
         loader.async_loading(self, self.model.loadf, (config_source_str,))
         loader.wait_for_finished()
@@ -166,8 +165,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_conan_search_dialog(self):
         """ Opens a Conan Search dialog. Only one allowed. """
         if self.search_dialog:
+            self.search_dialog.show()
             self.search_dialog.activateWindow()
             return
+
         # parent=None enables to hide the dialog behind the application window
         self.search_dialog = ConanSearchDialog(None, self)
         self.search_dialog.show()
