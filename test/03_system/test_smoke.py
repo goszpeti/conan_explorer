@@ -49,8 +49,6 @@ def test_main_loop(base_fixture):
     proc = Popen(["conan_app_launcher"], env={**os.environ, "CAL_DEBUG_LEVEL": "0"})
     time.sleep(7)
     try:
-        assert proc.poll() == 0
-        #proc.terminate()
         time.sleep(3)
         import psutil
         processes = psutil.process_iter()
