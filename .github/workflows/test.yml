@@ -92,7 +92,7 @@ jobs:
         # need -e because of coverage paths.
         run: |
           pip install pyqt5==5.15.6
-          pip install .[test]
+          pip install -e .[test]
       - name: Update remote
         run: |
           conan remote clean
