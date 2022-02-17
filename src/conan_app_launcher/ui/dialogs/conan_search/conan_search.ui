@@ -76,6 +76,15 @@
          <height>0</height>
         </size>
        </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>*</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>

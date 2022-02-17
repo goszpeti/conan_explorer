@@ -84,10 +84,6 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python }}
-      # - name: Install pip and Python test dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install -r test/requirements.txt
       - name: Install specific conan version
         if: matrix.conan != 'latest'
         run: |
@@ -96,7 +92,7 @@ jobs:
         # need -e because of coverage paths.
         run: |
           pip install pyqt5==5.15.6
-          pip install -e .[test]
+          pip install .[test]
       - name: Update remote
         run: |
           conan remote clean
