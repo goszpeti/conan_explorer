@@ -24,7 +24,8 @@ class ConanSearchDialog(QtWidgets.QDialog):
     conan_pkg_removed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
 
     def __init__(self, parent: Optional[QtWidgets.QWidget] = None, main_window: Optional["MainWindow"] = None):
-        super().__init__(parent)
+        # Add minimize and maximize buttons
+        super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         if main_window:
             self._main_window = main_window  # needed for signals and local pkg explorer, if started from main window
         else:
