@@ -46,23 +46,13 @@ def test_main_loop(base_fixture):
     settings.save()
 
     # conan_app_launcher
-    proc = Popen(["conan_app_launcher"], env={**os.environ, "CAL_DEBUG_LEVEL": "0"})
+    proc = Popen([sys.executable, "-m", "conan_app_launcher"])
     time.sleep(7)
     try:
+        assert proc.poll() is None
+        proc.terminate()
         time.sleep(3)
-        import psutil
-        processes = psutil.process_iter()
-        found = False
-        for process in processes:
-            if "python" in process.name():
-                for arg in process.cmdline():
-                    if "conan_app_launcher-" in arg:
-                        process.kill()
-                        found = True
-                        break
-                if found:
-                    break
-        assert found 
+        assert proc.poll() != 0  # terminate exits os dependently, but never with success (0)
     finally:
         # delete config file
         os.remove(str(settings_file_path))
