@@ -46,7 +46,7 @@ class ConanPkg(TypedDict, total=False):
 class LoggerWriter:
     """
     Dummy stream to log directly to a logger object, when writing in the stream.
-    Used to redirect custom stream form Conan. Adds a prefix to do some custom formatting in the Logger.
+    Used to redirect custom stream from Conan. Adds a prefix to do some custom formatting in the Logger.
     """
 
     def __init__(self, level, prefix: str):
@@ -73,7 +73,7 @@ class ConanApi():
         self.init_api()
 
     def init_api(self):
-        """ Instantiate the api. In some cases it needs to be instatiated anew. """
+        """ Instantiate the internal Conan api. In some cases it needs to be instatiated anew. """
         self.conan, _, _ = ConanAPIV1.factory()
         self.conan.user_io = UserIO(out=ConanOutput(LoggerWriter(
             Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))

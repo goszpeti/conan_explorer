@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from time import sleep
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.core import (open_cmd_in_path, open_file,

@@ -1,6 +1,6 @@
 
-# classes representing the ui config (Data Transfer Objects) - this is a bit overblown for this usecase,
-# but ot is worth an experiment
+""" Classes representing the ui config (Data Transfer Objects) 
+this is a bit overblown for this usecase, but it is worth an experiment """
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field

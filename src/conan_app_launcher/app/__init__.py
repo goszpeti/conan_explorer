@@ -28,7 +28,7 @@ conan_worker = ConanWorker(conan_api, active_settings)
 
 
 def run_application(conan_search=False):
-    """ Start the Qt application and an all main base """
+    """ Start the Qt application and load the main window """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
     from conan_app_launcher.ui.dialogs.bug_dialog import show_bug_dialog_exc_hook
     from conan_app_launcher.ui.common.theming import activate_theme
@@ -49,11 +49,8 @@ def run_application(conan_search=False):
     QtWidgets.QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
 
-    # start Qt app and ui
     qt_app = QtWidgets.QApplication([])
     activate_theme(qt_app)
-
-    app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
 
     if conan_search:
         from conan_app_launcher.ui.dialogs.conan_search import ConanSearchDialog
@@ -62,6 +59,7 @@ def run_application(conan_search=False):
         from conan_app_launcher.ui.main_window import MainWindow
         main_window = MainWindow(qt_app)
 
+    app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
     main_window.setWindowIcon(app_icon)
     main_window.show()  # show first, then load appsgrid with progress bar
     # load tabs needs the pyqt signals - constructor has to be finished

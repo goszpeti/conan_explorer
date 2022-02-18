@@ -71,7 +71,11 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     assert not found_pkg.get("id", "")
 
 
-def test_pkgs_sel_view(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+def test_local_package_explorer(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+    """
+
+    
+    """
     from conan_app_launcher.logger import Logger
     from pytestqt.plugin import _qapp_instance
 

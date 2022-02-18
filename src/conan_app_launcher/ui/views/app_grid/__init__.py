@@ -163,8 +163,9 @@ class AppGridView():
         dialog = QtWidgets.QInputDialog(self._main_window)
         tab_list = list(item.name for item in self.model.tabs)
         model = UiAppLinkModel()
+        dialog.setLabelText("Choose a tab for the new AppLink!")
         dialog.setComboBoxItems(tab_list)
-        dialog.setWindowTitle("Choose a tab!")
+        dialog.setWindowTitle("New AppLink")
         if dialog.exec_() == QtWidgets.QInputDialog.Accepted:
             answer = dialog.textValue()
             for tab in self.get_tabs():

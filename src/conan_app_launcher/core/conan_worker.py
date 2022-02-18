@@ -1,5 +1,4 @@
 
-import typing
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports

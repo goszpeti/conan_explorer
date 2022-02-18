@@ -42,11 +42,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, qt_app):
         super().__init__()
+        self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
         current_dir = Path(__file__).parent
         self.ui = uic.loadUi(current_dir / "main_window.ui", baseinstance=self)
         self._about_dialog = AboutDialog(self)
-        self._qt_app = qt_app
         self.load_icons()
 
         # connect logger to console widget to log possible errors at init
@@ -74,9 +74,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_enable_dark_mode.triggered.connect(self.on_theme_changed)
         self.ui.menu_increase_font_size.triggered.connect(self.on_font_size_increased)
         self.ui.menu_decrease_font_size.triggered.connect(self.on_font_size_decreased)
-
         self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
         self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
+        
         self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
 
     def closeEvent(self, event):  # override QMainWindow

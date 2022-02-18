@@ -37,6 +37,7 @@ def test_main_loop(base_fixture):
     """
     Smoke test, that the application can start.
     No error expected.
+    TODO: Start the actual executable, to test, that the entrypoints are correctly specified.
     """
 
     settings_file_path = Path.home() / conan_app_launcher.SETTINGS_FILE_NAME
