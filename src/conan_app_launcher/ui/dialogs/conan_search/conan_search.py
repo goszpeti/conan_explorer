@@ -61,11 +61,11 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self._pkg_result_loader = QtLoaderObject(self)
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
-        self._init_pkg_context_menu()
         self.apply_theme()
 
     def apply_theme(self):
         icon = QtGui.QIcon(get_themed_asset_image("icons/search_packages.png"))
+        self._init_pkg_context_menu()
         self._ui.search_icon.setPixmap(icon.pixmap(20, 20))
 
     def load(self):  # TODO define interface for entrypoints
