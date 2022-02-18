@@ -22,7 +22,7 @@ It is end-user oriented and focuses on using packages, rather then developing th
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_pkg_explorer.png" width="1024">
 
 #### Conan Search
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_conan_search.png" width="1024">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_conan_search.png" width="480">
 
 **Main Features**
 - compatible with a wide range of conan versions (from 1.24 onwards)
