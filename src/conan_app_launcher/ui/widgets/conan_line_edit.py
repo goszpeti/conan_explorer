@@ -1,5 +1,5 @@
 from threading import Thread
-from typing import Callable
+from typing import Callable, List
 
 import conan_app_launcher.app as app  # using gobal module pattern
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
@@ -78,5 +78,6 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
             app.conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
             self.completion_finished.emit()
             self._remote_refs = app.conan_api.info_cache.get_all_remote_refs()  # takes a while to get
-            current_completer_list = self.completer().model().stringList() # add two list together -> filter is applied later
-            self.completer().model().setStringList(self._remote_refs + current_completer_list)
+            current_completions: List[str] = self.completer().model().stringList() # add two list together -> filter is applied later
+            new_completions = set(self._remote_refs + current_completions)
+            self.completer().model().setStringList(list(new_completions))
