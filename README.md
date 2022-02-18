@@ -4,7 +4,7 @@
 
 ![https://pypi.org/project/conan-app-launcher/](https://img.shields.io/pypi/v/conan-app-launcher)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
-![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/10)
+![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/11)
 ![Python tests](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
 ![Alerts](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_app_launcher&metric=alert_status)
 ![Downloads](https://img.shields.io/pypi/dm/conan_app_launcher)
@@ -15,12 +15,14 @@ The goal of this project is to provide a frontend to start executables contained
 
 It is end-user oriented and focuses on using packages, rather then developing them. It can be used on Windows and Linux x64 platforms.
 
-#### Application Link Grid:
+#### Application Link Grid
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="1024">
 
-#### Local Package Manager:
+#### Local Package Manager
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_pkg_explorer.png" width="1024">
 
+#### Conan Search
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_conan_search.png" width="1024">
 
 **Main Features**
 - compatible with a wide range of conan versions (from 1.24 onwards)

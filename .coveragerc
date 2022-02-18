@@ -1,0 +1,25 @@
+[paths]
+source =
+   src
+   */site-packages
+
+[run]
+branch = True
+parallel = True
+source = 
+    conan_app_launcher
+
+[report]
+precision = 2
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+    def __repr__
+    if self\.debug
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+        if __name__ == .__main__.:

@@ -81,7 +81,7 @@ def test_choose_run_exe(base_fixture, tmp_path, mocker):
 def test_start_cli_option_app(base_fixture):
     """
     Test, that starting with the option is_console_app
-    will spawn a terminal-
+    will spawn a terminal.
     """
     executable = Path(sys.executable)
     is_console_app = True

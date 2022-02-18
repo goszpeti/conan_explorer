@@ -42,11 +42,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, qt_app):
         super().__init__()
+        self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
         current_dir = Path(__file__).parent
         self.ui = uic.loadUi(current_dir / "main_window.ui", baseinstance=self)
         self._about_dialog = AboutDialog(self)
-        self._qt_app = qt_app
         self.load_icons()
 
         # connect logger to console widget to log possible errors at init
@@ -74,9 +74,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_enable_dark_mode.triggered.connect(self.on_theme_changed)
         self.ui.menu_increase_font_size.triggered.connect(self.on_font_size_increased)
         self.ui.menu_decrease_font_size.triggered.connect(self.on_font_size_decreased)
-
         self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
         self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
+        
         self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
 
     def closeEvent(self, event):  # override QMainWindow
@@ -101,7 +101,6 @@ class MainWindow(QtWidgets.QMainWindow):
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
 
         # model loads incrementally
-        # TODO add async loading
         loader = QtLoaderObject(self)
         loader.async_loading(self, self.model.loadf, (config_source_str,))
         loader.wait_for_finished()
@@ -166,8 +165,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_conan_search_dialog(self):
         """ Opens a Conan Search dialog. Only one allowed. """
         if self.search_dialog:
+            self.search_dialog.show()
             self.search_dialog.activateWindow()
             return
+
         # parent=None enables to hide the dialog behind the application window
         self.search_dialog = ConanSearchDialog(None, self)
         self.search_dialog.show()

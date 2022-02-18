@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>841</width>
-    <height>735</height>
+    <width>922</width>
+    <height>795</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -76,8 +76,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>841</width>
-         <height>486</height>
+         <width>922</width>
+         <height>546</height>
         </rect>
        </property>
        <attribute name="label">
@@ -168,7 +168,7 @@
               <widget class="QWidget" name="tab_scroll_area_widgets">
                <property name="geometry">
                 <rect>
-                 <x>0</x>
+                 <x>34</x>
                  <y>0</y>
                  <width>828</width>
                  <height>415</height>
@@ -709,8 +709,8 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>841</width>
-     <height>21</height>
+     <width>922</width>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_help">
@@ -820,8 +820,8 @@ p, li { white-space: pre-wrap; }
         <string notr="true">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:7.875pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.875pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="tabStopWidth">
         <number>200</number>
@@ -853,7 +853,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Display versions dropdown</string>
+    <string>Display versions for AppLinks</string>
    </property>
   </action>
   <action name="menu_toggle_display_channels">
@@ -864,7 +864,7 @@ p, li { white-space: pre-wrap; }
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Display channels dropdown</string>
+    <string>Display channels for AppLinks</string>
    </property>
   </action>
   <action name="menu_settings">
@@ -890,7 +890,7 @@ p, li { white-space: pre-wrap; }
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Display users dropdown</string>
+    <string>Display users for AppLinks</string>
    </property>
   </action>
   <action name="menu_remove_locks">

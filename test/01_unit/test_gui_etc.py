@@ -3,8 +3,8 @@ Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
 import os
+import sys
 import traceback
-from conan_app_launcher.ui.main_window import MainWindow
 from test.conftest import TEST_REF
 from time import sleep
 
@@ -12,12 +12,13 @@ import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
 import pytest
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
-from conan_app_launcher.ui.dialogs.bug_dialog import (bug_reporting_dialog,
-                                                     show_bug_dialog_exc_hook)
-from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 from conan_app_launcher.ui.dialogs.about_dialog import AboutDialog
+from conan_app_launcher.ui.dialogs.bug_dialog import (bug_reporting_dialog,
+                                                      show_bug_dialog_exc_hook)
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.dialogs.conan_search import ConanSearchDialog
+from conan_app_launcher.ui.main_window import MainWindow
+from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
@@ -53,6 +54,9 @@ def test_edit_line_conan(base_fixture, light_theme_fixture, qtbot):
 
 
 def test_conan_install_dialog(base_fixture, qtbot, mocker):
+    """ 
+    Tests, that the Conan Install dialog can install references, packages and the update and auto_install flag works.
+    """
     root_obj = QtWidgets.QWidget()
     cfr = ConanFileReference.loads(TEST_REF)
 
@@ -75,11 +79,11 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
     mock_install_func.assert_called_with(conan_worker_element, None)
 
     # check only ref
-
+    conan_install_dialog.update_check_box.setCheckState(Qt.Unchecked)
     conan_install_dialog.conan_ref_line_edit.setText(TEST_REF)
     conan_install_dialog.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
-                                                "options": {}, "update": True, "auto_install": False}
+                                                "options": {}, "update": False, "auto_install": False}
     mock_install_func.assert_called_with(conan_worker_element, None)
 
     # check ref with autoupdate
@@ -90,6 +94,17 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
 
 
 def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
+    """ Tests, that the Conan search dialog:
+    - search button does not work under 3 characters
+    - can find the test packages from the name
+    - installed packages/pkgs have the correct internal flag
+    - After item expansion, the pkgs are shown
+    Context menu actions work:
+    - Copy ref and pkg
+    - Install dialog call
+    - Show conanfile call
+    - Show in Local Package Explorer
+    """
     cfr = ConanFileReference.loads(TEST_REF)
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
@@ -106,7 +121,6 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     assert not search_dialog._ui.search_button.isEnabled()
 
     # search for the test ref name: example -> 2 versions
-
     search_dialog._ui.search_line.setText("example")
     assert search_dialog._ui.search_button.isEnabled()
     search_dialog._ui.search_button.clicked.emit()
@@ -198,10 +212,6 @@ def test_about_dialog(base_fixture, qtbot):
 
 def test_bug_dialog(base_fixture, qtbot, mocker):
     """ Test, that the report generates the dialog correctly and fills out the info """
-
-    # qtbot.addWidget(main_gui)
-    # qtbot.waitExposed(main_gui, timeout=3000)
-    import sys
 
     # generate a traceback by raising an error
     try:

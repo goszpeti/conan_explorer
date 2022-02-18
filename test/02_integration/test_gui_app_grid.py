@@ -24,7 +24,7 @@ Qt = QtCore.Qt
 
 
 def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
-    """ Test, that rename dialog change the guis"""
+    """ Test, that rename dialog change the name """
     from pytestqt.plugin import _qapp_instance
 
     main_gui = main_window.MainWindow(_qapp_instance)
@@ -49,7 +49,7 @@ def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
 
 def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
-    """ """
+    """ Test, that Add Tab function adds a new tab """
     from pytestqt.plugin import _qapp_instance
 
     main_gui = main_window.MainWindow(_qapp_instance)
@@ -80,6 +80,7 @@ def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
 
 
 def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
+    """ Test, that Remove Tab actually removes a tab. Last tab must not be deletable. """
     from pytestqt.plugin import _qapp_instance
 
     main_gui = main_window.MainWindow(_qapp_instance)
@@ -141,6 +142,7 @@ def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
 
 
 def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
+    """ Test, that Edit AppLink Dialog saves all the configured data s"""
     from pytestqt.plugin import _qapp_instance
 
     main_gui = main_window.MainWindow(_qapp_instance)
@@ -187,6 +189,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
 
 
 def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+    """ Test, that Remove Applink removes and AppLink and the last one is not deletable """
     from pytestqt.plugin import _qapp_instance
 
     main_gui = main_window.MainWindow(_qapp_instance)
@@ -222,6 +225,7 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
 
 def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+    """ Tests, that the Edit App Dialog wotks for adding a new Link """
     from pytestqt.plugin import _qapp_instance
 
     app.active_settings.set(DISPLAY_APP_CHANNELS, False)  # disable, to check if a new app uses it
