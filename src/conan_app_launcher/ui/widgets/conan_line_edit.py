@@ -20,6 +20,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
     def __init__(self, parent, validator_enabled=True):
         super().__init__(parent)
         self.validator_enabled = validator_enabled
+        self.is_valid = False
         completer = QtWidgets.QCompleter([], self)
         completer.setCaseSensitivity(Qt.CaseInsensitive)
 
@@ -42,18 +43,17 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         self._loading_cbk = loading_cbk
 
     def validate_text(self, text):
-        valid = False
         if self.validator_enabled:
             try:
                 if ":" in text:
                     PackageReference.loads(text)
                 else:
                     ConanFileReference.loads(text)
-                valid = True
+                self.is_valid = True
             except Exception:
-                valid = False
+                self.is_valid = False
 
-            if valid:
+            if self.is_valid:
                 if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
                     self.setStyleSheet(f"background: {self.VALID_COLOR_DARK};")
                 else:
@@ -64,7 +64,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip seraching for such broad terms
             return
 
-        if not any([entry.startswith(text) for entry in self._remote_refs]) or not valid:
+        if not any([entry.startswith(text) for entry in self._remote_refs]) or not self.is_valid:
             if self._completion_thread and self._completion_thread.is_alive():  # one query at a time
                 return
             self._completion_thread = Thread(target=self.load_completion, args=[text, ])

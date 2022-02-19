@@ -4,6 +4,8 @@ from pathlib import Path
 from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
+from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
+
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 # define Qt so we can use it like the namespace in C++
@@ -32,21 +34,61 @@ class AppEditDialog(QtWidgets.QDialog):
         self._ui.icon_line_edit.setText(self._model.icon)
         self._ui.args_line_edit.setText(self._model.args)
 
-        self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started)
-        self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished)
+        self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started_info)
+        self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished_info)
         conan_options_text = ""
         for option in self._model.conan_options:
             conan_options_text += f"{option}={self._model.conan_options.get(option)}\n"
         self._ui.conan_opts_text_edit.setText(conan_options_text)
+        
+        self._ui.install_button.clicked.connect(self.on_install_clicked)
+        self._ui.executable_browse_button.clicked.connect(self.on_executable_browse_clicked)
+        self._ui.icon_browse_button.clicked.connect(self.on_icon_browse_clicked)
+
         # for some reason OK is not connected at default
         self._ui.button_box.accepted.connect(self.accept)
         self.adjustSize()
 
+    def on_install_clicked(self):
+        dialog = ConanInstallDialog(self, self._ui.conan_ref_line_edit.text()) # TODO , self._main_window.conan_pkg_installed)
+        dialog.show()
 
-    def loading_started(self):
+    def on_executable_browse_clicked(self):
+        dialog = QtWidgets.QFileDialog(parent=self, caption="Select file for icon display",
+                                       directory=str(self._model.package_folder))
+                                      # filter="Images (*.ico *.png *.jpg)")
+        dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
+        # TODO restrict to the package directory, or emit Error dialog and call anew
+        if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+            new_file = dialog.selectedFiles()[0]
+            resolved_path = self.resolve_to_pkg_folder(Path(new_file))
+            self._ui.exec_path_line_edit.setText(str(resolved_path))
+            # TODO remove .exe, cmd and bat ext if only one is in the dir?
+
+    def on_icon_browse_clicked(self):
+        dialog = QtWidgets.QFileDialog(parent=self, caption="Select file for icon display",
+                                       directory=str(self._model.package_folder),
+                                       filter="Images (*.ico *.png *.jpg)")
+        dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
+        if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+            new_file = dialog.selectedFiles()[0]
+            resolved_path = self.resolve_to_pkg_folder(Path(new_file))
+            self._ui.icon_line_edit.setText(str(resolved_path))
+
+    def resolve_to_pkg_folder(self, path: Path) -> Path:
+        """ Calculates a rel path from the package folder, if it is in it and returns it.
+        Otherwise return the original absolute path
+          """
+        if not path.is_absolute():
+            Logger().error("Eneterd path is not absolute!") # TODO what to do here?
+        if path.is_relative_to(self._model.package_folder):
+            return path.relative_to(self._model.package_folder)
+        return path
+
+    def loading_started_info(self):
         self._ui.conan_ref_label.setText("Conan Reference (query in progress)")
 
-    def loading_finished(self):
+    def loading_finished_info(self):
         self._ui.conan_ref_label.setText("Conan Reference (query finished)")
 
     def save_data(self):

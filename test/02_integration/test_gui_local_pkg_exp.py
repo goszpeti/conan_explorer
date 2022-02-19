@@ -73,8 +73,21 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
 
 def test_local_package_explorer(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     """
-
-    
+    Test Local Pacakge Explorer functions.
+    1. Change to Page, check if the installed package is in the list.
+    2. Select a ref, nothing should change.
+    3. Expand ref and select the pkg, fileview should open.
+    Test context menu functions of Pkg Selection View
+    1. Copy ref - Copy conan reference to clipboard (no pkg id!)  TODO does not work the same as Search Dialog!s
+    2. Open export folder - Opens in file manager
+    3. Show Conanfile - Opens in default texteditor
+    Test context menu functions of File View
+    1. Copy file as path - on clipboard
+    2. Open terminal - in the same folder as file or the selected folder
+    3. Open in File Manager
+    4. Copy - copy file to clipboard (MIME)
+    5. Paste - paste file from  clipboard (MIME)
+    6. Delete file
     """
     from conan_app_launcher.logger import Logger
     from pytestqt.plugin import _qapp_instance
