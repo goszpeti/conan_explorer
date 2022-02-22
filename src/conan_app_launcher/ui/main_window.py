@@ -40,7 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
 
-    def __init__(self, qt_app):
+    def __init__(self, qt_app: QtWidgets.QApplication):
         super().__init__()
         self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
@@ -53,7 +53,6 @@ class MainWindow(QtWidgets.QMainWindow):
         Logger.init_qt_logger(self.new_message_logged)
         self.new_message_logged.connect(self.write_log)
 
-        # load app grid
         self.app_grid = AppGridView(self, self.model.app_grid)
         self.local_package_explorer = LocalConanPackageExplorer(self)
         self.search_dialog: Optional[ConanSearchDialog] = None
@@ -114,7 +113,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
-        new_size = app.active_settings.get_int(FONT_SIZE) + 2
+        new_size = app.active_settings.get_int(FONT_SIZE) + 1
         if new_size > 24:
             return
         app.active_settings.set(FONT_SIZE, new_size)
@@ -123,7 +122,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_font_size_decreased(self):
         """ Decrease font size by 2. Ignore if font gets too small. """
-        new_size = app.active_settings.get_int(FONT_SIZE) - 2
+        new_size = app.active_settings.get_int(FONT_SIZE) - 1
         if new_size < 8:
             return
         app.active_settings.set(FONT_SIZE, new_size)
