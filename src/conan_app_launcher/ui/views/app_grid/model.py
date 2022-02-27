@@ -316,17 +316,25 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not self._executable or not self.package_folder.exists():
             # Logger().debug(f"No file/executable specified for {str(self.name)}")
             return Path("NULL")
-        # adjust path on windows, if no file extension is given
         path = Path(self._executable)
-        if platform.system() == "Windows" and not path.suffix:
-            path = path.with_suffix(".exe")
-        full_path = Path(self.package_folder / path)
-        if self.package_folder.is_dir() and not full_path.is_file():
-            Logger().debug(
-                f"Can't find file in package {self.conan_ref}:\n    {str(full_path)}")
+        full_path = self.resolve_executable_path(path)
         self._executable_path = full_path
 
         return self._executable_path
+
+    def resolve_executable_path(self, exe_rel_path: Path):
+        # adjust path on windows, if no file extension is given
+        possible_matches = self.package_folder.glob(str(exe_rel_path) + "*")
+        match_found = False
+        for match in possible_matches:
+            # don't allow for ambiguity!
+            if match_found:
+                Logger().error(f"Multiple candidates found for {exe_rel_path}")
+            match_found = True
+            return match
+        if not match_found:
+            Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
+        return Path("NULL")
 
     @property
     def icon(self) -> str:
@@ -391,8 +399,6 @@ class UiAppLinkModel(UiAppLinkConfig):
         Set all other available packages.
         Usually to be called from conan worker.
         """
-        # if self._available_refs != available_refs:
-        # app.conan_api.info_cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
 
         # call registered update callback

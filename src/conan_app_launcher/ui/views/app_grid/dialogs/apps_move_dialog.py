@@ -27,7 +27,7 @@ class AppsMoveDialog(QtWidgets.QDialog):
 
         self._ui.move_up_button.clicked.connect(self.move_up)
         self._ui.move_down_button.clicked.connect(self.move_down)
-        self._ui.button_box.accepted.connect(self.accept)
+        self._ui.button_box.accepted.connect(self.save)
 
     def move_up(self):
         """ Moves the selected item(s) up in the list """
@@ -82,3 +82,4 @@ class AppsMoveDialog(QtWidgets.QDialog):
 
     def save(self):
         self._ui.list_view.model().save()
+        self.accept()

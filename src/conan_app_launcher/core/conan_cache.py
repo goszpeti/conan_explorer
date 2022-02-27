@@ -169,7 +169,7 @@ class ConanInfoCache():
         self._save()
 
     def _load(self):
-        """ Laod the cache. """
+        """ Load the cache. """
         json_data = {}
         try:
             with open(self._cache_file, "r") as json_file:

@@ -62,7 +62,6 @@ def run_application(conan_search=False):
     app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
     main_window.setWindowIcon(app_icon)
     main_window.show()  # show first, then load appsgrid with progress bar
-    # load tabs needs the pyqt signals - constructor has to be finished
     main_window.load()
 
     qt_app.exec_()

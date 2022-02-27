@@ -1,6 +1,5 @@
 
 from pathlib import Path
-
 from conan_app_launcher import asset_path
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
@@ -46,7 +45,7 @@ class AppEditDialog(QtWidgets.QDialog):
         self._ui.icon_browse_button.clicked.connect(self.on_icon_browse_clicked)
 
         # for some reason OK is not connected at default
-        self._ui.button_box.accepted.connect(self.accept)
+        self._ui.button_box.accepted.connect(self.save_data)
         self.adjustSize()
 
     def on_install_clicked(self):
@@ -60,10 +59,19 @@ class AppEditDialog(QtWidgets.QDialog):
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         # TODO restrict to the package directory, or emit Error dialog and call anew
         if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
-            new_file = dialog.selectedFiles()[0]
-            resolved_path = self.resolve_to_pkg_folder(Path(new_file))
-            self._ui.exec_path_line_edit.setText(str(resolved_path))
-            # TODO remove .exe, cmd and bat ext if only one is in the dir?
+            exe_path = Path(dialog.selectedFiles()[0])
+            try:
+                exe_rel_path = exe_path.relative_to(self._model.package_folder)
+            except:
+                msg = QtWidgets.QMessageBox(parent=self)
+                msg.setWindowTitle("Invalid selection")
+                msg.setText(f"The entered path {str(exe_path)} is not in the selected conan package folder!")
+                msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                msg.setIcon(QtWidgets.QMessageBox.Critical)
+                msg.exec_()
+                return False
+            self._ui.exec_path_line_edit.setText(str(exe_rel_path))
+            return True
 
     def on_icon_browse_clicked(self):
         dialog = QtWidgets.QFileDialog(parent=self, caption="Select file for icon display",
@@ -71,19 +79,13 @@ class AppEditDialog(QtWidgets.QDialog):
                                        filter="Images (*.ico *.png *.jpg)")
         dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
-            new_file = dialog.selectedFiles()[0]
-            resolved_path = self.resolve_to_pkg_folder(Path(new_file))
-            self._ui.icon_line_edit.setText(str(resolved_path))
-
-    def resolve_to_pkg_folder(self, path: Path) -> Path:
-        """ Calculates a rel path from the package folder, if it is in it and returns it.
-        Otherwise return the original absolute path
-          """
-        if not path.is_absolute():
-            Logger().error("Eneterd path is not absolute!") # TODO what to do here?
-        if path.is_relative_to(self._model.package_folder):
-            return path.relative_to(self._model.package_folder)
-        return path
+            icon_path = Path(dialog.selectedFiles()[0])
+            try:
+                icon_rel_path = icon_path.relative_to(self._model.package_folder)
+                self._ui.icon_line_edit.setText(str(icon_rel_path))
+            except:
+                # errors, if it does not resolve
+                self._ui.icon_line_edit.setText(str(icon_path))
 
     def loading_started_info(self):
         self._ui.conan_ref_label.setText("Conan Reference (query in progress)")
@@ -93,9 +95,16 @@ class AppEditDialog(QtWidgets.QDialog):
 
     def save_data(self):
         # check all input validations
-        if not self._ui.conan_ref_line_edit.hasAcceptableInput():
-            # TODO handle invalid input and use QMessageBox
-            pass
+        if not self._ui.conan_ref_line_edit.is_valid:
+           msg = QtWidgets.QMessageBox(parent=self)
+           msg.setWindowTitle("Invalid Conan Reference")
+           msg.setText(f"The entered Conan reference has an invalid format!")
+           msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+           msg.setIcon(QtWidgets.QMessageBox.Critical)
+           msg.exec_()
+           return
+        if not self.exe_path_valid(Path(self._ui.exec_path_line_edit.text())):
+            return
 
         # write back app info
         self._model.name = self._ui.name_line_edit.text()
@@ -115,3 +124,4 @@ class AppEditDialog(QtWidgets.QDialog):
                 Logger().warning(f"Wrong format in option: {line}")
         self._model.conan_options = conan_options
         self._model.save()
+        self.accept()

@@ -103,7 +103,6 @@ class TabGrid(QtWidgets.QWidget):
         self._edit_app_dialog = AppEditDialog(new_model, parent=self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == AppEditDialog.Accepted:
-            self._edit_app_dialog.save_data()
             app_link = AppLink(self, new_model)
             app_link.load()
             app_link.model.update_from_cache()

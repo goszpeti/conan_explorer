@@ -180,7 +180,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         move_dialog = AppsMoveDialog(parent=self.parentWidget(), tab_ui_model=self.model.parent)
         ret = move_dialog.exec()
         if ret == QtWidgets.QDialog.Accepted:
-            move_dialog.save()
             self._parent_tab.remove_all_app_links()
             self._parent_tab.load_apps_from_model()
 
@@ -241,7 +240,6 @@ class AppLink(QtWidgets.QVBoxLayout):
         edit_app_dialog = AppEditDialog(self.model, parent=self.parentWidget())
         reply = edit_app_dialog.exec_()
         if reply == AppEditDialog.Accepted:
-            edit_app_dialog.save_data()
             # grey icon, so update from cache can ungrey it, if the path is correct
             self._app_button.grey_icon()
             self.model.update_from_cache()
