@@ -21,8 +21,11 @@ class Worker(QtCore.QObject):
 
     def work(self):
         if DEBUG_LEVEL > 1:  # pragma: no cover
-            import debugpy  # - debug with this the Qt Thread
-            debugpy.debug_this_thread()
+            try:
+                import debugpy  # - debug with this the Qt Thread
+                debugpy.debug_this_thread()
+            except:
+                Logger().debug("Debugger not loaded!")
         self.func(*self.args)
         self.finished.emit()
 

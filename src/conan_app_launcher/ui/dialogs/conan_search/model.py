@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Union
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.logger import Logger

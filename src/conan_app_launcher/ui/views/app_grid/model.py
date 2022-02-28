@@ -1,8 +1,8 @@
 import platform
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import Callable, List, Optional
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (
     INVALID_CONAN_REF, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
     USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
@@ -338,7 +338,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @property
     def icon(self) -> str:
-        """ Internal represantation of Icon to display on the link"""
+        """ Internal representation of Icon to display on the link"""
         return self._icon
 
     @icon.setter

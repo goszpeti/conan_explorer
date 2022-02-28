@@ -1,7 +1,7 @@
 from threading import Thread
 from typing import Callable, List
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
 from conans.model.ref import ConanFileReference, PackageReference
 from PyQt5 import QtCore, QtWidgets

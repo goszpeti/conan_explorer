@@ -1,4 +1,4 @@
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.logger import Logger
 from PyQt5 import QtWidgets
 from typing import List, Optional

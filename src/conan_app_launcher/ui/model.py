@@ -1,7 +1,7 @@
 
 from typing import Optional
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, user_save_path)
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiConfig,

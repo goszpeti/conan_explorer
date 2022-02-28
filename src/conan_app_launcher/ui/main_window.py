@@ -2,7 +2,7 @@ from pathlib import Path
 from shutil import rmtree
 from typing import Optional
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, PathLike,
                                 user_save_path)
 from conan_app_launcher.core.conan import ConanCleanup

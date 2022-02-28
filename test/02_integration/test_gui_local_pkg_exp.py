@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
