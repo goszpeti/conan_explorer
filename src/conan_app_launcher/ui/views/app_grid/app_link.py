@@ -64,7 +64,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         return max_width
 
     def _init_app_link(self):
-        """ Initalize all subwidgets with default values. """
+        """ Initialize all subwidgets with default values. """
         self._app_button = ClickableIcon(self._parent_tab, asset_path / "icons" / "app.png")
         self._app_name_label = QtWidgets.QLabel(self._parent_tab)
 
@@ -271,6 +271,8 @@ class AppLink(QtWidgets.QVBoxLayout):
             self.delete()
             self.model.parent.apps.remove(self.model)
             self.model.save()
+            self._parent_tab.redraw_grid(force=True)
+
 
     def update_with_conan_info(self):
         """ Update combo boxes with new conan data """

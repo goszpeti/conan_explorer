@@ -68,12 +68,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.menu_about_action.triggered.connect(self._about_dialog.show)
         self.ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
         self.ui.menu_search_in_remotes.triggered.connect(self.open_conan_search_dialog)
+        self.ui.menu_search_in_remotes.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_F))
         self.ui.menu_toggle_display_versions.triggered.connect(self.display_versions_setting_toggled)
         self.ui.menu_toggle_display_users.triggered.connect(self.apply_display_users_setting_toggled)
         self.ui.menu_toggle_display_channels.triggered.connect(self.display_channels_setting_toggled)
         self.ui.menu_enable_dark_mode.triggered.connect(self.on_theme_changed)
         self.ui.menu_increase_font_size.triggered.connect(self.on_font_size_increased)
+        self.ui.menu_increase_font_size.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_Plus))
         self.ui.menu_decrease_font_size.triggered.connect(self.on_font_size_decreased)
+        self.ui.menu_decrease_font_size.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_Minus))
+
         self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
         self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
         
@@ -114,7 +118,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
-        new_size = app.active_settings.get_int(FONT_SIZE) + 2
+        new_size = app.active_settings.get_int(FONT_SIZE) + 1
         if new_size > 24:
             return
         app.active_settings.set(FONT_SIZE, new_size)
@@ -123,7 +127,7 @@ class MainWindow(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_font_size_decreased(self):
         """ Decrease font size by 2. Ignore if font gets too small. """
-        new_size = app.active_settings.get_int(FONT_SIZE) - 2
+        new_size = app.active_settings.get_int(FONT_SIZE) - 1
         if new_size < 8:
             return
         app.active_settings.set(FONT_SIZE, new_size)
