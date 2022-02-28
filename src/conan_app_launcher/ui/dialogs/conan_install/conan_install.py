@@ -25,8 +25,9 @@ class ConanInstallDialog(QtWidgets.QDialog):
         self._ui.conan_ref_line_edit.validator_enabled = False
         self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_auto_install_on_pkg_ref)
         self._ui.button_box.accepted.connect(self.on_install)
+        self.auto_install_check_box.setChecked(True)  # default state
 
-        # doing after connecting toggle_auto_install_on_pkg_ref initalizes it correctly
+        # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
         self._ui.conan_ref_line_edit.setText(conan_ref)
         self.adjust_to_size()
 
@@ -43,10 +44,8 @@ class ConanInstallDialog(QtWidgets.QDialog):
     def toggle_auto_install_on_pkg_ref(self, text: str):
         if ":" in text: # if a package id is given, auto install does not make sense
             self.auto_install_check_box.setEnabled(False)
-            self.auto_install_check_box.setChecked(False)
         else:
             self.auto_install_check_box.setEnabled(True)
-            self.auto_install_check_box.setChecked(True)
 
     def on_install(self):
         update_check_state = False

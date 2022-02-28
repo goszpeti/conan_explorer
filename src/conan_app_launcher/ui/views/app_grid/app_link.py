@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import asset_path
+from conan_app_launcher import ICON_SIZE, asset_path
 from conan_app_launcher.core import open_in_file_manager, run_file
 from conan_app_launcher.logger import Logger
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
@@ -44,14 +44,16 @@ class AppLink(QtWidgets.QVBoxLayout):
     - Remove App Link
     - Rearrange App Links
     """
+    icon_size: int
 
-    def __init__(self, parent: "TabGrid", model: UiAppLinkModel):
+    def __init__(self, parent: "TabGrid", model: UiAppLinkModel, icon_size=ICON_SIZE):
         super().__init__()
         self._parent_tab = parent  # save parent - don't use qt signals ands slots
+        self.icon_size = icon_size
+        self.model = model
+
         self._lock_cboxes = False  # lock combo boxes to ignore changes of conanref
         self._enable_combo_boxes = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
-
-        self.model = model
         self._init_app_link()
 
     @staticmethod
@@ -64,7 +66,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         return max_width
 
     def _init_app_link(self):
-        """ Initalize all subwidgets with default values. """
+        """ Initialize all subwidgets with default values. """
         self._app_button = ClickableIcon(self._parent_tab, asset_path / "icons" / "app.png")
         self._app_name_label = QtWidgets.QLabel(self._parent_tab)
 
@@ -269,6 +271,8 @@ class AppLink(QtWidgets.QVBoxLayout):
             self.delete()
             self.model.parent.apps.remove(self.model)
             self.model.save()
+            self._parent_tab.redraw_grid(force=True)
+
 
     def update_with_conan_info(self):
         """ Update combo boxes with new conan data """
