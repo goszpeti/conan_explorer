@@ -22,7 +22,7 @@ __version__ = pkg_info.version
 REPO_URL = pkg_info.metadata.get("home-page", "")
 AUTHOR = pkg_info.metadata.get("author", "")
 
-ICON_SIZE = 60 # Icon size (width and height) in pixels on an Applink
+ICON_SIZE = 64 # Icon size (width and height) in pixels on an Applink
 INVALID_CONAN_REF = "Invalid/NA@NA/NA" # used to indicate a conan reference is invalid
 SETTINGS_FILE_NAME = ".cal_config" # for storing application settings
 DEFAULT_UI_CFG_FILE_NAME = "cal_ui.json"  # for legacy 0.X support

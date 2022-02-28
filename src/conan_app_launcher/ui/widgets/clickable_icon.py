@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Optional
 
 from conan_app_launcher import ICON_SIZE
-from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
@@ -18,7 +17,7 @@ class ClickableIcon(QtWidgets.QPushButton):
     # this signal is used to connect to backend functions.
     clicked = QtCore.pyqtSignal()
 
-    def __init__(self, parent, image: Path = None, flags=Qt.WindowFlags()):
+    def __init__(self, parent, image: Path = None, flags=Qt.WindowFlags(), icon_size=ICON_SIZE):
         super().__init__(parent=parent)
 
         self._greyed_out = True  # Must be ungreyed, when available
@@ -28,7 +27,7 @@ class ClickableIcon(QtWidgets.QPushButton):
 
         self.set_icon_from_file(image)
         self.setFlat(True)
-        self.setIconSize(QtCore.QSize(ICON_SIZE, ICON_SIZE))
+        self.setIconSize(QtCore.QSize(icon_size, icon_size))
         self.grey_icon()
         self.setWindowFlags(flags)
 
