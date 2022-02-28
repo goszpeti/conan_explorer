@@ -153,7 +153,7 @@ class ConanApi():
         pkg_id = ""
         try:
             infos = self.conan.install_reference(
-                str(conan_ref), settings=conan_settings, options=conan_options, update=update)
+                conan_ref, settings=conan_settings, options=conan_options, update=update)
             if not infos.get("error", True):
                 pkg_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
             return (pkg_id, self.get_package_folder(conan_ref, pkg_id))

@@ -83,14 +83,14 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
     conan_install_dialog.conan_ref_line_edit.setText(TEST_REF)
     conan_install_dialog.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
-                                                "options": {}, "update": False, "auto_install": False}
+                                                "options": {}, "update": False, "auto_install": True}
     mock_install_func.assert_called_with(conan_worker_element, None)
 
-    # check ref with autoupdate
-    conan_install_dialog.auto_install_check_box.setCheckState(Qt.Checked)
+    # check ref without autoupdate
+    conan_install_dialog.auto_install_check_box.setCheckState(Qt.Unchecked)
     conan_install_dialog.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
-                                                "options": {}, "update": True, "auto_install": True}
+                                                "options": {}, "update": True, "auto_install": False}
 
 
 def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):

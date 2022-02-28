@@ -44,7 +44,7 @@ class ConanInstallDialog(QtWidgets.QDialog):
         if ":" in text: # if a package id is given, auto install does not make sense
             self.auto_install_check_box.setEnabled(False)
         else:
-            self.auto_install_check_box.setEnabled(True)
+            self.auto_install_check_box.setChecked(True)
 
     def on_install(self):
         update_check_state = False
