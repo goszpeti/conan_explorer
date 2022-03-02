@@ -52,7 +52,8 @@ class UiAppGridModel(UiAppGridConfig, QtCore.QObject):
         for tab in self.tabs:
             for app in tab.apps:
                 conan_worker_element: ConanWorkerElement = {"ref_pkg_id": app.conan_ref, "settings": {},
-                                                            "options": app.conan_options, "update": False, "auto_install": True}
+                                                            "options": app.conan_options, "update": False,
+                                                            "auto_install": True}
                 if conan_worker_element not in conan_refs:
                     conan_refs.append(conan_worker_element)
         return conan_refs
@@ -326,14 +327,18 @@ class UiAppLinkModel(UiAppLinkConfig):
         # adjust path on windows, if no file extension is given
         possible_matches = self.package_folder.glob(str(exe_rel_path) + "*")
         match_found = False
-        for match in possible_matches:
-            # don't allow for ambiguity!
-            if match_found:
-                Logger().error(f"Multiple candidates found for {exe_rel_path}")
-            match_found = True
-            return match
-        if not match_found:
-            Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
+        try:
+            for match in possible_matches:
+                # don't allow for ambiguity!
+                if match_found:
+                    Logger().error(f"Multiple candidates found for {exe_rel_path}")
+                match_found = True
+                return match
+            if not match_found:
+                Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
+        except NotImplementedError:
+            Logger().error(f"Absolute path not allowed!")
+
         return Path("NULL")
 
     @property

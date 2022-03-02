@@ -33,7 +33,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
         combined_refs.update(self._remote_refs)
         self.completer().model().setStringList(list(combined_refs))
-        self.textChanged.connect(self.validate_text)
+        self.textChanged.connect(self.on_text_changed)
 
     def __del__(self):
         if self._completion_thread:
@@ -42,16 +42,20 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
     def set_loading_callback(self, loading_cbk: Callable):
         self._loading_cbk = loading_cbk
 
-    def validate_text(self, text):
+    def on_text_changed(self, text):
         if self.validator_enabled:
-            try:
-                if ":" in text:
-                    PackageReference.loads(text)
-                else:
-                    ConanFileReference.loads(text)
-                self.is_valid = True
-            except Exception:
+            """ Validate ConanFileReference or PackageReference. Empty text is invalid. """
+            if not text:
                 self.is_valid = False
+            else:
+                try:
+                    if ":" in text:
+                        PackageReference.loads(text)
+                    else:
+                        ConanFileReference.loads(text)
+                    self.is_valid = True
+                except Exception:
+                    self.is_valid = False
 
             if self.is_valid:
                 if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
@@ -61,9 +65,10 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
             else:  # if it does error it's invalid format, thus red
                 self.setStyleSheet(f"background: {self.INVALID_COLOR};")
 
-        if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip seraching for such broad terms
+        if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip searching for such broad terms
             return
 
+        # start a query for all similar packages with conan search by starting a new thread for it
         if not any([entry.startswith(text) for entry in self._remote_refs]) or not self.is_valid:
             if self._completion_thread and self._completion_thread.is_alive():  # one query at a time
                 return
@@ -77,7 +82,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         if app.conan_api:
             app.conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
             self.completion_finished.emit()
-            self._remote_refs = app.conan_api.info_cache.get_all_remote_refs()  # takes a while to get
+            self._remote_refs = app.conan_api.info_cache.get_all_remote_refs()
             current_completions: List[str] = self.completer().model().stringList() # add two list together -> filter is applied later
             new_completions = set(self._remote_refs + current_completions)
             self.completer().model().setStringList(list(new_completions))

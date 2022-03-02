@@ -131,7 +131,7 @@ class JsonUiConfig(UiConfigInterface):
             json.dump(json_app_config, config_file, indent=2)
 
     def migrate_to_0_3_0(self, app_config: JsonAppConfig):
-        """ Compatiblity function to update schema version. """
+        """ Compatibility function to update schema version. """
         if Version(app_config["version"]) >= Version("0.3.0"):
             return
         for tab in app_config["tabs"]:
@@ -141,7 +141,7 @@ class JsonUiConfig(UiConfigInterface):
                     app["conan_ref"] = value
 
     def migrate_to_0_4_0(self, app_config: JsonAppConfig):
-        """ Compatiblity function to update schema version. """
+        """ Compatibility function to update schema version. """
         if Version(app_config["version"]) >= Version("0.4.0"):
             return
         for tab in app_config["tabs"]:

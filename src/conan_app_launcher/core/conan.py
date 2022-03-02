@@ -186,10 +186,10 @@ class ConanApi():
         """ Return the pkg_id and package folder of a conan reference 
         and auto-install it with the best matching package, if it is not available """
 
-        pkg_id = ""
-        package = self.find_best_local_package(conan_ref, conan_options)
-        if package.get("id", ""):
-            return pkg_id, self.get_package_folder(conan_ref, package.get("id", ""))
+        pkg_id, path = self.get_best_matching_package_path(conan_ref, conan_options)
+        if pkg_id:
+            return pkg_id, path
+
         Logger().info(f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed.")
 
         pkg_id, path = self.install_best_matching_package(conan_ref, conan_options, update=update)
@@ -211,6 +211,12 @@ class ConanApi():
         return ("", Path("NULL"))
 
     # Local References and Packages
+
+    def get_best_matching_package_path(self, conan_ref: ConanFileReference, conan_options: Dict[str, str] = {}) -> Tuple[str, Path]:
+        package = self.find_best_local_package(conan_ref, conan_options)
+        if package.get("id", ""):
+            return package.get("id", ""), self.get_package_folder(conan_ref, package.get("id", ""))
+        return "", Path("NULL")
 
     def get_all_local_refs(self) -> List[ConanFileReference]:
         """ Returns all locally installed conan references """
