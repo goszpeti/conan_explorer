@@ -24,7 +24,7 @@ class Worker(QtCore.QObject):
             try:
                 import debugpy  # - debug with this the Qt Thread
                 debugpy.debug_this_thread()
-            except:
+            except Exception:
                 Logger().debug("Debugger not loaded!")
         self.func(*self.args)
         self.finished.emit()

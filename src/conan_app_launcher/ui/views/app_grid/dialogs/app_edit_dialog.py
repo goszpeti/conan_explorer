@@ -92,7 +92,7 @@ class AppEditDialog(QtWidgets.QDialog):
             exe_path = Path(dialog.selectedFiles()[0])
             try:
                 exe_rel_path = exe_path.relative_to(self._temp_package_path)
-            except:
+            except Exception:
                 msg = QtWidgets.QMessageBox(parent=self)
                 msg.setWindowTitle("Invalid selection")
                 msg.setText(f"The entered path {str(exe_path)} is not in the selected conan package folder!")
@@ -113,7 +113,7 @@ class AppEditDialog(QtWidgets.QDialog):
             try:
                 icon_rel_path = icon_path.relative_to(self._temp_package_path)
                 self._ui.icon_line_edit.setText(str(icon_rel_path))
-            except:
+            except Exception:
                 # errors, if it does not resolve
                 self._ui.icon_line_edit.setText(str(icon_path))
 

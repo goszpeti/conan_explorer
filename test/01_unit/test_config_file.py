@@ -114,7 +114,7 @@ def check_config(ref_dict, test_dict):
                     # We don't care if it is written differently, as long as it is the same object
                     ConanFileReference.loads(test_dict.get(
                         key)) == ConanFileReference.loads(ref_dict.get(key))
-                except:
+                except Exception:
                     assert test_dict.get(key) == ref_dict.get(key)
         else:
             assert not test_dict.get(key)
