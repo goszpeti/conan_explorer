@@ -14,8 +14,9 @@ def test_executable_eval(base_fixture):
     Tests, that the executable setter works on all cases.
     Expects correct file, error messoge on wrong file an error message on no file.
     """
-    app_config = UiAppLinkConfig("AppName", executable="python")
     exe = Path(sys.executable)
+
+    app_config = UiAppLinkConfig("AppName", executable=exe.name)
     app_link = UiAppLinkModel()
     app_link.load(app_config, None)
 
