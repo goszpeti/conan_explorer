@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
@@ -16,7 +16,6 @@ class ConanInstallDialog(QtWidgets.QDialog):
         super().__init__(parent)
         current_dir = Path(__file__).parent
         self._ui = uic.loadUi(current_dir / "conan_install.ui", baseinstance=self)
-        self._ui.conan_ref_line_edit.setText(conan_ref)
         self.pkg_installed_signal = pkg_installed_signal
 
         # init search bar
@@ -26,9 +25,11 @@ class ConanInstallDialog(QtWidgets.QDialog):
         self._ui.conan_ref_line_edit.validator_enabled = False
         self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_auto_install_on_pkg_ref)
         self._ui.button_box.accepted.connect(self.on_install)
+        self.auto_install_check_box.setChecked(True)  # default state
 
+        # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
+        self._ui.conan_ref_line_edit.setText(conan_ref)
         self.adjust_to_size()
-        self.toggle_auto_install_on_pkg_ref(self._ui.conan_ref_line_edit.text()) # initial evaluation
 
     def adjust_to_size(self):
         """ Expands the dialog to the length of the install ref text.
@@ -44,7 +45,7 @@ class ConanInstallDialog(QtWidgets.QDialog):
         if ":" in text: # if a package id is given, auto install does not make sense
             self.auto_install_check_box.setEnabled(False)
         else:
-            self.auto_install_check_box.setChecked(True)
+            self.auto_install_check_box.setEnabled(True)
 
     def on_install(self):
         update_check_state = False

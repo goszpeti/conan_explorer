@@ -1,8 +1,8 @@
 import platform
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import Callable, List, Optional
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (
     INVALID_CONAN_REF, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
     USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
@@ -52,7 +52,8 @@ class UiAppGridModel(UiAppGridConfig, QtCore.QObject):
         for tab in self.tabs:
             for app in tab.apps:
                 conan_worker_element: ConanWorkerElement = {"ref_pkg_id": app.conan_ref, "settings": {},
-                                                            "options": app.conan_options, "update": False, "auto_install": True}
+                                                            "options": app.conan_options, "update": False,
+                                                            "auto_install": True}
                 if conan_worker_element not in conan_refs:
                     conan_refs.append(conan_worker_element)
         return conan_refs
@@ -124,7 +125,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         """ Create an empty AppModel on init, so we can load it later"""
         # internal repr for vars which have other types or need to be manipulated
         self.conan_options = {}
-        self._package_folder = Path("NULL")
+        self.package_folder = Path("NULL")
         self._executable_path = Path("NULL")
         self._conan_ref = INVALID_CONAN_REF
         self._conan_file_reference = ConanFileReference.loads(self._conan_ref)
@@ -313,24 +314,36 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._executable = new_value
 
     def get_executable_path(self) -> Path:
-        if not self._executable or not self._package_folder.exists():
+        if not self._executable or not self.package_folder.exists():
             # Logger().debug(f"No file/executable specified for {str(self.name)}")
             return Path("NULL")
-        # adjust path on windows, if no file extension is given
         path = Path(self._executable)
-        if platform.system() == "Windows" and not path.suffix:
-            path = path.with_suffix(".exe")
-        full_path = Path(self._package_folder / path)
-        if self._package_folder.is_dir() and not full_path.is_file():
-            Logger().debug(
-                f"Can't find file in package {self.conan_ref}:\n    {str(full_path)}")
+        full_path = self.resolve_executable_path(path)
         self._executable_path = full_path
 
         return self._executable_path
 
+    def resolve_executable_path(self, exe_rel_path: Path):
+        # adjust path on windows, if no file extension is given
+        possible_matches = self.package_folder.glob(str(exe_rel_path) + "*")
+        match_found = False
+        try:
+            for match in possible_matches:
+                # don't allow for ambiguity!
+                if match_found:
+                    Logger().error(f"Multiple candidates found for {exe_rel_path}")
+                match_found = True
+                return match
+            if not match_found:
+                Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
+        except NotImplementedError:
+            Logger().error(f"Absolute path not allowed!")
+
+        return Path("NULL")
+
     @property
     def icon(self) -> str:
-        """ Internal represantation of Icon to display on the link"""
+        """ Internal representation of Icon to display on the link"""
         return self._icon
 
     @icon.setter
@@ -344,7 +357,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if self._icon.startswith("//"):
             self._icon = self._icon.replace("//", "./")
         if self._icon and not Path(self._icon).is_absolute():
-            icon_path = self._package_folder / self._icon
+            icon_path = self.package_folder / self._icon
         else:  # absolute path
             icon_path = Path(self._icon)
         try:
@@ -378,9 +391,9 @@ class UiAppLinkModel(UiAppLinkConfig):
         """
 
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
-            if self._package_folder != package_folder:
+            if self.package_folder != package_folder:
                 app.conan_api.info_cache.update_local_package_path(self._conan_file_reference, package_folder)
-        self._package_folder = package_folder
+        self.package_folder = package_folder
 
         # call registered update callback
         if self._update_cbk_func:
@@ -391,8 +404,6 @@ class UiAppLinkModel(UiAppLinkConfig):
         Set all other available packages.
         Usually to be called from conan worker.
         """
-        # if self._available_refs != available_refs:
-        # app.conan_api.info_cache.update_remote_package_list(available_refs)
         self._available_refs = available_refs
 
         # call registered update callback

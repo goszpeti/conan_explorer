@@ -107,6 +107,5 @@ Agreement for Icons8](https://icons8.com/vue-static/landings/pricing/icons8-lice
 * importlib-metadata by Jason R. Coombs under [ Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * typing-extensions by Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee under [Python Software Foundation License(PSF)](https://docs.python.org/3/license.html)
 * dataclasses by Eric V. Smith under [ Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
-    'dataclasses>=0.8 ; python_version<"3.7"'  # Apache Software License (Apache)
 
 

@@ -10,10 +10,10 @@ Qt = QtCore.Qt
 
 
 class ClickableIcon(QtWidgets.QPushButton):
-
-    """ Qt QPushButton with greyable icon, which can react on a mouse click.
-    Has advanced icon handling fir displaying the best matching icon.
-     """
+    """
+    Qt QPushButton with greyable icon, which can react on a mouse click.
+    Has advanced icon handling for displaying the best matching icon.
+    """
     # this signal is used to connect to backend functions.
     clicked = QtCore.pyqtSignal()
 

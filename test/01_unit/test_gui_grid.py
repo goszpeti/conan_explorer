@@ -4,12 +4,14 @@ using the whole application (standalone).
 """
 import os
 import platform
+import shutil
 import sys
 from pathlib import Path
 from subprocess import check_output
 from test.conftest import TEST_REF, conan_create_and_upload
 from time import sleep
 
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import (DISPLAY_APP_USERS,
                                          ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
@@ -59,6 +61,91 @@ def test_AppEditDialog_display_values(base_fixture, qtbot):
     qtbot.mouseClick(diag.button_box.buttons()[1], Qt.LeftButton)
 
     assert app_info.name == "test"
+
+
+def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
+    """
+    Test, if the browse executable and icon button works:
+    - buttons are only enabled, if an installed reference is entered
+    - opens the dialog in the package folder
+    - resolves the correct relative path for executables and forbids non-package-folder paths
+    - resolves the correct relative path for executables and sets non-package-folder paths to the abs. path
+    """
+    app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
+                               executable="bin/myexec", is_console_application=True,
+                               icon="//myicon.ico", conan_options={})
+    root_obj = QtWidgets.QWidget()
+    qtbot.addWidget(root_obj)
+    root_obj.setObjectName("parent")
+    diag = AppEditDialog(app_info, root_obj)
+    root_obj.setFixedSize(100, 200)
+    root_obj.show()
+
+    qtbot.waitExposed(root_obj)
+
+    # assert buttons are disabled (invalid ref)
+    assert not diag._ui.executable_browse_button.isEnabled()
+    assert not diag._ui.icon_browse_button.isEnabled()
+
+    # enter an installed reference
+    diag._ui.conan_ref_line_edit.setText(TEST_REF)
+    assert diag._ui.executable_browse_button.isEnabled()
+    assert diag._ui.icon_browse_button.isEnabled()
+
+    # click executable button
+    # positive test
+    if platform.system() == "Windows":
+        exe_rel_path = "bin\\python.exe"
+    else:
+        exe_rel_path = "bin/python"
+    selection = diag._temp_package_path / exe_rel_path
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
+                        return_value=[str(selection)])
+    diag._ui.executable_browse_button.clicked.emit()
+    assert diag._ui.exec_path_line_edit.text() == exe_rel_path
+
+    # negative test
+    selection = base_fixture.testdata_path / "nofile.json"
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
+                        return_value=[str(selection)])
+    
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+                        return_value=QtWidgets.QMessageBox.Accepted)
+    diag._ui.executable_browse_button.clicked.emit()
+    # entry not changed
+    assert diag._ui.exec_path_line_edit.text() == exe_rel_path
+
+    # open button 
+    # absolute
+    icon_path = app.asset_path / "icons" / "about.png"
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
+                        return_value=[str(icon_path)])
+    diag._ui.icon_browse_button.clicked.emit()
+    assert diag._ui.icon_line_edit.text() == str(icon_path)
+
+    # relative to package
+    icon_pkg_path = diag._temp_package_path / "icon.png"
+    # copy icon to pkg
+    shutil.copyfile(str(icon_path), str(icon_pkg_path))
+
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
+                        return_value=[str(icon_pkg_path)])
+    diag._ui.icon_browse_button.clicked.emit()
+    assert diag._ui.icon_line_edit.text() == "icon.png"
+    os.unlink(str(icon_pkg_path))
+
+    # simulate pressing backspace - buttons should disable
+    diag._ui.conan_ref_line_edit.setText(TEST_REF[0:-1])
+    assert not diag._ui.executable_browse_button.isEnabled()
+    assert not diag._ui.icon_browse_button.isEnabled()
 
 
 def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
@@ -133,7 +220,7 @@ def test_AppLink_open(base_fixture, qtbot):
     The set process is expected to be running.
     """
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
-                                 is_console_application=True, executable=sys.executable)
+                                 is_console_application=True, executable=Path(sys.executable).name)
     app_model = UiAppLinkModel().load(app_config, None)
     app_model.set_package_info(Path(sys.executable).parent)
 
@@ -171,7 +258,7 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     """
 
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
-                                 is_console_application=True, executable=sys.executable)
+                                 is_console_application=True, executable="python")
     app_model = UiAppLinkModel().load(app_config, None)
     app_model.set_package_info(Path(sys.executable).parent)
 

@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIcon, QPixmap, QImage
 from PyQt5.QtWidgets import QFileIconProvider
 
 import conan_app_launcher.app as app
-from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using gobal module pattern
+from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using global module pattern
 
 
 def get_themed_asset_image(image_rel_path: str) -> str:

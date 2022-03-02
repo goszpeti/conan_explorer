@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 
 from conan_app_launcher.logger import Logger
-
+WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
 
 def run_file(file_path: Path, is_console_app: bool, args: str):
     """ Decide, if a file should be opened or executed and call the appropriate method """
@@ -54,7 +54,7 @@ def is_file_executable(file_path: Path) -> bool:
             is_executable = True
     elif platform.system() == "Windows":
         # don't use PATHEXT - some programs write other filetypes like .py in it...
-        path_exts = [".cmd", ".com", ".bat", ".ps1", ".exe"]
+        path_exts = WIN_EXE_FILE_TYPES
         if file_path.suffix in path_exts:
             is_executable = True
     return is_executable

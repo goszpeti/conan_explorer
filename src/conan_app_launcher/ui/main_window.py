@@ -2,7 +2,7 @@ from pathlib import Path
 from shutil import rmtree
 from typing import Optional
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, PathLike,
                                 user_save_path)
 from conan_app_launcher.core.conan import ConanCleanup
@@ -40,7 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     new_message_logged = QtCore.pyqtSignal(str)  # str arg is the message
 
-    def __init__(self, qt_app):
+    def __init__(self, qt_app: QtWidgets.QApplication):
         super().__init__()
         self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
@@ -53,7 +53,6 @@ class MainWindow(QtWidgets.QMainWindow):
         Logger.init_qt_logger(self.new_message_logged)
         self.new_message_logged.connect(self.write_log)
 
-        # load app grid
         self.app_grid = AppGridView(self, self.model.app_grid)
         self.local_package_explorer = LocalConanPackageExplorer(self)
         self.search_dialog: Optional[ConanSearchDialog] = None

@@ -3,7 +3,7 @@ from pathlib import Path
 from time import sleep
 from typing import TYPE_CHECKING, Callable, Optional
 
-import conan_app_launcher.app as app  # using gobal module pattern
+import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
