@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 from conan_app_launcher import INVALID_CONAN_REF
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from conans.model.ref import ConanFileReference
 
 

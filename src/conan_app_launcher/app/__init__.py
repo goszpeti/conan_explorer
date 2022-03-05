@@ -2,10 +2,12 @@ import os
 import platform
 import sys
 import tempfile
+from typing import Optional
 
 from conan_app_launcher import (PKG_NAME, SETTINGS_FILE_NAME, __version__,
                                 asset_path, user_save_path)
-from conan_app_launcher.core import ConanApi, ConanWorker
+from conan_app_launcher.core.conan import ConanApi
+from conan_app_launcher.core.conan_worker import ConanWorker
 from conan_app_launcher.settings import (SETTINGS_INI_TYPE, SettingsInterface,
                                          settings_factory)
 
@@ -22,6 +24,10 @@ if platform.system() == "Windows":
     QtWin.setCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 
 ### Global variables ###
+
+# singleton with access to all backend components
+comp_ctrl: Optional["ComponentController"] = None
+
 active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
 conan_api = ConanApi()
 conan_worker = ConanWorker(conan_api, active_settings)
@@ -63,7 +69,10 @@ def run_application(conan_search=False):
     main_window.setWindowIcon(app_icon)
     main_window.show()  # show first, then load appsgrid with progress bar
     main_window.load()
+    main_window.installEventFilter(main_window)
+
 
     qt_app.exec_()
-    if conan_worker:  # cancel conan worker tasks on exit - this can possibly cancel an ongoing install task
-        conan_worker.finish_working(10)
+    #
+    #if conan_worker:  # cancel conan worker tasks on exit - this can possibly cancel an ongoing install task
+    #    conan_worker.finish_working(10)

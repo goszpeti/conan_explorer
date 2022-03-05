@@ -18,7 +18,7 @@ else:
         from typing_extensions import TypedDict
 
 from conan_app_launcher import PathLike, asset_path
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 
 # Internal represantation of JSON save format
 

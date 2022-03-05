@@ -7,12 +7,11 @@ from conan_app_launcher import (
     INVALID_CONAN_REF, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
     USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.common.icon import (extract_icon,
                                                get_icon_from_image_file,
                                                get_themed_asset_image)
-from conan_app_launcher.ui.data import (UiAppGridConfig, UiAppLinkConfig,
-                                        UiTabConfig)
+from conan_app_launcher.ui.data import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore
 from PyQt5.QtCore import QAbstractListModel, QModelIndex
@@ -201,12 +200,17 @@ class UiAppLinkModel(UiAppLinkConfig):
             conan_worker_element: ConanWorkerElement = {"ref_pkg_id": str(self._conan_ref), "settings": {},
                                                         "options": self.conan_options, "update": True, "auto_install": True}
             app.conan_worker.put_ref_in_install_queue(  # TODO pass down directly?
-                conan_worker_element, self.parent.parent.parent.conan_pkg_installed)
+                conan_worker_element, self.emit_conan_pkg_signal_callback)
             app.conan_worker.put_ref_in_version_queue(
-                conan_worker_element,  self.parent.parent.parent.conan_pkg_installed)
+                conan_worker_element,  self.emit_conan_pkg_signal_callback)
         except Exception as error:
             # errors happen fairly often, keep going
             Logger().warning(f"Conan reference invalid {str(error)}")
+
+    def emit_conan_pkg_signal_callback(self, conan_ref, pkg_id):
+        if not self.parent.parent.parent.conan_pkg_installed:
+            return
+        self.parent.parent.parent.conan_pkg_installed.emit(conan_ref, pkg_id)
 
     @property
     def version(self) -> str:

@@ -2,11 +2,11 @@
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing_extensions import Protocol
 
 from conan_app_launcher.settings import (ENABLE_APP_COMBO_BOXES,
                                          SettingsInterface)
-from PyQt5.QtCore import pyqtBoundSignal
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
@@ -19,7 +19,7 @@ else:
         from typing_extensions import TypedDict
 
 from conan_app_launcher import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from conans.model.ref import ConanFileReference, PackageReference
 
 
@@ -31,20 +31,24 @@ class ConanWorkerElement(TypedDict):
     auto_install: bool  # automatically determine best matching package.
 
 
+class ConanWorkerResultCallback(Protocol):
+    def __call__(self, conan_ref: str, pkg_id: str) -> Any: ...
+
 class ConanWorker():
     """ Sequential worker with a queue to execute conan install/version alternatives commands """
-
     def __init__(self, conan_api: "ConanApi", settings: SettingsInterface):
         self._conan_api = conan_api
-        self._conan_install_queue: Queue[Tuple[ConanWorkerElement, Optional[pyqtBoundSignal]]] = Queue(maxsize=0)
-        self._conan_versions_queue: Queue[Tuple[ConanWorkerElement, Optional[pyqtBoundSignal]]] = Queue(maxsize=0)
+        self._conan_install_queue: Queue[Tuple[ConanWorkerElement,
+                                               Optional[ConanWorkerResultCallback]]] = Queue(maxsize=0)
+        self._conan_versions_queue: Queue[Tuple[ConanWorkerElement,
+                                                Optional[ConanWorkerResultCallback]]] = Queue(maxsize=0)
         self._version_worker: Optional[Thread] = None
         self._install_worker: Optional[Thread] = None
         self._shutdown_requested = False  # internal flag to cancel worker on shutdown
         self._settings = settings
 
     def update_all_info(self, conan_elements: List[ConanWorkerElement],
-                        info_signal: Optional[pyqtBoundSignal]):
+                        info_callback: Optional[ConanWorkerResultCallback]):
         """ 
         Starts the worker for all given elements. Should be called at start. 
         info_signal is used to notify the caller, that the worker has finished for a given element.
@@ -54,22 +58,22 @@ class ConanWorker():
         # fill up queue
         for worker_element in conan_elements:
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:
-                self._conan_install_queue.put((worker_element, info_signal))
-            self._conan_versions_queue.put((worker_element, info_signal))
+                self._conan_install_queue.put((worker_element, info_callback))
+            self._conan_versions_queue.put((worker_element, info_callback))
 
         # start getting versions info in a separate thread in a bundled way to get better performance
         self._start_install_worker()
         if self._settings.get_bool(ENABLE_APP_COMBO_BOXES):
             self._start_version_worker()
 
-    def put_ref_in_version_queue(self, conan_element: ConanWorkerElement, info_signal: Optional[pyqtBoundSignal]):
-        self._conan_versions_queue.put((conan_element, info_signal))
+    def put_ref_in_version_queue(self, conan_element: ConanWorkerElement, info_callback: Optional[ConanWorkerResultCallback]):
+        self._conan_versions_queue.put((conan_element, info_callback))
         if self._settings.get_bool(ENABLE_APP_COMBO_BOXES):
             self._start_version_worker()
 
-    def put_ref_in_install_queue(self, conan_element: ConanWorkerElement, install_signal: Optional[pyqtBoundSignal]):
+    def put_ref_in_install_queue(self, conan_element: ConanWorkerElement, info_callback: Optional[ConanWorkerResultCallback]):
         """ Add a new entry to work on """
-        self._conan_install_queue.put((conan_element, install_signal))
+        self._conan_install_queue.put((conan_element, info_callback))
         self._start_install_worker()
 
     def _start_install_worker(self):
@@ -88,11 +92,11 @@ class ConanWorker():
 
     def _work_on_conan_install_queue(self):
         """ Call conan install from queue """
-        signal = None
+        info_callback = None
         conan_ref = None
         pkg_id = ""
         while not self._shutdown_requested and not self._conan_install_queue.empty():
-            worker_element, signal = self._conan_install_queue.get()
+            worker_element, info_callback = self._conan_install_queue.get()
             ref_pkg_id = worker_element.get("ref_pkg_id", "")
             conan_options = worker_element.get("options", {})
             conan_settings = worker_element.get("settings", {})
@@ -120,15 +124,18 @@ class ConanWorker():
             Logger().debug("Finish working on " + ref_pkg_id)
             self._conan_install_queue.task_done()
         # batch emitting signal TODO ????
-        if signal:
-            signal.emit(str(conan_ref), pkg_id)
+        if info_callback:
+            try:
+                info_callback(str(conan_ref), pkg_id)
+            except Exception as e:
+                Logger().error(str(e))
 
     def _work_on_conan_versions_queue(self):
         """ Get all version and channel combination of a package from all remotes. """
-        signal = None
+        info_callback = None
         conan_ref = ""
         while not self._shutdown_requested and not self._conan_versions_queue.empty():
-            worker_element, signal = self._conan_versions_queue.get()
+            worker_element, info_callback = self._conan_versions_queue.get()
             # available versions will be in cache and retrievable for every item from there
             try:
                 available_refs = self._conan_api.search_recipe_alternatives_in_remotes(
@@ -139,10 +146,10 @@ class ConanWorker():
             Logger().debug(f"Finished available package query for {str(conan_ref)}")
             if not available_refs:
                 continue
-        if signal:
-            signal.emit(conan_ref, "")
+        if info_callback:
+            info_callback(conan_ref, "")
 
-    def finish_working(self, timeout_s: int = None):
+    def finish_working(self, timeout_s: Optional[float]=None):
         """ Cancel, if worker is still not finished """
         self._shutdown_requested = True
         try:

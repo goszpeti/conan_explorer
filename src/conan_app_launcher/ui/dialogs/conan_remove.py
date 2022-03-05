@@ -1,7 +1,7 @@
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from PyQt5 import QtWidgets
-from typing import List, Optional
+from typing import Optional
 from PyQt5.QtCore import pyqtBoundSignal
 
 

@@ -89,7 +89,7 @@ def test_local_package_explorer(base_fixture, ui_no_refs_config_fixture, qtbot, 
     5. Paste - paste file from  clipboard (MIME)
     6. Delete file
     """
-    from conan_app_launcher.logger import Logger
+    from conan_app_launcher.app.logger import Logger
     from pytestqt.plugin import _qapp_instance
 
     cfr = ConanFileReference.loads(TEST_REF)

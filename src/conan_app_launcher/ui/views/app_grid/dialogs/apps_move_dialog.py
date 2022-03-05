@@ -2,7 +2,7 @@
 from pathlib import Path
 
 from conan_app_launcher import asset_path
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.views.app_grid.model import UiTabModel
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 

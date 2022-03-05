@@ -3,7 +3,7 @@
 from typing import Any, Callable, Optional, Tuple
 from conan_app_launcher import DEBUG_LEVEL
 
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 

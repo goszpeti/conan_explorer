@@ -7,6 +7,6 @@ Usable Macros with Jinja2 syntax:
 * {
     font-size: {{MAIN_FONT_SIZE}}pt;
 }
-QMenuBar {
-    font-size: {{MAIN_FONT_SIZE + 1 }}pt;
+QLabel#page_title{
+    font-size: {{MAIN_FONT_SIZE + 12 }}pt;
 }

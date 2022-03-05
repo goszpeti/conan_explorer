@@ -28,7 +28,7 @@ except Exception:
 
 from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path)
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 
 from .conan_cache import ConanInfoCache
 

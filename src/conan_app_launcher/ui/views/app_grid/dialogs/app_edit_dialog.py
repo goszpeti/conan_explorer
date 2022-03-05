@@ -4,7 +4,7 @@ from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import asset_path
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conans.model.ref import ConanFileReference

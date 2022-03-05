@@ -13,7 +13,7 @@ from subprocess import CalledProcessError, check_output
 from threading import Thread
 from unittest import mock
 
-import conan_app_launcher.logger as logger
+import conan_app_launcher.app.logger as logger
 import psutil
 import pytest
 from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path

@@ -1,7 +1,6 @@
 from typing import List
 
-from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkModel,
-                                                          UiTabModel)
+from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel, UiTabModel
 from PyQt5 import QtCore, QtWidgets
 
 from .app_link import AppLink

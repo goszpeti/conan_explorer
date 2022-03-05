@@ -58,4 +58,9 @@ class ConanInstallDialog(QtWidgets.QDialog):
         conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": {},
                                                     "options": {}, "update": update_check_state, "auto_install": auto_install_checked}
 
-        app.conan_worker.put_ref_in_install_queue(conan_worker_element, self.pkg_installed_signal)
+        app.conan_worker.put_ref_in_install_queue(conan_worker_element, self.emit_conan_pkg_signal_callback)
+
+    def emit_conan_pkg_signal_callback(self, conan_ref, pkg_id):
+        if not self.pkg_installed_signal:
+            return
+        self.pkg_installed_signal.emit(conan_ref, pkg_id)

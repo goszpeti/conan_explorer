@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 from conan_app_launcher import PathLike
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 
 from . import (DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS,
                ENABLE_APP_COMBO_BOXES, FONT_SIZE, GUI_STYLE, GUI_STYLE_LIGHT,

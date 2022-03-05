@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.common.icon import (get_platform_icon,
                                                get_themed_asset_image)
 from conan_app_launcher.ui.common.model import TreeModel, TreeModelItem
