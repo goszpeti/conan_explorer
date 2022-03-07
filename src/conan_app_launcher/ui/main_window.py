@@ -37,8 +37,6 @@ HTCAPTION = 2
 
 class MainWindow(QtWidgets.QMainWindow):
     """ Instantiates MainWindow and holds all UI objects """
-    TOOLBOX_GRID_ITEM = 0
-    TOOLBOX_PACKAGES_ITEM = 1
     conan_pkg_installed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
     conan_pkg_removed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
 
@@ -55,8 +53,11 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
+        self.menu_buttons = {}
         current_dir = Path(__file__).parent
         self.ui = uic.loadUi(current_dir / "main_window.ui", baseinstance=self)
+        self.stacked_widget: QtWidgets.QStackedWidget
+
         self._about_dialog = AboutDialog(self)
         self.load_icons()
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint |
@@ -135,7 +136,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         #self.app_grid = AppGridView(self, self.model.app_grid)
         #self.local_package_explorer = LocalConanPackageExplorer(self)
-        self.search_dialog: Optional[ConanSearchDialog] = None
+        self.search_dialog: Optional[ConanSearchDialog] = ConanSearchDialog(None, self)
+
 
         # initialize view user settings
         # self.ui.menu_toggle_display_versions.setChecked(app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
@@ -161,36 +163,141 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
         
         # self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
-        self.ui.toggle_menu_button.clicked.connect(lambda: self.toggleMenu(220, True))
+        self.ui.toggle_left_menu_button.clicked.connect(lambda: self.toggleMenu(220, True))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/grid.png")),
+                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.addNewMenu("App Grid", "app_grid_button", icon, True, self.search_dialog)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/opened_folder.png")),
+                               QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.addNewMenu("Local Package Explorer", "lcl_pkg_expl_btn", icon, True, self.search_dialog)
+        icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/search_packages.png")),
+                       QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.addNewMenu("Conan Search", "conan_search_btn", icon, True, self.search_dialog)
+
+        self.ui.settings_button.clicked.connect(lambda: self.toggleRightMenu(220, True))
+
+        #self.addNewMenu(self, "HOME", "btn_home", "url(:/16x16/icons/16x16/cil-home.png)", True)
+        #self.addNewMenu(self, "HOME", "btn_home", "url(:/16x16/icons/16x16/cil-home.png)", False)
+
+    def addNewMenu(self, name, objName, icon, isTopMenu, page_Widget):
+        button = QtWidgets.QPushButton(self)
+        button.setObjectName(objName)
+        sizePolicy3 = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(button.sizePolicy().hasHeightForWidth())
+        button.setSizePolicy(sizePolicy3)
+        button.setMinimumSize(QtCore.QSize(0, 70))
+        button.setLayoutDirection(Qt.LeftToRight)
+        button.setToolTip(name)
+        button.setIcon(icon)
+        button.setIconSize(QtCore.QSize(32, 32))
+        button.setStyleSheet("text-align:middle;")
+
+
+        button.clicked.connect(self.switch_page)
+        self.menu_buttons[name] = button
+
+        if isTopMenu:
+           self.ui.menu_top_subframe.layout().addWidget(button)
+        else:
+            self.ui.menu_bottom_subframe.layout().addWidget(button)
+
+        self.stacked_widget.addWidget(page_Widget)
+
+    def switch_page(self):
+        # GET BT CLICKED
+        btnWidget = self.sender()
+
+        # PAGE HOME
+        if btnWidget.objectName() == "app_grid_button":
+
+            self.ui.stacked_widget.setCurrentWidget(self.search_dialog)
+            # UIFunctions.resetStyle(self, "btn_home")
+            # UIFunctions.labelPage(self, "Home")
+            # parametrize
+            btnWidget.styleSheet()
+            btnWidget.setStyleSheet(btnWidget.styleSheet() + ";background-color: #B7B7B7")
+
+        # PAGE NEW USER
+        if btnWidget.objectName() == "lcl_pkg_expl_btn":
+            self.ui.stacked_widget.setCurrentWidget(self.ui.page)
+            # UIFunctions.resetStyle(self, "btn_new_user")
+            # UIFunctions.labelPage(self, "New User")
+            #btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
+
+        # PAGE WIDGETS
+        if btnWidget.objectName() == "btn_widgets":
+            self.ui.stacked_widget.setCurrentWidget(self.ui.page_widgets)
+            # UIFunctions.resetStyle(self, "btn_widgets")
+            # UIFunctions.labelPage(self, "Custom Widgets")
+            #btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
     def toggleMenu(self, maxWidth, enable):
         if enable:
             # GET WIDTH
-            width = self.ui.menu_frame.width()
+            width = self.ui.left_menu_frame.width()
             maxExtend = maxWidth
             standard = 70
 
             # SET MAX WIDTH
             if width == 70:
                 widthExtended = maxExtend
+                maximize = True
             else:
                 widthExtended = standard
+                maximize = False
 
             # ANIMATION
-            self.animation = QPropertyAnimation(self.ui.menu_frame, b"minimumWidth")
-            self.animation.setDuration(300)
+            self.animation = QPropertyAnimation(self.ui.left_menu_frame, b"minimumWidth")
+            self.animation.setDuration(200)
             self.animation.setStartValue(width)
             self.animation.setEndValue(widthExtended)
             self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
-            self.animation2 = QPropertyAnimation(self.ui.toggle_menu_frame, b"minimumWidth")
-            self.animation2.setDuration(300)
+            self.animation2 = QPropertyAnimation(self.ui.toggle_left_menu_frame, b"minimumWidth")
+            self.animation2.setDuration(200)
             self.animation2.setStartValue(width)
             self.animation2.setEndValue(widthExtended)
             self.animation2.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
             self.animation.start()
             self.animation2.start()
 
-            
+            # TODO set Button texts
+            for name, button in self.menu_buttons.items():
+                if maximize:
+                    button.setText(name)
+                    button.setStyleSheet("text-align:left;")
+
+                else:
+                    button.setText("")
+                    button.setStyleSheet("text-align:middle;")
+
+
+    def toggleRightMenu(self, maxWidth, enable):
+        if enable:
+            # GET WIDTH
+            width = self.ui.right_menu_frame.width()
+            maxExtend = maxWidth
+            standard = 0
+
+            # SET MAX WIDTH
+            if width == 0:
+                    widthExtended = maxExtend
+                    maximize = True
+            else:
+                widthExtended = standard
+                maximize = False
+
+            # ANIMATION
+            self.animation = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")
+            self.animation.setDuration(200)
+            self.animation.setStartValue(width)
+            self.animation.setEndValue(widthExtended)
+            self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
+            self.animation.start()
+
 
 
     def mousePressEvent(self, event):
