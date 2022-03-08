@@ -1,4 +1,7 @@
 from pathlib import Path
+import platform
+from typing import Optional, Tuple
+import re
 
 import conan_app_launcher.app as app
 from conan_app_launcher import base_path
@@ -27,3 +30,57 @@ def activate_theme(qt_app: QtWidgets.QApplication):
     style_sheet = configure_theme(base_path / "ui" / style_file, app.active_settings.get_int(FONT_SIZE))
 
     qt_app.setStyleSheet(style_sheet)
+
+
+def set_style_sheet_option(style_sheet: str, option: str, value: str, object: str="") -> str:
+    """ Helper for QSS related functions """
+    # empty string key is the one associated to the current object
+    qss = {}
+    # parse to the next "{"
+    obj_split_sheet = style_sheet.split("{")
+    current_object = ""
+    for section in obj_split_sheet:
+        next_objectname = ""
+        subsections = section.split("}")
+        if len(subsections) > 1:
+            # last line before } is next object name
+            next_objectname = subsections[-1].splitlines()[-1].strip()
+        entries = "".join(subsections).strip().split(";")
+        for entry in entries:
+            # filter // and /* */ comments
+            clean_lines = re.sub("\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$", "", entry).strip().splitlines()
+            if not clean_lines or next_objectname == clean_lines[0]:
+                continue
+            style = clean_lines[0].split(":", 1)
+            if len(style) < 2:
+                # TODO log warning?
+                print("WARNING")
+                continue
+            if not current_object in qss:
+                qss[current_object] = {}
+            qss[current_object][style[0]] = style[1]
+        current_object = next_objectname
+    # set value
+    qss.get(object, {})[option] = value
+    # convert back to qss
+    new_style_sheet = ""
+    for object_name, entries in qss.items():
+        if object_name:
+            new_style_sheet += object_name + " {"
+        for qss_opt, value in entries.items():
+            new_style_sheet += f"{qss_opt}:{value};"
+        if object_name:
+            new_style_sheet += "}"
+    return new_style_sheet
+
+
+def get_user_theme_color() -> Tuple[int,int,int]: # RGB
+    """ Returns black per default """
+    if platform.system() == "Windows":
+        # get theme color
+        from winreg import OpenKey, ConnectRegistry, HKEY_CURRENT_USER, QueryValueEx
+        reg = ConnectRegistry(None, HKEY_CURRENT_USER)
+        key = OpenKey(reg, r"Control Panel\Colors")
+        value = QueryValueEx(key, "Hilight")[0]  # Windows Theme Hilight color for border color in rgb
+        return tuple(value.split(" ")[0:3])
+    return 0,0,0

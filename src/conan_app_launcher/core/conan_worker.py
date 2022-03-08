@@ -10,7 +10,6 @@ from conan_app_launcher.settings import (ENABLE_APP_COMBO_BOXES,
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict
-
     from .conan import ConanApi
 else:
     try:

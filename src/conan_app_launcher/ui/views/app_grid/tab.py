@@ -99,7 +99,7 @@ class TabGrid(QtWidgets.QWidget):
             new_model = UiAppLinkModel()
             new_model.parent = self.model
         # save for testing
-        self._edit_app_dialog = AppEditDialog(new_model, parent=self.parentWidget())
+        self._edit_app_dialog = AppEditDialog(new_model, parent=None) #self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == AppEditDialog.Accepted:
             app_link = AppLink(self, new_model)

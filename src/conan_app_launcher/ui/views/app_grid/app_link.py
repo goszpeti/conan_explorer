@@ -179,7 +179,7 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._apply_new_config()
 
     def on_move(self):
-        move_dialog = AppsMoveDialog(parent=self.parentWidget(), tab_ui_model=self.model.parent)
+        move_dialog = AppsMoveDialog(parent=None, tab_ui_model=self.model.parent)
         ret = move_dialog.exec()
         if ret == QtWidgets.QDialog.Accepted:
             self._parent_tab.remove_all_app_links()
@@ -239,7 +239,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def open_edit_dialog(self, model: UiAppLinkModel = None):
         if model:
             self.model = model
-        edit_app_dialog = AppEditDialog(self.model, parent=self.parentWidget())
+        edit_app_dialog = AppEditDialog(self.model, parent=None) #self.parentWidget())
         reply = edit_app_dialog.exec_()
         if reply == AppEditDialog.Accepted:
             # grey icon, so update from cache can ungrey it, if the path is correct
@@ -252,7 +252,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def remove(self):
         # last link can't be deleted!
         if len(self.model.parent.apps) == 1:
-            msg = QtWidgets.QMessageBox(parent=self._parent_tab)
+            msg = QtWidgets.QMessageBox(parent=None)  # self._parent_tab
             msg.setWindowTitle("Info")
             msg.setText("Can't delete the last link!")
             msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
@@ -261,7 +261,7 @@ class AppLink(QtWidgets.QVBoxLayout):
             return
 
         # confirmation dialog
-        message_box = QtWidgets.QMessageBox(parent=self.parentWidget())
+        message_box = QtWidgets.QMessageBox(parent=None) # self.parentWidget())
         message_box.setWindowTitle("Delete app link")
         message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}?\"")
         message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)

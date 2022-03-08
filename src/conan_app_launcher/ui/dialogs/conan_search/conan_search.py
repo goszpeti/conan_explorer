@@ -32,7 +32,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
             self._main_window = self
         current_dir = Path(__file__).parent
         self._ui = uic.loadUi(current_dir / "conan_search.ui", baseinstance=self)
-        self.setMinimumSize(650, 550)
+        #self.setMinimumSize(650, 550)
 
         # init search bar
         icon = QtGui.QIcon(str(app.asset_path / "icons/icon.ico"))

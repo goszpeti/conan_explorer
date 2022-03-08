@@ -35,4 +35,4 @@ decrease_font.png -- https://icons8.com/icon/15034/decrease-font
 close -- https://icons8.com/icon/16248/close
 minus -- https://icons8.com/icon/16147/subtract
 restore -- https://icons8.com/icon/4Oupt5bWFn02/restore-down
-maximize -- <a target="_blank" href="https://icons8.com/icon/KERvxIIUeDAL/maximize-button">Maximize Button</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+maximize --https://icons8.com/icon/KERvxIIUeDAL/maximize-button

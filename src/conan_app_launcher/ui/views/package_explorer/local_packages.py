@@ -13,7 +13,7 @@ from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from .model import PROFILE_TYPE, REF_TYPE, PackageTreeItem, PkgSelectModel
 
@@ -23,34 +23,36 @@ if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
 
 
-class LocalConanPackageExplorer(QtCore.QObject):
+class LocalConanPackageExplorer(QtWidgets.QWidget):
     def __init__(self, main_window: "MainWindow"):
-        super().__init__()
+        super().__init__(main_window)
         self._main_window = main_window
         self.pkg_sel_model = None
         self._pkg_sel_model_loader = QtLoaderObject(self)
         self._pkg_sel_model_loaded = True
         self.fs_model = None
+        current_dir = Path(__file__).parent
+        self._ui = uic.loadUi(current_dir / "package_explorer.ui", baseinstance=self)
 
         # TODO belongs in a model?
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
-        main_window.ui.refresh_button.setIcon(QtGui.QIcon(get_themed_asset_image("icons/refresh.png")))
+        self._ui.refresh_button.setIcon(QtGui.QIcon(get_themed_asset_image("icons/refresh.png")))
 
-        main_window.ui.package_select_view.header().setVisible(True)
-        main_window.ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
-        main_window.ui.package_select_view.setContextMenuPolicy(Qt.CustomContextMenu)
-        main_window.ui.package_select_view.customContextMenuRequested.connect(
+        self._ui.package_select_view.header().setVisible(True)
+        self._ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
+        self._ui.package_select_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._ui.package_select_view.customContextMenuRequested.connect(
             self.on_selection_context_menu_requested)
         self._init_selection_context_menu()
 
-        main_window.ui.refresh_button.clicked.connect(self.on_pkg_refresh_clicked)
-        main_window.ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
-        main_window.ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
+        self._ui.refresh_button.clicked.connect(self.on_pkg_refresh_clicked)
+        self._ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
+        #self._ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
         main_window.conan_pkg_removed.connect(self.on_conan_pkg_removed)
 
     def apply_theme(self):
-        self._main_window.ui.refresh_button.setIcon(QtGui.QIcon(get_themed_asset_image("icons/refresh.png")))
+        self._ui.refresh_button.setIcon(QtGui.QIcon(get_themed_asset_image("icons/refresh.png")))
         self._init_selection_context_menu()
         self._init_pkg_file_context_menu()
 
@@ -90,7 +92,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         open_file(conanfile)
 
     def on_selection_context_menu_requested(self, position):
-        self.select_cntx_menu.exec_(self._main_window.ui.package_select_view.mapToGlobal(position))
+        self.select_cntx_menu.exec_(self._ui.package_select_view.mapToGlobal(position))
 
     def on_toolbox_changed(self, index):
         self.refresh_pkg_selection_view(update=False)  # only update the first time
@@ -99,11 +101,11 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.refresh_pkg_selection_view(update=True)
 
     def get_selected_pkg_source_item(self) -> Optional[PackageTreeItem]:
-        indexes = self._main_window.ui.package_select_view.selectedIndexes()
+        indexes = self._ui.package_select_view.selectedIndexes()
         if len(indexes) != 1:
             Logger().debug(f"Mismatch in selected items for context action: {str(len(indexes))}")
             return None
-        view_index = self._main_window.ui.package_select_view.selectedIndexes()[0]
+        view_index = self._ui.package_select_view.selectedIndexes()[0]
         source_item: PackageTreeItem = view_index.model().mapToSource(view_index).internalPointer()
         return source_item
 
@@ -165,15 +167,15 @@ class LocalConanPackageExplorer(QtCore.QObject):
     def finish_select_model_init(self):
         if self.pkg_sel_model:
 
-            self._main_window.ui.package_select_view.setModel(self.pkg_sel_model.proxy_model)
-            self._main_window.ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
+            self._ui.package_select_view.setModel(self.pkg_sel_model.proxy_model)
+            self._ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
             self.set_filter_wildcard()  # reapply package filter query
         else:
             Logger().error("Can't load local packages!")
 
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace
-        text = self._main_window.ui.package_filter_edit.toPlainText().strip()
+        text = self._ui.package_filter_edit.toPlainText().strip()
         if self.pkg_sel_model:
             self.pkg_sel_model.proxy_model.setFilterWildcard(text)
 
@@ -190,7 +192,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
     def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
         self._main_window.activateWindow()
-        self._main_window.ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
+        self._ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
        # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
         self._pkg_sel_model_loader.wait_for_finished()
 
@@ -198,7 +200,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
             return False
 
         # Reset filter, otherwise the element to be shown could be hidden
-        self._main_window.ui.package_filter_edit.setText("*")
+        self._ui.package_filter_edit.setText("*")
 
         # find out if we need to find a ref or or a package
         split_ref = conan_ref.split(":")
@@ -221,8 +223,8 @@ class LocalConanPackageExplorer(QtCore.QObject):
         # map to package view model
         proxy_index = self.pkg_sel_model.index(ref_row, 0, QtCore.QModelIndex())
         sel_model = self._main_window.package_select_view.selectionModel()
-        view_model = self._main_window.ui.package_select_view.model()
-        self._main_window.ui.package_select_view.expand(view_model.mapFromSource(proxy_index))
+        view_model = self._ui.package_select_view.model()
+        self._ui.package_select_view.expand(view_model.mapFromSource(proxy_index))
 
         if pkg_id:
             item: PackageTreeItem = proxy_index.internalPointer()
@@ -235,7 +237,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
             internal_sel_index = proxy_index
 
         view_index = view_model.mapFromSource(internal_sel_index)
-        self._main_window.ui.package_select_view.scrollTo(view_index)
+        self._ui.package_select_view.scrollTo(view_index)
         sel_model.select(view_index, QtCore.QItemSelectionModel.ClearAndSelect)
         sel_model.currentRowChanged.emit(proxy_index, internal_sel_index)
         Logger().debug(f"Selecting {view_index.data()} in Local Package Explorer")
@@ -266,20 +268,20 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.fs_model.setRootPath(str(pkg_path))
         self.fs_model.sort(0, Qt.AscendingOrder)
         self.re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)
-        self._main_window.ui.package_file_view.setModel(self.fs_model)
-        self._main_window.ui.package_file_view.setRootIndex(self.fs_model.index(str(pkg_path)))
-        self._main_window.ui.package_file_view.setColumnHidden(2, True)  # file type
-        self._main_window.ui.package_file_view.setColumnWidth(0, 200)
-        self._main_window.ui.package_file_view.header().setSortIndicator(0, Qt.AscendingOrder)
-        self.re_register_signal(self._main_window.ui.package_file_view.doubleClicked,
+        self._ui.package_file_view.setModel(self.fs_model)
+        self._ui.package_file_view.setRootIndex(self.fs_model.index(str(pkg_path)))
+        self._ui.package_file_view.setColumnHidden(2, True)  # file type
+        self._ui.package_file_view.setColumnWidth(0, 200)
+        self._ui.package_file_view.header().setSortIndicator(0, Qt.AscendingOrder)
+        self.re_register_signal(self._ui.package_file_view.doubleClicked,
                                 self.on_file_double_click)
         # disable edit on double click, since we want to open
-        self._main_window.ui.package_file_view.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
-        self._main_window.ui.package_path_label.setText(str(pkg_path))
+        self._ui.package_file_view.setEditTriggers(QtWidgets.QAbstractItemView.EditKeyPressed)
+        self._ui.package_path_label.setText(str(pkg_path))
 
-        self._main_window.ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
 
-        self.re_register_signal(self._main_window.ui.package_file_view.customContextMenuRequested,
+        self.re_register_signal(self._ui.package_file_view.customContextMenuRequested,
                                 self.on_file_context_menu_requested)
         self._init_pkg_file_context_menu()
 
@@ -289,13 +291,13 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.fs_model = None
         self._current_ref = ""
         self._current_pkg = None
-        self._main_window.ui.package_path_label.setText("")
-        self._main_window.ui.package_file_view.setModel(None)
+        self._ui.package_path_label.setText("")
+        self._ui.package_file_view.setModel(None)
         # try:
         #     self.fs_model.deleteLater()
         # except Exception:
         #     pass  # sometimes this can crash...
-        self._main_window.ui.package_path_label.setText("")
+        self._ui.package_path_label.setText("")
 
     @classmethod
     def re_register_signal(cls, signal: QtCore.pyqtBoundSignal, slot: Callable):
@@ -311,7 +313,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         run_file(file_path, True, args="")
 
     def _init_pkg_file_context_menu(self):
-        self.file_cntx_menu = QtWidgets.QMenu(self._main_window)
+        self.file_cntx_menu = QtWidgets.QMenu() #self._main_window)
 
         self.open_fm_action = QtWidgets.QAction("Show in File Manager", self._main_window)
         self.open_fm_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/file-explorer.png")))
@@ -361,7 +363,7 @@ class LocalConanPackageExplorer(QtCore.QObject):
         self.add_link_action.triggered.connect(self.on_add_app_link_from_file)
 
     def on_file_context_menu_requested(self, position):
-        self.file_cntx_menu.exec_(self._main_window.ui.package_file_view.mapToGlobal(position))
+        self.file_cntx_menu.exec_(self._ui.package_file_view.mapToGlobal(position))
 
     def on_copy_file_as_path(self) -> str:
         file = self._get_selected_pkg_file()
@@ -442,11 +444,11 @@ class LocalConanPackageExplorer(QtCore.QObject):
         open_in_file_manager(file_path)
 
     def _get_pkg_file_source_item(self) -> Optional[QtCore.QModelIndex]:
-        indexes = self._main_window.ui.package_file_view.selectedIndexes()
+        indexes = self._ui.package_file_view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug(f"No selected item for context action")
             return None
-        return self._main_window.ui.package_file_view.selectedIndexes()[0]
+        return self._ui.package_file_view.selectedIndexes()[0]
 
     def _get_selected_pkg_file(self) -> str:
         file_view_index = self._get_pkg_file_source_item()
