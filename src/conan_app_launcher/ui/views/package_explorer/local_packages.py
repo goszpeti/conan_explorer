@@ -8,7 +8,7 @@ from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.ui.common import QtLoaderObject
+from conan_app_launcher.ui.common import QtLoader
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
@@ -28,7 +28,7 @@ class LocalConanPackageExplorer(QtWidgets.QWidget):
         super().__init__(main_window)
         self._main_window = main_window
         self.pkg_sel_model = None
-        self._pkg_sel_model_loader = QtLoaderObject(self)
+        self._pkg_sel_model_loader = QtLoader(self)
         self._pkg_sel_model_loaded = True
         self.fs_model = None
         current_dir = Path(__file__).parent
@@ -48,8 +48,11 @@ class LocalConanPackageExplorer(QtWidgets.QWidget):
 
         self._ui.refresh_button.clicked.connect(self.on_pkg_refresh_clicked)
         self._ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
-        #self._ui.main_toolbox.currentChanged.connect(self.on_toolbox_changed)
         main_window.conan_pkg_removed.connect(self.on_conan_pkg_removed)
+
+    def showEvent(self, a0: QtGui.QShowEvent) -> None:
+        self.refresh_pkg_selection_view(update=False)  # only update the first time
+        return super().showEvent(a0)
 
     def apply_theme(self):
         self._ui.refresh_button.setIcon(QtGui.QIcon(get_themed_asset_image("icons/refresh.png")))
@@ -94,8 +97,8 @@ class LocalConanPackageExplorer(QtWidgets.QWidget):
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._ui.package_select_view.mapToGlobal(position))
 
-    def on_toolbox_changed(self, index):
-        self.refresh_pkg_selection_view(update=False)  # only update the first time
+    # def on_toolbox_changed(self, index):
+    #     self.refresh_pkg_selection_view(update=False)  # only update the first time
 
     def on_pkg_refresh_clicked(self):
         self.refresh_pkg_selection_view(update=True)

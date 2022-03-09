@@ -30,7 +30,7 @@ class Worker(QtCore.QObject):
         self.finished.emit()
 
 
-class QtLoaderObject(QtCore.QObject):
+class QtLoader(QtCore.QObject):
 
     def __init__(self, parent: QtCore.QObject):
         super().__init__(parent)

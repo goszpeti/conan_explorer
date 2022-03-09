@@ -13,7 +13,7 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
-from conan_app_launcher.ui.common import QtLoaderObject
+from conan_app_launcher.ui.common import QtLoader
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.common.theming import activate_theme
 from conan_app_launcher.ui.dialogs.conan_search import ConanSearchDialog
@@ -83,16 +83,14 @@ class MainWindow(FluentWindow):
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/grid.png")),
                         QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.add_menu_entry("App Grid", icon, True, self.app_grid)
+        self.add_left_menu_entry("App Grid", icon, True, self.app_grid)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/opened_folder.png")),
                                QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.add_menu_entry("Local Package Explorer", icon, True, self.local_package_explorer)
+        self.add_left_menu_entry("Local Package Explorer", icon, True, self.local_package_explorer)
         icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/search_packages.png")),
                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.add_menu_entry("Conan Search", icon, True, self.search_dialog)
-
-        self.ui.settings_button.clicked.connect(lambda: self.toggle_right_menu(220, True))
+        self.add_left_menu_entry("Conan Search", icon, True, self.search_dialog)
         self.left_menu_buttons["App Grid"][0].click()
 
 
@@ -113,7 +111,7 @@ class MainWindow(FluentWindow):
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
 
         # model loads incrementally
-        loader = QtLoaderObject(self)
+        loader = QtLoader(self)
         loader.async_loading(self, self.model.loadf, (config_source_str,))
         loader.wait_for_finished()
 

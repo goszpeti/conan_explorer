@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import open_file
-from conan_app_launcher.ui.common import QtLoaderObject
+from conan_app_launcher.ui.common import QtLoader
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conans.model.ref import ConanFileReference
@@ -58,7 +58,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self._ui.remote_list.adjustSize()
 
         self._pkg_result_model = PkgSearchModel()
-        self._pkg_result_loader = QtLoaderObject(self)
+        self._pkg_result_loader = QtLoader(self)
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self.apply_theme()

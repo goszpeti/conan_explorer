@@ -22,6 +22,10 @@ class FluentWindow(QMainWindow):
         self.left_menu_buttons: Dict[str, Tuple[QPushButton, QWidget]] = {}
         color = get_user_theme_color()  # TODO CSS
         self.button_highlight_color = "#B7B7B7"
+        self.left_menu_min_size = 70
+        self.left_menu_max_size = 220
+        self.right_menu_min_size = 0
+        self.right_menu_max_size = 200
 
         # resize related variables
         self._resize_press = 0
@@ -51,8 +55,8 @@ class FluentWindow(QMainWindow):
         self.ui.left_menu_top_subframe.mouseMoveEvent = self.move_window
         self.ui.top_frame.mouseMoveEvent = self.move_window
 
-        self.ui.toggle_left_menu_button.clicked.connect(lambda: self.toggle_left_menu(220, True))
-        self.ui.settings_button.clicked.connect(lambda: self.toggle_right_menu(220, True))
+        self.ui.toggle_left_menu_button.clicked.connect(self.toggle_left_menu)
+        self.ui.settings_button.clicked.connect(self.toggle_right_menu)
         self.page_info_label.setText("")
 
         # initial maximize state
@@ -96,7 +100,7 @@ class FluentWindow(QMainWindow):
         ctypes.windll.user32.SetWindowLongA(int(self.winId()), GWL_STYLE,
             style| WS_BORDER | WS_MAXIMIZEBOX | WS_CAPTION | CS_DBLCLKS | WS_THICKFRAME)
 
-    def add_menu_entry(self, name: str, icon: QtGui.QIcon, is_upper_menu: bool, page_widget: QWidget):
+    def add_left_menu_entry(self, name: str, icon: QtGui.QIcon, is_upper_menu: bool, page_widget: QWidget):
         button = QPushButton(self)
         button.setObjectName(name)
         size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -124,6 +128,27 @@ class FluentWindow(QMainWindow):
             self.ui.left_menu_bottom_subframe.layout().addWidget(button)
         self.page_stacked_widget.addWidget(page_widget)
 
+    def add_settings_menu_entry(self, name: str, widget: QWidget, icon=None, main_page_widget=False):
+        button = QPushButton(self)
+        button.setObjectName(name)
+        button.setMinimumSize(QSize(64, 50))
+        button.setMaximumHeight(50)
+        button.setLayoutDirection(Qt.LeftToRight)
+        button.setToolTip(name)
+        if icon:
+            button.setIcon(icon)
+        button.setIconSize(QSize(32, 32))
+        button.setStyleSheet("text-align:middle;")
+
+        self.right_menu_stacked_widget.addWidget(widget)
+        if main_page_widget:
+            self.page_stacked_widget.addWidget(widget)
+
+        else:
+            self.right_menu_back_button.setMinimumWidth(32)
+            self.right_menu_back_button.setMaximumWidth(32)
+
+
     def switch_page(self):
         button = self.sender()
         name = button.objectName()
@@ -141,58 +166,53 @@ class FluentWindow(QMainWindow):
         self.page_title.setText(name)
         self.page_info_label.setText("")
 
-    def toggle_left_menu(self, max_width: int, enable: bool):
-        if enable:
-            width = self.ui.left_menu_frame.width()
-            min_width = 70
+    def toggle_left_menu(self):
+        width = self.ui.left_menu_frame.width()
 
-            # switch extended and minimized state
-            if width == min_width:
-                width_to_set = max_width
-                maximize = True
-            else:
-                width_to_set = min_width
-                maximize = False
+        # switch extended and minimized state
+        if width == self.left_menu_min_size:
+            width_to_set = self.left_menu_max_size
+            maximize = True
+        else:
+            width_to_set = self.left_menu_min_size
+            maximize = False
 
-            self.animation = QPropertyAnimation(self.ui.left_menu_frame, b"minimumWidth")
-            self.animation.setDuration(200)
-            self.animation.setStartValue(width)
-            self.animation.setEndValue(width_to_set)
-            self.animation.setEasingCurve(QEasingCurve.InOutQuart)
-            self.animation.start()
+        self.animation = QPropertyAnimation(self.ui.left_menu_frame, b"minimumWidth")
+        self.animation.setDuration(200)
+        self.animation.setStartValue(width)
+        self.animation.setEndValue(width_to_set)
+        self.animation.setEasingCurve(QEasingCurve.InOutQuart)
+        self.animation.start()
 
-            # hide title
+        # hide title
+        if maximize:
+            self.title_label.setText(self.title_text)
+        else:
+            self.title_label.setText("")
+
+        # hide menu button texts
+        for name, (button, _) in self.left_menu_buttons.items():
             if maximize:
-                self.title_label.setText(self.title_text)
+                button.setText(name)
+                button.setStyleSheet("text-align:left;")
             else:
-                self.title_label.setText("")
+                button.setText("")
+                button.setStyleSheet("text-align:middle;")
 
-            # hide menu button texts
-            for name, (button, _) in self.left_menu_buttons.items():
-                if maximize:
-                    button.setText(name)
-                    button.setStyleSheet("text-align:left;")
-                else:
-                    button.setText("")
-                    button.setStyleSheet("text-align:middle;")
 
-            # TODO reselect current pages button
+    def toggle_right_menu(self):
+        width = self.ui.right_menu_frame.width()
+        if width == self.right_menu_min_size:
+            width_to_set = self.right_menu_max_size
+        else:
+            width_to_set = self.right_menu_min_size
 
-    def toggle_right_menu(self, max_width: int, enable: bool):
-        if enable:
-            width = self.ui.right_menu_frame.width()
-            min_width = 0
-            if width == min_width:
-                width_to_set = max_width
-            else:
-                width_to_set = min_width
-
-            self.animation = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")
-            self.animation.setDuration(200)
-            self.animation.setStartValue(width)
-            self.animation.setEndValue(width_to_set)
-            self.animation.setEasingCurve(QEasingCurve.InOutQuart)
-            self.animation.start()
+        self.animation = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")
+        self.animation.setDuration(200)
+        self.animation.setStartValue(width)
+        self.animation.setEndValue(width_to_set)
+        self.animation.setEasingCurve(QEasingCurve.InOutQuart)
+        self.animation.start()
 
     def mousePressEvent(self, event): # override
         """ Helper for moving window to know mouse position """
