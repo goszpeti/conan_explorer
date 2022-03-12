@@ -1,4 +1,5 @@
 
+import imp
 from pathlib import Path
 from typing import Optional
 
@@ -9,16 +10,14 @@ from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conans.model.ref import ConanFileReference
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import pyqtBoundSignal
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtBoundSignal, Qt
+from PyQt5.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
+from PyQt5.QtGui import QIcon
 
-# define Qt so we can use it like the namespace in C++
-Qt = QtCore.Qt
+class AppEditDialog(QDialog):
 
-
-class AppEditDialog(QtWidgets.QDialog):
-
-    def __init__(self,  model: UiAppLinkModel, parent: QtWidgets.QWidget, flags=Qt.WindowFlags(), pkg_installed_signal: Optional[pyqtBoundSignal] = None):
+    def __init__(self,  model: UiAppLinkModel, parent: Optional[QWidget], flags=Qt.WindowFlags(), pkg_installed_signal: Optional[pyqtBoundSignal] = None):
         super().__init__(parent=parent, flags=flags)
         self._model = model
         self._pkg_installed_signal = pkg_installed_signal
@@ -30,7 +29,7 @@ class AppEditDialog(QtWidgets.QDialog):
 
         self.setModal(True)
         self.setWindowTitle("Edit App Link")
-        self.setWindowIcon(QtGui.QIcon(str(asset_path / "icons" / "edit.png")))
+        self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.png")))
 
         self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started_info)
         self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished_info)
@@ -83,32 +82,32 @@ class AppEditDialog(QtWidgets.QDialog):
         dialog.show()
 
     def on_executable_browse_clicked(self):
-        dialog = QtWidgets.QFileDialog(parent=self, caption="Select file for icon display",
+        dialog = QFileDialog(parent=self, caption="Select file for icon display",
                                        directory=str(self._temp_package_path))
                                       # filter="Images (*.ico *.png *.jpg)")
-        dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
+        dialog.setFileMode(QFileDialog.ExistingFile)
         # TODO restrict to the package directory, or emit Error dialog and call anew
-        if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+        if dialog.exec_() == QFileDialog.Accepted:
             exe_path = Path(dialog.selectedFiles()[0])
             try:
                 exe_rel_path = exe_path.relative_to(self._temp_package_path)
             except Exception:
-                msg = QtWidgets.QMessageBox(parent=self)
+                msg = QMessageBox(parent=self)
                 msg.setWindowTitle("Invalid selection")
                 msg.setText(f"The entered path {str(exe_path)} is not in the selected conan package folder!")
-                msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-                msg.setIcon(QtWidgets.QMessageBox.Critical)
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.setIcon(QMessageBox.Critical)
                 msg.exec_()
                 return False
             self._ui.exec_path_line_edit.setText(str(exe_rel_path))
             return True
 
     def on_icon_browse_clicked(self):
-        dialog = QtWidgets.QFileDialog(parent=self, caption="Select file for icon display",
+        dialog = QFileDialog(parent=self, caption="Select file for icon display",
                                        directory=str(self._temp_package_path),
                                        filter="Images (*.ico *.png *.jpg)")
-        dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-        if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        if dialog.exec_() == QFileDialog.Accepted:
             icon_path = Path(dialog.selectedFiles()[0])
             try:
                 icon_rel_path = icon_path.relative_to(self._temp_package_path)
@@ -137,11 +136,11 @@ class AppEditDialog(QtWidgets.QDialog):
     def save_data(self):
         # check all input validations
         if not self._ui.conan_ref_line_edit.is_valid:
-           msg = QtWidgets.QMessageBox(parent=self)
+           msg = QMessageBox(parent=self)
            msg.setWindowTitle("Invalid Conan Reference")
            msg.setText(f"The entered Conan reference has an invalid format!")
-           msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-           msg.setIcon(QtWidgets.QMessageBox.Critical)
+           msg.setStandardButtons(QMessageBox.Ok)
+           msg.setIcon(QMessageBox.Critical)
            msg.exec_()
            return
         # TODO validate path?

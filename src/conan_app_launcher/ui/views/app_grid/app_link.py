@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import ICON_SIZE, asset_path
@@ -10,9 +10,11 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES)
-from conan_app_launcher.ui.common.icon import get_themed_asset_image
+from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QComboBox, QLayout, QSizePolicy, QSpacerItem, QMenu, QAction, QDialog, QMessageBox
 
 from .dialogs import ClickableIcon, AppEditDialog, AppsMoveDialog
 
@@ -20,16 +22,13 @@ if TYPE_CHECKING:  # pragma: no cover
     from.tab import TabGrid
 
 
-# define Qt so we can use it like the namespace in C++
-Qt = QtCore.Qt
-
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"
 
 current_dir = Path(__file__).parent
 
 
-class AppLink(QtWidgets.QVBoxLayout):
+class AppLink(QVBoxLayout):
     """ Represents a clickable button + info or combo box for an executable in a conan package.
     |- Button with Icon (clickable to start executable)
     |- Package version(s)
@@ -68,25 +67,25 @@ class AppLink(QtWidgets.QVBoxLayout):
     def _init_app_link(self):
         """ Initialize all subwidgets with default values. """
         self._app_button = ClickableIcon(self._parent_tab, asset_path / "icons" / "app.png")
-        self._app_name_label = QtWidgets.QLabel(self._parent_tab)
+        self._app_name_label = QLabel(self._parent_tab)
 
         if self._enable_combo_boxes:
-            self._app_version_cbox = QtWidgets.QComboBox(self._parent_tab)
-            self._app_user_cbox = QtWidgets.QComboBox(self._parent_tab)
-            self._app_channel_cbox = QtWidgets.QComboBox(self._parent_tab)
+            self._app_version_cbox = QComboBox(self._parent_tab)
+            self._app_user_cbox = QComboBox(self._parent_tab)
+            self._app_channel_cbox = QComboBox(self._parent_tab)
         else:
-            self._app_version_cbox = QtWidgets.QLabel(self._parent_tab)
-            self._app_user_cbox = QtWidgets.QLabel(self._parent_tab)
-            self._app_channel_cbox = QtWidgets.QLabel(self._parent_tab)
+            self._app_version_cbox = QLabel(self._parent_tab)
+            self._app_user_cbox = QLabel(self._parent_tab)
+            self._app_channel_cbox = QLabel(self._parent_tab)
             self._app_version_cbox.setAlignment(Qt.AlignHCenter)
             self._app_user_cbox.setAlignment(Qt.AlignHCenter)
             self._app_channel_cbox.setAlignment(Qt.AlignHCenter)
 
         # size policies
         self.setSpacing(3)
-        self.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                            QtWidgets.QSizePolicy.Fixed)
+        self.setSizeConstraint(QLayout.SetMinimumSize)
+        size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
+                                            QSizePolicy.Fixed)
         # add sub widgets
 
         self._app_button.setSizePolicy(size_policy)
@@ -122,8 +121,8 @@ class AppLink(QtWidgets.QVBoxLayout):
         self._app_channel_cbox.setMaximumWidth(max_width)
         self.addWidget(self._app_channel_cbox)
 
-        self._v_spacer = QtWidgets.QSpacerItem(
-            20, 5, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self._v_spacer = QSpacerItem(
+            20, 5, QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.addSpacerItem(self._v_spacer)
 
         # connect signals
@@ -137,39 +136,39 @@ class AppLink(QtWidgets.QVBoxLayout):
 
     def _init_context_menu(self):
         """ Setup context menu. """
-        self.menu = QtWidgets.QMenu()
+        self.menu = QMenu()
 
-        self.open_fm_action = QtWidgets.QAction("Show in File Manager", self)
-        self.open_fm_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/file-explorer.png")))
+        self.open_fm_action = QAction("Show in File Manager", self)
+        self.open_fm_action.setIcon(QIcon(get_themed_asset_image("icons/file-explorer.png")))
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
 
-        # self.show_in_pkg_exp_action = QtWidgets.QAction("Show in Package Explorer", self)
-        # self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(get_asset_image("icons/search_packages.png")))
+        # self.show_in_pkg_exp_action = QAction("Show in Package Explorer", self)
+        # self.show_in_pkg_exp_action.setIcon(QIcon(get_asset_image("icons/search_packages.png")))
         # self.menu.addAction(self.show_in_pkg_exp_action)
         # self.show_in_pkg_exp_action.setDisabled(True)  # TODO upcoming feature
 
         self.menu.addSeparator()
 
-        self.add_action = QtWidgets.QAction("Add new App Link", self)
-        self.add_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/add_link.png")))
+        self.add_action = QAction("Add new App Link", self)
+        self.add_action.setIcon(QIcon(get_themed_asset_image("icons/add_link.png")))
         self.menu.addAction(self.add_action)
         self.add_action.triggered.connect(self.open_app_link_add_dialog)
 
-        self.edit_action = QtWidgets.QAction("Edit", self)
-        self.edit_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/edit.png")))
+        self.edit_action = QAction("Edit", self)
+        self.edit_action.setIcon(QIcon(get_themed_asset_image("icons/edit.png")))
         self.menu.addAction(self.edit_action)
         self.edit_action.triggered.connect(self.open_edit_dialog)
 
-        self.remove_action = QtWidgets.QAction("Remove App Link", self)
-        self.remove_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/delete.png")))
+        self.remove_action = QAction("Remove App Link", self)
+        self.remove_action.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
         self.menu.addAction(self.remove_action)
         self.remove_action.triggered.connect(self.remove)
 
         self.menu.addSeparator()
 
-        self.rearrange_action = QtWidgets.QAction("Rearrange App Links", self)
-        self.rearrange_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/rearrange.png")))
+        self.rearrange_action = QAction("Rearrange App Links", self)
+        self.rearrange_action.setIcon(QIcon(get_themed_asset_image("icons/rearrange.png")))
         self.rearrange_action.triggered.connect(self.on_move)
 
         self.menu.addAction(self.rearrange_action)
@@ -181,7 +180,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def on_move(self):
         move_dialog = AppsMoveDialog(parent=None, tab_ui_model=self.model.parent)
         ret = move_dialog.exec()
-        if ret == QtWidgets.QDialog.Accepted:
+        if ret == QDialog.Accepted:
             self._parent_tab.remove_all_app_links()
             self._parent_tab.load_apps_from_model()
 
@@ -236,7 +235,7 @@ class AppLink(QtWidgets.QVBoxLayout):
     def open_app_link_add_dialog(self):
         self._parent_tab.open_app_link_add_dialog()
 
-    def open_edit_dialog(self, model: UiAppLinkModel = None):
+    def open_edit_dialog(self, model: Optional[UiAppLinkModel] = None):
         if model:
             self.model = model
         edit_app_dialog = AppEditDialog(self.model, parent=None) #self.parentWidget())
@@ -252,22 +251,22 @@ class AppLink(QtWidgets.QVBoxLayout):
     def remove(self):
         # last link can't be deleted!
         if len(self.model.parent.apps) == 1:
-            msg = QtWidgets.QMessageBox(parent=None)  # self._parent_tab
+            msg = QMessageBox(parent=None)  # self._parent_tab
             msg.setWindowTitle("Info")
             msg.setText("Can't delete the last link!")
-            msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            msg.setIcon(QtWidgets.QMessageBox.Information)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setIcon(QMessageBox.Information)
             msg.exec_()
             return
 
         # confirmation dialog
-        message_box = QtWidgets.QMessageBox(parent=None) # self.parentWidget())
+        message_box = QMessageBox(parent=None) # self.parentWidget())
         message_box.setWindowTitle("Delete app link")
         message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}?\"")
-        message_box.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-        message_box.setIcon(QtWidgets.QMessageBox.Question)
+        message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        message_box.setIcon(QMessageBox.Question)
         reply = message_box.exec_()
-        if reply == QtWidgets.QMessageBox.Yes:
+        if reply == QMessageBox.Yes:
             self.delete()
             self.model.parent.apps.remove(self.model)
             self.model.save()

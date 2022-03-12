@@ -1,14 +1,28 @@
-from tkinter.tix import Tree
-from .common.theming import get_user_theme_color, set_style_sheet_option
+import enum
+from .common import get_user_theme_color, set_style_sheet_option
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, Optional, Tuple
 from ctypes.wintypes import MSG
 import ctypes
 import platform
-from PyQt5 import QtGui, QtWidgets, uic
+from PyQt5 import uic
 from PyQt5.QtCore import QPoint, QRect, Qt, QPropertyAnimation, QSize, QEasingCurve, QObject, QEvent
 from PyQt5.QtWidgets import QPushButton, QWidget, QMainWindow, QStackedWidget, QGraphicsDropShadowEffect, QSizePolicy
+from PyQt5.QtGui import QColor, QIcon, QPixmap, QMouseEvent, QHoverEvent
 from conan_app_launcher.app import asset_path
+from enum import Enum
+
+
+class ResizeDirection(Enum):
+    default = 0
+    top = 1
+    left = 2
+    right = 3
+    bottom = 4
+    top_left = 5
+    top_right = 6
+    bottom_left = 7
+    bottom_right = 8
 
 class FluentWindow(QMainWindow):
 
@@ -29,7 +43,7 @@ class FluentWindow(QMainWindow):
 
         # resize related variables
         self._resize_press = 0
-        self._resize_direction = 0
+        self._resize_direction = ResizeDirection.default
         self._resize_point = QPoint()
         self._last_geometry = QRect()
         self.title_text = title_text
@@ -43,7 +57,7 @@ class FluentWindow(QMainWindow):
         # TODO this really expensive
         effect = QGraphicsDropShadowEffect()
         effect.setOffset(0, 0)
-        effect.setColor(QtGui.QColor(68, 68, 68))
+        effect.setColor(QColor(68, 68, 68))
         effect.setBlurRadius(10)
         #self.setGraphicsEffect(effect)
 
@@ -100,7 +114,7 @@ class FluentWindow(QMainWindow):
         ctypes.windll.user32.SetWindowLongA(int(self.winId()), GWL_STYLE,
             style| WS_BORDER | WS_MAXIMIZEBOX | WS_CAPTION | CS_DBLCLKS | WS_THICKFRAME)
 
-    def add_left_menu_entry(self, name: str, icon: QtGui.QIcon, is_upper_menu: bool, page_widget: QWidget):
+    def add_left_menu_entry(self, name: str, icon: QIcon, is_upper_menu: bool, page_widget: QWidget):
         button = QPushButton(self)
         button.setObjectName(name)
         size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -228,13 +242,12 @@ class FluentWindow(QMainWindow):
 
     def eventFilter(self, source: QObject, event: QEvent):
         """ Implements window resizing """
-        #hovermoveevent
         if event.type() == event.HoverMove: # QtGui.QHoverEvent
             if self._resize_press == 0:
                 self.handle_resize_cursor(event)  # cursor position control for cursor shape setup
         elif event.type() == event.MouseButtonPress: # QtGui.QMouseEvent
             self._resize_press = 1
-            self._resize_point = self.mapToGlobal(event.pos())
+            self._resize_point = self.mapToGlobal(event.pos()) # save the starting point of resize
             self._last_geometry = self.geometry()
         elif event.type() == event.MouseButtonRelease:  # QtGui.QMouseEvent
             self._resize_press = 0
@@ -245,136 +258,98 @@ class FluentWindow(QMainWindow):
 
         return super().eventFilter(source, event)
 
-    def handle_resize_cursor(self, event: QtGui.QMouseEvent, offset=5):
-        rect = self.rect()
+    def handle_resize_cursor(self, event: QHoverEvent, x_offset=10, y_offset=8):
+        # using relative position, since the event can only be fired inside of the Window
+        rect = self.rect()  # rect()
         top_left = rect.topLeft()
         top_right = rect.topRight()
         bottom_left = rect.bottomLeft()
         bottom_right = rect.bottomRight()
-        pos = event.pos()
-
-        #top
-        if pos in QRect(QPoint(top_left.x()+offset, top_left.y()), QPoint(top_right.x()-offset, top_right.y()+offset)):
+        position = event.pos() # relative pos to window
+        width = self.width()
+        height = self.height()
+        
+        if position in QRect(top_left.x() + x_offset, top_left.y(), width - 2*x_offset, y_offset):
+            self._resize_direction = ResizeDirection.top
             self.setCursor(Qt.SizeVerCursor)
-            self._resize_direction = 1
-        #bottom
-        elif pos in QRect(QPoint(bottom_left.x()+offset, bottom_left.y()), QPoint(bottom_right.x()-offset, bottom_right.y()-offset)):
+        elif position in QRect(bottom_left.x() + x_offset, bottom_left.y(), width - 2*x_offset, -y_offset):
+            self._resize_direction = ResizeDirection.bottom
             self.setCursor(Qt.SizeVerCursor)
-            self._resize_direction = 2
-        #right
-        elif pos in QRect(QPoint(top_right.x()-offset, top_right.y()+offset), QPoint(bottom_right.x(), bottom_right.y()-offset)):
+        elif position in QRect(top_right.x() - x_offset, top_right.y() + y_offset, x_offset, height - 2*y_offset):
+            self._resize_direction = ResizeDirection.right
             self.setCursor(Qt.SizeHorCursor)
-            self._resize_direction = 3
-        #left
-        elif pos in QRect(QPoint(top_left.x()+offset, top_left.y()+offset), QPoint(bottom_left.x(), bottom_left.y()-offset)):
+        elif position in QRect(top_left.x() + x_offset, top_left.y() + y_offset, -x_offset, height - 2*y_offset):
+            self._resize_direction = ResizeDirection.left
             self.setCursor(Qt.SizeHorCursor)
-            self._resize_direction = 4
-        #top_right
-        elif pos in QRect(QPoint(top_right.x(), top_right.y()), QPoint(top_right.x()-offset, top_right.y()+offset)):
+        elif position in QRect(top_right.x(), top_right.y(), -x_offset, y_offset):
+            self._resize_direction = ResizeDirection.top_right
             self.setCursor(Qt.SizeBDiagCursor)
-            self._resize_direction = offset
-        #bottom_left
-        elif pos in QRect(QPoint(bottom_left.x(), bottom_left.y()), QPoint(bottom_left.x()+offset, bottom_left.y()-offset)):
+        elif position in QRect(bottom_left.x(), bottom_left.y(), x_offset, -y_offset):
+            self._resize_direction = ResizeDirection.bottom_left
             self.setCursor(Qt.SizeBDiagCursor)
-            self._resize_direction = 6
-        #top_left
-        elif pos in QRect(QPoint(top_left.x(), top_left.y()), QPoint(top_left.x()+offset, top_left.y()+offset)):
+        elif position in QRect(top_left.x(), top_left.y(), x_offset, y_offset):
+            self._resize_direction = ResizeDirection.top_left
             self.setCursor(Qt.SizeFDiagCursor)
-            self._resize_direction = 7
-        #bottom_right
-        elif pos in QRect(QPoint(bottom_right.x(), bottom_right.y()), QPoint(bottom_right.x()-offset, bottom_right.y()-offset)):
+        elif position in QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset):
+            self._resize_direction = ResizeDirection.bottom_right
             self.setCursor(Qt.SizeFDiagCursor)
-            self._resize_direction = 8
-        #default
-        else:
+        else: # no resize
             self.setCursor(Qt.ArrowCursor)
 
     def resizing(self, event):
-        #top_resize
-        if self._resize_direction == 1:
-            last = self.mapToGlobal(event.pos())-self._resize_point
-            first = self._last_geometry.height()
-            first -= last.y()
-            Y = self._last_geometry.y()
-            Y += last.y()
-            if first > self.minimumHeight():
-                self.setGeometry(self._last_geometry.x(), Y, self._last_geometry.width(), first)
+        if self._resize_direction == ResizeDirection.top:
+            current_point = self.mapToGlobal(event.pos()) - self._resize_point
+            new_height = self._last_geometry.height() - current_point.y()
+            if new_height > self.minimumHeight():
+                self.setGeometry(self._last_geometry.x(), self._last_geometry.y() +
+                                 current_point.y(), self._last_geometry.width(), new_height)
             return
-        #bottom_resize
-        if self._resize_direction == 2:
-            last = self.mapToGlobal(event.pos())-self._resize_point
-            first = self._last_geometry.height()
-            first += last.y()
-            self.resize(self._last_geometry.width(), first)
+        elif self._resize_direction == ResizeDirection.bottom:
+            current_point = self.mapToGlobal(event.pos()) - self._resize_point
+            new_height = self._last_geometry.height() + current_point.y()
+            self.resize(self._last_geometry.width(), new_height)
             return
-        #right_resize
-        if self._resize_direction == 3:
-            last = self.mapToGlobal(event.pos())-self._resize_point
-            first = self._last_geometry.width()
-            first += last.x()
-            self.resize(first, self._last_geometry.height())
+        elif self._resize_direction == ResizeDirection.right:
+            current_point = self.mapToGlobal(event.pos()) - self._resize_point
+            new_width = self._last_geometry.width() + current_point.x()
+            self.resize(new_width, self._last_geometry.height())
             return
-        #left_resize
-        if self._resize_direction == 4:
-            last = self.mapToGlobal(event.pos())-self._resize_point
-            first = self._last_geometry.width()
-            first -= last.x()
-            X = self._last_geometry.x()
-            X += last.x()
-
-            if first > self.minimumWidth():
-                self.setGeometry(X, self._last_geometry.y(), first, self._last_geometry.height())
+        elif self._resize_direction == ResizeDirection.left:
+            current_point = self.mapToGlobal(event.pos()) - self._resize_point
+            new_width = self._last_geometry.width() - current_point.x()
+            if new_width > self.minimumWidth():
+                self.setGeometry(self._last_geometry.x() + current_point.x(),
+                                 self._last_geometry.y(), new_width, self._last_geometry.height())
             return
-        #top_right_resize
-        if self._resize_direction == 5:
-            last = self.mapToGlobal(event.pos())-self._resize_point
-            first_width = self._last_geometry.width()
-            first_height = self._last_geometry.height()
-            first_Y = self._last_geometry.y()
-            first_width += last.x()
-            first_height -= last.y()
-            first_Y += last.y()
-
-            if first_height > self.minimumHeight():
-                self.setGeometry(self._last_geometry.x(), first_Y, first_width, first_height)
+        elif self._resize_direction == ResizeDirection.top_right:
+            current_point = self.mapToGlobal(event.pos()) - self._resize_point
+            new_width = self._last_geometry.width() + current_point.x()
+            new_height = self._last_geometry.height() - current_point.y()
+            if new_height > self.minimumHeight():
+                self.setGeometry(self._last_geometry.x(), self._last_geometry.y() +
+                                 current_point.y(), new_width, new_height)
             return
-        #bottom_right_resize
-        if self._resize_direction == 6:
-            last = self.mapToGlobal(event.pos())-self._resize_point
-            first_width = self._last_geometry.width()
-            first_height = self._last_geometry.height()
-            first_X = self._last_geometry.x()
-            first_width -= last.x()
-            first_height += last.y()
-            first_X += last.x()
-
-            if first_width > self.minimumWidth():
-                self.setGeometry(first_X, self._last_geometry.y(), first_width, first_height)
+        elif self._resize_direction == ResizeDirection.bottom_right:
+            current_point = self.mapToGlobal(event.pos()) - self._resize_point
+            new_width = self._last_geometry.width() + current_point.x()
+            new_height = self._last_geometry.height() + current_point.y()
+            self.setGeometry(self._last_geometry.x(), self._last_geometry.y(), new_width, new_height)
             return
-        #top_left_resize
-        if self._resize_direction == 7:
-            last = self.mapToGlobal(event.pos())-self._resize_point
-            first_width = self._last_geometry.width()
-            first_height = self._last_geometry.height()
-            first_X = self._last_geometry.x()
-            first_Y = self._last_geometry.y()
-            first_width -= last.x()
-            first_height -= last.y()
-            first_X += last.x()
-            first_Y += last.y()
-
-            if first_height > self.minimumHeight() and first_width > self.minimumWidth():
-                self.setGeometry(first_X, first_Y, first_width, first_height)
+        elif self._resize_direction == ResizeDirection.bottom_left:
+            current_point = self.mapToGlobal(event.pos()) - self._resize_point
+            new_width = self._last_geometry.width() - current_point.x()
+            new_height = self._last_geometry.height() + current_point.y()
+            if new_width > self.minimumWidth():
+                self.setGeometry(self._last_geometry.x() + current_point.x(),
+                                 self._last_geometry.y(), new_width, new_height)
             return
-        #bottom_right_resize
-        if self._resize_direction == 8:
-            last = self.mapToGlobal(event.pos())-self._resize_point
-            first_width = self._last_geometry.width()
-            first_height = self._last_geometry.height()
-            first_width += last.x()
-            first_height += last.y()
-
-            self.setGeometry(self._last_geometry.x(), self._last_geometry.y(), first_width, first_height)
+        elif self._resize_direction == ResizeDirection.top_left:
+            current_point = self.mapToGlobal(event.pos()) - self._resize_point
+            new_width = self._last_geometry.width() - current_point.x()
+            new_height = self._last_geometry.height() - current_point.y()
+            if new_height > self.minimumHeight() and new_width > self.minimumWidth():
+                self.setGeometry(self._last_geometry.x() + current_point.x(),
+                                 self._last_geometry.y() + current_point.y(), new_width, new_height)
             return
 
     def maximize_restore(self):
@@ -388,7 +363,7 @@ class FluentWindow(QMainWindow):
     def set_restore_max_button_state(self):
         if self.isMaximized():
             self.ui.restore_max_button.setToolTip("Restore")
-            self.ui.restore_max_button.setIcon(QtGui.QIcon(QtGui.QPixmap(str(asset_path / "icons" / "restore.png"))))
+            self.ui.restore_max_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "restore.png"))))
         else:
             self.ui.restore_max_button.setToolTip("Maximize")
-            self.ui.restore_max_button.setIcon(QtGui.QIcon(QtGui.QPixmap(str(asset_path / "icons" / "maximize.png"))))
+            self.ui.restore_max_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "maximize.png"))))

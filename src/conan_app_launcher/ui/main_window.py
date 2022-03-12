@@ -1,45 +1,43 @@
+import ctypes
+from ctypes.wintypes import MSG
 from pathlib import Path
 from shutil import rmtree
 from typing import Optional
-from ctypes.wintypes import MSG
-import ctypes
+
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, PathLike,
                                 user_save_path)
-from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
-from conan_app_launcher.ui.common import QtLoader
-from conan_app_launcher.ui.common.icon import get_themed_asset_image
-from conan_app_launcher.ui.common.theming import activate_theme
-from conan_app_launcher.ui.dialogs.conan_search import ConanSearchDialog
-from conan_app_launcher.ui.fluent_window import FluentWindow
-from conan_app_launcher.ui.model import UiApplicationModel
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import pyqtSlot
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-from PyQt5.QtCore import QPropertyAnimation
+from .common import QLoader, activate_theme, get_themed_asset_image
 from .dialogs.about_dialog import AboutDialog
-from .views.app_grid import AppGridView
-from .views.package_explorer import LocalConanPackageExplorer
+from .fluent_window import FluentWindow
+from .model import UiApplicationModel
+from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
 
 
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
-    conan_pkg_installed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
-    conan_pkg_removed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
+    conan_pkg_installed = pyqtSignal(str, str)  # conan_ref, pkg_id
+    conan_pkg_removed = pyqtSignal(str, str)  # conan_ref, pkg_id
 
-    display_versions_changed = QtCore.pyqtSignal()
-    display_channels_changed = QtCore.pyqtSignal()
-    display_users_changed = QtCore.pyqtSignal()
+    display_versions_changed = pyqtSignal()
+    display_channels_changed = pyqtSignal()
+    display_users_changed = pyqtSignal()
 
-    log_console_message = QtCore.pyqtSignal(str)  # str arg is the message
+    log_console_message = pyqtSignal(str)  # str arg is the message
 
-    def __init__(self, qt_app: QtWidgets.QApplication):
+    def __init__(self, qt_app: QApplication):
         super().__init__("Conan App Launcher")
         self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
@@ -66,30 +64,30 @@ class MainWindow(FluentWindow):
         # self.ui.menu_about_action.triggered.connect(self._about_dialog.show)
         # self.ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
         # self.ui.menu_search_in_remotes.triggered.connect(self.open_conan_search_dialog)
-        # self.ui.menu_search_in_remotes.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_F))
+        # self.ui.menu_search_in_remotes.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_F))
         # self.ui.menu_toggle_display_versions.triggered.connect(self.display_versions_setting_toggled)
         # self.ui.menu_toggle_display_users.triggered.connect(self.apply_display_users_setting_toggled)
         # self.ui.menu_toggle_display_channels.triggered.connect(self.display_channels_setting_toggled)
         # self.ui.menu_enable_dark_mode.triggered.connect(self.on_theme_changed)
         # self.ui.menu_increase_font_size.triggered.connect(self.on_font_size_increased)
-        # self.ui.menu_increase_font_size.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_Plus))
+        # self.ui.menu_increase_font_size.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_Plus))
         # self.ui.menu_decrease_font_size.triggered.connect(self.on_font_size_decreased)
-        # self.ui.menu_decrease_font_size.setShortcut(QtGui.QKeySequence(Qt.CTRL + Qt.Key_Minus))
+        # self.ui.menu_decrease_font_size.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_Minus))
 
         # self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
         # self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
         
         # self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/grid.png")),
-                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon = QIcon()
+        icon.addPixmap(QPixmap(get_themed_asset_image("icons/grid.png")),
+                        QIcon.Normal, QIcon.Off)
         self.add_left_menu_entry("App Grid", icon, True, self.app_grid)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/opened_folder.png")),
-                               QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon = QIcon()
+        icon.addPixmap(QPixmap(get_themed_asset_image("icons/opened_folder.png")),
+                               QIcon.Normal, QIcon.Off)
         self.add_left_menu_entry("Local Package Explorer", icon, True, self.local_package_explorer)
-        icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/search_packages.png")),
-                       QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QPixmap(get_themed_asset_image("icons/search_packages.png")),
+                       QIcon.Normal, QIcon.Off)
         self.add_left_menu_entry("Conan Search", icon, True, self.search_dialog)
         self.left_menu_buttons["App Grid"][0].click()
 
@@ -111,7 +109,7 @@ class MainWindow(FluentWindow):
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
 
         # model loads incrementally
-        loader = QtLoader(self)
+        loader = QLoader(self)
         loader.async_loading(self, self.model.loadf, (config_source_str,))
         loader.wait_for_finished()
 
@@ -195,14 +193,14 @@ class MainWindow(FluentWindow):
         else:
             path_list = paths[0]
 
-        msg = QtWidgets.QMessageBox(parent=self)
+        msg = QMessageBox(parent=self)
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
-        msg.setIcon(QtWidgets.QMessageBox.Question)
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        msg.setIcon(QMessageBox.Question)
         reply = msg.exec_()
-        if reply == QtWidgets.QMessageBox.Yes:
+        if reply == QMessageBox.Yes:
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
@@ -213,10 +211,10 @@ class MainWindow(FluentWindow):
         config_file_path = Path(app.active_settings.get_string(LAST_CONFIG_FILE))
         if config_file_path.exists():
             dialog_path = config_file_path.parent
-        dialog = QtWidgets.QFileDialog(parent=self, caption="Select JSON Config File",
+        dialog = QFileDialog(parent=self, caption="Select JSON Config File",
                                        directory=str(dialog_path), filter="JSON files (*.json)")
-        dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
-        if dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        if dialog.exec_() == QFileDialog.Accepted:
             new_file = dialog.selectedFiles()[0]
             app.active_settings.set(LAST_CONFIG_FILE, new_file)
             # model loads incrementally
@@ -254,19 +252,19 @@ class MainWindow(FluentWindow):
 
     def load_icons(self):
         """ Load icons for main toolbox and menu """
-        # icon = QtGui.QIcon()
-        # icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/grid.png")),
-        #                QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        # icon = QIcon()
+        # icon.addPixmap(QPixmap(get_themed_asset_image("icons/grid.png")),
+        #                QIcon.Normal, QIcon.Off)
         # self.ui.main_toolbox.setItemIcon(self.TOOLBOX_GRID_ITEM, icon)
 
-        # icon.addPixmap(QtGui.QPixmap(get_themed_asset_image("icons/search_packages.png")),
-        #                QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        # icon.addPixmap(QPixmap(get_themed_asset_image("icons/search_packages.png")),
+        #                QIcon.Normal, QIcon.Off)
         # self.ui.main_toolbox.setItemIcon(self.TOOLBOX_PACKAGES_ITEM, icon)
 
         # menu
-        # self.ui.menu_cleanup_cache.setIcon(QtGui.QIcon(get_themed_asset_image("icons/cleanup.png")))
-        # self.ui.menu_about_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/about.png")))
-        # self.ui.menu_remove_locks.setIcon(QtGui.QIcon(get_themed_asset_image("icons/remove-lock.png")))
-        # self.ui.menu_search_in_remotes.setIcon(QtGui.QIcon(get_themed_asset_image("icons/search_packages.png")))
-        # self.ui.menu_increase_font_size.setIcon(QtGui.QIcon(get_themed_asset_image("icons/increase_font.png")))
-        # self.ui.menu_decrease_font_size.setIcon(QtGui.QIcon(get_themed_asset_image("icons/decrease_font.png")))
+        # self.ui.menu_cleanup_cache.setIcon(QIcon(get_themed_asset_image("icons/cleanup.png")))
+        # self.ui.menu_about_action.setIcon(QIcon(get_themed_asset_image("icons/about.png")))
+        # self.ui.menu_remove_locks.setIcon(QIcon(get_themed_asset_image("icons/remove-lock.png")))
+        # self.ui.menu_search_in_remotes.setIcon(QIcon(get_themed_asset_image("icons/search_packages.png")))
+        # self.ui.menu_increase_font_size.setIcon(QIcon(get_themed_asset_image("icons/increase_font.png")))
+        # self.ui.menu_decrease_font_size.setIcon(QIcon(get_themed_asset_image("icons/decrease_font.png")))

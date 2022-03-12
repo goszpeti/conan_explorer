@@ -7,7 +7,8 @@ import sys
 import traceback
 
 from conan_app_launcher import REPO_URL, __version__, base_path
-from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox
 
 bug_dialog_text = f"""
 **Describe the bug**
@@ -44,13 +45,13 @@ def bug_reporting_dialog(excvalue, tb):
         To help improve the program, please post a <a href="{new_issue_with_info_text}"> \
         <span style=" text-decoration: underline color:  # 0000ff;" \
         >new github issue</span></a> and describe, how the crash occured.'
-    dialog = QtWidgets.QMessageBox(parent=None)
+    dialog = QMessageBox(parent=None)
     dialog.setWindowTitle("Application Crash - Bug Report")
     dialog.setText(html_crash_text)
-    dialog.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse)
+    dialog.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
     dialog.setDetailedText(error_text)
-    dialog.setStandardButtons(QtWidgets.QMessageBox.Ok)
-    dialog.setIcon(QtWidgets.QMessageBox.Warning)
+    dialog.setStandardButtons(QMessageBox.Ok)
+    dialog.setIcon(QMessageBox.Warning)
     dialog.exec_()
     return dialog  # for testing
 

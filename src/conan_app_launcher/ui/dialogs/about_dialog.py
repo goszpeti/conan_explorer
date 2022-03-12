@@ -1,8 +1,10 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QSizePolicy, QDialogButtonBox, QFrame, QLabel, QVBoxLayout
+from PyQt5.QtGui import QIcon
 from conan_app_launcher import asset_path, __version__, REPO_URL, AUTHOR
 
 
-class AboutDialog(QtWidgets.QDialog):
+class AboutDialog(QDialog):
     """ Defines Help->About Dialog """
     html_content = f"""
     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
@@ -21,26 +23,26 @@ class AboutDialog(QtWidgets.QDialog):
         self.setWindowTitle("About")
         self.setModal(True)
 
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                                            QtWidgets.QSizePolicy.MinimumExpanding)
+        size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
+                                            QSizePolicy.MinimumExpanding)
         self.setSizePolicy(size_policy)
-        ok_button = QtWidgets.QDialogButtonBox.Ok
+        ok_button = QDialogButtonBox.Ok
 
-        icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
-        self._logo_label = QtWidgets.QLabel(self)
+        icon = QIcon(str(asset_path / "icons" / "icon.ico"))
+        self._logo_label = QLabel(self)
         self._logo_label.setPixmap(icon.pixmap(100, 100))
-        self._text = QtWidgets.QLabel(self)
+        self._text = QLabel(self)
         self._text.setOpenExternalLinks(True)
         self._text.setSizePolicy(size_policy)
-        self._text.setTextFormat(QtCore.Qt.RichText)
+        self._text.setTextFormat(Qt.RichText)
         self._text.setText(self.html_content)
-        self._text.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self._text.setFrameShape(QFrame.NoFrame)
 
-        self._button_box = QtWidgets.QDialogButtonBox(ok_button)
+        self._button_box = QDialogButtonBox(ok_button)
         self._button_box.accepted.connect(self.accept)
         self._button_box.rejected.connect(self.reject)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QVBoxLayout(self)
         layout.addWidget(self._logo_label)
         layout.addWidget(self._text)
         layout.addWidget(self._button_box)

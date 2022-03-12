@@ -1,13 +1,14 @@
+from typing import Optional
+
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from PyQt5 import QtWidgets
-from typing import Optional
 from PyQt5.QtCore import pyqtBoundSignal
+from PyQt5.QtWidgets import QMessageBox, QWidget
 
 
-class ConanRemoveDialog(QtWidgets.QMessageBox):
+class ConanRemoveDialog(QMessageBox):
 
-    def __init__(self, parent: Optional[QtWidgets.QWidget],  conan_ref: str, pkg_id: str,
+    def __init__(self, parent: Optional[QWidget],  conan_ref: str, pkg_id: str,
                  conan_pkg_removed: Optional[pyqtBoundSignal] = None):
         super().__init__(parent)
         self._conan_ref = conan_ref
@@ -16,8 +17,8 @@ class ConanRemoveDialog(QtWidgets.QMessageBox):
 
         self.setWindowTitle("Remove package")
         self.setText(f"Are you sure, you want to remove {conan_ref} {pkg_id}?")
-        self.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
-        self.setIcon(QtWidgets.QMessageBox.Question)
+        self.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        self.setIcon(QMessageBox.Question)
 
         self.setModal(True)
         self.button(self.Yes).clicked.connect(self.on_remove)

@@ -1,13 +1,14 @@
-from pathlib import Path
 import platform
-from typing import Optional, Tuple
 import re
+from pathlib import Path
+from typing import Tuple
 
 import conan_app_launcher.app as app
 from conan_app_launcher import base_path
 from conan_app_launcher.settings import FONT_SIZE, GUI_STYLE, GUI_STYLE_DARK
+
 from jinja2 import Template
-from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication
 
 
 def configure_theme(qss_template_path: Path, font_size_pt: int) -> str:
@@ -20,7 +21,7 @@ def configure_theme(qss_template_path: Path, font_size_pt: int) -> str:
     return qss_content
 
 
-def activate_theme(qt_app: QtWidgets.QApplication):
+def activate_theme(qt_app: QApplication):
     """ Apply the theme from the current settings and apply all related view options """
 
     style_file = "light_style.qss.in"
@@ -78,7 +79,8 @@ def get_user_theme_color() -> Tuple[int,int,int]: # RGB
     """ Returns black per default """
     if platform.system() == "Windows":
         # get theme color
-        from winreg import OpenKey, ConnectRegistry, HKEY_CURRENT_USER, QueryValueEx
+        from winreg import (HKEY_CURRENT_USER, ConnectRegistry, OpenKey,
+                            QueryValueEx)
         reg = ConnectRegistry(None, HKEY_CURRENT_USER)
         key = OpenKey(reg, r"Control Panel\Colors")
         value = QueryValueEx(key, "Hilight")[0]  # Windows Theme Hilight color for border color in rgb

@@ -4,14 +4,13 @@ from typing import Callable, List
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
 from conans.model.ref import ConanFileReference, PackageReference
-from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtWidgets import QLineEdit, QCompleter
 
-Qt = QtCore.Qt
 
-
-class ConanRefLineEdit(QtWidgets.QLineEdit):
+class ConanRefLineEdit(QLineEdit):
     """ Adds completions for Conan references and a validator. """
-    completion_finished = QtCore.pyqtSignal()
+    completion_finished = pyqtSignal()
     MINIMUM_CHARS_FOR_QUERY = 4
     INVALID_COLOR = "LightCoral"
     VALID_COLOR_LIGHT = "#37efba"  # light green
@@ -21,7 +20,7 @@ class ConanRefLineEdit(QtWidgets.QLineEdit):
         super().__init__(parent)
         self.validator_enabled = validator_enabled
         self.is_valid = False
-        completer = QtWidgets.QCompleter([], self)
+        completer = QCompleter([], self)
         completer.setCaseSensitivity(Qt.CaseInsensitive)
 
         self._completion_thread = None

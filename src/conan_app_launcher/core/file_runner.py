@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import List
 
 from conan_app_launcher.app.logger import Logger
+
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
 
 def run_file(file_path: Path, is_console_app: bool, args: str):

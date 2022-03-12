@@ -4,17 +4,11 @@ import sys
 import tempfile
 from typing import Optional
 
-from conan_app_launcher import (PKG_NAME, SETTINGS_FILE_NAME, __version__,
-                                asset_path, user_save_path)
-from conan_app_launcher.core.conan import ConanApi
-from conan_app_launcher.core.conan_worker import ConanWorker
-from conan_app_launcher.settings import (SETTINGS_INI_TYPE, SettingsInterface,
-                                         settings_factory)
+from conan_app_launcher import PKG_NAME, SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
+from conan_app_launcher.core import ConanApi, ConanWorker
+from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsInterface, settings_factory
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
-# define Qt so we can use it like the namespace in C++
-Qt = QtCore.Qt
 
 if platform.system() == "Windows":
     # Workaround for Windows, so that on the taskbar the
@@ -37,7 +31,7 @@ def run_application(conan_search=False):
     """ Start the Qt application and load the main window """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
     from conan_app_launcher.ui.dialogs.bug_dialog import show_bug_dialog_exc_hook
-    from conan_app_launcher.ui.common.theming import activate_theme
+    from conan_app_launcher.ui.common import activate_theme
     sys.excepthook = show_bug_dialog_exc_hook
 
     if platform.system() == "Darwin":
@@ -51,8 +45,8 @@ def run_application(conan_search=False):
         sys.stderr = open(os.path.join(tempfile.gettempdir(), "stderr-" + PKG_NAME), "w")
 
     # apply Qt attributes (only possible before QApplication is created)
-    QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    QtWidgets.QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
     QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
 
     qt_app = QtWidgets.QApplication([])

@@ -4,16 +4,14 @@ from typing import TYPE_CHECKING, List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import open_file
-from conan_app_launcher.ui.common import QtLoader
-from conan_app_launcher.ui.common.icon import get_themed_asset_image
+from conan_app_launcher.ui.common import QLoader, get_themed_asset_image
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, Qt
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
-Qt = QtCore.Qt
 
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
@@ -58,7 +56,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self._ui.remote_list.adjustSize()
 
         self._pkg_result_model = PkgSearchModel()
-        self._pkg_result_loader = QtLoader(self)
+        self._pkg_result_loader = QLoader(self)
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self.apply_theme()

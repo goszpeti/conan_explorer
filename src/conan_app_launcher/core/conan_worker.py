@@ -5,8 +5,7 @@ from threading import Thread
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 from typing_extensions import Protocol
 
-from conan_app_launcher.settings import (ENABLE_APP_COMBO_BOXES,
-                                         SettingsInterface)
+from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES, SettingsInterface
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import TypedDict

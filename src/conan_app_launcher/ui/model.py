@@ -6,7 +6,7 @@ from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, user_save_path)
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiConfig,
                                         ui_config_factory, UiConfigInterface)
-from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
+from .views.app_grid.model import UiAppGridModel
 
 
 class UiApplicationModel(UiConfig):

@@ -3,11 +3,9 @@ from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
-from conan_app_launcher.ui.common.icon import get_themed_asset_image
+from conan_app_launcher.ui.common import get_themed_asset_image
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import pyqtBoundSignal
-
-Qt = QtCore.Qt
 
 
 class ConanInstallDialog(QtWidgets.QDialog):

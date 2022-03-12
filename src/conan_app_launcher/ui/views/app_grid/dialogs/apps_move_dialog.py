@@ -1,20 +1,22 @@
 
 from pathlib import Path
+from typing import Optional
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.views.app_grid.model import UiTabModel
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QScrollArea, QGridLayout, QLayout, QDialog
 
-# define Qt so we can use it like the namespace in C++
-Qt = QtCore.Qt
+from PyQt5 import uic
+
 
 current_dir = Path(__file__).parent
 
 
-class AppsMoveDialog(QtWidgets.QDialog):
+class AppsMoveDialog(QDialog):
 
-    def __init__(self, tab_ui_model: UiTabModel, parent: QtWidgets.QWidget, flags=Qt.WindowFlags()):
+    def __init__(self, tab_ui_model: UiTabModel, parent: Optional[QWidget], flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
         self._ui = uic.loadUi(current_dir / "apps_move_dialog.ui", baseinstance=self)
         self.setWindowIcon(QtGui.QIcon(str(asset_path / "icons" / "rearrange.png")))

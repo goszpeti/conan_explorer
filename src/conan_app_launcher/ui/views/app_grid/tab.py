@@ -1,20 +1,18 @@
-from typing import List
+from typing import List, Optional
 
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel, UiTabModel
-from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QScrollArea, QGridLayout, QLayout
 
 from .app_link import AppLink
 from .dialogs import AppEditDialog
 
-# define Qt so we can use it like the namespace in C++
-Qt = QtCore.Qt
 
-
-class TabGrid(QtWidgets.QWidget):
+class TabGrid(QWidget):
     SPACING = 4
     MARGIN = 8
 
-    def __init__(self, parent: QtWidgets.QStackedWidget, model: UiTabModel):
+    def __init__(self, parent: QStackedWidget, model: UiTabModel):
         super().__init__(parent)
         self.model = model
         self.app_links: List[AppLink] = []  # list of refs to app links
@@ -25,26 +23,26 @@ class TabGrid(QtWidgets.QWidget):
         self.setObjectName("tab_" + self.model.name)
 
         # this is a dummy, because tab_scroll_area needs a layout
-        self.tab_layout = QtWidgets.QVBoxLayout(self)
-        self._v_spacer = QtWidgets.QSpacerItem(
-            20, 200, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.tab_layout = QVBoxLayout(self)
+        self._v_spacer = QSpacerItem(
+            20, 200, QSizePolicy.Minimum, QSizePolicy.Expanding)
         # makes it possible to have a scroll bar
-        self.tab_scroll_area = QtWidgets.QScrollArea(self)
+        self.tab_scroll_area = QScrollArea(self)
         # this holds all the app links, which are layouts
-        self.tab_scroll_area_widgets = QtWidgets.QWidget(self.tab_scroll_area)
+        self.tab_scroll_area_widgets = QWidget(self.tab_scroll_area)
         self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.model.name)
         # grid layout for tab_scroll_area_widgets
-        self.tab_grid_layout = QtWidgets.QGridLayout(self.tab_scroll_area_widgets)
+        self.tab_grid_layout = QGridLayout(self.tab_scroll_area_widgets)
 
         # set minimum on vertical is needed, so the app links very shrink,
         # when a dropdown is hidden
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                            QtWidgets.QSizePolicy.Minimum)
+        size_policy = QSizePolicy(QSizePolicy.Expanding,
+                                            QSizePolicy.Minimum)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
 
         self.tab_layout.setContentsMargins(2, 0, 2, 0)
-        self.tab_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.tab_layout.setSizeConstraint(QLayout.SetMinimumSize)
         self.tab_scroll_area.setSizePolicy(size_policy)
         self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.tab_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -54,7 +52,7 @@ class TabGrid(QtWidgets.QWidget):
         self.tab_scroll_area.setWidgetResizable(False)
         self.tab_scroll_area_widgets.setSizePolicy(size_policy)
         self.tab_scroll_area_widgets.setLayoutDirection(Qt.LeftToRight)
-        self.tab_grid_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)  # SetMinimumSize needed!
+        self.tab_grid_layout.setSizeConstraint(QLayout.SetMinimumSize)  # SetMinimumSize needed!
 
         self.tab_grid_layout.setContentsMargins(self.MARGIN, self.MARGIN, self.MARGIN, self.MARGIN)
         self.tab_grid_layout.setSpacing(self.SPACING)
@@ -94,7 +92,7 @@ class TabGrid(QtWidgets.QWidget):
         # spacer for compressing app links, when hiding cboxes
         self.tab_grid_layout.addItem(self._v_spacer, row+1, 0)
 
-    def open_app_link_add_dialog(self, new_model: UiAppLinkModel = None):
+    def open_app_link_add_dialog(self, new_model: Optional[UiAppLinkModel]=None):
         if not new_model:
             new_model = UiAppLinkModel()
             new_model.parent = self.model

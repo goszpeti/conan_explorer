@@ -1,4 +1,3 @@
-import platform
 from pathlib import Path
 from typing import Callable, List, Optional
 
@@ -8,23 +7,18 @@ from conan_app_launcher import (
     USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.ui.common.icon import (extract_icon,
-                                               get_icon_from_image_file,
-                                               get_themed_asset_image)
+from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore
-from PyQt5.QtCore import QAbstractListModel, QModelIndex
+
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
 from PyQt5.QtGui import QIcon
 
-Qt = QtCore.Qt
-
-
-class UiAppGridModel(UiAppGridConfig, QtCore.QObject):
+class UiAppGridModel(UiAppGridConfig, QObject):
 
     def __init__(self, *args, **kwargs):
         UiAppGridConfig.__init__(self, *args, **kwargs)
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.tabs: List[UiTabModel]
 
     def save(self):

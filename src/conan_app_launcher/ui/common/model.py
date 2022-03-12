@@ -1,4 +1,4 @@
-from PyQt5 import QtCore
+from PyQt5.QtCore import Qt, QAbstractItemModel, QModelIndex
 
 
 class TreeModelItem(object):
@@ -44,7 +44,7 @@ class TreeModelItem(object):
         self.is_loaded = True
 
 
-class TreeModel(QtCore.QAbstractItemModel):
+class TreeModel(QAbstractItemModel):
     """ Qt tree model to be used with TreeModelItem.
     Supports lazy loading, if TreeModelItem enables it."""
 
@@ -59,7 +59,7 @@ class TreeModel(QtCore.QAbstractItemModel):
 
     def index(self, row, column, parent):  # override
         if not self.hasIndex(row, column, parent):
-            return QtCore.QModelIndex()
+            return QModelIndex()
 
         if not parent.isValid():
             parent_item = self.root_item
@@ -70,9 +70,9 @@ class TreeModel(QtCore.QAbstractItemModel):
         if child_item:
             return self.createIndex(row, column, child_item)
         else:
-            return QtCore.QModelIndex()
+            return QModelIndex()
 
-    def data(self, index: QtCore.QModelIndex, role):  # override
+    def data(self, index: QModelIndex, role):  # override
         raise NotImplementedError
 
     def rowCount(self, parent):  # override
@@ -88,24 +88,24 @@ class TreeModel(QtCore.QAbstractItemModel):
 
     def flags(self, index):  # override
         if not index.isValid():
-            return QtCore.Qt.NoItemFlags
+            return Qt.NoItemFlags
 
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        return Qt.ItemIsEnabled | Qt.ItemIsSelectable
 
     def parent(self, index):  # override
         if not index.isValid():
-            return QtCore.QModelIndex()
+            return QModelIndex()
 
         child_item = index.internalPointer()
         parent_item = child_item.parent()
 
         if parent_item == self.root_item:
-            return QtCore.QModelIndex()
+            return QModelIndex()
 
         return self.createIndex(parent_item.row(), 0, parent_item)
 
     def headerData(self, section, orientation, role):  # override
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return self.root_item.data(section)
 
         return None
