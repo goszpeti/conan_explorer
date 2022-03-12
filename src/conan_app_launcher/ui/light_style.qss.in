@@ -2,11 +2,182 @@
 QSS template
 Usable Macros with Jinja2 syntax:
  - MAIN_FONT_SIZE (in pt)
+ - USER_COLOR
+ - WINDOW_BORDER_RADIUS
 */
 
 * {
     font-size: {{MAIN_FONT_SIZE}}pt;
 }
+QWidget#centralwidget{
+    border-radius: {{WINDOW_BORDER_RADIUS}}px;
+    border-style: solid;
+    border-width: 2px; 
+    background-color: #F0F0F0;
+    border-color: {{USER_COLOR}};
+}
+
+QFrame#content_frame{
+    border-radius: 7px;
+    }
+
 QLabel#page_title{
     font-size: {{MAIN_FONT_SIZE + 12 }}pt;
 }
+
+QMainWindow{
+    background-color: transparent;
+}
+
+/* QPushButton{
+    background-color:  #d3d3d3;
+    border-radius: 7px;
+} */
+
+/* only QPushButton - not ClickableLabel */
+
+.QPushButton{
+    border-radius: 5px;
+    margin: 2px;
+    text-align:middle;
+    background-color: #d3d3d3;
+}
+.QPushButton:hover{
+    background-color: #B7B7B7;
+}
+.QPushButton:pressed{
+    border-style: solid;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-left-color: transparent;
+    padding-top: 2px;
+    background-color: #A8A8A8;
+}
+.QPushButton:checked{
+    border-style: solid;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-left-color: transparent;
+    padding-top: 2px;
+    background-color: #A8A8A8;
+}
+
+ClickableIcon{
+    background-color: transparent;
+}
+ClickableIcon:hover{
+    background-color: #B7B7B7;
+}
+ClickableIcon:pressed{
+    border-style: solid;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-left-color: transparent;
+    padding-top: 2px;
+    background-color: #A8A8A8;
+}
+
+/* Window control buttons */
+
+QPushButton#minimize_button{
+background-color: transparent;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 0px;
+    border-top-right-radius: 0px;
+}
+QPushButton:hover#minimize_button{
+    border-style: solid;
+    background-color: #BCBCBC;
+}
+QPushButton:pressed#minimize_button{
+    color: #6699CC;
+    background-color: #D3D3D3;
+    padding: 1px
+}
+
+QPushButton#restore_max_button{
+    background-color: transparent;
+    border-radius: 0px;
+}
+QPushButton:hover#restore_max_button{
+    border-style: solid;
+    background-color: #BCBCBC;
+}
+QPushButton:pressed#restore_max_button{
+    color: #6699CC;
+    background-color: #D3D3D3;
+    padding: 1px
+}
+
+
+QPushButton#close_button{
+    background-color: transparent;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius:0px;
+    border-bottom-left-radius: 0px;
+}
+
+QPushButton#close_button:hover{
+    background-color: #C42B1C;
+}
+QPushButton#close_button:pressed{
+    color: #6699CC;
+    background-color: #C1655D;
+}
+
+QTabWidget{
+    background-color: white;
+}
+
+QTabBar::tab {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    /* color: #808086; */
+    padding: 3px;
+    margin-left:3px;
+    background-color: white;
+}
+/* QTabBar::tab:last:selected */
+QTabBar::tab:selected{
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding-left: 3px;
+    padding-bottom: 2px;
+    margin-left:3px;
+    background-color: white;
+}
+QTabBar::tab:hover {
+    background-color: #D3D3D3;
+}
+
+QTabBar::tab:!selected {
+    background-color: #F0F0F0;
+    margin-top: 2px; /* make non-selected tabs look smaller */
+}
+QTabBar::tab:!selected:hover {
+    background-color: #D3D3D3;
+    margin-top: 2px; /* make non-selected tabs look smaller */
+}
+
+AppLink {
+    background-color: #d3d3d3;
+}
+
+QListView {
+    background-color: white;
+}
+
+QListWidget {
+    background-color: white;
+}
+
+QTreeView {
+    background-color: white;
+}
+
+QTextBrowser {
+    background-color: white;
+}
+

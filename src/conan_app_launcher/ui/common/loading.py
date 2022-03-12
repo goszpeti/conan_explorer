@@ -42,7 +42,7 @@ class QLoader(QtCore.QObject):
                       loading_text: str = "Loading"):
         self.finished = False
 
-        self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
+        self.progress_dialog = QtWidgets.QProgressDialog()
         self.progress_dialog.setLabelText(loading_text)
         # Window flags to disable close button
         self.progress_dialog.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)

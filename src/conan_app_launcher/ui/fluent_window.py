@@ -34,7 +34,6 @@ class FluentWindow(QMainWindow):
                             Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
         self.use_native_windows_fcns = True if platform.system() == "Windows" and native_windows_fcns else False
         self.left_menu_buttons: Dict[str, Tuple[QPushButton, QWidget]] = {}
-        color = get_user_theme_color()  # TODO CSS
         self.button_highlight_color = "#B7B7B7"
         self.left_menu_min_size = 70
         self.left_menu_max_size = 220
@@ -141,6 +140,8 @@ class FluentWindow(QMainWindow):
         else:
             self.ui.left_menu_bottom_subframe.layout().addWidget(button)
         self.page_stacked_widget.addWidget(page_widget)
+        page_widget.setParent(self.page_stacked_widget)
+
 
     def add_settings_menu_entry(self, name: str, widget: QWidget, icon=None, main_page_widget=False):
         button = QPushButton(self)

@@ -1,18 +1,19 @@
 from typing import List, Optional
 
-from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel, UiTabModel
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QScrollArea, QGridLayout, QLayout
+from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QScrollArea, QGridLayout, QLayout
 
 from .app_link import AppLink
 from .dialogs import AppEditDialog
+from .model import UiAppLinkModel, UiTabModel
 
+from conan_app_launcher import APPLIST_ENABLED
 
 class TabGrid(QWidget):
     SPACING = 4
     MARGIN = 8
 
-    def __init__(self, parent: QStackedWidget, model: UiTabModel):
+    def __init__(self, parent: QTabWidget, model: UiTabModel):
         super().__init__(parent)
         self.model = model
         self.app_links: List[AppLink] = []  # list of refs to app links
@@ -21,44 +22,57 @@ class TabGrid(QWidget):
 
     def init_app_grid(self):
         self.setObjectName("tab_" + self.model.name)
-
+        self.setContentsMargins(0,0,0,0)
         # this is a dummy, because tab_scroll_area needs a layout
         self.tab_layout = QVBoxLayout(self)
-        self._v_spacer = QSpacerItem(
-            20, 200, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.tab_layout.setContentsMargins(2, 0, 2, 0)
+        self.tab_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.tab_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.tab_layout.setSizeConstraint(QLayout.SetMinimumSize)
+        self.setLayout(self.tab_layout)
+
         # makes it possible to have a scroll bar
         self.tab_scroll_area = QScrollArea(self)
+        self.tab_scroll_area.setContentsMargins(0, 0, 0, 0)
+
+        #self.tab_scroll_area.setSizePolicy(size_policy)
+        self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.tab_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.tab_scroll_area.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        #self.tab_scroll_area.setUpdatesEnabled(True)
+        self.tab_scroll_area.setWidgetResizable(True)
         # this holds all the app links, which are layouts
         self.tab_scroll_area_widgets = QWidget(self.tab_scroll_area)
         self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.model.name)
         # grid layout for tab_scroll_area_widgets
-        self.tab_grid_layout = QGridLayout(self.tab_scroll_area_widgets)
+        if APPLIST_ENABLED:
+            self.tab_grid_layout = QVBoxLayout(self.tab_scroll_area_widgets)
+        else:
+            self.tab_grid_layout = QGridLayout(self.tab_scroll_area_widgets)
 
         # set minimum on vertical is needed, so the app links very shrink,
         # when a dropdown is hidden
-        size_policy = QSizePolicy(QSizePolicy.Expanding,
-                                            QSizePolicy.Minimum)
+        #size_policy = QSizePolicy(QSizePolicy.Expanding,
+                                            #QSizePolicy.Minimum)
+        size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
+                                   QSizePolicy.MinimumExpanding)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
 
-        self.tab_layout.setContentsMargins(2, 0, 2, 0)
-        self.tab_layout.setSizeConstraint(QLayout.SetMinimumSize)
-        self.tab_scroll_area.setSizePolicy(size_policy)
-        self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.tab_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        self.tab_scroll_area.setAlignment(Qt.AlignTop)
-        self.tab_scroll_area.setUpdatesEnabled(True)
-        self.tab_scroll_area.setWidgetResizable(False)
         self.tab_scroll_area_widgets.setSizePolicy(size_policy)
         self.tab_scroll_area_widgets.setLayoutDirection(Qt.LeftToRight)
-        self.tab_grid_layout.setSizeConstraint(QLayout.SetMinimumSize)  # SetMinimumSize needed!
-
+        #self.tab_grid_layout.setSizeConstraint(QLayout.SetMinimumSize)  # SetMinimumSize needed!
+        self.tab_grid_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.tab_grid_layout.setContentsMargins(self.MARGIN, self.MARGIN, self.MARGIN, self.MARGIN)
         self.tab_grid_layout.setSpacing(self.SPACING)
+        self.tab_grid_layout.setContentsMargins(0, 0, 0, 0)
 
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
-        self.tab_layout.addWidget(self.tab_scroll_area)
+        self.layout().addWidget(self.tab_scroll_area)
+        self._v_spacer = QSpacerItem(
+            20, 200, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self._h_spacer = QSpacerItem(
+            20, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
     def get_max_columns(self):
         if self.tab_scroll_area:
@@ -83,14 +97,22 @@ class TabGrid(QWidget):
             app_link = AppLink(self, app_model)
             app_link.load()
             self.app_links.append(app_link)
-            self.tab_grid_layout.addLayout(app_link, row, column)
-            self.tab_grid_layout.setColumnMinimumWidth(column, app_link.max_width() - (2 * self.SPACING))
-            column += 1
-            if column == max_columns:
-                column = 0
-                row += 1
+            if APPLIST_ENABLED:
+                self.tab_grid_layout.addWidget(app_link)
+            else:
+                self.tab_grid_layout.addWidget(app_link, row, column)
+                self.tab_grid_layout.setColumnMinimumWidth(column, app_link.max_width() - (2 * self.SPACING))
+                column += 1
+                if column == max_columns:
+                    column = 0
+                    row += 1
         # spacer for compressing app links, when hiding cboxes
-        self.tab_grid_layout.addItem(self._v_spacer, row+1, 0)
+        if APPLIST_ENABLED:
+            self.tab_grid_layout.addItem(self._v_spacer)
+        else:
+            self.tab_grid_layout.addItem(self._v_spacer, row + 1, 0)
+            self.tab_grid_layout.addItem(self._h_spacer, 0, column+1)
+
 
     def open_app_link_add_dialog(self, new_model: Optional[UiAppLinkModel]=None):
         if not new_model:
@@ -110,6 +132,15 @@ class TabGrid(QWidget):
 
     def add_app_link_to_tab(self, app_link: AppLink):
         """ To be called from a child AppLink """
+        if APPLIST_ENABLED:
+            self.app_links.append(app_link)
+            self.model.apps.append(app_link.model)
+            self.tab_grid_layout.addLayout(app_link)
+            # self.tab_grid_layout.setColumnMinimumWidth(current_column, AppLink.max_width() - 8)
+            self.tab_grid_layout.update()
+            return
+
+
         current_row = int(len(self.model.apps) / self.get_max_columns())  # count from 0
         current_column = int(len(self.model.apps) % self.get_max_columns())  # count from 0 to count
 
@@ -134,6 +165,7 @@ class TabGrid(QWidget):
 
     def redraw_grid(self, force=False):
         """ Works only as long as the order does not change. Used for resizing the window. """
+
         # only if coloumnsize changes
         max_columns = self.get_max_columns()
         if max_columns in [self._columns_count, 1] and not force:  # already correct -> 1 means this is still not real width

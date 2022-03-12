@@ -7,7 +7,7 @@ from .model import UiAppLinkModel, UiTabModel
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QWidget, QInputDialog, QMenu, QAction, QMessageBox
+from PyQt5.QtWidgets import QWidget, QInputDialog, QMenu, QAction, QMessageBox, QTabWidget, QVBoxLayout
 
 from .tab import TabGrid
 
@@ -25,27 +25,33 @@ class AppGridView(QWidget):
 
         self._main_window = main_window
         current_dir = Path(__file__).parent
-        self._ui = uic.loadUi(current_dir / "app_grid.ui", baseinstance=self)
+        #self._ui = uic.loadUi(current_dir / "app_grid.ui", baseinstance=self)
+        self.setLayout(QVBoxLayout())
+        self.tab_widget = QTabWidget(self)
+        self.tab_widget.setElideMode(Qt.ElideLeft)
+        self.tab_widget.setUsesScrollButtons(True)
+        self.layout().addWidget(self.tab_widget)
+        self.layout().setContentsMargins(0, 0, 0, 0)
 
         self.model = model
         self.conan_pkg_installed = main_window.conan_pkg_installed
         self.conan_pkg_installed.connect(self.update_conan_info)
 
-        self._ui.tab_bar.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
-        self._ui.tab_bar.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
+        self.tab_widget.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tab_widget.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
 
-        self._ui.tab_bar.setMovable(True)
-        self._ui.tab_bar.tabBar().tabMoved.connect(self.on_tab_move)
-        if self._ui.tab_bar.count() > 0:  # remove the default tab
-            self._ui.tab_bar.removeTab(0)
+        self.tab_widget.setMovable(True)
+        self.tab_widget.tabBar().tabMoved.connect(self.on_tab_move)
+        if self.tab_widget.count() > 0:  # remove the default tab
+            self.tab_widget.removeTab(0)
 
     def re_init(self, model: "UiAppGridModel"):
         """ To be called, when a new config file is loaded """
         self.model = model
         # delete all tabs
-        tab_count = self._ui.tab_bar.count()
+        tab_count = self.tab_widget.count()
         for i in range(tab_count, 0, -1):
-            self._ui.tab_bar.removeTab(i-1)
+            self.tab_widget.removeTab(i-1)
         self.load()
 
     def re_init_all_app_links(self):
@@ -54,19 +60,19 @@ class AppGridView(QWidget):
 
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add
-        current_tab = self._ui.tab_bar.widget(self._ui.tab_bar.currentIndex())
+        current_tab = self.tab_widget.widget(self.tab_widget.currentIndex())
         current_tab.open_app_link_add_dialog()
 
     def on_tab_move(self):
         """ Refresh backend info when tabs are reordered"""
         reordered_tabs = []
-        for i in range(self._ui.tab_bar.count()):
-            reordered_tabs.append(self._ui.tab_bar.widget(i).model)
+        for i in range(self.tab_widget.count()):
+            reordered_tabs.append(self.tab_widget.widget(i).model)
         self.model.tabs = reordered_tabs
         self.model.save()
 
     def on_tab_context_menu_requested(self, position):
-        index = self._ui.tab_bar.tabBar().tabAt(position)
+        index = self.tab_widget.tabBar().tabAt(position)
         menu = QMenu()
         self.menu = menu
 
@@ -85,7 +91,7 @@ class AppGridView(QWidget):
         menu.addAction(new_tab_action)
         new_tab_action.triggered.connect(self.on_new_tab)
 
-        menu.exec_(self._ui.tab_bar.tabBar().mapToGlobal(position))
+        menu.exec_(self.tab_widget.tabBar().mapToGlobal(position))
         return self.menu  # for testing
 
     def on_new_tab(self):
@@ -102,19 +108,19 @@ class AppGridView(QWidget):
             self.model.tabs.append(tab_model)
             self.model.save()
             # add tab in ui
-            tab = TabGrid(self._ui.tab_bar, model=tab_model)
+            tab = TabGrid(self.tab_widget, model=tab_model)
             tab.load()
-            self._ui.tab_bar.addTab(tab, text)
+            self.tab_widget.addTab(tab, text)
 
     def on_tab_rename(self, index):
-        tab: TabGrid = self._ui.tab_bar.widget(index)
+        tab: TabGrid = self.tab_widget.widget(index)
 
         rename_tab_dialog = QInputDialog(self._main_window)
         text, accepted = rename_tab_dialog.getText(self._main_window, 'Rename tab',
                                                    'Enter new name:', text=tab.model.name)
         if accepted:
             tab.model.name = text
-            self._ui.tab_bar.setTabText(index, text)
+            self.tab_widget.setTabText(index, text)
             tab.model.save()
 
     def on_tab_remove(self, index):
@@ -128,24 +134,24 @@ class AppGridView(QWidget):
         msg.setIcon(QMessageBox.Question)
         reply = msg.exec_()
         if reply == QMessageBox.Yes:
-            self._ui.tab_bar.removeTab(index)
+            self.tab_widget.removeTab(index)
             self.model.tabs.remove(self.model.tabs[index])
             self.model.save()
 
     def get_tabs(self) -> List[TabGrid]:
-        return self._ui.tab_bar.findChildren(TabGrid)
+        return self.tab_widget.findChildren(TabGrid)
 
     def load(self):
         """ Creates new layout """
         for tab_config in self.model.tabs:
 
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabGrid(parent=self._ui.tab_bar, model=tab_config)
-            self._ui.tab_bar.addTab(tab, tab_config.name)
+            tab = TabGrid(parent=self.tab_widget, model=tab_config)
+            self.tab_widget.addTab(tab, tab_config.name)
             tab.load()
 
         # always show the first tab first
-        self._ui.tab_bar.setCurrentIndex(0)
+        self.tab_widget.setCurrentIndex(0)
         # needed, because the resizeEvent is only called for the active (first) tab
         self.re_init_all_app_links()
 

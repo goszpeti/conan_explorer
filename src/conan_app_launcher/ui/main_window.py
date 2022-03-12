@@ -5,7 +5,7 @@ from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, PathLike,
+from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, APPLIST_ENABLED, PathLike,
                                 user_save_path)
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan import ConanCleanup
@@ -51,8 +51,7 @@ class MainWindow(FluentWindow):
 
         self.app_grid = AppGridView(self, self.model.app_grid)
         self.local_package_explorer = LocalConanPackageExplorer(self)
-        self.search_dialog: Optional[ConanSearchDialog] = ConanSearchDialog(None, self)
-
+        self.search_dialog: Optional[ConanSearchDialog] = ConanSearchDialog(self, self)
 
         # initialize view user settings
         # self.ui.menu_toggle_display_versions.setChecked(app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
@@ -81,7 +80,7 @@ class MainWindow(FluentWindow):
         icon = QIcon()
         icon.addPixmap(QPixmap(get_themed_asset_image("icons/grid.png")),
                         QIcon.Normal, QIcon.Off)
-        self.add_left_menu_entry("App Grid", icon, True, self.app_grid)
+        self.add_left_menu_entry("Conan Quicklaunch", icon, True, self.app_grid)
         icon = QIcon()
         icon.addPixmap(QPixmap(get_themed_asset_image("icons/opened_folder.png")),
                                QIcon.Normal, QIcon.Off)
@@ -89,8 +88,7 @@ class MainWindow(FluentWindow):
         icon.addPixmap(QPixmap(get_themed_asset_image("icons/search_packages.png")),
                        QIcon.Normal, QIcon.Off)
         self.add_left_menu_entry("Conan Search", icon, True, self.search_dialog)
-        self.left_menu_buttons["App Grid"][0].click()
-
+        self.left_menu_buttons["Conan Quicklaunch"][0].click()
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
@@ -101,6 +99,15 @@ class MainWindow(FluentWindow):
             pass
         Logger.remove_qt_logger()
         super().closeEvent(event)
+
+    def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent
+        super().resizeEvent(a0)
+
+        if APPLIST_ENABLED:  # no redraw necessary
+            return
+        if a0.oldSize().width() == -1:  # initial resize - can be skipped
+            return
+        self.app_grid.re_init_all_app_links()
 
     def load(self, config_source: Optional[PathLike] = None):
         """ Load all application gui elements specified in the GUI config (file) """
@@ -204,7 +211,7 @@ class MainWindow(FluentWindow):
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
-    @ pyqtSlot()
+    @pyqtSlot()
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = user_save_path

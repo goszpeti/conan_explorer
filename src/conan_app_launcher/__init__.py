@@ -29,6 +29,7 @@ DEFAULT_UI_CFG_FILE_NAME = "cal_ui.json"  # for legacy 0.X support
 CONAN_LOG_PREFIX = "CONAN: " # logger uses this to indicate a log comes from Conan
 
 # Feature flags
+APPLIST_ENABLED = True
 ADD_TAB_BUTTON = False # a fixed "Add tab" button on the AppGrid
 ADD_APP_LINK_BUTTON = False  # a fixed "Add AppLink" button on the AppGrid
 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True # get versions directly from the custom cache

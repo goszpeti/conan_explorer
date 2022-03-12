@@ -2,6 +2,7 @@ import platform
 import re
 from pathlib import Path
 from typing import Tuple
+from distutils import version
 
 import conan_app_launcher.app as app
 from conan_app_launcher import base_path
@@ -11,13 +12,14 @@ from jinja2 import Template
 from PyQt5.QtWidgets import QApplication
 
 
-def configure_theme(qss_template_path: Path, font_size_pt: int) -> str:
+def configure_theme(qss_template_path: Path, font_size_pt: int, user_color: str, window_border_radius: int) -> str:
     """ Configure the given qss file with the set options and return it as a string """
 
     qss_template = None
     with open(qss_template_path, "r") as fd:
         qss_template = Template(fd.read())
-    qss_content = qss_template.render(MAIN_FONT_SIZE=font_size_pt)
+    qss_content = qss_template.render(MAIN_FONT_SIZE=font_size_pt, USER_COLOR=user_color,
+                                      WINDOW_BORDER_RADIUS=window_border_radius)
     return qss_content
 
 
@@ -27,8 +29,16 @@ def activate_theme(qt_app: QApplication):
     style_file = "light_style.qss.in"
     if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
         style_file = "dark_style.qss.in"
+    user_color = get_user_theme_color()
+    window_border_radius = 0
 
-    style_sheet = configure_theme(base_path / "ui" / style_file, app.active_settings.get_int(FONT_SIZE))
+    # enable rounded corners under Win 11 (main version number is still 10 - thanks MS!)
+    if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
+        window_border_radius = 7
+
+    user_color_str = f"rgb({user_color[0]},{user_color[1]},{user_color[2]})"
+    style_sheet = configure_theme(base_path / "ui" / style_file,
+                                  app.active_settings.get_int(FONT_SIZE), user_color_str, window_border_radius)
 
     qt_app.setStyleSheet(style_sheet)
 
