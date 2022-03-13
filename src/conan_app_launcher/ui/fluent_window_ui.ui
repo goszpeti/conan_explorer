@@ -453,27 +453,19 @@
                       <number>0</number>
                      </property>
                      <item>
-                      <widget class="QTreeWidget" name="treeWidget">
-                       <column>
-                        <property name="text">
-                         <string notr="true">1</string>
-                        </property>
-                       </column>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QWidget" name="widget" native="true"/>
-                     </item>
-                     <item>
-                      <widget class="QTreeWidget" name="treeWidget_2">
-                       <property name="frameShape">
-                        <enum>QFrame::NoFrame</enum>
+                      <widget class="QListView" name="listView_2">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
                        </property>
-                       <column>
-                        <property name="text">
-                         <string notr="true">1</string>
-                        </property>
-                       </column>
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>400</height>
+                        </size>
+                       </property>
                       </widget>
                      </item>
                     </layout>
@@ -485,7 +477,7 @@
                </widget>
                <widget class="QFrame" name="page_footer">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -535,16 +527,10 @@ border-bottom-right-radius: 7px;
                  <item>
                   <widget class="QTextBrowser" name="console">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+                    <sizepolicy hsizetype="Ignored" vsizetype="MinimumExpanding">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>100</width>
-                     <height>0</height>
-                    </size>
                    </property>
                    <property name="baseSize">
                     <size>
@@ -653,7 +639,7 @@ background-color:  #d3d3d3;
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_13">
+               <layout class="QVBoxLayout" name="verticalLayout_15">
                 <item>
                  <widget class="QFrame" name="right_menu_top_title_frame">
                   <property name="frameShape">
@@ -719,7 +705,9 @@ background-color:  #d3d3d3;
                 </item>
                 <item>
                  <widget class="QStackedWidget" name="right_menu_top_content_sw">
-                  <widget class="QWidget" name="page_3"/>
+                  <widget class="QWidget" name="main_top_settings_page">
+                   <layout class="QVBoxLayout" name="verticalLayout_13"/>
+                  </widget>
                   <widget class="QWidget" name="page_4"/>
                  </widget>
                 </item>
@@ -736,7 +724,7 @@ background-color:  #d3d3d3;
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_7">
                 <item>
-                 <widget class="QFrame" name="right_menu_top_title_frame_2">
+                 <widget class="QFrame" name="right_menu_bottom_title_frame">
                   <property name="frameShape">
                    <enum>QFrame::StyledPanel</enum>
                   </property>

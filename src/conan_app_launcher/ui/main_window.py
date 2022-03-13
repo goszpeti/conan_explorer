@@ -15,16 +15,16 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtGui import QIcon, QPixmap, QKeySequence
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox, QFrame, QHBoxLayout, QLabel
 
 from .common import QLoader, activate_theme, get_themed_asset_image
 from .views.about_page import AboutPage
 from .fluent_window import FluentWindow
 from .model import UiApplicationModel
 from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
-
+from .widgets.toggle import AnimatedToggle
 
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
@@ -56,7 +56,6 @@ class MainWindow(FluentWindow):
         # self.ui.menu_toggle_display_versions.setChecked(app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
         # self.ui.menu_toggle_display_users.setChecked(app.active_settings.get_bool(DISPLAY_APP_USERS))
         # self.ui.menu_toggle_display_channels.setChecked(app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
-        # dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
         # self.ui.menu_enable_dark_mode.setChecked(dark_mode_enabled)
 
         # self.ui.menu_about_action.triggered.connect(self._about_dialog.show)
@@ -87,9 +86,43 @@ class MainWindow(FluentWindow):
         icon.addPixmap(QPixmap(get_themed_asset_image("icons/search_packages.png")),
                        QIcon.Normal, QIcon.Off)
         self.add_left_menu_entry("Conan Search", icon, True, self.search_dialog)
+
+        # set default page
         self.page_entries["Conan Quicklaunch"][0].click()
 
-        self.add_right_menu_entry("About", self._about_dialog, QIcon(get_themed_asset_image("icons/about.png")), True)
+        view_settings_submenu = self.RightSubMenu("View Settings")
+        self.add_right_bottom_menu_sub_menu("View", view_settings_submenu, QIcon(
+            get_themed_asset_image("icons/package_Settings.png")))
+
+        view_settings_submenu.add_button_menu_entry(
+            "Font Size +", self.on_font_size_increased, QIcon(
+                get_themed_asset_image("icons/increase_font.png")), QKeySequence(Qt.CTRL + Qt.Key_Plus))
+        view_settings_submenu.add_button_menu_entry(
+            "Font Size - ", self.on_font_size_decreased, QIcon(
+                get_themed_asset_image("icons/decrease_font.png")), QKeySequence(Qt.CTRL + Qt.Key_Minus))
+
+        s_frame = QFrame(self)
+        s_frame.setLayout(QHBoxLayout())
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        dark_mode_toggle = AnimatedToggle(self)
+        dark_mode_toggle.setMinimumSize(70, 40)
+        dark_mode_toggle.setMaximumSize(70, 40)
+        s_frame.layout().addWidget(QLabel("Dark mode"))
+        s_frame.layout().addWidget(dark_mode_toggle)
+
+        #self.on_theme_changed
+        view_settings_submenu.add_custom_menu_entry(s_frame)
+        # dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
+
+        self.add_right_bottom_menu_main_page_entry(
+            "About", self._about_dialog, QIcon(get_themed_asset_image("icons/about.png")))
+
+        # menu
+        # self.ui.menu_cleanup_cache.setIcon(QIcon(get_themed_asset_image("icons/cleanup.png")))
+        # self.ui.menu_remove_locks.setIcon(QIcon(get_themed_asset_image("icons/remove-lock.png")))
+        # self.ui.menu_increase_font_size.setIcon(QIcon(get_themed_asset_image("icons/increase_font.png")))
+        # self.ui.menu_decrease_font_size.setIcon(QIcon(get_themed_asset_image("icons/decrease_font.png")))
+
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
@@ -131,7 +164,7 @@ class MainWindow(FluentWindow):
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
         new_size = app.active_settings.get_int(FONT_SIZE) + 1
-        if new_size > 24:
+        if new_size > 14:
             return
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)
@@ -261,10 +294,3 @@ class MainWindow(FluentWindow):
     def load_icons(self):
         """ Load icons for main toolbox and menu """
 
-        # menu
-        # self.ui.menu_cleanup_cache.setIcon(QIcon(get_themed_asset_image("icons/cleanup.png")))
-        # self.ui.menu_about_action.setIcon(QIcon(get_themed_asset_image("icons/about.png")))
-        # self.ui.menu_remove_locks.setIcon(QIcon(get_themed_asset_image("icons/remove-lock.png")))
-        # self.ui.menu_search_in_remotes.setIcon(QIcon(get_themed_asset_image("icons/search_packages.png")))
-        # self.ui.menu_increase_font_size.setIcon(QIcon(get_themed_asset_image("icons/increase_font.png")))
-        # self.ui.menu_decrease_font_size.setIcon(QIcon(get_themed_asset_image("icons/decrease_font.png")))
