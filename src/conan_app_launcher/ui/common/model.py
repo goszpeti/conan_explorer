@@ -1,5 +1,20 @@
 from PyQt5.QtCore import Qt, QAbstractItemModel, QModelIndex
+from PyQt5.QtWidgets import QFileSystemModel
 
+
+class FileSystemModel(QFileSystemModel):
+    """ This fixes an issue with the header not being centered vertically """
+    def __init__(self, h_align=Qt.AlignLeft | Qt.AlignVCenter, v_align=Qt.AlignVCenter, parent=None):
+        super().__init__(parent)
+        self.alignments = {Qt.Horizontal: h_align, Qt.Vertical: v_align}
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.TextAlignmentRole:
+            return self.alignments[orientation]
+        elif role == Qt.DecorationRole:
+            return None
+        else:
+            return QFileSystemModel.headerData(self, section, orientation, role)
 
 class TreeModelItem(object):
     """

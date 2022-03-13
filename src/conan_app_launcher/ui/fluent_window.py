@@ -33,8 +33,8 @@ class FluentWindow(QMainWindow):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint |
                             Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
         self.use_native_windows_fcns = True if platform.system() == "Windows" and native_windows_fcns else False
-        self.left_menu_buttons: Dict[str, Tuple[QPushButton, QWidget]] = {}
-        self.button_highlight_color = "#B7B7B7"
+        # all buttons and widgets to be able to shown on the main page (from settings and left menu)
+        self.page_entries: Dict[str, Tuple[QPushButton, QWidget]] = {}
         self.left_menu_min_size = 70
         self.left_menu_max_size = 220
         self.right_menu_min_size = 0
@@ -67,6 +67,7 @@ class FluentWindow(QMainWindow):
 
         self.ui.left_menu_top_subframe.mouseMoveEvent = self.move_window
         self.ui.top_frame.mouseMoveEvent = self.move_window
+        self.ui.top_frame.mouseDoubleClickEvent = self.maximize_restore
 
         self.ui.toggle_left_menu_button.clicked.connect(self.toggle_left_menu)
         self.ui.settings_button.clicked.connect(self.toggle_right_menu)
@@ -76,6 +77,9 @@ class FluentWindow(QMainWindow):
         self.set_restore_max_button_state()
         self.enable_windows_native_animations()
 
+        # minimize settings window buttons
+        self.right_menu_bottom_back_button.hide()
+        self.right_menu_top_back_button.hide()
 
     def move_window(self, event):
         # do nothing if the resize function is active
@@ -114,26 +118,22 @@ class FluentWindow(QMainWindow):
             style| WS_BORDER | WS_MAXIMIZEBOX | WS_CAPTION | CS_DBLCLKS | WS_THICKFRAME)
 
     def add_left_menu_entry(self, name: str, icon: QIcon, is_upper_menu: bool, page_widget: QWidget):
-        button = QPushButton(self)
+        button = QPushButton(icon, "", self)
         button.setObjectName(name)
         size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        # size_policy.setHorizontalStretch(0)
-        # size_policy.setVerticalStretch(0)
         size_policy.setHeightForWidth(button.sizePolicy().hasHeightForWidth())
         button.setSizePolicy(size_policy)
         button.setMinimumSize(QSize(64, 50))
         button.setMaximumHeight(50)
-        button.setLayoutDirection(Qt.LeftToRight)
+        #button.setLayoutDirection(Qt.LeftToRight)
         button.setToolTip(name)
-        button.setIcon(icon)
         button.setIconSize(QSize(32, 32))
         button.setStyleSheet("text-align:middle;")
         button.setCheckable(True)
-        #page_widget.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred))
         page_widget.setMinimumHeight(300) # enable resizing of console on every page
 
         button.clicked.connect(self.switch_page)
-        self.left_menu_buttons[name] = (button, page_widget)
+        self.page_entries[name] = (button, page_widget)
 
         if is_upper_menu:
            self.ui.left_menu_middle_subframe.layout().addWidget(button)
@@ -143,7 +143,7 @@ class FluentWindow(QMainWindow):
         page_widget.setParent(self.page_stacked_widget)
 
 
-    def add_settings_menu_entry(self, name: str, widget: QWidget, icon=None, main_page_widget=False):
+    def add_right_menu_entry(self, name: str, widget: QWidget, icon=None, opens_main_page_widget=False, is_upper_menu=False):
         button = QPushButton(self)
         button.setObjectName(name)
         button.setMinimumSize(QSize(64, 50))
@@ -153,25 +153,35 @@ class FluentWindow(QMainWindow):
         if icon:
             button.setIcon(icon)
         button.setIconSize(QSize(32, 32))
-        button.setStyleSheet("text-align:middle;")
+        button.setText("  " + name)
+        button.setStyleSheet("text-align:left;")
 
-        self.right_menu_stacked_widget.addWidget(widget)
-        if main_page_widget:
+        if is_upper_menu:
+            # TODO Add a stacked widget page for each main page entry 
+            self.right_menu_top_content_sw.insertWidget(button)
+        else:
+            self.main_settings_page.layout().insertWidget(self.main_settings_page.layout().count()-1, button)
+        if opens_main_page_widget:
+            self.page_entries[name] = (button, widget)
             self.page_stacked_widget.addWidget(widget)
+            button.clicked.connect(self.switch_page)
+            button.clicked.connect(self.toggle_right_menu)
+            widget.setParent(self.page_stacked_widget)
 
         else:
-            self.right_menu_back_button.setMinimumWidth(32)
-            self.right_menu_back_button.setMaximumWidth(32)
+            self.right_menu_bottom_back_button.setMinimumWidth(32)
+            self.right_menu_top_back_button.setMaximumWidth(32)
 
 
     def switch_page(self):
         button = self.sender()
         name = button.objectName()
-        _, page = self.left_menu_buttons[name]
+        _, page = self.page_entries[name]
         # switch page_stacked_widget to the saved page
         self.page_stacked_widget.setCurrentWidget(page)
         # TODO change button stylings - reset old selections and highlight new one
-        for _ ,(inactive_button, _) in self.left_menu_buttons.items():
+        
+        for _ ,(inactive_button, _) in self.page_entries.items():
             inactive_button.setChecked(False)
             #inactive_button.setStyleSheet(set_style_sheet_option(
             #    inactive_button.styleSheet(), "background-color", "transparent"))
@@ -180,6 +190,9 @@ class FluentWindow(QMainWindow):
         button.setChecked(True)
         self.page_title.setText(name)
         self.page_info_label.setText("")
+
+        # TODO check page settings at minimize if not needed
+        self.right_menu_top_frame.hide()
 
     def toggle_left_menu(self):
         width = self.ui.left_menu_frame.width()
@@ -206,9 +219,9 @@ class FluentWindow(QMainWindow):
             self.title_label.setText("")
 
         # hide menu button texts
-        for name, (button, _) in self.left_menu_buttons.items():
+        for button in self.ui.left_menu_middle_subframe.findChildren(QPushButton): # name, (button, _) in self.page_entries.items():
             if maximize:
-                button.setText(name)
+                button.setText(button.objectName())
                 button.setStyleSheet("text-align:left;")
             else:
                 button.setText("")
@@ -353,7 +366,7 @@ class FluentWindow(QMainWindow):
                                  self._last_geometry.y() + current_point.y(), new_width, new_height)
             return
 
-    def maximize_restore(self):
+    def maximize_restore(self, a0): # dummy arg to be used asn an event slot  TODO: better solution
         if self.isMaximized():
             self.showNormal()
             #self.resize(self.width()+1, self.height()+1)

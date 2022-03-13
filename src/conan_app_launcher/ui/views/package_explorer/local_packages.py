@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from time import sleep
 from typing import TYPE_CHECKING, Callable, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -8,14 +7,14 @@ from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.ui.common import QLoader, get_themed_asset_image
+from conan_app_launcher.ui.common import QLoader, get_themed_asset_image, FileSystemModel
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import uic
 
 from PyQt5.QtCore import Qt, QModelIndex, QFile, QItemSelectionModel, QMimeData, QUrl, pyqtBoundSignal
-from PyQt5.QtWidgets import QWidget, QMenu, QAction, QApplication, QFileSystemModel, QAbstractItemView, QMessageBox
+from PyQt5.QtWidgets import QWidget, QMenu, QAction, QApplication, QAbstractItemView, QMessageBox
 from PyQt5.QtGui import QIcon, QShowEvent, QKeySequence
 
 
@@ -41,7 +40,6 @@ class LocalConanPackageExplorer(QWidget):
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
         self._ui.refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
 
-        self._ui.package_select_view.header().setVisible(True)
         self._ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
         self._ui.package_select_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.package_select_view.customContextMenuRequested.connect(
@@ -98,9 +96,6 @@ class LocalConanPackageExplorer(QWidget):
 
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._ui.package_select_view.mapToGlobal(position))
-
-    # def on_toolbox_changed(self, index):
-    #     self.refresh_pkg_selection_view(update=False)  # only update the first time
 
     def on_pkg_refresh_clicked(self):
         self.refresh_pkg_selection_view(update=True)
@@ -269,7 +264,7 @@ class LocalConanPackageExplorer(QWidget):
             Logger().warning(
                 f"Can't find package path for {conan_ref} and {str(source_item.item_data[0])} for File View")
             return
-        self.fs_model = QFileSystemModel()
+        self.fs_model = FileSystemModel()
         self.fs_model.setRootPath(str(pkg_path))
         self.fs_model.sort(0, Qt.AscendingOrder)
         self.re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)
@@ -298,10 +293,6 @@ class LocalConanPackageExplorer(QWidget):
         self._current_pkg = None
         self._ui.package_path_label.setText("")
         self._ui.package_file_view.setModel(None)
-        # try:
-        #     self.fs_model.deleteLater()
-        # except Exception:
-        #     pass  # sometimes this can crash...
         self._ui.package_path_label.setText("")
 
     @classmethod

@@ -20,7 +20,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from .common import QLoader, activate_theme, get_themed_asset_image
-from .dialogs.about_dialog import AboutDialog
+from .views.about_page import AboutPage
 from .fluent_window import FluentWindow
 from .model import UiApplicationModel
 from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
@@ -41,9 +41,8 @@ class MainWindow(FluentWindow):
         super().__init__("Conan App Launcher")
         self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
-        current_dir = Path(__file__).parent
 
-        self._about_dialog = AboutDialog(self)
+        self._about_dialog = AboutPage(self)
         self.load_icons()
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self.log_console_message)
@@ -88,7 +87,9 @@ class MainWindow(FluentWindow):
         icon.addPixmap(QPixmap(get_themed_asset_image("icons/search_packages.png")),
                        QIcon.Normal, QIcon.Off)
         self.add_left_menu_entry("Conan Search", icon, True, self.search_dialog)
-        self.left_menu_buttons["Conan Quicklaunch"][0].click()
+        self.page_entries["Conan Quicklaunch"][0].click()
+
+        self.add_right_menu_entry("About", self._about_dialog, QIcon(get_themed_asset_image("icons/about.png")), True)
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
@@ -259,14 +260,6 @@ class MainWindow(FluentWindow):
 
     def load_icons(self):
         """ Load icons for main toolbox and menu """
-        # icon = QIcon()
-        # icon.addPixmap(QPixmap(get_themed_asset_image("icons/grid.png")),
-        #                QIcon.Normal, QIcon.Off)
-        # self.ui.main_toolbox.setItemIcon(self.TOOLBOX_GRID_ITEM, icon)
-
-        # icon.addPixmap(QPixmap(get_themed_asset_image("icons/search_packages.png")),
-        #                QIcon.Normal, QIcon.Off)
-        # self.ui.main_toolbox.setItemIcon(self.TOOLBOX_PACKAGES_ITEM, icon)
 
         # menu
         # self.ui.menu_cleanup_cache.setIcon(QIcon(get_themed_asset_image("icons/cleanup.png")))

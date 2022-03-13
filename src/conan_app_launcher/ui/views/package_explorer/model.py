@@ -21,7 +21,7 @@ class PackageFilter(QSortFilterProxyModel):
         self.setFilterKeyColumn(0)
 
     def filterAcceptsRow(self, row_num, source_parent):
-        ''' Overriding the parent function '''
+        """ Overriding the parent function """
 
         # Check if the current row matches
         if self.filter_accepts_row_itself(row_num, source_parent):

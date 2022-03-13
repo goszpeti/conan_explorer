@@ -24,7 +24,6 @@ class ClickableIcon(QPushButton):
         self._greyed_out = True  # Must be ungreyed, when available
         self._grey_effect = QGraphicsColorizeEffect()
         self._grey_effect.setColor(QColor(128, 128, 128, 128))
-        #self.setStyleSheet("QPushButton{background-color: transparent;}")
         self.setGraphicsEffect(self._grey_effect)
 
         self.set_icon_from_file(image)

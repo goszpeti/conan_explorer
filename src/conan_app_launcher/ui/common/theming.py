@@ -36,9 +36,9 @@ def activate_theme(qt_app: QApplication):
     if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
         window_border_radius = 7
 
-    user_color_str = f"rgb({user_color[0]},{user_color[1]},{user_color[2]})"
+    #user_color_str = f"rgb({user_color[0]},{user_color[1]},{user_color[2]})"
     style_sheet = configure_theme(base_path / "ui" / style_file,
-                                  app.active_settings.get_int(FONT_SIZE), user_color_str, window_border_radius)
+                                  app.active_settings.get_int(FONT_SIZE), user_color, window_border_radius)
 
     qt_app.setStyleSheet(style_sheet)
 
@@ -85,14 +85,18 @@ def set_style_sheet_option(style_sheet: str, option: str, value: str, object: st
     return new_style_sheet
 
 
-def get_user_theme_color() -> Tuple[int,int,int]: # RGB
+def get_user_theme_color() -> str: # RGB
     """ Returns black per default """
     if platform.system() == "Windows":
         # get theme color
         from winreg import (HKEY_CURRENT_USER, ConnectRegistry, OpenKey,
                             QueryValueEx)
         reg = ConnectRegistry(None, HKEY_CURRENT_USER)
-        key = OpenKey(reg, r"Control Panel\Colors")
-        value = QueryValueEx(key, "Hilight")[0]  # Windows Theme Hilight color for border color in rgb
-        return tuple(value.split(" ")[0:3])
-    return 0,0,0
+        key = OpenKey(reg, r"SOFTWARE\Microsoft\Windows\DWM")
+        value = QueryValueEx(key, "AccentColor")[0]  # Windows Theme Hilight color for border color in rgb
+        abgr_color = hex(int(value))
+        if len(abgr_color) < 9:
+            return "#FFFFF"
+        rgb_color = abgr_color[-2:] + abgr_color[-4:-2] + abgr_color[-6:-4]
+        return "#" + rgb_color
+    return "#FFFFF"

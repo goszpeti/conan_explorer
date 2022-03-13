@@ -7,8 +7,10 @@ from conan_app_launcher.core import open_file
 from conan_app_launcher.ui.common import QLoader, get_themed_asset_image
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QPoint
+from PyQt5.QtWidgets import QDialog, QWidget, QAction, QListWidgetItem,  QMenu, QApplication
+from PyQt5.QtGui import QIcon, QKeySequence
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
@@ -17,11 +19,11 @@ if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.main_window import MainWindow
 
 
-class ConanSearchDialog(QtWidgets.QDialog):
-    conan_pkg_installed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
-    conan_pkg_removed = QtCore.pyqtSignal(str, str)  # conan_ref, pkg_id
+class ConanSearchDialog(QDialog):
+    conan_pkg_installed = pyqtSignal(str, str)  # conan_ref, pkg_id
+    conan_pkg_removed = pyqtSignal(str, str)  # conan_ref, pkg_id
 
-    def __init__(self, parent: Optional[QtWidgets.QWidget] = None, main_window: Optional["MainWindow"] = None):
+    def __init__(self, parent: Optional[QWidget] = None, main_window: Optional["MainWindow"] = None):
         # Add minimize and maximize buttons
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         if main_window:
@@ -30,18 +32,17 @@ class ConanSearchDialog(QtWidgets.QDialog):
             self._main_window = self
         current_dir = Path(__file__).parent
         self._ui = uic.loadUi(current_dir / "conan_search.ui", baseinstance=self)
-        #self.setMinimumSize(650, 550)
-
+        
         # init search bar
-        icon = QtGui.QIcon(str(app.asset_path / "icons/icon.ico"))
+        icon = QIcon(str(app.asset_path / "icons/icon.ico"))
         self.setWindowIcon(icon)
 
         self._ui.search_button.clicked.connect(self.on_search)
         self._ui.search_button.setEnabled(False)
         self._ui.search_line.validator_enabled = False
         self._ui.search_line.textChanged.connect(self._enable_search_button)
-        self.search_action = QtWidgets.QAction("search", parent)
-        self.search_action.setShortcut(QtGui.QKeySequence(Qt.Key_Enter))
+        self.search_action = QAction("search", parent)
+        self.search_action.setShortcut(QKeySequence(Qt.Key_Enter))
         # for the shortcut to work, the action has to be added to a higher level widget
         self.addAction(self.search_action)
         self.search_action.triggered.connect(self.on_search)
@@ -49,11 +50,14 @@ class ConanSearchDialog(QtWidgets.QDialog):
         # init remotes list
         remotes = app.conan_api.get_remotes()
         for remote in remotes:
-            item = QtWidgets.QListWidgetItem(remote.name, self._ui.remote_list)
+            item = QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Checked)
             item.checkState
-        self._ui.remote_list.adjustSize()
+        # sets height to the height of the items, but max 120
+        items_height = self._ui.remote_list.sizeHintForRow(
+            0) * self._ui.remote_list.count() + 2 * self._ui.remote_list.frameWidth()
+        self._ui.remote_list.setFixedHeight(min(items_height, 120))
 
         self._pkg_result_model = PkgSearchModel()
         self._pkg_result_loader = QLoader(self)
@@ -62,7 +66,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
         self.apply_theme()
 
     def apply_theme(self):
-        icon = QtGui.QIcon(get_themed_asset_image("icons/search_packages.png"))
+        icon = QIcon(get_themed_asset_image("icons/search_packages.png"))
         self._init_pkg_context_menu()
         self._ui.search_icon.setPixmap(icon.pixmap(20, 20))
 
@@ -78,32 +82,32 @@ class ConanSearchDialog(QtWidgets.QDialog):
 
     def _init_pkg_context_menu(self):
         """ Initalize context menu with all actions """
-        self.select_cntx_menu = QtWidgets.QMenu()
+        self.select_cntx_menu = QMenu()
 
-        self.copy_ref_action = QtWidgets.QAction("Copy reference", self)
-        self.copy_ref_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/copy_link.png")))
+        self.copy_ref_action = QAction("Copy reference", self)
+        self.copy_ref_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self.on_copy_ref_requested)
 
-        self.show_conanfile_action = QtWidgets.QAction("Show conanfile", self)
-        self.show_conanfile_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/file_preview.png")))
+        self.show_conanfile_action = QAction("Show conanfile", self)
+        self.show_conanfile_action.setIcon(QIcon(get_themed_asset_image("icons/file_preview.png")))
         self.select_cntx_menu.addAction(self.show_conanfile_action)
         self.show_conanfile_action.triggered.connect(self.on_show_conanfile_requested)
 
-        self.install_pkg_action = QtWidgets.QAction("Install package", self)
-        self.install_pkg_action.setIcon(QtGui.QIcon(get_themed_asset_image("icons/download_pkg.png")))
+        self.install_pkg_action = QAction("Install package", self)
+        self.install_pkg_action.setIcon(QIcon(get_themed_asset_image("icons/download_pkg.png")))
         self.select_cntx_menu.addAction(self.install_pkg_action)
         self.install_pkg_action.triggered.connect(self.on_install_pkg_requested)
 
         if self._main_window:
-            self.show_in_pkg_exp_action = QtWidgets.QAction("Show in Package Explorer", self)
-            self.show_in_pkg_exp_action.setIcon(QtGui.QIcon(
+            self.show_in_pkg_exp_action = QAction("Show in Package Explorer", self)
+            self.show_in_pkg_exp_action.setIcon(QIcon(
                 get_themed_asset_image("icons/search_packages.png")))
             self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
             self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 
-    @pyqtSlot(QtCore.QPoint)
-    def on_pkg_context_menu_requested(self, position: QtCore.QPoint):
+    @pyqtSlot(QPoint)
+    def on_pkg_context_menu_requested(self, position: QPoint):
         """ 
         Executes, when context menu is requested. 
         This is done to dynamically grey out some options depending on the item type.
@@ -172,7 +176,7 @@ class ConanSearchDialog(QtWidgets.QDialog):
     def on_copy_ref_requested(self):
         """ Copy the selected reference to the clipboard """
         combined_ref = self.get_selected_combined_ref()
-        QtWidgets.QApplication.clipboard().setText(combined_ref)
+        QApplication.clipboard().setText(combined_ref)
 
     @pyqtSlot()
     def on_show_conanfile_requested(self):

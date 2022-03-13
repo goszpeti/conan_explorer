@@ -47,13 +47,13 @@ class AppLink(QFrame):
     """
     icon_size: int
 
-    def __init__(self, parent: "TabGrid", model: UiAppLinkModel, icon_size=ICON_SIZE):
+    def __init__(self, parent: "QWidget", parent_tab: "TabGrid", model: UiAppLinkModel, icon_size=ICON_SIZE):
         super().__init__(parent)
         self.setLayout(QHBoxLayout(self) if APPLIST_ENABLED else QVBoxLayout(self))
         self.setObjectName(repr(self))
-        self._parent_tab = parent  # save parent - don't use qt signals ands slots
         self.icon_size = icon_size
         self.model = model
+        self._parent_tab = parent_tab  # save parent - don't use qt signals ands slots
         self._lock_cboxes = False  # lock combo boxes to ignore changes of conanref
         self._enable_combo_boxes = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
         self._init_app_link()
@@ -70,9 +70,7 @@ class AppLink(QFrame):
     def _init_app_link(self):
         """ Initialize all subwidgets with default values. """
         max_width = self.max_width()
-        # size policies
         self.layout().setSpacing(3)
-        #self.layout().setSizeConstraint(QLayout.SetMinimumSize)
 
         if APPLIST_ENABLED:
             max_width = 150
@@ -97,38 +95,20 @@ class AppLink(QFrame):
             self._center_right_frame.layout().setSizeConstraint(QLayout.SetMinimumSize)
             self._right_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
     
-            # self._left_frame.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,
-            #                                            QSizePolicy.Preferred))
-            # self._center_frame.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,
-            #                                              QSizePolicy.Preferred))# size_policy)  # 200
-            # self._center_right_frame.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,
-            #                                       QSizePolicy.Preferred))
-            # self._right_frame.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,
-            #                                             QSizePolicy.Preferred))
-    
             self._left_frame.setMaximumWidth(max_width)
             self._left_frame.setMinimumWidth(max_width)
             self._right_frame.setMinimumWidth(200)
             self._right_frame.setMaximumWidth(150)
-            self._center_frame.setMinimumWidth(200) # 120
-            #self._center_frame.setMaximumWidth(600) # 200
-
+            self._center_frame.setMinimumWidth(200)
 
             self._app_button = ClickableIcon(self._left_frame, asset_path / "icons" / "app.png")
             self._app_name_label = QLabel(self)
             self._left_frame.layout().addWidget(self._app_button)
-            #self._left_frame.layout().addWidget(self._app_name_label)
             self._app_button.setMinimumWidth(max_width)
             self._app_button.setMaximumWidth(max_width)
-            #self._app_name_label.setLayout(QVBoxLayout(self._app_name_label))
-            #self._app_name_label.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
             self._app_name_label.setMinimumWidth(200)
-            #self._app_name_label.setMaximumWidth(600)
-            #self._app_name_label.setSizePolicy(size_policy)
             self._app_name_label.setWordWrap(True)
             self._app_name_label.setAlignment(Qt.AlignLeft)
-            #self._app_name_label.setTextFormat(Qt.RichText)
-            #self._app_name_label.setMinimumWidth(max_width)
 
             self._app_version_cbox = QLabel(self._center_frame)
             self._app_user_cbox = QLabel(self._center_frame)
@@ -181,19 +161,25 @@ class AppLink(QFrame):
             self.layout().addWidget(self._app_version_cbox)
             self.layout().addWidget(self._app_user_cbox)
             self.layout().addWidget(self._app_channel_cbox)
+            self._app_name_label.setMaximumWidth(max_width)
+
+            self._app_version_cbox.setMaximumWidth(max_width
+            )
+
+            self._app_user_cbox.setMaximumWidth(max_width)
+
         self.setSizePolicy(size_policy)
 
         # add sub widgets
 
         self._app_button.setSizePolicy(size_policy)
-        self._app_button.setMinimumHeight(self.icon_size)
+        self._app_button.setMinimumHeight(self.icon_size + 10)
         self._app_button.setContextMenuPolicy(Qt.CustomContextMenu)
         self._app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
 
         self._app_name_label.setAlignment(Qt.AlignCenter)
         self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setWordWrap(True)
-        #self._app_name_label.setMaximumWidth(max_width)
 
         if self._enable_combo_boxes:
             self._app_version_cbox.setDisabled(True)
@@ -201,8 +187,6 @@ class AppLink(QFrame):
         self._app_version_cbox.setSizePolicy(size_policy)
         self._app_version_cbox.setAlignment(Qt.AlignCenter)
 
-        #self._app_version_cbox.setMaximumWidth(max_width
-        # )
 
         if self._enable_combo_boxes:
             self._app_user_cbox.setDisabled(True)
@@ -210,29 +194,12 @@ class AppLink(QFrame):
         self._app_user_cbox.setAlignment(Qt.AlignCenter)
 
         self._app_user_cbox.setSizePolicy(size_policy)
-        #self._app_user_cbox.setMaximumWidth(max_width)
 
         if self._enable_combo_boxes:
             self._app_channel_cbox.setDisabled(True)
             self._app_channel_cbox.setDuplicatesEnabled(False)
         self._app_channel_cbox.setSizePolicy(size_policy)
         self._app_channel_cbox.setAlignment(Qt.AlignCenter)
-
-        #self._app_channel_cbox.setMaximumWidth(max_width)
-
-        self._v_spacer = QSpacerItem(
-                20, 5, QSizePolicy.Minimum, QSizePolicy.Minimum)
-            #self.layout().addSpacerItem(self._v_spacer)
-
-
-        # self._app_button.setSizePolicy(size_policy)
-        # self._app_button.setContextMenuPolicy(Qt.CustomContextMenu)
-        # self._app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
-
-        # self._app_name_label.setAlignment(Qt.AlignCenter)
-        # self._app_name_label.setSizePolicy(size_policy)
-        # self._app_name_label.setWordWrap(True)
-        # self._app_name_label.setMaximumWidth(max_width)
 
         # connect signals
         self._app_button.clicked.connect(self.on_click)
@@ -251,11 +218,6 @@ class AppLink(QFrame):
         self.open_fm_action.setIcon(QIcon(get_themed_asset_image("icons/file-explorer.png")))
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
-
-        # self.show_in_pkg_exp_action = QAction("Show in Package Explorer", self)
-        # self.show_in_pkg_exp_action.setIcon(QIcon(get_asset_image("icons/search_packages.png")))
-        # self.menu.addAction(self.show_in_pkg_exp_action)
-        # self.show_in_pkg_exp_action.setDisabled(True)  # TODO upcoming feature
 
         self.menu.addSeparator()
 
@@ -287,7 +249,7 @@ class AppLink(QFrame):
         self._apply_new_config()
 
     def on_move(self):
-        move_dialog = AppsMoveDialog(parent=None, tab_ui_model=self.model.parent)
+        move_dialog = AppsMoveDialog(parent=self, tab_ui_model=self.model.parent)
         ret = move_dialog.exec()
         if ret == QDialog.Accepted:
             self._parent_tab.remove_all_app_links()
