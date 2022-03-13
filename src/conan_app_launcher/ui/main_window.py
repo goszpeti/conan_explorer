@@ -1,5 +1,3 @@
-import ctypes
-from ctypes.wintypes import MSG
 from pathlib import Path
 from shutil import rmtree
 from typing import Optional
@@ -105,8 +103,8 @@ class MainWindow(FluentWindow):
         s_frame.setLayout(QHBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)
         dark_mode_toggle = AnimatedToggle(self)
-        dark_mode_toggle.setMinimumSize(70, 40)
-        dark_mode_toggle.setMaximumSize(70, 40)
+        dark_mode_toggle.setMinimumSize(70, 50)
+        dark_mode_toggle.setMaximumSize(70, 50)
         s_frame.layout().addWidget(QLabel("Dark mode"))
         s_frame.layout().addWidget(dark_mode_toggle)
 
