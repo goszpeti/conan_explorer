@@ -175,7 +175,7 @@ class LocalConanPackageExplorer(QWidget):
 
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace
-        text = self._ui.package_filter_edit.toPlainText().strip()
+        text = self._ui.package_filter_edit.text().strip()  # toPlainText
         if self.pkg_sel_model:
             self.pkg_sel_model.proxy_model.setFilterWildcard(text)
 

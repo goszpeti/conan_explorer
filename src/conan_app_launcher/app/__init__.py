@@ -67,6 +67,6 @@ def run_application(conan_search=False):
 
 
     qt_app.exec_()
-    #
-    #if conan_worker:  # cancel conan worker tasks on exit - this can possibly cancel an ongoing install task
-    #    conan_worker.finish_working(10)
+
+    if conan_worker:  # cancel conan worker tasks on exit - this can possibly cancel an ongoing install task
+       conan_worker.finish_working(10)

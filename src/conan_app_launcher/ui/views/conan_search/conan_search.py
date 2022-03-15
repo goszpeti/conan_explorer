@@ -9,7 +9,7 @@ from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QPoint
-from PyQt5.QtWidgets import QDialog, QWidget, QAction, QListWidgetItem,  QMenu, QApplication
+from PyQt5.QtWidgets import QDialog, QWidget, QAction, QListWidgetItem,  QMenu, QApplication, QShortcut, QMessageBox
 from PyQt5.QtGui import QIcon, QKeySequence
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
@@ -41,11 +41,12 @@ class ConanSearchDialog(QDialog):
         self._ui.search_button.setEnabled(False)
         self._ui.search_line.validator_enabled = False
         self._ui.search_line.textChanged.connect(self._enable_search_button)
-        self.search_action = QAction("search", parent)
-        self.search_action.setShortcut(QKeySequence(Qt.Key_Enter))
-        # for the shortcut to work, the action has to be added to a higher level widget
-        self.addAction(self.search_action)
-        self.search_action.triggered.connect(self.on_search)
+        
+        self._ui.search_button.setShortcut(QKeySequence(Qt.Key_Return))
+        # search_shortcut = QShortcut(,  self)
+        # search_shortcut.activated.connect(self.on_search)
+        # search_shortcut.activatedAmbiguously.connect(self.on_search)
+
 
         # init remotes list
         remotes = app.conan_api.get_remotes()
@@ -129,6 +130,8 @@ class ConanSearchDialog(QDialog):
         """ Search for the user entered text by re-initing the model"""
         # IMPORTANT! if put in async loading, the pyqt signal of the model will be created in another Qt thread
         # and not be able to emit to the GUI thread.
+        if not self._ui.search_button.isEnabled():
+            return
         conan_pkg_removed_signal = None
         if self._main_window:
             conan_pkg_removed_signal = self._main_window.conan_pkg_removed

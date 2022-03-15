@@ -3,7 +3,7 @@ import platform
 from ctypes.wintypes import MSG
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple, Union
 
 from conan_app_launcher import app
 from conan_app_launcher.app import asset_path
@@ -11,11 +11,12 @@ from PyQt5 import uic
 from PyQt5.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
                           QPropertyAnimation, QRect, QSize, Qt)
 from PyQt5.QtGui import QColor, QHoverEvent, QIcon, QKeySequence, QPixmap
-from PyQt5.QtWidgets import (QGraphicsDropShadowEffect, QShortcut,
+from PyQt5.QtWidgets import (QGraphicsDropShadowEffect, QLabel,
                              QMainWindow, QPushButton, QSizePolicy,
                              QSpacerItem, QVBoxLayout, QWidget)
 
 from conan_app_launcher.settings import FONT_SIZE
+from .common import QLoader, activate_theme, get_themed_asset_image
 
 from .common import get_user_theme_color, set_style_sheet_option
 from .fluent_window_ui import Ui_MainWindow
@@ -32,9 +33,26 @@ class ResizeDirection(Enum):
     bottom_left = 7
     bottom_right = 8
 
-class FluentWindow(QMainWindow):
+class ThemedWidget():
+    def __init__(self) -> None:
+        self._icon_map: Dict[Union[QPushButton, QLabel], str] = {}  # for re-theming
 
-    class RightSubMenu(QWidget):
+    @property
+    def icon_map(self):
+        return self._icon_map
+
+    def add_themed_icon(self, widget: Union[QPushButton, QLabel], asset_rel_path: str):
+        widget.setIcon(QIcon(get_themed_asset_image(asset_rel_path)))
+        self.icon_map[widget] = asset_rel_path
+
+    def reload_themed_icons(self):
+        for widget, asset_rel_path in self.icon_map.items():
+            widget.setIcon(QIcon(get_themed_asset_image(asset_rel_path)))
+
+
+class FluentWindow(QMainWindow, ThemedWidget):
+
+    class RightSubMenu(QWidget, ThemedWidget):
         def __init__(self, name: str = ""):
             super().__init__()
             self.setLayout(QVBoxLayout(self))
@@ -45,19 +63,19 @@ class FluentWindow(QMainWindow):
         def add_custom_menu_entry(self, widget: QWidget):
             self.layout().insertWidget(self.layout().count() - 1, widget)
 
-
-        def add_button_menu_entry(self, name: str, target: Callable, icon=None, shortcut: Optional[QKeySequence]=None):
+        def add_button_menu_entry(self, name: str, target: Callable, asset_icon:str="", shortcut: Optional[QKeySequence]=None):
             button = QPushButton(self)
+
             button.setObjectName(name + "_submenu")
             button.setMinimumSize(QSize(64, 50))
             button.setMaximumHeight(50)
             button.setLayoutDirection(Qt.LeftToRight)
             button.setToolTip(name)
-            if icon:
-                button.setIcon(icon)
+            if asset_icon:
+                self.add_themed_icon(button, asset_icon)
             button.setIconSize(QSize(32, 32))
             button.setText(name)  # "  " +
-            font_size = app.active_settings.get_int(FONT_SIZE) - 2
+            font_size = app.active_settings.get_int(FONT_SIZE) # - 2 # TODO
             button.setStyleSheet(f"text-align:left;font-size:{font_size}pt")
             # insert before spacer
             self.layout().insertWidget(self.layout().count() - 1, button)
@@ -66,8 +84,9 @@ class FluentWindow(QMainWindow):
 
             if not shortcut:
                 return
-            shortcut_obj = QShortcut(shortcut, self)
-            shortcut_obj.activated.connect(target)
+            button.setShortcut(shortcut)
+            # shortcut_obj = QShortcut(shortcut, self)
+            # shortcut_obj.activated.connect(target)
             button.setText(f"{button.text()} ({shortcut.toString()})")
 
         
@@ -76,8 +95,8 @@ class FluentWindow(QMainWindow):
 
     def __init__(self, title_text: str="", native_windows_fcns=True, rounded_corners=True):
         super().__init__()
-        current_dir = Path(__file__).parent
         #self.ui = Ui_MainWindow(self)
+        current_dir = Path(__file__).parent
         self.ui = uic.loadUi(current_dir / "fluent_window_ui.ui", baseinstance=self)
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint |
@@ -88,7 +107,7 @@ class FluentWindow(QMainWindow):
         self.left_menu_min_size = 70
         self.left_menu_max_size = 230
         self.right_menu_min_size = 0
-        self.right_menu_max_size = 300
+        self.right_menu_max_size = 270
 
         # resize related variables
         self._resize_press = 0
@@ -106,6 +125,9 @@ class FluentWindow(QMainWindow):
         effect.setColor(QColor(68, 68, 68))
         effect.setBlurRadius(10)
         #self.setGraphicsEffect(effect)
+
+        self.add_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.png")
+        self.add_themed_icon(self.ui.settings_button, "icons/settings.png")
 
         # window buttons
         self.ui.restore_max_button.clicked.connect(self.maximize_restore)
@@ -135,6 +157,14 @@ class FluentWindow(QMainWindow):
 
         # TODO: needed?
         self.ui.right_menu_top_content_sw.setCurrentWidget(self.ui.main_top_settings_page)
+
+    def apply_theme(self):
+        """ This function must be able to reload all icons from the left and right menu bar. """
+        self.reload_themed_icons()
+        for submenu in self.ui.right_menu_bottom_content_sw.findChildren(FluentWindow.RightSubMenu):
+            submenu.reload_themed_icons()
+        for submenu in self.ui.right_menu_top_content_sw.findChildren(FluentWindow.RightSubMenu):
+            submenu.reload_themed_icons()
 
     def move_window(self, event):
         # do nothing if the resize function is active
@@ -172,8 +202,9 @@ class FluentWindow(QMainWindow):
         ctypes.windll.user32.SetWindowLongA(int(self.winId()), GWL_STYLE,
             style| WS_BORDER | WS_MAXIMIZEBOX | WS_CAPTION | CS_DBLCLKS | WS_THICKFRAME)
 
-    def add_left_menu_entry(self, name: str, icon: QIcon, is_upper_menu: bool, page_widget: QWidget):
-        button = QPushButton(icon, "", self)
+    def add_left_menu_entry(self, name: str, asset_icon: str, is_upper_menu: bool, page_widget: QWidget):
+        button = QPushButton("", self.ui.left_menu_frame)
+        self.add_themed_icon(button, asset_icon)
         button.setObjectName(name)
         size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         size_policy.setHeightForWidth(button.sizePolicy().hasHeightForWidth())
@@ -197,31 +228,32 @@ class FluentWindow(QMainWindow):
         page_widget.setParent(self.ui.page_stacked_widget)
 
     # can only be called for top level menu
-    def add_right_bottom_menu_main_page_entry(self, name: str, page_widget: QWidget, icon=None):
-        button = self.add_right_menu_entry(name, icon, is_upper_menu=False)
+    def add_right_bottom_menu_main_page_entry(self, name: str, page_widget: QWidget, asset_icon:str=""):
+        button = self.add_right_menu_entry(name, asset_icon, is_upper_menu=False)
         self.page_entries[name] = (button, page_widget)
         self.ui.page_stacked_widget.addWidget(page_widget)
         button.clicked.connect(self.switch_page)
         button.clicked.connect(self.toggle_right_menu)
         page_widget.setParent(self.ui.page_stacked_widget)
 
-    def add_right_bottom_menu_sub_menu(self, name: str, sub_menu: RightSubMenu, icon=None):
-        button = self.add_right_menu_entry(name, icon, is_upper_menu=False)
-
+    def add_right_bottom_menu_sub_menu(self, name: str, sub_menu: RightSubMenu, asset_icon:str=""):
+        button = self.add_right_menu_entry(name, asset_icon, is_upper_menu=False)
         self.ui.right_menu_bottom_content_sw.addWidget(sub_menu)
+        sub_menu.setParent(self.ui.right_menu_bottom_content_sw)
         button.clicked.connect(self.ui.right_menu_bottom_back_button.show)
         button.clicked.connect(lambda: self.ui.right_menu_bottom_content_sw.setCurrentWidget(sub_menu))
-        # self.right_menu_top_back_button.setMaximumWidth(32)
 
-    def add_right_menu_entry(self, name: str, icon=None, is_upper_menu=False):
-        button = QPushButton(self)
+
+    def add_right_menu_entry(self, name: str, asset_icon: str, is_upper_menu=False):
+        button = QPushButton(self.ui.right_menu_frame)
         button.setObjectName(name)
         button.setMinimumSize(QSize(64, 50))
         button.setMaximumHeight(50)
         button.setLayoutDirection(Qt.LeftToRight)
         button.setToolTip(name)
-        if icon:
-            button.setIcon(icon)
+        if asset_icon:
+            self.add_themed_icon(button, asset_icon)
+
         button.setIconSize(QSize(32, 32))
         button.setText("  " + name)
         button.setStyleSheet("text-align:left;")
@@ -294,6 +326,8 @@ class FluentWindow(QMainWindow):
             width_to_set = self.right_menu_max_size
         else:
             width_to_set = self.right_menu_min_size
+            # uncheck every known left menu button for right menu TODO: better solution?
+            self.ui.settings_button.setChecked(False)
 
         self.animation = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")
         self.animation.setDuration(200)
@@ -302,8 +336,6 @@ class FluentWindow(QMainWindow):
         self.animation.setEasingCurve(QEasingCurve.InOutQuart)
         self.animation.start()
 
-        # uncheck every known left menu button for right menu TODO: better solution?
-        self.ui.settings_button.setChecked(False)
 
     def mousePressEvent(self, event): # override
         """ Helper for moving window to know mouse position """
@@ -319,6 +351,8 @@ class FluentWindow(QMainWindow):
 
     def eventFilter(self, source: QObject, event: QEvent):
         """ Implements window resizing """
+        if self.isMaximized(): # no resize when maximized
+            return super().eventFilter(source, event)
         if event.type() == event.HoverMove: # QtGui.QHoverEvent
             if self._resize_press == 0:
                 self.handle_resize_cursor(event)  # cursor position control for cursor shape setup
@@ -429,10 +463,9 @@ class FluentWindow(QMainWindow):
                                  self._last_geometry.y() + current_point.y(), new_width, new_height)
             return
 
-    def maximize_restore(self, a0): # dummy arg to be used asn an event slot  TODO: better solution
+    def maximize_restore(self, a0=False): # dummy arg to be used asn an event slot  TODO: better solution
         if self.isMaximized():
             self.showNormal()
-            #self.resize(self.width()+1, self.height()+1)
         else:
             self.showMaximized()
         self.set_restore_max_button_state()

@@ -35,7 +35,7 @@ class AnimatedToggle(QCheckBox):
         self.animation.setDuration(200)  # ms
 
         self.pulse_anim = QPropertyAnimation(self, b"pulse_radius", self)
-        self.pulse_anim.setDuration(350)  # ms
+        self.pulse_anim.setDuration(300)  # ms
         self.pulse_anim.setStartValue(10)
         self.pulse_anim.setEndValue(20)
 
@@ -86,45 +86,44 @@ class AnimatedToggle(QCheckBox):
 
     def paintEvent(self, e: QPaintEvent):
 
-        contRect = self.contentsRect()
-        handleRadius = round(0.24 * contRect.height())
+        cont_rect = self.contentsRect()
+        handle_radius = round(0.2* cont_rect.height())
 
-        p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
 
-        p.setPen(self._transparent_pen)
-        barRect = QRectF(
+        painter.setPen(self._transparent_pen)
+        bar_rect = QRectF(
             0, 0,
-            contRect.width() - handleRadius, 0.40 * contRect.height()
+            cont_rect.width() - handle_radius, 0.40 * cont_rect.height()
         )
-        barRect.moveCenter(contRect.center())
-        rounding = barRect.height() / 2
+        bar_rect.moveCenter(cont_rect.center())
+        rounding = bar_rect.height() / 2
 
         # the handle will move along this line
-        trailLength = contRect.width() - 2 * handleRadius
+        trailLength = cont_rect.width() - 2 * handle_radius
 
-        xPos = contRect.x() + handleRadius + trailLength * self._handle_position
+        xPos = cont_rect.x() + handle_radius + trailLength * self._handle_position
 
         if self.pulse_anim.state() == QPropertyAnimation.Running:
-            p.setBrush(
+            painter.setBrush(
                 self._pulse_checked_animation if
                 self.isChecked() else self._pulse_unchecked_animation)
-            p.drawEllipse(QPointF(xPos, barRect.center().y()),
+            painter.drawEllipse(QPointF(xPos, bar_rect.center().y()),
                           self._pulse_radius, self._pulse_radius)
 
         if self.isChecked():
-            p.setBrush(self._bar_checked_brush)
-            p.drawRoundedRect(barRect, rounding, rounding)
-            p.setBrush(self._handle_checked_brush)
-
+            painter.setBrush(self._bar_checked_brush)
+            painter.drawRoundedRect(bar_rect, rounding, rounding)
+            painter.setBrush(self._handle_checked_brush)
         else:
-            p.setBrush(self._bar_brush)
-            p.drawRoundedRect(barRect, rounding, rounding)
-            p.setPen(self._light_grey_pen)
-            p.setBrush(self._handle_brush)
+            painter.setBrush(self._bar_brush)
+            painter.drawRoundedRect(bar_rect, rounding, rounding)
+            painter.setPen(self._light_grey_pen)
+            painter.setBrush(self._handle_brush)
 
-        p.drawEllipse(
-            QPointF(xPos, barRect.center().y()),
-            handleRadius, handleRadius)
+        painter.drawEllipse(
+            QPointF(xPos, bar_rect.center().y()),
+            handle_radius, handle_radius)
 
-        p.end()
+        painter.end()

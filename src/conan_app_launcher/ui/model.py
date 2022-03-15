@@ -31,9 +31,9 @@ class UiApplicationModel(UiConfig):
         # update conan info
         self.app_grid = UiAppGridModel()
         self.app_grid.load(ui_config.app_grid, self)
-        # if app.conan_worker:
-        #     app.conan_worker.finish_working(3)
-        #     app.conan_worker.update_all_info(self.app_grid.get_all_conan_worker_elements(), self.emit_conan_pkg_signal_callback)
+        if app.conan_worker:
+            app.conan_worker.finish_working(3)
+            app.conan_worker.update_all_info(self.app_grid.get_all_conan_worker_elements(), self.emit_conan_pkg_signal_callback)
 
         return self
 

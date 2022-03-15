@@ -4,12 +4,13 @@ from typing import Optional
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common import get_themed_asset_image
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import pyqtBoundSignal
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtBoundSignal, Qt, QSize
+from PyQt5.QtWidgets import QDialog, QWidget
+from PyQt5.QtGui import QIcon
 
-
-class ConanInstallDialog(QtWidgets.QDialog):
-    def __init__(self, parent: Optional[QtWidgets.QWidget], conan_ref: str, pkg_installed_signal: Optional[pyqtBoundSignal] = None):
+class ConanInstallDialog(QDialog):
+    def __init__(self, parent: Optional[QWidget], conan_ref: str, pkg_installed_signal: Optional[pyqtBoundSignal] = None):
         """ conan_ref can be in full ref format with <ref>:<id> """
         super().__init__(parent)
         current_dir = Path(__file__).parent
@@ -17,7 +18,7 @@ class ConanInstallDialog(QtWidgets.QDialog):
         self.pkg_installed_signal = pkg_installed_signal
 
         # init search bar
-        icon = QtGui.QIcon(get_themed_asset_image("icons/download_pkg.png"))
+        icon = QIcon(get_themed_asset_image("icons/download_pkg.png"))
         self.setWindowIcon(icon)
         self._ui.install_icon.setPixmap(icon.pixmap(20, 20))
         self._ui.conan_ref_line_edit.validator_enabled = False
@@ -37,7 +38,7 @@ class ConanInstallDialog(QtWidgets.QDialog):
         self.adjustSize()
         h_offset = (self.size() - self.conan_ref_line_edit.size()).width()
         width = self._ui.conan_ref_line_edit.fontMetrics().boundingRect(self._ui.conan_ref_line_edit.text()).width()
-        self.resize(QtCore.QSize(width + h_offset + 15, self.height()))  # 15 margin
+        self.resize(QSize(width + h_offset + 15, self.height()))  # 15 margin
 
     def toggle_auto_install_on_pkg_ref(self, text: str):
         if ":" in text: # if a package id is given, auto install does not make sense

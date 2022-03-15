@@ -47,7 +47,7 @@
      <item>
       <widget class="ConanRefLineEdit" name="search_line">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>1</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -115,7 +115,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="remotes_layout">
+    <layout class="QVBoxLayout" name="remotes_layout" stretch="0,1">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
@@ -189,7 +189,7 @@
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="layoutWidget_2">
-      <layout class="QVBoxLayout" name="results_layout">
+      <layout class="QVBoxLayout" name="results_layout" stretch="0,1">
        <property name="sizeConstraint">
         <enum>QLayout::SetMinAndMaxSize</enum>
        </property>
@@ -209,7 +209,7 @@
        <item>
         <widget class="QTreeView" name="search_results_tree_view">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -228,9 +228,12 @@
       </layout>
      </widget>
      <widget class="QWidget" name="layoutWidget_3">
-      <layout class="QVBoxLayout" name="pkg_info_layout">
+      <layout class="QVBoxLayout" name="pkg_info_layout" stretch="0,1">
        <property name="sizeConstraint">
         <enum>QLayout::SetMinAndMaxSize</enum>
+       </property>
+       <property name="topMargin">
+        <number>4</number>
        </property>
        <item>
         <widget class="QLabel" name="package_info_label">

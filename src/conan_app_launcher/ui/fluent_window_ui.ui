@@ -245,7 +245,7 @@
                     <number>0</number>
                    </property>
                    <property name="rightMargin">
-                    <number>0</number>
+                    <number>2</number>
                    </property>
                    <property name="bottomMargin">
                     <number>0</number>
@@ -495,9 +495,7 @@
                  </size>
                 </property>
                 <property name="styleSheet">
-                 <string notr="true">background-color: rgb(255, 255, 255);
-border-bottom-right-radius: 7px;
-</string>
+                 <string notr="true"/>
                 </property>
                 <property name="frameShape">
                  <enum>QFrame::NoFrame</enum>
@@ -599,9 +597,7 @@ p, li { white-space: pre-wrap; }
              </size>
             </property>
             <property name="styleSheet">
-             <string notr="true">QFrame{
-background-color:  #d3d3d3;
-}</string>
+             <string notr="true"/>
             </property>
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
@@ -633,6 +629,9 @@ background-color:  #d3d3d3;
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::StyledPanel</enum>
                </property>
@@ -642,6 +641,9 @@ background-color:  #d3d3d3;
                <layout class="QVBoxLayout" name="verticalLayout_15">
                 <item>
                  <widget class="QFrame" name="right_menu_top_title_frame">
+                  <property name="styleSheet">
+                   <string notr="true"/>
+                  </property>
                   <property name="frameShape">
                    <enum>QFrame::StyledPanel</enum>
                   </property>
@@ -716,6 +718,9 @@ background-color:  #d3d3d3;
              </item>
              <item>
               <widget class="QFrame" name="right_menu_bottom_frame">
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::StyledPanel</enum>
                </property>
@@ -725,6 +730,9 @@ background-color:  #d3d3d3;
                <layout class="QVBoxLayout" name="verticalLayout_7">
                 <item>
                  <widget class="QFrame" name="right_menu_bottom_title_frame">
+                  <property name="styleSheet">
+                   <string notr="true"/>
+                  </property>
                   <property name="frameShape">
                    <enum>QFrame::StyledPanel</enum>
                   </property>
@@ -800,7 +808,13 @@ background-color:  #d3d3d3;
                     <height>100</height>
                    </size>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true"/>
+                  </property>
                   <widget class="QWidget" name="main_settings_page">
+                   <property name="styleSheet">
+                    <string notr="true"/>
+                   </property>
                    <layout class="QVBoxLayout" name="verticalLayout_14">
                     <item>
                      <spacer name="verticalSpacer_2">
@@ -845,7 +859,6 @@ background-color:  #d3d3d3;
          </property>
          <property name="styleSheet">
           <string notr="true">QFrame{
-background-color:  #d3d3d3;
 border-bottom-left-radius: 5px;
 border-top-left-radius: 5px;
 }</string>

@@ -73,47 +73,36 @@ class MainWindow(FluentWindow):
         # self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
         
         # self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
-        icon = QIcon()
-        icon.addPixmap(QPixmap(get_themed_asset_image("icons/grid.png")),
-                        QIcon.Normal, QIcon.Off)
-        self.add_left_menu_entry("Conan Quicklaunch", icon, True, self.app_grid)
-        icon = QIcon()
-        icon.addPixmap(QPixmap(get_themed_asset_image("icons/opened_folder.png")),
-                               QIcon.Normal, QIcon.Off)
-        self.add_left_menu_entry("Local Package Explorer", icon, True, self.local_package_explorer)
-        icon.addPixmap(QPixmap(get_themed_asset_image("icons/search_packages.png")),
-                       QIcon.Normal, QIcon.Off)
-        self.add_left_menu_entry("Conan Search", icon, True, self.search_dialog)
+        self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", True, self.app_grid)
+        self.add_left_menu_entry("Local Package Explorer", "icons/opened_folder.png", True, self.local_package_explorer)
+        self.add_left_menu_entry("Conan Search", "icons/search_packages.png", True, self.search_dialog)
 
         # set default page
         self.page_entries["Conan Quicklaunch"][0].click()
 
         view_settings_submenu = self.RightSubMenu("View Settings")
-        self.add_right_bottom_menu_sub_menu("View", view_settings_submenu, QIcon(
-            get_themed_asset_image("icons/package_Settings.png")))
+        self.add_right_bottom_menu_sub_menu("View", view_settings_submenu, "icons/package_Settings.png")
 
         view_settings_submenu.add_button_menu_entry(
-            "Font Size +", self.on_font_size_increased, QIcon(
-                get_themed_asset_image("icons/increase_font.png")), QKeySequence(Qt.CTRL + Qt.Key_Plus))
+            "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence(Qt.CTRL + Qt.Key_Plus))
         view_settings_submenu.add_button_menu_entry(
-            "Font Size - ", self.on_font_size_decreased, QIcon(
-                get_themed_asset_image("icons/decrease_font.png")), QKeySequence(Qt.CTRL + Qt.Key_Minus))
+            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence(Qt.CTRL + Qt.Key_Minus))
 
         s_frame = QFrame(self)
         s_frame.setLayout(QHBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)
-        dark_mode_toggle = AnimatedToggle(self)
-        dark_mode_toggle.setMinimumSize(70, 50)
-        dark_mode_toggle.setMaximumSize(70, 50)
+        self.dark_mode_toggle = AnimatedToggle(self)
+        self.dark_mode_toggle.setMinimumSize(70, 50)
+        self.dark_mode_toggle.setMaximumSize(70, 50)
         s_frame.layout().addWidget(QLabel("Dark mode"))
-        s_frame.layout().addWidget(dark_mode_toggle)
+        s_frame.layout().addWidget(self.dark_mode_toggle)
+        dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
+        self.dark_mode_toggle.setChecked(dark_mode_enabled)
 
-        #self.on_theme_changed
+        self.dark_mode_toggle.stateChanged.connect(self.on_theme_changed)
         view_settings_submenu.add_custom_menu_entry(s_frame)
-        # dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
 
-        self.add_right_bottom_menu_main_page_entry(
-            "About", self._about_dialog, QIcon(get_themed_asset_image("icons/about.png")))
+        self.add_right_bottom_menu_main_page_entry("About", self._about_dialog, "icons/about.png")
 
         # menu
         # self.ui.menu_cleanup_cache.setIcon(QIcon(get_themed_asset_image("icons/cleanup.png")))
@@ -178,7 +167,14 @@ class MainWindow(FluentWindow):
 
     @pyqtSlot()
     def on_theme_changed(self):
-        if self.ui.menu_enable_dark_mode.isChecked():
+        # wait 0,5 seconds, so all animations can finish
+        import datetime
+        start = datetime.datetime.now()
+        while not datetime.datetime.now() - start > datetime.timedelta(milliseconds=600):
+            QApplication.processEvents()
+
+        dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
+        if not dark_mode_enabled:
             app.active_settings.set(GUI_STYLE, GUI_STYLE_DARK)
         else:
             app.active_settings.set(GUI_STYLE, GUI_STYLE_LIGHT)
@@ -186,7 +182,7 @@ class MainWindow(FluentWindow):
         activate_theme(self._qt_app)
 
         # all icons must be reloaded
-        self.load_icons()
+        self.apply_theme()
         self.local_package_explorer.apply_theme()
         self.app_grid.re_init(self.model.app_grid)  # needs a whole reload because models need to be reinitialized
         if self.search_dialog:
