@@ -26,12 +26,12 @@ class AppGridView(QWidget):
         self._main_window = main_window
         current_dir = Path(__file__).parent
         #self._ui = uic.loadUi(current_dir / "app_grid.ui", baseinstance=self)
-        self.setLayout(QVBoxLayout())
+        self.setLayout(QVBoxLayout(self))
         self.tab_widget = QTabWidget(self)
         self.tab_widget.setElideMode(Qt.ElideLeft)
         self.tab_widget.setUsesScrollButtons(True)
         self.layout().addWidget(self.tab_widget)
-        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.layout().setContentsMargins(2, 0, 2, 0)
 
         self.model = model
         self.conan_pkg_installed = main_window.conan_pkg_installed

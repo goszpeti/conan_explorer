@@ -98,9 +98,6 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="handleWidth">
-        <number>5</number>
-       </property>
        <property name="childrenCollapsible">
         <bool>false</bool>
        </property>

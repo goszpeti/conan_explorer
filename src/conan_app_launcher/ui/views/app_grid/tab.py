@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QScrollArea, QGridLayout, QLayout
@@ -8,6 +8,11 @@ from .dialogs import AppEditDialog
 from .model import UiAppLinkModel, UiTabModel
 
 from conan_app_launcher import APPLIST_ENABLED
+
+
+class TabScrollAreaWidgets(QWidget):
+    def __init__(self, parent: Optional['QWidget'] = None):
+        super().__init__(parent)
 
 class TabGrid(QWidget):
     SPACING = 3
@@ -22,10 +27,10 @@ class TabGrid(QWidget):
 
     def init_app_grid(self):
         self.setObjectName("tab_" + self.model.name)
-        self.setContentsMargins(0,0,0,0)
+        self.setContentsMargins(0, 0, 0, 0)
         # this is a dummy, because tab_scroll_area needs a layout
         self.tab_layout = QVBoxLayout(self)
-        self.tab_layout.setContentsMargins(2, 0, 2, 0)
+        self.tab_layout.setContentsMargins(0, 0, 0, 0)
         self.tab_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.tab_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.tab_layout.setSizeConstraint(QLayout.SetMinimumSize)
@@ -42,8 +47,9 @@ class TabGrid(QWidget):
         #self.tab_scroll_area.setUpdatesEnabled(True)
         self.tab_scroll_area.setWidgetResizable(True)
         # this holds all the app links, which are layouts
-        self.tab_scroll_area_widgets = QWidget(self.tab_scroll_area)
+        self.tab_scroll_area_widgets = TabScrollAreaWidgets(self.tab_scroll_area)
         self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.model.name)
+        # self.tab_scroll_area_widgets.setStyleSheet("background-color: #808086;")
         # grid layout for tab_scroll_area_widgets
         if APPLIST_ENABLED:
             self.tab_grid_layout = QVBoxLayout(self.tab_scroll_area_widgets)
@@ -66,7 +72,7 @@ class TabGrid(QWidget):
         self.tab_grid_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.tab_grid_layout.setContentsMargins(self.MARGIN, self.MARGIN, self.MARGIN, self.MARGIN)
         self.tab_grid_layout.setSpacing(self.SPACING)
-        self.tab_grid_layout.setContentsMargins(0, 0, 0, 0)
+        self.tab_grid_layout.setContentsMargins(0, 0, 5, 0)
 
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.layout().addWidget(self.tab_scroll_area)
