@@ -11,6 +11,7 @@ Palette:
  - light-dark: 696969
  - dark: #5c5c5c
  - darker: #474747
+ - almost here: #
  - darkest: #202020
 */
 
@@ -51,7 +52,8 @@ TabGrid{
     background-color: #808086;
 }
 AppLink {
-    background-color: #202020;
+    background-color: #353839;
+    border-radius: 7px;
 }
 QTabWidget{
     background-color: #5c5c5c;
@@ -85,7 +87,7 @@ QFrame#content_frame{
     border-radius: 7px;
 }
 QFrame#content_frame .QFrame{
-    background-color: #202020;
+    background-color: #353839;
     border-radius: 7px;
 }
 
@@ -112,10 +114,11 @@ QFrame#content_frame .QPushButton:checked{
 }
 
 ClickableIcon{
+    border-radius: 5px;
     background-color: transparent;
 }
 ClickableIcon:hover{
-    background-color: #474747;
+    background-color: #5c5c5c;
 }
 ClickableIcon:pressed{
     border-style: solid;
@@ -214,6 +217,13 @@ QPushButton#close_button:pressed{
 QMainWindow{
     background-color: transparent;
 }
+QDialog{
+    background-color: #474747;
+}
+QDialog::title {
+    background-color: #696969;
+}
+ 
 
 QTabBar::tab {
     border-top-left-radius: 6px;
