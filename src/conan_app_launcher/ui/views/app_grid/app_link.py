@@ -208,6 +208,10 @@ class AppLink(QFrame):
             self._app_user_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
             self._app_channel_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
 
+        if APPLIST_ENABLED:
+            self._edit_button.clicked.connect(self.open_edit_dialog)
+            self._remove_button.clicked.connect(self.remove)
+
         self._init_context_menu()
 
     def _init_context_menu(self):
