@@ -26,8 +26,10 @@ from .widgets.toggle import AnimatedToggle
 
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
+
+    # signals for inter page communication
     conan_pkg_installed = pyqtSignal(str, str)  # conan_ref, pkg_id
-    conan_pkg_removed = pyqtSignal(str, str)  # conan_ref, pkg_id
+    conan_pkg_removed = pyqtSignal(str, str)  # conan_ref, pkg_ids
 
     display_versions_changed = pyqtSignal()
     display_channels_changed = pyqtSignal()
@@ -46,9 +48,10 @@ class MainWindow(FluentWindow):
         Logger.init_qt_logger(self.log_console_message)
         self.log_console_message.connect(self.write_log)
 
-        self.app_grid = AppGridView(self, self.model.app_grid)
-        self.local_package_explorer = LocalConanPackageExplorer(self)
-        self.search_dialog: Optional[ConanSearchDialog] = ConanSearchDialog(self, self)
+        self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
+        self.local_package_explorer = LocalConanPackageExplorer(self, self.conan_pkg_removed, self.page_widgets)
+        self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed,
+                                               self.conan_pkg_removed, self.page_widgets)
 
         # initialize view user settings
         # self.ui.menu_toggle_display_versions.setChecked(app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
@@ -78,7 +81,7 @@ class MainWindow(FluentWindow):
         self.add_left_menu_entry("Conan Search", "icons/search_packages.png", True, self.search_dialog)
 
         # set default page
-        self.page_entries["Conan Quicklaunch"][0].click()
+        self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
 
         view_settings_submenu = self.RightSubMenu("View Settings")
         self.add_right_bottom_menu_sub_menu("View", view_settings_submenu, "icons/package_Settings.png")

@@ -42,11 +42,11 @@ QFrame#right_menu_frame{
 }
 
 QLabel#page_title {
-    font-size: {{MAIN_FONT_SIZE + 12 }}pt;
     border-style: solid;
     border-bottom-color: #6699CC;
     border-bottom-width: 2px;
-    padding: 3px;
+    margin: 1px;
+    font-size: {{MAIN_FONT_SIZE + 12 }}pt;
 }
 
 QLabel#right_menu_top_title_label {

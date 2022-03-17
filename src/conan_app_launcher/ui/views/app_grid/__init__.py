@@ -1,11 +1,11 @@
-from pathlib import Path
 from typing import TYPE_CHECKING, List
 
+from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from .model import UiAppLinkModel, UiTabModel
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtBoundSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QWidget, QInputDialog, QMenu, QAction, QMessageBox, QTabWidget, QVBoxLayout
 
@@ -20,12 +20,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class AppGridView(QWidget):
 
-    def __init__(self, main_window: "MainWindow", model: "UiAppGridModel"):
-        super().__init__(main_window)
-
-        self._main_window = main_window
-        current_dir = Path(__file__).parent
-        #self._ui = uic.loadUi(current_dir / "app_grid.ui", baseinstance=self)
+    def __init__(self, parent, model: "UiAppGridModel", conan_pkg_installed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
+        super().__init__(parent)
+        self.page_widgets = page_widgets
         self.setLayout(QVBoxLayout(self))
         self.tab_widget = QTabWidget(self)
         self.tab_widget.setElideMode(Qt.ElideLeft)
@@ -34,8 +31,7 @@ class AppGridView(QWidget):
         self.layout().setContentsMargins(2, 0, 2, 0)
 
         self.model = model
-        self.conan_pkg_installed = main_window.conan_pkg_installed
-        self.conan_pkg_installed.connect(self.update_conan_info)
+        conan_pkg_installed.connect(self.update_conan_info)
 
         self.tab_widget.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
         self.tab_widget.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
@@ -73,20 +69,20 @@ class AppGridView(QWidget):
 
     def on_tab_context_menu_requested(self, position):
         index = self.tab_widget.tabBar().tabAt(position)
-        menu = QMenu()
+        menu = QMenu(self)
         self.menu = menu
 
-        rename_action = QAction("Rename", self._main_window)
+        rename_action = QAction("Rename", self)
         rename_action.setIcon(QIcon(get_themed_asset_image("icons/rename.png")))
         menu.addAction(rename_action)
         rename_action.triggered.connect(lambda: self.on_tab_rename(index))
 
-        remove_action = QAction("Remove", self._main_window)
+        remove_action = QAction("Remove", self)
         remove_action.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
         menu.addAction(remove_action)
         remove_action.triggered.connect(lambda: self.on_tab_remove(index))
 
-        new_tab_action = QAction("Add new tab", self._main_window)
+        new_tab_action = QAction("Add new tab", self)
         new_tab_action.setIcon(QIcon(get_themed_asset_image("icons/plus.png")))
         menu.addAction(new_tab_action)
         new_tab_action.triggered.connect(self.on_new_tab)
@@ -96,8 +92,8 @@ class AppGridView(QWidget):
 
     def on_new_tab(self):
         # call tab on_app_link_add
-        new_tab_dialog = QInputDialog(self._main_window)
-        text, accepted = new_tab_dialog.getText(self._main_window, 'Add tab',
+        new_tab_dialog = QInputDialog(self)
+        text, accepted = new_tab_dialog.getText(self, 'Add tab',
                                                 'Enter name:')
         if accepted:
             # do nothing on empty text
@@ -115,8 +111,8 @@ class AppGridView(QWidget):
     def on_tab_rename(self, index):
         tab: TabGrid = self.tab_widget.widget(index)
 
-        rename_tab_dialog = QInputDialog(self._main_window)
-        text, accepted = rename_tab_dialog.getText(self._main_window, 'Rename tab',
+        rename_tab_dialog = QInputDialog(self)
+        text, accepted = rename_tab_dialog.getText(self, 'Rename tab',
                                                    'Enter new name:', text=tab.model.name)
         if accepted:
             tab.model.name = text
@@ -127,7 +123,7 @@ class AppGridView(QWidget):
         # last tab can't be deleted! # TODO dialog
         if len(self.model.tabs) == 1:
             return
-        msg = QMessageBox(parent=self._main_window)
+        msg = QMessageBox(parent=self)
         msg.setWindowTitle("Delete tab")
         msg.setText("Are you sure, you want to delete this tab\t")
         msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
@@ -157,7 +153,7 @@ class AppGridView(QWidget):
 
     def open_new_app_dialog_from_extern(self, app_config: UiAppLinkConfig):
         """ Called from pacakge explorer, where tab is unknown"""
-        dialog = QInputDialog(self._main_window)
+        dialog = QInputDialog(self)
         tab_list = list(item.name for item in self.model.tabs)
         model = UiAppLinkModel()
         dialog.setLabelText("Choose a tab for the new AppLink!")
@@ -170,7 +166,7 @@ class AppGridView(QWidget):
                     tab.open_app_link_add_dialog(model.load(app_config, tab.model))
 
     def update_conan_info(self, conan_ref: str, pkg_id: str):
-        if self._main_window.isHidden():  # the gui is about to shut down
+        if self.isHidden():  # the gui is about to shut down
             return
         # call update on every entry which has this ref
         for tab in self.get_tabs():

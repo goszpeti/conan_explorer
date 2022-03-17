@@ -3,7 +3,7 @@ import platform
 from ctypes.wintypes import MSG
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Type, TypeVar, Union
 
 from conan_app_launcher import app
 from conan_app_launcher.app import asset_path
@@ -13,7 +13,7 @@ from PyQt5.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
 from PyQt5.QtGui import QColor, QHoverEvent, QIcon, QKeySequence, QPixmap
 from PyQt5.QtWidgets import (QGraphicsDropShadowEffect, QLabel,
                              QMainWindow, QPushButton, QSizePolicy,
-                             QSpacerItem, QVBoxLayout, QWidget)
+                             QSpacerItem, QVBoxLayout, QWidget, QShortcut)
 
 from conan_app_launcher.settings import FONT_SIZE
 from .common import QLoader, activate_theme, get_themed_asset_image
@@ -84,13 +84,47 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
             if not shortcut:
                 return
-            button.setShortcut(shortcut)
-            # shortcut_obj = QShortcut(shortcut, self)
-            # shortcut_obj.activated.connect(target)
+            # use global shortcut instead of button.setShortcut -> Works from anywhere
+            shortcut_obj = QShortcut(shortcut, self)
+            shortcut_obj.activated.connect(target)
             button.setText(f"{button.text()} ({shortcut.toString()})")
 
         
         # TODO add embeddable widgets like buttons, etc
+
+    class PageStore():
+
+        def __init__(self) -> None:
+            self._page_widgets: Dict[str, Tuple[QPushButton, QWidget]] = {}
+
+        def get_page_by_name(self, name: str) -> QWidget:
+            return self._page_widgets[name][1]
+
+        def get_button_by_name(self, name: str) -> QPushButton:
+            return self._page_widgets[name][0]
+
+
+        def get_button_by_type(self, type: Type) -> QPushButton:
+            for _, (button, page) in self._page_widgets.items():
+                if isinstance(page, type):
+                    return button
+            raise Exception(f"{type} not in page_widgets!")
+
+        T = TypeVar('T')
+        def get_page_by_type(self, type: Type[T]) -> T:
+            for _, (_, page) in self._page_widgets.items():
+                if isinstance(page, type):
+                    return page
+            raise Exception(f"{type} not in page_widgets!")
+        
+        def get_all_buttons(self):
+            buttons = []
+            for button, _ in self._page_widgets.values():
+                buttons.append(button)
+            return buttons
+
+        def add_new_page(self, name, button, page):
+            self._page_widgets[name] = (button, page)
 
 
     def __init__(self, title_text: str="", native_windows_fcns=True, rounded_corners=True):
@@ -103,9 +137,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
                             Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
         self.use_native_windows_fcns = True if platform.system() == "Windows" and native_windows_fcns else False
         # all buttons and widgets to be able to shown on the main page (from settings and left menu)
-        self.page_entries: Dict[str, Tuple[QPushButton, QWidget]] = {}
+        self.page_widgets = FluentWindow.PageStore()
         self.left_menu_min_size = 70
-        self.left_menu_max_size = 230
+        self.left_menu_max_size = 250
         self.right_menu_min_size = 0
         self.right_menu_max_size = 270
 
@@ -117,11 +151,11 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.title_text = title_text
         #QtWin.enableBlurBehindWindow(self)
 
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.setWindowOpacity(0.98)
+        #self.setAttribute(Qt.WA_TranslucentBackground, True)
+        #self.setWindowOpacity(0.98)
         # TODO this really expensive
         effect = QGraphicsDropShadowEffect()
-        effect.setOffset(0, 0)
+        #effect.setOffset(0, 0)
         effect.setColor(QColor(68, 68, 68))
         effect.setBlurRadius(10)
         #self.setGraphicsEffect(effect)
@@ -218,7 +252,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         page_widget.setMinimumHeight(300) # enable resizing of console on every page
 
         button.clicked.connect(self.switch_page)
-        self.page_entries[name] = (button, page_widget)
+        self.page_widgets.add_new_page(name, button, page_widget)
 
         if is_upper_menu:
            self.ui.left_menu_middle_subframe.layout().addWidget(button)
@@ -230,7 +264,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     # can only be called for top level menu
     def add_right_bottom_menu_main_page_entry(self, name: str, page_widget: QWidget, asset_icon:str=""):
         button = self.add_right_menu_entry(name, asset_icon, is_upper_menu=False)
-        self.page_entries[name] = (button, page_widget)
+        self.page_widgets.add_new_page(name, button, page_widget)
         self.ui.page_stacked_widget.addWidget(page_widget)
         button.clicked.connect(self.switch_page)
         button.clicked.connect(self.toggle_right_menu)
@@ -266,20 +300,16 @@ class FluentWindow(QMainWindow, ThemedWidget):
         return button
 
     def switch_page(self):
-        button: QPushButton = self.sender()
-        name = button.objectName()
-        _, page = self.page_entries[name]
+        sender_button: QPushButton = self.sender()
+        name = sender_button.objectName()
+        page = self.page_widgets.get_page_by_name(name)
         # switch page_stacked_widget to the saved page
         self.ui.page_stacked_widget.setCurrentWidget(page)
         # TODO change button stylings - reset old selections and highlight new one
-        
-        for _ ,(inactive_button, _) in self.page_entries.items():
-            inactive_button.setChecked(False)
-            #inactive_button.setStyleSheet(set_style_sheet_option(
-            #    inactive_button.styleSheet(), "background-color", "transparent"))
+        for button in self.page_widgets.get_all_buttons():
+            button.setChecked(False)
 
-        #button.setStyleSheet(set_style_sheet_option(button.styleSheet(), "background-color", "#B7B7B7"))
-        button.setChecked(True)
+        sender_button.setChecked(True)
         self.ui.page_title.setText(name)
         self.ui.page_info_label.setText("")
 

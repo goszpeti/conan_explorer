@@ -1,14 +1,16 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Tuple
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.common import QLoader, get_themed_asset_image, FileSystemModel
 from conan_app_launcher.ui.data import UiAppLinkConfig
+from conan_app_launcher.ui.views import AppGridView
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import uic
@@ -25,9 +27,11 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class LocalConanPackageExplorer(QWidget):
-    def __init__(self, main_window: "MainWindow"):
-        super().__init__(main_window)
-        self._main_window = main_window
+
+    def __init__(self, parent: QWidget, conan_pkg_removed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
+        super().__init__(parent)
+        self.page_widgets = page_widgets
+        self.conan_pkg_removed = conan_pkg_removed
         self.pkg_sel_model = None
         self._pkg_sel_model_loader = QLoader(self)
         self._pkg_sel_model_loaded = True
@@ -35,7 +39,6 @@ class LocalConanPackageExplorer(QWidget):
         current_dir = Path(__file__).parent
         self._ui = uic.loadUi(current_dir / "package_explorer.ui", baseinstance=self)
 
-        # TODO belongs in a model?
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
         self._ui.refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
@@ -48,7 +51,7 @@ class LocalConanPackageExplorer(QWidget):
 
         self._ui.refresh_button.clicked.connect(self.on_pkg_refresh_clicked)
         self._ui.package_filter_edit.textChanged.connect(self.set_filter_wildcard)
-        main_window.conan_pkg_removed.connect(self.on_conan_pkg_removed)
+        conan_pkg_removed.connect(self.on_conan_pkg_removed)
 
     def showEvent(self, a0: QShowEvent) -> None:
         self.refresh_pkg_selection_view(update=False)  # only update the first time
@@ -64,22 +67,22 @@ class LocalConanPackageExplorer(QWidget):
     def _init_selection_context_menu(self):
         self.select_cntx_menu = QMenu()
 
-        self.copy_ref_action = QAction("Copy reference", self._main_window)
+        self.copy_ref_action = QAction("Copy reference", self)
         self.copy_ref_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self.on_copy_ref_requested)
 
-        self.open_export_action = QAction("Open export Folder", self._main_window)
+        self.open_export_action = QAction("Open export Folder", self)
         self.open_export_action.setIcon(QIcon(get_themed_asset_image("icons/opened_folder.png")))
         self.select_cntx_menu.addAction(self.open_export_action)
         self.open_export_action.triggered.connect(self.on_open_export_folder_requested)
 
-        self.show_conanfile_action = QAction("Show conanfile", self._main_window)
+        self.show_conanfile_action = QAction("Show conanfile", self)
         self.show_conanfile_action.setIcon(QIcon(get_themed_asset_image("icons/file_preview.png")))
         self.select_cntx_menu.addAction(self.show_conanfile_action)
         self.show_conanfile_action.triggered.connect(self.on_show_conanfile_requested)
 
-        self.remove_ref_action = QAction("Remove package", self._main_window)
+        self.remove_ref_action = QAction("Remove package", self)
         self.remove_ref_action.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
         self.select_cntx_menu.addAction(self.remove_ref_action)
         self.remove_ref_action.triggered.connect(self.on_remove_ref_requested)
@@ -140,14 +143,14 @@ class LocalConanPackageExplorer(QWidget):
         pkg_id = ""
         if pkg_info:
             pkg_id = pkg_info.get("id", "")
-        dialog = ConanRemoveDialog(self._main_window, conan_ref, pkg_id, self._main_window.conan_pkg_removed)
+        dialog = ConanRemoveDialog(self, conan_ref, pkg_id, self.conan_pkg_removed)
         dialog.show()
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
         # clear file view if this pkg is selected
         if self._current_ref == conan_ref:
             self.close_files_view()
-        # TODO this can be done cheaper?
+        # TODO this can be done cheaper by removing the item from the model
         self.refresh_pkg_selection_view()
 
     # Global pane and cross connection slots
@@ -162,7 +165,7 @@ class LocalConanPackageExplorer(QWidget):
         self.pkg_sel_model = PkgSelectModel()
         self._pkg_sel_model_loaded = False
         self._pkg_sel_model_loader.async_loading(
-            self._main_window, self.pkg_sel_model.setup_model_data, (), self.finish_select_model_init, "Reading Packages")
+            self, self.pkg_sel_model.setup_model_data, (), self.finish_select_model_init, "Reading Packages")
 
     def finish_select_model_init(self):
         if self.pkg_sel_model:
@@ -191,8 +194,7 @@ class LocalConanPackageExplorer(QWidget):
 
     def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
-        self._main_window.activateWindow()
-        self._ui.main_toolbox.setCurrentIndex(1)  # changes to this page and loads
+        self.page_widgets.get_button_by_type(type(self)).click()  # changes to this page and loads
        # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
         self._pkg_sel_model_loader.wait_for_finished()
 
@@ -222,7 +224,7 @@ class LocalConanPackageExplorer(QWidget):
 
         # map to package view model
         proxy_index = self.pkg_sel_model.index(ref_row, 0, QModelIndex())
-        sel_model = self._main_window.package_select_view.selectionModel()
+        sel_model = self._ui.package_select_view.selectionModel()
         view_model = self._ui.package_select_view.model()
         self._ui.package_select_view.expand(view_model.mapFromSource(proxy_index))
 
@@ -309,51 +311,51 @@ class LocalConanPackageExplorer(QWidget):
         run_file(file_path, True, args="")
 
     def _init_pkg_file_context_menu(self):
-        self.file_cntx_menu = QMenu() #self._main_window)
+        self.file_cntx_menu = QMenu(self)
 
-        self.open_fm_action = QAction("Show in File Manager", self._main_window)
+        self.open_fm_action = QAction("Show in File Manager", self)
         self.open_fm_action.setIcon(QIcon(get_themed_asset_image("icons/file-explorer.png")))
         self.file_cntx_menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_file_in_file_manager)
 
-        self.copy_as_path_action = QAction("Copy as Path", self._main_window)
+        self.copy_as_path_action = QAction("Copy as Path", self)
         self.copy_as_path_action.setIcon(QIcon(get_themed_asset_image("icons/copy_to_clipboard.png")))
         self.file_cntx_menu.addAction(self.copy_as_path_action)
         self.copy_as_path_action.triggered.connect(self.on_copy_file_as_path)
 
-        self.open_terminal_action = QAction("Open terminal here", self._main_window)
+        self.open_terminal_action = QAction("Open terminal here", self)
         self.open_terminal_action.setIcon(QIcon(get_themed_asset_image("icons/cmd.png")))
         self.file_cntx_menu.addAction(self.open_terminal_action)
         self.open_terminal_action.triggered.connect(self.on_open_terminal_in_dir)
 
         self.file_cntx_menu.addSeparator()
 
-        self.copy_action = QAction("Copy", self._main_window)
+        self.copy_action = QAction("Copy", self)
         self.copy_action.setIcon(QIcon(get_themed_asset_image("icons/copy.png")))
         self.copy_action.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_C))
         self.file_cntx_menu.addAction(self.copy_action)
         # for the shortcut to work, the action has to be added to a higher level widget
-        self._main_window.addAction(self.copy_action)
+        self.addAction(self.copy_action)
         self.copy_action.triggered.connect(self.on_file_copy)
 
-        self.paste_action = QAction("Paste", self._main_window)
+        self.paste_action = QAction("Paste", self)
         self.paste_action.setIcon(QIcon(get_themed_asset_image("icons/paste.png")))
         self.paste_action.setShortcut(QKeySequence("Ctrl+v"))  # Qt.CTRL + Qt.Key_V))
         self.paste_action.setShortcutContext(Qt.ApplicationShortcut)
-        self._main_window.addAction(self.paste_action)
+        self.addAction(self.paste_action)
         self.file_cntx_menu.addAction(self.paste_action)
         self.paste_action.triggered.connect(self.on_file_paste)
 
-        self.delete_action = QAction("Delete", self._main_window)
+        self.delete_action = QAction("Delete", self)
         self.delete_action.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
         self.delete_action.setShortcut(QKeySequence(Qt.Key_Delete))
         self.file_cntx_menu.addAction(self.delete_action)
-        self._main_window.addAction(self.delete_action)
+        self.addAction(self.delete_action)
         self.delete_action.triggered.connect(self.on_file_delete)
 
         self.file_cntx_menu.addSeparator()
 
-        self.add_link_action = QAction("Add link to App Grid", self._main_window)
+        self.add_link_action = QAction("Add link to App Grid", self)
         self.add_link_action.setIcon(QIcon(get_themed_asset_image("icons/add_link.png")))
         self.file_cntx_menu.addAction(self.add_link_action)
         self.add_link_action.triggered.connect(self.on_add_app_link_from_file)
@@ -374,7 +376,7 @@ class LocalConanPackageExplorer(QWidget):
 
     def on_file_delete(self):
         file = self._get_selected_pkg_file()
-        msg = QMessageBox(parent=self._main_window)
+        msg = QMessageBox(parent=self)
         msg.setWindowTitle("Delete file")
         msg.setText("Are you sure, you want to delete this file\t")
         msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
@@ -433,7 +435,7 @@ class LocalConanPackageExplorer(QWidget):
 
         app_config = UiAppLinkConfig(
             name="NewLink", conan_ref=self.get_selected_conan_ref(), executable=str(rel_path))
-        self._main_window.app_grid.open_new_app_dialog_from_extern(app_config)
+        self.page_widgets.get_page_by_type(AppGridView).open_new_app_dialog_from_extern(app_config)
 
     def on_open_file_in_file_manager(self, model_index):
         file_path = Path(self._get_selected_pkg_file())

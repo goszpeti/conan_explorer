@@ -338,8 +338,10 @@ class AppLink(QFrame):
         message_box.setIcon(QMessageBox.Question)
         reply = message_box.exec_()
         if reply == QMessageBox.Yes:
-            self.delete()
+            self.hide() # TODO call extra function
             self.model.parent.apps.remove(self.model)
+            self._parent_tab.app_links.remove(self)
+
             self.model.save()
             self._parent_tab.redraw_grid(force=True)
 

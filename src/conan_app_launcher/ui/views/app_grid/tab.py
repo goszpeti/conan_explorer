@@ -120,8 +120,10 @@ class TabGrid(QWidget):
                     #break
                     column = 0
                     row += 1
+            app_link.show()
         # spacer for compressing app links, when hiding cboxes
         if APPLIST_ENABLED:
+            pass
             self.tab_grid_layout.addItem(self._v_spacer)
         else:
             self.tab_grid_layout.addItem(self._v_spacer, row + 1, 0)
@@ -135,7 +137,7 @@ class TabGrid(QWidget):
         self._edit_app_dialog = AppEditDialog(new_model, parent=None) #self.parentWidget())
         reply = self._edit_app_dialog.exec_()
         if reply == AppEditDialog.Accepted:
-            app_link = AppLink(self, new_model)
+            app_link = AppLink(None, self, new_model)
             app_link.load()
             app_link.model.update_from_cache()
             self.add_app_link_to_tab(app_link)
@@ -148,7 +150,7 @@ class TabGrid(QWidget):
         if APPLIST_ENABLED:
             self.app_links.append(app_link)
             self.model.apps.append(app_link.model)
-            self.tab_grid_layout.addWidget(app_link)
+            self.tab_grid_layout.insertWidget(len(self.app_links)-2, app_link)
             self.tab_grid_layout.update()
             return
 
@@ -163,7 +165,7 @@ class TabGrid(QWidget):
 
     def remove_all_app_links(self):
         """ 
-        Clears all AppLink by actually deleting them. Manipulating self.tab_grid_layout does not work!
+        Clears all AppLinks.
         Can then be reloaded with load_apps_from_model.
         """
         # remove spacer - needed so, the layout can be resized correctly, if layout shifts
@@ -171,6 +173,7 @@ class TabGrid(QWidget):
         self.tab_grid_layout.removeItem(self._h_spacer)
         for app_link in self.app_links:
             self.tab_grid_layout.removeWidget(app_link)
+            app_link.hide()
 
     def redraw_grid(self, force=False):
         """ Works only as long as the order does not change. Used for resizing the window. """

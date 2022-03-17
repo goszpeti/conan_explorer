@@ -1,35 +1,32 @@
 import pprint
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import open_file
+from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.common import QLoader, get_themed_asset_image
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conans.model.ref import ConanFileReference
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QPoint
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QPoint, pyqtBoundSignal
 from PyQt5.QtWidgets import QDialog, QWidget, QAction, QListWidgetItem,  QMenu, QApplication, QShortcut, QMessageBox
 from PyQt5.QtGui import QIcon, QKeySequence
+
+from conan_app_launcher.ui.views.package_explorer.local_packages import LocalConanPackageExplorer
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
 
-if TYPE_CHECKING:  # pragma: no cover
-    from conan_app_launcher.ui.main_window import MainWindow
-
-
 class ConanSearchDialog(QDialog):
-    conan_pkg_installed = pyqtSignal(str, str)  # conan_ref, pkg_id
-    conan_pkg_removed = pyqtSignal(str, str)  # conan_ref, pkg_id
 
-    def __init__(self, parent: Optional[QWidget] = None, main_window: Optional["MainWindow"] = None):
+    def __init__(self, parent: Optional[QWidget], conan_pkg_installed: pyqtBoundSignal, conan_pkg_removed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
         # Add minimize and maximize buttons
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
-        if main_window:
-            self._main_window = main_window  # needed for signals and local pkg explorer, if started from main window
-        else:
-            self._main_window = self
+        self.page_widgets = page_widgets
+        self.conan_pkg_installed = conan_pkg_installed
+        self.conan_pkg_removed = conan_pkg_removed
+
         current_dir = Path(__file__).parent
         self._ui = uic.loadUi(current_dir / "conan_search.ui", baseinstance=self)
         
@@ -100,12 +97,11 @@ class ConanSearchDialog(QDialog):
         self.select_cntx_menu.addAction(self.install_pkg_action)
         self.install_pkg_action.triggered.connect(self.on_install_pkg_requested)
 
-        if self._main_window:
-            self.show_in_pkg_exp_action = QAction("Show in Package Explorer", self)
-            self.show_in_pkg_exp_action.setIcon(QIcon(
-                get_themed_asset_image("icons/search_packages.png")))
-            self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
-            self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
+        self.show_in_pkg_exp_action = QAction("Show in Package Explorer", self)
+        self.show_in_pkg_exp_action.setIcon(QIcon(
+            get_themed_asset_image("icons/search_packages.png")))
+        self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
+        self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 
     @pyqtSlot(QPoint)
     def on_pkg_context_menu_requested(self, position: QPoint):
@@ -118,11 +114,10 @@ class ConanSearchDialog(QDialog):
             return
         if item.empty:
             return
-        if self._main_window:
-            if item.is_installed:
-                self.show_in_pkg_exp_action.setEnabled(True)
-            else:
-                self.show_in_pkg_exp_action.setEnabled(False)
+        if item.is_installed:
+            self.show_in_pkg_exp_action.setEnabled(True)
+        else:
+            self.show_in_pkg_exp_action.setEnabled(False)
         self.select_cntx_menu.exec_(self._ui.search_results_tree_view.mapToGlobal(position))
 
     @pyqtSlot()
@@ -132,11 +127,8 @@ class ConanSearchDialog(QDialog):
         # and not be able to emit to the GUI thread.
         if not self._ui.search_button.isEnabled():
             return
-        conan_pkg_removed_signal = None
-        if self._main_window:
-            conan_pkg_removed_signal = self._main_window.conan_pkg_removed
 
-        self._pkg_result_model = PkgSearchModel(self._main_window.conan_pkg_installed, conan_pkg_removed_signal)
+        self._pkg_result_model = PkgSearchModel(self.conan_pkg_installed, self.conan_pkg_removed)
         self._pkg_result_loader.async_loading(
             self, self._load_search_model, (), self._finish_load_search_model, "Searching for packages...")
         # reset info text
@@ -144,13 +136,11 @@ class ConanSearchDialog(QDialog):
 
     @pyqtSlot()
     def on_show_in_pkg_exp(self):
-        """ Switch to the main gui and select the item (ref or pkg) in the Local Package Epxlorer. """
-        if not self._main_window:
-            return
+        """ Switch to the main gui and select the item (ref or pkg) in the Local Package Explorer. """
         item = self.get_selected_source_item(self._ui.search_results_tree_view)
         if not item:
             return
-        self._main_window.local_package_explorer.select_local_package_from_ref(item.get_conan_ref(), refresh=True)
+        self.page_widgets.get_page_by_type(LocalConanPackageExplorer).select_local_package_from_ref(item.get_conan_ref(), refresh=True)
 
     def _load_search_model(self):
         """ Initialize tree view model by searching in conan """
@@ -193,7 +183,7 @@ class ConanSearchDialog(QDialog):
     def on_install_pkg_requested(self):
         """ Spawn the Conan install dialog """
         combined_ref = self.get_selected_combined_ref()
-        dialog = ConanInstallDialog(self, combined_ref, self._main_window.conan_pkg_installed)
+        dialog = ConanInstallDialog(self, combined_ref, self.conan_pkg_installed)
         dialog.show()
 
     def get_selected_remotes(self) -> List[str]:
