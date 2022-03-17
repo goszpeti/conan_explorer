@@ -55,6 +55,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     class RightSubMenu(QWidget, ThemedWidget):
         def __init__(self, name: str = ""):
             super().__init__()
+            self.name = name
             self.setLayout(QVBoxLayout(self))
             self.layout().addItem(QSpacerItem(
                 20, 200, QSizePolicy.Minimum, QSizePolicy.Expanding))
@@ -270,13 +271,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
         button.clicked.connect(self.toggle_right_menu)
         page_widget.setParent(self.ui.page_stacked_widget)
 
-    def add_right_bottom_menu_sub_menu(self, name: str, sub_menu: RightSubMenu, asset_icon:str=""):
-        button = self.add_right_menu_entry(name, asset_icon, is_upper_menu=False)
+    def add_right_bottom_menu_sub_menu(self, sub_menu: RightSubMenu, asset_icon:str=""):
+        button = self.add_right_menu_entry(sub_menu.name, asset_icon, is_upper_menu=False)
         self.ui.right_menu_bottom_content_sw.addWidget(sub_menu)
         sub_menu.setParent(self.ui.right_menu_bottom_content_sw)
         button.clicked.connect(self.ui.right_menu_bottom_back_button.show)
         button.clicked.connect(lambda: self.ui.right_menu_bottom_content_sw.setCurrentWidget(sub_menu))
-
+        return button
 
     def add_right_menu_entry(self, name: str, asset_icon: str, is_upper_menu=False):
         button = QPushButton(self.ui.right_menu_frame)

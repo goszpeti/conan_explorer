@@ -57,40 +57,36 @@ class MainWindow(FluentWindow):
         # self.ui.menu_toggle_display_versions.setChecked(app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
         # self.ui.menu_toggle_display_users.setChecked(app.active_settings.get_bool(DISPLAY_APP_USERS))
         # self.ui.menu_toggle_display_channels.setChecked(app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
-        # self.ui.menu_enable_dark_mode.setChecked(dark_mode_enabled)
 
-        # self.ui.menu_about_action.triggered.connect(self._about_dialog.show)
         # self.ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
-        # self.ui.menu_search_in_remotes.triggered.connect(self.open_conan_search_dialog)
-        # self.ui.menu_search_in_remotes.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_F))
         # self.ui.menu_toggle_display_versions.triggered.connect(self.display_versions_setting_toggled)
         # self.ui.menu_toggle_display_users.triggered.connect(self.apply_display_users_setting_toggled)
         # self.ui.menu_toggle_display_channels.triggered.connect(self.display_channels_setting_toggled)
-        # self.ui.menu_enable_dark_mode.triggered.connect(self.on_theme_changed)
-        # self.ui.menu_increase_font_size.triggered.connect(self.on_font_size_increased)
-        # self.ui.menu_increase_font_size.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_Plus))
-        # self.ui.menu_decrease_font_size.triggered.connect(self.on_font_size_decreased)
-        # self.ui.menu_decrease_font_size.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_Minus))
 
         # self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
         # self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
         
         # self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
         self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", True, self.app_grid)
-        self.add_left_menu_entry("Local Package Explorer", "icons/opened_folder.png", True, self.local_package_explorer)
+        self.add_left_menu_entry("Local Package Explorer", "icons/package.png", True, self.local_package_explorer)
         self.add_left_menu_entry("Conan Search", "icons/search_packages.png", True, self.search_dialog)
-
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
 
-        view_settings_submenu = self.RightSubMenu("View Settings")
-        self.add_right_bottom_menu_sub_menu("View", view_settings_submenu, "icons/package_Settings.png")
+        # right menu
+        view_settings_submenu = self.RightSubMenu("View")
+        self.add_right_bottom_menu_sub_menu(view_settings_submenu, "icons/package_settings.png")
+
+        view_settings_submenu = self.RightSubMenu("Conan")
+        conan_button = self.add_right_bottom_menu_sub_menu(view_settings_submenu)
+        conan_button.setIcon(QIcon(str(app.asset_path / "icons/conan.png")))
 
         view_settings_submenu.add_button_menu_entry(
             "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence(Qt.CTRL + Qt.Key_Plus))
         view_settings_submenu.add_button_menu_entry(
             "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence(Qt.CTRL + Qt.Key_Minus))
 
+        # Dark mode - TODO: add generic name + toggle entry function to Submenu
         s_frame = QFrame(self)
         s_frame.setLayout(QHBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)
@@ -105,6 +101,8 @@ class MainWindow(FluentWindow):
         self.dark_mode_toggle.stateChanged.connect(self.on_theme_changed)
         view_settings_submenu.add_custom_menu_entry(s_frame)
 
+        self.add_right_menu_entry("Remove Locks", "icons/remove-lock.png").clicked.connect(app.conan_api.remove_locks)
+        self.add_right_menu_entry("Clean Conan Cache", "icons/cleanup").clicked.connect(self.open_cleanup_cache_dialog)
         self.add_right_bottom_menu_main_page_entry("About", self._about_dialog, "icons/about.png")
 
         # menu
