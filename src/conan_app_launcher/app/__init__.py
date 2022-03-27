@@ -2,7 +2,6 @@ import os
 import platform
 import sys
 import tempfile
-from typing import Optional
 
 from conan_app_launcher import PKG_NAME, SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
 from conan_app_launcher.core import ConanApi, ConanWorker

@@ -3,26 +3,24 @@ from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import (ADD_APP_LINK_BUTTON, ADD_TAB_BUTTON, APPLIST_ENABLED, PathLike,
-                                user_save_path)
+from conan_app_launcher import PathLike, user_save_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan import ConanCleanup
-from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
+from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtGui import QIcon, QPixmap, QKeySequence
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox, QFrame, QHBoxLayout, QLabel
+from PyQt5.QtGui import QIcon, QKeySequence
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-from .common import QLoader, activate_theme, get_themed_asset_image
+from .common import QLoader, activate_theme
 from .views.about_page import AboutPage
 from .fluent_window import FluentWindow
 from .model import UiApplicationModel
 from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
-from .widgets.toggle import AnimatedToggle
 
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
@@ -42,75 +40,69 @@ class MainWindow(FluentWindow):
         self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
 
-        self._about_dialog = AboutPage(self)
-        self.load_icons()
+
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self.log_console_message)
         self.log_console_message.connect(self.write_log)
 
+        self.about_page = AboutPage(self)
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
         self.local_package_explorer = LocalConanPackageExplorer(self, self.conan_pkg_removed, self.page_widgets)
         self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed,
                                                self.conan_pkg_removed, self.page_widgets)
 
-        # initialize view user settings
-        # self.ui.menu_toggle_display_versions.setChecked(app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
-        # self.ui.menu_toggle_display_users.setChecked(app.active_settings.get_bool(DISPLAY_APP_USERS))
-        # self.ui.menu_toggle_display_channels.setChecked(app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
+        self._init_left_menu()
+        self._init_right_menu()
 
-        # self.ui.menu_open_config_file.triggered.connect(self.open_config_file_dialog)
-        # self.ui.menu_toggle_display_versions.triggered.connect(self.display_versions_setting_toggled)
-        # self.ui.menu_toggle_display_users.triggered.connect(self.apply_display_users_setting_toggled)
-        # self.ui.menu_toggle_display_channels.triggered.connect(self.display_channels_setting_toggled)
 
-        # self.ui.menu_cleanup_cache.triggered.connect(self.open_cleanup_cache_dialog)
-        # self.ui.menu_remove_locks.triggered.connect(app.conan_api.remove_locks)
-        
-        # self.ui.main_toolbox.currentChanged.connect(self.on_main_view_changed)
+    def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", True, self.app_grid)
         self.add_left_menu_entry("Local Package Explorer", "icons/package.png", True, self.local_package_explorer)
         self.add_left_menu_entry("Conan Search", "icons/search_packages.png", True, self.search_dialog)
+
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
 
-        # right menu
-        view_settings_submenu = self.RightSubMenu("View")
-        self.add_right_bottom_menu_sub_menu(view_settings_submenu, "icons/package_settings.png")
 
-        view_settings_submenu = self.RightSubMenu("Conan")
-        conan_button = self.add_right_bottom_menu_sub_menu(view_settings_submenu)
-        conan_button.setIcon(QIcon(str(app.asset_path / "icons/conan.png")))
+    def _init_right_menu(self):
+
+        # Right Settings menu
+        quicklaunch_submenu = self.RightSubMenu("Quicklaunch")
+        quicklaunch_submenu.add_button_menu_entry(
+            "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.png")
+        quicklaunch_submenu.add_toggle_menu_entry(
+            "Use Grid for AppLinks", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
+
+        quicklaunch_submenu.add_toggle_menu_entry(
+            "Display versions for AppLinks", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
+        quicklaunch_submenu.add_toggle_menu_entry(
+            "Display users for AppLinks", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
+        quicklaunch_submenu.add_toggle_menu_entry(
+            "Display channels for AppLinks", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
+
+        self.add_right_menu_sub_menu(quicklaunch_submenu, "icons/grid.png")
+        self.add_right_menu_line()
+
+        view_settings_submenu = self.RightSubMenu("View")
+        self.add_right_menu_sub_menu(view_settings_submenu, "icons/package_settings.png")
 
         view_settings_submenu.add_button_menu_entry(
             "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence(Qt.CTRL + Qt.Key_Plus))
         view_settings_submenu.add_button_menu_entry(
             "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence(Qt.CTRL + Qt.Key_Minus))
 
-        # Dark mode - TODO: add generic name + toggle entry function to Submenu
-        s_frame = QFrame(self)
-        s_frame.setLayout(QHBoxLayout())
-        self.layout().setContentsMargins(0, 0, 0, 0)
-        self.dark_mode_toggle = AnimatedToggle(self)
-        self.dark_mode_toggle.setMinimumSize(70, 50)
-        self.dark_mode_toggle.setMaximumSize(70, 50)
-        s_frame.layout().addWidget(QLabel("Dark mode"))
-        s_frame.layout().addWidget(self.dark_mode_toggle)
         dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
-        self.dark_mode_toggle.setChecked(dark_mode_enabled)
+        view_settings_submenu.add_toggle_menu_entry("Dark Mode", self.on_theme_changed, dark_mode_enabled)
 
-        self.dark_mode_toggle.stateChanged.connect(self.on_theme_changed)
-        view_settings_submenu.add_custom_menu_entry(s_frame)
+        conan_settings_submenu = self.RightSubMenu("Conan")
+        conan_button = self.add_right_menu_sub_menu(conan_settings_submenu)
+        conan_button.setIcon(QIcon(str(app.asset_path / "icons/conan.png")))
 
+        self.add_right_menu_line()
         self.add_right_menu_entry("Remove Locks", "icons/remove-lock.png").clicked.connect(app.conan_api.remove_locks)
         self.add_right_menu_entry("Clean Conan Cache", "icons/cleanup").clicked.connect(self.open_cleanup_cache_dialog)
-        self.add_right_bottom_menu_main_page_entry("About", self._about_dialog, "icons/about.png")
-
-        # menu
-        # self.ui.menu_cleanup_cache.setIcon(QIcon(get_themed_asset_image("icons/cleanup.png")))
-        # self.ui.menu_remove_locks.setIcon(QIcon(get_themed_asset_image("icons/remove-lock.png")))
-        # self.ui.menu_increase_font_size.setIcon(QIcon(get_themed_asset_image("icons/increase_font.png")))
-        # self.ui.menu_decrease_font_size.setIcon(QIcon(get_themed_asset_image("icons/decrease_font.png")))
-
+        self.add_right_menu_line()
+        self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
@@ -189,34 +181,6 @@ class MainWindow(FluentWindow):
         if self.search_dialog:
             self.search_dialog.apply_theme()
 
-    @pyqtSlot()
-    def on_main_view_changed(self):
-        """ Change between main views (grid and package explorer) """
-        if self.ui.main_toolbox.currentIndex() == 1:  # package view
-            # hide floating grid buttons
-            if ADD_APP_LINK_BUTTON:
-                self.ui.add_app_link_button.hide()
-            if ADD_TAB_BUTTON:
-                self.ui.add_tab_button.hide()
-        elif self.ui.main_toolbox.currentIndex() == 0:  # grid view
-            # show floating buttons
-            if ADD_APP_LINK_BUTTON:
-                self.ui.add_app_link_button.show()
-            if ADD_TAB_BUTTON:
-                self.ui.add_tab_button.show()
-
-    @ pyqtSlot()
-    def open_conan_search_dialog(self):
-        """ Opens a Conan Search dialog. Only one allowed. """
-        if self.search_dialog:
-            self.search_dialog.show()
-            self.search_dialog.activateWindow()
-            return
-
-        # parent=None enables to hide the dialog behind the application window
-        self.search_dialog = ConanSearchDialog(None, self)
-        self.search_dialog.show()
-
     @ pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
@@ -258,34 +222,42 @@ class MainWindow(FluentWindow):
 
             # conan works, model can be loaded
             self.app_grid.re_init(self.model.app_grid)  # loads tabs
-            # self.apply_view_settings()  # now view settings can be applied
 
     @pyqtSlot()
     def display_versions_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        status = self.ui.menu_toggle_display_versions.isChecked()
+        # status is changed only after this is done, so the state must be negated
+        sender_toggle = self.sender()
+        status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_VERSIONS, status)
-        self.app_grid.re_init_all_app_links()
+        self.app_grid.re_init_all_app_links(force=True)
 
     @pyqtSlot()
     def apply_display_users_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        status = self.ui.menu_toggle_display_users.isChecked()
+        sender_toggle = self.sender()
+        status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_USERS, status)
-        self.app_grid.re_init_all_app_links()
+        self.app_grid.re_init_all_app_links(force=True)
 
     @pyqtSlot()
     def display_channels_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        status = self.ui.menu_toggle_display_channels.isChecked()
+        sender_toggle = self.sender()
+        status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_CHANNELS, status)
-        self.app_grid.re_init_all_app_links()
+        self.app_grid.re_init_all_app_links(force=True)
+
+    @pyqtSlot()
+    def quicklaunch_grid_mode_toggled(self):
+        sender_toggle = self.sender()
+        status = not sender_toggle.isChecked()
+        app.active_settings.set(APPLIST_ENABLED, status)
+        self.app_grid.re_init(self.model.app_grid)
 
     @pyqtSlot(str)
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self.ui.console.append(text)
 
-    def load_icons(self):
-        """ Load icons for main toolbox and menu """
 

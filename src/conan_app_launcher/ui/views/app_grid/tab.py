@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QScrollArea, QGridLayout, QLayout
@@ -6,8 +6,9 @@ from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QSpacerItem, QSize
 from .app_link import AppLink
 from .dialogs import AppEditDialog
 from .model import UiAppLinkModel, UiTabModel
+import conan_app_launcher.app as app  # using global module pattern
 
-from conan_app_launcher import APPLIST_ENABLED
+from conan_app_launcher.settings import APPLIST_ENABLED
 
 
 class TabScrollAreaWidgets(QWidget):
@@ -51,7 +52,7 @@ class TabGrid(QWidget):
         self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.model.name)
         # self.tab_scroll_area_widgets.setStyleSheet("background-color: #808086;")
         # grid layout for tab_scroll_area_widgets
-        if APPLIST_ENABLED:
+        if app.active_settings.get_bool(APPLIST_ENABLED):
             self.tab_grid_layout = QVBoxLayout(self.tab_scroll_area_widgets)
             size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
                                     QSizePolicy.MinimumExpanding)
@@ -94,21 +95,21 @@ class TabGrid(QWidget):
         self.init_app_grid()
         self.load_apps_from_model()
 
-    def load_apps_from_model(self):
+    def load_apps_from_model(self, force_reload=False):
         row = 0
         column = 0
         max_columns = self.get_max_columns()
         self._columns_count = max_columns
-        if not self.app_links:
+        if not self.app_links or force_reload:
             for app_model in self.model.apps:
-                app_link = AppLink(self.tab_scroll_area_widgets, self, app_model)
+                app_link = AppLink(self, self, app_model)
                 app_link.load()
                 self.app_links.append(app_link)
 
         for app_link in self.app_links:
             # add in order of occurence
 
-            if APPLIST_ENABLED:
+            if app.active_settings.get_bool(APPLIST_ENABLED):
                 self.tab_grid_layout.addWidget(app_link)
             else:
                 self.tab_grid_layout.addWidget(app_link, row, column)
@@ -122,8 +123,7 @@ class TabGrid(QWidget):
                     row += 1
             app_link.show()
         # spacer for compressing app links, when hiding cboxes
-        if APPLIST_ENABLED:
-            pass
+        if app.active_settings.get_bool(APPLIST_ENABLED):
             self.tab_grid_layout.addItem(self._v_spacer)
         else:
             self.tab_grid_layout.addItem(self._v_spacer, row + 1, 0)
@@ -134,7 +134,7 @@ class TabGrid(QWidget):
             new_model = UiAppLinkModel()
             new_model.parent = self.model
         # save for testing
-        self._edit_app_dialog = AppEditDialog(new_model, parent=None) #self.parentWidget())
+        self._edit_app_dialog = AppEditDialog(new_model, parent=self)
         reply = self._edit_app_dialog.exec_()
         if reply == AppEditDialog.Accepted:
             app_link = AppLink(None, self, new_model)
@@ -163,7 +163,7 @@ class TabGrid(QWidget):
         self.tab_grid_layout.setColumnMinimumWidth(current_column, AppLink.max_width() - 8)
         self.tab_grid_layout.update()
 
-    def remove_all_app_links(self):
+    def remove_all_app_links(self, force=False):
         """ 
         Clears all AppLinks.
         Can then be reloaded with load_apps_from_model.
@@ -173,7 +173,15 @@ class TabGrid(QWidget):
         self.tab_grid_layout.removeItem(self._h_spacer)
         for app_link in self.app_links:
             self.tab_grid_layout.removeWidget(app_link)
-            app_link.hide()
+            if force:
+                # TODO this a leak, currently it does not delete everything!
+                app_link.hide()
+                app_link.delete()
+            else:
+                app_link.hide()
+
+        if force:
+            self.app_links = []
 
     def redraw_grid(self, force=False):
         """ Works only as long as the order does not change. Used for resizing the window. """
@@ -183,5 +191,5 @@ class TabGrid(QWidget):
         if max_columns in [self._columns_count, 1] and not force:  # already correct -> 1 means this is still not real width
             return
         if self.tab_scroll_area:  # don't call on init
-            self.remove_all_app_links()
-            self.load_apps_from_model()
+            self.remove_all_app_links(force)
+            self.load_apps_from_model(force)

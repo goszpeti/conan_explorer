@@ -50,9 +50,9 @@ class AppGridView(QWidget):
             self.tab_widget.removeTab(i-1)
         self.load()
 
-    def re_init_all_app_links(self):
+    def re_init_all_app_links(self, force=False):
         for tab in self.get_tabs():
-            tab.redraw_grid(force=True)
+            tab.redraw_grid(force)
 
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add
@@ -148,8 +148,6 @@ class AppGridView(QWidget):
 
         # always show the first tab first
         self.tab_widget.setCurrentIndex(0)
-        # needed, because the resizeEvent is only called for the active (first) tab
-        self.re_init_all_app_links()
 
     def open_new_app_dialog_from_extern(self, app_config: UiAppLinkConfig):
         """ Called from pacakge explorer, where tab is unknown"""

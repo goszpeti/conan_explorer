@@ -40,10 +40,6 @@ class ConanSearchDialog(QDialog):
         self._ui.search_line.textChanged.connect(self._enable_search_button)
         
         self._ui.search_button.setShortcut(QKeySequence(Qt.Key_Return))
-        # search_shortcut = QShortcut(,  self)
-        # search_shortcut.activated.connect(self.on_search)
-        # search_shortcut.activatedAmbiguously.connect(self.on_search)
-
 
         # init remotes list
         remotes = app.conan_api.get_remotes()

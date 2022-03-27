@@ -3,7 +3,10 @@ from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
-from typing_extensions import Protocol
+try:
+    from typing_extensions import Protocol
+except:
+    from typing import Protocol
 
 from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES, SettingsInterface
 

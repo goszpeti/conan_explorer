@@ -41,6 +41,7 @@ QWidget#centralwidget{
 
 QLabel#right_menu_top_title_label {
     font-size: {{MAIN_FONT_SIZE + 2}}pt;
+    padding: 3px;
 }
 
 QLabel#right_menu_bottom_title_label {
@@ -54,7 +55,8 @@ TabGrid{
     background-color: #808086;
 }
 AppLink {
-    background-color: #353839;
+    /* background-color: #353839; */
+    background-color:  qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #5a88b6, stop:1 #6699CC);;
     border-radius: 7px;
 }
 QTabWidget{
@@ -89,7 +91,7 @@ QFrame#content_frame{
     border-radius: 7px;
 }
 QFrame#content_frame .QFrame{
-    background-color: #353839;
+    background-color: transparent;
     border-radius: 7px;
 }
 

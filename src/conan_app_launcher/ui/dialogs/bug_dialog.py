@@ -45,7 +45,7 @@ def bug_reporting_dialog(excvalue, tb):
         To help improve the program, please post a <a href="{new_issue_with_info_text}"> \
         <span style=" text-decoration: underline color:  # 0000ff;" \
         >new github issue</span></a> and describe, how the crash occured.'
-    dialog = QMessageBox(parent=None)
+    dialog = QMessageBox(None) # TODO style?
     dialog.setWindowTitle("Application Crash - Bug Report")
     dialog.setText(html_crash_text)
     dialog.setTextInteractionFlags(Qt.LinksAccessibleByMouse)

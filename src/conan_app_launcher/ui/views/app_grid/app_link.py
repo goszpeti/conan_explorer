@@ -6,7 +6,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import ICON_SIZE, asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import open_in_file_manager, run_file
-from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
+from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES)
@@ -22,7 +22,6 @@ from .dialogs import AppEditDialog, AppsMoveDialog, ClickableIcon
 
 if TYPE_CHECKING:  # pragma: no cover
     from.tab import TabGrid
-from conan_app_launcher import APPLIST_ENABLED
 
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"
@@ -49,13 +48,14 @@ class AppLink(QFrame):
 
     def __init__(self, parent: "QWidget", parent_tab: "TabGrid", model: UiAppLinkModel, icon_size=ICON_SIZE):
         super().__init__(parent)
-        self.setLayout(QHBoxLayout(self) if APPLIST_ENABLED else QVBoxLayout(self))
+        self._app_list_enabled = app.active_settings.get_bool(APPLIST_ENABLED)
+        self.setLayout(QHBoxLayout(self) if self._app_list_enabled else QVBoxLayout(self))
         self.setObjectName(repr(self))
         self.icon_size = icon_size
         self.model = model
         self._parent_tab = parent_tab  # save parent - don't use qt signals ands slots
         self._lock_cboxes = False  # lock combo boxes to ignore changes of conanref
-        self._enable_combo_boxes = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
+        self._combo_boxes_enabled = app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES)
         self._init_app_link()
 
     @staticmethod
@@ -72,7 +72,7 @@ class AppLink(QFrame):
         max_width = self.max_width()
         self.layout().setSpacing(3)
 
-        if APPLIST_ENABLED:
+        if self._app_list_enabled:
             max_width = 150
             self.setMinimumHeight(100)
             self.setMaximumHeight(100)
@@ -85,10 +85,10 @@ class AppLink(QFrame):
             self._right_frame = QFrame(self)
 
 
-            self._left_frame.setLayout(QVBoxLayout(self._left_frame))
-            self._center_frame.setLayout(QVBoxLayout(self._center_frame))
-            self._center_right_frame.setLayout(QVBoxLayout(self._center_right_frame))
-            self._right_frame.setLayout(QVBoxLayout(self._right_frame))
+            self._left_frame.setLayout(QVBoxLayout(self))
+            self._center_frame.setLayout(QVBoxLayout(self))
+            self._center_right_frame.setLayout(QVBoxLayout(self))
+            self._right_frame.setLayout(QVBoxLayout(self))
 
             self._left_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
             self._center_frame.layout().setSizeConstraint(QLayout.SetMinimumSize)
@@ -97,6 +97,8 @@ class AppLink(QFrame):
     
             self._left_frame.setMaximumWidth(max_width)
             self._left_frame.setMinimumWidth(max_width)
+            #self._left_frame.layout().setAlignment(Qt.AlignCenter)
+            self._left_frame.layout().setContentsMargins(0,0,0,5)
             self._right_frame.setMinimumWidth(200)
             self._right_frame.setMaximumWidth(150)
             self._center_frame.setMinimumWidth(200)
@@ -122,8 +124,8 @@ class AppLink(QFrame):
             self._app_user_cbox.setSizePolicy(size_policy)
             self._app_channel_cbox.setSizePolicy(size_policy)
 
-            self._edit_button = QPushButton("Edit", self._right_frame)
-            self._remove_button = QPushButton("Remove", self._right_frame)
+            self._edit_button = QPushButton("Edit", self)
+            self._remove_button = QPushButton("Remove", self)
             self._edit_button.setIcon(QIcon(get_themed_asset_image("icons/edit.png")))
             self._remove_button.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
             self._edit_button.setMinimumWidth(150)
@@ -145,7 +147,7 @@ class AppLink(QFrame):
             self._app_button = ClickableIcon(self, asset_path / "icons" / "app.png")
             self._app_name_label = QLabel(self)
 
-            if self._enable_combo_boxes:
+            if self._combo_boxes_enabled:
                 self._app_version_cbox = QComboBox(self)
                 self._app_user_cbox = QComboBox(self)
                 self._app_channel_cbox = QComboBox(self)
@@ -181,21 +183,21 @@ class AppLink(QFrame):
         self._app_name_label.setSizePolicy(size_policy)
         self._app_name_label.setWordWrap(True)
 
-        if self._enable_combo_boxes:
+        if self._combo_boxes_enabled:
             self._app_version_cbox.setDisabled(True)
             self._app_version_cbox.setDuplicatesEnabled(False)
         self._app_version_cbox.setSizePolicy(size_policy)
         self._app_version_cbox.setAlignment(Qt.AlignCenter)
 
 
-        if self._enable_combo_boxes:
+        if self._combo_boxes_enabled:
             self._app_user_cbox.setDisabled(True)
             self._app_user_cbox.setDuplicatesEnabled(False)
         self._app_user_cbox.setAlignment(Qt.AlignCenter)
 
         self._app_user_cbox.setSizePolicy(size_policy)
 
-        if self._enable_combo_boxes:
+        if self._combo_boxes_enabled:
             self._app_channel_cbox.setDisabled(True)
             self._app_channel_cbox.setDuplicatesEnabled(False)
         self._app_channel_cbox.setSizePolicy(size_policy)
@@ -203,12 +205,12 @@ class AppLink(QFrame):
 
         # connect signals
         self._app_button.clicked.connect(self.on_click)
-        if self._enable_combo_boxes:
+        if self._combo_boxes_enabled:
             self._app_version_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
             self._app_user_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
             self._app_channel_cbox.currentIndexChanged.connect(self.on_ref_cbox_selected)
 
-        if APPLIST_ENABLED:
+        if self._app_list_enabled:
             self._edit_button.clicked.connect(self.open_edit_dialog)
             self._remove_button.clicked.connect(self.remove)
 
@@ -286,7 +288,7 @@ class AppLink(QFrame):
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon())
 
-        if self._enable_combo_boxes:
+        if self._combo_boxes_enabled:
             self._lock_cboxes = True
             self._app_channel_cbox.clear()
             self._app_channel_cbox.addItem(self.model.channel)
@@ -313,7 +315,7 @@ class AppLink(QFrame):
     def open_edit_dialog(self, model: Optional[UiAppLinkModel] = None):
         if model:
             self.model = model
-        edit_app_dialog = AppEditDialog(self.model, parent=None) #self.parentWidget())
+        edit_app_dialog = AppEditDialog(self.model, parent=self)
         reply = edit_app_dialog.exec_()
         if reply == AppEditDialog.Accepted:
             # grey icon, so update from cache can ungrey it, if the path is correct
@@ -326,7 +328,7 @@ class AppLink(QFrame):
     def remove(self):
         # last link can't be deleted!
         if len(self.model.parent.apps) == 1:
-            msg = QMessageBox(parent=None)  # self._parent_tab
+            msg = QMessageBox(parent=self)  # self._parent_tab
             msg.setWindowTitle("Info")
             msg.setText("Can't delete the last link!")
             msg.setStandardButtons(QMessageBox.Ok)
@@ -335,7 +337,7 @@ class AppLink(QFrame):
             return
 
         # confirmation dialog
-        message_box = QMessageBox(parent=None) # self.parentWidget())
+        message_box = QMessageBox(parent=self) # self.parentWidget())
         message_box.setWindowTitle("Delete app link")
         message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}?\"")
         message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
@@ -354,7 +356,7 @@ class AppLink(QFrame):
         """ Update combo boxes with new conan data """
         self.update_icon()
 
-        if not self._enable_combo_boxes:  # set text instead
+        if not self._combo_boxes_enabled:  # set text instead
             self._app_version_cbox.setText(self.model.version)
             self._app_user_cbox.setText(self.model.user)
             self._app_channel_cbox.setText(self.model.channel)

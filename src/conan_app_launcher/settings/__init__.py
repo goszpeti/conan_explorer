@@ -13,6 +13,8 @@ LAST_CONFIG_FILE = "last_config_file"
 DISPLAY_APP_VERSIONS = "disp_app_versions"
 DISPLAY_APP_USERS = "disp_app_users"
 DISPLAY_APP_CHANNELS = "disp_app_channels"
+APPLIST_ENABLED = "enable_app_list"
+
 # enable combobox for app user/channel/version
 ENABLE_APP_COMBO_BOXES = "enable_app_link_combo_boxes"
 FONT_SIZE = "font_size"

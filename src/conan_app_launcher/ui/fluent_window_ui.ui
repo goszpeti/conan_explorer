@@ -660,7 +660,7 @@ p, li { white-space: pre-wrap; }
              <item>
               <widget class="QFrame" name="right_menu_top_frame">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
@@ -701,6 +701,12 @@ p, li { white-space: pre-wrap; }
                    </property>
                    <item>
                     <widget class="QPushButton" name="right_menu_top_back_button">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="minimumSize">
                       <size>
                        <width>32</width>
@@ -718,7 +724,7 @@ p, li { white-space: pre-wrap; }
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../assets/icons/back.png</normalon>
+                       <normalon>../assets/icons/expand.png</normalon>
                       </iconset>
                      </property>
                      <property name="flat">
@@ -1121,97 +1127,6 @@ border-top-left-radius: 5px;
     </item>
    </layout>
   </widget>
-  <action name="menu_about_action">
-   <property name="text">
-    <string>About</string>
-   </property>
-  </action>
-  <action name="menu_open_config_file">
-   <property name="text">
-    <string>Open Config File</string>
-   </property>
-  </action>
-  <action name="menu_toggle_display_versions">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Display versions for AppLinks</string>
-   </property>
-  </action>
-  <action name="menu_toggle_display_channels">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Display channels for AppLinks</string>
-   </property>
-  </action>
-  <action name="menu_settings">
-   <property name="text">
-    <string>Settings</string>
-   </property>
-  </action>
-  <action name="menu_auto_install">
-   <property name="text">
-    <string>Auto Install</string>
-   </property>
-  </action>
-  <action name="menu_cleanup_cache">
-   <property name="text">
-    <string>Clean Local Cache</string>
-   </property>
-  </action>
-  <action name="menu_toggle_display_users">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Display users for AppLinks</string>
-   </property>
-  </action>
-  <action name="menu_remove_locks">
-   <property name="text">
-    <string>Remove Locks</string>
-   </property>
-  </action>
-  <action name="menu_search_in_remotes">
-   <property name="text">
-    <string>Search in Remotes</string>
-   </property>
-  </action>
-  <action name="actionConan_Settings">
-   <property name="text">
-    <string>Conan Settings</string>
-   </property>
-  </action>
-  <action name="menu_enable_dark_mode">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Enable Dark Mode</string>
-   </property>
-  </action>
-  <action name="menu_increase_font_size">
-   <property name="text">
-    <string>Increase Font Size</string>
-   </property>
-  </action>
-  <action name="menu_decrease_font_size">
-   <property name="text">
-    <string>Decrease Font Size</string>
-   </property>
-  </action>
  </widget>
  <resources/>
  <connections/>

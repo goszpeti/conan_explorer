@@ -69,11 +69,11 @@ def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixt
     # TEST ACTION
     main_gui.ui.menu_about_action.trigger()
     time.sleep(3)
-    assert main_gui._about_dialog.isEnabled()
-    qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], Qt.LeftButton)
+    assert main_gui.about_page.isEnabled()
+    qtbot.mouseClick(main_gui.about_page._button_box.buttons()[0], Qt.LeftButton)
 
     # TEST EVALUATION
-    assert main_gui._about_dialog.isHidden()
+    assert main_gui.about_page.isHidden()
 
     Logger.remove_qt_logger()
 
