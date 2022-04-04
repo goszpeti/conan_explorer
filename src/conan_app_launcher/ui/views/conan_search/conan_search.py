@@ -1,19 +1,20 @@
 import pprint
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import open_file
-from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.common import QLoader, get_themed_asset_image
-from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
+from conan_app_launcher.ui.dialogs import ConanInstallDialog
+from conan_app_launcher.ui.fluent_window import FluentWindow
+from conan_app_launcher.ui.views import LocalConanPackageExplorer
+from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.model.ref import ConanFileReference
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QPoint, pyqtBoundSignal
-from PyQt5.QtWidgets import QDialog, QWidget, QAction, QListWidgetItem,  QMenu, QApplication, QShortcut, QMessageBox
+from PyQt5.QtCore import QPoint, Qt, pyqtBoundSignal, pyqtSlot
 from PyQt5.QtGui import QIcon, QKeySequence
-
-from conan_app_launcher.ui.views.package_explorer.local_packages import LocalConanPackageExplorer
+from PyQt5.QtWidgets import (QAction, QApplication, QDialog, QListWidgetItem,
+                             QWidget)
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
@@ -76,7 +77,7 @@ class ConanSearchDialog(QDialog):
 
     def _init_pkg_context_menu(self):
         """ Initalize context menu with all actions """
-        self.select_cntx_menu = QMenu()
+        self.select_cntx_menu = RoundedMenu()
 
         self.copy_ref_action = QAction("Copy reference", self)
         self.copy_ref_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))

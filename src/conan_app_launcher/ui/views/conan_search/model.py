@@ -10,7 +10,6 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import pyqtSlot, Qt
 
 
-
 REF_TYPE = 0
 PROFILE_TYPE = 1
 
@@ -167,14 +166,17 @@ class PkgSearchModel(TreeModel):
     def mark_pkg_as_not_installed(self, conan_ref: str, pkg_id: str):
         self._set_pkg_install_status(conan_ref, pkg_id, False)
 
-    def _set_pkg_install_status(self, conan_ref: str, pkg_id: str, status: bool):
+    def _set_pkg_install_status(self, conan_ref: str, pkg_id: str, installed: bool):
         item = self.get_item_from_ref(conan_ref)
         if not item:
             return
-        item.is_installed = status
+        item.is_installed = installed
         pkg_items = item.child_items
         for pkg_item in pkg_items:
-            if pkg_item.pkg_data.get("id", "") == pkg_id:
-                Logger().debug(f"Set {pkg_id} as install status to {status}")
-                pkg_item.is_installed = status
-                break
+            if installed:
+                if pkg_item.pkg_data.get("id", "") == pkg_id:
+                    Logger().debug(f"Set {pkg_id} as install status to {installed}")
+                    pkg_item.is_installed = installed
+                    break
+            if not pkg_id and not installed:  # if ref was removed, all pkgs are deleted too
+                pkg_item.is_installed = installed

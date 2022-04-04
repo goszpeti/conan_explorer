@@ -26,7 +26,7 @@ conan_worker = ConanWorker(conan_api, active_settings)
 def run_application():
     """ Start the Qt application and load the main window """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
-    from conan_app_launcher.ui.dialogs.bug_dialog import show_bug_dialog_exc_hook
+    from conan_app_launcher.ui.dialogs import show_bug_dialog_exc_hook
     from conan_app_launcher.ui.common import activate_theme
     sys.excepthook = show_bug_dialog_exc_hook
 

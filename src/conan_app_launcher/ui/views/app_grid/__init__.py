@@ -1,20 +1,18 @@
 from typing import TYPE_CHECKING, List
 
-from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
-from .model import UiAppLinkModel, UiTabModel
-from PyQt5 import uic
+from conan_app_launcher.ui.fluent_window import FluentWindow
+from conan_app_launcher.ui.widgets import RoundedMenu
 from PyQt5.QtCore import Qt, pyqtBoundSignal
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QWidget, QInputDialog, QMenu, QAction, QMessageBox, QTabWidget, QVBoxLayout
+from PyQt5.QtWidgets import (QAction, QInputDialog, QMessageBox, QTabWidget,
+                             QVBoxLayout, QWidget)
 
+from .model import UiAppLinkModel, UiTabModel
 from .tab import TabGrid
 
-
-
 if TYPE_CHECKING:  # pragma: no cover
-    from conan_app_launcher.ui.main_window import MainWindow
     from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
 
 
@@ -69,7 +67,7 @@ class AppGridView(QWidget):
 
     def on_tab_context_menu_requested(self, position):
         index = self.tab_widget.tabBar().tabAt(position)
-        menu = QMenu(self)
+        menu = RoundedMenu(self)
         self.menu = menu
 
         rename_action = QAction("Rename", self)

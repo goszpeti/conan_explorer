@@ -11,7 +11,6 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
-from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
@@ -70,15 +69,19 @@ class MainWindow(FluentWindow):
         quicklaunch_submenu = self.RightSubMenu("Quicklaunch")
         quicklaunch_submenu.add_button_menu_entry(
             "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.png")
+        quicklaunch_submenu.add_button_menu_entry(
+            "Add AppLink", self.on_add_link, "icons/add_link.png")
+        quicklaunch_submenu.add_button_menu_entry(
+            "Rearrange AppLinks", self.on_rearrange, "icons/rearrange.png")
         quicklaunch_submenu.add_toggle_menu_entry(
-            "Use Grid for AppLinks", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
+            "Display as List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
 
         quicklaunch_submenu.add_toggle_menu_entry(
-            "Display versions for AppLinks", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
+            "Show version", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
         quicklaunch_submenu.add_toggle_menu_entry(
-            "Display users for AppLinks", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
+            "Show user", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
         quicklaunch_submenu.add_toggle_menu_entry(
-            "Display channels for AppLinks", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
+            "Show channels", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
 
         self.add_right_menu_sub_menu(quicklaunch_submenu, "icons/grid.png")
         self.add_right_menu_line()
@@ -224,6 +227,17 @@ class MainWindow(FluentWindow):
             self.app_grid.re_init(self.model.app_grid)  # loads tabs
 
     @pyqtSlot()
+    def on_add_link(self):
+        #current_tab = self.app_grid.model.tabs[self.app_grid.tab_widget.currentIndex()]
+        tab = self.app_grid.tab_widget.currentWidget()
+        tab.app_links[0].open_app_link_add_dialog()
+
+    @pyqtSlot()
+    def on_rearrange(self):
+        tab = self.app_grid.tab_widget.currentWidget()
+        tab.app_links[0].on_move()
+
+    @pyqtSlot()
     def display_versions_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         # status is changed only after this is done, so the state must be negated
@@ -251,7 +265,7 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def quicklaunch_grid_mode_toggled(self):
         sender_toggle = self.sender()
-        status = not sender_toggle.isChecked()
+        status = sender_toggle.isChecked()
         app.active_settings.set(APPLIST_ENABLED, status)
         self.app_grid.re_init(self.model.app_grid)
 

@@ -1,34 +1,35 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Callable, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.ui.fluent_window import FluentWindow
-from conan_app_launcher.ui.common import QLoader, get_themed_asset_image, FileSystemModel
+from conan_app_launcher.ui.common import FileSystemModel, QLoader, get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig
+from conan_app_launcher.ui.dialogs import ConanRemoveDialog
 from conan_app_launcher.ui.views import AppGridView
-from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
+from conan_app_launcher.ui.widgets import RoundedMenu
+
 from conans.model.ref import ConanFileReference
 from PyQt5 import uic
-
-from PyQt5.QtCore import Qt, QModelIndex, QFile, QItemSelectionModel, QMimeData, QUrl, pyqtBoundSignal
-from PyQt5.QtWidgets import QWidget, QMenu, QAction, QApplication, QAbstractItemView, QMessageBox
-from PyQt5.QtGui import QIcon, QShowEvent, QKeySequence
-
+from PyQt5.QtCore import (QFile, QItemSelectionModel, QMimeData, QModelIndex,
+                          Qt, QUrl, pyqtBoundSignal)
+from PyQt5.QtGui import QIcon, QKeySequence, QShowEvent
+from PyQt5.QtWidgets import (QAbstractItemView, QAction, QApplication,
+                             QMessageBox, QWidget)
 
 from .model import PROFILE_TYPE, REF_TYPE, PackageTreeItem, PkgSelectModel
 
 if TYPE_CHECKING:  # pragma: no cover
-    from conan_app_launcher.ui.main_window import MainWindow
+    from conan_app_launcher.ui.fluent_window import FluentWindow
 
 
 class LocalConanPackageExplorer(QWidget):
 
-    def __init__(self, parent: QWidget, conan_pkg_removed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
+    def __init__(self, parent: QWidget, conan_pkg_removed: pyqtBoundSignal, page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self.page_widgets = page_widgets
         self.conan_pkg_removed = conan_pkg_removed
@@ -65,7 +66,7 @@ class LocalConanPackageExplorer(QWidget):
     # Selection view context menu
 
     def _init_selection_context_menu(self):
-        self.select_cntx_menu = QMenu()
+        self.select_cntx_menu = RoundedMenu()
 
         self.copy_ref_action = QAction("Copy reference", self)
         self.copy_ref_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
@@ -211,8 +212,10 @@ class LocalConanPackageExplorer(QWidget):
             conan_ref = split_ref[0]
             pkg_id = split_ref[1]
 
-        if not self.find_item_in_pkg_sel_model(conan_ref):
+        if self.find_item_in_pkg_sel_model(conan_ref) == -1:  # TODO  also need pkg id
+
             self.refresh_pkg_selection_view()
+
 
         # wait for model to be loaded
         self._pkg_sel_model_loader.wait_for_finished()
@@ -311,7 +314,7 @@ class LocalConanPackageExplorer(QWidget):
         run_file(file_path, True, args="")
 
     def _init_pkg_file_context_menu(self):
-        self.file_cntx_menu = QMenu(self)
+        self.file_cntx_menu = RoundedMenu(self)
 
         self.open_fm_action = QAction("Show in File Manager", self)
         self.open_fm_action.setIcon(QIcon(get_themed_asset_image("icons/file-explorer.png")))

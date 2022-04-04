@@ -1,14 +1,15 @@
 from typing import List, Optional
 
+import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher.settings import APPLIST_ENABLED
+from conan_app_launcher.ui.fluent_window import RIGHT_MENU_MAX_WIDTH
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QSpacerItem, QSizePolicy, QScrollArea, QGridLayout, QLayout
+from PyQt5.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy,
+                             QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
 
 from .app_link import AppLink
 from .dialogs import AppEditDialog
 from .model import UiAppLinkModel, UiTabModel
-import conan_app_launcher.app as app  # using global module pattern
-
-from conan_app_launcher.settings import APPLIST_ENABLED
 
 
 class TabScrollAreaWidgets(QWidget):
@@ -85,7 +86,7 @@ class TabGrid(QWidget):
     def get_max_columns(self):
         if self.tab_scroll_area:
             width = self.parent().width()
-            max_columns = int(width / (AppLink.max_width() + self.SPACING))
+            max_columns = int(width + RIGHT_MENU_MAX_WIDTH / (AppLink.max_width() + self.SPACING))
             if max_columns == 0:
                 max_columns = 1
             return max_columns

@@ -11,13 +11,13 @@ from conan_app_launcher import app
 from conan_app_launcher.app import asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import FONT_SIZE
-from .widgets.toggle import AnimatedToggle
+from .widgets import AnimatedToggle
 
 
 from PyQt5 import uic
 from PyQt5.QtCore import QEasingCurve, QEvent, QObject, QPoint, QPropertyAnimation, QRect, QSize, Qt
-from PyQt5.QtGui import QColor, QHoverEvent, QIcon, QKeySequence, QPixmap
-from PyQt5.QtWidgets import (QFrame, QGraphicsDropShadowEffect, QHBoxLayout, QLabel, QMainWindow, QPushButton, 
+from PyQt5.QtGui import QHoverEvent, QIcon, QKeySequence, QPixmap
+from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton, 
                             QShortcut, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
 
 from .common import get_themed_asset_image
@@ -82,13 +82,14 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 frame.setLayout(QVBoxLayout(frame))
             else:
                 frame.setLayout(QHBoxLayout(frame))
+            label.setMaximumHeight(50)
+
             if label.width() > RIGHT_MENU_MAX_WIDTH:
                 Logger().debug(f"{str(name)} right side menu exceeds max width!")
-            self.layout().setContentsMargins(0, 0, 0, 0)
+            frame.layout().setContentsMargins(0, 0, 0, 0)
             frame.layout().addWidget(label)
             frame.layout().addWidget(widget)
             self.add_custom_menu_entry(frame)
-            pass
 
         def add_toggle_menu_entry(self, name: str, target: Callable, initial_state: bool):
             toggle = AnimatedToggle(self)
@@ -179,7 +180,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def __init__(self, title_text: str="", native_windows_fcns=True, rounded_corners=True):
         super().__init__()
         current_dir = Path(__file__).parent
-        self.ui = uic.loadUi(current_dir / "fluent_window_ui.ui", baseinstance=self)
+        self.ui = uic.loadUi(current_dir / "fluent_window.ui", baseinstance=self)
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint |
                             Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
@@ -193,17 +194,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self._resize_point = QPoint()
         self._last_geometry = QRect()
         self.title_text = title_text
-        #QtWin.enableBlurBehindWindow(self)
-
-        #self.setAttribute(Qt.WA_TranslucentBackground, True)
-        #self.setWindowOpacity(0.98)
-        # TODO this really expensive
-        effect = QGraphicsDropShadowEffect()
-        #effect.setOffset(0, 0)
-        effect.setColor(QColor(68, 68, 68))
-        effect.setBlurRadius(10)
-        #self.setGraphicsEffect(effect)
-
+        
         self.add_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.png")
         self.add_themed_icon(self.ui.settings_button, "icons/settings.png")
 

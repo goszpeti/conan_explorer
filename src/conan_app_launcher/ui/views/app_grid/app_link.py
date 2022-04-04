@@ -12,13 +12,14 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
+from conan_app_launcher.ui.widgets import ClickableIcon, RoundedMenu
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QComboBox, QDialog, QFrame, QHBoxLayout,
-                             QLabel, QLayout, QMenu, QMessageBox, QSizePolicy, QPushButton,
-                             QSpacerItem, QVBoxLayout)
+                             QLabel, QLayout, QMessageBox, QPushButton,
+                             QSizePolicy, QVBoxLayout, QWidget)
 
-from .dialogs import AppEditDialog, AppsMoveDialog, ClickableIcon
+from .dialogs import AppEditDialog, AppsMoveDialog
 
 if TYPE_CHECKING:  # pragma: no cover
     from.tab import TabGrid
@@ -46,7 +47,7 @@ class AppLink(QFrame):
     """
     icon_size: int
 
-    def __init__(self, parent: "QWidget", parent_tab: "TabGrid", model: UiAppLinkModel, icon_size=ICON_SIZE):
+    def __init__(self, parent: QWidget, parent_tab: "TabGrid", model: UiAppLinkModel, icon_size=ICON_SIZE):
         super().__init__(parent)
         self._app_list_enabled = app.active_settings.get_bool(APPLIST_ENABLED)
         self.setLayout(QHBoxLayout(self) if self._app_list_enabled else QVBoxLayout(self))
@@ -218,8 +219,7 @@ class AppLink(QFrame):
 
     def _init_context_menu(self):
         """ Setup context menu. """
-        self.menu = QMenu()
-
+        self.menu = RoundedMenu()
         self.open_fm_action = QAction("Show in File Manager", self)
         self.open_fm_action.setIcon(QIcon(get_themed_asset_image("icons/file-explorer.png")))
         self.menu.addAction(self.open_fm_action)

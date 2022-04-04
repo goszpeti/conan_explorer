@@ -5,7 +5,6 @@ from typing import Optional
 
 from conan_app_launcher import ICON_SIZE
 
-from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, QSize, Qt
 from PyQt5.QtWidgets import QPushButton, QGraphicsColorizeEffect, QGraphicsPixmapItem
 from PyQt5.QtGui import QColor, QIcon, QPixmap
@@ -18,7 +17,7 @@ class ClickableIcon(QPushButton):
     # this signal is used to connect to backend functions.
     clicked = pyqtSignal()
 
-    def __init__(self, parent, image: Path = None, flags=Qt.WindowFlags(), icon_size=ICON_SIZE):
+    def __init__(self, parent, image=Path("NULL"), flags=Qt.WindowFlags(), icon_size=ICON_SIZE):
         super().__init__(parent=parent)
 
         self._greyed_out = True  # Must be ungreyed, when available

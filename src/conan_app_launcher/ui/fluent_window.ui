@@ -399,7 +399,7 @@
           <item>
            <widget class="QFrame" name="page_frame">
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -445,7 +445,7 @@
                  <string notr="true"/>
                 </property>
                 <property name="frameShape">
-                 <enum>QFrame::StyledPanel</enum>
+                 <enum>QFrame::NoFrame</enum>
                 </property>
                 <property name="frameShadow">
                  <enum>QFrame::Raised</enum>
@@ -506,7 +506,6 @@
                      </item>
                     </layout>
                    </widget>
-                   <widget class="QWidget" name="page_2"/>
                   </widget>
                  </item>
                 </layout>
@@ -636,7 +635,7 @@ p, li { white-space: pre-wrap; }
              <string notr="true"/>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -669,7 +668,7 @@ p, li { white-space: pre-wrap; }
                 <string notr="true"/>
                </property>
                <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
+                <enum>QFrame::NoFrame</enum>
                </property>
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
@@ -752,7 +751,6 @@ p, li { white-space: pre-wrap; }
                   <widget class="QWidget" name="main_top_settings_page">
                    <layout class="QVBoxLayout" name="verticalLayout_13"/>
                   </widget>
-                  <widget class="QWidget" name="page_4"/>
                  </widget>
                 </item>
                </layout>
@@ -764,7 +762,7 @@ p, li { white-space: pre-wrap; }
                 <string notr="true"/>
                </property>
                <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
+                <enum>QFrame::NoFrame</enum>
                </property>
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
@@ -776,7 +774,7 @@ p, li { white-space: pre-wrap; }
                    <string notr="true"/>
                   </property>
                   <property name="frameShape">
-                   <enum>QFrame::StyledPanel</enum>
+                   <enum>QFrame::NoFrame</enum>
                   </property>
                   <property name="frameShadow">
                    <enum>QFrame::Raised</enum>
@@ -859,7 +857,7 @@ p, li { white-space: pre-wrap; }
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_14">
                     <item>
-                     <spacer name="verticalSpacer_2">
+                     <spacer name="main_settings_page_vspacer">
                       <property name="orientation">
                        <enum>Qt::Vertical</enum>
                       </property>
@@ -873,7 +871,6 @@ p, li { white-space: pre-wrap; }
                     </item>
                    </layout>
                   </widget>
-                  <widget class="QWidget" name="page_6"/>
                  </widget>
                 </item>
                </layout>
@@ -906,7 +903,7 @@ border-top-left-radius: 5px;
 }</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
@@ -933,7 +930,7 @@ border-top-left-radius: 5px;
              <string notr="true"/>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -955,11 +952,13 @@ border-top-left-radius: 5px;
               <widget class="QLabel" name="title_label">
                <property name="font">
                 <font>
-                 <pointsize>10</pointsize>
+                 <weight>75</weight>
+                 <italic>false</italic>
+                 <bold>true</bold>
                 </font>
                </property>
-               <property name="text">
-                <string/>
+               <property name="styleSheet">
+                <string notr="true">font: bold</string>
                </property>
                <property name="indent">
                 <number>3</number>
@@ -1025,7 +1024,7 @@ border-top-left-radius: 5px;
              </size>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -1046,7 +1045,7 @@ border-top-left-radius: 5px;
           <item>
            <widget class="QFrame" name="left_menu_bottom_subframe">
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
@@ -1068,7 +1067,7 @@ border-top-left-radius: 5px;
               <number>10</number>
              </property>
              <item>
-              <spacer name="verticalSpacer">
+              <spacer name="left_menu_bottom_vspacer">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>

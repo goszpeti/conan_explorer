@@ -30,10 +30,19 @@ QLabel#page_title {
     font-size: {{MAIN_FONT_SIZE + 11 }}pt;
 }
 
+QLabel#title_label {
+    font: bold;
+    font-size: {{MAIN_FONT_SIZE + 2 }}pt;
+}
+
+QLabel#about_label {
+    background-color: #5c5c5c;
+    border-radius: {{WINDOW_BORDER_RADIUS}}px;
+}
 
 QWidget#centralwidget{
     border-style: solid;
-    border-width: 2px; 
+    border-width: 2px;
     background-color: #5c5c5c;
     border-color: {{USER_COLOR}};
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
@@ -368,9 +377,11 @@ QStackedWidget{
 
 QMenu{
     background-color: #474747;
+    border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
 QMenu::item:selected{
     background-color: #5c5c5c;
+    border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
 
 QLineEdit {
