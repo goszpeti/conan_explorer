@@ -17,8 +17,7 @@ class TabScrollAreaWidgets(QWidget):
         super().__init__(parent)
 
 class TabGrid(QWidget):
-    SPACING = 3
-    MARGIN = 8
+    SPACING = 10
 
     def __init__(self, parent: QTabWidget, model: UiTabModel):
         super().__init__(parent)
@@ -72,7 +71,6 @@ class TabGrid(QWidget):
         self.tab_scroll_area_widgets.setSizePolicy(size_policy)
         self.tab_scroll_area_widgets.setLayoutDirection(Qt.LeftToRight)
         self.tab_grid_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.tab_grid_layout.setContentsMargins(self.MARGIN, self.MARGIN, self.MARGIN, self.MARGIN)
         self.tab_grid_layout.setSpacing(self.SPACING)
         self.tab_grid_layout.setContentsMargins(0, 0, 5, 0)
 
@@ -80,26 +78,24 @@ class TabGrid(QWidget):
         self.layout().addWidget(self.tab_scroll_area)
         self._v_spacer = QSpacerItem(
             20, 200, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        self._h_spacer = QSpacerItem(
-            100, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-    def get_max_columns(self):
+    def get_max_columns(self, offset=0):
         if self.tab_scroll_area:
             width = self.parent().width()
-            max_columns = int(width + RIGHT_MENU_MAX_WIDTH / (AppLink.max_width() + self.SPACING))
+            max_columns = int((width + offset) / (AppLink.max_width()))
             if max_columns == 0:
                 max_columns = 1
             return max_columns
         return 1  # always enable one row
 
-    def load(self):
+    def load(self, offset=0):
         self.init_app_grid()
-        self.load_apps_from_model()
+        self.load_apps_from_model(offset)
 
-    def load_apps_from_model(self, force_reload=False):
+    def load_apps_from_model(self, force_reload=False, offset=0):
         row = 0
         column = 0
-        max_columns = self.get_max_columns()
+        max_columns = self.get_max_columns(offset)
         self._columns_count = max_columns
         if not self.app_links or force_reload:
             for app_model in self.model.apps:
@@ -116,10 +112,7 @@ class TabGrid(QWidget):
                 self.tab_grid_layout.addWidget(app_link, row, column)
                 self.tab_grid_layout.setColumnMinimumWidth(column, app_link.max_width() - (2 * self.SPACING))
                 column += 1
-                self.tab_grid_layout.addItem(self._h_spacer, row, column)
-
                 if column == max_columns:
-                    #break
                     column = 0
                     row += 1
             app_link.show()
@@ -128,7 +121,9 @@ class TabGrid(QWidget):
             self.tab_grid_layout.addItem(self._v_spacer)
         else:
             self.tab_grid_layout.addItem(self._v_spacer, row + 1, 0)
-
+        self.tab_grid_layout.addItem(QSpacerItem(
+            2000, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), max_columns+1, 0, 0, 0)
+        self.tab_grid_layout.setColumnStretch(max_columns+1, 1)
 
     def open_app_link_add_dialog(self, new_model: Optional[UiAppLinkModel]=None):
         if not new_model:
@@ -171,7 +166,7 @@ class TabGrid(QWidget):
         """
         # remove spacer - needed so, the layout can be resized correctly, if layout shifts
         self.tab_grid_layout.removeItem(self._v_spacer)
-        self.tab_grid_layout.removeItem(self._h_spacer)
+        # self.tab_grid_layout.removeItem(self._h_spacer)
         for app_link in self.app_links:
             self.tab_grid_layout.removeWidget(app_link)
             if force:

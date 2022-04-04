@@ -120,7 +120,7 @@ class MainWindow(FluentWindow):
     def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent
         super().resizeEvent(a0)
 
-        if APPLIST_ENABLED:  # no redraw necessary
+        if app.active_settings.get_bool(APPLIST_ENABLED):  # no redraw necessary
             return
         if a0.oldSize().width() == -1:  # initial resize - can be skipped
             return
@@ -184,7 +184,7 @@ class MainWindow(FluentWindow):
         if self.search_dialog:
             self.search_dialog.apply_theme()
 
-    @ pyqtSlot()
+    @pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         paths = ConanCleanup(app.conan_api).get_cleanup_cache_paths()
@@ -267,7 +267,7 @@ class MainWindow(FluentWindow):
         sender_toggle = self.sender()
         status = sender_toggle.isChecked()
         app.active_settings.set(APPLIST_ENABLED, status)
-        self.app_grid.re_init(self.model.app_grid)
+        self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
     @pyqtSlot(str)
     def write_log(self, text):

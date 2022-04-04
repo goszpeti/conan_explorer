@@ -39,14 +39,14 @@ class AppGridView(QWidget):
         if self.tab_widget.count() > 0:  # remove the default tab
             self.tab_widget.removeTab(0)
 
-    def re_init(self, model: "UiAppGridModel"):
+    def re_init(self, model: "UiAppGridModel", offset=0):
         """ To be called, when a new config file is loaded """
         self.model = model
         # delete all tabs
         tab_count = self.tab_widget.count()
         for i in range(tab_count, 0, -1):
             self.tab_widget.removeTab(i-1)
-        self.load()
+        self.load(offset)
 
     def re_init_all_app_links(self, force=False):
         for tab in self.get_tabs():
@@ -135,14 +135,14 @@ class AppGridView(QWidget):
     def get_tabs(self) -> List[TabGrid]:
         return self.tab_widget.findChildren(TabGrid)
 
-    def load(self):
+    def load(self, offset=0):
         """ Creates new layout """
         for tab_config in self.model.tabs:
 
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             tab = TabGrid(parent=self.tab_widget, model=tab_config)
             self.tab_widget.addTab(tab, tab_config.name)
-            tab.load()
+            tab.load(offset)
 
         # always show the first tab first
         self.tab_widget.setCurrentIndex(0)
