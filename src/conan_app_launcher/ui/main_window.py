@@ -14,15 +14,16 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox, QWidget
 
 from .common import QLoader, activate_theme
 from .views.about_page import AboutPage
-from .fluent_window import FluentWindow
+from .fluent_window import ExtFluentWindow
 from .model import UiApplicationModel
 from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
 
-class MainWindow(FluentWindow):
+
+class MainWindow(ExtFluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
 
     # signals for inter page communication
@@ -258,6 +259,6 @@ class MainWindow(FluentWindow):
     @pyqtSlot(str)
     def write_log(self, text):
         """ Write the text signaled by the logger """
-        self.ui.console.append(text)
+        self.findChild(QWidget, name="console").append(text)
 
 

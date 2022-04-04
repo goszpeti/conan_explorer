@@ -82,15 +82,35 @@ TabScrollAreaWidgets{
 
 
 /* Styling for buttons each frame */
-
 /* only QPushButton - not ClickableLabel */
+QDialog .QPushButton {
+    border-radius: 5px;
+    margin: 2px;
+    text-align: middle;
+    background-color: #474747;
+    padding: 3px;
+    min-width: 30px;
+}
 
+QDialog .QPushButton:hover {
+    background-color: #5c5c5c;
+}
 
-QFrame#content_frame{
+QDialog .QPushButton:pressed {
+    padding-top: 5px;
+    background-color: #696969;
+}
+
+QDialog .QPushButton:checked {
+    background-color: #5c5c5c;
+}
+
+QDialog{
     background-color: #5c5c5c;
     border-radius: 7px;
 }
-QFrame#content_frame .QFrame{
+
+QDialog .QFrame{
     background-color: transparent;
     border-radius: 7px;
 }

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import open_file
-from conan_app_launcher.ui.fluent_window import FluentWindow
+from conan_app_launcher.ui.fluent_window import ExtFluentWindow
 from conan_app_launcher.ui.common import QLoader, get_themed_asset_image
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conans.model.ref import ConanFileReference
@@ -20,7 +20,7 @@ from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
 class ConanSearchDialog(QDialog):
 
-    def __init__(self, parent: Optional[QWidget], conan_pkg_installed: pyqtBoundSignal, conan_pkg_removed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
+    def __init__(self, parent: Optional[QWidget], conan_pkg_installed: pyqtBoundSignal, conan_pkg_removed: pyqtBoundSignal, page_widgets: ExtFluentWindow.PageStore):
         # Add minimize and maximize buttons
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         self.page_widgets = page_widgets

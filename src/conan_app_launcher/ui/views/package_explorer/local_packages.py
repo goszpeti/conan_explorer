@@ -7,7 +7,7 @@ from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.ui.fluent_window import FluentWindow
+from conan_app_launcher.ui.fluent_window import ExtFluentWindow
 from conan_app_launcher.ui.common import QLoader, get_themed_asset_image, FileSystemModel
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.views import AppGridView
@@ -28,7 +28,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class LocalConanPackageExplorer(QWidget):
 
-    def __init__(self, parent: QWidget, conan_pkg_removed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
+    def __init__(self, parent: QWidget, conan_pkg_removed: pyqtBoundSignal, page_widgets: ExtFluentWindow.PageStore):
         super().__init__(parent)
         self.page_widgets = page_widgets
         self.conan_pkg_removed = conan_pkg_removed

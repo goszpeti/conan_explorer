@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, List
 
-from conan_app_launcher.ui.fluent_window import FluentWindow
+from conan_app_launcher.ui.fluent_window import ExtFluentWindow
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from .model import UiAppLinkModel, UiTabModel
@@ -20,7 +20,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class AppGridView(QWidget):
 
-    def __init__(self, parent, model: "UiAppGridModel", conan_pkg_installed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
+    def __init__(self, parent, model: "UiAppGridModel", conan_pkg_installed: pyqtBoundSignal, page_widgets: ExtFluentWindow.PageStore):
         super().__init__(parent)
         self.page_widgets = page_widgets
         self.setLayout(QVBoxLayout(self))
