@@ -15,7 +15,7 @@ from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
 from conan_app_launcher.ui.views.app_grid.dialogs import AppsMoveDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
-from conan_app_launcher.ui.views.app_grid.tab import (AppEditDialog, AppLink,
+from conan_app_launcher.ui.views.app_grid.tab import (AppEditDialog, AppLinkBase,
                                                         TabGrid)
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
@@ -156,7 +156,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     tab_model = tabs[1].model
     apps_model = tab_model.apps
     prev_count = len(apps_model)
-    app_link: AppLink = tabs[1].app_links[0]
+    app_link: AppLinkBase = tabs[1].app_links[0]
 
     # check that no changes happens on cancel
     mocker.patch.object(AppEditDialog, 'exec_',
@@ -176,9 +176,9 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     # check that the gui has updated
     assert len(app_link._parent_tab.app_links) == prev_count
     assert app_link.model.name == "NewApp"
-    assert app_link._app_name_label.text() == "NewApp"
-    assert app_link._app_version_cbox.text() == ConanFileReference.loads(TEST_REF).version
-    assert app_link._app_channel_cbox.text() == ConanFileReference.loads(TEST_REF).channel
+    assert app_link._app_name.text() == "NewApp"
+    assert app_link._app_version.text() == ConanFileReference.loads(TEST_REF).version
+    assert app_link._app_channel.text() == ConanFileReference.loads(TEST_REF).channel
 
     # check, that the config file has updated
     config_tabs = JsonUiConfig(ui_config_fixture).load().app_grid.tabs
@@ -246,14 +246,14 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     tab_model = tab.model
     apps_model = tab_model.apps
     prev_count = len(apps_model)
-    app_link: AppLink = tab.app_links[0]
+    app_link: AppLinkBase = tab.app_links[0]
     app_config = UiAppLinkConfig(name="NewApp", conan_ref=TEST_REF,
                                  executable="conanmanifest.txt")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
 
     mocker.patch.object(AppEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
-    new_app_link: AppLink = tab.open_app_link_add_dialog(app_model)
+    new_app_link: AppLinkBase = tab.open_app_link_add_dialog(app_model)
     assert new_app_link
     assert tab._edit_app_dialog._ui.name_line_edit.text()
 
@@ -263,8 +263,8 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     apps = tab_model.apps
     assert len(apps) == prev_count + 1
     assert new_app_link.model.name == "NewApp"
-    assert new_app_link._app_name_label.text() == "NewApp"
-    assert new_app_link._app_channel_cbox.isHidden()
+    assert new_app_link._app_name.text() == "NewApp"
+    assert new_app_link._app_channel.isHidden()
     assert new_app_link.model.package_folder.exists()
 
     # check, that the config file has updated

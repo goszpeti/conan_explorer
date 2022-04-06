@@ -8,5 +8,5 @@ from PyQt5.QtCore import Qt
 class RoundedMenu(QMenu):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags() | Qt.NoDropShadowWindowHint | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)

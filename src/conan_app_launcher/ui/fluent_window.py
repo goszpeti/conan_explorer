@@ -21,8 +21,8 @@ from .common import get_themed_asset_image
 
 from .fluent_window_ui import Ui_MainWindow
 
-LEFT_MENU_MIN_WIDTH = 70
-LEFT_MENU_MAX_WIDTH = 250
+LEFT_MENU_MIN_WIDTH = 80
+LEFT_MENU_MAX_WIDTH = 300
 RIGHT_MENU_MIN_WIDTH = 0
 RIGHT_MENU_MAX_WIDTH = 270
 
@@ -76,8 +76,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
             """ Creates a Frame with a text label and a custom widget under it and adds it to the menu """
             label = QLabel(name)
             label.adjustSize() # adjust layout according to size and throw a warning, if too big?
+            widget.adjustSize()
+            widget.setMinimumHeight(50)
+            widget.setMaximumHeight(100)
+
             frame = QFrame(self)
-            if label.width() > (RIGHT_MENU_MAX_WIDTH - self.TOGGLE_WIDTH - 10):  # 10 for margin
+            if label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 10):  # 10 for margin
                 frame.setLayout(QVBoxLayout(frame))
             else:
                 frame.setLayout(QHBoxLayout(frame))
@@ -100,7 +104,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             return toggle
 
 
-        def add_button_menu_entry(self, name: str, target: Callable, asset_icon:str="", shortcut: Optional[QKeySequence]=None):
+        def add_button_menu_entry(self, name: str, target: Callable, asset_icon:str="", shortcut: Optional[QKeySequence]=None, parent=None):
             """ Adds a button with an icon and links with a callable. Optionally can have a key shortcut. """
             button = QPushButton(self)
             button.setObjectName(name + "_submenu")
@@ -122,7 +126,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if not shortcut:
                 return button
             # use global shortcut instead of button.setShortcut -> Works from anywhere
-            shortcut_obj = QShortcut(shortcut, self)
+            shortcut_obj = QShortcut(shortcut, parent)
             shortcut_obj.activated.connect(target)
             button.setText(f"{button.text()} ({shortcut.toString()})")
             return button
@@ -193,10 +197,15 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self._resize_point = QPoint()
         self._last_geometry = QRect()
         self.title_text = title_text
-        
+
+        self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
+        self.ui.toggle_left_menu_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
+        self.ui.settings_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
+
         self.add_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.png")
         self.add_themed_icon(self.ui.settings_button, "icons/settings.png")
-
+        self.ui.minimize_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "minus.png"))))
+        self.ui.close_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "close.png"))))
         # window buttons
         self.ui.restore_max_button.clicked.connect(self.maximize_restore)
         self.ui.minimize_button.clicked.connect(self.showMinimized)

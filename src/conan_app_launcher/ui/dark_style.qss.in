@@ -63,7 +63,7 @@ AppGridView{
 TabGrid{
     background-color: #808086;
 }
-AppLink {
+AppLinkBase {
     /* background-color: #353839; */
     background-color:  qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #5a88b6, stop:1 #6699CC);;
     border-radius: 7px;

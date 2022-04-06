@@ -1,5 +1,7 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
+import conan_app_launcher.app as app
+from conan_app_launcher.settings import APPLIST_ENABLED  # using global module pattern
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
@@ -10,7 +12,7 @@ from PyQt5.QtWidgets import (QAction, QInputDialog, QMessageBox, QTabWidget,
                              QVBoxLayout, QWidget)
 
 from .model import UiAppLinkModel, UiTabModel
-from .tab import TabGrid
+from .tab import TabBase, TabGrid, TabList
 
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
@@ -50,7 +52,7 @@ class AppGridView(QWidget):
 
     def re_init_all_app_links(self, force=False):
         for tab in self.get_tabs():
-            tab.redraw_grid(force)
+            tab.redraw(force)
 
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add
@@ -102,12 +104,12 @@ class AppGridView(QWidget):
             self.model.tabs.append(tab_model)
             self.model.save()
             # add tab in ui
-            tab = TabGrid(self.tab_widget, model=tab_model)
+            tab = self.get_tab_type()(self.tab_widget, model=tab_model)
             tab.load()
             self.tab_widget.addTab(tab, text)
 
     def on_tab_rename(self, index):
-        tab: TabGrid = self.tab_widget.widget(index)
+        tab: TabBase = self.tab_widget.widget(index)
 
         rename_tab_dialog = QInputDialog(self)
         text, accepted = rename_tab_dialog.getText(self, 'Rename tab',
@@ -132,15 +134,15 @@ class AppGridView(QWidget):
             self.model.tabs.remove(self.model.tabs[index])
             self.model.save()
 
-    def get_tabs(self) -> List[TabGrid]:
-        return self.tab_widget.findChildren(TabGrid)
+    def get_tabs(self) -> List[TabBase]:  # Union[TabGrid, TabList]
+        return self.tab_widget.findChildren(TabBase) # TODO
 
     def load(self, offset=0):
         """ Creates new layout """
         for tab_config in self.model.tabs:
 
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabGrid(parent=self.tab_widget, model=tab_config)
+            tab = self.get_tab_type()(parent=self.tab_widget, model=tab_config)
             self.tab_widget.addTab(tab, tab_config.name)
             tab.load(offset)
 
@@ -169,3 +171,12 @@ class AppGridView(QWidget):
             for app in tab.app_links:
                 app.model.update_from_cache()
                 app.update_with_conan_info()
+
+    @classmethod
+    def get_tab_type(cls):
+        if app.active_settings.get_bool(APPLIST_ENABLED):
+            return TabList
+        else:
+            return TabGrid
+
+

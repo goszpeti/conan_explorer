@@ -1,5 +1,6 @@
 from pathlib import Path
 from shutil import rmtree
+import platform
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -13,7 +14,7 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox, QLabel
 
 from .common import AsyncLoader, activate_theme
 from .views.about_page import AboutPage
@@ -90,16 +91,24 @@ class MainWindow(FluentWindow):
         self.add_right_menu_sub_menu(view_settings_submenu, "icons/package_settings.png")
 
         view_settings_submenu.add_button_menu_entry(
-            "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence(Qt.CTRL + Qt.Key_Plus))
+            "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence(Qt.CTRL + Qt.Key_Plus), self)
         view_settings_submenu.add_button_menu_entry(
-            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence(Qt.CTRL + Qt.Key_Minus))
+            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence(Qt.CTRL + Qt.Key_Minus), self)
 
         dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
         view_settings_submenu.add_toggle_menu_entry("Dark Mode", self.on_theme_changed, dark_mode_enabled)
 
-        conan_settings_submenu = self.RightSubMenu("Conan")
-        conan_button = self.add_right_menu_sub_menu(conan_settings_submenu)
-        conan_button.setIcon(QIcon(str(app.asset_path / "icons/conan.png")))
+        # conan_settings_submenu = self.RightSubMenu("Conan")
+        # conan_button = self.add_right_menu_sub_menu(conan_settings_submenu)
+        # conan_button.setIcon(QIcon(str(app.asset_path / "icons/conan.png")))
+        # home_path = QLabel(app.conan_api.conan.config_home(), self)  #
+        # home_path.setWordWrap(True)
+        # home_path.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        # conan_settings_submenu.add_named_custom_entry("Home Path:", home_path)
+
+        # conan_settings_submenu.add_named_custom_entry("Storage Path:", QLabel(app.conan_api.client_cache.store, self))
+        # if platform.system() == "Windows":
+        #     conan_settings_submenu.add_named_custom_entry("Short Path:", QLabel(str(app.conan_api.get_short_path_root()), self))
 
         self.add_right_menu_line()
         self.add_right_menu_entry("Remove Locks", "icons/remove-lock.png").clicked.connect(app.conan_api.remove_locks)

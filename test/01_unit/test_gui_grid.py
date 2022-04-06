@@ -16,7 +16,7 @@ from conan_app_launcher.settings import (DISPLAY_APP_USERS,
                                          ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.views.app_grid.app_link import AppLink
+from conan_app_launcher.ui.views.app_grid.app_link import AppLinkBase
 from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
     AppEditDialog
 from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
@@ -226,7 +226,7 @@ def test_AppLink_open(base_fixture, qtbot):
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
-    app_ui = AppLink(root_obj, app_model)
+    app_ui = AppLinkBase(root_obj, app_model)
     app_ui.load()
     root_obj.setFixedSize(100, 200)
     root_obj.show()
@@ -264,7 +264,7 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
-    app_ui = AppLink(root_obj, app_model)
+    app_ui = AppLinkBase(root_obj, app_model)
     app_ui.load()
 
     assert not app_ui.model.get_icon().isNull()
@@ -303,7 +303,7 @@ def test_AppLink_cbox_switch(base_fixture, qtbot):
     root_obj.setFixedSize(100, 200)
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    app_link = AppLink(root_obj, app_model)
+    app_link = AppLinkBase(root_obj, app_model)
     app_link.load()
     root_obj.show()
 
@@ -315,58 +315,58 @@ def test_AppLink_cbox_switch(base_fixture, qtbot):
     sleep(1)
 
     # check initial state
-    assert app_link._app_version_cbox.count() == 2
-    assert app_link._app_version_cbox.itemText(0) == "1.0.0"
-    assert app_link._app_version_cbox.itemText(1) == "2.0.0"
-    assert app_link._app_user_cbox.count() == 2
-    assert app_link._app_user_cbox.itemText(0) == "user1"
-    assert app_link._app_user_cbox.itemText(1) == "user2"
-    assert app_link._app_channel_cbox.count() == 2
-    assert app_link._app_channel_cbox.itemText(0) == "channel1"
-    assert app_link._app_channel_cbox.itemText(1) == "channel2"
+    assert app_link._app_version.count() == 2
+    assert app_link._app_version.itemText(0) == "1.0.0"
+    assert app_link._app_version.itemText(1) == "2.0.0"
+    assert app_link._app_user.count() == 2
+    assert app_link._app_user.itemText(0) == "user1"
+    assert app_link._app_user.itemText(1) == "user2"
+    assert app_link._app_channel.count() == 2
+    assert app_link._app_channel.itemText(0) == "channel1"
+    assert app_link._app_channel.itemText(1) == "channel2"
 
     # now change version to 2.0.0 -> user can change to default, channel should go to NA
     # this is done, so that the user can select it and not autinstall something random
-    app_link._app_version_cbox.setCurrentIndex(1)
-    assert app_link._app_version_cbox.count() == 2
-    assert app_link._app_version_cbox.itemText(0) == "1.0.0"
-    assert app_link._app_version_cbox.itemText(1) == "2.0.0"
-    assert app_link._app_user_cbox.count() == 2
-    assert app_link._app_user_cbox.itemText(0) == "user3"
-    assert app_link._app_user_cbox.itemText(1) == "user4"
-    assert app_link._app_channel_cbox.count() == 3
-    assert app_link._app_channel_cbox.itemText(0) == "NA"
-    assert app_link._app_channel_cbox.currentIndex() == 0
-    assert app_link._app_channel_cbox.itemText(1) == "channel5"
-    assert app_link._app_channel_cbox.itemText(2) == "channel6"
+    app_link._app_version.setCurrentIndex(1)
+    assert app_link._app_version.count() == 2
+    assert app_link._app_version.itemText(0) == "1.0.0"
+    assert app_link._app_version.itemText(1) == "2.0.0"
+    assert app_link._app_user.count() == 2
+    assert app_link._app_user.itemText(0) == "user3"
+    assert app_link._app_user.itemText(1) == "user4"
+    assert app_link._app_channel.count() == 3
+    assert app_link._app_channel.itemText(0) == "NA"
+    assert app_link._app_channel.currentIndex() == 0
+    assert app_link._app_channel.itemText(1) == "channel5"
+    assert app_link._app_channel.itemText(2) == "channel6"
 
     # check that reference and executable has updated
     assert app_model.conan_ref == "switch_test/2.0.0@user3/NA"
     assert app_model.get_executable_path() == Path("NULL")
 
     # change user
-    app_link._app_channel_cbox.setCurrentIndex(1)
+    app_link._app_channel.setCurrentIndex(1)
     # wait for version update
     if app.conan_worker:
         app.conan_worker.finish_working()
     sleep(1)
     # setting a channel removes NA entry and entry becomes -1
-    assert app_link._app_channel_cbox.itemText(0) == "channel5"
-    assert app_link._app_channel_cbox.itemText(1) == "channel6"
-    assert app_link._app_channel_cbox.currentIndex() == 0
+    assert app_link._app_channel.itemText(0) == "channel5"
+    assert app_link._app_channel.itemText(1) == "channel6"
+    assert app_link._app_channel.currentIndex() == 0
     # conan worker currently not integrated -> no pkg path update
     # assert app_model._package_folder.exists()
 
     # now change back to 1.0.0 -> user can change to default, channel should go to NA
-    app_link._app_version_cbox.setCurrentIndex(0)
-    assert app_link._app_version_cbox.count() == 2
-    assert app_link._app_version_cbox.itemText(0) == "1.0.0"
-    assert app_link._app_version_cbox.itemText(1) == "2.0.0"
-    assert app_link._app_user_cbox.count() == 2
-    assert app_link._app_user_cbox.itemText(0) == "user1"
-    assert app_link._app_user_cbox.itemText(1) == "user2"
-    assert app_link._app_channel_cbox.count() == 3
-    assert app_link._app_channel_cbox.itemText(0) == "NA"
-    assert app_link._app_channel_cbox.currentIndex() == 0
-    assert app_link._app_channel_cbox.itemText(1) == "channel1"
-    assert app_link._app_channel_cbox.itemText(2) == "channel2"
+    app_link._app_version.setCurrentIndex(0)
+    assert app_link._app_version.count() == 2
+    assert app_link._app_version.itemText(0) == "1.0.0"
+    assert app_link._app_version.itemText(1) == "2.0.0"
+    assert app_link._app_user.count() == 2
+    assert app_link._app_user.itemText(0) == "user1"
+    assert app_link._app_user.itemText(1) == "user2"
+    assert app_link._app_channel.count() == 3
+    assert app_link._app_channel.itemText(0) == "NA"
+    assert app_link._app_channel.currentIndex() == 0
+    assert app_link._app_channel.itemText(1) == "channel1"
+    assert app_link._app_channel.itemText(2) == "channel2"
