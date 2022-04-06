@@ -104,9 +104,9 @@ QFrame#content_frame .QFrame{
     border-radius: 7px;
 }
 
-/* QFrame#content_frame QFrame{
-    background-color: #202020;
-} */
+QMessageBox QPushButton{
+    background-color: #474747;
+}
 QFrame#content_frame .QPushButton{
     border-radius: 5px;
     margin: 2px;

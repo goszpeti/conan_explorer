@@ -15,7 +15,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-from .common import QLoader, activate_theme
+from .common import AsyncLoader, activate_theme
 from .views.about_page import AboutPage
 from .fluent_window import FluentWindow
 from .model import UiApplicationModel
@@ -133,7 +133,7 @@ class MainWindow(FluentWindow):
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
 
         # model loads incrementally
-        loader = QLoader(self)
+        loader = AsyncLoader(self)
         loader.async_loading(self, self.model.loadf, (config_source_str,))
         loader.wait_for_finished()
 

@@ -1,35 +1,35 @@
 import pprint
-from pathlib import Path
 from typing import List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import open_file
-from conan_app_launcher.ui.common import QLoader, get_themed_asset_image
+from conan_app_launcher.ui.common import AsyncLoader, get_themed_asset_image
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.model.ref import ConanFileReference
-from PyQt5 import uic
+
 from PyQt5.QtCore import QPoint, Qt, pyqtBoundSignal, pyqtSlot
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import (QAction, QApplication, QDialog, QListWidgetItem,
                              QWidget)
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
-
+from .conan_search_ui import Ui_Form
 
 class ConanSearchDialog(QDialog):
 
-    def __init__(self, parent: Optional[QWidget], conan_pkg_installed: pyqtBoundSignal, conan_pkg_removed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
+    def __init__(self, parent: Optional[QWidget], conan_pkg_installed: Optional[pyqtBoundSignal]=None,
+                 conan_pkg_removed: Optional[pyqtBoundSignal]=None, page_widgets: Optional[FluentWindow.PageStore]=None):
         # Add minimize and maximize buttons
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         self.page_widgets = page_widgets
         self.conan_pkg_installed = conan_pkg_installed
         self.conan_pkg_removed = conan_pkg_removed
 
-        current_dir = Path(__file__).parent
-        self._ui = uic.loadUi(current_dir / "conan_search.ui", baseinstance=self)
+        self._ui = Ui_Form()
+        self._ui.setupUi(self)
         
         # init search bar
         icon = QIcon(str(app.asset_path / "icons/icon.ico"))
@@ -55,7 +55,7 @@ class ConanSearchDialog(QDialog):
         self._ui.remote_list.setFixedHeight(min(items_height, 120))
 
         self._pkg_result_model = PkgSearchModel()
-        self._pkg_result_loader = QLoader(self)
+        self._pkg_result_loader = AsyncLoader(self)
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self.apply_theme()
@@ -136,6 +136,8 @@ class ConanSearchDialog(QDialog):
         """ Switch to the main gui and select the item (ref or pkg) in the Local Package Explorer. """
         item = self.get_selected_source_item(self._ui.search_results_tree_view)
         if not item:
+            return
+        if not self.page_widgets:
             return
         self.page_widgets.get_page_by_type(LocalConanPackageExplorer).select_local_package_from_ref(item.get_conan_ref(), refresh=True)
 

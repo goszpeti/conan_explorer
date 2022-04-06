@@ -77,7 +77,7 @@ class TabGrid(QWidget):
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.layout().addWidget(self.tab_scroll_area)
         self._v_spacer = QSpacerItem(
-            20, 200, QSizePolicy.Minimum, QSizePolicy.Expanding)
+            20, 2000, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
     def get_max_columns(self, offset=0):
         if self.tab_scroll_area:
@@ -109,7 +109,7 @@ class TabGrid(QWidget):
             if app.active_settings.get_bool(APPLIST_ENABLED):
                 self.tab_grid_layout.addWidget(app_link)
             else:
-                self.tab_grid_layout.addWidget(app_link, row, column)
+                self.tab_grid_layout.addWidget(app_link, row, column, 1, 1)
                 self.tab_grid_layout.setColumnMinimumWidth(column, app_link.max_width() - (2 * self.SPACING))
                 column += 1
                 if column == max_columns:
@@ -121,9 +121,9 @@ class TabGrid(QWidget):
             self.tab_grid_layout.addItem(self._v_spacer)
         else:
             self.tab_grid_layout.addItem(self._v_spacer, row + 1, 0)
-        self.tab_grid_layout.addItem(QSpacerItem(
-            2000, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), max_columns+1, 0, 0, 0)
-        self.tab_grid_layout.setColumnStretch(max_columns+1, 1)
+            self.tab_grid_layout.addItem(QSpacerItem(
+                2000, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), max_columns+1, 0, 0, 0)
+            self.tab_grid_layout.setColumnStretch(max_columns+1, 1)
 
     def open_app_link_add_dialog(self, new_model: Optional[UiAppLinkModel]=None):
         if not new_model:

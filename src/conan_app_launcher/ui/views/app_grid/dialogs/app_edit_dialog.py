@@ -10,10 +10,11 @@ from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from conans.model.ref import ConanFileReference
 
-from PyQt5 import uic
 from PyQt5.QtCore import pyqtBoundSignal, Qt
 from PyQt5.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
 from PyQt5.QtGui import QIcon
+
+from .app_edit_dialog_ui import Ui_Dialog
 
 class AppEditDialog(QDialog):
 
@@ -24,8 +25,8 @@ class AppEditDialog(QDialog):
         self._temp_package_path = Path("NULL") # pkg path of the currently entered pkg
 
         # without baseinstance, dialog would further needed to be configured
-        current_dir = Path(__file__).parent
-        self._ui = uic.loadUi(current_dir / "app_edit_dialog.ui", baseinstance=self)
+        self._ui = Ui_Dialog()
+        self._ui.setupUi(self)
 
         self.setModal(True)
         self.setWindowTitle("Edit App Link")

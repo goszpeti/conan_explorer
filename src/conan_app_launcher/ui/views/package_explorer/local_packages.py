@@ -7,14 +7,13 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.ui.common import FileSystemModel, QLoader, get_themed_asset_image
+from conan_app_launcher.ui.common import FileSystemModel, AsyncLoader, get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog
 from conan_app_launcher.ui.views import AppGridView
 from conan_app_launcher.ui.widgets import RoundedMenu
 
 from conans.model.ref import ConanFileReference
-from PyQt5 import uic
 from PyQt5.QtCore import (QFile, QItemSelectionModel, QMimeData, QModelIndex,
                           Qt, QUrl, pyqtBoundSignal)
 from PyQt5.QtGui import QIcon, QKeySequence, QShowEvent
@@ -22,6 +21,8 @@ from PyQt5.QtWidgets import (QAbstractItemView, QAction, QApplication,
                              QMessageBox, QWidget)
 
 from .model import PROFILE_TYPE, REF_TYPE, PackageTreeItem, PkgSelectModel
+
+from .package_explorer_ui import Ui_Form
 
 if TYPE_CHECKING:  # pragma: no cover
     from conan_app_launcher.ui.fluent_window import FluentWindow
@@ -34,11 +35,12 @@ class LocalConanPackageExplorer(QWidget):
         self.page_widgets = page_widgets
         self.conan_pkg_removed = conan_pkg_removed
         self.pkg_sel_model = None
-        self._pkg_sel_model_loader = QLoader(self)
+        self._pkg_sel_model_loader = AsyncLoader(self)
         self._pkg_sel_model_loaded = True
         self.fs_model = None
-        current_dir = Path(__file__).parent
-        self._ui = uic.loadUi(current_dir / "package_explorer.ui", baseinstance=self)
+
+        self._ui = Ui_Form()
+        self._ui.setupUi(self)
 
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
@@ -314,7 +316,7 @@ class LocalConanPackageExplorer(QWidget):
         run_file(file_path, True, args="")
 
     def _init_pkg_file_context_menu(self):
-        self.file_cntx_menu = RoundedMenu(self)
+        self.file_cntx_menu = RoundedMenu()
 
         self.open_fm_action = QAction("Show in File Manager", self)
         self.open_fm_action.setIcon(QIcon(get_themed_asset_image("icons/file-explorer.png")))

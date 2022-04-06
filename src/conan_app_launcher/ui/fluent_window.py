@@ -3,7 +3,6 @@ if platform.system() == "Windows":
     import ctypes
     from ctypes.wintypes import MSG
 from enum import Enum
-from pathlib import Path
 from typing import Callable, Dict, Optional, Tuple, Type, TypeVar, Union
 
 # uses Logger, settings and theming related functions
@@ -13,14 +12,14 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import FONT_SIZE
 from .widgets import AnimatedToggle
 
-
-from PyQt5 import uic
 from PyQt5.QtCore import QEasingCurve, QEvent, QObject, QPoint, QPropertyAnimation, QRect, QSize, Qt
 from PyQt5.QtGui import QHoverEvent, QIcon, QKeySequence, QPixmap
 from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton, 
                             QShortcut, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
 
 from .common import get_themed_asset_image
+
+from .fluent_window_ui import Ui_MainWindow
 
 LEFT_MENU_MIN_WIDTH = 70
 LEFT_MENU_MAX_WIDTH = 250
@@ -179,8 +178,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
     def __init__(self, title_text: str="", native_windows_fcns=True, rounded_corners=True):
         super().__init__()
-        current_dir = Path(__file__).parent
-        self.ui = uic.loadUi(current_dir / "fluent_window.ui", baseinstance=self)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint |
                             Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)

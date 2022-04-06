@@ -9,8 +9,7 @@ from PyQt5.QtCore import Qt, QItemSelectionModel
 from PyQt5.QtWidgets import QWidget, QAbstractItemView, QDialog
 from PyQt5.QtGui import QIcon
 
-from PyQt5 import uic
-
+from .apps_move_dialog_ui import Ui_rearrange_dialog
 
 current_dir = Path(__file__).parent
 
@@ -19,7 +18,10 @@ class AppsMoveDialog(QDialog):
 
     def __init__(self, tab_ui_model: UiTabModel, parent: Optional[QWidget], flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
-        self._ui = uic.loadUi(current_dir / "apps_move_dialog.ui", baseinstance=self)
+
+        self._ui = Ui_rearrange_dialog()
+        self._ui.setupUi(self)
+
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "rearrange.png")))
 
         self._ui.list_view.setModel(tab_ui_model)

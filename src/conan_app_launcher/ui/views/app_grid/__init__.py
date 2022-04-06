@@ -67,7 +67,7 @@ class AppGridView(QWidget):
 
     def on_tab_context_menu_requested(self, position):
         index = self.tab_widget.tabBar().tabAt(position)
-        menu = RoundedMenu(self)
+        menu = RoundedMenu()
         self.menu = menu
 
         rename_action = QAction("Rename", self)

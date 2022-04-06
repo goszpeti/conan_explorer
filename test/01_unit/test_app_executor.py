@@ -160,7 +160,7 @@ def test_start_script(base_fixture, tmp_path):
 
 def test_open_file(base_fixture):
     """ Test file opener by opening a text file and checking for the app to spawn"""
-    test_file = Path(tempfile.gettempdir(), "test.txt")
+    test_file = Path(tempfile.gettempdir(), "test.inf")
     with open(str(test_file), "w") as f:
         f.write("test")
 
@@ -181,9 +181,9 @@ def test_open_file(base_fixture):
         default_app = "notepad.exe"
         # this is application specific
         ret = check_output(f'tasklist /fi "IMAGENAME eq {default_app}"')
-        assert default_app in ret.decode("utf-8")
+        assert default_app in ret.decode("utf-8").lower()
         lines = ret.decode("utf-8").splitlines()
-        line = lines[3].replace(" ", "")
-        pid = line.split(default_app)[1].split("Console")[0]
+        line = lines[3].replace(" ", "").lower()
+        pid = line.split(default_app)[1].split("console")[0]
         os.system("taskkill /PID " + pid)
     os.remove(test_file)

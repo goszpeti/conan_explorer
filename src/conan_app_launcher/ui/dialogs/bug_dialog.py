@@ -40,8 +40,6 @@ class MyMessageBox(QMessageBox):
         super().__init__(parent)
         self._width = 150   # default
 
-        self.setSizeGripEnabled(True)
-
     def setWidth(self, width):
         self._width = width
 

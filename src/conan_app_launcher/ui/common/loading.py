@@ -28,7 +28,7 @@ class Worker(QtCore.QObject):
         self.finished.emit()
 
 
-class QLoader(QtCore.QObject):
+class AsyncLoader(QtCore.QObject):
 
     def __init__(self, parent: QtCore.QObject):
         super().__init__(parent)
