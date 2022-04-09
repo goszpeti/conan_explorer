@@ -45,30 +45,30 @@ class AppsMoveDialog(QDialog):
             first_row = sel_indexes[0].row() - 1
             if not first_row >= 0:
                 return
-            self.list_view.selectionModel().clearSelection()
+            self._ui.list_view.selectionModel().clearSelection()
 
             for idx in sel_indexes:
                 if idx is None:
                     continue
                 row = idx.row()
-                pre_idx = self.list_view.model().index(row - 1)
-                self.list_view.model().beginMoveRows(idx, row, row, pre_idx, pre_idx.row())
-                self.list_view.model().moveRow(idx, row, pre_idx, pre_idx.row())
-                self.list_view.model().endMoveRows()
-                self.list_view.selectionModel().select(pre_idx, QItemSelectionModel.Select)
+                pre_idx = self._ui.list_view.model().index(row - 1)
+                self._ui.list_view.model().beginMoveRows(idx, row, row, pre_idx, pre_idx.row())
+                self._ui.list_view.model().moveRow(idx, row, pre_idx, pre_idx.row())
+                self._ui.list_view.model().endMoveRows()
+                self._ui.list_view.selectionModel().select(pre_idx, QItemSelectionModel.Select)
         except Exception as e:
             print(e)
 
     def move_down(self):
         """ Moves the selected item(s) down in the list """
         max_row = self._ui.list_view.model().rowCount()
-        indexes = self.list_view.selectedIndexes()
+        indexes = self._ui.list_view.selectedIndexes()
         if len(indexes) == 0:
             Logger().info('Select at least one item from list!')
 
         try:  # modify from reverse so qt index does not get reset
             indexes.sort()
-            self.list_view.selectionModel().clearSelection()
+            self._ui.list_view.selectionModel().clearSelection()
             last_sel_row = indexes[-1].row() + 1
             if not last_sel_row < max_row:  # cannot be moved down
                 return
@@ -76,12 +76,12 @@ class AppsMoveDialog(QDialog):
                 if idx is None:
                     continue
                 row = idx.row()
-                post_idx = self.list_view.model().index(row + 2)
-                post_sel_idx = self.list_view.model().index(row + 1)
-                self.list_view.model().beginMoveRows(idx, row, row, post_sel_idx, post_sel_idx.row())
-                self.list_view.model().moveRow(idx, row, post_idx, row + 2)
-                self.list_view.model().endMoveRows()
-                self.list_view.selectionModel().select(post_sel_idx, QItemSelectionModel.Select)
+                post_idx = self._ui.list_view.model().index(row + 2)
+                post_sel_idx = self._ui.list_view.model().index(row + 1)
+                self._ui.list_view.model().beginMoveRows(idx, row, row, post_sel_idx, post_sel_idx.row())
+                self._ui.list_view.model().moveRow(idx, row, post_idx, row + 2)
+                self._ui.list_view.model().endMoveRows()
+                self._ui.list_view.selectionModel().select(post_sel_idx, QItemSelectionModel.Select)
         except Exception as e:
             print(e)
 
