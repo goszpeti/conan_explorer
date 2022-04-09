@@ -204,6 +204,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         self.add_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.png")
         self.add_themed_icon(self.ui.settings_button, "icons/settings.png")
+        self.add_themed_icon(self.ui.right_menu_top_back_button, "icons/back.png")
+        self.add_themed_icon(self.ui.right_menu_bottom_back_button, "icons/back.png")
+
         self.ui.minimize_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "minus.png"))))
         self.ui.close_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "close.png"))))
         # window buttons
