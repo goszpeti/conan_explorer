@@ -4,7 +4,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import APPLIST_ENABLED
 from conan_app_launcher.ui.fluent_window import RIGHT_MENU_MAX_WIDTH
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy,
+from PyQt5.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy, QFrame,
                              QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
 
 from .app_link import AppLinkBase, GridAppLink, ListAppLink
@@ -44,6 +44,7 @@ class TabBase(QWidget):
         # makes it possible to have a scroll bar
         self.tab_scroll_area = QScrollArea(self)
         self.tab_scroll_area.setContentsMargins(0, 0, 0, 0)
+        self.tab_scroll_area.setFrameStyle(QFrame.NoFrame)
 
         #self.tab_scroll_area.setSizePolicy(size_policy)
         self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
@@ -53,6 +54,7 @@ class TabBase(QWidget):
         self.tab_scroll_area.setWidgetResizable(True)
         # this holds all the app links, which are layouts
         self.tab_scroll_area_widgets = TabScrollAreaWidgets(self.tab_scroll_area)
+
         self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.model.name)
         self._initialized = True
     
