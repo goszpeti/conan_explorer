@@ -32,9 +32,8 @@ class AppEditDialog(QDialog):
         self.setWindowTitle("Edit App Link")
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.png")))
 
-        self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started_info)
-        self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished_info)
-        self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_browse_buttons)
+        self._ui.executable_browse_button.setEnabled(False)
+        self._ui.icon_browse_button.setEnabled(False)
 
         self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started_info)
         self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished_info)
@@ -55,9 +54,6 @@ class AppEditDialog(QDialog):
         self._ui.install_button.clicked.connect(self.on_install_clicked)
         self._ui.executable_browse_button.clicked.connect(self.on_executable_browse_clicked)
         self._ui.icon_browse_button.clicked.connect(self.on_icon_browse_clicked)
-
-        self._ui.executable_browse_button.setEnabled(False)
-        self._ui.icon_browse_button.setEnabled(False)
 
         # enable/disable button, if package_folder is set
         if self._pkg_installed_signal:

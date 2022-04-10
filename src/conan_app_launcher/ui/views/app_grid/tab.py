@@ -188,24 +188,6 @@ class TabGrid(TabBase):
             2000, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), max_columns+1, 0, 0, 0)
         self.tab_layout.setColumnStretch(max_columns+1, 1)
 
-<<<<<<< HEAD
-=======
-    def open_app_link_add_dialog(self, new_model: UiAppLinkModel = None):
-        if not new_model:
-            new_model = UiAppLinkModel()
-            new_model.parent = self.model
-        # save for testing
-        self._edit_app_dialog = AppEditDialog(new_model, parent=self.parentWidget())
-        reply = self._edit_app_dialog.exec_()
-        if reply == AppEditDialog.Accepted:
-            app_link = AppLink(self, new_model)
-            app_link.load()
-            app_link.model.update_from_cache()
-            self.add_app_link_to_tab(app_link)
-            self.model.save()  # TODO this should happen on apps.append
-            return app_link  # for testing
-        return None
->>>>>>> origin/master
 
 class TabList(TabBase):
     def __init__(self, parent: QTabWidget, model: UiTabModel):

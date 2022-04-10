@@ -67,7 +67,7 @@ AppLinkBase {
 /* Styling for buttons each frame */
 
 /* only QPushButton - not ClickableLabel */
-QFrame#center_frame .QPushButton	{
+QFrame#center_frame .QPushButton, QToolButton{
     border-radius: 5px;
     margin: 2px;
     text-align:middle;
@@ -75,14 +75,14 @@ QFrame#center_frame .QPushButton	{
     padding: 3px;
     min-width: 30px;
 }
-QFrame#center_frame .QPushButton:hover{
+QFrame#center_frame .QPushButton:hover, QToolButton:hover{
     background-color: #B7B7B7;
 }
-QFrame#center_frame .QPushButton:pressed{
+QFrame#center_frame .QPushButton:pressed, QToolButton:pressed{
     padding-top: 5px;
     background-color: #A8A8A8;
 }
-QFrame#center_frame .QPushButton:checked{
+QFrame#center_frame .QPushButton:checked, QToolButton:checked{
     background-color: #A8A8A8;
 }
 
