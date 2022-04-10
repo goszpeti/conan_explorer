@@ -93,7 +93,7 @@
      <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="bottomMargin">
      <number>1</number>
@@ -117,7 +117,7 @@
         <number>3</number>
        </property>
        <property name="topMargin">
-        <number>2</number>
+        <number>1</number>
        </property>
        <property name="rightMargin">
         <number>2</number>
@@ -174,8 +174,8 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>16777215</width>
-              <height>75</height>
+              <width>16777214</width>
+              <height>100</height>
              </size>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -189,7 +189,7 @@
               <number>2</number>
              </property>
              <property name="bottomMargin">
-              <number>0</number>
+              <number>2</number>
              </property>
              <item>
               <widget class="QLabel" name="page_title">
@@ -249,15 +249,12 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>135</width>
+                    <width>150</width>
                     <height>45</height>
                    </size>
                   </property>
                   <property name="layoutDirection">
                    <enum>Qt::RightToLeft</enum>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true"/>
                   </property>
                   <property name="frameShape">
                    <enum>QFrame::NoFrame</enum>
@@ -273,7 +270,7 @@
                     <number>0</number>
                    </property>
                    <property name="rightMargin">
-                    <number>2</number>
+                    <number>0</number>
                    </property>
                    <property name="bottomMargin">
                     <number>0</number>
@@ -282,12 +279,9 @@
                     <widget class="QPushButton" name="close_button">
                      <property name="minimumSize">
                       <size>
-                       <width>45</width>
+                       <width>50</width>
                        <height>30</height>
                       </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true"/>
                      </property>
                      <property name="text">
                       <string/>
@@ -306,12 +300,9 @@
                     <widget class="QPushButton" name="restore_max_button">
                      <property name="minimumSize">
                       <size>
-                       <width>45</width>
+                       <width>50</width>
                        <height>30</height>
                       </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true"/>
                      </property>
                      <property name="text">
                       <string/>
@@ -327,12 +318,9 @@
                     <widget class="QPushButton" name="minimize_button">
                      <property name="minimumSize">
                       <size>
-                       <width>45</width>
+                       <width>50</width>
                        <height>30</height>
                       </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true"/>
                      </property>
                      <property name="text">
                       <string/>
@@ -382,7 +370,7 @@
            <number>0</number>
           </property>
           <property name="rightMargin">
-           <number>0</number>
+           <number>2</number>
           </property>
           <property name="bottomMargin">
            <number>1</number>

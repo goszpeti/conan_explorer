@@ -24,7 +24,7 @@ from .fluent_window_ui import Ui_MainWindow
 LEFT_MENU_MIN_WIDTH = 80
 LEFT_MENU_MAX_WIDTH = 300
 RIGHT_MENU_MIN_WIDTH = 0
-RIGHT_MENU_MAX_WIDTH = 270
+RIGHT_MENU_MAX_WIDTH = 300
 
 class ResizeDirection(Enum):
     default = 0
