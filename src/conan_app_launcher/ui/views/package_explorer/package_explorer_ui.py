@@ -21,6 +21,7 @@ class Ui_Form(object):
         self.verticalLayout.setObjectName("verticalLayout")
         self.local_packages_bar_layout = QtWidgets.QHBoxLayout()
         self.local_packages_bar_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.local_packages_bar_layout.setContentsMargins(-1, -1, 7, -1)
         self.local_packages_bar_layout.setObjectName("local_packages_bar_layout")
         self.refresh_button = QtWidgets.QPushButton(Form)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)

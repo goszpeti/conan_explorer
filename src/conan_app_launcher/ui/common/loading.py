@@ -35,7 +35,7 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog: Optional[QtWidgets.QProgressDialog] = None
         self.worker: Optional[Worker] = None
         self.load_thread: Optional[QtCore.QThread] = None
-        self.finished = False
+        self.finished = True
 
     def async_loading(self, dialog_parent: QtWidgets.QWidget, work_task: Callable, worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,

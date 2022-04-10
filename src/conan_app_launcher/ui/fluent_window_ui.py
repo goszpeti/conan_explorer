@@ -396,7 +396,6 @@ class Ui_MainWindow(object):
         self.toggle_left_menu_button.setSizePolicy(sizePolicy)
         self.toggle_left_menu_button.setMinimumSize(QtCore.QSize(64, 45))
         self.toggle_left_menu_button.setMaximumSize(QtCore.QSize(64, 45))
-        self.toggle_left_menu_button.setStyleSheet("")
         self.toggle_left_menu_button.setText("")
         icon6 = QtGui.QIcon()
         icon6.addPixmap(QtGui.QPixmap("c:\\repos\\app_grid_conan\\src\\conan_app_launcher\\ui\\../assets/icons/menu_stripes.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -455,3 +454,5 @@ class Ui_MainWindow(object):
         self.page_info_label.setText(_translate("MainWindow", "Page Info"))
         self.right_menu_top_title_label.setText(_translate("MainWindow", "Page Settings"))
         self.right_menu_bottom_title_label.setText(_translate("MainWindow", "Settings"))
+        self.toggle_left_menu_button.setToolTip(_translate("MainWindow", "Expand/Collapse Menu"))
+        self.settings_button.setToolTip(_translate("MainWindow", "Show Settings Menu"))

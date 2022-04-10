@@ -111,7 +111,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
             button.setMinimumSize(QSize(64, 50))
             button.setMaximumHeight(50)
             button.setLayoutDirection(Qt.LeftToRight)
-            button.setToolTip(name)
             if asset_icon:
                 self.add_themed_icon(button, asset_icon)
             button.setIconSize(QSize(32, 32))
@@ -337,7 +336,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         button.setMinimumSize(QSize(64, 50))
         button.setMaximumHeight(50)
         button.setLayoutDirection(Qt.LeftToRight)
-        button.setToolTip(name)
         if asset_icon:
             self.add_themed_icon(button, asset_icon)
 
@@ -579,8 +577,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
     def set_restore_max_button_state(self):
         if self.isMaximized():
-            self.ui.restore_max_button.setToolTip("Restore")
             self.ui.restore_max_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "restore.png"))))
         else:
-            self.ui.restore_max_button.setToolTip("Maximize")
             self.ui.restore_max_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "maximize.png"))))

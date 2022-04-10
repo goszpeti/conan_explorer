@@ -36,7 +36,6 @@ class LocalConanPackageExplorer(QWidget):
         self.conan_pkg_removed = conan_pkg_removed
         self.pkg_sel_model = None
         self._pkg_sel_model_loader = AsyncLoader(self)
-        self._pkg_sel_model_loaded = True
         self.fs_model = None
 
         self._ui = Ui_Form()
@@ -166,7 +165,6 @@ class LocalConanPackageExplorer(QWidget):
         if not update and self.pkg_sel_model:  # loads only at first init
             return
         self.pkg_sel_model = PkgSelectModel()
-        self._pkg_sel_model_loaded = False
         self._pkg_sel_model_loader.async_loading(
             self, self.pkg_sel_model.setup_model_data, (), self.finish_select_model_init, "Reading Packages")
 

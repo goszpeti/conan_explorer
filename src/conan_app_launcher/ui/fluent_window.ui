@@ -964,8 +964,8 @@ border-top-left-radius: 5px;
                  <height>45</height>
                 </size>
                </property>
-               <property name="styleSheet">
-                <string notr="true"/>
+               <property name="toolTip">
+                <string>Expand/Collapse Menu</string>
                </property>
                <property name="text">
                 <string/>
@@ -1071,6 +1071,9 @@ border-top-left-radius: 5px;
                  <width>64</width>
                  <height>16777215</height>
                 </size>
+               </property>
+               <property name="toolTip">
+                <string>Show Settings Menu</string>
                </property>
                <property name="text">
                 <string/>
