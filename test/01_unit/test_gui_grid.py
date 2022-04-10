@@ -12,11 +12,11 @@ from test.conftest import TEST_REF, conan_create_and_upload
 from time import sleep
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.settings import (DISPLAY_APP_USERS,
+from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_USERS,
                                          ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.views.app_grid.app_link import AppLinkBase
+from conan_app_launcher.ui.views.app_grid.app_link import ListAppLink, GridAppLink
 from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
     AppEditDialog
 from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
@@ -58,7 +58,7 @@ def test_AppEditDialog_display_values(base_fixture, qtbot):
     diag._ui.name_line_edit.setText("NewName")
 
     # press cancel - no values should be saved
-    qtbot.mouseClick(diag.button_box.buttons()[1], Qt.LeftButton)
+    qtbot.mouseClick(diag._ui.button_box.buttons()[1], Qt.LeftButton)
 
     assert app_info.name == "test"
 
@@ -226,7 +226,7 @@ def test_AppLink_open(base_fixture, qtbot):
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
-    app_ui = AppLinkBase(root_obj, app_model)
+    app_ui = ListAppLink(root_obj, None, app_model)
     app_ui.load()
     root_obj.setFixedSize(100, 200)
     root_obj.show()
@@ -264,7 +264,7 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
-    app_ui = AppLinkBase(root_obj, app_model)
+    app_ui = ListAppLink(root_obj, None, app_model)
     app_ui.load()
 
     assert not app_ui.model.get_icon().isNull()
@@ -295,7 +295,8 @@ def test_AppLink_cbox_switch(base_fixture, qtbot):
     # need cache
     app.active_settings.set(DISPLAY_APP_USERS, True)
     app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
-    #app_info._executable = Path(sys.executable)
+    app.active_settings.set(APPLIST_ENABLED, False)
+
     app_config = UiAppLinkConfig(name="test", conan_ref="switch_test/1.0.0@user1/channel1",
                                  is_console_application=True, executable="")
     app_model = UiAppLinkModel().load(app_config, None)
@@ -303,7 +304,7 @@ def test_AppLink_cbox_switch(base_fixture, qtbot):
     root_obj.setFixedSize(100, 200)
     qtbot.addWidget(root_obj)
     root_obj.setObjectName("parent")
-    app_link = AppLinkBase(root_obj, app_model)
+    app_link = GridAppLink(root_obj, None, app_model)
     app_link.load()
     root_obj.show()
 
