@@ -1,5 +1,4 @@
 
-import imp
 from pathlib import Path
 from typing import Optional
 
@@ -18,7 +17,8 @@ from .app_edit_dialog_ui import Ui_Dialog
 
 class AppEditDialog(QDialog):
 
-    def __init__(self,  model: UiAppLinkModel, parent: Optional[QWidget], flags=Qt.WindowFlags(), pkg_installed_signal: Optional[pyqtBoundSignal] = None):
+    def __init__(self,  model: UiAppLinkModel, parent: Optional[QWidget], flags=Qt.WindowFlags(), 
+                 pkg_installed_signal: Optional[pyqtBoundSignal] = None):
         super().__init__(parent=parent, flags=flags)
         self._model = model
         self._pkg_installed_signal = pkg_installed_signal
@@ -31,6 +31,10 @@ class AppEditDialog(QDialog):
         self.setModal(True)
         self.setWindowTitle("Edit App Link")
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.png")))
+
+        self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started_info)
+        self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished_info)
+        self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_browse_buttons)
 
         self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started_info)
         self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished_info)

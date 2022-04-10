@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
