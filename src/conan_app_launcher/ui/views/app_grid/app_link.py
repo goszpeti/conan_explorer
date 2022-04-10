@@ -6,20 +6,21 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import ICON_SIZE, asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import open_in_file_manager, run_file
-from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
+from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
-                                         ENABLE_APP_COMBO_BOXES)
+                                         ENABLE_APP_COMBO_BOXES, FONT_SIZE)
 from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.widgets import ClickableIcon, RoundedMenu
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QFontMetrics, QFont
 from PyQt5.QtWidgets import (QAction, QComboBox, QDialog, QFrame, QHBoxLayout,
                              QLabel, QLayout, QMessageBox, QPushButton,
                              QSizePolicy, QVBoxLayout, QWidget)
 
 from .dialogs import AppEditDialog, AppsMoveDialog
+from abc import ABC
 
 if TYPE_CHECKING:  # pragma: no cover
     from.tab import TabBase, TabGrid, TabList
@@ -28,6 +29,7 @@ OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"
 
 current_dir = Path(__file__).parent
+
 
 class AppLinkBase(QFrame):
     """ Represents a clickable button + info or combo box for an executable in a conan package.
@@ -119,8 +121,7 @@ class AppLinkBase(QFrame):
         move_dialog = AppsMoveDialog(parent=self, tab_ui_model=self.model.parent)
         ret = move_dialog.exec()
         if ret == QDialog.Accepted:
-            self._parent_tab.remove_all_app_links()
-            self._parent_tab.load_apps_from_model()
+            self._parent_tab.redraw(force=True)
 
     def delete(self):
         self._app_name.close()
@@ -129,6 +130,29 @@ class AppLinkBase(QFrame):
         self._app_channel.close()
         self._app_button.close()
 
+    def resizeEvent(self, event):
+        """ Calculate, how text can be split into multiple lines, based on the current width"""
+        max_width = self._app_name.width()
+        fs = app.active_settings.get_int(FONT_SIZE)
+        font = QFont()
+        font.setPointSize(fs)
+        fm = QFontMetrics(font)
+        px = fm.horizontalAdvance(self._app_name.text())
+        new_length = int(len(self.model.name) * (max_width-10) / px)
+        if len(self._app_name.text().split("\n")[0]) > new_length > len(self.model.name) or new_length-1 == len(self._app_name.text().split("\n")[0]):
+            return
+
+        split_name = self.model.name.split(" ")
+        name = ""  # split long titles
+        for word in split_name:
+            n_to_short = int(len(word) / new_length) + int(len(word) % new_length > 0)
+            new_word = ""
+            for i in range(n_to_short):
+                new_word += word[new_length*i:new_length*(i+1)] + "\n"  # + word[new_length:]
+            name += " " + new_word if name else new_word
+        self._app_name.setText(name)
+        super().resizeEvent(event)
+    
     def on_context_menu_requested(self, position):
         self.menu.exec_(self._app_button.mapToGlobal(position))
 
@@ -136,12 +160,6 @@ class AppLinkBase(QFrame):
         open_in_file_manager(self.model.get_executable_path().parent)
 
     def _apply_new_config(self):
-        #split_name = self.model.name.split(" ")
-        # name = "" # split long titles
-        # for word in split_name:
-        #     if len(word) > 24:
-        #         word = word[:24] + " " + word[24:-1]
-        #     name += " " + word if name else word
         self._app_name.setText(self.model.name)
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon())
@@ -228,6 +246,9 @@ class AppLinkBase(QFrame):
         run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
 
 class ListAppLink(AppLinkBase):
+    _max_width = 130
+
+
     def __init__(self, parent: Optional[QWidget], parent_tab: "TabList", model: UiAppLinkModel, icon_size=ICON_SIZE, ):
         super().__init__(parent, parent_tab, model, icon_size)
         self.setLayout(QHBoxLayout(self))
@@ -240,6 +261,8 @@ class ListAppLink(AppLinkBase):
 
         size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
                                     QSizePolicy.Fixed)
+        self.setSizePolicy(size_policy)
+
         self._left_frame = QFrame(self)
         self._center_frame = QFrame(self)
         self._center_right_frame = QFrame(self)
@@ -252,16 +275,14 @@ class ListAppLink(AppLinkBase):
 
         self._left_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
         self._center_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self._center_right_frame.layout().setSizeConstraint(QLayout.SetMaximumSize)
+        self._center_right_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
         self._right_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
 
         self._left_frame.setMaximumWidth(self.max_width())
         self._left_frame.setMinimumWidth(self.max_width())
         self._left_frame.layout().setContentsMargins(0, 0, 0, 5)
         self._center_frame.setMinimumWidth(200)
-        self._center_frame.setMaximumWidth(500)  # TODO get wfrom window width and adjust on resize
 
-        self._center_right_frame.setMaximumWidth(150) 
         self._right_frame.setMinimumWidth(200)
         self._right_frame.setMaximumWidth(200)
 
@@ -272,14 +293,13 @@ class ListAppLink(AppLinkBase):
         self._app_version = QLabel(self._center_frame)
         self._app_user = QLabel(self._center_frame)
         self._app_channel = QLabel(self._center_frame)
+        self._app_version.setMinimumWidth(100)
+
         self._center_frame.layout().addWidget(self._app_name)
 
         self._center_right_frame.layout().addWidget(self._app_version)
         self._center_right_frame.layout().addWidget(self._app_user)
         self._center_right_frame.layout().addWidget(self._app_channel)
-        self._app_version.setSizePolicy(size_policy)
-        self._app_user.setSizePolicy(size_policy)
-        self._app_channel.setSizePolicy(size_policy)
 
         self._app_name.setAlignment(Qt.AlignLeft)
         self._app_version.setAlignment(Qt.AlignCenter)
@@ -305,13 +325,19 @@ class ListAppLink(AppLinkBase):
         self.layout().addWidget(self._center_frame)
         self.layout().addWidget(self._center_right_frame)
         self.layout().addWidget(self._right_frame)
+        self.layout().setStretch(1,1) # enbales stretching of app_name
 
-        self.setSizePolicy(size_policy)
-        self._app_button.setSizePolicy(size_policy)
-        self._app_name.setSizePolicy(size_policy)
+        self._app_name.setSizePolicy(QSizePolicy(QSizePolicy.Expanding,
+                         QSizePolicy.Fixed))
+
         self._app_version.setSizePolicy(size_policy)
         self._app_user.setSizePolicy(size_policy)
         self._app_channel.setSizePolicy(size_policy)
+
+        self._left_frame.setSizePolicy(size_policy)
+        self._center_frame.setSizePolicy(size_policy)
+        self._center_right_frame.setSizePolicy(size_policy)
+        self._right_frame.setSizePolicy(size_policy)
 
         self._edit_button.clicked.connect(self.open_edit_dialog)
         self._remove_button.clicked.connect(self.remove)
@@ -325,7 +351,11 @@ class ListAppLink(AppLinkBase):
         self._app_user.setText(self.model.user)
         self._app_channel.setText(self.model.channel)
 
+
 class GridAppLink(AppLinkBase):
+    _max_width = 200
+
+
     def __init__(self, parent: Optional[QWidget], parent_tab: "TabGrid", model: UiAppLinkModel, icon_size=ICON_SIZE):
         super().__init__(parent, parent_tab, model, icon_size)
         self.setLayout(QVBoxLayout(self))
@@ -365,6 +395,8 @@ class GridAppLink(AppLinkBase):
 
         self._app_button.setSizePolicy(size_policy)
         self._app_name.setSizePolicy(size_policy)
+        size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
+                                  QSizePolicy.Fixed)
         self._app_version.setSizePolicy(size_policy)
         self._app_user.setSizePolicy(size_policy)
         self._app_channel.setSizePolicy(size_policy)
