@@ -96,7 +96,7 @@ def get_user_theme_color() -> str: # RGB
         value = QueryValueEx(key, "AccentColor")[0]  # Windows Theme Hilight color for border color in rgb
         abgr_color = hex(int(value))
         if len(abgr_color) < 9:
-            return "#FFFFF"
+            return "#000000"
         rgb_color = abgr_color[-2:] + abgr_color[-4:-2] + abgr_color[-6:-4]
         return "#" + rgb_color
-    return "#FFFFF"
+    return "#000000"
