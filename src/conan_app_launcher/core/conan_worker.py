@@ -124,7 +124,8 @@ class ConanWorker():
                 continue
             Logger().debug("Finish working on " + ref_pkg_id)
             self._conan_install_queue.task_done()
-        # batch emitting signal TODO ????
+        # batch emitting signal - easier when many packages are 
+        # in queue and no difference if there is only one
         if info_callback:
             try:
                 info_callback(str(conan_ref), pkg_id)
@@ -136,7 +137,7 @@ class ConanWorker():
         info_callback = None
         conan_ref = ""
         while not self._shutdown_requested and not self._conan_versions_queue.empty():
-            worker_element, info_callback = self._conan_versions_queue.get()
+            _, info_callback = self._conan_versions_queue.get()
             # available versions will be in cache and retrievable for every item from there
             try:
                 available_refs = self._conan_api.search_recipe_alternatives_in_remotes(

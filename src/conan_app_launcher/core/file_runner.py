@@ -32,7 +32,7 @@ def open_in_file_manager(file_path: Path):
     elif platform.system() == "Windows":
         # select switch for highlighting
         # TODO: spawns an empty visible shell on some/slower? systems
-        subprocess.call("explorer /select," + str(file_path))
+        subprocess.call("explorer /select," + str(file_path), creationflags=subprocess.CREATE_NO_WINDOW)
 
 
 def open_cmd_in_path(file_path: Path) -> int:

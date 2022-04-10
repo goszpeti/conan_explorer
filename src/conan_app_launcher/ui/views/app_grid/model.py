@@ -1,3 +1,5 @@
+import platform
+
 from pathlib import Path
 from typing import Callable, List, Optional
 
@@ -28,10 +30,6 @@ class UiAppGridModel(UiAppGridConfig, QObject):
     def load(self, ui_config: UiAppGridConfig, parent) -> "UiAppGridModel":
         super().__init__(ui_config.tabs)
         self.parent = parent
-        # add default tab and link
-        # if not ui_config.tabs:
-        #     ui_config.tabs.append(UiTabConfig())
-        #     ui_config.tabs[0].apps.append(UiAppLinkConfig())
         # load all submodels
         tabs_model = []
         for tab_config in self.tabs:
@@ -313,7 +311,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def get_executable_path(self) -> Path:
         if not self._executable or not self.package_folder.exists():
-            # Logger().debug(f"No file/executable specified for {str(self.name)}")
+            Logger().debug(f"No file/executable specified for {str(self.name)}")
             return Path("NULL")
         path = Path(self._executable)
         full_path = self.resolve_executable_path(path)
@@ -321,23 +319,27 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         return self._executable_path
 
-    def resolve_executable_path(self, exe_rel_path: Path):
+    def resolve_executable_path(self, exe_rel_path: Path) -> Path:
         # adjust path on windows, if no file extension is given
-        possible_matches = self.package_folder.glob(str(exe_rel_path) + "*")
-        match_found = False
-        try:
-            for match in possible_matches:
-                # don't allow for ambiguity!
-                if match_found:
-                    Logger().error(f"Multiple candidates found for {exe_rel_path}")
-                match_found = True
-                return match
-            if not match_found:
-                Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
-        except NotImplementedError:
-            Logger().error(f"Absolute path not allowed!")
-
-        return Path("NULL")
+        if platform.system() == "Windows":
+            possible_matches = self.package_folder.glob(str(exe_rel_path) + "*")
+            match_found = False
+            match = Path("NULL")
+            try:
+                for match in possible_matches:
+                    # don't allow for ambiguity!
+                    if match_found:
+                        Logger().error(f"Multiple candidates found for {exe_rel_path}")
+                    match_found = True
+                if not match_found:
+                    Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
+                else:
+                    return match
+            except NotImplementedError:
+                Logger().error(f"Absolute path not allowed!")
+            return Path("NULL")
+        else:
+            return self.package_folder / exe_rel_path
 
     @property
     def icon(self) -> str:

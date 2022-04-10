@@ -131,6 +131,11 @@ class AppLinkBase(QFrame):
         self._app_button.close()
 
     def resizeEvent(self, event):
+        self.split_name_into_lines()
+        super().resizeEvent(event)
+
+
+    def split_name_into_lines(self):
         """ Calculate, how text can be split into multiple lines, based on the current width"""
         max_width = self._app_name.width()
         fs = app.active_settings.get_int(FONT_SIZE)
@@ -139,19 +144,27 @@ class AppLinkBase(QFrame):
         fm = QFontMetrics(font)
         px = fm.horizontalAdvance(self._app_name.text())
         new_length = int(len(self.model.name) * (max_width-10) / px)
-        if len(self._app_name.text().split("\n")[0]) > new_length > len(self.model.name) or new_length-1 == len(self._app_name.text().split("\n")[0]):
+        if len(self._app_name.text().split("\n")[0]) > new_length > len(self.model.name) or \
+               new_length-1 == len(self._app_name.text().split("\n")[0]):
             return
+        name = self.word_wrap(self.model.name, new_length)
+        self._app_name.setText(name)
 
-        split_name = self.model.name.split(" ")
+    @staticmethod
+    def word_wrap(text:str, max_length:int) -> str:
+        split_name = text.split(" ")
         name = ""  # split long titles
         for word in split_name:
-            n_to_short = int(len(word) / new_length) + int(len(word) % new_length > 0)
-            new_word = ""
-            for i in range(n_to_short):
-                new_word += word[new_length*i:new_length*(i+1)] + "\n"  # + word[new_length:]
+            if len(word) < max_length:
+                new_word = word
+            else:
+                n_to_short = int(len(word) / max_length) + int(len(word) % max_length > 0)
+                new_word = ""
+                for i in range(n_to_short):
+                    new_word += word[max_length*i:max_length*(i+1)] + "\n"
+                new_word = new_word[:-1]  # remove last \n
             name += " " + new_word if name else new_word
-        self._app_name.setText(name)
-        super().resizeEvent(event)
+        return name
     
     def on_context_menu_requested(self, position):
         self.menu.exec_(self._app_button.mapToGlobal(position))
@@ -310,14 +323,14 @@ class ListAppLink(AppLinkBase):
         self._app_button.setMinimumWidth(self.max_width())
         self._app_button.setMaximumWidth(self.max_width())
 
-        self._edit_button = QPushButton("Edit", self)
-        self._remove_button = QPushButton("Remove", self)
+        self._edit_button = QPushButton("Edit ", self)
+        self._remove_button = QPushButton("Remove ", self)
         self._edit_button.setIcon(QIcon(get_themed_asset_image("icons/edit.png")))
         self._remove_button.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
-        self._edit_button.setMinimumWidth(150)
-        self._edit_button.setMaximumWidth(150)
-        self._remove_button.setMinimumWidth(150)
-        self._remove_button.setMaximumWidth(150)
+        self._edit_button.setMinimumWidth(200)
+        self._edit_button.setMaximumWidth(200)
+        self._remove_button.setMinimumWidth(200)
+        self._remove_button.setMaximumWidth(200)
 
         self._right_frame.layout().addWidget(self._edit_button)
         self._right_frame.layout().addWidget(self._remove_button)
