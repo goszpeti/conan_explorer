@@ -721,6 +721,8 @@ p, li { white-space: pre-wrap; }
                      <property name="font">
                       <font>
                        <pointsize>12</pointsize>
+                       <weight>75</weight>
+                       <bold>true</bold>
                       </font>
                      </property>
                      <property name="text">
@@ -733,7 +735,7 @@ p, li { white-space: pre-wrap; }
                 </item>
                 <item>
                  <widget class="QStackedWidget" name="right_menu_top_content_sw">
-                  <widget class="QWidget" name="main_top_settings_page">
+                  <widget class="RightSubMenu" name="main_top_settings_page">
                    <layout class="QVBoxLayout" name="verticalLayout_13"/>
                   </widget>
                  </widget>
@@ -815,10 +817,12 @@ p, li { white-space: pre-wrap; }
                      <property name="font">
                       <font>
                        <pointsize>12</pointsize>
+                       <weight>75</weight>
+                       <bold>true</bold>
                       </font>
                      </property>
                      <property name="text">
-                      <string>Settings</string>
+                      <string>General Settings</string>
                      </property>
                     </widget>
                    </item>
@@ -836,24 +840,14 @@ p, li { white-space: pre-wrap; }
                   <property name="styleSheet">
                    <string notr="true"/>
                   </property>
-                  <widget class="QWidget" name="main_settings_page">
+                  <widget class="RightSubMenu" name="main_bottom_settings_page">
                    <property name="styleSheet">
                     <string notr="true"/>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_14">
-                    <item>
-                     <spacer name="main_settings_page_vspacer">
-                      <property name="orientation">
-                       <enum>Qt::Vertical</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>20</width>
-                        <height>40</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
+                   <layout class="QVBoxLayout" name="main_settings_page_layout">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
                    </layout>
                   </widget>
                  </widget>
@@ -1115,6 +1109,14 @@ border-top-left-radius: 5px;
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RightSubMenu</class>
+   <extends>QWidget</extends>
+   <header>.fluent_window.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
