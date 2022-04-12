@@ -198,6 +198,10 @@ QFrame#left_menu_frame QPushButton:checked {
 
 /* Right Frame Subwidgets */
 
+QFrame#right_menu_frame * {
+    background-color: #808086;
+}
+
 QLabel#right_menu_top_title_label {
     font-size: {{MAIN_FONT_SIZE + 2}}pt;
     padding: 3px;
@@ -208,15 +212,10 @@ QLabel#right_menu_bottom_title_label {
     padding: 3px;
 }
 
-QFrame#right_menu_frame{
-    background-color:  #808086;
-}
-
 QFrame#right_menu_frame QPushButton{
     border-radius: 5px;
     margin: 2px;
     text-align:middle;
-    background-color: #808086;
     padding: 3px;
     min-width: 30px;
 }
@@ -405,11 +404,11 @@ QStackedWidget{
 
 QMenu{
     background-color: #474747;
+    padding-top: 10px;
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
 QMenu::item:selected{
     background-color: #5c5c5c;
-    border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
 
 QLineEdit {
