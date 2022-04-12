@@ -15,7 +15,9 @@ from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.views.about_page import AboutPage
 from conan_app_launcher.ui.views.app_grid.tab import TabGrid
+
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
@@ -44,7 +46,7 @@ def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
     qtbot.waitExposed(main_gui, timeout=3000)
 
     # TEST EVALUATION
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.findChildren(TabGrid):
         assert tab.model.name == "New Tab"
         for test_app in tab.app_links:
             assert test_app.model.name == "New App"
@@ -67,13 +69,11 @@ def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixt
     qtbot.waitExposed(main_gui, timeout=3000)
 
     # TEST ACTION
-    main_gui.ui.menu_about_action.trigger()
+    main_gui.page_widgets.get_button_by_type(AboutPage).click()
     time.sleep(3)
-    assert main_gui.about_page.isEnabled()
-    qtbot.mouseClick(main_gui.about_page._button_box.buttons()[0], Qt.LeftButton)
 
     # TEST EVALUATION
-    assert main_gui.about_page.isHidden()
+    assert main_gui.about_page.isVisible()
 
     Logger.remove_qt_logger()
 
@@ -99,7 +99,7 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
                         return_value=QtWidgets.QDialog.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[selection])
-    main_gui.ui.menu_open_config_file.trigger()
+    main_gui.page_widgets.get_right_menu_by_type(type(main_gui.app_grid)).get_menu_entry_by_name("Open Layout File").click()
 
     # TEST EVALUATION
     time.sleep(3)
@@ -169,7 +169,8 @@ def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker)
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
 
-    main_gui.ui.menu_cleanup_cache.trigger()
+    button: QtWidgets.QPushButton = main_gui.get_right_menu_entry_by_name("Clean Conan Cache")
+    button.click()
     time.sleep(3)
 
     # TEST EVALUATION

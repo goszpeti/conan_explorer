@@ -162,6 +162,7 @@ class AppGridView(QWidget):
             for tab in self.get_tabs():
                 if answer == tab.model.name:
                     tab.open_app_link_add_dialog(model.load(app_config, tab.model))
+                    break
 
     def update_conan_info(self, conan_ref: str, pkg_id: str):
         if self.isHidden():  # the gui is about to shut down

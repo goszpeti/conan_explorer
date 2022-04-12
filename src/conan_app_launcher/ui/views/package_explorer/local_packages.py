@@ -427,6 +427,9 @@ class LocalConanPackageExplorer(QWidget):
 
     def on_add_app_link_from_file(self):
         file_path = Path(self._get_selected_pkg_file())
+        if not file_path.is_file():
+            Logger().error("Please select a file, not a directory!")
+            return
         conan_ref = ConanFileReference.loads(self._current_ref)
         # determine relpath from package
         pkg_info = self._current_pkg

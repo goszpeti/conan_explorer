@@ -23,7 +23,7 @@ class AnimatedToggle(QCheckBox):
 
         # Setup the rest of the widget.
 
-        self.setContentsMargins(8, 0, 8, 0)
+        self.setContentsMargins(8, 0, 0, 0)
         self._handle_position = 0
 
         self.stateChanged.connect(self.handle_state_change)
@@ -93,8 +93,7 @@ class AnimatedToggle(QCheckBox):
         painter.setRenderHint(QPainter.Antialiasing)
 
         painter.setPen(self._transparent_pen)
-        bar_rect = QRectF(
-            0, 0,
+        bar_rect = QRectF(0, 0,
             cont_rect.width() - handle_radius, 0.40 * cont_rect.height()
         )
         bar_rect.moveCenter(cont_rect.center())
