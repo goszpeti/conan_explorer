@@ -9,7 +9,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
-                                         DISPLAY_APP_VERSIONS, FONT_SIZE,
+                                         DISPLAY_APP_VERSIONS, ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox, QLabel
 
 from .common import AsyncLoader, activate_theme
 from .views.about_page import AboutPage
-from .fluent_window import FluentWindow
+from .fluent_window import FluentWindow, SideSubMenu
 from .model import UiApplicationModel
 from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
 
@@ -49,14 +49,15 @@ class MainWindow(FluentWindow):
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
         self.local_package_explorer = LocalConanPackageExplorer(self, self.conan_pkg_removed, self.page_widgets)
         self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed,
-                                               self.conan_pkg_removed, self.page_widgets)
+                                              self.conan_pkg_removed, self.page_widgets)
 
         self._init_left_menu()
         self._init_right_menu()
 
 
     def _init_left_menu(self):
-        self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", True, self.app_grid)
+        self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", is_upper_menu=True, page_widget=self.app_grid, 
+                                create_page_menu=True)
         self.add_left_menu_entry("Local Package Explorer", "icons/package.png", True, self.local_package_explorer)
         self.add_left_menu_entry("Conan Search", "icons/search_packages.png", True, self.search_dialog)
 
@@ -67,28 +68,31 @@ class MainWindow(FluentWindow):
     def _init_right_menu(self):
 
         # Right Settings menu
-        quicklaunch_submenu = self.RightSubMenu("Quicklaunch")
-        quicklaunch_submenu.add_button_menu_entry(
-            "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.png")
-        quicklaunch_submenu.add_button_menu_entry(
-            "Add AppLink", self.on_add_link, "icons/add_link.png")
-        quicklaunch_submenu.add_button_menu_entry(
-            "Rearrange AppLinks", self.on_rearrange, "icons/rearrange.png")
-        quicklaunch_submenu.add_toggle_menu_entry(
-            "Display as List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
+        quicklaunch_submenu = self.page_widgets.get_right_menu_by_type(type(self.app_grid))
+        if quicklaunch_submenu:
+            quicklaunch_submenu.add_button_menu_entry(
+                "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.png")
+            quicklaunch_submenu.add_button_menu_entry(
+                "Add AppLink", self.on_add_link, "icons/add_link.png")
+            quicklaunch_submenu.add_button_menu_entry(
+                "Rearrange AppLinks", self.on_rearrange, "icons/rearrange.png")
+            quicklaunch_submenu.add_menu_line()
 
-        quicklaunch_submenu.add_toggle_menu_entry(
-            "Show version", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
-        quicklaunch_submenu.add_toggle_menu_entry(
-            "Show user", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
-        quicklaunch_submenu.add_toggle_menu_entry(
-            "Show channels", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
+            quicklaunch_submenu.add_toggle_menu_entry(
+                "Display as List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
+            quicklaunch_submenu.add_toggle_menu_entry(
+                "Use Combo Boxes in Grid Mode", self.quicklaunch_cbox_mode_toggled, app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES))
 
-        self.add_right_menu_sub_menu(quicklaunch_submenu, "icons/grid.png")
-        self.add_right_menu_line()
+            quicklaunch_submenu.add_toggle_menu_entry(
+                "Show version", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
+            quicklaunch_submenu.add_toggle_menu_entry(
+                "Show user", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
+            quicklaunch_submenu.add_toggle_menu_entry(
+                "Show channels", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
 
-        view_settings_submenu = self.RightSubMenu("View")
-        self.add_right_menu_sub_menu(view_settings_submenu, "icons/package_settings.png")
+        view_settings_submenu = SideSubMenu(self.ui.right_menu_bottom_content_sw, "View")
+        
+        self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/package_settings.png")
 
         view_settings_submenu.add_button_menu_entry(
             "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence(Qt.CTRL + Qt.Key_Plus), self)
@@ -97,6 +101,17 @@ class MainWindow(FluentWindow):
 
         dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
         view_settings_submenu.add_toggle_menu_entry("Dark Mode", self.on_theme_changed, dark_mode_enabled)
+
+
+    
+        self.main_general_settings_menu.add_menu_line()
+        self.main_general_settings_menu.add_button_menu_entry(
+            "Remove Locks", app.conan_api.remove_locks, "icons/remove-lock.png")
+        self.main_general_settings_menu.add_button_menu_entry(
+            "Clean Conan Cache", self.open_cleanup_cache_dialog, "icons/cleanup")
+        self.main_general_settings_menu.add_menu_line()
+        self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
+
 
         # conan_settings_submenu = self.RightSubMenu("Conan")
         # conan_button = self.add_right_menu_sub_menu(conan_settings_submenu)
@@ -109,12 +124,7 @@ class MainWindow(FluentWindow):
         # conan_settings_submenu.add_named_custom_entry("Storage Path:", QLabel(app.conan_api.client_cache.store, self))
         # if platform.system() == "Windows":
         #     conan_settings_submenu.add_named_custom_entry("Short Path:", QLabel(str(app.conan_api.get_short_path_root()), self))
-
-        self.add_right_menu_line()
-        self.add_right_menu_entry("Remove Locks", "icons/remove-lock.png").clicked.connect(app.conan_api.remove_locks)
-        self.add_right_menu_entry("Clean Conan Cache", "icons/cleanup").clicked.connect(self.open_cleanup_cache_dialog)
-        self.add_right_menu_line()
-        self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
+        # TODO
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
@@ -276,6 +286,13 @@ class MainWindow(FluentWindow):
         sender_toggle = self.sender()
         status = sender_toggle.isChecked()
         app.active_settings.set(APPLIST_ENABLED, status)
+        self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
+
+    @pyqtSlot()
+    def quicklaunch_cbox_mode_toggled(self):
+        sender_toggle = self.sender()
+        status = sender_toggle.isChecked()
+        app.active_settings.set(ENABLE_APP_COMBO_BOXES, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
     @pyqtSlot(str)
