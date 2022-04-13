@@ -92,8 +92,15 @@ class SideSubMenu(QWidget, ThemedWidget):
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
         return self.findChildren(QWidget, name)[0]
 
-    def add_custom_menu_entry(self, widget: QWidget):
+    @staticmethod
+    def _gen_obj_name(name: str) -> str:
+        """ Generates an object nam from a menu title or name (spaces to underscores and lowercase) """
+        return name.replace(" ", "_").lower()
+
+    def add_custom_menu_entry(self, widget: QWidget, name: Optional[str]=None):
         """ Very basic custom entry, no extra functions """
+        if name:
+            widget.setObjectName(self._gen_obj_name(name))
         self._content_layout.insertWidget(self._content_layout.count() - 1, widget)
 
     def add_menu_line(self):
@@ -101,15 +108,17 @@ class SideSubMenu(QWidget, ThemedWidget):
         line.setMidLineWidth(3)
         line.setFrameShape(QFrame.HLine)
         line.setFrameShadow(QFrame.Sunken)
-        self.add_custom_menu_entry(line)
+        self.add_custom_menu_entry(line, "line") # TODO give them an index?
 
     def add_named_custom_entry(self, name: str, widget: QWidget):
         """ Creates a Frame with a text label and a custom widget under it and adds it to the menu """
         label = QLabel(text=name, parent=self)
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
+        label.setObjectName(self._gen_obj_name(name) + "_label")
         widget.adjustSize()
         widget.setMinimumHeight(50)
         widget.setMaximumHeight(100)
+        widget.setObjectName(self._gen_obj_name(name) + "_widget")
 
         frame = QFrame(self)
         if label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 10):  # 10 for margin
@@ -124,7 +133,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         frame.layout().setSpacing(4)
         frame.layout().addWidget(label)
         frame.layout().addWidget(widget)
-        self.add_custom_menu_entry(frame)
+        self.add_custom_menu_entry(frame, name)
 
     def add_toggle_menu_entry(self, name: str, target: Callable, initial_state: bool):
         toggle = AnimatedToggle(self)
@@ -145,18 +154,15 @@ class SideSubMenu(QWidget, ThemedWidget):
                               shortcut: Optional[QKeySequence]=None, shortcut_parent=None):
         """ Adds a button with an icon and links with a callable. Optionally can have a key shortcut. """
         button = QPushButton(self)
-        button.setObjectName(name) # + "_submenu")
         button.setMinimumSize(QSize(64, 50))
         button.setMaximumHeight(50)
-        button.setLayoutDirection(Qt.LeftToRight)
         if asset_icon:
             self.add_themed_icon(button, asset_icon)
         button.setIconSize(QSize(32, 32))
         button.setText(name)
-        #font_size = app.active_settings.get_int(FONT_SIZE) TODO
-        button.setStyleSheet(f"text-align:left")  # ;font-size:{font_size}pt
+        button.setStyleSheet(f"text-align:left")
         # insert before spacer
-        self._content_layout.insertWidget(self._content_layout.count() - 1, button)
+        self.add_custom_menu_entry(button, name)
 
         button.clicked.connect(target)
 

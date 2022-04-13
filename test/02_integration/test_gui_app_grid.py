@@ -331,6 +331,7 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     app.active_settings = IniSettings(Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
+    app.active_settings.set(APPLIST_ENABLED, False)
     app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     # load path into local cache
     app.conan_api.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {})

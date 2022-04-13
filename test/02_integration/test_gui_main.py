@@ -15,6 +15,7 @@ from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.widgets import AnimatedToggle
 from conan_app_launcher.ui.views.about_page import AboutPage
 from conan_app_launcher.ui.views.app_grid.tab import TabGrid
 
@@ -195,7 +196,7 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
     qtbot.waitExposed(main_gui, timeout=3000)
 
     tabs_num = 2  # two tabs in this file
-    assert main_gui.ui.tab_bar.count() == tabs_num
+    assert main_gui.app_grid.tab_widget.tabBar().count() == tabs_num
     time.sleep(5)
 
     app.conan_worker.finish_working(10)
@@ -204,7 +205,7 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
 
     # TEST EVALUATION
     time.sleep(5)
-    assert main_gui.ui.tab_bar.count() == tabs_num
+    assert main_gui.app_grid.tab_widget.tabBar().count() == tabs_num
 
 
 def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
@@ -227,16 +228,20 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
 
     # TEST ACTION and EVALUATION
     # assert default state
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()
             assert test_app._app_channel_cbox.isHidden()
 
     # click VERSIONS
-    main_gui.ui.menu_toggle_display_versions.trigger()
+    menu_entry = main_gui.page_widgets.get_right_menu_by_type(
+        type(main_gui.app_grid))
+    assert menu_entry
+    version_toggle: AnimatedToggle = menu_entry.get_menu_entry_by_name("show_version_widget")
+    version_toggle.setChecked(True)
     time.sleep(1)
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()
@@ -250,30 +255,32 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     assert app.active_settings.get(DISPLAY_APP_VERSIONS)
 
     # click CHANNELS
-    main_gui.ui.menu_toggle_display_channels.trigger()
+    channel_toggle: AnimatedToggle = menu_entry.get_menu_entry_by_name("show_channel_widget")
+    channel_toggle.setChecked(True)
     time.sleep(1)
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
     # click USERS
-    main_gui.ui.menu_toggle_display_users.trigger()
+    user_toggle: AnimatedToggle = menu_entry.get_menu_entry_by_name("show_user_widget")
+    user_toggle.setChecked(True)
     time.sleep(1)
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_user_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
     # click again
-    main_gui.ui.menu_toggle_display_versions.trigger()
-    main_gui.ui.menu_toggle_display_channels.trigger()
-    main_gui.ui.menu_toggle_display_users.trigger()
+    version_toggle.setChecked(False)
+    channel_toggle.setChecked(False)
+    user_toggle.setChecked(False)
     time.sleep(1)
 
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()

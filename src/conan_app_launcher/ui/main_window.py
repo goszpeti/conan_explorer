@@ -88,7 +88,7 @@ class MainWindow(FluentWindow):
             quicklaunch_submenu.add_toggle_menu_entry(
                 "Show user", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
             quicklaunch_submenu.add_toggle_menu_entry(
-                "Show channels", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
+                "Show channel", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
 
         view_settings_submenu = SideSubMenu(self.ui.right_menu_bottom_content_sw, "View")
         

@@ -36,7 +36,7 @@
             "apps": [
                 {
                     "name": "App2",
-                    "conan_ref": "app2/1.0.0@user/stable",
+                    "conan_ref": "example/1.0.0@_/_",
                     "executable": "bin/app2.exe",
                     "icon": "//myicon.png",
                     "conan_options": []

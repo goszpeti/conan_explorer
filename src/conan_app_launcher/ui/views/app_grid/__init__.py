@@ -165,7 +165,7 @@ class AppGridView(QWidget):
                     break
 
     def update_conan_info(self, conan_ref: str, pkg_id: str):
-        if self.isHidden():  # the gui is about to shut down
+        if not self.isEnabled():  # the gui is about to shut down
             return
         # call update on every entry which has this ref
         for tab in self.get_tabs():
