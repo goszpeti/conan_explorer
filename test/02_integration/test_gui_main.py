@@ -170,7 +170,7 @@ def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker)
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
 
-    button: QtWidgets.QPushButton = main_gui.get_right_menu_entry_by_name("Clean Conan Cache")
+    button: QtWidgets.QPushButton = main_gui.main_general_settings_menu.get_menu_entry_by_name("Clean Conan Cache")
     button.click()
     time.sleep(3)
 

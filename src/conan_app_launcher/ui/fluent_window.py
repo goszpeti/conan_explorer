@@ -14,7 +14,7 @@ from conan_app_launcher.settings import FONT_SIZE
 from .widgets import AnimatedToggle
 
 from PyQt5.QtCore import QEasingCurve, QEvent, QObject, QPoint, QPropertyAnimation, QRect, QSize, Qt
-from PyQt5.QtGui import QHoverEvent, QIcon, QKeySequence, QPixmap
+from PyQt5.QtGui import QHoverEvent, QIcon, QKeySequence, QPixmap, QMouseEvent
 from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton, QScrollArea, QLayout,
                              QShortcut, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget, QStackedWidget)
 
@@ -25,6 +25,11 @@ LEFT_MENU_MIN_WIDTH = 80
 LEFT_MENU_MAX_WIDTH = 300
 RIGHT_MENU_MIN_WIDTH = 0
 RIGHT_MENU_MAX_WIDTH = 300
+
+
+def gen_obj_name(name: str) -> str:
+    """ Generates an object name from a menu title or name (spaces to underscores and lowercase) """
+    return name.replace(" ", "_").lower()
 
 class ResizeDirection(Enum):
     default = 0
@@ -90,17 +95,12 @@ class SideSubMenu(QWidget, ThemedWidget):
 
 
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
-        return self.findChildren(QWidget, name)[0]
-
-    @staticmethod
-    def _gen_obj_name(name: str) -> str:
-        """ Generates an object nam from a menu title or name (spaces to underscores and lowercase) """
-        return name.replace(" ", "_").lower()
+        return self.findChildren(QWidget, gen_obj_name(name))[0]
 
     def add_custom_menu_entry(self, widget: QWidget, name: Optional[str]=None):
         """ Very basic custom entry, no extra functions """
         if name:
-            widget.setObjectName(self._gen_obj_name(name))
+            widget.setObjectName(gen_obj_name(name))
         self._content_layout.insertWidget(self._content_layout.count() - 1, widget)
 
     def add_menu_line(self):
@@ -114,11 +114,11 @@ class SideSubMenu(QWidget, ThemedWidget):
         """ Creates a Frame with a text label and a custom widget under it and adds it to the menu """
         label = QLabel(text=name, parent=self)
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
-        label.setObjectName(self._gen_obj_name(name) + "_label")
+        label.setObjectName(gen_obj_name(name) + "_label")
         widget.adjustSize()
         widget.setMinimumHeight(50)
         widget.setMaximumHeight(100)
-        widget.setObjectName(self._gen_obj_name(name) + "_widget")
+        widget.setObjectName(gen_obj_name(name) + "_widget")
 
         frame = QFrame(self)
         if label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 10):  # 10 for margin
@@ -185,13 +185,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self._page_widgets: Dict[str, Tuple[QPushButton, QWidget, Optional[SideSubMenu]]] = {}
 
         def get_page_by_name(self, name: str) -> QWidget:
-            return self._page_widgets[name][1]
+            return self._page_widgets[gen_obj_name(name)][1]
 
         def get_button_by_name(self, name: str) -> QPushButton:
-            return self._page_widgets[name][0]
+            return self._page_widgets[gen_obj_name(name)][0]
 
         def get_right_menu_by_name(self, name: str) -> "Optional[SideSubMenu]":
-            return self._page_widgets[name][2]
+            return self._page_widgets[gen_obj_name(name)][2]
 
         def get_right_menu_by_type(self, type: Type) -> "Optional[SideSubMenu]":
             for _, (_, page, rm) in self._page_widgets.items():
@@ -219,7 +219,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             return buttons
 
         def add_new_page(self, name, button, page, right_sub_menu):
-            self._page_widgets[name] = (button, page, right_sub_menu)
+            self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu)
 
 
     def __init__(self, title_text: str="", native_windows_fcns=True, rounded_corners=True):
@@ -284,7 +284,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def move_window(self, event):
         # do nothing if the resize function is active
         if self.cursor().shape() != Qt.ArrowCursor:
-            self.eventFilter(None, event) # call this to be able to resize
+            self.eventFilter(self, event) # call this to be able to resize
             return
         if self._use_native_windows_fcns:
             # enables Windows snap functions
@@ -320,7 +320,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def add_left_menu_entry(self, name: str, asset_icon: str, is_upper_menu: bool, page_widget: QWidget, create_page_menu=False):
         button = QPushButton("", self.ui.left_menu_frame)
         self.add_themed_icon(button, asset_icon)
-        button.setObjectName(name)
+        button.setObjectName(gen_obj_name(name))
         size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         size_policy.setHeightForWidth(button.sizePolicy().hasHeightForWidth())
         button.setSizePolicy(size_policy)
@@ -357,11 +357,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
         button.clicked.connect(self.toggle_right_menu)
         page_widget.setParent(self.ui.page_stacked_widget)
 
-    def get_right_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
-        return self.ui.right_menu_frame.findChildren(QWidget, name)[0]
-
     def switch_page(self):
-        sender_button: QPushButton = self.sender()
+        sender_button  = self.sender()
+        assert isinstance(sender_button, QPushButton), "Switch page can only be triggered from a button!"
         name = sender_button.objectName()
         page = self.page_widgets.get_page_by_name(name)
         # switch page_stacked_widget to the saved page
@@ -459,19 +457,20 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """ Implements window resizing """
         if self.isMaximized(): # no resize when maximized
             return super().eventFilter(source, event)
-        if event.type() == event.HoverMove: # QtGui.QHoverEvent
-            if self._resize_press == 0:
-                self.handle_resize_cursor(event)  # cursor position control for cursor shape setup
-        elif event.type() == event.MouseButtonPress: # QtGui.QMouseEvent
-            self._resize_press = 1
-            self._resize_point = self.mapToGlobal(event.pos()) # save the starting point of resize
-            self._last_geometry = self.geometry()
-        elif event.type() == event.MouseButtonRelease:  # QtGui.QMouseEvent
-            self._resize_press = 0
-            self.handle_resize_cursor(event)
-        elif event.type() == event.MouseMove:
-            if self.cursor().shape() != Qt.ArrowCursor:
-                self.resizing(event)
+        if isinstance(event, QHoverEvent):  # Use isinstance instead of type because of typehinting 
+            if event.type() == event.HoverMove:
+                if self._resize_press == 0:
+                    self.handle_resize_cursor(event)  # cursor position control for cursor shape setup
+        elif isinstance(event, QMouseEvent):
+            if event.type() == event.MouseButtonPress:
+                self._resize_press = 1
+                self._resize_point = self.mapToGlobal(event.pos()) # save the starting point of resize
+                self._last_geometry = self.geometry()
+            elif event.type() == event.MouseButtonRelease: # reset cursor after move
+                self._resize_press = 0
+            elif event.type() == event.MouseMove:
+                if self.cursor().shape() != Qt.ArrowCursor:
+                    self.resizing(event)
 
         return super().eventFilter(source, event)
 
