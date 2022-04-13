@@ -1,7 +1,5 @@
 import platform
-import re
 from pathlib import Path
-from typing import Tuple
 from distutils import version
 
 import conan_app_launcher.app as app
@@ -36,54 +34,10 @@ def activate_theme(qt_app: QApplication):
     if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
         window_border_radius = 7
 
-    #user_color_str = f"rgb({user_color[0]},{user_color[1]},{user_color[2]})"
     style_sheet = configure_theme(base_path / "ui" / style_file,
                                   app.active_settings.get_int(FONT_SIZE), user_color, window_border_radius)
 
     qt_app.setStyleSheet(style_sheet)
-
-
-def set_style_sheet_option(style_sheet: str, option: str, value: str, object: str="") -> str:
-    """ Helper for QSS related functions """
-    # empty string key is the one associated to the current object
-    qss = {}
-    # parse to the next "{"
-    obj_split_sheet = style_sheet.split("{")
-    current_object = ""
-    for section in obj_split_sheet:
-        next_objectname = ""
-        subsections = section.split("}")
-        if len(subsections) > 1:
-            # last line before } is next object name
-            next_objectname = subsections[-1].splitlines()[-1].strip()
-        entries = "".join(subsections).strip().split(";")
-        for entry in entries:
-            # filter // and /* */ comments
-            clean_lines = re.sub("\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$", "", entry).strip().splitlines()
-            if not clean_lines or next_objectname == clean_lines[0]:
-                continue
-            style = clean_lines[0].split(":", 1)
-            if len(style) < 2:
-                # TODO log warning?
-                print("WARNING")
-                continue
-            if not current_object in qss:
-                qss[current_object] = {}
-            qss[current_object][style[0]] = style[1]
-        current_object = next_objectname
-    # set value
-    qss.get(object, {})[option] = value
-    # convert back to qss
-    new_style_sheet = ""
-    for object_name, entries in qss.items():
-        if object_name:
-            new_style_sheet += object_name + " {"
-        for qss_opt, value in entries.items():
-            new_style_sheet += f"{qss_opt}:{value};"
-        if object_name:
-            new_style_sheet += "}"
-    return new_style_sheet
-
 
 def get_user_theme_color() -> str: # RGB
     """ Returns black per default """

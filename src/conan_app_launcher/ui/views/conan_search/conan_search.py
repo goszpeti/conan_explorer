@@ -9,19 +9,19 @@ from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.model.ref import ConanFileReference
-
 from PyQt5.QtCore import QPoint, Qt, pyqtBoundSignal, pyqtSlot
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import (QAction, QApplication, QDialog, QListWidgetItem,
                              QWidget)
 
-from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 from .conan_search_ui import Ui_Form
+from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
+
 
 class ConanSearchDialog(QDialog):
 
-    def __init__(self, parent: Optional[QWidget], conan_pkg_installed: Optional[pyqtBoundSignal]=None,
-                 conan_pkg_removed: Optional[pyqtBoundSignal]=None, page_widgets: Optional[FluentWindow.PageStore]=None):
+    def __init__(self, parent: Optional[QWidget], conan_pkg_installed: Optional[pyqtBoundSignal] = None,
+                 conan_pkg_removed: Optional[pyqtBoundSignal] = None, page_widgets: Optional[FluentWindow.PageStore] = None):
         # Add minimize and maximize buttons
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         self.page_widgets = page_widgets
@@ -30,7 +30,7 @@ class ConanSearchDialog(QDialog):
 
         self._ui = Ui_Form()
         self._ui.setupUi(self)
-        
+
         # init search bar
         icon = QIcon(str(app.asset_path / "icons/icon.ico"))
         self.setWindowIcon(icon)
@@ -39,7 +39,7 @@ class ConanSearchDialog(QDialog):
         self._ui.search_button.setEnabled(False)
         self._ui.search_line.validator_enabled = False
         self._ui.search_line.textChanged.connect(self._enable_search_button)
-        
+
         self._ui.search_button.setShortcut(QKeySequence(Qt.Key_Return))
 
         # init remotes list
@@ -139,7 +139,8 @@ class ConanSearchDialog(QDialog):
             return
         if not self.page_widgets:
             return
-        self.page_widgets.get_page_by_type(LocalConanPackageExplorer).select_local_package_from_ref(item.get_conan_ref(), refresh=True)
+        self.page_widgets.get_page_by_type(LocalConanPackageExplorer).select_local_package_from_ref(
+            item.get_conan_ref(), refresh=True)
 
     def _load_search_model(self):
         """ Initialize tree view model by searching in conan """

@@ -1,7 +1,8 @@
+from conan_app_launcher import AUTHOR, REPO_URL, __version__, asset_path
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QSizePolicy, QSpacerItem, QFrame, QLabel, QVBoxLayout
 from PyQt5.QtGui import QIcon
-from conan_app_launcher import asset_path, __version__, REPO_URL, AUTHOR
+from PyQt5.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
+                             QVBoxLayout, QWidget)
 
 
 class AboutPage(QWidget):
@@ -36,4 +37,4 @@ class AboutPage(QWidget):
         layout.addWidget(self._logo_label)
         layout.addWidget(self._text)
         layout.addItem(QSpacerItem(
-             20, 600, QSizePolicy.Minimum, QSizePolicy.Expanding))
+            20, 600, QSizePolicy.Minimum, QSizePolicy.Expanding))

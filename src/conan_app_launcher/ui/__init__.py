@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-from conan_app_launcher import DEBUG_LEVEL
 from conan_app_launcher.app.logger import Logger
 
 # compile uic files, if needed

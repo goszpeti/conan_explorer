@@ -39,19 +39,19 @@ class AsyncLoader(QtCore.QObject):
 
     def async_loading(self, dialog_parent: QtWidgets.QWidget, work_task: Callable, worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,
-                      loading_text: str = "Loading", dialog=True):
+                      loading_text: str = "Loading"):
         self.finished = False
-        if dialog:
-            self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
-            self.progress_dialog.setLabelText(loading_text)
-            # Window flags to disable close button
-            self.progress_dialog.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
-            self.progress_dialog.setWindowTitle("Loading...")
-            self.progress_dialog.setCancelButton(None)
-            self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
-            self.progress_dialog.setRange(0, 0)
-            self.progress_dialog.setMinimumDuration(1000)
-            self.progress_dialog.show()
+
+        self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
+        self.progress_dialog.setLabelText(loading_text)
+        # Window flags to disable close button
+        self.progress_dialog.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        self.progress_dialog.setWindowTitle("Loading...")
+        self.progress_dialog.setCancelButton(None)
+        self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
+        self.progress_dialog.setRange(0, 0)
+        self.progress_dialog.setMinimumDuration(1000)
+        self.progress_dialog.show()
 
         self.worker = Worker(work_task, worker_args)
         self.load_thread = QtCore.QThread()
@@ -67,15 +67,15 @@ class AsyncLoader(QtCore.QObject):
         self.worker.finished.connect(self.load_thread.quit)
 
         self.load_thread.finished.connect(self.load_thread.deleteLater)
-        if dialog:
-            self.load_thread.finished.connect(self.progress_dialog.hide)
+        self.load_thread.finished.connect(self.progress_dialog.hide)
+
         Logger().debug(f"Start async loading thread for {str(work_task)}")
         self.load_thread.start()
 
     def thread_finished(self):
         self.finished = True
 
-    def wait_for_finished(self):  # TODO timeout + cancel
+    def wait_for_finished(self):
         Logger().debug("wait for loading thread")
         # execute once
         while not self.finished:

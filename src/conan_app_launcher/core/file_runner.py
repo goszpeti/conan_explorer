@@ -31,7 +31,6 @@ def open_in_file_manager(file_path: Path):
         subprocess.call(("xdg-open", str(dir_to_view)))
     elif platform.system() == "Windows":
         # select switch for highlighting
-        # TODO: spawns an empty visible shell on some/slower? systems
         subprocess.call("explorer /select," + str(file_path), creationflags=subprocess.CREATE_NO_WINDOW)
 
 

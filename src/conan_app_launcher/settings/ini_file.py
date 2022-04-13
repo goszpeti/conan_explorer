@@ -85,7 +85,7 @@ class IniSettings(SettingsInterface):
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
 
-    def set(self, setting_name: str, value):
+    def set(self, setting_name: str, value: Union[str, int, float, bool]):
         """ Set the value of a specific setting """
         if setting_name in self._values.keys() and isinstance(value, dict):  # dict type setting
             self._values[setting_name].update(value)
@@ -124,13 +124,13 @@ class IniSettings(SettingsInterface):
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
             self._parser.write(ini_file)
 
-    def _get_section(self, section_name) -> configparser.SectionProxy:
+    def _get_section(self, section_name: str) -> configparser.SectionProxy:
         """ Helper function to get a section from ini, or create it, if it does not exist."""
         if section_name not in self._parser:
             self._parser.add_section(section_name)
         return self._parser[section_name]
 
-    def _read_dict_setting(self, section_name):
+    def _read_dict_setting(self, section_name: str):
         """ 
         Helper function to get a dict style setting.
         Dict settings are section itself and are read dynamically.
@@ -140,14 +140,14 @@ class IniSettings(SettingsInterface):
         for setting_name in section.keys():
             self._read_setting(setting_name, section_name)
 
-    def _read_setting(self, setting_name, section_name):
+    def _read_setting(self, setting_name: str, section_name: str):
         """ Helper function to get a setting, which uses the init value to determine the type. """
         section = self._get_section(section_name)
         default_value = self.get(setting_name)
         if isinstance(default_value, dict):  # no dicts supported directly
             return
 
-        if not setting_name in section:  # write out
+        if setting_name not in section:  # write out
             section[setting_name] = str(default_value)
             return
 
@@ -161,8 +161,7 @@ class IniSettings(SettingsInterface):
         elif isinstance(default_value, int):
             value = int(section.get(setting_name))
         if value is None:  # dict type, value will be taken as a string
-            value = section.get(setting_name)
-            self.set(section_name, {setting_name: value})
+            self._logger.error(f"Settings: Setting {setting_name} to write is unknown", )
             return
         # autosave must be disabled, otherwise we overwrite the other settings in the file
         auto_save = self._auto_save
@@ -177,6 +176,6 @@ class IniSettings(SettingsInterface):
             return  # dicts are read only currently
 
         section = self._get_section(section_name)
-        if not setting_name in section:
-            self._logger.error("Settings: Setting %s to write is unknown", setting_name)
+        if setting_name not in section:
+            self._logger.error(f"Settings: Setting {setting_name} to write is unknown")
         section[setting_name] = str(value)

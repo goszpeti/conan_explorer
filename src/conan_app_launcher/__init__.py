@@ -5,8 +5,10 @@ No imports from own modules allowed! This is done to resolve circular dependenci
 import os
 try: # from Python 3.8
     from importlib.metadata import distribution
+    from importlib.metadata import PackageNotFoundError
 except ImportError:
     from importlib_metadata import distribution
+    from importlib_metadata import PackageNotFoundError
 
 from pathlib import Path
 from typing import TypeVar
@@ -22,7 +24,7 @@ try:
     __version__ = pkg_info.version
     REPO_URL = pkg_info.metadata.get("home-page", "")
     AUTHOR = pkg_info.metadata.get("author", "")
-except:
+except PackageNotFoundError:  # For local usecases, when there is no distribution
     __version__ = "1.0.0"
     REPO_URL = ""
     AUTHOR = ""

@@ -134,7 +134,7 @@ class ConanApi():
         return Path("NULL")
 
     def get_conanfile_path(self, conan_ref: ConanFileReference) -> Path:
-        if not conan_ref in self.get_all_local_refs():
+        if conan_ref not in self.get_all_local_refs():
             self.conan.info(self.generate_canonical_ref(conan_ref))
         layout = self.client_cache.package_layout(conan_ref)
         if layout:
@@ -489,7 +489,7 @@ class ConanCleanup():
     def get_cleanup_cache_paths(self) -> List[str]:
         """ Get a list of orphaned short path and cache folders """
         # Blessed are the users Microsoft products!
-        if not platform.system() == "Windows":
+        if platform.system() != "Windows":
             return []
         return self.get_orphaned_references() + self.get_orphaned_packages()
 

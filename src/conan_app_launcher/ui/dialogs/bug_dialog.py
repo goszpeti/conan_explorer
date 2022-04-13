@@ -8,8 +8,7 @@ import traceback
 
 from conan_app_launcher import REPO_URL, __version__, base_path
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMessageBox, QSizePolicy, QTextEdit
-from PyQt5.QtGui import QFontMetrics
+from PyQt5.QtWidgets import QMessageBox
 
 bug_dialog_text = f"""
 **Describe the bug**

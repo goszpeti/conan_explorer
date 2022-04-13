@@ -1,25 +1,25 @@
 import platform
 from re import T
+
 if platform.system() == "Windows":
     import ctypes
     from ctypes.wintypes import MSG
+
 from enum import Enum
 from typing import Callable, Dict, Optional, Tuple, Type, TypeVar, Union
 
 # uses Logger, settings and theming related functions
-from conan_app_launcher import app
 from conan_app_launcher.app import asset_path
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.settings import FONT_SIZE
-from .widgets import AnimatedToggle
-
-from PyQt5.QtCore import QEasingCurve, QEvent, QObject, QPoint, QPropertyAnimation, QRect, QSize, Qt
-from PyQt5.QtGui import QHoverEvent, QIcon, QKeySequence, QPixmap, QMouseEvent
-from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow, QPushButton, QScrollArea, QLayout,
-                             QShortcut, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget, QStackedWidget)
+from PyQt5.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
+                          QPropertyAnimation, QRect, QSize, Qt)
+from PyQt5.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap
+from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
+                             QPushButton, QShortcut, QSizePolicy,
+                             QStackedWidget, QVBoxLayout, QWidget)
 
 from .common import get_themed_asset_image
-
+from .widgets import AnimatedToggle
 
 LEFT_MENU_MIN_WIDTH = 80
 LEFT_MENU_MAX_WIDTH = 300
@@ -31,6 +31,7 @@ def gen_obj_name(name: str) -> str:
     """ Generates an object name from a menu title or name (spaces to underscores and lowercase) """
     return name.replace(" ", "_").lower()
 
+
 class ResizeDirection(Enum):
     default = 0
     top = 1
@@ -41,6 +42,7 @@ class ResizeDirection(Enum):
     top_right = 6
     bottom_left = 7
     bottom_right = 8
+
 
 class ThemedWidget():
     def __init__(self) -> None:
@@ -58,14 +60,16 @@ class ThemedWidget():
         for widget, asset_rel_path in self.icon_map.items():
             widget.setIcon(QIcon(get_themed_asset_image(asset_rel_path)))
 
+
 class SideSubMenu(QWidget, ThemedWidget):
     TOGGLE_WIDTH = 70
     TOGGLE_HEIGHT = 50
 
-    def __init__(self, parent_stacked_widget: QStackedWidget, title: str="", is_top_level=False, disable_scroll_bar=False):
+    def __init__(self, parent_stacked_widget: QStackedWidget, title: str = "", is_top_level=False, disable_scroll_bar=False):
         QWidget.__init__(self, parent_stacked_widget)
         ThemedWidget.__init__(self)
-        from .side_menu_ui import Ui_SideMenu  # need to resolve circular import
+        from .side_menu_ui import \
+            Ui_SideMenu  # need to resolve circular import
         self.ui = Ui_SideMenu()
         self.ui.setupUi(self)
 
@@ -83,7 +87,7 @@ class SideSubMenu(QWidget, ThemedWidget):
 
     def set_title(self, title: str):
         self.ui.side_menu_title_label.setText(title)
-    
+
     def on_expand_minimize(self):
         """ THe title button can be used to minimize a submenu """
         if self.ui.side_menu_content_frame.height() > 0:
@@ -93,11 +97,10 @@ class SideSubMenu(QWidget, ThemedWidget):
             self.add_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
             self.ui.side_menu_content_frame.setMaximumHeight(4096)
 
-
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
         return self.findChildren(QWidget, gen_obj_name(name))[0]
 
-    def add_custom_menu_entry(self, widget: QWidget, name: Optional[str]=None):
+    def add_custom_menu_entry(self, widget: QWidget, name: Optional[str] = None):
         """ Very basic custom entry, no extra functions """
         if name:
             widget.setObjectName(gen_obj_name(name))
@@ -108,7 +111,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         line.setMidLineWidth(3)
         line.setFrameShape(QFrame.HLine)
         line.setFrameShadow(QFrame.Sunken)
-        self.add_custom_menu_entry(line, "line") # TODO give them an index?
+        self.add_custom_menu_entry(line, "line")  # TODO give them an index?
 
     def add_named_custom_entry(self, name: str, widget: QWidget):
         """ Creates a Frame with a text label and a custom widget under it and adds it to the menu """
@@ -150,8 +153,8 @@ class SideSubMenu(QWidget, ThemedWidget):
         sub_menu.ui.side_menu_title_button.clicked.connect(lambda: self.parent_stacked_widget.setCurrentWidget(self))
         return button
 
-    def add_button_menu_entry(self, name: str, target: Callable, asset_icon: str="", 
-                              shortcut: Optional[QKeySequence]=None, shortcut_parent=None):
+    def add_button_menu_entry(self, name: str, target: Callable, asset_icon: str = "",
+                              shortcut: Optional[QKeySequence] = None, shortcut_parent=None):
         """ Adds a button with an icon and links with a callable. Optionally can have a key shortcut. """
         button = QPushButton(self)
         button.setMinimumSize(QSize(64, 50))
@@ -173,6 +176,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         shortcut_obj.activated.connect(target)
         button.setText(f"{button.text()} ({shortcut.toString()})")
         return button
+
 
 class FluentWindow(QMainWindow, ThemedWidget):
 
@@ -206,12 +210,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
             raise Exception(f"{type} not in page_widgets!")
 
         T = TypeVar('T')
+
         def get_page_by_type(self, type: Type[T]) -> T:
             for _, (_, page, _) in self._page_widgets.items():
                 if isinstance(page, type):
                     return page
             raise Exception(f"{type} not in page_widgets!")
-        
+
         def get_all_buttons(self):
             buttons = []
             for button, _, _ in self._page_widgets.values():
@@ -221,16 +226,15 @@ class FluentWindow(QMainWindow, ThemedWidget):
         def add_new_page(self, name, button, page, right_sub_menu):
             self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu)
 
-
-    def __init__(self, title_text: str="", native_windows_fcns=True, rounded_corners=True):
+    def __init__(self, title_text: str = "", native_windows_fcns=True, rounded_corners=True):
         super().__init__()
-        from .fluent_window_ui import Ui_MainWindow # need to resolve circular import
+        from .fluent_window_ui import Ui_MainWindow  # need to resolve circular import
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
-        
+
         self.main_general_settings_menu = SideSubMenu(
-           self.ui.right_menu_bottom_content_sw, "General Settings", True, True)
+            self.ui.right_menu_bottom_content_sw, "General Settings", True, True)
         self.ui.right_menu_bottom_content_sw.addWidget(self.main_general_settings_menu)
         self.ui.right_menu_bottom_content_sw.setCurrentWidget(self.main_general_settings_menu)
 
@@ -284,7 +288,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def move_window(self, event):
         # do nothing if the resize function is active
         if self.cursor().shape() != Qt.ArrowCursor:
-            self.eventFilter(self, event) # call this to be able to resize
+            self.eventFilter(self, event)  # call this to be able to resize
             return
         if self._use_native_windows_fcns:
             # enables Windows snap functions
@@ -315,7 +319,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         WS_BORDER = 8388608
         style = ctypes.windll.user32.GetWindowLongA(int(self.winId()), GWL_STYLE)
         ctypes.windll.user32.SetWindowLongA(int(self.winId()), GWL_STYLE,
-            style| WS_BORDER | WS_MAXIMIZEBOX | WS_CAPTION | CS_DBLCLKS | WS_THICKFRAME)
+                                            style | WS_BORDER | WS_MAXIMIZEBOX | WS_CAPTION | CS_DBLCLKS | WS_THICKFRAME)
 
     def add_left_menu_entry(self, name: str, asset_icon: str, is_upper_menu: bool, page_widget: QWidget, create_page_menu=False):
         button = QPushButton("", self.ui.left_menu_frame)
@@ -330,7 +334,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         button.setIconSize(QSize(32, 32))
         button.setStyleSheet("text-align:middle;")
         button.setCheckable(True)
-        page_widget.setMinimumHeight(300) # enable resizing of console on every page
+        page_widget.setMinimumHeight(300)  # enable resizing of console on every page
 
         button.clicked.connect(self.switch_page)
 
@@ -342,14 +346,14 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.page_widgets.add_new_page(name, button, page_widget, right_sub_menu)
 
         if is_upper_menu:
-           self.ui.left_menu_middle_subframe.layout().addWidget(button)
+            self.ui.left_menu_middle_subframe.layout().addWidget(button)
         else:
             self.ui.left_menu_bottom_subframe.layout().addWidget(button)
         self.ui.page_stacked_widget.addWidget(page_widget)
         page_widget.setParent(self.ui.page_stacked_widget)
 
     # can only be called for top level menu
-    def add_right_bottom_menu_main_page_entry(self, name: str, page_widget: QWidget, asset_icon:str=""):
+    def add_right_bottom_menu_main_page_entry(self, name: str, page_widget: QWidget, asset_icon: str = ""):
         """ Add a main page entry, where the button is in the settings menu"""
         button = self.main_general_settings_menu.add_button_menu_entry(name, self.switch_page, asset_icon)
         self.page_widgets.add_new_page(name, button, page_widget, None)
@@ -358,7 +362,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         page_widget.setParent(self.ui.page_stacked_widget)
 
     def switch_page(self):
-        sender_button  = self.sender()
+        sender_button = self.sender()
         assert isinstance(sender_button, QPushButton), "Switch page can only be triggered from a button!"
         name = sender_button.objectName()
         page = self.page_widgets.get_page_by_name(name)
@@ -381,9 +385,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.ui.right_menu_top_content_sw.show()
             self.ui.right_menu_top_content_sw.setCurrentWidget(rm)
 
-        #if self.ui.settings_button.isChecked():
+        # if self.ui.settings_button.isChecked():
         #    self.toggle_right_menu()
- 
 
     def toggle_left_menu(self):
         width = self.ui.left_menu_frame.width()
@@ -410,7 +413,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.ui.title_label.setText("")
 
         # hide menu button texts
-        for button in self.ui.left_menu_middle_subframe.findChildren(QPushButton): # name, (button, _) in self.page_entries.items():
+        # name, (button, _) in self.page_entries.items():
+        for button in self.ui.left_menu_middle_subframe.findChildren(QPushButton):
             if maximize:
                 button.setText(button.objectName())
                 button.setStyleSheet("text-align:left;")
@@ -439,8 +443,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.right_anim.setEasingCurve(QEasingCurve.InOutQuart)
         self.right_anim.start()
 
-
-    def mousePressEvent(self, event): # override
+    def mousePressEvent(self, event):  # override
         """ Helper for moving window to know mouse position """
         self.drag_position = event.globalPos()
 
@@ -455,18 +458,18 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
     def eventFilter(self, source: QObject, event: QEvent):
         """ Implements window resizing """
-        if self.isMaximized(): # no resize when maximized
+        if self.isMaximized():  # no resize when maximized
             return super().eventFilter(source, event)
-        if isinstance(event, QHoverEvent):  # Use isinstance instead of type because of typehinting 
+        if isinstance(event, QHoverEvent):  # Use isinstance instead of type because of typehinting
             if event.type() == event.HoverMove:
                 if self._resize_press == 0:
                     self.handle_resize_cursor(event)  # cursor position control for cursor shape setup
         elif isinstance(event, QMouseEvent):
             if event.type() == event.MouseButtonPress:
                 self._resize_press = 1
-                self._resize_point = self.mapToGlobal(event.pos()) # save the starting point of resize
+                self._resize_point = self.mapToGlobal(event.pos())  # save the starting point of resize
                 self._last_geometry = self.geometry()
-            elif event.type() == event.MouseButtonRelease: # reset cursor after move
+            elif event.type() == event.MouseButtonRelease:  # reset cursor after move
                 self._resize_press = 0
             elif event.type() == event.MouseMove:
                 if self.cursor().shape() != Qt.ArrowCursor:
@@ -481,10 +484,10 @@ class FluentWindow(QMainWindow, ThemedWidget):
         top_right = rect.topRight()
         bottom_left = rect.bottomLeft()
         bottom_right = rect.bottomRight()
-        position = event.pos() # relative pos to window
+        position = event.pos()  # relative pos to window
         width = self.width()
         height = self.height()
-        
+
         if position in QRect(top_left.x() + x_offset, top_left.y(), width - 2*x_offset, y_offset):
             self._resize_direction = ResizeDirection.top
             self.setCursor(Qt.SizeVerCursor)
@@ -509,7 +512,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         elif position in QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset):
             self._resize_direction = ResizeDirection.bottom_right
             self.setCursor(Qt.SizeFDiagCursor)
-        else: # no resize
+        else:  # no resize
             self.setCursor(Qt.ArrowCursor)
 
     def resizing(self, event):
@@ -568,7 +571,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
                                  self._last_geometry.y() + current_point.y(), new_width, new_height)
             return
 
-    def maximize_restore(self, a0=False): # dummy arg to be used asn an event slot  TODO: better solution
+    def maximize_restore(self, a0=False):  # dummy arg to be used asn an event slot  TODO: better solution
         if self.isMaximized():
             self.showNormal()
         else:

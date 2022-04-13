@@ -1,6 +1,5 @@
 from pathlib import Path
 from shutil import rmtree
-import platform
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -9,18 +8,20 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
-                                         DISPLAY_APP_VERSIONS, ENABLE_APP_COMBO_BOXES, FONT_SIZE,
+                                         DISPLAY_APP_VERSIONS,
+                                         ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox, QLabel
+from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from .common import AsyncLoader, activate_theme
-from .views.about_page import AboutPage
 from .fluent_window import FluentWindow, SideSubMenu
 from .model import UiApplicationModel
 from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
+from .views.about_page import AboutPage
+
 
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
@@ -40,7 +41,6 @@ class MainWindow(FluentWindow):
         self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
 
-
         # connect logger to console widget to log possible errors at init
         Logger.init_qt_logger(self.log_console_message)
         self.log_console_message.connect(self.write_log)
@@ -49,21 +49,19 @@ class MainWindow(FluentWindow):
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
         self.local_package_explorer = LocalConanPackageExplorer(self, self.conan_pkg_removed, self.page_widgets)
         self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed,
-                                              self.conan_pkg_removed, self.page_widgets)
+                                               self.conan_pkg_removed, self.page_widgets)
 
         self._init_left_menu()
         self._init_right_menu()
 
-
     def _init_left_menu(self):
-        self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", is_upper_menu=True, page_widget=self.app_grid, 
-                                create_page_menu=True)
+        self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", is_upper_menu=True, page_widget=self.app_grid,
+                                 create_page_menu=True)
         self.add_left_menu_entry("Local Package Explorer", "icons/package.png", True, self.local_package_explorer)
         self.add_left_menu_entry("Conan Search", "icons/search_packages.png", True, self.search_dialog)
 
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
-
 
     def _init_right_menu(self):
 
@@ -91,7 +89,7 @@ class MainWindow(FluentWindow):
                 "Show channel", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
 
         view_settings_submenu = SideSubMenu(self.ui.right_menu_bottom_content_sw, "View")
-        
+
         self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/package_settings.png")
 
         view_settings_submenu.add_button_menu_entry(
@@ -102,8 +100,6 @@ class MainWindow(FluentWindow):
         dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
         view_settings_submenu.add_toggle_menu_entry("Dark Mode", self.on_theme_changed, dark_mode_enabled)
 
-
-    
         self.main_general_settings_menu.add_menu_line()
         self.main_general_settings_menu.add_button_menu_entry(
             "Remove Locks", app.conan_api.remove_locks, "icons/remove-lock.png")
@@ -111,7 +107,6 @@ class MainWindow(FluentWindow):
             "Clean Conan Cache", self.open_cleanup_cache_dialog, "icons/cleanup")
         self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
-
 
         # conan_settings_submenu = self.RightSubMenu("Conan")
         # conan_button = self.add_right_menu_sub_menu(conan_settings_submenu)
@@ -234,7 +229,7 @@ class MainWindow(FluentWindow):
         if config_file_path.exists():
             dialog_path = config_file_path.parent
         dialog = QFileDialog(parent=self, caption="Select JSON Config File",
-                                       directory=str(dialog_path), filter="JSON files (*.json)")
+                             directory=str(dialog_path), filter="JSON files (*.json)")
         dialog.setFileMode(QFileDialog.ExistingFile)
         if dialog.exec_() == QFileDialog.Accepted:
             new_file = dialog.selectedFiles()[0]
@@ -299,5 +294,3 @@ class MainWindow(FluentWindow):
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self.ui.console.append(text)
-
-

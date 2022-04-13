@@ -159,7 +159,7 @@ class ConanInfoCache():
                 channel = "_"
             current_version_channel = f"{ref.version}/{channel}"
             version_channels = set(self._remote_packages.get(ref.name, {}).get(user, []))
-            if not current_version_channel in version_channels:
+            if current_version_channel not in version_channels:
                 version_channels.add(current_version_channel)
                 version_channels_list = list(version_channels)
                 if not self._remote_packages.get(ref.name):
