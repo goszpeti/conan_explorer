@@ -61,6 +61,7 @@ def test_open_in_file_manager(base_fixture, mocker):
     else:
         ret = open_in_file_manager(current_file_path)
         assert ret.pid > 0
+        time.sleep(3)
         proc = psutil.Process(ret.pid)
         assert len(proc.children()) == 1
         # list a few candidates
