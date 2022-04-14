@@ -1,17 +1,20 @@
 import os
 import platform
-import psutil
 import stat
+import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
 from subprocess import check_output
+from test.conftest import get_window_pid, is_ci_job
 
 import conan_app_launcher  # for mocker
-from conan_app_launcher.core.file_runner import (execute_app, open_file, open_in_file_manager,
+import psutil
+from conan_app_launcher.core.file_runner import (execute_app, open_file,
+                                                 open_in_file_manager,
                                                  run_file)
-from test.conftest import get_window_pid
+
 
 def test_choose_run_file(base_fixture, tmp_path, mocker):
     """
@@ -38,19 +41,25 @@ def test_choose_run_file(base_fixture, tmp_path, mocker):
     conan_app_launcher.core.file_runner.open_file.assert_called_once_with(test_file)
 
 
-def test_open_in_file_manager(base_fixture):
+def test_open_in_file_manager(base_fixture, mocker):
     """ Test, that on calling open_in_file_manager a file explorer actually opens """
     current_file_path = Path(__file__)
-    ret = open_in_file_manager(current_file_path)
-    assert ret
-    time.sleep(5)
+
     if platform.system() == "Windows":
-        # On Windows the window title is that of the opened directory name, so we can easily test, if it opened
-        pid = get_window_pid(current_file_path.parent.name)
-        assert pid > 0
-        proc = psutil.Process(pid)
-        proc.kill()
+        if is_ci_job():
+            mocker.patch('subprocess.Popen')
+            ret = open_in_file_manager(current_file_path)
+            subprocess.Popen.assert_called_once_with("explorer /select," + str(current_file_path), creationflags=subprocess.CREATE_NO_WINDOW)
+        else:
+            open_in_file_manager(current_file_path)
+            time.sleep(2)
+            # Does not work in CI :( - On Windows the window title is that of the opened directory name, so we can easily test, if it opened
+            pid = get_window_pid(current_file_path.parent.name)
+            assert pid > 0
+            proc = psutil.Process(pid)
+            proc.kill()
     else:
+        ret = open_in_file_manager(current_file_path)
         assert ret.pid > 0
         proc = psutil.Process(ret.pid)
         assert len(proc.children()) == 1

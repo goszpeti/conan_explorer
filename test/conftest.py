@@ -33,6 +33,11 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
 
 
+def is_ci_job():
+    if os.getenv("GITHUB_WORKSPACE"):
+        return True
+    return False
+
 def get_window_pid(title):
     import win32process
     import win32gui
