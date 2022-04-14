@@ -238,7 +238,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.setAttribute(Qt.WA_TranslucentBackground, True)
 
         self.main_general_settings_menu = SideSubMenu(
-            self.ui.right_menu_bottom_content_sw, "General Settings", True, True)
+            self.ui.right_menu_bottom_content_sw, "General Settings", True)
         self.ui.right_menu_bottom_content_sw.addWidget(self.main_general_settings_menu)
         self.ui.right_menu_bottom_content_sw.setCurrentWidget(self.main_general_settings_menu)
 
