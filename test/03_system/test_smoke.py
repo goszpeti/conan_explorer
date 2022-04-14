@@ -55,13 +55,14 @@ def test_main_loop(base_fixture):
         found_process = False
         for process in psutil.process_iter():
             if platform.system() == "Windows":
-                script = "conan_app_launcher-script.pyw"
+                script = "Scripts\\conan_app_launcher-script.pyw"
             else:
-                script = "conan_app_launcher" # TODO
+                script = "bin/conan_app_launcher" # TODO
             try:
-                if "python" in process.name().lower() and script in process.cmdline()[1]:
+                if process.cmdline() and "python" in process.cmdline()[0].lower() and script in process.cmdline()[1]:
                     found_process = True
                     process.kill()
+                    break
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         time.sleep(2)

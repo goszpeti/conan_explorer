@@ -126,7 +126,7 @@ class ConanWorker():
             self._conan_install_queue.task_done()
         # batch emitting signal - easier when many packages are 
         # in queue and no difference if there is only one
-        if info_callback:
+        if info_callback and self._shutdown_requested:
             try:
                 info_callback(str(conan_ref), pkg_id)
             except Exception as e:
@@ -148,8 +148,11 @@ class ConanWorker():
             Logger().debug(f"Finished available package query for {str(conan_ref)}")
             if not available_refs:
                 continue
-        if info_callback:
-            info_callback(conan_ref, "")
+        if info_callback and self._shutdown_requested:
+            try:
+                info_callback(conan_ref, "")
+            except Exception as e:
+                Logger().error(str(e))
 
     def finish_working(self, timeout_s: Optional[float]=None):
         """ Cancel, if worker is still not finished """
