@@ -28,10 +28,10 @@ def open_in_file_manager(file_path: Path):
         # no standardized select functionailty.
         # However xdg-open on a dir will open the folder in the default file explorer.
         dir_to_view = file_path.parent if file_path.is_file() else file_path
-        return subprocess.call(("xdg-open", str(dir_to_view)))
+        return subprocess.Popen(("xdg-open", str(dir_to_view)))
     elif platform.system() == "Windows":
         # select switch for highlighting
-        return subprocess.call("explorer /select," + str(file_path), creationflags=subprocess.CREATE_NO_WINDOW)
+        return subprocess.Popen("explorer /select," + str(file_path), creationflags=subprocess.CREATE_NO_WINDOW)
 
 
 def open_cmd_in_path(file_path: Path) -> int:

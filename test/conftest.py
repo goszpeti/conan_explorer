@@ -33,6 +33,13 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
 
 
+def get_window_pid(title):
+    import win32process
+    import win32gui
+    hwnd = win32gui.FindWindow(None, title)
+    _, pid = win32process.GetWindowThreadProcessId(hwnd)
+    return pid
+
 class PathSetup():
     """ Get the important paths form the source repo. """
 

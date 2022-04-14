@@ -1,5 +1,6 @@
 import os
 import platform
+import psutil
 import stat
 import sys
 import tempfile
@@ -8,9 +9,9 @@ from pathlib import Path
 from subprocess import check_output
 
 import conan_app_launcher  # for mocker
-from conan_app_launcher.core.file_runner import (execute_app, open_file,
+from conan_app_launcher.core.file_runner import (execute_app, open_file, open_in_file_manager,
                                                  run_file)
-
+from test.conftest import get_window_pid
 
 def test_choose_run_file(base_fixture, tmp_path, mocker):
     """
@@ -19,6 +20,15 @@ def test_choose_run_file(base_fixture, tmp_path, mocker):
     """
     # Mock away the calls
     mocker.patch('conan_app_launcher.core.file_runner.open_file')
+    mocker.patch('conan_app_launcher.core.file_runner.execute_app')
+
+    # test with nonexistant path - nothing should happen (no exception raising)
+
+    run_file(Path("NULL"), False, "")
+    conan_app_launcher.core.file_runner.open_file.assert_not_called()
+    conan_app_launcher.core.file_runner.execute_app.assert_not_called()
+
+    # test with existing path
     test_file = Path(tmp_path) / "test.txt"
     with open(test_file, "w") as f:
         f.write("test")
@@ -26,6 +36,26 @@ def test_choose_run_file(base_fixture, tmp_path, mocker):
     run_file(test_file, False, "")
 
     conan_app_launcher.core.file_runner.open_file.assert_called_once_with(test_file)
+
+
+def test_open_in_file_manager(base_fixture):
+    """ Test, that on calling open_in_file_manager a file explorer actually opens """
+    current_file_path = Path(__file__)
+    ret = open_in_file_manager(current_file_path)
+    assert ret
+    time.sleep(2)
+    if platform.system() == "Windows":
+        # On Windows the window title is that of the opened directory name, so we can easily test, if it opened
+        pid = get_window_pid(current_file_path.parent.name)
+        assert pid > 0
+    else:
+        assert ret.pid > 0
+        proc = psutil.Process(ret.pid)
+        assert len(proc.children()) == 1
+        # For GNOME based Ubuntu
+        assert proc.children()[0].name() == "nautilus"
+    ret.kill()
+
 
 
 def test_choose_run_script(base_fixture, tmp_path, mocker):

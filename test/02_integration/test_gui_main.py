@@ -100,7 +100,7 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
                         return_value=QtWidgets.QDialog.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[selection])
-    main_gui.page_widgets.get_right_menu_by_type(type(main_gui.app_grid)).get_menu_entry_by_name("Open Layout File").click()
+    main_gui.page_widgets.get_side_menu_by_type(type(main_gui.app_grid)).get_menu_entry_by_name("Open Layout File").click()
 
     # TEST EVALUATION
     time.sleep(3)
@@ -235,7 +235,7 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
             assert test_app._app_channel_cbox.isHidden()
 
     # click VERSIONS
-    menu_entry = main_gui.page_widgets.get_right_menu_by_type(
+    menu_entry = main_gui.page_widgets.get_side_menu_by_type(
         type(main_gui.app_grid))
     assert menu_entry
     version_toggle: AnimatedToggle = menu_entry.get_menu_entry_by_name("show_version_widget")
