@@ -67,7 +67,7 @@ class MainWindow(FluentWindow):
     def _init_right_menu(self):
 
         # Right Settings menu
-        quicklaunch_submenu = self.page_widgets.get_right_menu_by_type(type(self.app_grid))
+        quicklaunch_submenu = self.page_widgets.get_side_menu_by_type(type(self.app_grid))
         if quicklaunch_submenu:
             quicklaunch_submenu.add_button_menu_entry(
                 "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.png")

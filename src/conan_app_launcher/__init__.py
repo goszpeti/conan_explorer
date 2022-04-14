@@ -24,7 +24,8 @@ try:
     __version__ = pkg_info.version
     REPO_URL = pkg_info.metadata.get("home-page", "")
     AUTHOR = pkg_info.metadata.get("author", "")
-except PackageNotFoundError:  # For local usecases, when there is no distribution
+except PackageNotFoundError: # pragma: no cover
+    # For local usecases, when there is no distribution
     __version__ = "1.0.0"
     REPO_URL = ""
     AUTHOR = ""

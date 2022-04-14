@@ -80,17 +80,28 @@ class SideSubMenu(QWidget, ThemedWidget):
         self.parent_stacked_widget = parent_stacked_widget
         self.parent_stacked_widget.addWidget(self)
         self.title = title
+        self.is_top_level = is_top_level
         self.set_title(title)
         self._content_layout = self.ui.side_menu_content_frame.layout()
         self.add_themed_icon(self.ui.side_menu_title_button, "icons/back.png")
 
         if is_top_level:
             self.ui.side_menu_title_button.hide()  # off per default
-            # self.add_themed_icon(self.ui.title_button, "icons/expand.png")
-            # self.ui.title_button.clicked.connect(self.on_expand_minimize)  # off per default
+ 
 
     def set_title(self, title: str):
         self.ui.side_menu_title_label.setText(title)
+
+    def enable_collapsible(self) -> bool:
+        """
+        Enable this side menu being collapsed. The side_menu_title_button will be used for this,
+        so this must be a top level menu, otherwise the back button could not be operated anymore.
+        """
+        if not self.is_top_level:
+            return False
+        self.add_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
+        self.ui.side_menu_title_button.clicked.connect(self.on_expand_minimize)  # off per default
+        return True
 
     def on_expand_minimize(self):
         """ The title button can be used to minimize a submenu """
@@ -198,13 +209,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
         def get_button_by_name(self, name: str) -> QPushButton:
             return self._page_widgets[gen_obj_name(name)][0]
 
-        def get_right_menu_by_name(self, name: str) -> "Optional[SideSubMenu]":
+        def get_side_menu_by_name(self, name: str) -> "Optional[SideSubMenu]":
             return self._page_widgets[gen_obj_name(name)][2]
 
-        def get_right_menu_by_type(self, type: Type) -> "Optional[SideSubMenu]":
-            for _, (_, page, rm) in self._page_widgets.items():
+        def get_side_menu_by_type(self, type: Type) -> "Optional[SideSubMenu]":
+            for _, (_, page, menu) in self._page_widgets.items():
                 if isinstance(page, type):
-                    return rm
+                    return menu
             raise WidgetNotFoundException(f"{type} not in page_widgets!")
 
         def get_button_by_type(self, type: Type) -> QPushButton:
@@ -380,14 +391,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.page_title.setText(name)
         self.ui.page_info_label.setText("")
 
-        rm = self.page_widgets.get_right_menu_by_name(name)
-        if not rm:
+        side_menu = self.page_widgets.get_side_menu_by_name(name)
+        if not side_menu:
             # check page settings at minimize if not needed
             self.ui.right_menu_top_content_sw.hide()
-            pass
         else:
             self.ui.right_menu_top_content_sw.show()
-            self.ui.right_menu_top_content_sw.setCurrentWidget(rm)
+            self.ui.right_menu_top_content_sw.setCurrentWidget(side_menu)
 
         if self.ui.settings_button.isChecked():
            self.toggle_right_menu()
@@ -524,24 +534,20 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if new_height > self.minimumHeight():
                 self.setGeometry(self._last_geometry.x(), self._last_geometry.y() +
                                  current_point.y(), self._last_geometry.width(), new_height)
-            return
         elif self._resize_direction == ResizeDirection.bottom:
             current_point = self.mapToGlobal(event.pos()) - self._resize_point
             new_height = self._last_geometry.height() + current_point.y()
             self.resize(self._last_geometry.width(), new_height)
-            return
         elif self._resize_direction == ResizeDirection.right:
             current_point = self.mapToGlobal(event.pos()) - self._resize_point
             new_width = self._last_geometry.width() + current_point.x()
             self.resize(new_width, self._last_geometry.height())
-            return
         elif self._resize_direction == ResizeDirection.left:
             current_point = self.mapToGlobal(event.pos()) - self._resize_point
             new_width = self._last_geometry.width() - current_point.x()
             if new_width > self.minimumWidth():
                 self.setGeometry(self._last_geometry.x() + current_point.x(),
                                  self._last_geometry.y(), new_width, self._last_geometry.height())
-            return
         elif self._resize_direction == ResizeDirection.top_right:
             current_point = self.mapToGlobal(event.pos()) - self._resize_point
             new_width = self._last_geometry.width() + current_point.x()
@@ -549,13 +555,11 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if new_height > self.minimumHeight():
                 self.setGeometry(self._last_geometry.x(), self._last_geometry.y() +
                                  current_point.y(), new_width, new_height)
-            return
         elif self._resize_direction == ResizeDirection.bottom_right:
             current_point = self.mapToGlobal(event.pos()) - self._resize_point
             new_width = self._last_geometry.width() + current_point.x()
             new_height = self._last_geometry.height() + current_point.y()
             self.setGeometry(self._last_geometry.x(), self._last_geometry.y(), new_width, new_height)
-            return
         elif self._resize_direction == ResizeDirection.bottom_left:
             current_point = self.mapToGlobal(event.pos()) - self._resize_point
             new_width = self._last_geometry.width() - current_point.x()
@@ -563,7 +567,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if new_width > self.minimumWidth():
                 self.setGeometry(self._last_geometry.x() + current_point.x(),
                                  self._last_geometry.y(), new_width, new_height)
-            return
         elif self._resize_direction == ResizeDirection.top_left:
             current_point = self.mapToGlobal(event.pos()) - self._resize_point
             new_width = self._last_geometry.width() - current_point.x()
@@ -571,7 +574,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if new_height > self.minimumHeight() and new_width > self.minimumWidth():
                 self.setGeometry(self._last_geometry.x() + current_point.x(),
                                  self._last_geometry.y() + current_point.y(), new_width, new_height)
-            return
 
     def maximize_restore(self, a0=False):  # dummy arg to be used asn an event slot  TODO: better solution
         if self.isMaximized():
