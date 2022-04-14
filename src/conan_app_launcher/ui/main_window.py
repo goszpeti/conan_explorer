@@ -168,7 +168,7 @@ class MainWindow(FluentWindow):
         # wait 0,5 seconds, so all animations can finish
         import datetime
         start = datetime.datetime.now()
-        while not datetime.datetime.now() - start > datetime.timedelta(milliseconds=600):
+        while datetime.datetime.now() - start <= datetime.timedelta(milliseconds=600):
             QApplication.processEvents()
 
         dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False

@@ -30,9 +30,9 @@ class AnimatedToggle(QCheckBox):
 
         self._pulse_radius = 0
 
-        self.animation = QPropertyAnimation(self, b"handle_position", self)
-        self.animation.setEasingCurve(QEasingCurve.InOutCubic)
-        self.animation.setDuration(200)  # ms
+        self.handle_anim = QPropertyAnimation(self, b"handle_position", self)
+        self.handle_anim.setEasingCurve(QEasingCurve.InOutCubic)
+        self.handle_anim.setDuration(200)  # ms
 
         self.pulse_anim = QPropertyAnimation(self, b"pulse_radius", self)
         self.pulse_anim.setDuration(300)  # ms
@@ -40,7 +40,7 @@ class AnimatedToggle(QCheckBox):
         self.pulse_anim.setEndValue(20)
 
         self.animations_group = QSequentialAnimationGroup()
-        self.animations_group.addAnimation(self.animation)
+        self.animations_group.addAnimation(self.handle_anim)
         self.animations_group.addAnimation(self.pulse_anim)
 
         self._pulse_unchecked_animation = QBrush(QColor(pulse_unchecked_color))
@@ -79,9 +79,9 @@ class AnimatedToggle(QCheckBox):
     def handle_state_change(self, value):
         self.animations_group.stop()
         if value:
-            self.animation.setEndValue(1)
+            self.handle_anim.setEndValue(1)
         else:
-            self.animation.setEndValue(0)
+            self.handle_anim.setEndValue(0)
         self.animations_group.start()
 
     def paintEvent(self, e: QPaintEvent):
@@ -100,15 +100,15 @@ class AnimatedToggle(QCheckBox):
         rounding = bar_rect.height() / 2
 
         # the handle will move along this line
-        trailLength = cont_rect.width() - 2 * handle_radius
+        trail_length = cont_rect.width() - 2 * handle_radius
 
-        xPos = cont_rect.x() + handle_radius + trailLength * self._handle_position
+        x_pos = cont_rect.x() + handle_radius + trail_length * self._handle_position
 
         if self.pulse_anim.state() == QPropertyAnimation.Running:
             painter.setBrush(
                 self._pulse_checked_animation if
                 self.isChecked() else self._pulse_unchecked_animation)
-            painter.drawEllipse(QPointF(xPos, bar_rect.center().y()),
+            painter.drawEllipse(QPointF(x_pos, bar_rect.center().y()),
                           self._pulse_radius, self._pulse_radius)
 
         if self.isChecked():
@@ -122,7 +122,7 @@ class AnimatedToggle(QCheckBox):
             painter.setBrush(self._handle_brush)
 
         painter.drawEllipse(
-            QPointF(xPos, bar_rect.center().y()),
+            QPointF(x_pos, bar_rect.center().y()),
             handle_radius, handle_radius)
 
         painter.end()

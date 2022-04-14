@@ -52,8 +52,8 @@ def test_open_in_file_manager(base_fixture):
         assert ret.pid > 0
         proc = psutil.Process(ret.pid)
         assert len(proc.children()) == 1
-        # For GNOME based Ubuntu
-        assert proc.children()[0].name() == "nautilus"
+        # list a few candidates
+        assert proc.children()[0].name() in ["nautilus", "chrome", "thunar", "dolphin", "pcmanfm"]
     ret.kill()
 
 

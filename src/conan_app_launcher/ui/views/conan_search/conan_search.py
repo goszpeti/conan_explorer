@@ -159,7 +159,7 @@ class ConanSearchDialog(QDialog):
         item = self.get_selected_source_item(self._ui.search_results_tree_view)
         if not item:
             return
-        if not item.type == PROFILE_TYPE:
+        if item.type != PROFILE_TYPE:
             return
         pkg_info = pprint.pformat(item.pkg_data).translate(
             {ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})

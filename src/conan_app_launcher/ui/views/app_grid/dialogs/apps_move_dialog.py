@@ -43,7 +43,7 @@ class AppsMoveDialog(QDialog):
         try:
             sel_indexes.sort()  # selected indexes need to be sorted
             first_row = sel_indexes[0].row() - 1
-            if not first_row >= 0:
+            if first_row < 0:
                 return
             self._ui.list_view.selectionModel().clearSelection()
 
@@ -70,7 +70,7 @@ class AppsMoveDialog(QDialog):
             indexes.sort()
             self._ui.list_view.selectionModel().clearSelection()
             last_sel_row = indexes[-1].row() + 1
-            if not last_sel_row < max_row:  # cannot be moved down
+            if last_sel_row >= max_row:  # cannot be moved down
                 return
             for idx in reversed(indexes):
                 if idx is None:

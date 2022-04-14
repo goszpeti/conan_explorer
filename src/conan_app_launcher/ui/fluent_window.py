@@ -461,7 +461,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """ Helper for moving window to know mouse position """
         self.drag_position = event.globalPos()
 
-    def nativeEvent(self, eventType, message):
+    def nativeEvent(self, eventType, message): # override
         """ Platform native events """
         if self._use_native_windows_fcns:
             msg = MSG.from_address(message.__int__())
@@ -469,7 +469,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 return True, 0
         return super().nativeEvent(eventType, message)
 
-    def eventFilter(self, source: QObject, event: QEvent):
+    def eventFilter(self, source: QObject, event: QEvent):  # override
         """ Implements window resizing """
         if self.isMaximized():  # no resize when maximized
             return super().eventFilter(source, event)
@@ -575,7 +575,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 self.setGeometry(self._last_geometry.x() + current_point.x(),
                                  self._last_geometry.y() + current_point.y(), new_width, new_height)
 
-    def maximize_restore(self, a0=False):  # dummy arg to be used asn an event slot  TODO: better solution
+    def maximize_restore(self, a0=False):  # dummy arg to be used as an event slot
         if self.isMaximized():
             self.showNormal()
         else:

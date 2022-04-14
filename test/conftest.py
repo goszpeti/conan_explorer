@@ -185,10 +185,13 @@ def base_fixture(request):
 
     # delete cache file
     if (base_path / ConanInfoCache.CACHE_FILE_NAME).exists():
-        os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
+        try:
+            os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
+        except PermissionError: # just Windows things...
+            time.sleep(5)
+            os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
 
     # reset singletons
-    #logger.Logger._instance = None
     app.conan_worker = None
     app.conan_api = None
     app.active_settings = None
