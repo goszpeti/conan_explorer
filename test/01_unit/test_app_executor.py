@@ -43,11 +43,13 @@ def test_open_in_file_manager(base_fixture):
     current_file_path = Path(__file__)
     ret = open_in_file_manager(current_file_path)
     assert ret
-    time.sleep(2)
+    time.sleep(5)
     if platform.system() == "Windows":
         # On Windows the window title is that of the opened directory name, so we can easily test, if it opened
         pid = get_window_pid(current_file_path.parent.name)
         assert pid > 0
+        proc = psutil.Process(pid)
+        proc.kill()
     else:
         assert ret.pid > 0
         proc = psutil.Process(ret.pid)

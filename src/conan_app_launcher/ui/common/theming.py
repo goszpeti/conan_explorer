@@ -1,9 +1,9 @@
 import platform
 from pathlib import Path
-from distutils import version
 
 import conan_app_launcher.app as app
 from conan_app_launcher import base_path
+from conan_app_launcher.core.file_runner import is_windows_11
 from conan_app_launcher.settings import FONT_SIZE, GUI_STYLE, GUI_STYLE_DARK
 
 from jinja2 import Template
@@ -30,8 +30,8 @@ def activate_theme(qt_app: QApplication):
     user_color = get_user_theme_color()
     window_border_radius = 0
 
-    # enable rounded corners under Win 11 (main version number is still 10 - thanks MS!)
-    if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
+    # enable rounded corners under Win 11 
+    if is_windows_11():
         window_border_radius = 7
 
     style_sheet = configure_theme(base_path / "ui" / style_file,

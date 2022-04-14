@@ -2,12 +2,20 @@ import os
 import platform
 import shutil
 import subprocess
+from distutils import version
 from pathlib import Path
 from typing import List
 
 from conan_app_launcher.app.logger import Logger
 
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
+
+
+def is_windows_11():
+    """ main version number is still 10 - thanks MS! """
+    if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
+        return True
+    return False
 
 def run_file(file_path: Path, is_console_app: bool, args: str):
     """ Decide, if a file should be opened or executed and call the appropriate method """
