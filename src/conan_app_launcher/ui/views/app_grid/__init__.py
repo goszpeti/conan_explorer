@@ -168,12 +168,15 @@ class AppGridView(QWidget):
     def update_conan_info(self, conan_ref: str, pkg_id: str):
         if not self.isEnabled():  # the gui is about to shut down
             return
-        # call update on every entry which has this ref
         try:
             for tab in self.get_tabs():
                 for app in tab.app_links:
+                    # Catch shutdown
+                    if not self.isEnabled():
+                        return
                     app.model.update_from_cache()
                     app.update_conan_info()
+
         except Exception as e:
             Logger().error(f"Can't update AppGrid with conan info {str(e)}")
 
