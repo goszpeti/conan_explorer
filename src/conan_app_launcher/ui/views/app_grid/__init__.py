@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, List, Union
 
 import conan_app_launcher.app as app
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import APPLIST_ENABLED  # using global module pattern
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
@@ -168,10 +169,14 @@ class AppGridView(QWidget):
         if not self.isEnabled():  # the gui is about to shut down
             return
         # call update on every entry which has this ref
-        for tab in self.get_tabs():
-            for app in tab.app_links:
-                app.model.update_from_cache()
-                app.update_with_conan_info()
+        try:
+            for tab in self.get_tabs():
+                for app in tab.app_links:
+                    app.model.update_from_cache()
+                    app.update_conan_info()
+        except Exception as e:
+            Logger().error(f"Can't update AppGrid with conan info {str(e)}")
+
 
     @classmethod
     def get_tab_type(cls):

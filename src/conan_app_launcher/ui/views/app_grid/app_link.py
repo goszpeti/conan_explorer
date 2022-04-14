@@ -114,7 +114,7 @@ class AppLinkBase(QFrame):
         self.menu.addAction(self.rearrange_action)
 
     def load(self):
-        self.model.register_update_callback(self.update_with_conan_info)
+        self.model.register_update_callback(self.update_conan_info)
         self._apply_new_config()
 
     def on_move(self):
@@ -180,7 +180,7 @@ class AppLinkBase(QFrame):
         self.update_users_info_visible()
         self.update_channels_info_visible()
 
-        self.update_with_conan_info()  # initial update with offline information
+        self.update_conan_info()  # initial update with offline information
 
     def open_app_link_add_dialog(self):
         self._parent_tab.open_app_link_add_dialog()
@@ -224,7 +224,7 @@ class AppLinkBase(QFrame):
             self.model.save()
             self._parent_tab.redraw(force=True)
 
-    def update_with_conan_info(self):
+    def update_conan_info(self):
         """ Update with new conan data """
         pass
       
@@ -357,8 +357,8 @@ class ListAppLink(AppLinkBase):
         super()._init_app_link()
 
 
-    def update_with_conan_info(self):
-        """ Update with new conan data """
+    def update_conan_info(self):
+        """ Update with new conan data """ # TODO should be in model!
         self.update_icon()
         self._app_version.setText(self.model.version)
         self._app_user.setText(self.model.user)
@@ -497,7 +497,7 @@ class GridAppLink(AppLinkBase):
         self.model.lock_changes = False
         self._lock_cboxes = False
 
-    def update_with_conan_info(self):
+    def update_conan_info(self):
         """ Update with new conan data """
         self.update_icon()
 
