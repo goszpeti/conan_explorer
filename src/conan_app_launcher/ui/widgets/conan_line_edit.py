@@ -41,37 +41,43 @@ class ConanRefLineEdit(QLineEdit):
     def set_loading_callback(self, loading_cbk: Callable):
         self._loading_cbk = loading_cbk
 
-    def on_text_changed(self, text):
-        if self.validator_enabled:
-            """ Validate ConanFileReference or PackageReference. Empty text is invalid. """
-            if not text:
-                self.is_valid = False
-            else:
-                try:
-                    if ":" in text:
-                        PackageReference.loads(text)
-                    else:
-                        ConanFileReference.loads(text)
-                    self.is_valid = True
-                except Exception:
-                    self.is_valid = False
+    def on_text_changed(self, text: str):
+        self.validate(text)
+        self.search_query(text)
 
-            if self.is_valid:
-                if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
-                    self.setStyleSheet(f"background: {self.VALID_COLOR_DARK};")
-                else:
-                    self.setStyleSheet(f"background: {self.VALID_COLOR_LIGHT};")
-            else:  # if it does error it's invalid format, thus red
-                self.setStyleSheet(f"background: {self.INVALID_COLOR};")
-
-        if len(text) < self.MINIMUM_CHARS_FOR_QUERY:  # skip searching for such broad terms
+    def validate(self, conan_ref: str):
+        """ Validate ConanFileReference or PackageReference. Empty text is invalid. """
+        if not self.validator_enabled:
             return
+        if not conan_ref:
+            self.is_valid = False
+        else:
+            try:
+                if ":" in conan_ref:
+                    PackageReference.loads(conan_ref)
+                else:
+                    ConanFileReference.loads(conan_ref)
+                self.is_valid = True
+            except Exception:
+                self.is_valid = False
 
+        # color background
+        if self.is_valid:
+            if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
+                self.setStyleSheet(f"background: {self.VALID_COLOR_DARK};")
+            else:
+                self.setStyleSheet(f"background: {self.VALID_COLOR_LIGHT};")
+        else:  # if it does error it's invalid format, thus red
+            self.setStyleSheet(f"background: {self.INVALID_COLOR};")
+
+    def search_query(self, conan_ref: str):
+        if len(conan_ref) < self.MINIMUM_CHARS_FOR_QUERY:  # skip searching for such broad terms
+            return
         # start a query for all similar packages with conan search by starting a new thread for it
-        if not any([entry.startswith(text) for entry in self._remote_refs]) or not self.is_valid:
+        if not any([entry.startswith(conan_ref) for entry in self._remote_refs]) or not self.is_valid:
             if self._completion_thread and self._completion_thread.is_alive():  # one query at a time
                 return
-            self._completion_thread = Thread(target=self.load_completion, args=[text, ])
+            self._completion_thread = Thread(target=self.load_completion, args=[conan_ref, ])
             self._completion_thread.start()
             if self._loading_cbk:
                 self._loading_cbk()

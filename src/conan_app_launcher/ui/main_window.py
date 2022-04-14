@@ -109,19 +109,6 @@ class MainWindow(FluentWindow):
         self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
 
-        # TODO Where to do?
-        # conan_settings_submenu = self.RightSubMenu("Conan")
-        # conan_button = self.add_right_menu_sub_menu(conan_settings_submenu)
-        # conan_button.setIcon(QIcon(str(app.asset_path / "icons/conan.png")))
-        # home_path = QLabel(app.conan_api.conan.config_home(), self)  #
-        # home_path.setWordWrap(True)
-        # home_path.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        # conan_settings_submenu.add_named_custom_entry("Home Path:", home_path)
-
-        # conan_settings_submenu.add_named_custom_entry("Storage Path:", QLabel(app.conan_api.client_cache.store, self))
-        # if platform.system() == "Windows":
-        #     conan_settings_submenu.add_named_custom_entry("Short Path:", QLabel(str(app.conan_api.get_short_path_root()), self))
-
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
         try:
@@ -243,7 +230,6 @@ class MainWindow(FluentWindow):
 
     @pyqtSlot()
     def on_add_link(self):
-        #current_tab = self.app_grid.model.tabs[self.app_grid.tab_widget.currentIndex()]
         tab = self.app_grid.tab_widget.currentWidget()
         tab.app_links[0].open_app_link_add_dialog()
 

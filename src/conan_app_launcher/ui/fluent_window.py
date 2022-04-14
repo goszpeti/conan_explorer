@@ -31,6 +31,10 @@ def gen_obj_name(name: str) -> str:
     """ Generates an object name from a menu title or name (spaces to underscores and lowercase) """
     return name.replace(" ", "_").lower()
 
+class WidgetNotFoundException(Exception):
+    """ Raised, when a widget searched for, ist in the parent container. """
+    pass
+
 
 class ResizeDirection(Enum):
     default = 0
@@ -65,7 +69,7 @@ class SideSubMenu(QWidget, ThemedWidget):
     TOGGLE_WIDTH = 70
     TOGGLE_HEIGHT = 50
 
-    def __init__(self, parent_stacked_widget: QStackedWidget, title: str = "", is_top_level=False, disable_scroll_bar=False):
+    def __init__(self, parent_stacked_widget: QStackedWidget, title: str = "", is_top_level=False):
         QWidget.__init__(self, parent_stacked_widget)
         ThemedWidget.__init__(self)
         from .side_menu_ui import \
@@ -89,7 +93,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         self.ui.side_menu_title_label.setText(title)
 
     def on_expand_minimize(self):
-        """ THe title button can be used to minimize a submenu """
+        """ The title button can be used to minimize a submenu """
         if self.ui.side_menu_content_frame.height() > 0:
             self.ui.side_menu_content_frame.setMaximumHeight(0)
             self.add_themed_icon(self.ui.side_menu_title_button, "icons/forward.png")
@@ -201,13 +205,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
             for _, (_, page, rm) in self._page_widgets.items():
                 if isinstance(page, type):
                     return rm
-            raise Exception(f"{type} not in page_widgets!")
+            raise WidgetNotFoundException(f"{type} not in page_widgets!")
 
         def get_button_by_type(self, type: Type) -> QPushButton:
             for _, (button, page, _) in self._page_widgets.items():
                 if isinstance(page, type):
                     return button
-            raise Exception(f"{type} not in page_widgets!")
+            raise WidgetNotFoundException(f"{type} not in page_widgets!")
 
         T = TypeVar('T')
 
@@ -215,7 +219,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             for _, (_, page, _) in self._page_widgets.items():
                 if isinstance(page, type):
                     return page
-            raise Exception(f"{type} not in page_widgets!")
+            raise WidgetNotFoundException(f"{type} not in page_widgets!")
 
         def get_all_buttons(self):
             buttons = []
@@ -385,8 +389,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.ui.right_menu_top_content_sw.show()
             self.ui.right_menu_top_content_sw.setCurrentWidget(rm)
 
-        # if self.ui.settings_button.isChecked():
-        #    self.toggle_right_menu()
+        if self.ui.settings_button.isChecked():
+           self.toggle_right_menu()
 
     def toggle_left_menu(self):
         width = self.ui.left_menu_frame.width()
@@ -460,9 +464,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
         if self.isMaximized():  # no resize when maximized
             return super().eventFilter(source, event)
         if isinstance(event, QHoverEvent):  # Use isinstance instead of type because of typehinting
-            if event.type() == event.HoverMove:
-                if self._resize_press == 0:
-                    self.handle_resize_cursor(event)  # cursor position control for cursor shape setup
+            if event.type() == event.HoverMove and self._resize_press == 0:
+                self.handle_resize_cursor(event)  # cursor position control for cursor shape setup
         elif isinstance(event, QMouseEvent):
             if event.type() == event.MouseButtonPress:
                 self._resize_press = 1

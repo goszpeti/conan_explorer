@@ -61,7 +61,7 @@ def bug_reporting_dialog(excvalue, tb):
 
 def show_bug_dialog_exc_hook(exctype, excvalue, tb):
     print("Application crashed")
-    error_text = f"ERROR: {excvalue}"
+    error_text = f"ERROR: {str(exctype)} {excvalue}"
     with open(base_path / "crash.log", "w") as fd:
         fd.write(error_text + "\n")
         traceback.print_tb(tb, limit=10, file=fd)

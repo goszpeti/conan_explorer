@@ -174,10 +174,9 @@ class PkgSearchModel(TreeModel):
         item.is_installed = installed
         pkg_items = item.child_items
         for pkg_item in pkg_items:
-            if installed:
-                if pkg_item.pkg_data.get("id", "") == pkg_id:
-                    Logger().debug(f"Set {pkg_id} as install status to {installed}")
-                    pkg_item.is_installed = installed
-                    break
+            if installed and pkg_item.pkg_data.get("id", "") == pkg_id:
+                Logger().debug(f"Set {pkg_id} as install status to {installed}")
+                pkg_item.is_installed = installed
+                break
             if not pkg_id and not installed:  # if ref was removed, all pkgs are deleted too
                 pkg_item.is_installed = installed
