@@ -79,7 +79,7 @@ def test_local_package_explorer(base_fixture, ui_no_refs_config_fixture, qtbot, 
     2. Select a ref, nothing should change.
     3. Expand ref and select the pkg, fileview should open.
     Test context menu functions of Pkg Selection View
-    1. Copy ref - Copy conan reference to clipboard (no pkg id!)  TODO does not work the same as Search Dialog!s
+    1. Copy ref - Copy conan reference to clipboard (no pkg id!)
     2. Open export folder - Opens in file manager
     3. Show Conanfile - Opens in default texteditor
     Test context menu functions of File View

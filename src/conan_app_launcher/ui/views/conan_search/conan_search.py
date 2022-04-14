@@ -65,7 +65,7 @@ class ConanSearchDialog(QDialog):
         self._init_pkg_context_menu()
         self._ui.search_icon.setPixmap(icon.pixmap(20, 20))
 
-    def load(self):  # TODO define interface for entrypoints
+    def load(self):  # TODO define interface for views
         pass
 
     def _enable_search_button(self):

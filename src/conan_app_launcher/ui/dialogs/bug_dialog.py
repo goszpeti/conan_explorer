@@ -8,7 +8,8 @@ import traceback
 
 from conan_app_launcher import REPO_URL, __version__, base_path
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMessageBox
+
+from conan_app_launcher.ui.widgets import MyMessageBox
 
 bug_dialog_text = f"""
 **Describe the bug**
@@ -33,23 +34,6 @@ If applicable, add screenshots to help explain your problem.
 Add any other context about the problem here.
 """
 
-
-class MyMessageBox(QMessageBox):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._width = 150   # default
-
-    def setWidth(self, width):
-        self._width = width
-
-    def resizeEvent(self, event):
-        _result = super().resizeEvent(event)
-
-        self.setFixedWidth(self._width)
-
-        return _result
-
-
 def bug_reporting_dialog(excvalue, tb):
     import urllib.parse  # late import hopefully we don't need this
     error_text = f"{excvalue}\n" + "\n".join(traceback.format_tb(tb, limit=None))
@@ -62,14 +46,14 @@ def bug_reporting_dialog(excvalue, tb):
         To help improve the program, please post a <a href="{new_issue_with_info_text}"> \
         <span style=" text-decoration: underline color:  # 0000ff;" \
         >new github issue</span></a> and describe, how the crash occured.'
-    dialog = MyMessageBox()  # TODO style?
+    dialog = MyMessageBox()
     #dialog.setStyleSheet("QLabel{width: 300px; min-width: 300px; max-width: 300px;text-align:center}")
     dialog.setWindowTitle("Application Crash - Bug Report")
     dialog.setText(html_crash_text)
     dialog.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
     dialog.setDetailedText(error_text)
-    dialog.setStandardButtons(QMessageBox.Ok)
-    dialog.setIcon(QMessageBox.Warning)
+    dialog.setStandardButtons(MyMessageBox.Ok)
+    dialog.setIcon(MyMessageBox.Warning)
     dialog.setWidth(800)
     dialog.exec_()
     return dialog  # for testing

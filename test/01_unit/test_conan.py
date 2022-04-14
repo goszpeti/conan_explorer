@@ -143,7 +143,7 @@ def test_install_with_any_settings(mocker, capfd):
     """
     # mock the remote response
     os.system(f"conan remove {TEST_REF} -f")
-    # TODO: Create the any package
+    # Create the "any" package
     conan = ConanApi()
     assert conan.install_package(
         ConanFileReference.loads(TEST_REF),

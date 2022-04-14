@@ -134,8 +134,8 @@ class AppGridView(QWidget):
             self.model.tabs.remove(self.model.tabs[index])
             self.model.save()
 
-    def get_tabs(self) -> List[TabBase]:  # Union[TabGrid, TabList]
-        return self.tab_widget.findChildren(TabBase) # TODO
+    def get_tabs(self) -> List[Union[TabGrid, TabList]]:
+        return self.tab_widget.findChildren(self.get_tab_type())
 
     def load(self, offset=0):
         """ Creates new layout """

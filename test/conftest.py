@@ -123,10 +123,10 @@ def start_conan_server():
         time.sleep(3)
         print("ADDING CONAN REMOTE")
         os.system("conan remote add local http://127.0.0.1:9300/ false")
-        # add the same remote twice to be able to test multiremote views - TODO does not work
-    #    os.system("conan remote add local2 http://127.0.0.1:9300/ false")
         os.system("conan user demo -r local -p demo")  # todo autogenerate and config
-    #    os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
+        # add the same remote twice to be able to test multiremote views - TODO does not work
+        # os.system("conan remote add local2 http://127.0.0.1:9300/ false")
+        # os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
 
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
@@ -153,7 +153,7 @@ def ConanServer():
 
 
 @pytest.fixture
-def base_fixture(request):  # TODO , autouse=True?
+def base_fixture(request):
     """
     Set up the global variables to be able to start the application.
     Needs to be used, if the tested component uses the global Logger.

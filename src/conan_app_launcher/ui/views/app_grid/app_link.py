@@ -217,7 +217,7 @@ class AppLinkBase(QFrame):
         message_box.setIcon(QMessageBox.Question)
         reply = message_box.exec_()
         if reply == QMessageBox.Yes:
-            self.hide() # TODO call extra function
+            self.hide()
             self.model.parent.apps.remove(self.model)
             self._parent_tab.app_links.remove(self)
 

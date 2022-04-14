@@ -12,9 +12,10 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
+from conan_app_launcher.ui.widgets import MyMessageBox
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QFileDialog
 
 from .common import AsyncLoader, activate_theme
 from .fluent_window import FluentWindow, SideSubMenu
@@ -108,6 +109,7 @@ class MainWindow(FluentWindow):
         self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
 
+        # TODO Where to do?
         # conan_settings_submenu = self.RightSubMenu("Conan")
         # conan_button = self.add_right_menu_sub_menu(conan_settings_submenu)
         # conan_button.setIcon(QIcon(str(app.asset_path / "icons/conan.png")))
@@ -119,7 +121,6 @@ class MainWindow(FluentWindow):
         # conan_settings_submenu.add_named_custom_entry("Storage Path:", QLabel(app.conan_api.client_cache.store, self))
         # if platform.system() == "Windows":
         #     conan_settings_submenu.add_named_custom_entry("Short Path:", QLabel(str(app.conan_api.get_short_path_root()), self))
-        # TODO
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
@@ -210,14 +211,14 @@ class MainWindow(FluentWindow):
         else:
             path_list = paths[0]
 
-        msg = QMessageBox(parent=self)
+        msg = MyMessageBox(parent=self)
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-        msg.setIcon(QMessageBox.Question)
+        msg.setStandardButtons(MyMessageBox.Yes | MyMessageBox.Cancel)
+        msg.setIcon(MyMessageBox.Question)
         reply = msg.exec_()
-        if reply == QMessageBox.Yes:
+        if reply == MyMessageBox.Yes:
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 

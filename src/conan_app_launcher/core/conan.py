@@ -14,7 +14,7 @@ else:
         from typing import TypedDict
     except ImportError:
         from typing_extensions import TypedDict
-
+from conans.errors import ConanException
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.model.ref import ConanFileReference, PackageReference
 from conans.paths.package_layouts.package_editable_layout import \
@@ -157,7 +157,7 @@ class ConanApi():
             if not infos.get("error", True):
                 pkg_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
             return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
-        except Exception as error:
+        except ConanException as error:
             Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return (pkg_id, Path("NULL"))
 
@@ -178,7 +178,7 @@ class ConanApi():
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, package.get("id", "")))
             return True
-        except Exception as error:
+        except ConanException as error:
             Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(error)}")
             return False
 
@@ -322,7 +322,7 @@ class ConanApi():
             if search_results:
                 found_pkgs = search_results[0].get("items")[0].get("packages")
             Logger().debug(str(found_pkgs))
-        except Exception:  # no problem, next # TODO catch correct exception
+        except ConanException:  # no problem, next
             return []
         return found_pkgs
 

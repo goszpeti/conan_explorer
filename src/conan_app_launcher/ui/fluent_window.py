@@ -449,7 +449,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
     def nativeEvent(self, eventType, message):
         """ Platform native events """
-        # TODO crashes on Linux sometimes...
         if self._use_native_windows_fcns:
             msg = MSG.from_address(message.__int__())
             if msg.message == 131:  # ignore WM_NCCALCSIZE event. Suppresses native Window drawing of title-bar.
