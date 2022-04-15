@@ -18,8 +18,8 @@ from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
                              QPushButton, QShortcut, QSizePolicy,
                              QStackedWidget, QVBoxLayout, QWidget)
 
-from .common import get_themed_asset_image
-from .widgets import AnimatedToggle
+from ..common import get_themed_asset_image
+from ..widgets import AnimatedToggle
 
 LEFT_MENU_MIN_WIDTH = 80
 LEFT_MENU_MAX_WIDTH = 300
@@ -30,6 +30,7 @@ RIGHT_MENU_MAX_WIDTH = 300
 def gen_obj_name(name: str) -> str:
     """ Generates an object name from a menu title or name (spaces to underscores and lowercase) """
     return name.replace(" ", "_").lower()
+
 
 class WidgetNotFoundException(Exception):
     """ Raised, when a widget searched for, ist in the parent container. """
@@ -46,8 +47,6 @@ class ResizeDirection(Enum):
     top_right = 6
     bottom_left = 7
     bottom_right = 8
-
-
 class ThemedWidget():
     def __init__(self) -> None:
         self._icon_map: Dict[Union[QPushButton, QLabel], str] = {}  # for re-theming
@@ -72,8 +71,7 @@ class SideSubMenu(QWidget, ThemedWidget):
     def __init__(self, parent_stacked_widget: QStackedWidget, title: str = "", is_top_level=False):
         QWidget.__init__(self, parent_stacked_widget)
         ThemedWidget.__init__(self)
-        from .side_menu_ui import \
-            Ui_SideMenu  # need to resolve circular import
+        from .side_menu_ui import Ui_SideMenu  # need to resolve circular import
         self.ui = Ui_SideMenu()
         self.ui.setupUi(self)
 
@@ -201,45 +199,47 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """
 
         def __init__(self) -> None:
-            self._page_widgets: Dict[str, Tuple[QPushButton, QWidget, Optional[SideSubMenu]]] = {}
-
-        def get_page_by_name(self, name: str) -> QWidget:
-            return self._page_widgets[gen_obj_name(name)][1]
+            self._page_widgets: Dict[str, Tuple[QPushButton, QWidget, Optional[SideSubMenu], str]] = {}
 
         def get_button_by_name(self, name: str) -> QPushButton:
             return self._page_widgets[gen_obj_name(name)][0]
 
+        def get_page_by_name(self, name: str) -> QWidget:
+            return self._page_widgets[gen_obj_name(name)][1]
+
         def get_side_menu_by_name(self, name: str) -> "Optional[SideSubMenu]":
             return self._page_widgets[gen_obj_name(name)][2]
 
+        def get_display_name_by_name(self, name: str) -> str:
+            return self._page_widgets[gen_obj_name(name)][3]
+
         def get_side_menu_by_type(self, type: Type) -> "Optional[SideSubMenu]":
-            for _, (_, page, menu) in self._page_widgets.items():
+            for _, (_, page, menu, _) in self._page_widgets.items():
                 if isinstance(page, type):
                     return menu
             raise WidgetNotFoundException(f"{type} not in page_widgets!")
 
         def get_button_by_type(self, type: Type) -> QPushButton:
-            for _, (button, page, _) in self._page_widgets.items():
+            for _, (button, page, _, _) in self._page_widgets.items():
                 if isinstance(page, type):
                     return button
             raise WidgetNotFoundException(f"{type} not in page_widgets!")
 
         T = TypeVar('T')
-
         def get_page_by_type(self, type: Type[T]) -> T:
-            for _, (_, page, _) in self._page_widgets.items():
+            for _, (_, page, _, _), in self._page_widgets.items():
                 if isinstance(page, type):
                     return page
             raise WidgetNotFoundException(f"{type} not in page_widgets!")
 
         def get_all_buttons(self):
             buttons = []
-            for button, _, _ in self._page_widgets.values():
+            for button, _, _, _ in self._page_widgets.values():
                 buttons.append(button)
             return buttons
 
         def add_new_page(self, name, button, page, right_sub_menu):
-            self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu)
+            self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu, name)
 
     def __init__(self, title_text: str = "", native_windows_fcns=True, rounded_corners=True):
         super().__init__()
@@ -379,8 +379,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def switch_page(self):
         sender_button = self.sender()
         assert isinstance(sender_button, QPushButton), "Switch page can only be triggered from a button!"
-        name = sender_button.objectName()
-        page = self.page_widgets.get_page_by_name(name)
+        obj_name = sender_button.objectName()
+        page = self.page_widgets.get_page_by_name(obj_name)
         # switch page_stacked_widget to the saved page
         self.ui.page_stacked_widget.setCurrentWidget(page)
         # TODO change button stylings - reset old selections and highlight new one
@@ -388,10 +388,10 @@ class FluentWindow(QMainWindow, ThemedWidget):
             button.setChecked(False)
 
         sender_button.setChecked(True)
-        self.ui.page_title.setText(name)
+        self.ui.page_title.setText(self.page_widgets.get_display_name_by_name(obj_name))
         self.ui.page_info_label.setText("")
 
-        side_menu = self.page_widgets.get_side_menu_by_name(name)
+        side_menu = self.page_widgets.get_side_menu_by_name(obj_name)
         if not side_menu:
             # check page settings at minimize if not needed
             self.ui.right_menu_top_content_sw.hide()

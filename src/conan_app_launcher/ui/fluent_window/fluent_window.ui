@@ -76,9 +76,6 @@
      <verstretch>1</verstretch>
     </sizepolicy>
    </property>
-   <property name="styleSheet">
-    <string notr="true"/>
-   </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
      <number>0</number>
@@ -87,10 +84,10 @@
      <number>1</number>
     </property>
     <property name="topMargin">
-     <number>0</number>
+     <number>1</number>
     </property>
     <property name="rightMargin">
-     <number>0</number>
+     <number>1</number>
     </property>
     <property name="bottomMargin">
      <number>1</number>
@@ -111,16 +108,16 @@
       </property>
       <layout class="QGridLayout" name="gridLayout">
        <property name="leftMargin">
-        <number>3</number>
-       </property>
-       <property name="topMargin">
         <number>1</number>
        </property>
-       <property name="rightMargin">
+       <property name="topMargin">
         <number>2</number>
        </property>
+       <property name="rightMargin">
+        <number>1</number>
+       </property>
        <property name="bottomMargin">
-        <number>2</number>
+        <number>1</number>
        </property>
        <property name="spacing">
         <number>0</number>
@@ -138,9 +135,6 @@
            <width>16777215</width>
            <height>70</height>
           </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
          </property>
          <property name="lineWidth">
           <number>0</number>
@@ -370,7 +364,7 @@
            <number>2</number>
           </property>
           <property name="bottomMargin">
-           <number>1</number>
+           <number>0</number>
           </property>
           <item>
            <widget class="QFrame" name="page_frame">
@@ -394,7 +388,7 @@
               <number>0</number>
              </property>
              <property name="bottomMargin">
-              <number>1</number>
+              <number>0</number>
              </property>
              <item>
               <widget class="QSplitter" name="content_footer_splitter">
@@ -434,7 +428,7 @@
                   <enum>QLayout::SetMinAndMaxSize</enum>
                  </property>
                  <property name="leftMargin">
-                  <number>0</number>
+                  <number>2</number>
                  </property>
                  <property name="topMargin">
                   <number>5</number>
@@ -511,9 +505,6 @@
                   <height>500</height>
                  </size>
                 </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
                 <property name="frameShape">
                  <enum>QFrame::NoFrame</enum>
                 </property>
@@ -534,10 +525,10 @@
                   <number>0</number>
                  </property>
                  <property name="rightMargin">
-                  <number>2</number>
+                  <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>2</number>
+                  <number>0</number>
                  </property>
                  <item>
                   <widget class="QTextBrowser" name="console">
@@ -613,9 +604,6 @@ p, li { white-space: pre-wrap; }
               <height>16777215</height>
              </size>
             </property>
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
             <property name="frameShape">
              <enum>QFrame::NoFrame</enum>
             </property>
@@ -623,8 +611,17 @@ p, li { white-space: pre-wrap; }
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_5">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
              <property name="rightMargin">
               <number>4</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
              </property>
              <item>
               <widget class="QScrollArea" name="right_menu_scroll_area">
@@ -655,7 +652,7 @@ p, li { white-space: pre-wrap; }
                   <x>0</x>
                   <y>0</y>
                   <width>97</width>
-                  <height>717</height>
+                  <height>735</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -868,9 +865,6 @@ border-top-left-radius: 5px;
           </property>
           <item>
            <widget class="QFrame" name="left_menu_top_subframe">
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
             <property name="frameShape">
              <enum>QFrame::NoFrame</enum>
             </property>
