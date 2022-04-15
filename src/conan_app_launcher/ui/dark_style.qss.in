@@ -249,7 +249,9 @@ QDialog{
 QDialog::title {
     background-color: #696969;
 }
-
+QDialog::title {
+    background-color: #696969;
+}
 
 QTabWidget{
     background-color: #5c5c5c;
@@ -439,6 +441,7 @@ QSplitter::handle {
 QSplitter::handle:horizontal {
     width: 4px;
 }
+
 QSplitter::handle:vertical {
     height: 4px;
 }
