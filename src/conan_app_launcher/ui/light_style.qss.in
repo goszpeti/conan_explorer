@@ -219,6 +219,11 @@ QFrame#right_menu_frame QPushButton:checked{
     background-color: #A8A8A8;
 }
 
+QLabel#side_menu_title_label {
+    font: bold;
+    font-size: {{MAIN_FONT_SIZE + 1}}pt;
+}
+
 /* Generic widgets */
 
 QMainWindow{

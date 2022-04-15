@@ -136,7 +136,6 @@ TabScrollAreaWidgets {
 AppLinkBase {
     /* background-color: #353839; */
     background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #5a88b6, stop:1 #6699CC);
-    ;
     border-radius: 7px;
 }
 
@@ -231,6 +230,13 @@ QFrame#right_menu_frame QPushButton:checked{
     background-color: #696969;
 }
 
+QLabel#side_menu_title_label {
+    font: bold;
+    font-size: {{MAIN_FONT_SIZE + 1}}pt;
+}
+
+
+
 
 /* Generic widgets */
 
@@ -243,7 +249,9 @@ QDialog{
 QDialog::title {
     background-color: #696969;
 }
-
+QDialog::title {
+    background-color: #696969;
+}
 
 QTabWidget{
     background-color: #5c5c5c;
@@ -433,6 +441,7 @@ QSplitter::handle {
 QSplitter::handle:horizontal {
     width: 4px;
 }
+
 QSplitter::handle:vertical {
     height: 4px;
 }
