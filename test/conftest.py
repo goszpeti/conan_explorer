@@ -173,6 +173,7 @@ def base_fixture(request):
     """
     paths = PathSetup()
     os.environ["CONAN_REVISIONS_ENABLED"] = "1"
+    os.environ["DISABLE_ASYNC_LOADER"] = "True" # for code coverage to work
     import conan_app_launcher.app as app
 
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)

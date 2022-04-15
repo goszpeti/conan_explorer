@@ -124,7 +124,6 @@ class ConanSearchDialog(QDialog):
         # and not be able to emit to the GUI thread.
         if not self._ui.search_button.isEnabled():
             return
-
         self._pkg_result_model = PkgSearchModel(self.conan_pkg_installed, self.conan_pkg_removed)
         self._pkg_result_loader.async_loading(
             self, self._load_search_model, (), self._finish_load_search_model, "Searching for packages...")

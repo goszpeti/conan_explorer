@@ -1,5 +1,6 @@
 """ Common ui classes, and functions """
 
+import os
 from typing import Any, Callable, Optional, Tuple
 
 from conan_app_launcher import DEBUG_LEVEL
@@ -52,6 +53,14 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog.setRange(0, 0)
         self.progress_dialog.setMinimumDuration(1000)
         self.progress_dialog.show()
+
+        if bool(os.getenv("DISABLE_ASYNC_LOADER")):
+            work_task(*worker_args)
+            self.thread_finished()
+            self.progress_dialog.hide()
+            if finish_task:
+                finish_task()
+            return
 
         self.worker = Worker(work_task, worker_args)
         self.load_thread = QtCore.QThread()

@@ -2,17 +2,13 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
-import os
-import sys
-import traceback
 from test.conftest import TEST_REF
-from time import sleep
 
 import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
 from conan_app_launcher.ui.main_window import MainWindow
 from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 
 Qt = QtCore.Qt
 
@@ -29,14 +25,13 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     - Show conanfile call
     - Show in Local Package Explorer
     """
+    from pytestqt.plugin import _qapp_instance
     cfr = ConanFileReference.loads(TEST_REF)
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     from pytestqt.plugin import _qapp_instance
     main_window = MainWindow(_qapp_instance)
-    search_dialog = main_window.search_dialog  # ConanSearchDialog(root_obj, main_window.conan_pkg_installed,
-    # main_window.conan_pkg_removed, main_window.page_widgets)
-
+    search_dialog = main_window.search_dialog
     qtbot.addWidget(main_window)
     main_window.show()
     qtbot.waitExposed(main_window)
