@@ -5,8 +5,10 @@ No imports from own modules allowed! This is done to resolve circular dependenci
 import os
 try: # from Python 3.8
     from importlib.metadata import distribution
+    from importlib.metadata import PackageNotFoundError
 except ImportError:
     from importlib_metadata import distribution
+    from importlib_metadata import PackageNotFoundError
 
 from pathlib import Path
 from typing import TypeVar
@@ -17,10 +19,16 @@ PathLike = TypeVar("PathLike", str, Path)
 
 # load metadata from package info - needs to be installed as editable in dev mode!
 PKG_NAME = "conan_app_launcher"
-pkg_info = distribution(PKG_NAME)
-__version__ = pkg_info.version
-REPO_URL = pkg_info.metadata.get("home-page", "")
-AUTHOR = pkg_info.metadata.get("author", "")
+try:
+    pkg_info = distribution(PKG_NAME)
+    __version__ = pkg_info.version
+    REPO_URL = pkg_info.metadata.get("home-page", "")
+    AUTHOR = pkg_info.metadata.get("author", "")
+except PackageNotFoundError: # pragma: no cover
+    # For local usecases, when there is no distribution
+    __version__ = "1.0.0"
+    REPO_URL = ""
+    AUTHOR = ""
 
 ICON_SIZE = 64 # Icon size (width and height) in pixels on an Applink
 INVALID_CONAN_REF = "Invalid/NA@NA/NA" # used to indicate a conan reference is invalid
@@ -29,8 +37,6 @@ DEFAULT_UI_CFG_FILE_NAME = "cal_ui.json"  # for legacy 0.X support
 CONAN_LOG_PREFIX = "CONAN: " # logger uses this to indicate a log comes from Conan
 
 # Feature flags
-ADD_TAB_BUTTON = False # a fixed "Add tab" button on the AppGrid
-ADD_APP_LINK_BUTTON = False  # a fixed "Add AppLink" button on the AppGrid
 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True # get versions directly from the custom cache
 USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH = True  # get pkg paths directly from the custom cache
 # use conan worker to also search for the package path - works in a addition to USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH and also installs

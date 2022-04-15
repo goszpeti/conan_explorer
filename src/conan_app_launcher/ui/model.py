@@ -6,7 +6,7 @@ from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, user_save_path)
 from conan_app_launcher.settings import LAST_CONFIG_FILE
 from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiConfig,
                                         ui_config_factory, UiConfigInterface)
-from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
+from .views.app_grid.model import UiAppGridModel
 
 
 class UiApplicationModel(UiConfig):
@@ -33,9 +33,14 @@ class UiApplicationModel(UiConfig):
         self.app_grid.load(ui_config.app_grid, self)
         if app.conan_worker:
             app.conan_worker.finish_working(3)
-            app.conan_worker.update_all_info(self.app_grid.get_all_conan_worker_elements(), self.conan_pkg_installed)
-    
+            app.conan_worker.update_all_info(self.app_grid.get_all_conan_worker_elements(), self.emit_conan_pkg_signal_callback)
+
         return self
+
+    def emit_conan_pkg_signal_callback(self, conan_ref, pkg_id):
+        if not self.conan_pkg_installed:
+            return
+        self.conan_pkg_installed.emit(conan_ref, pkg_id)
 
     def loadf(self, config_source: str) -> "UiApplicationModel":
         """ Load model and submodels from specified file source """

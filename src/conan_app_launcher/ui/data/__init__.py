@@ -28,7 +28,7 @@ class UiAppLinkConfig():
 @dataclass
 class UiTabConfig():
     name: str = "New Tab"
-    # TODO: The Union is a workaround. How to say, that this is the base class?
+    # The Union is a workaround. How to say, that this is the base class?
     apps: List[Union[UiAppLinkConfig, "UiAppLinkModel"]] = field(default_factory=list)
 
     def __post_init__(self):
@@ -38,7 +38,7 @@ class UiTabConfig():
 
 @dataclass
 class UiAppGridConfig():
-    # TODO: The Union is a workaround. How to say, that this is the base class?
+    # The Union is a workaround. How to say, that this is the base class?
     tabs: List[Union[UiTabConfig, "UiTabModel"]] = field(default_factory=list)
 
     def __post_init__(self):

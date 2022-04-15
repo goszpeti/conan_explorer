@@ -142,6 +142,7 @@ jobs:
             -Dsonar.organization=goszpeti
             -Dsonar.projectKey=goszpeti_conan_app_launcher
             -Dsonar.sources=./src
+            -Dsonar.exclusions=**/*_ui.py
             -Dsonar.tests=./test
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.python.version=3.6,3.7,3.8,3.9

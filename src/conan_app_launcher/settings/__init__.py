@@ -13,6 +13,8 @@ LAST_CONFIG_FILE = "last_config_file"
 DISPLAY_APP_VERSIONS = "disp_app_versions"
 DISPLAY_APP_USERS = "disp_app_users"
 DISPLAY_APP_CHANNELS = "disp_app_channels"
+APPLIST_ENABLED = "enable_app_list"
+
 # enable combobox for app user/channel/version
 ENABLE_APP_COMBO_BOXES = "enable_app_link_combo_boxes"
 FONT_SIZE = "font_size"
@@ -23,7 +25,7 @@ GUI_STYLE_LIGHT = "light"
 
 # Implementation types fro factory
 SETTINGS_INI_TYPE = "ini"
-SETTINGS_QT_TYPE = "qt"  # TODO try this out, see issue #56
+SETTINGS_QT_TYPE = "qt"  # Try this out, see issue #56
 
 
 def settings_factory(type: str, source: PathLike) -> "SettingsInterface":

@@ -1,18 +1,15 @@
 from typing import Dict, List, Optional, Union
 
 import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.logger import Logger
-from conan_app_launcher.ui.common.icon import (get_platform_icon,
-                                               get_themed_asset_image)
-from conan_app_launcher.ui.common.model import TreeModel, TreeModelItem
+from conan_app_launcher.ui.common import (TreeModel, TreeModelItem,
+                                          get_platform_icon,
+                                          get_themed_asset_image)
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import pyqtSlot
-
-Qt = QtCore.Qt
-
+from PyQt5.QtCore import Qt, pyqtSlot
 
 REF_TYPE = 0
 PROFILE_TYPE = 1
@@ -170,14 +167,16 @@ class PkgSearchModel(TreeModel):
     def mark_pkg_as_not_installed(self, conan_ref: str, pkg_id: str):
         self._set_pkg_install_status(conan_ref, pkg_id, False)
 
-    def _set_pkg_install_status(self, conan_ref: str, pkg_id: str, status: bool):
+    def _set_pkg_install_status(self, conan_ref: str, pkg_id: str, installed: bool):
         item = self.get_item_from_ref(conan_ref)
         if not item:
             return
-        item.is_installed = status
+        item.is_installed = installed
         pkg_items = item.child_items
         for pkg_item in pkg_items:
-            if pkg_item.pkg_data.get("id", "") == pkg_id:
-                Logger().debug(f"Set {pkg_id} as install status to {status}")
-                pkg_item.is_installed = status
+            if installed and pkg_item.pkg_data.get("id", "") == pkg_id:
+                Logger().debug(f"Set {pkg_id} as install status to {installed}")
+                pkg_item.is_installed = installed
                 break
+            if not pkg_id and not installed:  # if ref was removed, all pkgs are deleted too
+                pkg_item.is_installed = installed

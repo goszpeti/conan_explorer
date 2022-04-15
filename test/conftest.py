@@ -13,7 +13,7 @@ from subprocess import CalledProcessError, check_output
 from threading import Thread
 from unittest import mock
 
-import conan_app_launcher.logger as logger
+import conan_app_launcher.app.logger as logger
 import psutil
 import pytest
 from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path
@@ -32,6 +32,18 @@ SKIP_CREATE_CONAN_TEST_DATA = strtobool(os.getenv("SKIP_CREATE_CONAN_TEST_DATA",
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
 
+
+def is_ci_job():
+    if os.getenv("GITHUB_WORKSPACE"):
+        return True
+    return False
+
+def get_window_pid(title):
+    import win32process
+    import win32gui
+    hwnd = win32gui.FindWindow(None, title)
+    _, pid = win32process.GetWindowThreadProcessId(hwnd)
+    return pid
 
 class PathSetup():
     """ Get the important paths form the source repo. """
@@ -123,10 +135,10 @@ def start_conan_server():
         time.sleep(3)
         print("ADDING CONAN REMOTE")
         os.system("conan remote add local http://127.0.0.1:9300/ false")
-        # add the same remote twice to be able to test multiremote views - TODO does not work
-    #    os.system("conan remote add local2 http://127.0.0.1:9300/ false")
         os.system("conan user demo -r local -p demo")  # todo autogenerate and config
-    #    os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
+        # add the same remote twice to be able to test multiremote views - TODO does not work
+        # os.system("conan remote add local2 http://127.0.0.1:9300/ false")
+        # os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
 
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
@@ -153,7 +165,7 @@ def ConanServer():
 
 
 @pytest.fixture
-def base_fixture(request):  # TODO , autouse=True?
+def base_fixture(request):
     """
     Set up the global variables to be able to start the application.
     Needs to be used, if the tested component uses the global Logger.
@@ -178,10 +190,13 @@ def base_fixture(request):  # TODO , autouse=True?
 
     # delete cache file
     if (base_path / ConanInfoCache.CACHE_FILE_NAME).exists():
-        os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
+        try:
+            os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
+        except PermissionError: # just Windows things...
+            time.sleep(5)
+            os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
 
     # reset singletons
-    #logger.Logger._instance = None
     app.conan_worker = None
     app.conan_api = None
     app.active_settings = None

@@ -12,10 +12,13 @@ from shutil import rmtree
 from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, app, user_save_path
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanCleanup
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
+from conan_app_launcher.ui.widgets import AnimatedToggle
+from conan_app_launcher.ui.views.about_page import AboutPage
 from conan_app_launcher.ui.views.app_grid.tab import TabGrid
+
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
@@ -44,7 +47,7 @@ def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
     qtbot.waitExposed(main_gui, timeout=3000)
 
     # TEST EVALUATION
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.findChildren(TabGrid):
         assert tab.model.name == "New Tab"
         for test_app in tab.app_links:
             assert test_app.model.name == "New App"
@@ -67,13 +70,11 @@ def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixt
     qtbot.waitExposed(main_gui, timeout=3000)
 
     # TEST ACTION
-    main_gui.ui.menu_about_action.trigger()
+    main_gui.page_widgets.get_button_by_type(AboutPage).click()
     time.sleep(3)
-    assert main_gui._about_dialog.isEnabled()
-    qtbot.mouseClick(main_gui._about_dialog._button_box.buttons()[0], Qt.LeftButton)
 
     # TEST EVALUATION
-    assert main_gui._about_dialog.isHidden()
+    assert main_gui.about_page.isVisible()
 
     Logger.remove_qt_logger()
 
@@ -99,7 +100,7 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
                         return_value=QtWidgets.QDialog.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[selection])
-    main_gui.ui.menu_open_config_file.trigger()
+    main_gui.page_widgets.get_side_menu_by_type(type(main_gui.app_grid)).get_menu_entry_by_name("Open Layout File").click()
 
     # TEST EVALUATION
     time.sleep(3)
@@ -169,7 +170,8 @@ def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker)
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
 
-    main_gui.ui.menu_cleanup_cache.trigger()
+    button: QtWidgets.QPushButton = main_gui.main_general_settings_menu.get_menu_entry_by_name("Clean Conan Cache")
+    button.click()
     time.sleep(3)
 
     # TEST EVALUATION
@@ -194,7 +196,7 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
     qtbot.waitExposed(main_gui, timeout=3000)
 
     tabs_num = 2  # two tabs in this file
-    assert main_gui.ui.tab_bar.count() == tabs_num
+    assert main_gui.app_grid.tab_widget.tabBar().count() == tabs_num
     time.sleep(5)
 
     app.conan_worker.finish_working(10)
@@ -203,7 +205,7 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
 
     # TEST EVALUATION
     time.sleep(5)
-    assert main_gui.ui.tab_bar.count() == tabs_num
+    assert main_gui.app_grid.tab_widget.tabBar().count() == tabs_num
 
 
 def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
@@ -226,16 +228,20 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
 
     # TEST ACTION and EVALUATION
     # assert default state
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()
             assert test_app._app_channel_cbox.isHidden()
 
     # click VERSIONS
-    main_gui.ui.menu_toggle_display_versions.trigger()
+    menu_entry = main_gui.page_widgets.get_side_menu_by_type(
+        type(main_gui.app_grid))
+    assert menu_entry
+    version_toggle: AnimatedToggle = menu_entry.get_menu_entry_by_name("show_version_widget")
+    version_toggle.setChecked(True)
     time.sleep(1)
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()
@@ -249,30 +255,32 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     assert app.active_settings.get(DISPLAY_APP_VERSIONS)
 
     # click CHANNELS
-    main_gui.ui.menu_toggle_display_channels.trigger()
+    channel_toggle: AnimatedToggle = menu_entry.get_menu_entry_by_name("show_channel_widget")
+    channel_toggle.setChecked(True)
     time.sleep(1)
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
     # click USERS
-    main_gui.ui.menu_toggle_display_users.trigger()
+    user_toggle: AnimatedToggle = menu_entry.get_menu_entry_by_name("show_user_widget")
+    user_toggle.setChecked(True)
     time.sleep(1)
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert not test_app._app_version_cbox.isHidden()
             assert not test_app._app_user_cbox.isHidden()
             assert not test_app._app_channel_cbox.isHidden()
 
     # click again
-    main_gui.ui.menu_toggle_display_versions.trigger()
-    main_gui.ui.menu_toggle_display_channels.trigger()
-    main_gui.ui.menu_toggle_display_users.trigger()
+    version_toggle.setChecked(False)
+    channel_toggle.setChecked(False)
+    user_toggle.setChecked(False)
     time.sleep(1)
 
-    for tab in main_gui.ui.tab_bar.findChildren(TabGrid):
+    for tab in main_gui.app_grid.tab_widget.tabBar().findChildren(TabGrid):
         for test_app in tab.app_links:
             assert test_app._app_version_cbox.isHidden()
             assert test_app._app_user_cbox.isHidden()

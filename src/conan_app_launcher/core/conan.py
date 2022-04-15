@@ -14,7 +14,7 @@ else:
         from typing import TypedDict
     except ImportError:
         from typing_extensions import TypedDict
-
+from conans.errors import ConanException
 from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
 from conans.model.ref import ConanFileReference, PackageReference
 from conans.paths.package_layouts.package_editable_layout import \
@@ -28,7 +28,7 @@ except Exception:
 
 from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path)
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 
 from .conan_cache import ConanInfoCache
 
@@ -134,7 +134,7 @@ class ConanApi():
         return Path("NULL")
 
     def get_conanfile_path(self, conan_ref: ConanFileReference) -> Path:
-        if not conan_ref in self.get_all_local_refs():
+        if conan_ref not in self.get_all_local_refs():
             self.conan.info(self.generate_canonical_ref(conan_ref))
         layout = self.client_cache.package_layout(conan_ref)
         if layout:
@@ -157,7 +157,7 @@ class ConanApi():
             if not infos.get("error", True):
                 pkg_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
             return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
-        except Exception as error:
+        except ConanException as error:
             Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return (pkg_id, Path("NULL"))
 
@@ -178,7 +178,7 @@ class ConanApi():
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, package.get("id", "")))
             return True
-        except Exception as error:
+        except ConanException as error:
             Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(error)}")
             return False
 
@@ -322,7 +322,7 @@ class ConanApi():
             if search_results:
                 found_pkgs = search_results[0].get("items")[0].get("packages")
             Logger().debug(str(found_pkgs))
-        except Exception:  # no problem, next # TODO catch correct exception
+        except ConanException:  # no problem, next
             return []
         return found_pkgs
 
@@ -489,7 +489,7 @@ class ConanCleanup():
     def get_cleanup_cache_paths(self) -> List[str]:
         """ Get a list of orphaned short path and cache folders """
         # Blessed are the users Microsoft products!
-        if not platform.system() == "Windows":
+        if platform.system() != "Windows":
             return []
         return self.get_orphaned_references() + self.get_orphaned_packages()
 

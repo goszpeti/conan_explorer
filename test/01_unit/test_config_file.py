@@ -43,7 +43,7 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
 
     assert tabs[1].name == "Extra"
     tab1_entries = tabs[1].apps
-    assert tab1_entries[0].conan_ref == "app2/1.0.0@user/stable"
+    assert tab1_entries[0].conan_ref == "example/1.0.0@_/_"
     assert tab1_entries[0].executable == "bin/app2.exe"
     assert tab1_entries[0].icon == "//myicon.png"
     assert tab1_entries[0].name == "App2"

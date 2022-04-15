@@ -1,21 +1,19 @@
+import imp
 import pprint
 from typing import List, Union
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.ui.common.icon import (get_platform_icon,
-                                               get_themed_asset_image)
-from conan_app_launcher.ui.common.model import TreeModel, TreeModelItem
-from PyQt5 import QtCore, QtGui
-
-Qt = QtCore.Qt
+from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_image, TreeModel, TreeModelItem
+from PyQt5.QtCore import QSortFilterProxyModel, Qt, QModelIndex
+from PyQt5.QtGui import QIcon
 
 REF_TYPE = 0
 PROFILE_TYPE = 1
 
 
-class PackageFilter(QtCore.QSortFilterProxyModel):
+class PackageFilter(QSortFilterProxyModel):
     """ Filter packages but always showing the parent (ref) of the packages """
 
     def __init__(self):
@@ -23,7 +21,7 @@ class PackageFilter(QtCore.QSortFilterProxyModel):
         self.setFilterKeyColumn(0)
 
     def filterAcceptsRow(self, row_num, source_parent):
-        ''' Overriding the parent function '''
+        """ Overriding the parent function """
 
         # Check if the current row matches
         if self.filter_accepts_row_itself(row_num, source_parent):
@@ -92,7 +90,7 @@ class PkgSelectModel(TreeModel):
                 conan_item.append_child(pkg_item)
             self.root_item.append_child(conan_item)
 
-    def data(self, index: QtCore.QModelIndex, role):  # override
+    def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
             return None
         item: PackageTreeItem = index.internalPointer()
@@ -103,7 +101,7 @@ class PkgSelectModel(TreeModel):
                 return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
         if role == Qt.DecorationRole:
             if item.type == REF_TYPE:
-                return QtGui.QIcon(get_themed_asset_image("icons/package.png"))
+                return QIcon(get_themed_asset_image("icons/package.png"))
             if item.type == PROFILE_TYPE:
                 profile_name = self.get_quick_profile_name(item)
                 return get_platform_icon(profile_name)

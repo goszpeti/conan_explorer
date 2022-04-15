@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 from conan_app_launcher import INVALID_CONAN_REF
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
 from conans.model.ref import ConanFileReference
 
 
@@ -142,7 +142,7 @@ class ConanInfoCache():
             version_channels.remove(f"{conan_ref.version}/{conan_ref.channel}")
             self._save()
 
-    def update_remote_package_list(self, remote_packages=List[ConanFileReference], invalidate=False):
+    def update_remote_package_list(self, remote_packages: List[ConanFileReference]=[], invalidate=False):
         """
         Update the cache with the info of several remote packages. 
         Invalidate option clears the cache.
@@ -159,7 +159,7 @@ class ConanInfoCache():
                 channel = "_"
             current_version_channel = f"{ref.version}/{channel}"
             version_channels = set(self._remote_packages.get(ref.name, {}).get(user, []))
-            if not current_version_channel in version_channels:
+            if current_version_channel not in version_channels:
                 version_channels.add(current_version_channel)
                 version_channels_list = list(version_channels)
                 if not self._remote_packages.get(ref.name):

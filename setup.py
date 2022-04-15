@@ -21,6 +21,7 @@ PYTHON_REQUIRES = ">=3.6.0"  # still support Ubuntu 18
 
 # What packages are required for this module to be executed?
 REQUIRES = [
+    'PyQt5-sip==12.9.1 ; python_version<"3.7"',
     "PyQt5>=5.13.0",  # GPLv3 (Windows and Ubuntu 20.04 use 5.14 minimally)
     "conan>=1.24, <2",  # MIT License
     "jsonschema>=3.2.0",  # MIT License
@@ -36,7 +37,8 @@ TEST_REQUIRES = [
     "pytest-cov==3.0.0",
     "pytest-mock==3.6.1",
     "pytest-qt==4.0.2",
-    "psutil"
+    "psutil",
+    "pywin32; sys_platform=='win32'"
 ]
 
 DEV_REQUIRES = [
@@ -118,7 +120,6 @@ setup(
     entry_points={
         "gui_scripts": [
             "conan_app_launcher=conan_app_launcher.__main__:run_conan_app_launcher",
-            "conan_searcher=conan_app_launcher.__main__:run_conan_searcher"
         ]
     },
 )

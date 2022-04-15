@@ -2,11 +2,20 @@ import os
 import platform
 import shutil
 import subprocess
+from distutils import version
 from pathlib import Path
 from typing import List
 
-from conan_app_launcher.logger import Logger
+from conan_app_launcher.app.logger import Logger
+
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
+
+
+def is_windows_11():
+    """ main version number is still 10 - thanks MS! """
+    if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
+        return True
+    return False
 
 def run_file(file_path: Path, is_console_app: bool, args: str):
     """ Decide, if a file should be opened or executed and call the appropriate method """
@@ -27,11 +36,10 @@ def open_in_file_manager(file_path: Path):
         # no standardized select functionailty.
         # However xdg-open on a dir will open the folder in the default file explorer.
         dir_to_view = file_path.parent if file_path.is_file() else file_path
-        subprocess.call(("xdg-open", str(dir_to_view)))
+        return subprocess.Popen(("xdg-open", str(dir_to_view)))
     elif platform.system() == "Windows":
         # select switch for highlighting
-        # TODO: spawns an empty visible shell on some/slower? systems
-        subprocess.call("explorer /select," + str(file_path))
+        return subprocess.Popen("explorer /select," + str(file_path), creationflags=subprocess.CREATE_NO_WINDOW)
 
 
 def open_cmd_in_path(file_path: Path) -> int:

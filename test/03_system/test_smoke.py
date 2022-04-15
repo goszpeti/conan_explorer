@@ -4,16 +4,17 @@ Because the unit tests use qtbot helper, a QApplication object is already presen
 and it cannot be instatiated anew with the main loop of the program.
 """
 import os
-import sys
 import time
 from pathlib import Path
 from subprocess import Popen
-
+import platform
 import conan_app_launcher
 from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
                                          settings_factory)
 from PyQt5 import QtWidgets
 
+from test.conftest import check_if_process_running
+import psutil
 
 def test_main_loop_mock(base_fixture, mocker):
     """
@@ -37,7 +38,7 @@ def test_main_loop(base_fixture):
     """
     Smoke test, that the application can start.
     No error expected.
-    TODO: Start the actual executable, to test, that the entrypoints are correctly specified.
+    Start the actual executable, to test, that the entrypoints are correctly specified.
     """
 
     settings_file_path = Path.home() / conan_app_launcher.SETTINGS_FILE_NAME
@@ -47,13 +48,25 @@ def test_main_loop(base_fixture):
     settings.save()
 
     # conan_app_launcher
-    proc = Popen([sys.executable, "-m", "conan_app_launcher"])
-    time.sleep(7)
+    Popen(["conan_app_launcher"])
+
+    time.sleep(4)
     try:
-        assert proc.poll() is None
-        proc.terminate()
-        time.sleep(3)
-        assert proc.poll() != 0  # terminate exits os dependently, but never with success (0)
+        found_process = False
+        for process in psutil.process_iter():
+            if platform.system() == "Windows":
+                script = "Scripts\\conan_app_launcher-script.pyw"
+            else:
+                script = "bin/conan_app_launcher" # TODO
+            try:
+                if process.cmdline() and "python" in process.cmdline()[0].lower() and script in process.cmdline()[1]:
+                    found_process = True
+                    process.kill()
+                    break
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        time.sleep(2)
+        assert found_process
     finally:
         # delete config file
         os.remove(str(settings_file_path))

@@ -1,4 +1,5 @@
 import platform
+
 from pathlib import Path
 from typing import Callable, List, Optional
 
@@ -7,25 +8,19 @@ from conan_app_launcher import (
     INVALID_CONAN_REF, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
     USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
-from conan_app_launcher.logger import Logger
-from conan_app_launcher.ui.common.icon import (extract_icon,
-                                               get_icon_from_image_file,
-                                               get_themed_asset_image)
-from conan_app_launcher.ui.data import (UiAppGridConfig, UiAppLinkConfig,
-                                        UiTabConfig)
+from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_image
+from conan_app_launcher.ui.data import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore
-from PyQt5.QtCore import QAbstractListModel, QModelIndex
+
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
 from PyQt5.QtGui import QIcon
 
-Qt = QtCore.Qt
-
-
-class UiAppGridModel(UiAppGridConfig, QtCore.QObject):
+class UiAppGridModel(UiAppGridConfig, QObject):
 
     def __init__(self, *args, **kwargs):
         UiAppGridConfig.__init__(self, *args, **kwargs)
-        QtCore.QObject.__init__(self)
+        QObject.__init__(self)
         self.tabs: List[UiTabModel]
 
     def save(self):
@@ -35,10 +30,6 @@ class UiAppGridModel(UiAppGridConfig, QtCore.QObject):
     def load(self, ui_config: UiAppGridConfig, parent) -> "UiAppGridModel":
         super().__init__(ui_config.tabs)
         self.parent = parent
-        # add default tab and link
-        # if not ui_config.tabs:
-        #     ui_config.tabs.append(UiTabConfig())
-        #     ui_config.tabs[0].apps.append(UiAppLinkConfig())
         # load all submodels
         tabs_model = []
         for tab_config in self.tabs:
@@ -200,13 +191,18 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             conan_worker_element: ConanWorkerElement = {"ref_pkg_id": str(self._conan_ref), "settings": {},
                                                         "options": self.conan_options, "update": True, "auto_install": True}
-            app.conan_worker.put_ref_in_install_queue(  # TODO pass down directly?
-                conan_worker_element, self.parent.parent.parent.conan_pkg_installed)
+            app.conan_worker.put_ref_in_install_queue(
+                conan_worker_element, self.emit_conan_pkg_signal_callback)
             app.conan_worker.put_ref_in_version_queue(
-                conan_worker_element,  self.parent.parent.parent.conan_pkg_installed)
+                conan_worker_element,  self.emit_conan_pkg_signal_callback)
         except Exception as error:
             # errors happen fairly often, keep going
             Logger().warning(f"Conan reference invalid {str(error)}")
+
+    def emit_conan_pkg_signal_callback(self, conan_ref, pkg_id):
+        if not self.parent.parent.parent.conan_pkg_installed:
+            return
+        self.parent.parent.parent.conan_pkg_installed.emit(conan_ref, pkg_id)
 
     @property
     def version(self) -> str:
@@ -315,7 +311,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def get_executable_path(self) -> Path:
         if not self._executable or not self.package_folder.exists():
-            # Logger().debug(f"No file/executable specified for {str(self.name)}")
+            Logger().debug(f"No file/executable specified for {str(self.name)}")
             return Path("NULL")
         path = Path(self._executable)
         full_path = self.resolve_executable_path(path)
@@ -323,23 +319,27 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         return self._executable_path
 
-    def resolve_executable_path(self, exe_rel_path: Path):
+    def resolve_executable_path(self, exe_rel_path: Path) -> Path:
         # adjust path on windows, if no file extension is given
-        possible_matches = self.package_folder.glob(str(exe_rel_path) + "*")
-        match_found = False
-        try:
-            for match in possible_matches:
-                # don't allow for ambiguity!
-                if match_found:
-                    Logger().error(f"Multiple candidates found for {exe_rel_path}")
-                match_found = True
-                return match
-            if not match_found:
-                Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
-        except NotImplementedError:
-            Logger().error(f"Absolute path not allowed!")
-
-        return Path("NULL")
+        if platform.system() == "Windows":
+            possible_matches = self.package_folder.glob(str(exe_rel_path) + "*")
+            match_found = False
+            match = Path("NULL")
+            try:
+                for match in possible_matches:
+                    # don't allow for ambiguity!
+                    if match_found:
+                        Logger().error(f"Multiple candidates found for {exe_rel_path}")
+                    match_found = True
+                if not match_found:
+                    Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
+                else:
+                    return match
+            except NotImplementedError:
+                Logger().error(f"Absolute path not allowed!")
+            return Path("NULL")
+        else:
+            return self.package_folder / exe_rel_path
 
     @property
     def icon(self) -> str:
