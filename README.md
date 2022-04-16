@@ -29,8 +29,9 @@ It is end-user oriented and focuses on using packages, rather then developing th
 - integrated console for information an packages and config file
 - installable with pip
 
-App Grid
+Quicklaunch
 - configurable layout (tabs and applications) in the GUI
+- list and grid view
 - can also open files with their associated default program
 - installs all referenced packages automatically
 - automatic conan settings resolution for your platform
@@ -42,7 +43,7 @@ Local Package Explorer
 - understand package settings at a glance from a shortened representation, e.g. Linux_x64_ggc7
 - supports copy/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan workflow
 
-Conan Search View
+Conan Search
 - search for references in selected remotes
 - show all existing packages for a reference and their infos
 - install package directly via right-click menu
@@ -63,8 +64,6 @@ Currently testing and compatibility is only endured for Debian based distros, sp
 3. To open files with its associated program xdg-open is used:
 
     sudo apt install xdg-utils
-
-Ubuntu 16.04 is not supported due to its native Python version (3.5).
 
 
 ### With pip from PyPi
