@@ -429,8 +429,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
         # hide menu button texts
         # name, (button, _) in self.page_entries.items():
         for button in self.ui.left_menu_middle_subframe.findChildren(QPushButton):
+            name = self.page_widgets.get_display_name_by_name(button.objectName())
             if maximize:
-                button.setText(button.objectName())
+                button.setText(name)
                 button.setStyleSheet("text-align:left;")
             else:
                 button.setText("")
