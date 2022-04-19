@@ -11,7 +11,7 @@ from test.conftest import get_window_pid, is_ci_job
 
 import conan_app_launcher  # for mocker
 import psutil
-from conan_app_launcher.core.file_runner import (execute_app, open_file,
+from conan_app_launcher.core.system import (execute_app, open_file,
                                                  open_in_file_manager,
                                                  run_file)
 
