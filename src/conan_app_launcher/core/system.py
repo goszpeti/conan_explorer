@@ -44,8 +44,8 @@ def open_in_file_manager(file_path: Path):
         # select switch for highlighting
         creationflags = 0
         if version.StrictVersion(platform.python_version()) > "3.6":
-            creationflags = subprocess.CREATE_NO_WINDOW
-        return subprocess.Popen("explorer /select," + str(file_path), creationflags)
+            creationflags = subprocess.CREATE_NO_WINDOW # available since 3.7
+        return subprocess.Popen("explorer /select," + str(file_path), creationflags=creationflags)
 
 
 def open_cmd_in_path(file_path: Path) -> int:
