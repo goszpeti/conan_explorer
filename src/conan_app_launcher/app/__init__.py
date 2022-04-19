@@ -1,7 +1,6 @@
 import os
 import platform
 import sys
-import tempfile
 
 from conan_app_launcher import PKG_NAME, SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
 from conan_app_launcher.core import ConanApi, ConanWorker
@@ -34,12 +33,6 @@ def run_application():
     if platform.system() == "Darwin":
         print("Mac OS is currently not supported.")
         sys.exit(1)
-
-    # Redirect stdout and stderr for usage with pythonw as executor -
-    # otherwise conan will not work
-    if sys.executable.endswith("pythonw.exe"):
-        sys.stdout = open(os.devnull, "w")
-        sys.stderr = open(os.path.join(tempfile.gettempdir(), "stderr-" + PKG_NAME), "w")
 
     # apply Qt attributes (only possible before QApplication is created)
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)

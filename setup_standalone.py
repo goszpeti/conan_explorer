@@ -23,13 +23,12 @@ else:
     # platforms - QtGui
     # mediaservice - QtMultimedia
     # printsupport - QtPrintSupport
-    include_files = get_qt_plugins_paths("PyQt5", "platforms")
+    include_files = get_qt_plugins_paths("PyQt5", "platforms") + get_qt_plugins_paths("PyQt5", "styles")
 
 # base="Win32GUI" should be used only for Windows GUI app
 base = None
 if sys.platform == "win32":
     base = "Win32GUI"
-qt5libdir = "lib/PyQt5/Qt5/bin/"
 build_exe_options = {
     "includes": "conan_app_launcher",
     "excludes": ["debugpy"],
@@ -94,4 +93,5 @@ setup(
         "bdist_msi": bdist_msi_options
     },
     executables=executables,
+    optimize="-O2"
 )
