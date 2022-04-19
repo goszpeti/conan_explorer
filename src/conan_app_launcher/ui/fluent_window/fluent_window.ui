@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>851</width>
-    <height>795</height>
+    <width>859</width>
+    <height>824</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -69,19 +69,19 @@
    <iconset>
     <normaloff>:/icons/icon.ico</normaloff>:/icons/icon.ico</iconset>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="central_widget">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>1</horstretch>
      <verstretch>1</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="central_widget_layout">
     <property name="spacing">
      <number>0</number>
     </property>
     <property name="leftMargin">
-     <number>1</number>
+     <number>3</number>
     </property>
     <property name="topMargin">
      <number>1</number>
@@ -94,9 +94,6 @@
     </property>
     <item>
      <widget class="QFrame" name="main_frame">
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
       </property>
@@ -106,7 +103,7 @@
       <property name="lineWidth">
        <number>0</number>
       </property>
-      <layout class="QGridLayout" name="gridLayout">
+      <layout class="QGridLayout" name="main_frame_layout">
        <property name="leftMargin">
         <number>1</number>
        </property>
@@ -114,7 +111,7 @@
         <number>2</number>
        </property>
        <property name="rightMargin">
-        <number>1</number>
+        <number>6</number>
        </property>
        <property name="bottomMargin">
         <number>1</number>
@@ -139,7 +136,7 @@
          <property name="lineWidth">
           <number>0</number>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <layout class="QHBoxLayout" name="top_frame_layout">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -169,7 +166,7 @@
               <height>100</height>
              </size>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <layout class="QHBoxLayout" name="top_center_frame_layout">
              <property name="leftMargin">
               <number>5</number>
              </property>
@@ -177,7 +174,7 @@
               <number>3</number>
              </property>
              <property name="rightMargin">
-              <number>2</number>
+              <number>0</number>
              </property>
              <property name="bottomMargin">
               <number>2</number>
@@ -219,7 +216,7 @@
                  <number>0</number>
                 </property>
                 <property name="leftMargin">
-                 <number>0</number>
+                 <number>9</number>
                 </property>
                 <property name="topMargin">
                  <number>0</number>
@@ -350,7 +347,7 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QHBoxLayout" name="center_frame_layout">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -374,7 +371,7 @@
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0">
+            <layout class="QVBoxLayout" name="page_frame_layout" stretch="0">
              <property name="spacing">
               <number>0</number>
              </property>
@@ -411,16 +408,13 @@
                   <height>300</height>
                  </size>
                 </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
                 <property name="frameShape">
                  <enum>QFrame::NoFrame</enum>
                 </property>
                 <property name="frameShadow">
                  <enum>QFrame::Raised</enum>
                 </property>
-                <layout class="QVBoxLayout" name="verticalLayout_4">
+                <layout class="QVBoxLayout" name="content_frame_layout">
                  <property name="spacing">
                   <number>0</number>
                  </property>
@@ -445,7 +439,7 @@
                     <number>0</number>
                    </property>
                    <widget class="QWidget" name="page">
-                    <layout class="QVBoxLayout" name="verticalLayout_8">
+                    <layout class="QVBoxLayout" name="page_layout">
                      <property name="leftMargin">
                       <number>2</number>
                      </property>
@@ -511,7 +505,7 @@
                 <property name="frameShadow">
                  <enum>QFrame::Raised</enum>
                 </property>
-                <layout class="QVBoxLayout" name="verticalLayout_3">
+                <layout class="QVBoxLayout" name="page_footer_layout">
                  <property name="spacing">
                   <number>0</number>
                  </property>
@@ -528,7 +522,7 @@
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>0</number>
+                  <number>2</number>
                  </property>
                  <item>
                   <widget class="QTextBrowser" name="console">
@@ -552,6 +546,9 @@
                    </property>
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
+                   </property>
+                   <property name="verticalScrollBarPolicy">
+                    <enum>Qt::ScrollBarAlwaysOn</enum>
                    </property>
                    <property name="sizeAdjustPolicy">
                     <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -610,7 +607,7 @@ p, li { white-space: pre-wrap; }
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_5">
+            <layout class="QVBoxLayout" name="right_menu_frame_layout">
              <property name="leftMargin">
               <number>0</number>
              </property>
@@ -651,11 +648,11 @@ p, li { white-space: pre-wrap; }
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>97</width>
-                  <height>735</height>
+                  <width>93</width>
+                  <height>764</height>
                  </rect>
                 </property>
-                <layout class="QVBoxLayout" name="verticalLayout_13">
+                <layout class="QVBoxLayout" name="right_menu_scroll_area_widgets_layout">
                  <property name="spacing">
                   <number>2</number>
                  </property>
@@ -666,7 +663,7 @@ p, li { white-space: pre-wrap; }
                   <number>2</number>
                  </property>
                  <property name="rightMargin">
-                  <number>4</number>
+                  <number>0</number>
                  </property>
                  <property name="bottomMargin">
                   <number>0</number>
@@ -682,7 +679,7 @@ p, li { white-space: pre-wrap; }
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayout_7">
+                   <layout class="QVBoxLayout" name="right_menu_content_frame_layout">
                     <property name="spacing">
                      <number>0</number>
                     </property>
@@ -719,7 +716,7 @@ p, li { white-space: pre-wrap; }
                          <verstretch>0</verstretch>
                         </sizepolicy>
                        </property>
-                       <layout class="QVBoxLayout" name="verticalLayout_15">
+                       <layout class="QVBoxLayout" name="dummy_layout2">
                         <item>
                          <widget class="QPushButton" name="pushButton_6">
                           <property name="text">
@@ -768,7 +765,7 @@ p, li { white-space: pre-wrap; }
                        <property name="styleSheet">
                         <string notr="true"/>
                        </property>
-                       <layout class="QVBoxLayout" name="verticalLayout_14">
+                       <layout class="QVBoxLayout" name="dummy_layout">
                         <item>
                          <widget class="QPushButton" name="pushButton">
                           <property name="sizePolicy">
@@ -836,10 +833,7 @@ p, li { white-space: pre-wrap; }
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">QFrame{
-border-bottom-left-radius: 5px;
-border-top-left-radius: 5px;
-}</string>
+          <string notr="true"/>
          </property>
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
@@ -847,7 +841,7 @@ border-top-left-radius: 5px;
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <layout class="QVBoxLayout" name="left_menu_frame_layout">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -871,7 +865,7 @@ border-top-left-radius: 5px;
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_12">
+            <layout class="QVBoxLayout" name="left_menu_top_subframe_layout">
              <property name="leftMargin">
               <number>3</number>
              </property>
@@ -965,7 +959,7 @@ border-top-left-radius: 5px;
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_11">
+            <layout class="QVBoxLayout" name="left_menu_middle_subframe_layout">
              <property name="leftMargin">
               <number>3</number>
              </property>
@@ -986,7 +980,7 @@ border-top-left-radius: 5px;
             <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_9">
+            <layout class="QVBoxLayout" name="left_menu_bottom_subframe_layout">
              <property name="spacing">
               <number>5</number>
              </property>

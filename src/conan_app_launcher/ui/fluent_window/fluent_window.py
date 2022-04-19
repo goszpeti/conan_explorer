@@ -22,9 +22,9 @@ from ..common import get_themed_asset_image
 from ..widgets import AnimatedToggle
 
 LEFT_MENU_MIN_WIDTH = 80
-LEFT_MENU_MAX_WIDTH = 300
+LEFT_MENU_MAX_WIDTH = 330
 RIGHT_MENU_MIN_WIDTH = 0
-RIGHT_MENU_MAX_WIDTH = 300
+RIGHT_MENU_MAX_WIDTH = 340
 
 
 def gen_obj_name(name: str) -> str:
@@ -145,7 +145,7 @@ class SideSubMenu(QWidget, ThemedWidget):
 
         if label.width() > RIGHT_MENU_MAX_WIDTH:
             Logger().debug(f"{str(name)} right side menu exceeds max width!")
-        frame.layout().setContentsMargins(9, 0, 9, 0)
+        frame.layout().setContentsMargins(5, 0, 5, 0)
         frame.layout().setSpacing(4)
         frame.layout().addWidget(label)
         frame.layout().addWidget(widget)
@@ -267,8 +267,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.title_text = title_text
 
         self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
-        self.ui.toggle_left_menu_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
-        self.ui.settings_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
+        menu_margins = self.ui.left_menu_bottom_subframe.layout().contentsMargins()
+        button_offset = menu_margins.right() + menu_margins.left()
+        # fix buttons sizes, so they don't expand on togglling the menu
+        self.ui.toggle_left_menu_button.setMinimumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
+        self.ui.toggle_left_menu_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
+        self.ui.settings_button.setMinimumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
+        self.ui.settings_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
 
         self.add_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.png")
         self.add_themed_icon(self.ui.settings_button, "icons/settings.png")

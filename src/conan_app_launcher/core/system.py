@@ -16,8 +16,8 @@ WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
 
 def is_windows_11():
     """ main version number is still 10 - thanks MS! """
-    #if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
-    #    return True
+    if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
+       return True
     return False
 
 def run_file(file_path: Path, is_console_app: bool, args: str):

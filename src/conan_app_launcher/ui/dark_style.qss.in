@@ -22,7 +22,7 @@ Palette:
 
 /* Setup for specific widgets */
 
-QWidget#centralwidget{
+QWidget#central_widget{
     border-style: solid;
     border-width: 2px;
     background-color: #5c5c5c;
@@ -159,7 +159,8 @@ ClickableIcon:pressed {
 
 QLabel#about_label {
     background-color: #5c5c5c;
-    border-radius: {{WINDOW_BORDER_RADIUS}}px;
+    border-radius: 5px;
+    padding-left: 5px;
 }
 
 /* Left Frame Subwidgets */

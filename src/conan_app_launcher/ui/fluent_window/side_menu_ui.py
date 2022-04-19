@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\repos\app_grid_conan\src\conan_app_launcher\ui\side_menu.ui'
+# Form implementation generated from reading ui file 'c:\repos\app_grid_conan\src\conan_app_launcher\ui\fluent_window\side_menu.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.6
 #
@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_SideMenu(object):
     def setupUi(self, SideMenu):
         SideMenu.setObjectName("SideMenu")
-        SideMenu.resize(187, 211)
+        SideMenu.resize(179, 182)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -40,7 +40,7 @@ class Ui_SideMenu(object):
         sizePolicy.setHeightForWidth(self.side_menu_title_button.sizePolicy().hasHeightForWidth())
         self.side_menu_title_button.setSizePolicy(sizePolicy)
         self.side_menu_title_button.setMinimumSize(QtCore.QSize(32, 32))
-        self.side_menu_title_button.setMaximumSize(QtCore.QSize(32, 32))
+        self.side_menu_title_button.setMaximumSize(QtCore.QSize(50, 50))
         self.side_menu_title_button.setText("")
         self.side_menu_title_button.setFlat(True)
         self.side_menu_title_button.setObjectName("side_menu_title_button")

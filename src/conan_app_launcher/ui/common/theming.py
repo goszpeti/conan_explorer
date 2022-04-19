@@ -3,7 +3,7 @@ from pathlib import Path
 
 import conan_app_launcher.app as app
 from conan_app_launcher import base_path
-from conan_app_launcher.core.file_runner import is_windows_11
+from conan_app_launcher.core.system import is_windows_11
 from conan_app_launcher.settings import FONT_SIZE, GUI_STYLE, GUI_STYLE_DARK
 
 from jinja2 import Template
