@@ -17,7 +17,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
-from .common import AsyncLoader, activate_theme
+from .common import AsyncLoader, activate_theme, init_qt_logger, remove_qt_logger
 from .fluent_window import FluentWindow, SideSubMenu
 from .model import UiApplicationModel
 from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
@@ -37,13 +37,15 @@ class MainWindow(FluentWindow):
 
     log_console_message = pyqtSignal(str)  # str arg is the message
 
+    qt_logger_name = "qt_logger"
+
     def __init__(self, qt_app: QApplication):
         super().__init__("Conan App Launcher")
         self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
 
         # connect logger to console widget to log possible errors at init
-        Logger.init_qt_logger(self.log_console_message)
+        init_qt_logger(Logger(), self.qt_logger_name, self.log_console_message)
         self.log_console_message.connect(self.write_log)
 
         self.about_page = AboutPage(self)
@@ -116,7 +118,7 @@ class MainWindow(FluentWindow):
         except Exception:
             # Sometimes the closeEvent is called twice and disconnect errors.
             pass
-        Logger.remove_qt_logger()
+        remove_qt_logger(Logger(), self.qt_logger_name)
         super().closeEvent(event)
 
     def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent

@@ -1,10 +1,8 @@
 import logging
-from threading import Lock
 from typing import Optional
 
-from PyQt5.QtCore import pyqtBoundSignal
 
-from conan_app_launcher import CONAN_LOG_PREFIX, DEBUG_LEVEL, PKG_NAME
+from conan_app_launcher import DEBUG_LEVEL, PKG_NAME
 
 
 class Logger(logging.Logger):
@@ -13,7 +11,6 @@ class Logger(logging.Logger):
     """
     _instance: Optional[logging.Logger] = None
     formatter = logging.Formatter(r"%(levelname)s: %(message)s")
-    qt_handler_name = "qt_handler"
 
     def __new__(cls):
         if cls._instance is None:
@@ -48,63 +45,3 @@ class Logger(logging.Logger):
         logger.propagate = False
 
         return logger
-
-    class QtLogHandler(logging.Handler):
-        """
-        This log handler sends a logger string to a qt widget.
-        update_signal needs str as argument.
-        """
-        _lock = Lock()
-
-        def __init__(self, update_signal: pyqtBoundSignal):
-            super().__init__(logging.DEBUG)
-            self._update_signal = update_signal
-
-        def emit(self, record: logging.LogRecord):
-            # don't access the qt object directly, since updates will only work
-            # correctly in main loop, so instead send a PyQt Signal with the text to the Ui
-            
-            if not record.message.startswith(CONAN_LOG_PREFIX):
-                message = self.format(record)
-            else:
-                # remove log formatting for conan logs
-                message = record.message.replace(CONAN_LOG_PREFIX, "")
-            if message and self._lock:  # one log at a time
-                with self._lock:
-                    try:
-                        self._update_signal.emit(message)
-                    except Exception:
-                        print("QT Logger errored") # don't log here with logger...
-
-    @classmethod
-    def init_qt_logger(cls, update_signal: pyqtBoundSignal):
-        """
-        Redirects the logger to QT widget.
-        Needs to be called when GUI objects are available.
-        update_signal needs str as argument.
-        """
-        if not cls._instance:
-            raise RuntimeError
-        logger = cls._instance
-        qt_handler = Logger.QtLogHandler(update_signal)
-        qt_handler.set_name(cls.qt_handler_name)
-        log_debug_level = logging.INFO
-        qt_handler.setLevel(log_debug_level)
-        qt_handler.setFormatter(cls.formatter)
-
-        logger.addHandler(qt_handler)
-
-    @classmethod
-    def remove_qt_logger(cls) -> bool:
-        """ Remove qt logger (to be called before gui closes) """
-        if not cls._instance:
-            return True # don't care, if it is not actually there
-        logger = cls._instance
-
-        for handler in logger.handlers:
-            if handler.get_name() == cls.qt_handler_name:
-                logger.removeHandler(handler)
-                if handler:
-                    del(handler)
-                return True
-        return False
