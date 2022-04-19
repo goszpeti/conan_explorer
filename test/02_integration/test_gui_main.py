@@ -51,7 +51,6 @@ def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
         assert tab.model.name == "New Tab"
         for test_app in tab.app_links:
             assert test_app.model.name == "New App"
-    Logger.remove_qt_logger()
 
 
 def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixture, qtbot):
@@ -75,8 +74,6 @@ def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixt
 
     # TEST EVALUATION
     assert main_gui.about_page.isVisible()
-
-    Logger.remove_qt_logger()
 
 
 def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
@@ -106,7 +103,6 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
     time.sleep(3)
     assert app.active_settings.get(LAST_CONFIG_FILE) == selection
     app.conan_worker.finish_working(3)
-    Logger.remove_qt_logger()
 
 
 def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
@@ -177,7 +173,6 @@ def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker)
     # TEST EVALUATION
     assert not os.path.exists(pkg_cache_folder)
     assert not pkg_dir_to_delete.parent.exists()
-    Logger.remove_qt_logger()
 
 
 def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot):
@@ -287,4 +282,3 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
             assert test_app._app_channel_cbox.isHidden()
 
     app.conan_worker.finish_working(10)
-    Logger.remove_qt_logger()
