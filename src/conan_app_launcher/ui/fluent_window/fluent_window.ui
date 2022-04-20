@@ -108,7 +108,7 @@
         <number>1</number>
        </property>
        <property name="topMargin">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="rightMargin">
         <number>6</number>
@@ -278,6 +278,9 @@
                       <iconset>
                        <normalon>../assets/icons/close.png</normalon>
                       </iconset>
+                     </property>
+                     <property name="flat">
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
@@ -646,7 +649,7 @@ p, li { white-space: pre-wrap; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>764</height>
+                  <height>766</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="right_menu_scroll_area_widgets_layout">
@@ -819,13 +822,13 @@ p, li { white-space: pre-wrap; }
         <widget class="QFrame" name="left_menu_frame">
          <property name="minimumSize">
           <size>
-           <width>70</width>
+           <width>75</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>70</width>
+           <width>75</width>
            <height>16777215</height>
           </size>
          </property>
@@ -863,6 +866,9 @@ p, li { white-space: pre-wrap; }
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QVBoxLayout" name="left_menu_top_subframe_layout">
+             <property name="spacing">
+              <number>15</number>
+             </property>
              <property name="leftMargin">
               <number>3</number>
              </property>
@@ -877,6 +883,12 @@ p, li { white-space: pre-wrap; }
              </property>
              <item>
               <widget class="QLabel" name="title_label">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="font">
                 <font>
                  <weight>75</weight>
