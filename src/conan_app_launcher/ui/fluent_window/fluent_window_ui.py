@@ -111,7 +111,6 @@ class Ui_MainWindow(object):
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap("c:\\repos\\app_grid_conan\\src\\conan_app_launcher\\ui\\fluent_window\\../assets/icons/close.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.close_button.setIcon(icon1)
-        self.close_button.setFlat(False)
         self.close_button.setObjectName("close_button")
         self.horizontalLayout_4.addWidget(self.close_button)
         self.restore_max_button = QtWidgets.QPushButton(self.window_btns_frame)

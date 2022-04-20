@@ -279,9 +279,6 @@
                        <normalon>../assets/icons/close.png</normalon>
                       </iconset>
                      </property>
-                     <property name="flat">
-                      <bool>false</bool>
-                     </property>
                     </widget>
                    </item>
                    <item>

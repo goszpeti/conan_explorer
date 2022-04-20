@@ -254,8 +254,9 @@ class ConanApi():
         if packages:
             if len(packages) > 1:
                 settings = packages[0].get("settings", {})
+                id = packages[0].get("id", "")
                 Logger().warning(f"Multiple matching packages found for '<b>{str(conan_ref)}</b>'!\n"
-                                 f"Choosing this: {settings}.")
+                                 f"Choosing this: {id} ({self.build_conan_profile_name_alias(settings)})")
             # Update cache with this package
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
@@ -447,7 +448,7 @@ class ConanApi():
     def build_conan_profile_name_alias(settings: Dict[str, str]) -> str:
         """ Build a  human readable pseduo profile name, like Windows_x64_vs16_v142_release """
         if not settings:
-            return "default"
+            return "No Settings"
 
         os = settings.get("os", "")
         if not os:

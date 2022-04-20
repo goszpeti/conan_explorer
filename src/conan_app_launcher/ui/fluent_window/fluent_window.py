@@ -11,6 +11,8 @@ from typing import Callable, Dict, Optional, Tuple, Type, TypeVar, Union
 # uses Logger, settings and theming related functions
 from conan_app_launcher.app import asset_path
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.core.system import is_windows_11
+
 from PyQt5.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
                           QPropertyAnimation, QRect, QSize, Qt)
 from PyQt5.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap
@@ -137,7 +139,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         widget.setObjectName(gen_obj_name(name) + "_widget")
 
         frame = QFrame(self)
-        if label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 10):  # 10 for margin
+        if label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 30):  # aggressive 30 px padding
             frame.setLayout(QVBoxLayout(frame))
         else:
             frame.setLayout(QHBoxLayout(frame))
@@ -246,7 +248,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
         from .fluent_window_ui import Ui_MainWindow  # need to resolve circular import
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        if is_windows_11(): # To hide black edges around the border rounding
+            self.setAttribute(Qt.WA_TranslucentBackground, True)
 
         self.main_general_settings_menu = SideSubMenu(
             self.ui.right_menu_bottom_content_sw, "General Settings", True)

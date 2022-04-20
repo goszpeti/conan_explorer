@@ -16,13 +16,13 @@ The goal of this project is to provide a frontend to start executables contained
 It is end-user oriented and focuses on using packages, rather then developing them. It can be used on Windows and Linux x64 platforms.
 
 #### Application Link Grid
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="1024">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="512">
 
 #### Local Package Manager
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_pkg_explorer.png" width="1024">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_pkg_explorer.png" width="512">
 
 #### Conan Search
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_conan_search.png" width="1024">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_conan_search.png" width="512">
 
 **Main Features**
 - compatible with a wide range of conan versions (from 1.24 onwards)
