@@ -18,7 +18,7 @@ def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
     # check empty - should return a default name
     profile_name = ConanApi.build_conan_profile_name_alias({})
-    assert profile_name == "default"
+    assert profile_name == "No Settings"
 
     # check a partial
     settings = {'os': 'Windows', 'arch': 'x86_64'}
