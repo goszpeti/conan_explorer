@@ -86,12 +86,16 @@ class IniSettings(SettingsInterface):
         return bool(self.get(name))
 
     def set(self, setting_name: str, value: Union[str, int, float, bool]):
-        """ Set the value of a specific setting """
+        """ Set the value of a specific setting. Does not write to file, if value is already set. """
         if setting_name in self._values.keys() and isinstance(value, dict):  # dict type setting
+            if self._values[setting_name] == value:
+                return
             self._values[setting_name].update(value)
         else:
             for section in self._values.keys():
                 if setting_name in self._values[section]:
+                    if self._values[section][setting_name] == value:
+                        return
                     self._values[section][setting_name] = value
                     break
         if self._auto_save:
@@ -108,19 +112,22 @@ class IniSettings(SettingsInterface):
 
     def _read_ini(self):
         """ Read settings ini with configparser. """
+        update_needed = False
         try:
             self._parser.read(self._ini_file_path, encoding="UTF-8")
             for section in self._values.keys():
                 if not self._values[section]:  # empty section - this is a user filled dict
-                    self._read_dict_setting(section)
+                    update_needed |= self._read_dict_setting(section)
                 for setting in self._values[section]:
-                    self._read_setting(setting, section)
+                    update_needed |= self._read_setting(setting, section)
         except Exception as e:
             Logger().error(
                 f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
             os.remove(str(self._ini_file_path))  # let an exeception to the user, file can't be deleted
 
         # write file - to record defaults, if missing
+        if not update_needed:
+            return
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
             self._parser.write(ini_file)
 
@@ -130,26 +137,29 @@ class IniSettings(SettingsInterface):
             self._parser.add_section(section_name)
         return self._parser[section_name]
 
-    def _read_dict_setting(self, section_name: str):
+    def _read_dict_setting(self, section_name: str) -> bool:
         """ 
         Helper function to get a dict style setting.
         Dict settings are section itself and are read dynamically.
         """
         section = self._get_section(section_name)
-
+        update_needed = False
         for setting_name in section.keys():
-            self._read_setting(setting_name, section_name)
+            update_needed |= self._read_setting(setting_name, section_name)
+        return update_needed
 
-    def _read_setting(self, setting_name: str, section_name: str):
-        """ Helper function to get a setting, which uses the init value to determine the type. """
+    def _read_setting(self, setting_name: str, section_name: str) -> bool:
+        """ Helper function to get a setting, which uses the init value to determine the type. 
+        Returns, if file needs tobe updated
+        """
         section = self._get_section(section_name)
         default_value = self.get(setting_name)
         if isinstance(default_value, dict):  # no dicts supported directly
-            return
+            return False
 
         if setting_name not in section:  # write out
             section[setting_name] = str(default_value)
-            return
+            return True
 
         value = None
         if isinstance(default_value, bool):
@@ -162,12 +172,13 @@ class IniSettings(SettingsInterface):
             value = int(section.get(setting_name))
         if value is None:  # dict type, value will be taken as a string
             self._logger.error(f"Settings: Setting {setting_name} to write is unknown", )
-            return
+            return False
         # autosave must be disabled, otherwise we overwrite the other settings in the file
         auto_save = self._auto_save
         self._auto_save = False
         self.set(setting_name, value)
         self._auto_save = auto_save
+        return False
 
     def _write_setting(self, setting_name, section_name):
         """ Helper function to write a setting. """

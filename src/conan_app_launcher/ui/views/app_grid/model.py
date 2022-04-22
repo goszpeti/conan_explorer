@@ -329,7 +329,7 @@ class UiAppLinkModel(UiAppLinkConfig):
                 for match in possible_matches:
                     # don't allow for ambiguity!
                     if match_found:
-                        Logger().error(f"Multiple candidates found for {exe_rel_path}")
+                        Logger().error(f"Multiple candidates found for {exe_rel_path} in {self.name}: e.g. {str(match.name)}")
                     match_found = True
                 if not match_found:
                     Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")

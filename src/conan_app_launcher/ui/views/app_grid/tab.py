@@ -54,7 +54,7 @@ class TabBase(QWidget):
         self.tab_scroll_area.setWidgetResizable(True)
         # this holds all the app links, which are layouts
         self.tab_scroll_area_widgets = TabScrollAreaWidgets(self.tab_scroll_area)
-
+        self.tab_scroll_area_widgets.setContentsMargins(0, 0, 0, 0)
         self.tab_scroll_area_widgets.setObjectName("tab_widgets_" + self.model.name)
         self._initialized = True
     

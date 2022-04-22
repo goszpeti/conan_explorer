@@ -16,7 +16,7 @@ from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.model.ref import ConanFileReference
 from PyQt5.QtCore import (QFile, QItemSelectionModel, QMimeData, QModelIndex,
                           Qt, QUrl, pyqtBoundSignal)
-from PyQt5.QtGui import QIcon, QKeySequence, QShowEvent
+from PyQt5.QtGui import QIcon, QKeySequence, QShowEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAbstractItemView, QAction, QApplication,
                              QMessageBox, QWidget)
 
@@ -57,6 +57,15 @@ class LocalConanPackageExplorer(QWidget):
     def showEvent(self, a0: QShowEvent) -> None:
         self.refresh_pkg_selection_view(update=False)  # only update the first time
         return super().showEvent(a0)
+
+    def resizeEvent(self, a0: QResizeEvent) -> None:
+        # resize filter splitter to roughly match file view splitter
+        sizes = self._ui.splitter.sizes()
+        offset = self._ui.package_filter_label.width() + self._ui.refresh_button.width()
+        self._ui.splitter_filter.setSizes([sizes[0] - offset, self._ui.splitter_filter.width()
+                                           - sizes[0] + offset])
+        b = self._ui.splitter_filter.sizes()
+        super().resizeEvent(a0)
 
     def apply_theme(self):
         self._ui.refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))

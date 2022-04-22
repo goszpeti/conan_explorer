@@ -19,6 +19,9 @@ import pytest
 from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path
 from conan_app_launcher.core import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.settings import *
+from conan_app_launcher.ui.common import remove_qt_logger
+from conan_app_launcher.ui.main_window import MainWindow
+
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
@@ -184,7 +187,7 @@ def base_fixture(request):
     # Teardown
 
     # remove logger, so the logger doesn't log into nonexistant qt gui
-    logger.Logger.remove_qt_logger()
+    remove_qt_logger(logger.Logger(), MainWindow.qt_logger_name)
     # finish worker - otherwise errors and crashes will occur!
     if app.conan_worker:
         app.conan_worker.finish_working(3)

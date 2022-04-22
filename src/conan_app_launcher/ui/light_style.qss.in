@@ -21,7 +21,7 @@ Palette:
 
 /* Setup for specific widgets */
 
-QWidget#centralwidget{
+QWidget#central_widget{
     border-style: solid;
     border-width: 2px;
     background-color: #F0F0F0;
@@ -41,16 +41,16 @@ QLabel#page_title {
 
 /* Window control buttons */
 
-QPushButton#minimize_button {
+QPushButton#minimize_button,
+QPushButton#restore_max_button,
+QPushButton#close_button
+{
     background-color: transparent;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 0px;
-    border-top-right-radius: 0px;
 }
 
 QPushButton:hover#minimize_button,
-QPushButton:hover#restore_max_button {
+QPushButton:hover#restore_max_button
+{
     border-style: solid;
     background-color: #BCBCBC;
 }
@@ -61,24 +61,12 @@ QPushButton:pressed#restore_max_button {
     padding: 1px
 }
 
-QPushButton#restore_max_button {
-    background-color: transparent;
-    border-radius: 0px;
-}
-
-QPushButton#close_button {
-    background-color: transparent;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-}
-
-QPushButton#close_button:hover {
+QPushButton:hover#close_button {
+    border-style: solid;
     background-color: #C42B1C;
 }
 
-QPushButton#close_button:pressed {
+QPushButton:pressed#close_button {
     background-color: #C1655D;
 }
 
@@ -156,6 +144,8 @@ ClickableIcon:pressed {
 
 QFrame#left_menu_frame {
     background-color: #d3d3d3;
+    border-bottom-left-radius: {{WINDOW_BORDER_RADIUS}}px;
+    border-top-left-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
 
 QLabel#title_label {

@@ -25,16 +25,18 @@ class AppGridView(QWidget):
         super().__init__(parent)
         self.page_widgets = page_widgets
         self.setLayout(QVBoxLayout(self))
+        self.layout().setContentsMargins(0, 0, 0, 0)
         self.tab_widget = QTabWidget(self)
+        self.tab_widget.setContentsMargins(0, 0, 0, 0)
         self.tab_widget.setElideMode(Qt.ElideLeft)
         self.tab_widget.setUsesScrollButtons(True)
         self.layout().addWidget(self.tab_widget)
-        self.layout().setContentsMargins(2, 0, 2, 0)
 
         self.model = model
         conan_pkg_installed.connect(self.update_conan_info)
 
         self.tab_widget.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tab_widget.tabBar().setContentsMargins(0, 0, 0, 0)
         self.tab_widget.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
 
         self.tab_widget.setMovable(True)

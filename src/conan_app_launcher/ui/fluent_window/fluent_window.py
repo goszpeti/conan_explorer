@@ -11,6 +11,8 @@ from typing import Callable, Dict, Optional, Tuple, Type, TypeVar, Union
 # uses Logger, settings and theming related functions
 from conan_app_launcher.app import asset_path
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.core.system import is_windows_11
+
 from PyQt5.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
                           QPropertyAnimation, QRect, QSize, Qt)
 from PyQt5.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap
@@ -22,9 +24,9 @@ from ..common import get_themed_asset_image
 from ..widgets import AnimatedToggle
 
 LEFT_MENU_MIN_WIDTH = 80
-LEFT_MENU_MAX_WIDTH = 300
+LEFT_MENU_MAX_WIDTH = 330
 RIGHT_MENU_MIN_WIDTH = 0
-RIGHT_MENU_MAX_WIDTH = 300
+RIGHT_MENU_MAX_WIDTH = 340
 
 
 def gen_obj_name(name: str) -> str:
@@ -137,7 +139,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         widget.setObjectName(gen_obj_name(name) + "_widget")
 
         frame = QFrame(self)
-        if label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 10):  # 10 for margin
+        if label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 30):  # aggressive 30 px padding
             frame.setLayout(QVBoxLayout(frame))
         else:
             frame.setLayout(QHBoxLayout(frame))
@@ -145,7 +147,7 @@ class SideSubMenu(QWidget, ThemedWidget):
 
         if label.width() > RIGHT_MENU_MAX_WIDTH:
             Logger().debug(f"{str(name)} right side menu exceeds max width!")
-        frame.layout().setContentsMargins(9, 0, 9, 0)
+        frame.layout().setContentsMargins(5, 0, 5, 0)
         frame.layout().setSpacing(4)
         frame.layout().addWidget(label)
         frame.layout().addWidget(widget)
@@ -246,7 +248,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
         from .fluent_window_ui import Ui_MainWindow  # need to resolve circular import
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        if is_windows_11(): # To hide black edges around the border rounding
+            self.setAttribute(Qt.WA_TranslucentBackground, True)
 
         self.main_general_settings_menu = SideSubMenu(
             self.ui.right_menu_bottom_content_sw, "General Settings", True)
@@ -267,8 +270,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.title_text = title_text
 
         self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
-        self.ui.toggle_left_menu_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
-        self.ui.settings_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
+        menu_margins = self.ui.left_menu_bottom_subframe.layout().contentsMargins()
+        button_offset = menu_margins.right() + menu_margins.left()
+        # fix buttons sizes, so they don't expand on togglling the menu
+        self.ui.toggle_left_menu_button.setMinimumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
+        self.ui.toggle_left_menu_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
+        self.ui.settings_button.setMinimumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
+        self.ui.settings_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
 
         self.add_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.png")
         self.add_themed_icon(self.ui.settings_button, "icons/settings.png")

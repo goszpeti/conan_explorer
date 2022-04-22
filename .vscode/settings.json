@@ -1,0 +1,5 @@
+{
+    "restructuredtext.confPath": "${workspaceFolder}\\source",
+    "restructuredtext.builtDocumentationPath": "${workspaceFolder}\\build",
+    "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe"
+}
