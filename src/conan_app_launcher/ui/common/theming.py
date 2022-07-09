@@ -53,9 +53,14 @@ def get_user_theme_color() -> str: # RGB
         except:
             Logger().warning("Can't read user accent color, setting it to black.")
             return "#000000"
-        abgr_color = hex(int(value))
-        if len(abgr_color) < 9:
+        try:
+            abgr_color = hex(int(value))
+            if len(abgr_color) < 9: # wrong format, return default
+                return "#000000"
+            # convert abgr to rgb
+            rgb_color = abgr_color[-2:] + abgr_color[-4:-2] + abgr_color[-6:-4]
+        except:
+            Logger().warning("Can't convert read user accent color, setting it to black.")
             return "#000000"
-        rgb_color = abgr_color[-2:] + abgr_color[-4:-2] + abgr_color[-6:-4]
         return "#" + rgb_color
     return "#000000"

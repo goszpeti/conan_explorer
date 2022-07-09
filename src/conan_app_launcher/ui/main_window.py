@@ -12,7 +12,7 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
-from conan_app_launcher.ui.widgets import MyMessageBox
+from conan_app_launcher.ui.widgets import MyMessageBox, AnimatedToggle
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QApplication, QFileDialog
@@ -244,7 +244,7 @@ class MainWindow(FluentWindow):
     def display_versions_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         # status is changed only after this is done, so the state must be negated
-        sender_toggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender()
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_VERSIONS, status)
         self.app_grid.re_init_all_app_links(force=True)
@@ -252,7 +252,7 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def apply_display_users_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender()
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_USERS, status)
         self.app_grid.re_init_all_app_links(force=True)
@@ -260,21 +260,21 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def display_channels_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender()
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_CHANNELS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
     @pyqtSlot()
     def quicklaunch_grid_mode_toggled(self):
-        sender_toggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender()
         status = sender_toggle.isChecked()
         app.active_settings.set(APPLIST_ENABLED, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
     @pyqtSlot()
     def quicklaunch_cbox_mode_toggled(self):
-        sender_toggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender()
         status = sender_toggle.isChecked()
         app.active_settings.set(ENABLE_APP_COMBO_BOXES, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())

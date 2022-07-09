@@ -3,8 +3,10 @@ Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
 import os
+import platform
 import sys
 import traceback
+from conan_app_launcher.ui.common.theming import get_user_theme_color
 from test.conftest import TEST_REF
 
 import conan_app_launcher  # for mocker
@@ -127,3 +129,27 @@ def test_bug_dialog(base_fixture, qtbot, mocker):
     dialog = bug_reporting_dialog(exc_info[1], exc_info[2])
     assert dialog.text()
     assert "\n".join(traceback.format_tb(exc_info[2], limit=None)) in dialog.detailedText()
+
+def test_get_accent_color(mocker):
+    """
+    Test, that get_user_theme_color returns black on default and the color on Windows
+    in the format #RRGGBB
+    """
+    if platform.system() == "Windows":
+        # Use 4279313508, which is ff112464 -> 642411 (dark red)
+        mocker.patch("winreg.QueryValueEx", return_value=["4279313508"])
+        color = get_user_theme_color()
+        assert color == "#642411"
+        # Test invalid registry access
+        mocker.patch("winreg.QueryValueEx", side_effect=Exception('mocked error'))
+        color = get_user_theme_color()
+        assert color == "#000000"
+        # Test invalid registry value
+        mocker.patch("winreg.QueryValueEx", return_value=["DUMMY"])
+        color = get_user_theme_color()
+        assert color == "#000000"
+
+    elif platform.system() == "Linux":
+        color = get_user_theme_color()
+        assert color == "#000000"
+

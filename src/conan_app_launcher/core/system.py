@@ -13,12 +13,12 @@ from conan_app_launcher.app.logger import Logger
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
 
 
-
 def is_windows_11():
-    """ main version number is still 10 - thanks MS! """
+    """ Main version number is still 10 - thanks MS! """
     if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
-       return True
+        return True
     return False
+
 
 def run_file(file_path: Path, is_console_app: bool, args: str):
     """ Decide, if a file should be opened or executed and call the appropriate method """
@@ -44,7 +44,7 @@ def open_in_file_manager(file_path: Path):
         # select switch for highlighting
         creationflags = 0
         if version.StrictVersion(platform.python_version()) >= version.StrictVersion("3.7.0"):
-            creationflags = subprocess.CREATE_NO_WINDOW # available since 3.7
+            creationflags = subprocess.CREATE_NO_WINDOW  # available since 3.7
         return subprocess.Popen("explorer /select," + str(file_path), creationflags=creationflags)
 
 
