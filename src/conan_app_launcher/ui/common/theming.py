@@ -5,6 +5,7 @@ import conan_app_launcher.app as app
 from conan_app_launcher import base_path
 from conan_app_launcher.core.system import is_windows_11
 from conan_app_launcher.settings import FONT_SIZE, GUI_STYLE, GUI_STYLE_DARK
+from conan_app_launcher.app.logger import Logger
 
 from jinja2 import Template
 from PyQt5.QtWidgets import QApplication
@@ -45,12 +46,21 @@ def get_user_theme_color() -> str: # RGB
         # get theme color
         from winreg import (HKEY_CURRENT_USER, ConnectRegistry, OpenKey,
                             QueryValueEx)
-        reg = ConnectRegistry(None, HKEY_CURRENT_USER)
-        key = OpenKey(reg, r"SOFTWARE\Microsoft\Windows\DWM")
-        value = QueryValueEx(key, "AccentColor")[0]  # Windows Theme Hilight color for border color in rgb
-        abgr_color = hex(int(value))
-        if len(abgr_color) < 9:
+        try:
+            reg = ConnectRegistry(None, HKEY_CURRENT_USER)
+            key = OpenKey(reg, r"SOFTWARE\Microsoft\Windows\DWM")
+            value = QueryValueEx(key, "AccentColor")[0]  # Windows Theme Hilight color for border color in rgb
+        except:
+            Logger().warning("Can't read user accent color, setting it to black.")
             return "#000000"
-        rgb_color = abgr_color[-2:] + abgr_color[-4:-2] + abgr_color[-6:-4]
+        try:
+            abgr_color = hex(int(value))
+            if len(abgr_color) < 9: # wrong format, return default
+                return "#000000"
+            # convert abgr to rgb
+            rgb_color = abgr_color[-2:] + abgr_color[-4:-2] + abgr_color[-6:-4]
+        except:
+            Logger().warning("Can't convert read user accent color, setting it to black.")
+            return "#000000"
         return "#" + rgb_color
     return "#000000"

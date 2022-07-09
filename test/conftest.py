@@ -37,6 +37,7 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
 
 
 def is_ci_job():
+    """ Test runs in CI environment """
     if os.getenv("GITHUB_WORKSPACE"):
         return True
     return False

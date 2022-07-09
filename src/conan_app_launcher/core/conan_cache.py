@@ -27,11 +27,12 @@ class ConanInfoCache():
 
         # create cache file, if it does not exist
         if not self._cache_file.exists():
-            self._cache_file.open('a').close()
+            self._cache_file.touch()
             return
 
         # read cached info
         self._load()
+        
 
     def get_local_package_path(self, conan_ref: ConanFileReference) -> Path:
         """ Return cached package path of a locally installed package. """
@@ -194,5 +195,8 @@ class ConanInfoCache():
         json_data["read_only"] = self._read_only
         json_data["remote_packages"] = self._remote_packages
         json_data["local_packages"] = self._local_packages
-        with open(self._cache_file, "w") as json_file:
-            json.dump(json_data, json_file)
+        try:
+            with open(self._cache_file, "w") as json_file:
+                json.dump(json_data, json_file)
+        except:
+            Logger().debug("ConanCache: Can't save speedup-cache file.")
