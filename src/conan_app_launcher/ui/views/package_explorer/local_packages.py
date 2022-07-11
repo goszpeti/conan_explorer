@@ -9,6 +9,7 @@ from conan_app_launcher.core import (open_cmd_in_path, open_file,
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.ui.common import (AsyncLoader, FileSystemModel,
                                           get_themed_asset_image)
+from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog
 from conan_app_launcher.ui.views import AppGridView
@@ -279,13 +280,13 @@ class LocalConanPackageExplorer(QWidget):
         self.fs_model = FileSystemModel()
         self.fs_model.setRootPath(str(pkg_path))
         self.fs_model.sort(0, Qt.AscendingOrder)
-        self.re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)
+        re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)
         self._ui.package_file_view.setModel(self.fs_model)
         self._ui.package_file_view.setRootIndex(self.fs_model.index(str(pkg_path)))
         self._ui.package_file_view.setColumnHidden(2, True)  # file type
         self._ui.package_file_view.setColumnWidth(0, 200)
         self._ui.package_file_view.header().setSortIndicator(0, Qt.AscendingOrder)
-        self.re_register_signal(self._ui.package_file_view.doubleClicked,
+        re_register_signal(self._ui.package_file_view.doubleClicked,
                                 self.on_file_double_click)
         # disable edit on double click, since we want to open
         self._ui.package_file_view.setEditTriggers(QAbstractItemView.EditKeyPressed)
@@ -293,7 +294,7 @@ class LocalConanPackageExplorer(QWidget):
 
         self._ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
 
-        self.re_register_signal(self._ui.package_file_view.customContextMenuRequested,
+        re_register_signal(self._ui.package_file_view.customContextMenuRequested,
                                 self.on_file_context_menu_requested)
         self._init_pkg_file_context_menu()
 
@@ -307,14 +308,6 @@ class LocalConanPackageExplorer(QWidget):
         self._ui.package_file_view.setModel(None)
         self._ui.package_path_label.setText("")
 
-    @classmethod
-    def re_register_signal(cls, signal: pyqtBoundSignal, slot: Callable):
-        try:  # need to be removed, otherwise will be called multiple times
-            signal.disconnect()
-        except TypeError:
-            # no way to check if it is connected and it will throw an error
-            pass
-        signal.connect(slot)
 
     def on_file_double_click(self, model_index):
         file_path = Path(model_index.model().fileInfo(model_index).absoluteFilePath())

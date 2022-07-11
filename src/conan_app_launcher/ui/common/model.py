@@ -1,6 +1,14 @@
-from PyQt5.QtCore import Qt, QAbstractItemModel, QModelIndex
+from typing import Callable
+from PyQt5.QtCore import Qt, QAbstractItemModel, QModelIndex, pyqtBoundSignal
 from PyQt5.QtWidgets import QFileSystemModel
 
+def re_register_signal(signal: pyqtBoundSignal, slot: Callable):
+    try:  # need to be removed, otherwise will be called multiple times
+        signal.disconnect()
+    except TypeError:
+        # no way to check if it is connected and it will throw an error
+        pass
+    signal.connect(slot)
 
 class FileSystemModel(QFileSystemModel):
     """ This fixes an issue with the header not being centered vertically """
