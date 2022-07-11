@@ -12,6 +12,7 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
+from conan_app_launcher.ui.views.conan_conf.conan_conf import ConanConfigView
 from conan_app_launcher.ui.widgets import MyMessageBox, AnimatedToggle
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QKeySequence
@@ -53,7 +54,7 @@ class MainWindow(FluentWindow):
         self.local_package_explorer = LocalConanPackageExplorer(self, self.conan_pkg_removed, self.page_widgets)
         self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed,
                                                self.conan_pkg_removed, self.page_widgets)
-
+        self.conan_config = ConanConfigView(self)
         self._init_left_menu()
         self._init_right_menu()
 
@@ -62,6 +63,7 @@ class MainWindow(FluentWindow):
                                  create_page_menu=True)
         self.add_left_menu_entry("Local Package Explorer", "icons/package.png", True, self.local_package_explorer)
         self.add_left_menu_entry("Conan Search", "icons/search_packages.png", True, self.search_dialog)
+        self.add_left_menu_entry("Conan Config", "icons/package_settings.png", True, self.conan_config)
 
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()

@@ -15,7 +15,7 @@ else:
     except ImportError:
         from typing_extensions import TypedDict
 from conans.errors import ConanException
-from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
+from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO, client_version
 from conans.model.ref import ConanFileReference, PackageReference
 from conans.paths.package_layouts.package_editable_layout import \
     PackageEditableLayout
@@ -71,6 +71,7 @@ class ConanApi():
         self.info_cache: ConanInfoCache
         self._short_path_root = Path("NULL")
         self.init_api()
+        self.client_version = client_version
 
     def init_api(self):
         """ Instantiate the internal Conan api. In some cases it needs to be instatiated anew. """
