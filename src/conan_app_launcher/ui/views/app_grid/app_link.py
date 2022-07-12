@@ -11,6 +11,7 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE)
 from conan_app_launcher.ui.common import get_themed_asset_image
+from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.widgets import ClickableIcon, RoundedMenu
 from PyQt5.QtCore import Qt
@@ -19,7 +20,7 @@ from PyQt5.QtWidgets import (QAction, QComboBox, QDialog, QFrame, QHBoxLayout,
                              QLabel, QLayout, QMessageBox, QPushButton,
                              QSizePolicy, QVBoxLayout, QWidget)
 
-from .dialogs import AppEditDialog, AppsMoveDialog
+from .dialogs import AppEditDialog
 from abc import ABC
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -44,7 +45,7 @@ class AppLinkBase(QFrame):
     - Add new App Link
     - Edit
     - Remove App Link
-    - Rearrange App Links
+    - Reorder App Links
     """
     icon_size: int
     _max_width = 175
@@ -107,18 +108,18 @@ class AppLinkBase(QFrame):
 
         self.menu.addSeparator()
 
-        self.rearrange_action = QAction("Rearrange App Links", self)
-        self.rearrange_action.setIcon(QIcon(get_themed_asset_image("icons/rearrange.png")))
-        self.rearrange_action.triggered.connect(self.on_move)
+        self.reorder_action = QAction("Reorder App Links", self)
+        self.reorder_action.setIcon(QIcon(get_themed_asset_image("icons/rearrange.png")))
+        self.reorder_action.triggered.connect(self.on_move)
 
-        self.menu.addAction(self.rearrange_action)
+        self.menu.addAction(self.reorder_action)
 
     def load(self):
         self.model.register_update_callback(self.update_conan_info)
         self._apply_new_config()
 
     def on_move(self):
-        move_dialog = AppsMoveDialog(parent=self, tab_ui_model=self.model.parent)
+        move_dialog = ReorderDialog(parent=self, model=self.model.parent)
         ret = move_dialog.exec()
         if ret == QDialog.Accepted:
             self._parent_tab.redraw(force=True)

@@ -17,14 +17,7 @@
    <item>
     <widget class="QTabWidget" name="config_tab_widget">
      <property name="styleSheet">
-      <string notr="true">
-QScrollArea{
-    background-color: #808086;
-}
-QWidget#info_contents {
-    background-color: #808086;
-}
-</string>
+      <string notr="true"/>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -149,7 +142,17 @@ QWidget#info_contents {
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QTreeView" name="remotes_tree_view"/>
+        <widget class="QTreeView" name="remotes_tree_view">
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="sortingEnabled">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

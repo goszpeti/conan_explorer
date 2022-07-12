@@ -18,14 +18,7 @@ class Ui_Form(object):
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.config_tab_widget = QtWidgets.QTabWidget(Form)
-        self.config_tab_widget.setStyleSheet("\n"
-"QScrollArea{\n"
-"    background-color: #808086;\n"
-"}\n"
-"QWidget#info_contents {\n"
-"    background-color: #808086;\n"
-"}\n"
-"")
+        self.config_tab_widget.setStyleSheet("")
         self.config_tab_widget.setObjectName("config_tab_widget")
         self.info_widget = QtWidgets.QWidget()
         self.info_widget.setStyleSheet("")
@@ -88,6 +81,9 @@ class Ui_Form(object):
         self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.remotes)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.remotes_tree_view = QtWidgets.QTreeView(self.remotes)
+        self.remotes_tree_view.setDragEnabled(True)
+        self.remotes_tree_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.remotes_tree_view.setSortingEnabled(False)
         self.remotes_tree_view.setObjectName("remotes_tree_view")
         self.verticalLayout_4.addWidget(self.remotes_tree_view)
         self.config_tab_widget.addTab(self.remotes, "")

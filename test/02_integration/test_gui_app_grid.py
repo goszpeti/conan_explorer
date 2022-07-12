@@ -5,6 +5,7 @@ so the qtbot is usable to inspect gui objects.
 import os
 import tempfile
 from pathlib import Path
+from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from test.conftest import TEST_REF
 
 import conan_app_launcher.app as app
@@ -13,7 +14,6 @@ from conan_app_launcher.settings.ini_file import IniSettings
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.data.json_file import JsonUiConfig
-from conan_app_launcher.ui.views.app_grid.dialogs import AppsMoveDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.views.app_grid.tab import (AppEditDialog, AppLinkBase,
                                                         TabGrid)
@@ -297,7 +297,7 @@ def test_move_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     tab_model = tab.model
     apps_model = tab_model.apps
     app_link = tab.app_links[0]
-    move_dialog = AppsMoveDialog(parent=main_gui, tab_ui_model=tab_model)
+    move_dialog = ReorderDialog(parent=main_gui, model=tab_model)
     move_dialog.show()
     sel_idx = tab_model.index(0, 0, QtCore.QModelIndex())
     move_dialog._ui.list_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.Select)

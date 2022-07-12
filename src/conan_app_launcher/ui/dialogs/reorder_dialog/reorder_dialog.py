@@ -1,30 +1,33 @@
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Protocol
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.ui.views.app_grid.model import UiTabModel
-from PyQt5.QtCore import Qt, QItemSelectionModel
+from PyQt5.QtCore import Qt, QItemSelectionModel, QAbstractListModel
 from PyQt5.QtWidgets import QWidget, QAbstractItemView, QDialog
 from PyQt5.QtGui import QIcon
 
-from .apps_move_dialog_ui import Ui_rearrange_dialog
+from .reorder_dialog_ui import Ui_rearrange_dialog
 
 current_dir = Path(__file__).parent
 
 
-class AppsMoveDialog(QDialog):
+class ReorderingModel(QAbstractListModel):
+    def save(self):
+        ...
 
-    def __init__(self, tab_ui_model: UiTabModel, parent: Optional[QWidget], flags=Qt.WindowFlags()):
+class ReorderDialog(QDialog):
+
+    def __init__(self, model: ReorderingModel, parent: Optional[QWidget], flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
-
+        self._model = model
         self._ui = Ui_rearrange_dialog()
         self._ui.setupUi(self)
 
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "rearrange.png")))
 
-        self._ui.list_view.setModel(tab_ui_model)
+        self._ui.list_view.setModel(model)
 
         self._ui.list_view.setUpdatesEnabled(True)
         self._ui.list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
@@ -51,7 +54,7 @@ class AppsMoveDialog(QDialog):
                 if idx is None:
                     continue
                 row = idx.row()
-                pre_idx = self._ui.list_view.model().index(row - 1)
+                pre_idx = self._model.index(row - 1)
                 self._ui.list_view.model().beginMoveRows(idx, row, row, pre_idx, pre_idx.row())
                 self._ui.list_view.model().moveRow(idx, row, pre_idx, pre_idx.row())
                 self._ui.list_view.model().endMoveRows()
@@ -76,8 +79,8 @@ class AppsMoveDialog(QDialog):
                 if idx is None:
                     continue
                 row = idx.row()
-                post_idx = self._ui.list_view.model().index(row + 2)
-                post_sel_idx = self._ui.list_view.model().index(row + 1)
+                post_idx = self._model.index(row + 2)
+                post_sel_idx = self._model.index(row + 1)
                 self._ui.list_view.model().beginMoveRows(idx, row, row, post_sel_idx, post_sel_idx.row())
                 self._ui.list_view.model().moveRow(idx, row, post_idx, row + 2)
                 self._ui.list_view.model().endMoveRows()
@@ -86,5 +89,5 @@ class AppsMoveDialog(QDialog):
             print(e)
 
     def save(self):
-        self._ui.list_view.model().save()
+        self._model.save()
         self.accept()

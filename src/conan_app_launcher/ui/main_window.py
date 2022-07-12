@@ -78,7 +78,7 @@ class MainWindow(FluentWindow):
             quicklaunch_submenu.add_button_menu_entry(
                 "Add AppLink", self.on_add_link, "icons/add_link.png")
             quicklaunch_submenu.add_button_menu_entry(
-                "Rearrange AppLinks", self.on_rearrange, "icons/rearrange.png")
+                "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
             quicklaunch_submenu.add_menu_line()
 
             quicklaunch_submenu.add_toggle_menu_entry(
@@ -238,7 +238,7 @@ class MainWindow(FluentWindow):
         tab.app_links[0].open_app_link_add_dialog()
 
     @pyqtSlot()
-    def on_rearrange(self):
+    def on_reorder(self):
         tab = self.app_grid.tab_widget.currentWidget()
         tab.app_links[0].on_move()
 

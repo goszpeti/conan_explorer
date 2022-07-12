@@ -100,13 +100,26 @@ class ConanApi():
         self.conan.remove_locks()
         Logger().info("Removed Conan cache locks.")
 
-    def get_remotes(self) -> List[Remote]:
+    def get_remotes(self, include_disabled=False) -> List[Remote]:
         remotes = []
         try:
-            remotes = self.client_cache.registry.load_remotes().values()
+            if include_disabled:
+                remotes = self.conan.remote_list()
+            else:
+                remotes = self.client_cache.registry.load_remotes().values()
         except Exception as e:
             Logger().error(f"Error while reading remotes file: {str(e)}")
         return remotes
+    
+    def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]: # user_name, autheticated
+        user_info = self.conan.users_list(remote_name).get("remotes", {})
+        if len(user_info) < 1:
+            return ("", False)
+        try:
+            return (str(user_info[0].get("user_name", "")), user_info[0].get("authenticated", False))
+        except:
+            Logger().warning(f"Can't get user info for {remote_name}")
+            return ("", False)
 
     def get_short_path_root(self) -> Path:
         """ Return short path root for Windows. Sadly there is no built-in way to do  """

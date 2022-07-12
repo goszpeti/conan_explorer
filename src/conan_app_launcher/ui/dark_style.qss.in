@@ -255,6 +255,11 @@ QScrollArea{
     background-color: #808086;
 }
 
+QWidget#info_contents {
+    background-color: #808086;
+}
+
+
 QMessageBox QPushButton{
     background-color: #474747;
 }
