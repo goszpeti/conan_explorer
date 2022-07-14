@@ -13,7 +13,7 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
 from conan_app_launcher.ui.views.conan_conf.conan_conf import ConanConfigView
-from conan_app_launcher.ui.widgets import MyMessageBox, AnimatedToggle
+from conan_app_launcher.ui.widgets import WideMessageBox, AnimatedToggle
 from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QApplication, QFileDialog
@@ -202,14 +202,14 @@ class MainWindow(FluentWindow):
         else:
             path_list = paths[0]
 
-        msg = MyMessageBox(parent=self)
+        msg = WideMessageBox(parent=self)
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(MyMessageBox.Yes | MyMessageBox.Cancel)
-        msg.setIcon(MyMessageBox.Question)
+        msg.setStandardButtons(WideMessageBox.Yes | WideMessageBox.Cancel)
+        msg.setIcon(WideMessageBox.Question)
         reply = msg.exec_()
-        if reply == MyMessageBox.Yes:
+        if reply == WideMessageBox.Yes:
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 

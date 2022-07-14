@@ -213,7 +213,7 @@ class AppLinkBase(QFrame):
         # confirmation dialog
         message_box = QMessageBox(parent=self) # self.parentWidget())
         message_box.setWindowTitle("Delete app link")
-        message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}?\"")
+        message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}\"?")
         message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         message_box.setIcon(QMessageBox.Question)
         reply = message_box.exec_()

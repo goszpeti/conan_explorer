@@ -12,7 +12,7 @@ from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction, QApplication, QDialog, QWidget
+from PyQt5.QtWidgets import QAction, QApplication, QDialog, QWidget, QMessageBox
 
 from .conan_conf_ui import Ui_Form
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
@@ -240,9 +240,17 @@ class ConanConfigView(QDialog):
         remote_item = self._get_selected_remote()
         if not remote_item:
             return
-        # TODO Question Dialog
-        app.conan_api.conan.remote_remove(remote_item.remote.name)
-        self._setup_remotes_model()
+        message_box = QMessageBox(parent=self)  # self.parentWidget())
+        message_box.setWindowTitle("Delete app link")
+        message_box.setText(f"Are you sure, you want to delete the remote {remote_item.remote.name}?")
+        message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        message_box.setIcon(QMessageBox.Question)
+        reply = message_box.exec_()
+        if reply == QMessageBox.Yes:
+            self.hide()
+            app.conan_api.conan.remote_remove(remote_item.remote.name)
+            self._setup_remotes_model()
+
 
     def on_remote_disable(self, model_index):
         remote_item = self._get_selected_remote()
