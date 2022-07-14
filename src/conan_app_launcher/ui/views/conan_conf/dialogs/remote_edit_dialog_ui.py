@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(562, 161)
+        Dialog.resize(562, 163)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -62,15 +62,6 @@ class Ui_Dialog(object):
         self.edit_grid.addWidget(self.verify_ssl_label, 2, 0, 1, 1)
         self.edit_grid.setRowStretch(0, 1)
         self.verticalLayout.addLayout(self.edit_grid)
-        self.login_button = QtWidgets.QPushButton(Dialog)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.login_button.sizePolicy().hasHeightForWidth())
-        self.login_button.setSizePolicy(sizePolicy)
-        self.login_button.setFlat(False)
-        self.login_button.setObjectName("login_button")
-        self.verticalLayout.addWidget(self.login_button)
         self.note_label = QtWidgets.QLabel(Dialog)
         self.note_label.setText("")
         self.note_label.setObjectName("note_label")
@@ -92,8 +83,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Edit App Link"))
+        Dialog.setWindowTitle(_translate("Dialog", "Edit Remote"))
         self.url_label.setText(_translate("Dialog", "URL"))
         self.name_label.setText(_translate("Dialog", "Name"))
         self.verify_ssl_label.setText(_translate("Dialog", "Verify SSL"))
-        self.login_button.setText(_translate("Dialog", "Enter or Change Credentials"))

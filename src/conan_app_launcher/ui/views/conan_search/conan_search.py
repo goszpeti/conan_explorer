@@ -48,11 +48,10 @@ class ConanSearchDialog(QDialog):
             item = QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Checked)
-            item.checkState
         # sets height to the height of the items, but max 120
         items_height = self._ui.remote_list.sizeHintForRow(
             0) * self._ui.remote_list.count() + 2 * self._ui.remote_list.frameWidth()
-        self._ui.remote_list.setFixedHeight(min(items_height, 120))
+        #self._ui.remote_list.setFixedHeight(min(items_height, 120))
 
         self._pkg_result_model = PkgSearchModel()
         self._pkg_result_loader = AsyncLoader(self)

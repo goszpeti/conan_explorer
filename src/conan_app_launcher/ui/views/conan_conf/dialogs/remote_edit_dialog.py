@@ -16,7 +16,7 @@ current_dir = Path(__file__).parent
 
 class RemoteEditDialog(QDialog):
 
-    def __init__(self, remote: Remote, new_remote, parent: Optional[QWidget], flags=Qt.WindowFlags()):
+    def __init__(self, remote: Remote, new_remote=False, parent: Optional[QWidget]=None, flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
         self._remote = remote
         self._new_remote = new_remote
@@ -25,7 +25,7 @@ class RemoteEditDialog(QDialog):
         self._ui.setupUi(self)
 
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.png")))
-        self._ui.login_button.clicked.connect(self.on_login_clicked)
+        # self._ui.login_button.clicked.connect(self.on_login_clicked)
         self._ui.button_box.accepted.connect(self.save)
         
         self._ui.name_line_edit.setText(remote.name)
@@ -49,8 +49,8 @@ class RemoteEditDialog(QDialog):
         self.accept()
         
         
-    def on_login_clicked(self):
-        # TODO
-        name = self._ui.name_line_edit.text()
-        login_dialog = RemoteLoginDialog(self, remote_names=[name])
-        login_dialog.show()
+    # def on_login_clicked(self):
+    #     # TODO
+    #     name = self._ui.name_line_edit.text()
+        # login_dialog = RemoteLoginDialog(self, remote_names=[self._remote])
+        # login_dialog.show()

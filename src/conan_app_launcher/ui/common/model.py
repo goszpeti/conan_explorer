@@ -71,8 +71,10 @@ class TreeModel(QAbstractItemModel):
     """ Qt tree model to be used with TreeModelItem.
     Supports lazy loading, if TreeModelItem enables it."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, checkable=False, *args, **kwargs):
         super(TreeModel, self).__init__(*args, **kwargs)
+        self.root_item: TreeModelItem
+        self._checkable = checkable
 
     def columnCount(self, parent):  # override
         if parent.isValid():
@@ -112,8 +114,10 @@ class TreeModel(QAbstractItemModel):
     def flags(self, index):  # override
         if not index.isValid():
             return Qt.NoItemFlags
-
-        return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        if self._checkable:
+            flags = flags | Qt.ItemIsUserCheckable
+        return flags
 
     def parent(self, index):  # override
         if not index.isValid():
