@@ -15,6 +15,8 @@ class IniSettings(SettingsInterface):
     """
     Settings mechanism with an ini file to use as a storage.
     File and entries are automatically created from the default value of the class.
+    All entries need to be entered in the default values, no runtime registration.
+    Settings should be accessed via their constant name.
     """
     # internal constants
     _GENERAL_SECTION_NAME = "General"

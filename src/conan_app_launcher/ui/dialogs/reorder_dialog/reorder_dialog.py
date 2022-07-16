@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from typing import Optional, Protocol, Union
+from typing import Optional, Union
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger

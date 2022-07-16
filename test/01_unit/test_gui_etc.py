@@ -48,7 +48,7 @@ def test_edit_line_conan(base_fixture, light_theme_fixture, qtbot):
     widget.setText("zlib/1.2.8")
     assert ConanRefLineEdit.INVALID_COLOR in widget.styleSheet()
     # test autocompletion (very implicit)
-    widget._completion_thread.join()
+    widget._completion_thread.join(10)
     assert TEST_REF in widget._remote_refs
 
 

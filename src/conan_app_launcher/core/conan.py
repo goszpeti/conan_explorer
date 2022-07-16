@@ -288,7 +288,8 @@ class ConanApi():
             # no query possible with pattern
             search_results = self.conan.search_recipes(
                 query, remote_name=remote, case_sensitive=False).get("results", None)
-        except Exception:
+        except Exception as e:
+            Logger().error(f"Error while searching for recipe: {str(e)}")
             return []
         if not search_results:
             return res_list
@@ -310,7 +311,6 @@ class ConanApi():
                                                              remote_name="all").get("results", None)
         except Exception as e:
             Logger().warning(str(e))
-            return []
         try:
             if SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
                 local_results: List = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",

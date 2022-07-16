@@ -93,7 +93,6 @@ class RemotesTableModel(TreeModel):
 
     def setup_model_data(self):
         remote_groups = self.get_remote_groups()
-
         for group_name, remotes in remote_groups.items():
             # RemotesModelItem(Remote(group_name, "", False, False), self.root_item)
             remote_group_item = TreeModelItem([group_name, "", "", "", ""], self.root_item)
