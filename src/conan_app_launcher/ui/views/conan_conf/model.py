@@ -16,41 +16,6 @@ class RemotesModelItem(TreeModelItem):
                           user, str(auth)], parent, lazy_loading=lazy_loading)
         self.remote = remote
 
-
-class RemotesListModel(ReorderingModel):
-    def __init__(self):
-        super().__init__()
-        self._remotes = app.conan_api.get_remotes(include_disabled=True)
-
-    def data(self, index, role):
-        if role == Qt.DisplayRole:
-            text = self._remotes[index.row()].name
-            return text
-
-    def rowCount(self, parent=None):
-        return len(self._remotes)
-    
-    def setData(self, index, value, role):
-        if role == Qt.UserRole:
-            self._remotes[index.row()] = value
-
-    def save(self):
-        # update every remote with new index
-        i = 0
-        for remote in self._remotes:
-            app.conan_api.conan.remote_update(remote.name, remote.url, remote.verify_ssl, i)
-            i+=1
-
-    def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
-        app_to_move = self._remotes[source_row]
-        self._remotes.insert(destination_child, app_to_move)
-        if source_row < destination_child:
-            self._remotes.pop(source_row)
-        else:
-            self._remotes.pop(source_row+1)
-        return super().moveRow(source_parent, source_row, destination_parent, destination_child)
-
-
 class RemotesTableModel(TreeModel):
     """ Remotes displayed as a table with detail info - implemented as a tree with one level:
         this is done, because list model cannot have a header and multiple columns and a
@@ -92,18 +57,10 @@ class RemotesTableModel(TreeModel):
         return remote_groups
 
     def setup_model_data(self):
-        remote_groups = self.get_remote_groups()
-        for group_name, remotes in remote_groups.items():
-            # RemotesModelItem(Remote(group_name, "", False, False), self.root_item)
-            remote_group_item = TreeModelItem([group_name, "", "", "", ""], self.root_item)
-            for remote in remotes:
-                user_name, auth = app.conan_api.get_remote_user_info(remote.name)
-                remote_item = RemotesModelItem(remote, user_name, auth, self.root_item)
-                self.root_item.append_child(remote_item)
-
-                #remote_item = RemotesModelItem(remote, user_name, auth, remote_group_item)
-                #remote_group_item.append_child(remote_item)
-            #self.root_item.append_child(remote_group_item)
+        for remote in app.conan_api.get_remotes(include_disabled=True):
+            user_name, auth = app.conan_api.get_remote_user_info(remote.name)
+            remote_item = RemotesModelItem(remote, user_name, auth, self.root_item)
+            self.root_item.append_child(remote_item)
 
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
@@ -114,14 +71,7 @@ class RemotesTableModel(TreeModel):
                 return item.data(index.column())
             except:
                 return ""
-        # elif(role == Qt.CheckStateRole):  # checkedItems.contains(index) ?
-        #              #       Qt: : Checked :
-        #     # TODO only row 0
-        #     return Qt.Unchecked
 
-        # elif(role == Qt: : BackgroundColorRole):
-        #     return checkedItems.contains(index) ?
-        #     QColor("#ffffb2"): QColor("#ffffff")
         if isinstance(item, RemotesModelItem):
             if role == Qt.FontRole and item.remote.disabled:
                 font = QFont()

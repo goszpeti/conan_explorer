@@ -10,13 +10,13 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QWidget
 
 from .remote_edit_dialog_ui import Ui_Dialog
-from .remote_login import RemoteLoginDialog
 
 current_dir = Path(__file__).parent
 
+
 class RemoteEditDialog(QDialog):
 
-    def __init__(self, remote: Remote, new_remote=False, parent: Optional[QWidget]=None, flags=Qt.WindowFlags()):
+    def __init__(self, remote: Remote, new_remote=False, parent: Optional[QWidget] = None, flags=Qt.WindowFlags()):
         super().__init__(parent=parent, flags=flags)
         self._remote = remote
         self._new_remote = new_remote
@@ -27,7 +27,7 @@ class RemoteEditDialog(QDialog):
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.png")))
         # self._ui.login_button.clicked.connect(self.on_login_clicked)
         self._ui.button_box.accepted.connect(self.save)
-        
+
         self._ui.name_line_edit.setText(remote.name)
         self._ui.url_line_edit.setText(remote.url)
         self._ui.verify_ssl_checkbox.setChecked(remote.verify_ssl)
@@ -47,10 +47,3 @@ class RemoteEditDialog(QDialog):
             app.conan_api.conan.remote_update(new_name, new_url, new_verify_ssl)
 
         self.accept()
-        
-        
-    # def on_login_clicked(self):
-    #     # TODO
-    #     name = self._ui.name_line_edit.text()
-        # login_dialog = RemoteLoginDialog(self, remote_names=[self._remote])
-        # login_dialog.show()

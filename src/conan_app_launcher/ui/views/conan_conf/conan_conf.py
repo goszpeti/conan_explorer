@@ -32,13 +32,13 @@ class ConanConfigView(QDialog):
 
         self.config_file_path = Path(app.conan_api.client_cache.conan_conf_path)
         self.profiles_path = Path(app.conan_api.client_cache.default_profile_path).parent
-        
+
         self._init_info_tab()
         self._init_remotes_tab()
         self._init_profiles_tab()
         self._init_config_file_tab()
         self._init_settings_yml_tab()
-        
+
         app.conan_api.conan.remote_list_pref
 
     def _init_info_tab(self):
@@ -46,7 +46,7 @@ class ConanConfigView(QDialog):
 
         # setup system version:
         with escape_venv():
-            try: #move to conan? 
+            try:  # move to conan?
                 out = subprocess.check_output("conan --version").decode("utf-8")  # TODO
                 conan_sys_version = out.lower().split("version ")[1].rstrip()
             except:
@@ -56,7 +56,7 @@ class ConanConfigView(QDialog):
                 python_sys_version = out.lower().split("python ")[1].rstrip()
             except:
                 python_sys_version = "Unknown"
-            
+
         self._ui.python_cur_version_value_label.setText(platform.python_version())
         self._ui.revision_enabled_checkbox.setChecked(app.conan_api.client_cache.config.revisions_enabled)
         # TODO context menu or link to Open in File Manager
@@ -91,7 +91,7 @@ class ConanConfigView(QDialog):
             self.on_profile_context_menu_requested)
         self._init_profile_context_menu()
         self._ui.save_profile_button.clicked.connect(self.save_profile_file)
-        
+
     def _init_profile_context_menu(self):
         self._copy_profile_action = QAction("Copy profile name", self)
         self._copy_profile_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
@@ -116,7 +116,7 @@ class ConanConfigView(QDialog):
     def on_profile_context_menu_requested(self, position):
         self.profiles_cntx_menu.exec_(self._ui.profiles_list_view.mapToGlobal(position))
 
-### Remote
+# Remote
 
     def _setup_remotes_model(self):
         self._remotes_model = RemotesTableModel()
@@ -135,7 +135,7 @@ class ConanConfigView(QDialog):
     def _init_remotes_tab(self):
         self._setup_remotes_model()
         self._remotes_cntx_menu = RoundedMenu()
-        self._remotes_group_cntx_menu = RoundedMenu() # TODO
+        self._remotes_group_cntx_menu = RoundedMenu()  # TODO
 
         self._ui.remote_refresh_button.clicked.connect(self._init_remotes_tab)
         self._ui.remote_refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
@@ -157,7 +157,7 @@ class ConanConfigView(QDialog):
         self._ui.remotes_tree_view.customContextMenuRequested.connect(
             self.on_remote_context_menu_requested)
         self._init_remote_context_menu()
-        
+
     def on_remote_context_menu_requested(self, position):
         if isinstance(self._get_selected_remote(), RemotesModelItem):
             self._remotes_cntx_menu.exec_(self._ui.remotes_tree_view.mapToGlobal(position))
@@ -190,22 +190,10 @@ class ConanConfigView(QDialog):
         self._remotes_cntx_menu.addAction(self._disable_profile_action)
         self._disable_profile_action.triggered.connect(self.on_remote_disable)
 
-        #self._remotes_cntx_menu.addSeparator()
-
-        # self._reorder_remotes_action = QAction("Reorder remotes", self)
-        # self._reorder_remotes_action.setIcon(QIcon(get_themed_asset_image("icons/rearrange.png")))
-        # self._remotes_cntx_menu.addAction(self._reorder_remotes_action)
-        # self._reorder_remotes_action.triggered.connect(self.on_remote_reorder)
-        
         self._login_remotes_action = QAction("(Multi)Login to remote", self)
         self._login_remotes_action.setIcon(QIcon(get_themed_asset_image("icons/login.png")))
         self._remotes_cntx_menu.addAction(self._login_remotes_action)
         self._login_remotes_action.triggered.connect(self.on_remotes_login)
-        
-        
-        # TODO remove?
-        #self._remotes_group_cntx_menu.addAction(self._reorder_remotes_action)
-
 
     def on_remote_edit(self, model_index):
         remote_item = self._get_selected_remote()
@@ -215,7 +203,7 @@ class ConanConfigView(QDialog):
         self.remote_dialog.exec_()
         # update remote list
         self._init_remotes_tab()
-        
+
     def on_remotes_login(self):
         remote_item = self._get_selected_remote()
         if not remote_item:
@@ -230,19 +218,13 @@ class ConanConfigView(QDialog):
 
         self._init_remotes_tab()
 
-    # def on_remote_reorder(self):
-    #     model = RemotesListModel()
-    #     dialog = ReorderDialog(model, self)
-    #     dialog.exec_()
-    #     self._setup_remotes_model()
-
     def on_remote_add(self, model_index):
         new_remote = Remote("New", "", True, False)
         self.remote_dialog = RemoteEditDialog(new_remote, True, self)
         self.remote_dialog.exec_()
         # update remote list
         self._init_remotes_tab()
-        
+
     def on_remote_remove(self, model_index):
         remote_item = self._get_selected_remote()
         if not remote_item:
@@ -257,7 +239,6 @@ class ConanConfigView(QDialog):
             self.hide()
             app.conan_api.conan.remote_remove(remote_item.remote.name)
             self._init_remotes_tab()
-
 
     def on_remote_disable(self, model_index):
         remote_item = self._get_selected_remote()
