@@ -32,34 +32,34 @@ jobs:
             python: "3.6"
             conan: "latest"
             os: ubuntu-latest
-          # - name: "ubuntu-py37"
-          #   python: "3.7"
-          #   os: ubuntu-latest
-          #   conan: "latest"
-          # - name: "ubuntu-py38"
-          #   python: "3.8"
-          #   os: ubuntu-latest
-          #   conan: "latest"
-          # - name: "ubuntu-py39"
-          #   python: "3.9"
-          #   use_coverage: true
-          #   conan: "latest"
-          #   os: ubuntu-latest
-          # - name: "windows-py310"
-          #   python: "3.10"
-          #   os: windows-latest
-          #   use_coverage: true
-          #   conan: "latest"
-          # - name: "ubuntu-py38-conan1.24.0"
-          #   python: "3.8"
-          #   os: ubuntu-latest
-          #   conan: "1.24.0"
-          #   use_coverage: true
-          # - name: "ubuntu-py310-conan1.28.0"
-          #   python: "3.10"
-          #   os: ubuntu-latest
-          #   conan: "1.28.2"
-          #   use_coverage: true
+          - name: "ubuntu-py37"
+            python: "3.7"
+            os: ubuntu-latest
+            conan: "latest"
+          - name: "ubuntu-py38"
+            python: "3.8"
+            os: ubuntu-latest
+            conan: "latest"
+          - name: "ubuntu-py39"
+            python: "3.9"
+            use_coverage: true
+            conan: "latest"
+            os: ubuntu-latest
+          - name: "windows-py310"
+            python: "3.10"
+            os: windows-latest
+            use_coverage: true
+            conan: "latest"
+          - name: "ubuntu-py38-conan1.24.0"
+            python: "3.8"
+            os: ubuntu-latest
+            conan: "1.24.0"
+            use_coverage: true
+          - name: "ubuntu-py310-conan1.28.0"
+            python: "3.10"
+            os: ubuntu-latest
+            conan: "1.28.2"
+            use_coverage: true
 
     env:
       DISPLAY: ":99.0"
