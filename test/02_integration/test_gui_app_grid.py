@@ -1,7 +1,4 @@
-"""
-These test starts the application but not with the main function,
-so the qtbot is usable to inspect gui objects.
-"""
+
 import os
 import tempfile
 from pathlib import Path

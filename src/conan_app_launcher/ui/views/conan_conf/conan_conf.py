@@ -24,9 +24,6 @@ class ConanConfigView(QDialog):
     def __init__(self, parent: Optional[QWidget]):
         # Add minimize and maximize buttons
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
-        #self.page_widgets = page_widgets
-        #self.conan_pkg_installed = conan_pkg_installed
-        #self.conan_pkg_removed = conan_pkg_removed
         self._ui = Ui_Form()
         self._ui.setupUi(self)
 
@@ -39,7 +36,8 @@ class ConanConfigView(QDialog):
         self._init_config_file_tab()
         self._init_settings_yml_tab()
 
-        app.conan_api.conan.remote_list_pref
+        # always show first tab on start
+        self._ui.config_tab_widget.tabBar().setCurrentIndex(0)
 
     def _init_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(app.conan_api.client_version)
@@ -135,7 +133,6 @@ class ConanConfigView(QDialog):
     def _init_remotes_tab(self):
         self._setup_remotes_model()
         self._remotes_cntx_menu = RoundedMenu()
-        self._remotes_group_cntx_menu = RoundedMenu()  # TODO
 
         self._ui.remote_refresh_button.clicked.connect(self._init_remotes_tab)
         self._ui.remote_refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
@@ -230,7 +227,7 @@ class ConanConfigView(QDialog):
         if not remote_item:
             return
         message_box = QMessageBox(parent=self)  # self.parentWidget())
-        message_box.setWindowTitle("Delete app link")
+        message_box.setWindowTitle("Delete Remove")
         message_box.setText(f"Are you sure, you want to delete the remote {remote_item.remote.name}?")
         message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         message_box.setIcon(QMessageBox.Question)
