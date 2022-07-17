@@ -79,8 +79,8 @@ jobs:
           /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
       - name: Install xterm for testing in Linux
         if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt install lxterminal nautilus x11-utils # terminal, file manager, xwininfo
+        run: |  # terminal, file manager, xwininfo, text-editor
+          sudo apt install lxterminal nautilus x11-utils mousepad
           sudo apt install dbus-x11 at-spi2-core
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v1
