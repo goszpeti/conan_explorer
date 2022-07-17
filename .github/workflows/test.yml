@@ -80,7 +80,7 @@ jobs:
       - name: Install xterm for testing in Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          sudo apt install lxterminal nautilus
+          sudo apt install lxterminal nautilus x11-utils # terminal, file manager, xwininfo
           sudo apt install dbus-x11 at-spi2-core
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v1
