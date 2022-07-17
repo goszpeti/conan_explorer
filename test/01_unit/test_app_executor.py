@@ -7,7 +7,7 @@ import tempfile
 import time
 from pathlib import Path
 from subprocess import check_output
-from test.conftest import get_window_pid, is_ci_job
+from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 
 import conan_app_launcher  # for mocker
 import psutil
@@ -208,19 +208,18 @@ def test_open_file(base_fixture):
     with open(str(test_file), "w") as f:
         f.write("test")
 
+    if platform.system() == "Linux":
+        # set default app for textfile
+
+        ret = check_output(["xdg-mime", "default", "mousepad.desktop", "text/plain"]).decode("utf-8")
+        assert "mousepad" in check_output(["xdg-mime", "query", "default", "text/plain"]).decode("utf-8")
+
     open_file(test_file)
 
     time.sleep(3)  # wait for program to start
     if platform.system() == "Linux":
-        # set for textfile
-        ret = check_output(["xdg-mime", "default", "org.gnome.Terminal.desktop",
-                            "text/plain"]).decode("utf-8")
-
-        ret = check_output(["xdg-mime", "query", "default", "text/plain"]).decode("utf-8")
         # check pid of created process
-        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
-        assert "Terminal" in ret
-        os.system("pkill --newest terminal")
+        assert check_if_process_running("mousepad", kill=True)
     elif platform.system() == "Windows":
         default_app = "notepad.exe"
         # this is application specific

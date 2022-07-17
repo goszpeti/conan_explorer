@@ -136,10 +136,10 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
     return 0
 
 
-def open_file(file: Path):
+def open_file(file: Path)-> int: # pid
     """ Open files with their associated programs """
     if file.absolute().is_file():
         if platform.system() == 'Windows':
             os.startfile(str(file))
         elif platform.system() == "Linux":
-            subprocess.call(("xdg-open", str(file)))
+            subprocess.Popen(("xdg-open", str(file)))
