@@ -210,10 +210,8 @@ def test_open_file(base_fixture):
 
     if platform.system() == "Linux":
         # set default app for textfile
-
-        ret = check_output(["xdg-mime", "default", "mousepad.desktop", "text/plain"]).decode("utf-8")
-        assert "mousepad" in check_output(["xdg-mime", "query", "default", "text/plain"]).decode("utf-8")
-
+        check_output(["xdg-mime", "default", "mousepad.desktop", "text/plain"]).decode("utf-8")
+        time.sleep(1)
     open_file(test_file)
 
     time.sleep(3)  # wait for program to start
