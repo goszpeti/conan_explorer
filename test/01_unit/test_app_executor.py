@@ -68,7 +68,7 @@ def test_open_in_file_manager(base_fixture, mocker):
         # list a few candidates
         assert proc.children()[0].name() in ["nautilus", "chrome", "thunar", "dolphin", "pcmanfm"]
         ret.kill()
-
+        os.system("pkill nautilus")
 
 
 def test_choose_run_script(base_fixture, tmp_path, mocker):
@@ -135,8 +135,9 @@ def test_start_cli_option_app(base_fixture):
     if platform.system() == "Linux":
         time.sleep(5)  # wait for terminal to spawn
         # check pid of created process
-        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
-        assert "Terminal" in ret
+        proc = psutil.Process(pid)
+        assert proc.name() == "x-terminal-emulator"
+        assert "python" in proc.cmdline()[2]
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         assert pid > 0
