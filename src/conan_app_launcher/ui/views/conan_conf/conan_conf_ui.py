@@ -259,7 +259,7 @@ class Ui_Form(object):
         self.remote_refresh_button.setText(_translate("Form", "Refresh list"))
         self.remote_move_up_button.setText(_translate("Form", "Move Up"))
         self.remote_move_down_button.setText(_translate("Form", "Move Down"))
-        self.remote_login.setText(_translate("Form", "Login"))
+        self.remote_login.setText(_translate("Form", "(Multi)Login"))
         self.remote_toggle_disabled.setText(_translate("Form", "Enable/Disable"))
         self.remote_add.setText(_translate("Form", "Add"))
         self.remote_remove.setText(_translate("Form", "Remove"))

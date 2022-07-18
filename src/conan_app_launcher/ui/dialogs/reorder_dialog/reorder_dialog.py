@@ -75,7 +75,10 @@ class ReorderController():
                 self._view.model().beginMoveRows(idx, row, row, pre_idx, pre_idx.row())
                 self._view.model().moveRow(idx, row, pre_idx, pre_idx.row())
                 self._view.model().endMoveRows()
-                self._view.selectionModel().select(pre_idx, QItemSelectionModel.Select)
+                # for all columns
+                for column in range(self._model.columnCount(QModelIndex())):
+                    index = self._model.index(row-1, column, QModelIndex())
+                    self._view.selectionModel().select(index, QItemSelectionModel.Select)
         except Exception as e:
             print(e)
 
@@ -101,7 +104,10 @@ class ReorderController():
                 self._model.beginMoveRows(idx, row, row, post_sel_idx, post_sel_idx.row())
                 self._model.moveRow(idx, row, post_idx, row + 2)
                 self._model.endMoveRows()
-                self._view.selectionModel().select(post_sel_idx, QItemSelectionModel.Select)
+                # for all columns
+                for column in range(self._model.columnCount(QModelIndex())):
+                    index = self._model.index(row+1, column, QModelIndex())
+                    self._view.selectionModel().select(index, QItemSelectionModel.Select)
         except Exception as e:
             print(e)
 

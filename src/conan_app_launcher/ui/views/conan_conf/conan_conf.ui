@@ -326,7 +326,7 @@
              <item>
               <widget class="QPushButton" name="remote_login">
                <property name="text">
-                <string>Login</string>
+                <string>(Multi)Login</string>
                </property>
               </widget>
              </item>

@@ -10,7 +10,7 @@ from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.dialogs import ReorderController
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QModelIndex, QItemSelectionModel
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QApplication, QDialog, QWidget, QMessageBox
 
@@ -130,15 +130,17 @@ class ConanConfigView(QDialog):
         self._ui.remotes_tree_view.resizeColumnToContents(3)
         self._ui.remotes_tree_view.resizeColumnToContents(4)
 
-    def _init_remotes_tab(self):
-        self._setup_remotes_model()
-        self._remotes_cntx_menu = RoundedMenu()
-
-        self._ui.remote_refresh_button.clicked.connect(self._init_remotes_tab)
+        # callbacks are bound on instance of _remote_reorder_controller
         self._ui.remote_refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
         self._ui.remote_move_up_button.clicked.connect(self._remote_reorder_controller.move_up)
         self._ui.remote_move_up_button.setIcon(QIcon(get_themed_asset_image("icons/arrow_up.png")))
         self._ui.remote_move_down_button.clicked.connect(self._remote_reorder_controller.move_down)
+
+    def _init_remotes_tab(self):
+        
+        self._init_remotes_model()
+        self._remotes_cntx_menu = RoundedMenu()
+        self._ui.remote_refresh_button.clicked.connect(self._init_remotes_tab)
         self._ui.remote_move_down_button.setIcon(QIcon(get_themed_asset_image("icons/arrow_down.png")))
         self._ui.remote_login.clicked.connect(self.on_remotes_login)
         self._ui.remote_login.setIcon(QIcon(get_themed_asset_image("icons/login.png")))
@@ -155,11 +157,33 @@ class ConanConfigView(QDialog):
             self.on_remote_context_menu_requested)
         self._init_remote_context_menu()
 
+    def _init_remotes_model(self):
+
+        # save selected remote, if triggering a re-init
+        sel_remote = self._get_selected_remote()
+        self._setup_remotes_model()
+        if sel_remote:
+            self._select_remote(sel_remote.remote.name)
+
+    def _select_remote(self, remote_name: str):
+        row_remote_to_sel = -1
+        row = 0
+        remote_item = None
+        for remote_item in self._remotes_model.root_item.child_items:
+            if remote_item.item_data[0] == remote_name:
+                row_remote_to_sel = row
+                break
+            row += 1
+        if row_remote_to_sel < 0:
+            Logger().debug("No remote to select")
+            return
+        sel_model = self._ui.remotes_tree_view.selectionModel()
+        for column in range(self._remotes_model.columnCount(QModelIndex())):
+            index = self._remotes_model.index(row_remote_to_sel, column, QModelIndex())
+            sel_model.select(index, QItemSelectionModel.Select)
+
     def on_remote_context_menu_requested(self, position):
-        if isinstance(self._get_selected_remote(), RemotesModelItem):
-            self._remotes_cntx_menu.exec_(self._ui.remotes_tree_view.mapToGlobal(position))
-        else:
-            self._remotes_group_cntx_menu.exec_(self._ui.remotes_tree_view.mapToGlobal(position))
+        self._remotes_cntx_menu.exec_(self._ui.remotes_tree_view.mapToGlobal(position))
 
     def _init_remote_context_menu(self):
         self._copy_remote_action = QAction("Copy remote name", self)
@@ -199,7 +223,7 @@ class ConanConfigView(QDialog):
         self.remote_dialog = RemoteEditDialog(remote_item.remote, False, self)
         self.remote_dialog.exec_()
         # update remote list
-        self._init_remotes_tab()
+        self._init_remotes_model()
 
     def on_remotes_login(self):
         remote_item = self._get_selected_remote()
@@ -213,14 +237,14 @@ class ConanConfigView(QDialog):
         self.remote_dialog.exec_()
         # update remote list
 
-        self._init_remotes_tab()
+        self._init_remotes_model()
 
     def on_remote_add(self, model_index):
         new_remote = Remote("New", "", True, False)
         self.remote_dialog = RemoteEditDialog(new_remote, True, self)
         self.remote_dialog.exec_()
         # update remote list
-        self._init_remotes_tab()
+        self._init_remotes_model()
 
     def on_remote_remove(self, model_index):
         remote_item = self._get_selected_remote()
@@ -233,16 +257,15 @@ class ConanConfigView(QDialog):
         message_box.setIcon(QMessageBox.Question)
         reply = message_box.exec_()
         if reply == QMessageBox.Yes:
-            self.hide()
             app.conan_api.conan.remote_remove(remote_item.remote.name)
-            self._init_remotes_tab()
+            self._init_remotes_model()
 
     def on_remote_disable(self, model_index):
         remote_item = self._get_selected_remote()
         if not remote_item:
             return
         app.conan_api.conan.remote_set_disabled_state(remote_item.remote.name, not remote_item.remote.disabled)
-        self._init_remotes_tab()
+        self._init_remotes_model()
 
     def _get_selected_remote(self) -> Union[RemotesModelItem, None]:
         indexes = self._ui.remotes_tree_view.selectedIndexes()
