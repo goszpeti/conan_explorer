@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>562</width>
-    <height>163</height>
+    <width>776</width>
+    <height>146</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
     <horstretch>1</horstretch>
     <verstretch>1</verstretch>
    </sizepolicy>
@@ -97,13 +97,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QLabel" name="note_label">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="button_box">

@@ -21,12 +21,14 @@ from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 class ConanSearchDialog(QDialog):
 
     def __init__(self, parent: Optional[QWidget], conan_pkg_installed: Optional[pyqtBoundSignal] = None,
-                 conan_pkg_removed: Optional[pyqtBoundSignal] = None, page_widgets: Optional[FluentWindow.PageStore] = None):
+                 conan_pkg_removed: Optional[pyqtBoundSignal] = None, conan_remotes_updated: Optional[pyqtBoundSignal] = None,
+                 page_widgets: Optional[FluentWindow.PageStore] = None):
         # Add minimize and maximize buttons
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         self.page_widgets = page_widgets
         self.conan_pkg_installed = conan_pkg_installed
         self.conan_pkg_removed = conan_pkg_removed
+        self.conan_remotes_updated = conan_remotes_updated
 
         self._ui = Ui_Form()
         self._ui.setupUi(self)
@@ -43,7 +45,19 @@ class ConanSearchDialog(QDialog):
         self._ui.search_button.setShortcut(QKeySequence(Qt.Key_Return))
 
         # init remotes list
+        if self.conan_remotes_updated:
+            self.conan_remotes_updated.connect(self._init_remotes)
+        else:  # call at least once
+            self._init_remotes
+        self._pkg_result_model = PkgSearchModel()
+        self._pkg_result_loader = AsyncLoader(self)
+        self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
+        self.apply_theme()
+
+    def _init_remotes(self):
         remotes = app.conan_api.get_remotes()
+        self._ui.remote_list.clear()
         for remote in remotes:
             item = QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
@@ -51,13 +65,6 @@ class ConanSearchDialog(QDialog):
         # sets height to the height of the items, but max 120
         items_height = self._ui.remote_list.sizeHintForRow(
             0) * self._ui.remote_list.count() + 2 * self._ui.remote_list.frameWidth()
-        #self._ui.remote_list.setFixedHeight(min(items_height, 120))
-
-        self._pkg_result_model = PkgSearchModel()
-        self._pkg_result_loader = AsyncLoader(self)
-        self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
-        self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
-        self.apply_theme()
 
     def apply_theme(self):
         icon = QIcon(get_themed_asset_image("icons/search_packages.png"))

@@ -63,3 +63,6 @@ class RemoteLoginDialog(QDialog):
         long_string = "A" * len(self._ui.password_line_edit.text())
         self._ui.password_line_edit.setText(long_string)
         self._ui.password_line_edit.setText("")
+        # run gc to clear all possible dangling Python strings
+        import gc
+        gc.collect()

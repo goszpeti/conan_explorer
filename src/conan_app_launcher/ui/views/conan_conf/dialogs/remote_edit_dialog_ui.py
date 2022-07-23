@@ -14,8 +14,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(562, 163)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        Dialog.resize(776, 146)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
@@ -62,10 +62,6 @@ class Ui_Dialog(object):
         self.edit_grid.addWidget(self.verify_ssl_label, 2, 0, 1, 1)
         self.edit_grid.setRowStretch(0, 1)
         self.verticalLayout.addLayout(self.edit_grid)
-        self.note_label = QtWidgets.QLabel(Dialog)
-        self.note_label.setText("")
-        self.note_label.setObjectName("note_label")
-        self.verticalLayout.addWidget(self.note_label)
         self.button_box = QtWidgets.QDialogButtonBox(Dialog)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(1)

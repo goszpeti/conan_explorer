@@ -31,6 +31,7 @@ class MainWindow(FluentWindow):
     # signals for inter page communication
     conan_pkg_installed = pyqtSignal(str, str)  # conan_ref, pkg_id
     conan_pkg_removed = pyqtSignal(str, str)  # conan_ref, pkg_ids
+    conan_remotes_updated = pyqtSignal()
 
     display_versions_changed = pyqtSignal()
     display_channels_changed = pyqtSignal()
@@ -52,9 +53,9 @@ class MainWindow(FluentWindow):
         self.about_page = AboutPage(self)
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
         self.local_package_explorer = LocalConanPackageExplorer(self, self.conan_pkg_removed, self.page_widgets)
-        self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed,
-                                               self.conan_pkg_removed, self.page_widgets)
-        self.conan_config = ConanConfigView(self)
+        self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed, self.conan_pkg_removed, 
+                                               self.conan_remotes_updated, self.page_widgets)
+        self.conan_config = ConanConfigView(self, self.conan_remotes_updated)
         self._init_left_menu()
         self._init_right_menu()
 

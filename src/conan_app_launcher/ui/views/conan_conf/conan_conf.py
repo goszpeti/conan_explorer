@@ -10,7 +10,7 @@ from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.dialogs import ReorderController
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
-from PyQt5.QtCore import Qt, QModelIndex, QItemSelectionModel
+from PyQt5.QtCore import Qt, QModelIndex, QItemSelectionModel, pyqtBoundSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QApplication, QDialog, QWidget, QMessageBox
 
@@ -21,7 +21,7 @@ from .model import ProfilesModel, RemotesModelItem, RemotesTableModel
 
 class ConanConfigView(QDialog):
 
-    def __init__(self, parent: Optional[QWidget]):
+    def __init__(self, parent: Optional[QWidget], conan_remotes_updated: Optional[pyqtBoundSignal] = None):
         # Add minimize and maximize buttons
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         self._ui = Ui_Form()
@@ -29,7 +29,7 @@ class ConanConfigView(QDialog):
 
         self.config_file_path = Path(app.conan_api.client_cache.conan_conf_path)
         self.profiles_path = Path(app.conan_api.client_cache.default_profile_path).parent
-
+        self.conan_remotes_updated = conan_remotes_updated
         self._init_info_tab()
         self._init_remotes_tab()
         self._init_profiles_tab()
@@ -116,31 +116,10 @@ class ConanConfigView(QDialog):
 
 # Remote
 
-    def _setup_remotes_model(self):
-        self._remotes_model = RemotesTableModel()
-        self._remotes_model.setup_model_data()
-        self._remote_reorder_controller = ReorderController(self._ui.remotes_tree_view, self._remotes_model)
-        self._ui.remotes_tree_view.setItemsExpandable(False)
-        self._ui.remotes_tree_view.setRootIsDecorated(False)
-        self._ui.remotes_tree_view.setModel(self._remotes_model)
-        self._ui.remotes_tree_view.expandAll()
-        self._ui.remotes_tree_view.resizeColumnToContents(0)
-        self._ui.remotes_tree_view.resizeColumnToContents(1)
-        self._ui.remotes_tree_view.resizeColumnToContents(2)
-        self._ui.remotes_tree_view.resizeColumnToContents(3)
-        self._ui.remotes_tree_view.resizeColumnToContents(4)
-
-        # callbacks are bound on instance of _remote_reorder_controller
-        self._ui.remote_refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
-        self._ui.remote_move_up_button.clicked.connect(self._remote_reorder_controller.move_up)
-        self._ui.remote_move_up_button.setIcon(QIcon(get_themed_asset_image("icons/arrow_up.png")))
-        self._ui.remote_move_down_button.clicked.connect(self._remote_reorder_controller.move_down)
-
     def _init_remotes_tab(self):
-        
         self._init_remotes_model()
         self._remotes_cntx_menu = RoundedMenu()
-        self._ui.remote_refresh_button.clicked.connect(self._init_remotes_tab)
+        self._ui.remote_refresh_button.clicked.connect(self._init_remotes_model)
         self._ui.remote_move_down_button.setIcon(QIcon(get_themed_asset_image("icons/arrow_down.png")))
         self._ui.remote_login.clicked.connect(self.on_remotes_login)
         self._ui.remote_login.setIcon(QIcon(get_themed_asset_image("icons/login.png")))
@@ -158,14 +137,36 @@ class ConanConfigView(QDialog):
         self._init_remote_context_menu()
 
     def _init_remotes_model(self):
-
         # save selected remote, if triggering a re-init
         sel_remote = self._get_selected_remote()
         self._setup_remotes_model()
         if sel_remote:
             self._select_remote(sel_remote.remote.name)
+        if self.conan_remotes_updated:
+            self.conan_remotes_updated.emit()
 
-    def _select_remote(self, remote_name: str):
+    def _setup_remotes_model(self):
+        self._remotes_model = RemotesTableModel()
+        self._remote_reorder_controller = ReorderController(self._ui.remotes_tree_view, self._remotes_model)
+
+        self._remotes_model.setup_model_data()
+        self._ui.remotes_tree_view.setItemsExpandable(False)
+        self._ui.remotes_tree_view.setRootIsDecorated(False)
+        self._ui.remotes_tree_view.setModel(self._remotes_model)
+        self._ui.remotes_tree_view.expandAll()
+        self._ui.remotes_tree_view.resizeColumnToContents(0)
+        self._ui.remotes_tree_view.resizeColumnToContents(1)
+        self._ui.remotes_tree_view.resizeColumnToContents(2)
+        self._ui.remotes_tree_view.resizeColumnToContents(3)
+        self._ui.remotes_tree_view.resizeColumnToContents(4)
+
+        # callbacks are bound on instance of _remote_reorder_controller
+        self._ui.remote_refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
+        self._ui.remote_move_up_button.clicked.connect(self._remote_reorder_controller.move_up)
+        self._ui.remote_move_up_button.setIcon(QIcon(get_themed_asset_image("icons/arrow_up.png")))
+        self._ui.remote_move_down_button.clicked.connect(self._remote_reorder_controller.move_down)
+
+    def _select_remote(self, remote_name: str) -> bool:
         row_remote_to_sel = -1
         row = 0
         remote_item = None
@@ -176,11 +177,12 @@ class ConanConfigView(QDialog):
             row += 1
         if row_remote_to_sel < 0:
             Logger().debug("No remote to select")
-            return
+            return False
         sel_model = self._ui.remotes_tree_view.selectionModel()
         for column in range(self._remotes_model.columnCount(QModelIndex())):
             index = self._remotes_model.index(row_remote_to_sel, column, QModelIndex())
             sel_model.select(index, QItemSelectionModel.Select)
+        return True
 
     def on_remote_context_menu_requested(self, position):
         self._remotes_cntx_menu.exec_(self._ui.remotes_tree_view.mapToGlobal(position))

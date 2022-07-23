@@ -25,7 +25,6 @@ class RemotesTableModel(TreeModel):
     def __init__(self, *args, **kwargs):
         super(RemotesTableModel, self).__init__(checkable=True, *args, **kwargs)
         self.root_item = TreeModelItem(["Name", "URL", "SSL", "User", "Authenticated"])
-        #self._remotes = app.conan_api.get_remotes(include_disabled=True)
 
     def get_remotes_from_same_server(self, remote: Remote):
         remote_groups = self.get_remote_groups()
@@ -57,6 +56,7 @@ class RemotesTableModel(TreeModel):
         return remote_groups
 
     def setup_model_data(self):
+        self.root_item.child_items = []
         for remote in app.conan_api.get_remotes(include_disabled=True):
             user_name, auth = app.conan_api.get_remote_user_info(remote.name)
             remote_item = RemotesModelItem(remote, user_name, auth, self.root_item)

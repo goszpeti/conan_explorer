@@ -1,6 +1,7 @@
 
 import os
 from pathlib import Path
+from time import sleep
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL, TEST_REMOTE_NAME, TEST_REMOTE_URL
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -59,8 +60,6 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
     assert remotes_model
 
     #### 1. check, that the test remotes are in the list
-    row_remote_to_test = 0
-    row = 0
     for remote_item in remotes_model.root_item.child_items:
         if remote_item.item_data[0] == TEST_REMOTE_NAME:
             assert remote_item.item_data[1] in TEST_REMOTE_URL
@@ -72,13 +71,9 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
             assert remote_item.item_data[2] == "False"
             assert remote_item.item_data[3] == "None"
             assert remote_item.item_data[4] == "False"
-            row_remote_to_test = row
 
     #### 2. Select new remote
-    sel_model = conan_conf_view._ui.remotes_tree_view.selectionModel()
-    index = remotes_model.index(row_remote_to_test, 0, QModelIndex())
-    assert index.data(0) == "local3"
-    sel_model.select(index, QItemSelectionModel.ClearAndSelect)
+    assert conan_conf_view._select_remote("local3")
 
     #### 3. Test Disable/Enable
     conan_conf_view._ui.remote_toggle_disabled.click()
@@ -95,12 +90,54 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
         if remote.name == "local3":
             assert not remote.disabled
     # 4. Move last remote up, check order
+    last_item = remotes_model.root_item.child_items[-1]
+    assert conan_conf_view._select_remote(last_item.remote.name)
+    
+    conan_conf_view._ui.remote_move_up_button.click()
+    sleep(1)
+    remotes_model = conan_conf_view._remotes_model
+    second_last_item = remotes_model.root_item.child_items[-2]
+
+    assert second_last_item.remote.name == last_item.remote.name
+
     # 5. Move this remote down, check order
+    conan_conf_view._ui.remote_move_down_button.click()
+    sleep(1)
+    remotes_model = conan_conf_view._remotes_model
+    last_item = remotes_model.root_item.child_items[-1]
+    assert second_last_item.remote.name == last_item.remote.name
+
     # 6. Add a new remote via cli -> push refresh -> new remote should appear
+    os.system("conan remote add local4 http://127.0.0.1:9303/ false")
+    conan_conf_view._ui.remote_refresh_button.click()
+    assert conan_conf_view._select_remote("local4")
+
     # 7. Delete the new remote
+    # mock cancel -> nothing should change
+    # mock OK
+    remotes_count = conan_conf_view._remotes_model.root_item.child_count()
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+                        return_value=QtWidgets.QMessageBox.Cancel)
+    conan_conf_view._ui.remote_remove.click()
+    assert conan_conf_view._select_remote("local4")
+    assert conan_conf_view._remotes_model.root_item.child_count() == remotes_count
+
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+                        return_value=QtWidgets.QMessageBox.Yes)
+    conan_conf_view._ui.remote_remove.click()
+    assert conan_conf_view._remotes_model.root_item.child_count()  == remotes_count - 1
+
     # 8. Add a new remote via button/dialog -> save
+    # mock cancel -> nothing should change
+    # mock OK
+    conan_conf_view._ui.remote_add.click()
+
     # 9. Edit the remote -> changes should be reflected in the model
+    # mock cancel -> nothing should change
+
+
     # 10. Delete the remote
+    conan_conf_view._ui.remote_remove.click()
     # 11. Test login with the local remote TODO???
     return
 
