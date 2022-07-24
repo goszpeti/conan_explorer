@@ -23,7 +23,8 @@ GUI_STYLE = "style"
 GUI_STYLE_DARK = "dark"
 GUI_STYLE_LIGHT = "light"
 
-LAST_WINDOW_SIZE = "last_window_size"
+WINDOW_SIZE = "window_size"
+CONSOLE_SPLIT_SIZES = "console_split_sizes"
 
 # Implementation types for factory
 SETTINGS_INI_TYPE = "ini"

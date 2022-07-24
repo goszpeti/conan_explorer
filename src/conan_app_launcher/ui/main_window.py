@@ -6,12 +6,12 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import PathLike, user_save_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan import ConanCleanup
-from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
+from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
-                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE, LAST_WINDOW_SIZE)
+                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE, WINDOW_SIZE)
 from conan_app_launcher.ui.views.conan_conf.conan_conf import ConanConfigView
 from conan_app_launcher.ui.widgets import WideMessageBox, AnimatedToggle
 from PyQt5.QtCore import Qt, QRect, pyqtSignal, pyqtSlot
@@ -58,7 +58,6 @@ class MainWindow(FluentWindow):
         self.conan_config = ConanConfigView(self, self.conan_remotes_updated)
         self._init_left_menu()
         self._init_right_menu()
-        self.restore_last_window_state()
 
     def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", is_upper_menu=True, page_widget=self.app_grid,
@@ -148,8 +147,9 @@ class MainWindow(FluentWindow):
         # model loaded, now load the gui elements, which have a static model
         self.app_grid.re_init(self.model.app_grid)
 
-        # TODO: Other modules are currently loaded on demand. A window and view restoration would be nice and
-        # should be called from here
+        # Other modules are currently loaded on demand.
+        self.restore_window_state()
+
 
     @pyqtSlot()
     def on_font_size_increased(self):
@@ -288,31 +288,44 @@ class MainWindow(FluentWindow):
         """ Write the text signaled by the logger """
         self.ui.console.append(text)
 
-    def restore_last_window_state(self):
-        last_size = app.active_settings.get_string(LAST_WINDOW_SIZE)
-        if last_size.lower() == "maximized":
+    def restore_window_state(self):
+        # restore window size
+        sizes_str = app.active_settings.get_string(WINDOW_SIZE)
+        if sizes_str.lower() == "maximized":
             self.showMaximized()
         else:
             split_sizes_int = [0,0,800,600]
             try:
-                split_sizes = last_size.strip().split(",")
+                split_sizes = sizes_str.strip().split(",")
                 split_sizes_int = [int(size) for size in split_sizes]
             except Exception as e:
-                Logger().warning(f"Can't read last window size: {str(e)}")
-            if not len(split_sizes_int) == 4:
-                Logger().warning("Invalid last window size length.")
-                return
+                Logger().warning(f"Can't read window size: {str(e)}")
             try:
+                assert len(split_sizes_int) == 4, "Invalid setting window size length."
                 geometry = QRect(*split_sizes_int)
                 self.setGeometry(geometry)
             except Exception as e:
-                Logger().warning(f"Can't restore last window size: {str(e)}")
-
+                Logger().warning(f"Can't restore window size: {str(e)}")
+        # restore console size
+        try:
+            sizes_str = app.active_settings.get_string(CONSOLE_SPLIT_SIZES)
+            split_sizes = sizes_str.strip().split(",")
+            split_sizes_int = [int(size) for size in split_sizes]
+            self.ui.content_footer_splitter.setSizes(split_sizes_int)
+        except Exception as e:
+            Logger().warning(f"Can't restore console size: {str(e)}")
 
     def save_window_state(self):
+        # save window size
         if self.isMaximized():
-            app.active_settings.set(LAST_WINDOW_SIZE, "maximized")
+            app.active_settings.set(WINDOW_SIZE, "maximized")
         else:
             geometry = self.geometry()
             geo_str = f"{geometry.left()},{geometry.top()},{geometry.width()},{geometry.height()}"
-            app.active_settings.set(LAST_WINDOW_SIZE, geo_str)
+            app.active_settings.set(WINDOW_SIZE, geo_str)
+        # save console size
+        sizes = self.ui.content_footer_splitter.sizes()
+        if len(sizes) < 2:
+            Logger().warning(f"Can't save splitter size")
+        sizes_str=f"{int(sizes[0])},{int(sizes[1])}"
+        app.active_settings.set(CONSOLE_SPLIT_SIZES, sizes_str)
