@@ -128,7 +128,7 @@ class AppGridView(QWidget):
             return
         msg = QMessageBox(parent=self)
         msg.setWindowTitle("Delete tab")
-        msg.setText("Are you sure, you want to delete this tab\t")
+        msg.setText("Are you sure, you want to delete this tab?\t")
         msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
         msg.setIcon(QMessageBox.Question)
         reply = msg.exec_()

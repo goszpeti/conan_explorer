@@ -66,19 +66,21 @@ jobs:
       LC_ALL: "en_US.UTF-8"
       CONAN_REVISIONS_ENABLED: 1
       CAL_DEBUG_LEVEL: 3
-      QT_LOGGING_RULES=: "*.debug=true"
+      # QT_LOGGING_RULES=: "*.debug=true"
+      QT_DEBUG_PLUGINS: 1
     steps:
       - uses: actions/checkout@v2
       - name: Set up a display for gui in Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt update
-          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0
+          sudo apt install python3-pyqt5
+          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 libxcb-shape0
           /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
       - name: Install xterm for testing in Linux
         if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt install gnome-terminal
+        run: |  # terminal, file manager, xwininfo, text-editor
+          sudo apt install lxterminal nautilus x11-utils mousepad
           sudo apt install dbus-x11 at-spi2-core
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v1

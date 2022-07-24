@@ -15,7 +15,7 @@ else:
     except ImportError:
         from typing_extensions import TypedDict
 from conans.errors import ConanException
-from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
+from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO, client_version
 from conans.model.ref import ConanFileReference, PackageReference
 from conans.paths.package_layouts.package_editable_layout import \
     PackageEditableLayout
@@ -71,6 +71,7 @@ class ConanApi():
         self.info_cache: ConanInfoCache
         self._short_path_root = Path("NULL")
         self.init_api()
+        self.client_version = client_version
 
     def init_api(self):
         """ Instantiate the internal Conan api. In some cases it needs to be instatiated anew. """
@@ -99,13 +100,26 @@ class ConanApi():
         self.conan.remove_locks()
         Logger().info("Removed Conan cache locks.")
 
-    def get_remotes(self) -> List[Remote]:
+    def get_remotes(self, include_disabled=False) -> List[Remote]:
         remotes = []
         try:
-            remotes = self.client_cache.registry.load_remotes().values()
+            if include_disabled:
+                remotes = self.conan.remote_list()
+            else:
+                remotes = self.client_cache.registry.load_remotes().values()
         except Exception as e:
             Logger().error(f"Error while reading remotes file: {str(e)}")
         return remotes
+    
+    def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]: # user_name, autheticated
+        user_info = self.conan.users_list(remote_name).get("remotes", {})
+        if len(user_info) < 1:
+            return ("", False)
+        try:
+            return (str(user_info[0].get("user_name", "")), user_info[0].get("authenticated", False))
+        except Exception:
+            Logger().warning(f"Can't get user info for {remote_name}")
+            return ("", False)
 
     def get_short_path_root(self) -> Path:
         """ Return short path root for Windows. Sadly there is no built-in way to do  """
@@ -274,7 +288,8 @@ class ConanApi():
             # no query possible with pattern
             search_results = self.conan.search_recipes(
                 query, remote_name=remote, case_sensitive=False).get("results", None)
-        except Exception:
+        except Exception as e:
+            Logger().error(f"Error while searching for recipe: {str(e)}")
             return []
         if not search_results:
             return res_list
@@ -296,7 +311,6 @@ class ConanApi():
                                                              remote_name="all").get("results", None)
         except Exception as e:
             Logger().warning(str(e))
-            return []
         try:
             if SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
                 local_results: List = self.conan.search_recipes(f"{conan_ref.name}/*@*/*",

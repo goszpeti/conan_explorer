@@ -1,4 +1,3 @@
-import imp
 import pprint
 from typing import List, Union
 
@@ -74,7 +73,7 @@ class PackageTreeItem(TreeModelItem):
 class PkgSelectModel(TreeModel):
 
     def __init__(self, *args, **kwargs):
-        super(TreeModel, self).__init__(*args, **kwargs)
+        super(PkgSelectModel, self).__init__(*args, **kwargs)
         self.root_item = PackageTreeItem(["Packages"])
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)

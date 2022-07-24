@@ -7,8 +7,9 @@ import platform
 import shutil
 import sys
 from pathlib import Path
+import psutil
 from subprocess import check_output
-from test.conftest import TEST_REF, conan_create_and_upload
+from test.conftest import TEST_REF, check_if_process_running, conan_create_and_upload
 from time import sleep
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -252,9 +253,14 @@ def test_AppLink_open(base_fixture, qtbot):
     sleep(5)  # wait for terminal to spawn
     # check pid of created process
     if platform.system() == "Linux":
-        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
-        assert "Terminal" in ret
-        os.system("pkill --newest terminal")
+        process_name = "x-terminal-emulator"
+        for process in psutil.process_iter():
+            try:
+                if process_name.lower() in process.name().lower():
+                    assert "python" in process.cmdline()[2]
+                    process.kill()
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
     elif platform.system() == "Windows":
         # check windowname of process - default shell spawns with path as windowname
         # DOES NOT WORK with Windows Terminal in 11 -> has no title

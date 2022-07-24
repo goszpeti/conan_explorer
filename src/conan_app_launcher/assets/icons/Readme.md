@@ -36,3 +36,6 @@ close -- https://icons8.com/icon/16248/close
 minus -- https://icons8.com/icon/16147/subtract
 restore -- https://icons8.com/icon/4Oupt5bWFn02/restore-down
 maximize --https://icons8.com/icon/KERvxIIUeDAL/maximize-button
+eye -- https://icons8.com/icon/16100/eye
+hide -- https://icons8.com/icon/34264/hide
+login --https://icons8.com/icon/26231/login

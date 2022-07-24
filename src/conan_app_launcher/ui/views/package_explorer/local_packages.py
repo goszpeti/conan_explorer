@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
@@ -9,6 +9,7 @@ from conan_app_launcher.core import (open_cmd_in_path, open_file,
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.ui.common import (AsyncLoader, FileSystemModel,
                                           get_themed_asset_image)
+from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.data import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog
 from conan_app_launcher.ui.views import AppGridView
@@ -64,7 +65,7 @@ class LocalConanPackageExplorer(QWidget):
         offset = self._ui.package_filter_label.width() + self._ui.refresh_button.width()
         self._ui.splitter_filter.setSizes([sizes[0] - offset, self._ui.splitter_filter.width()
                                            - sizes[0] + offset])
-        b = self._ui.splitter_filter.sizes()
+        self._resize_file_columns()
         super().resizeEvent(a0)
 
     def apply_theme(self):
@@ -105,7 +106,9 @@ class LocalConanPackageExplorer(QWidget):
     def on_show_conanfile_requested(self):
         conan_ref = self.get_selected_conan_ref()
         conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
-        open_file(conanfile)
+        loader = AsyncLoader(self)
+        loader.async_loading(self, open_file, (conanfile,), loading_text="Opening Conanfile...")
+        loader.wait_for_finished()
 
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._ui.package_select_view.mapToGlobal(position))
@@ -178,10 +181,9 @@ class LocalConanPackageExplorer(QWidget):
 
     def finish_select_model_init(self):
         if self.pkg_sel_model:
-
             self._ui.package_select_view.setModel(self.pkg_sel_model.proxy_model)
             self._ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
-            self.set_filter_wildcard()  # reapply package filter query
+            self.set_filter_wildcard()  # re-apply package filter query
         else:
             Logger().error("Can't load local packages!")
 
@@ -221,7 +223,6 @@ class LocalConanPackageExplorer(QWidget):
             pkg_id = split_ref[1]
 
         if self.find_item_in_pkg_sel_model(conan_ref) == -1:  # TODO  also need pkg id
-
             self.refresh_pkg_selection_view()
 
         # wait for model to be loaded
@@ -259,8 +260,7 @@ class LocalConanPackageExplorer(QWidget):
     # Package file view init and functions
 
     def on_pkg_selection_change(self):
-        """ """
-        # change folder in file view
+        """ Change folder in file view """
         source_item = self.get_selected_pkg_source_item()
         if not source_item:
             return
@@ -279,13 +279,13 @@ class LocalConanPackageExplorer(QWidget):
         self.fs_model = FileSystemModel()
         self.fs_model.setRootPath(str(pkg_path))
         self.fs_model.sort(0, Qt.AscendingOrder)
-        self.re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)
+        re_register_signal(self.fs_model.fileRenamed, self.on_file_double_click)
         self._ui.package_file_view.setModel(self.fs_model)
         self._ui.package_file_view.setRootIndex(self.fs_model.index(str(pkg_path)))
         self._ui.package_file_view.setColumnHidden(2, True)  # file type
-        self._ui.package_file_view.setColumnWidth(0, 200)
+        self.fs_model.layoutChanged.connect(self._resize_file_columns)
         self._ui.package_file_view.header().setSortIndicator(0, Qt.AscendingOrder)
-        self.re_register_signal(self._ui.package_file_view.doubleClicked,
+        re_register_signal(self._ui.package_file_view.doubleClicked,
                                 self.on_file_double_click)
         # disable edit on double click, since we want to open
         self._ui.package_file_view.setEditTriggers(QAbstractItemView.EditKeyPressed)
@@ -293,9 +293,10 @@ class LocalConanPackageExplorer(QWidget):
 
         self._ui.package_file_view.setContextMenuPolicy(Qt.CustomContextMenu)
 
-        self.re_register_signal(self._ui.package_file_view.customContextMenuRequested,
+        re_register_signal(self._ui.package_file_view.customContextMenuRequested,
                                 self.on_file_context_menu_requested)
         self._init_pkg_file_context_menu()
+        self._resize_file_columns()
 
     def close_files_view(self):
         if self.fs_model:
@@ -307,14 +308,6 @@ class LocalConanPackageExplorer(QWidget):
         self._ui.package_file_view.setModel(None)
         self._ui.package_path_label.setText("")
 
-    @classmethod
-    def re_register_signal(cls, signal: pyqtBoundSignal, slot: Callable):
-        try:  # need to be removed, otherwise will be called multiple times
-            signal.disconnect()
-        except TypeError:
-            # no way to check if it is connected and it will throw an error
-            pass
-        signal.connect(slot)
 
     def on_file_double_click(self, model_index):
         file_path = Path(model_index.model().fileInfo(model_index).absoluteFilePath())
@@ -469,3 +462,9 @@ class LocalConanPackageExplorer(QWidget):
             else:
                 return ""
         return file_view_index.model().fileInfo(file_view_index).absoluteFilePath()
+
+    def _resize_file_columns(self):
+        self._ui.package_file_view.resizeColumnToContents(3)
+        self._ui.package_file_view.resizeColumnToContents(2)
+        self._ui.package_file_view.resizeColumnToContents(1)
+        self._ui.package_file_view.resizeColumnToContents(0)

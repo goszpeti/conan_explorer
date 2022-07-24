@@ -7,7 +7,7 @@ import tempfile
 import time
 from pathlib import Path
 from subprocess import check_output
-from test.conftest import get_window_pid, is_ci_job
+from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 
 import conan_app_launcher  # for mocker
 import psutil
@@ -68,7 +68,7 @@ def test_open_in_file_manager(base_fixture, mocker):
         # list a few candidates
         assert proc.children()[0].name() in ["nautilus", "chrome", "thunar", "dolphin", "pcmanfm"]
         ret.kill()
-
+        os.system("pkill nautilus")
 
 
 def test_choose_run_script(base_fixture, tmp_path, mocker):
@@ -135,8 +135,9 @@ def test_start_cli_option_app(base_fixture):
     if platform.system() == "Linux":
         time.sleep(5)  # wait for terminal to spawn
         # check pid of created process
-        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
-        assert "Terminal" in ret
+        proc = psutil.Process(pid)
+        assert proc.name() == "x-terminal-emulator"
+        assert "python" in proc.cmdline()[2]
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         assert pid > 0
@@ -207,19 +208,16 @@ def test_open_file(base_fixture):
     with open(str(test_file), "w") as f:
         f.write("test")
 
+    if platform.system() == "Linux":
+        # set default app for textfile
+        check_output(["xdg-mime", "default", "mousepad.desktop", "text/plain"]).decode("utf-8")
+        time.sleep(1)
     open_file(test_file)
 
     time.sleep(3)  # wait for program to start
     if platform.system() == "Linux":
-        # set for textfile
-        ret = check_output(["xdg-mime", "default", "org.gnome.Terminal.desktop",
-                            "text/plain"]).decode("utf-8")
-
-        ret = check_output(["xdg-mime", "query", "default", "text/plain"]).decode("utf-8")
         # check pid of created process
-        ret = check_output(["xwininfo", "-name", "Terminal"]).decode("utf-8")
-        assert "Terminal" in ret
-        os.system("pkill --newest terminal")
+        assert check_if_process_running("mousepad", kill=True)
     elif platform.system() == "Windows":
         default_app = "notepad.exe"
         # this is application specific

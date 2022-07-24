@@ -1,5 +1,6 @@
 """ OS Abstraction Layer for all file based functions """
 
+from contextlib import contextmanager
 import os
 import platform
 import shutil
@@ -7,10 +8,28 @@ import subprocess
 from distutils import version
 from pathlib import Path
 from typing import List
-
+import sys
 from conan_app_launcher.app.logger import Logger
 
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
+from  conans import tools
+
+@contextmanager
+def escape_venv():
+    path_var = os.environ.get("PATH", "")
+    bin_path = Path(sys.executable).parent
+    import re
+    path_regex = re.compile(re.escape(str(bin_path)), re.IGNORECASE)
+    new_path_var = path_regex.sub('', path_var)
+    apply_vars = {"PATH": new_path_var}
+    old_env = dict(os.environ)
+    os.environ.update(apply_vars)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_env)
+    
 
 
 def is_windows_11():
@@ -123,4 +142,4 @@ def open_file(file: Path):
         if platform.system() == 'Windows':
             os.startfile(str(file))
         elif platform.system() == "Linux":
-            subprocess.call(("xdg-open", str(file)))
+            subprocess.Popen(("xdg-open", str(file)))

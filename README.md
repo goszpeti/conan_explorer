@@ -4,7 +4,7 @@
 
 ![https://pypi.org/project/conan-app-launcher/](https://img.shields.io/pypi/v/conan-app-launcher)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
-![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/11)
+![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/15)
 ![Python tests](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
 ![Alerts](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_app_launcher&metric=alert_status)
 ![Downloads](https://img.shields.io/pypi/dm/conan_app_launcher)
@@ -23,6 +23,9 @@ It is end-user oriented and focuses on using packages, rather then developing th
 
 #### Conan Search
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_conan_search.png" width="512">
+
+#### Conan Config
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_conan_conf.png" width="512">
 
 **Main Features**
 - compatible with a wide range of conan versions (from 1.24 onwards)
@@ -47,6 +50,11 @@ Conan Search
 - search for references in selected remotes
 - show all existing packages for a reference and their infos
 - install package directly via right-click menu
+
+Conan Config
+- view and edit your profiles
+- view and edit your remotes - with multilogin to the same arifactory server for multiple remotes
+- see the most important paths and config at one glance
 
 
 ## How to install?

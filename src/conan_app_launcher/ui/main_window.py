@@ -6,14 +6,15 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import PathLike, user_save_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan import ConanCleanup
-from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
+from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
-                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
-from conan_app_launcher.ui.widgets import MyMessageBox, AnimatedToggle
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE, WINDOW_SIZE)
+from conan_app_launcher.ui.views.conan_conf.conan_conf import ConanConfigView
+from conan_app_launcher.ui.widgets import WideMessageBox, AnimatedToggle
+from PyQt5.QtCore import Qt, QRect, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
@@ -30,6 +31,7 @@ class MainWindow(FluentWindow):
     # signals for inter page communication
     conan_pkg_installed = pyqtSignal(str, str)  # conan_ref, pkg_id
     conan_pkg_removed = pyqtSignal(str, str)  # conan_ref, pkg_ids
+    conan_remotes_updated = pyqtSignal()
 
     display_versions_changed = pyqtSignal()
     display_channels_changed = pyqtSignal()
@@ -51,9 +53,9 @@ class MainWindow(FluentWindow):
         self.about_page = AboutPage(self)
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
         self.local_package_explorer = LocalConanPackageExplorer(self, self.conan_pkg_removed, self.page_widgets)
-        self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed,
-                                               self.conan_pkg_removed, self.page_widgets)
-
+        self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed, self.conan_pkg_removed, 
+                                               self.conan_remotes_updated, self.page_widgets)
+        self.conan_config = ConanConfigView(self, self.conan_remotes_updated)
         self._init_left_menu()
         self._init_right_menu()
 
@@ -62,6 +64,7 @@ class MainWindow(FluentWindow):
                                  create_page_menu=True)
         self.add_left_menu_entry("Local Package Explorer", "icons/package.png", True, self.local_package_explorer)
         self.add_left_menu_entry("Conan Search", "icons/search_packages.png", True, self.search_dialog)
+        self.add_left_menu_entry("Conan Config", "icons/package_settings.png", True, self.conan_config)
 
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
@@ -76,11 +79,11 @@ class MainWindow(FluentWindow):
             quicklaunch_submenu.add_button_menu_entry(
                 "Add AppLink", self.on_add_link, "icons/add_link.png")
             quicklaunch_submenu.add_button_menu_entry(
-                "Rearrange AppLinks", self.on_rearrange, "icons/rearrange.png")
+                "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
             quicklaunch_submenu.add_menu_line()
 
             quicklaunch_submenu.add_toggle_menu_entry(
-                "Display as List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
+                "Display as Grid or List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
             quicklaunch_submenu.add_toggle_menu_entry(
                 "Use Combo Boxes in Grid Mode", self.quicklaunch_cbox_mode_toggled, app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES))
 
@@ -144,8 +147,9 @@ class MainWindow(FluentWindow):
         # model loaded, now load the gui elements, which have a static model
         self.app_grid.re_init(self.model.app_grid)
 
-        # TODO: Other modules are currently loaded on demand. A window and view restoration would be nice and
-        # should be called from here
+        # Other modules are currently loaded on demand.
+        self.restore_window_state()
+
 
     @pyqtSlot()
     def on_font_size_increased(self):
@@ -200,14 +204,14 @@ class MainWindow(FluentWindow):
         else:
             path_list = paths[0]
 
-        msg = MyMessageBox(parent=self)
+        msg = WideMessageBox(parent=self)
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(MyMessageBox.Yes | MyMessageBox.Cancel)
-        msg.setIcon(MyMessageBox.Question)
+        msg.setStandardButtons(WideMessageBox.Yes | WideMessageBox.Cancel)
+        msg.setIcon(WideMessageBox.Question)
         reply = msg.exec_()
-        if reply == MyMessageBox.Yes:
+        if reply == WideMessageBox.Yes:
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
@@ -236,7 +240,7 @@ class MainWindow(FluentWindow):
         tab.app_links[0].open_app_link_add_dialog()
 
     @pyqtSlot()
-    def on_rearrange(self):
+    def on_reorder(self):
         tab = self.app_grid.tab_widget.currentWidget()
         tab.app_links[0].on_move()
 
@@ -283,3 +287,45 @@ class MainWindow(FluentWindow):
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self.ui.console.append(text)
+
+    def restore_window_state(self):
+        # restore window size
+        sizes_str = app.active_settings.get_string(WINDOW_SIZE)
+        if sizes_str.lower() == "maximized":
+            self.showMaximized()
+        else:
+            split_sizes_int = [0,0,800,600]
+            try:
+                split_sizes = sizes_str.strip().split(",")
+                split_sizes_int = [int(size) for size in split_sizes]
+            except Exception as e:
+                Logger().warning(f"Can't read window size: {str(e)}")
+            try:
+                assert len(split_sizes_int) == 4, "Invalid setting window size length."
+                geometry = QRect(*split_sizes_int)
+                self.setGeometry(geometry)
+            except Exception as e:
+                Logger().warning(f"Can't restore window size: {str(e)}")
+        # restore console size
+        try:
+            sizes_str = app.active_settings.get_string(CONSOLE_SPLIT_SIZES)
+            split_sizes = sizes_str.strip().split(",")
+            split_sizes_int = [int(size) for size in split_sizes]
+            self.ui.content_footer_splitter.setSizes(split_sizes_int)
+        except Exception as e:
+            Logger().warning(f"Can't restore console size: {str(e)}")
+
+    def save_window_state(self):
+        # save window size
+        if self.isMaximized():
+            app.active_settings.set(WINDOW_SIZE, "maximized")
+        else:
+            geometry = self.geometry()
+            geo_str = f"{geometry.left()},{geometry.top()},{geometry.width()},{geometry.height()}"
+            app.active_settings.set(WINDOW_SIZE, geo_str)
+        # save console size
+        sizes = self.ui.content_footer_splitter.sizes()
+        if len(sizes) < 2:
+            Logger().warning(f"Can't save splitter size")
+        sizes_str=f"{int(sizes[0])},{int(sizes[1])}"
+        app.active_settings.set(CONSOLE_SPLIT_SIZES, sizes_str)

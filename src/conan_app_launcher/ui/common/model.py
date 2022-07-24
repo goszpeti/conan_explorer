@@ -1,6 +1,14 @@
-from PyQt5.QtCore import Qt, QAbstractItemModel, QModelIndex
+from typing import Any, Callable, List
+from PyQt5.QtCore import Qt, QAbstractItemModel, QModelIndex, pyqtBoundSignal
 from PyQt5.QtWidgets import QFileSystemModel
 
+def re_register_signal(signal: pyqtBoundSignal, slot: Callable):
+    try:  # need to be removed, otherwise will be called multiple times
+        signal.disconnect()
+    except TypeError:
+        # no way to check if it is connected and it will throw an error
+        pass
+    signal.connect(slot)
 
 class FileSystemModel(QFileSystemModel):
     """ This fixes an issue with the header not being centered vertically """
@@ -22,7 +30,7 @@ class TreeModelItem(object):
     Implemented like the default QT example.
     """
 
-    def __init__(self, data=[], parent=None, lazy_loading=False):
+    def __init__(self, data:List[Any], parent=None, lazy_loading=False):
         self.parent_item = parent
         self.item_data = data
         self.child_items = []
@@ -63,8 +71,10 @@ class TreeModel(QAbstractItemModel):
     """ Qt tree model to be used with TreeModelItem.
     Supports lazy loading, if TreeModelItem enables it."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, checkable=False, *args, **kwargs):
         super(TreeModel, self).__init__(*args, **kwargs)
+        self.root_item: TreeModelItem
+        self._checkable = checkable
 
     def columnCount(self, parent):  # override
         if parent.isValid():
@@ -104,8 +114,10 @@ class TreeModel(QAbstractItemModel):
     def flags(self, index):  # override
         if not index.isValid():
             return Qt.NoItemFlags
-
-        return Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        if self._checkable:
+            flags = flags | Qt.ItemIsUserCheckable
+        return flags
 
     def parent(self, index):  # override
         if not index.isValid():

@@ -19,11 +19,14 @@ APPLIST_ENABLED = "enable_app_list"
 ENABLE_APP_COMBO_BOXES = "enable_app_link_combo_boxes"
 FONT_SIZE = "font_size"
 GUI_STYLE = "style"
-
+# style choices
 GUI_STYLE_DARK = "dark"
 GUI_STYLE_LIGHT = "light"
 
-# Implementation types fro factory
+WINDOW_SIZE = "window_size"
+CONSOLE_SPLIT_SIZES = "console_split_sizes"
+
+# Implementation types for factory
 SETTINGS_INI_TYPE = "ini"
 SETTINGS_QT_TYPE = "qt"  # Try this out, see issue #56
 

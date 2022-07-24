@@ -9,7 +9,7 @@ import traceback
 from conan_app_launcher import REPO_URL, __version__, base_path
 from PyQt5.QtCore import Qt
 
-from conan_app_launcher.ui.widgets import MyMessageBox
+from conan_app_launcher.ui.widgets import WideMessageBox
 
 bug_dialog_text = f"""
 **Describe the bug**
@@ -46,14 +46,14 @@ def bug_reporting_dialog(excvalue, tb):
         To help improve the program, please post a <a href="{new_issue_with_info_text}"> \
         <span style=" text-decoration: underline color:  # 0000ff;" \
         >new github issue</span></a> and describe, how the crash occured.'
-    dialog = MyMessageBox()
+    dialog = WideMessageBox()
     #dialog.setStyleSheet("QLabel{width: 300px; min-width: 300px; max-width: 300px;text-align:center}")
     dialog.setWindowTitle("Application Crash - Bug Report")
     dialog.setText(html_crash_text)
     dialog.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
     dialog.setDetailedText(error_text)
-    dialog.setStandardButtons(MyMessageBox.Ok)
-    dialog.setIcon(MyMessageBox.Warning)
+    dialog.setStandardButtons(WideMessageBox.Ok)
+    dialog.setIcon(WideMessageBox.Warning)
     dialog.setWidth(800)
     dialog.exec_()
     return dialog  # for testing

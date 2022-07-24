@@ -12,7 +12,8 @@ class RoundedMenu(QMenu):
         self.setAttribute(Qt.WA_TranslucentBackground)
 
 
-class MyMessageBox(QMessageBox):
+class WideMessageBox(QMessageBox):
+    """ MessageBox with more width """
     def __init__(self, parent=None):
         super().__init__(parent)
         self._width = 150   # default

@@ -1,7 +1,4 @@
-"""
-Test the self written qt gui base, which can be instantiated without
-using the whole application (standalone).
-"""
+
 from test.conftest import TEST_REF
 
 import conan_app_launcher  # for mocker

@@ -13,7 +13,7 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = "conan-app-launcher"
-VERSION = "1.3.1"
+VERSION = "1.4.0"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
@@ -43,8 +43,6 @@ TEST_REQUIRES = [
 
 DEV_REQUIRES = [
     "autopep8", # formatter
-    #"pylint" - currently using VsCode language server
-    #"mypy"
     "rope", # refactoring
     "debugpy", # Qt thread debugging
     "PyQt5-stubs" # type hints

@@ -54,9 +54,12 @@ def extract_icon(file_path: Path) -> QIcon:
     return QIcon()
 
 
-def get_platform_icon(profile_name) -> QIcon:
+def get_platform_icon(profile_name: str) -> QIcon:
+    """ Return an Icon based on the profile name.
+    TODO: This would be better done with a settings object.
+    """
     profile_name = profile_name.lower()
-    if "windows" in profile_name:
+    if "win" in profile_name: # I hope people have no random win"s" in their profilename
         return QIcon(get_themed_asset_image("icons/windows.png"))
     elif "linux" in profile_name:
         return QIcon(get_themed_asset_image("icons/linux.png"))

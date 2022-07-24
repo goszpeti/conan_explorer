@@ -1,7 +1,4 @@
-"""
-Test the self written qt gui base, which can be instantiated without
-using the whole application (standalone).
-"""
+
 import os
 from pathlib import Path
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL

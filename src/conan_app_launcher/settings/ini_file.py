@@ -6,15 +6,17 @@ from typing import Any, Dict, Optional, Union
 from conan_app_launcher import PathLike
 from conan_app_launcher.app.logger import Logger
 
-from . import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS,
+from . import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS,
                ENABLE_APP_COMBO_BOXES, FONT_SIZE, GUI_STYLE, GUI_STYLE_LIGHT,
-               LAST_CONFIG_FILE, SettingsInterface)
+               LAST_CONFIG_FILE, WINDOW_SIZE, SettingsInterface)
 
 
 class IniSettings(SettingsInterface):
     """
     Settings mechanism with an ini file to use as a storage.
     File and entries are automatically created from the default value of the class.
+    All entries need to be entered in the default values, no runtime registration.
+    Settings should be accessed via their constant name.
     """
     # internal constants
     _GENERAL_SECTION_NAME = "General"
@@ -53,7 +55,9 @@ class IniSettings(SettingsInterface):
                 APPLIST_ENABLED: True,
                 DISPLAY_APP_CHANNELS: True,
                 DISPLAY_APP_USERS: False,
-                DISPLAY_APP_VERSIONS: True
+                DISPLAY_APP_VERSIONS: True,
+                WINDOW_SIZE: "0,0,800,600",
+                CONSOLE_SPLIT_SIZES: "413,126"
             },
         }
 

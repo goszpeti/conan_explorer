@@ -31,6 +31,8 @@ conan_server_thread = None
 TEST_REF = "example/9.9.9@local/testing"
 TEST_REF_OFFICIAL = "example/1.0.0@_/_"
 SKIP_CREATE_CONAN_TEST_DATA = strtobool(os.getenv("SKIP_CREATE_CONAN_TEST_DATA", "False"))
+TEST_REMOTE_NAME = "local"
+TEST_REMOTE_URL = "http://127.0.0.1:9300/"
 
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
@@ -85,7 +87,7 @@ def create_test_ref(ref, paths, create_params=[""], update=False):
 
 def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
     os.system(f"conan create {conanfile} {ref} {create_params}")
-    os.system(f"conan upload {ref} -r local --force --all")
+    os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
 
 
 def run_conan_server():
@@ -138,11 +140,8 @@ def start_conan_server():
         conan_server_thread.start()
         time.sleep(3)
         print("ADDING CONAN REMOTE")
-        os.system("conan remote add local http://127.0.0.1:9300/ false")
-        os.system("conan user demo -r local -p demo")  # todo autogenerate and config
-        # add the same remote twice to be able to test multiremote views - TODO does not work
-        # os.system("conan remote add local2 http://127.0.0.1:9300/ false")
-        # os.system("conan user demo -r local2 -p demo")  # todo autogenerate and config
+        os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
+        os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
 
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
