@@ -8,8 +8,10 @@ from conan_app_launcher.ui.common import (TreeModel, TreeModelItem,
                                           get_platform_icon,
                                           get_themed_asset_image)
 from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSlot
+
+from conan_app_launcher.ui.common.loading import AsyncLoader
 
 REF_TYPE = 0
 PROFILE_TYPE = 1
@@ -29,7 +31,8 @@ class SearchedPackageTreeItem(TreeModelItem):
         self.is_installed = installed
         self.empty = empty  # indicates a "no result" item, which must be handled separately
 
-    def load_children(self):
+    def load_children(self):  # override
+        # can't call super method: fetching would finish early
         self.child_items = []
 
         pkgs_to_be_added: Dict[str, SearchedPackageTreeItem] = {}
@@ -57,7 +60,7 @@ class SearchedPackageTreeItem(TreeModelItem):
                 ["No package found", "",  ""], self, {}, PROFILE_TYPE, empty=True))
         self.is_loaded = True
 
-    def child_count(self) -> int:
+    def child_count(self) -> int:  # override
         if self.type == REF_TYPE:
             return len(self.child_items) if len(self.child_items) > 0 else 1
         elif self.type == PROFILE_TYPE:
@@ -80,6 +83,7 @@ class PkgSearchModel(TreeModel):
         self.proxy_model = QtCore.QSortFilterProxyModel()  # for sorting
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
+        self._loader_widget_parent = None
         if conan_pkg_installed:
             conan_pkg_installed.connect(self.mark_pkg_as_installed)
         if conan_pkg_removed:
@@ -180,3 +184,10 @@ class PkgSearchModel(TreeModel):
                 break
             if not pkg_id and not installed:  # if ref was removed, all pkgs are deleted too
                 pkg_item.is_installed = installed
+
+    def fetchMore(self, index): # override
+        item = index.internalPointer()
+        loader = AsyncLoader(self)
+        self._loader_widget_parent = QtWidgets.QWidget()
+        loader.async_loading(self._loader_widget_parent, item.load_children, loading_text="Loading Packages...")
+        loader.wait_for_finished()

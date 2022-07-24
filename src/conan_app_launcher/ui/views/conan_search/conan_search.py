@@ -182,7 +182,9 @@ class ConanSearchDialog(QDialog):
         combined_ref = self.get_selected_combined_ref()
         conan_ref = combined_ref.split(":")[0]
         conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
-        open_file(conanfile)
+        loader = AsyncLoader(self)
+        loader.async_loading(self, open_file, (conanfile,), loading_text="Opening Conanfile...")
+        loader.wait_for_finished()
 
     @pyqtSlot()
     def on_install_pkg_requested(self):

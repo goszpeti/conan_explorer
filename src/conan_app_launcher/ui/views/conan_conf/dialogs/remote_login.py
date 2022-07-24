@@ -6,6 +6,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
 from conans.client.cache.remote_registry import Remote
+from conan_app_launcher.ui.common import AsyncLoader
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QWidget, QListWidgetItem
@@ -42,9 +43,14 @@ class RemoteLoginDialog(QDialog):
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "login.png")))
         self._ui.button_box.accepted.connect(self.save)
 
-# TODO  clear_password on cancel?
 
     def save(self):
+        loader = AsyncLoader(self)
+        loader.async_loading(self, self.login, loading_text="Logging you in...")
+        loader.wait_for_finished()
+        self.accept()
+
+    def login(self):
         for remote in self._remotes:
             # TODO output? Try catch?
             try:
@@ -55,7 +61,6 @@ class RemoteLoginDialog(QDialog):
                 return
             Logger().info(f"Successfully logged in to {remote}")
         self.clear_password()
-        self.accept()
 
     def clear_password(self):
         # This will override the currently stored password. Setting an empty string 

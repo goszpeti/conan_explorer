@@ -223,9 +223,9 @@ class ConanConfigView(QDialog):
         if not remote_item:
             return
         self.remote_dialog = RemoteEditDialog(remote_item.remote, False, self)
-        self.remote_dialog.exec_()
-        # update remote list
-        self._init_remotes_model()
+        reply = self.remote_dialog.exec_()
+        if reply == QDialog.Accepted:
+            self._init_remotes_model()
 
     def on_remotes_login(self):
         remote_item = self._get_selected_remote()
@@ -236,17 +236,16 @@ class ConanConfigView(QDialog):
         if not remotes:
             return
         self.remote_dialog = RemoteLoginDialog(self, remotes=remotes)
-        self.remote_dialog.exec_()
-        # update remote list
-
-        self._init_remotes_model()
+        reply = self.remote_dialog.exec_()
+        if reply == QDialog.Accepted:
+                self._init_remotes_model()
 
     def on_remote_add(self, model_index):
         new_remote = Remote("New", "", True, False)
         self.remote_dialog = RemoteEditDialog(new_remote, True, self)
-        self.remote_dialog.exec_()
-        # update remote list
-        self._init_remotes_model()
+        reply = self.remote_dialog.exec_()
+        if reply == QDialog.Accepted:
+            self._init_remotes_model()
 
     def on_remote_remove(self, model_index):
         remote_item = self._get_selected_remote()

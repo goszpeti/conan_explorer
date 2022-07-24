@@ -136,7 +136,7 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
     return 0
 
 
-def open_file(file: Path)-> int: # pid
+def open_file(file: Path):
     """ Open files with their associated programs """
     if file.absolute().is_file():
         if platform.system() == 'Windows':

@@ -52,6 +52,7 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
         self.progress_dialog.setRange(0, 0)
         self.progress_dialog.setMinimumDuration(1000)
+        self.progress_dialog.setFixedWidth(300)
         self.progress_dialog.show()
 
         if bool(os.getenv("DISABLE_ASYNC_LOADER")):

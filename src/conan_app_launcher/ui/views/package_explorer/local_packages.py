@@ -106,7 +106,9 @@ class LocalConanPackageExplorer(QWidget):
     def on_show_conanfile_requested(self):
         conan_ref = self.get_selected_conan_ref()
         conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
-        open_file(conanfile)
+        loader = AsyncLoader(self)
+        loader.async_loading(self, open_file, (conanfile,), loading_text="Opening Conanfile...")
+        loader.wait_for_finished()
 
     def on_selection_context_menu_requested(self, position):
         self.select_cntx_menu.exec_(self._ui.package_select_view.mapToGlobal(position))
