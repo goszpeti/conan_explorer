@@ -83,7 +83,7 @@ class MainWindow(FluentWindow):
             quicklaunch_submenu.add_menu_line()
 
             quicklaunch_submenu.add_toggle_menu_entry(
-                "Display as List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
+                "Display as Grid or List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
             quicklaunch_submenu.add_toggle_menu_entry(
                 "Use Combo Boxes in Grid Mode", self.quicklaunch_cbox_mode_toggled, app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES))
 

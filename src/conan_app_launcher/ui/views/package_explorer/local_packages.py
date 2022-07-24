@@ -65,7 +65,7 @@ class LocalConanPackageExplorer(QWidget):
         offset = self._ui.package_filter_label.width() + self._ui.refresh_button.width()
         self._ui.splitter_filter.setSizes([sizes[0] - offset, self._ui.splitter_filter.width()
                                            - sizes[0] + offset])
-        b = self._ui.splitter_filter.sizes()
+        self._resize_file_columns()
         super().resizeEvent(a0)
 
     def apply_theme(self):
@@ -181,10 +181,9 @@ class LocalConanPackageExplorer(QWidget):
 
     def finish_select_model_init(self):
         if self.pkg_sel_model:
-
             self._ui.package_select_view.setModel(self.pkg_sel_model.proxy_model)
             self._ui.package_select_view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
-            self.set_filter_wildcard()  # reapply package filter query
+            self.set_filter_wildcard()  # re-apply package filter query
         else:
             Logger().error("Can't load local packages!")
 
@@ -224,7 +223,6 @@ class LocalConanPackageExplorer(QWidget):
             pkg_id = split_ref[1]
 
         if self.find_item_in_pkg_sel_model(conan_ref) == -1:  # TODO  also need pkg id
-
             self.refresh_pkg_selection_view()
 
         # wait for model to be loaded
@@ -262,8 +260,7 @@ class LocalConanPackageExplorer(QWidget):
     # Package file view init and functions
 
     def on_pkg_selection_change(self):
-        """ """
-        # change folder in file view
+        """ Change folder in file view """
         source_item = self.get_selected_pkg_source_item()
         if not source_item:
             return
@@ -286,7 +283,7 @@ class LocalConanPackageExplorer(QWidget):
         self._ui.package_file_view.setModel(self.fs_model)
         self._ui.package_file_view.setRootIndex(self.fs_model.index(str(pkg_path)))
         self._ui.package_file_view.setColumnHidden(2, True)  # file type
-        self._ui.package_file_view.setColumnWidth(0, 200)
+        self.fs_model.layoutChanged.connect(self._resize_file_columns)
         self._ui.package_file_view.header().setSortIndicator(0, Qt.AscendingOrder)
         re_register_signal(self._ui.package_file_view.doubleClicked,
                                 self.on_file_double_click)
@@ -299,6 +296,7 @@ class LocalConanPackageExplorer(QWidget):
         re_register_signal(self._ui.package_file_view.customContextMenuRequested,
                                 self.on_file_context_menu_requested)
         self._init_pkg_file_context_menu()
+        self._resize_file_columns()
 
     def close_files_view(self):
         if self.fs_model:
@@ -464,3 +462,9 @@ class LocalConanPackageExplorer(QWidget):
             else:
                 return ""
         return file_view_index.model().fileInfo(file_view_index).absoluteFilePath()
+
+    def _resize_file_columns(self):
+        self._ui.package_file_view.resizeColumnToContents(3)
+        self._ui.package_file_view.resizeColumnToContents(2)
+        self._ui.package_file_view.resizeColumnToContents(1)
+        self._ui.package_file_view.resizeColumnToContents(0)

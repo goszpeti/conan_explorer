@@ -154,11 +154,7 @@ class ConanConfigView(QDialog):
         self._ui.remotes_tree_view.setRootIsDecorated(False)
         self._ui.remotes_tree_view.setModel(self._remotes_model)
         self._ui.remotes_tree_view.expandAll()
-        self._ui.remotes_tree_view.resizeColumnToContents(0)
-        self._ui.remotes_tree_view.resizeColumnToContents(1)
-        self._ui.remotes_tree_view.resizeColumnToContents(2)
-        self._ui.remotes_tree_view.resizeColumnToContents(3)
-        self._ui.remotes_tree_view.resizeColumnToContents(4)
+        self._resize_remote_columns()
 
         # callbacks are bound on instance of _remote_reorder_controller
         self._ui.remote_refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
@@ -289,3 +285,14 @@ class ConanConfigView(QDialog):
 
     def save_config_file(self):
         self.config_file_path.write_text(self._ui.config_file_text_browser.toPlainText())
+
+    def resizeEvent(self, a0) -> None:  # override QtGui.QResizeEvent
+        super().resizeEvent(a0)
+        self._resize_remote_columns()
+        
+    def _resize_remote_columns(self):
+        self._ui.remotes_tree_view.resizeColumnToContents(4)
+        self._ui.remotes_tree_view.resizeColumnToContents(3)
+        self._ui.remotes_tree_view.resizeColumnToContents(2)
+        self._ui.remotes_tree_view.resizeColumnToContents(1)
+        self._ui.remotes_tree_view.resizeColumnToContents(0)

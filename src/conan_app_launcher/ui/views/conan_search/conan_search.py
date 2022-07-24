@@ -154,7 +154,7 @@ class ConanSearchDialog(QDialog):
     def _finish_load_search_model(self):
         """ After conan search adjust the view """
         self._ui.search_results_tree_view.setModel(self._pkg_result_model.proxy_model)
-        self._ui.search_results_tree_view.setColumnWidth(0, 320)
+        self._resize_package_columns()
         self._ui.search_results_tree_view.sortByColumn(1, Qt.AscendingOrder)  # sort by remote at default
         self._ui.search_results_tree_view.selectionModel().selectionChanged.connect(self.on_package_selected)
 
@@ -225,3 +225,12 @@ class ConanSearchDialog(QDialog):
         view_index = view.selectedIndexes()[0]
         source_item = view_index.model().mapToSource(view_index).internalPointer()
         return source_item
+
+    def resizeEvent(self, a0) -> None:  # override QtGui.QResizeEvent
+        super().resizeEvent(a0)
+        self._resize_package_columns()
+        
+    def _resize_package_columns(self):
+        self._ui.search_results_tree_view.resizeColumnToContents(2)
+        self._ui.search_results_tree_view.resizeColumnToContents(1)
+        self._ui.search_results_tree_view.resizeColumnToContents(0)
