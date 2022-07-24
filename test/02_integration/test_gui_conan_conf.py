@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 from time import sleep
+import conan_app_launcher
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL, TEST_REMOTE_NAME, TEST_REMOTE_URL
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -130,13 +131,28 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
     # 8. Add a new remote via button/dialog -> save
     # mock cancel -> nothing should change
     # mock OK
+    remotes_count = conan_conf_view._remotes_model.root_item.child_count()
+    mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Rejected)
     conan_conf_view._ui.remote_add.click()
+    assert conan_conf_view._remotes_model.root_item.child_count() == remotes_count
+
+    mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Accepted)
+    conan_conf_view._ui.remote_add.click()
+    # can't easily call this, while dialog is opened - so call it on the saved, but now hidden dialog manually
+    conan_conf_view.remote_dialog.save()
+    conan_conf_view._init_remotes_model()
+    assert conan_conf_view._remotes_model.root_item.child_count() == remotes_count + 1
 
     # 9. Edit the remote -> changes should be reflected in the model
     # mock cancel -> nothing should change
+    assert conan_conf_view._select_remote("New")
+    mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Rejected)
+    
 
-
-    # 10. Delete the remote
+    # 10. Delete the remote (should still be selected!)
     conan_conf_view._ui.remote_remove.click()
     # 11. Test login with the local remote TODO???
     return
