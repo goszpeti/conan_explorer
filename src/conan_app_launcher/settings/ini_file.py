@@ -8,7 +8,7 @@ from conan_app_launcher.app.logger import Logger
 
 from . import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS,
                ENABLE_APP_COMBO_BOXES, FONT_SIZE, GUI_STYLE, GUI_STYLE_LIGHT,
-               LAST_CONFIG_FILE, SettingsInterface)
+               LAST_CONFIG_FILE, LAST_WINDOW_SIZE, SettingsInterface)
 
 
 class IniSettings(SettingsInterface):
@@ -55,7 +55,8 @@ class IniSettings(SettingsInterface):
                 APPLIST_ENABLED: True,
                 DISPLAY_APP_CHANNELS: True,
                 DISPLAY_APP_USERS: False,
-                DISPLAY_APP_VERSIONS: True
+                DISPLAY_APP_VERSIONS: True,
+                LAST_WINDOW_SIZE: "0,0,800,600"
             },
         }
 

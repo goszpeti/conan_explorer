@@ -11,10 +11,10 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
-                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE)
+                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE, LAST_WINDOW_SIZE)
 from conan_app_launcher.ui.views.conan_conf.conan_conf import ConanConfigView
 from conan_app_launcher.ui.widgets import WideMessageBox, AnimatedToggle
-from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt, QRect, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QApplication, QFileDialog
 
@@ -58,6 +58,7 @@ class MainWindow(FluentWindow):
         self.conan_config = ConanConfigView(self, self.conan_remotes_updated)
         self._init_left_menu()
         self._init_right_menu()
+        self.restore_last_window_state()
 
     def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", is_upper_menu=True, page_widget=self.app_grid,
@@ -286,3 +287,32 @@ class MainWindow(FluentWindow):
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self.ui.console.append(text)
+
+    def restore_last_window_state(self):
+        last_size = app.active_settings.get_string(LAST_WINDOW_SIZE)
+        if last_size.lower() == "maximized":
+            self.showMaximized()
+        else:
+            split_sizes_int = [0,0,800,600]
+            try:
+                split_sizes = last_size.strip().split(",")
+                split_sizes_int = [int(size) for size in split_sizes]
+            except Exception as e:
+                Logger().warning(f"Can't read last window size: {str(e)}")
+            if not len(split_sizes_int) == 4:
+                Logger().warning("Invalid last window size length.")
+                return
+            try:
+                geometry = QRect(*split_sizes_int)
+                self.setGeometry(geometry)
+            except Exception as e:
+                Logger().warning(f"Can't restore last window size: {str(e)}")
+
+
+    def save_window_state(self):
+        if self.isMaximized():
+            app.active_settings.set(LAST_WINDOW_SIZE, "maximized")
+        else:
+            geometry = self.geometry()
+            geo_str = f"{geometry.left()},{geometry.top()},{geometry.width()},{geometry.height()}"
+            app.active_settings.set(LAST_WINDOW_SIZE, geo_str)
