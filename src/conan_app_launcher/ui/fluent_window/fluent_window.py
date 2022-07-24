@@ -480,6 +480,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
     def eventFilter(self, source: QObject, event: QEvent):  # override
         """ Implements window resizing """
+        self.set_restore_max_button_state()
         if self.isMaximized():  # no resize when maximized
             return super().eventFilter(source, event)
         if isinstance(event, QHoverEvent):  # Use isinstance instead of type because of typehinting
@@ -589,10 +590,17 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.showNormal()
         else:
             self.showMaximized()
-        self.set_restore_max_button_state()
 
     def set_restore_max_button_state(self):
         if self.isMaximized():
-            self.ui.restore_max_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "restore.png"))))
+            if self.ui.restore_max_button.icon().themeName() == "restore":
+                return
+            icon = QIcon(QPixmap(str(asset_path / "icons" / "restore.png")))
+            icon.setThemeName("restore")
+            self.ui.restore_max_button.setIcon(icon)
         else:
-            self.ui.restore_max_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "maximize.png"))))
+            if self.ui.restore_max_button.icon().themeName() == "maximize":
+                return
+            icon = QIcon(QPixmap(str(asset_path / "icons" / "maximize.png")))
+            icon.setThemeName("maximize")
+            self.ui.restore_max_button.setIcon(icon)
