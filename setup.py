@@ -43,8 +43,6 @@ TEST_REQUIRES = [
 
 DEV_REQUIRES = [
     "autopep8", # formatter
-    #"pylint" - currently using VsCode language server
-    #"mypy"
     "rope", # refactoring
     "debugpy", # Qt thread debugging
     "PyQt5-stubs" # type hints

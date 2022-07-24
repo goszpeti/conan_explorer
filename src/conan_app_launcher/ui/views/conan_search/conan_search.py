@@ -48,7 +48,7 @@ class ConanSearchDialog(QDialog):
         if self.conan_remotes_updated:
             self.conan_remotes_updated.connect(self._init_remotes)
         else:  # call at least once
-            self._init_remotes
+            self._init_remotes()
         self._pkg_result_model = PkgSearchModel()
         self._pkg_result_loader = AsyncLoader(self)
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -62,9 +62,6 @@ class ConanSearchDialog(QDialog):
             item = QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setCheckState(Qt.Checked)
-        # sets height to the height of the items, but max 120
-        items_height = self._ui.remote_list.sizeHintForRow(
-            0) * self._ui.remote_list.count() + 2 * self._ui.remote_list.frameWidth()
 
     def apply_theme(self):
         icon = QIcon(get_themed_asset_image("icons/search_packages.png"))

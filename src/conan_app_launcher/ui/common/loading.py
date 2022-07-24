@@ -86,7 +86,7 @@ class AsyncLoader(QtCore.QObject):
         self.finished = True
 
     def wait_for_finished(self):
-        Logger().debug("wait for loading thread")
+        Logger().debug("Wait for loading thread...")
         # execute once
         while not self.finished:
             QtWidgets.QApplication.processEvents()

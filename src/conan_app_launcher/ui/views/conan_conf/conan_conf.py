@@ -45,19 +45,18 @@ class ConanConfigView(QDialog):
         # setup system version:
         with escape_venv():
             try:  # move to conan?
-                out = subprocess.check_output("conan --version").decode("utf-8")  # TODO
+                out = subprocess.check_output("conan --version").decode("utf-8")
                 conan_sys_version = out.lower().split("version ")[1].rstrip()
-            except:
+            except Exception:
                 conan_sys_version = "Unknown"
             try:  # move to conan?
-                out = subprocess.check_output("python --version").decode("utf-8")  # TODO
+                out = subprocess.check_output("python --version").decode("utf-8")
                 python_sys_version = out.lower().split("python ")[1].rstrip()
-            except:
+            except Exception:
                 python_sys_version = "Unknown"
 
         self._ui.python_cur_version_value_label.setText(platform.python_version())
         self._ui.revision_enabled_checkbox.setChecked(app.conan_api.client_cache.config.revisions_enabled)
-        # TODO context menu or link to Open in File Manager
         self._ui.conan_sys_version_value_label.setText(conan_sys_version)
         self._ui.python_sys_version_value_label.setText(python_sys_version)
         self._ui.conan_usr_home_value_label.setText(app.conan_api.client_cache.cache_folder)
@@ -66,16 +65,15 @@ class ConanConfigView(QDialog):
 
     def _init_settings_yml_tab(self):
         try:
-            # conan config init?
             self._ui.settings_file_text_browser.setText(Path(app.conan_api.client_cache.settings_path).read_text())
-        except:
+        except Exception:
             Logger().error("Cannot read settings.yaml file!")
 
     def _init_config_file_tab(self):
         try:
             self._ui.config_file_text_browser.setText(self.config_file_path.read_text())
             self._ui.save_config_file_button.clicked.connect(self.save_config_file)
-        except:
+        except Exception:
             Logger().error("Cannot read Conan config file!")
 
     def _init_profiles_tab(self):
@@ -104,10 +102,9 @@ class ConanConfigView(QDialog):
     def on_profile_selected(self):
         view_index = self._ui.profiles_list_view.selectedIndexes()[0]
         profile_name = view_index.data()
-        # TODO move to conan api
         try:
             profile_content = (self.profiles_path / profile_name).read_text()
-        except:
+        except Exception:
             profile_content = ""
         self._ui.profiles_text_browser.setText(profile_content)
 
@@ -227,7 +224,6 @@ class ConanConfigView(QDialog):
         remote_item = self._get_selected_remote()
         if not remote_item:
             return
-        # TODO egt all remotes in group
         remotes = self._remotes_model.get_remotes_from_same_server(remote_item.remote)
         if not remotes:
             return
