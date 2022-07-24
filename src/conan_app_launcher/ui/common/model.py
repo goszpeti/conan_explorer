@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable, List
 from PyQt5.QtCore import Qt, QAbstractItemModel, QModelIndex, pyqtBoundSignal
 from PyQt5.QtWidgets import QFileSystemModel
 
@@ -30,7 +30,7 @@ class TreeModelItem(object):
     Implemented like the default QT example.
     """
 
-    def __init__(self, data=[], parent=None, lazy_loading=False):
+    def __init__(self, data:List[Any], parent=None, lazy_loading=False):
         self.parent_item = parent
         self.item_data = data
         self.child_items = []

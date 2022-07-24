@@ -143,7 +143,7 @@ class ConanInfoCache():
             version_channels.remove(f"{conan_ref.version}/{conan_ref.channel}")
             self._save()
 
-    def update_remote_package_list(self, remote_packages: List[ConanFileReference]=[], invalidate=False):
+    def update_remote_package_list(self, remote_packages: List[ConanFileReference], invalidate=False):
         """
         Update the cache with the info of several remote packages. 
         Invalidate option clears the cache.

@@ -40,7 +40,7 @@ class RemotesTableModel(TreeModel):
     def get_remote_groups(self) -> Dict[str, List[Remote]]:
         """
         Try to group similar URLs(currently only for artifactory links) 
-        and return them in adict frouped by the full URL.
+        and return them in a dict grouped by the full URL.
         """
         remote_groups: Dict[str, List[Remote]] = {}
         for remote in app.conan_api.get_remotes(include_disabled=True):

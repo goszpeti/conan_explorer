@@ -117,7 +117,7 @@ class ConanApi():
             return ("", False)
         try:
             return (str(user_info[0].get("user_name", "")), user_info[0].get("authenticated", False))
-        except:
+        except Exception:
             Logger().warning(f"Can't get user info for {remote_name}")
             return ("", False)
 

@@ -33,7 +33,6 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
     8. Add a new remote via button/dialog -> save
     9. Edit the remote -> changes should be reflected in the model
     10. Delete the remote
-    11. Test login with the local remote TODO???
     """
     from conan_app_launcher.app.logger import Logger
     from pytestqt.plugin import _qapp_instance
@@ -41,6 +40,10 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
     # add 2 more remotes
     os.system("conan remote add local2 http://127.0.0.1:9301/ false")
     os.system("conan remote add local3 http://127.0.0.1:9302/ false")
+    # remove potentially created remotes from this testcase
+    os.system("conan remote remove local4")
+    os.system("conan remote remove New")
+    os.system("conan remote remove Edited")
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
@@ -54,9 +57,6 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
 
     # changes to conan conf page
     main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
-    from pytestqt.plugin import _qapp_instance
-    # while True:
-    #    _qapp_instance.processEvents()
     remotes_model = conan_conf_view._remotes_model
     assert remotes_model
 
@@ -141,107 +141,82 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
                         return_value=QtWidgets.QDialog.Accepted)
     conan_conf_view._ui.remote_add.click()
     # can't easily call this, while dialog is opened - so call it on the saved, but now hidden dialog manually
-    conan_conf_view.remote_dialog.save()
+    conan_conf_view.remote_edit_dialog.save()
+    conan_conf_view.remote_edit_dialog.save() # save a second time (errors under the hood), to see if Exception from conan is handled
     conan_conf_view._init_remotes_model()
     assert conan_conf_view._remotes_model.root_item.child_count() == remotes_count + 1
 
     # 9. Edit the remote -> changes should be reflected in the model
-    # mock cancel -> nothing should change
     assert conan_conf_view._select_remote("New")
-    mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Rejected)
+    mock_diag = mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Accepted)
+    conan_conf_view.on_remote_edit(None)
+    mock_diag.assert_called_once()
+
+    # now call directly to gain access to the dialog
+    assert conan_conf_view.remote_edit_dialog._ui.name_line_edit.text() == "New"
+    assert conan_conf_view.remote_edit_dialog._ui.url_line_edit.text() == ""
+    assert conan_conf_view.remote_edit_dialog._ui.verify_ssl_checkbox.isChecked()
     
+    conan_conf_view.remote_edit_dialog._ui.name_line_edit.setText("Edited")
+    conan_conf_view.remote_edit_dialog._ui.url_line_edit.setText("http://127.0.0.1:9305/")
+    conan_conf_view.remote_edit_dialog._ui.verify_ssl_checkbox.setChecked(False)
+    conan_conf_view.remote_edit_dialog.save()
+    conan_conf_view._ui.remote_refresh_button.click()
+    assert conan_conf_view._select_remote("Edited")
+    edited_remote_item = conan_conf_view._get_selected_remote()
+    assert edited_remote_item
+    assert edited_remote_item.remote.url == "http://127.0.0.1:9305/"
+    assert edited_remote_item.remote.verify_ssl == False
 
-    # 10. Delete the remote (should still be selected!)
-    conan_conf_view._ui.remote_remove.click()
-    # 11. Test login with the local remote TODO???
-    return
+    os.system("conan remote remove Edited")
 
+def test_conan_config_view_remote_login(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+    # Test login with the local remote
+    from pytestqt.plugin import _qapp_instance
+    os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
 
-    ### Test pkg reference context menu functions ###
-    # test copy ref
-    Logger().debug("test copy ref")
-    lpe.on_copy_ref_requested()
-    assert QtWidgets.QApplication.clipboard().text() == str(cfr)
-    conanfile = app.conan_api.get_conanfile_path(cfr)
+    main_gui = main_window.MainWindow(_qapp_instance)
+    main_gui.show()
+    main_gui.load(ui_no_refs_config_fixture)
 
-    # test open export folder
-    Logger().debug("open export folder")
-    import conan_app_launcher.ui.views.package_explorer.local_packages as lp
-    mocker.patch.object(lp, 'open_in_file_manager')
-    lpe.on_open_export_folder_requested()
-    lp.open_in_file_manager.assert_called_once_with(conanfile)
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
 
-    # test show conanfile
-    Logger().debug("open show conanfile")
-    mocker.patch.object(lp, 'open_file')
-    lpe.on_show_conanfile_requested()
-    lp.open_file.assert_called_once_with(conanfile)
+    app.conan_worker.finish_working()
+    conan_conf_view = main_gui.conan_config
 
-    #### Test file context menu functions ###
-    # select a file
-    Logger().debug("select a file")
+    # changes to conan conf page
+    main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
+    # select local, invoke dialog, click cancel -> remote user info should not change
+    assert conan_conf_view._select_remote(TEST_REMOTE_NAME)
+    mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteLoginDialog, 'exec_',
+                        return_value=QtWidgets.QDialog.Rejected)
+    conan_conf_view._ui.remote_login.click()
+    assert app.conan_api.get_remote_user_info(TEST_REMOTE_NAME) == ("demo", True)  # still logged in
 
-    root_path = Path(lpe.fs_model.rootPath())
-    file = root_path / "conaninfo.txt"
-    sel_idx = lpe.fs_model.index(str(file), 0)
-    lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
+    # evaluate dialog, after it closed
+    assert conan_conf_view.remote_login_dialog._ui.remote_list.count() == 1
+    assert conan_conf_view.remote_login_dialog._ui.password_line_edit.text() == ""
+    assert conan_conf_view.remote_login_dialog._ui.name_line_edit.text() == "demo"
 
-    # check copy as path - don't check the clipboard, it has issues in windows with qtbot
-    cp_text = lpe.on_copy_file_as_path()
-    assert Path(cp_text) == file
+    # now enter a wrong password and call save
+    conan_conf_view.remote_login_dialog._ui.name_line_edit.setText("wrong")
+    conan_conf_view.remote_login_dialog._ui.password_line_edit.setText("wrong")
+    conan_conf_view.remote_login_dialog.save()
+    # throws error on console, but still logged in
+    assert app.conan_api.get_remote_user_info("local") == ("demo", True)
+    
+    # log out with cli
+    os.system("conan user --clean")
+    assert app.conan_api.get_remote_user_info("local") == ("None", False)
 
-    # check open terminal
-    Logger().debug("open terminal")
+    # now enter the correct password and call save
+    conan_conf_view.remote_login_dialog._ui.name_line_edit.setText("demo")
+    conan_conf_view.remote_login_dialog._ui.password_line_edit.setText("demo")
+    conan_conf_view.remote_login_dialog.save()
 
-    pid = lpe.on_open_terminal_in_dir()
-    assert pid > 0
-    import signal
-    os.kill(pid, signal.SIGTERM)
-
-    # check "open in file manager"
-    Logger().debug("open in file manager")
-    lpe.on_open_file_in_file_manager(None)
-    lp.open_in_file_manager.assert_called_with(Path(cp_text))
-
-    # check "Add AppLink to AppGrid"
-    mocker.patch.object(QtWidgets.QInputDialog, 'exec_',
-                        return_value=QtWidgets.QInputDialog.Accepted)
-    mocker.patch.object(QtWidgets.QInputDialog, 'textValue',
-                        return_value="Basics")
-    mocker.patch.object(AppEditDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
-
-    lpe.on_add_app_link_from_file()
-    # assert that the link has been created
-    last_app_link = main_gui.app_grid.model.tabs[0].apps[-1]
-    assert last_app_link.executable == "conaninfo.txt"
-    assert str(last_app_link.conan_file_reference) == str(cfr)
-
-    # Check copy
-    mime_file = lpe.on_file_copy()
-    mime_file_text = mime_file.toString()
-    assert "file://" in mime_file_text and cp_text in mime_file_text
-
-    # check paste
-    Logger().debug("check paste")
-    config_path: Path = ui_no_refs_config_fixture  # use the config file as test data to be pasted
-    data = QtCore.QMimeData()
-    url = QtCore.QUrl.fromLocalFile(str(config_path))
-    data.setUrls([url])
-    _qapp_instance.clipboard().setMimeData(data)
-    lpe.on_file_paste()  # check new file
-    assert (root_path / config_path.name).exists()
-
-    # check delete
-    Logger().debug("delete")
-    sel_idx = lpe.fs_model.index(
-        str(root_path / config_path.name), 0)  # (0, 0, QtCore.QModelIndex())
-    lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Yes)
-    lpe.on_file_delete()  # check new file?
-    assert not (root_path / config_path.name).exists()
-
-
-def test_conan_config_view_profiles(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
-    pass
+    # logged in
+    assert app.conan_api.get_remote_user_info("local") == ("demo", True)
+    # assert password is empty (does not really test, if it worked correctly)
+    assert conan_conf_view.remote_login_dialog._ui.password_line_edit.text() == ""

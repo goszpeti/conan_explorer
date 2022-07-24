@@ -4,12 +4,10 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.ui.common import (TreeModel, TreeModelItem,
-                                          get_platform_icon,
-                                          get_themed_asset_image)
+from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_image
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot, pyqtBoundSignal
 
 from conan_app_launcher.ui.common.loading import AsyncLoader
 
@@ -71,13 +69,16 @@ class SearchedPackageTreeItem(TreeModelItem):
         if self.type == REF_TYPE:
             return self.data(0)
         elif self.type == PROFILE_TYPE:
-            return self.parent().data(0) + ":" + self.data(0)
+            parent = self.parent()
+            if parent is None:
+                return ""
+            return parent.data(0) + ":" + self.data(0)
         return ""
 
 
 class PkgSearchModel(TreeModel):
 
-    def __init__(self, conan_pkg_installed=None, conan_pkg_removed=None, *args, **kwargs):  # Optional[pyQtBoundSignal]
+    def __init__(self, conan_pkg_installed: Optional[pyqtBoundSignal] = None, conan_pkg_removed: Optional[pyqtBoundSignal] = None, *args, **kwargs):
         super(PkgSearchModel, self).__init__(*args, **kwargs)
         self.root_item = SearchedPackageTreeItem(["Packages", "Remote(s)", "Quick Profile"])
         self.proxy_model = QtCore.QSortFilterProxyModel()  # for sorting
@@ -89,7 +90,7 @@ class PkgSearchModel(TreeModel):
         if conan_pkg_removed:
             conan_pkg_removed.connect(self.mark_pkg_as_not_installed)
 
-    def setup_model_data(self, search_query, remotes=[]):
+    def setup_model_data(self, search_query:str, remotes: List[str]):
         # needs to be ConanFileReference, so we can check with get_all_local_refs directly
         recipes_with_remotes: Dict[ConanFileReference, str] = {}
         for remote in remotes:
@@ -109,15 +110,15 @@ class PkgSearchModel(TreeModel):
 
         installed_refs = app.conan_api.get_all_local_refs()
         for recipe in recipes_with_remotes:
-            remotes = recipes_with_remotes.get(recipe, "")
+            recipe_remotes = recipes_with_remotes.get(recipe, "")
             installed = False
             if recipe in installed_refs:
                 installed = True
             conan_item = SearchedPackageTreeItem(
-                [str(recipe), remotes, ""], self.root_item, None, REF_TYPE, lazy_loading=True, installed=installed)
+                [str(recipe), recipe_remotes, ""], self.root_item, None, REF_TYPE, lazy_loading=True, installed=installed)
             self.root_item.append_child(conan_item)
 
-    def data(self, index: QtCore.QModelIndex, role):  # override
+    def data(self, index: QtCore.QModelIndex, role: Qt.ItemDataRole):  # override
         if not index.isValid():
             return None
         item: SearchedPackageTreeItem = index.internalPointer()

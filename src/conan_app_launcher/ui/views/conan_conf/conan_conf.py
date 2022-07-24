@@ -42,7 +42,7 @@ class ConanConfigView(QDialog):
     def _init_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(app.conan_api.client_version)
 
-        # setup system version:
+        # setup system version outside of own venv
         with escape_venv():
             try:  # move to conan?
                 out = subprocess.check_output("conan --version").decode("utf-8")
@@ -160,6 +160,7 @@ class ConanConfigView(QDialog):
         self._ui.remote_move_down_button.clicked.connect(self._remote_reorder_controller.move_down)
 
     def _select_remote(self, remote_name: str) -> bool:
+        """ Selects a remote in the view and returns true if it exists. """
         row_remote_to_sel = -1
         row = 0
         remote_item = None
@@ -215,8 +216,8 @@ class ConanConfigView(QDialog):
         remote_item = self._get_selected_remote()
         if not remote_item:
             return
-        self.remote_dialog = RemoteEditDialog(remote_item.remote, False, self)
-        reply = self.remote_dialog.exec_()
+        self.remote_edit_dialog = RemoteEditDialog(remote_item.remote, False, self)
+        reply = self.remote_edit_dialog.exec_()
         if reply == QDialog.Accepted:
             self._init_remotes_model()
 
@@ -227,15 +228,15 @@ class ConanConfigView(QDialog):
         remotes = self._remotes_model.get_remotes_from_same_server(remote_item.remote)
         if not remotes:
             return
-        self.remote_dialog = RemoteLoginDialog(self, remotes=remotes)
-        reply = self.remote_dialog.exec_()
+        self.remote_login_dialog = RemoteLoginDialog(remotes, self)
+        reply = self.remote_login_dialog.exec_()
         if reply == QDialog.Accepted:
                 self._init_remotes_model()
 
     def on_remote_add(self, model_index):
         new_remote = Remote("New", "", True, False)
-        self.remote_dialog = RemoteEditDialog(new_remote, True, self)
-        reply = self.remote_dialog.exec_()
+        self.remote_edit_dialog = RemoteEditDialog(new_remote, True, self)
+        reply = self.remote_edit_dialog.exec_()
         if reply == QDialog.Accepted:
             self._init_remotes_model()
 
@@ -282,7 +283,8 @@ class ConanConfigView(QDialog):
     def save_config_file(self):
         self.config_file_path.write_text(self._ui.config_file_text_browser.toPlainText())
 
-    def resizeEvent(self, a0) -> None:  # override QtGui.QResizeEvent
+    def resizeEvent(self, a0) -> None:  # override
+        """ Resize remote view columns automatically if window size changes """
         super().resizeEvent(a0)
         self._resize_remote_columns()
         
