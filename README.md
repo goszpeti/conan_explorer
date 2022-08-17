@@ -11,7 +11,11 @@
 
 ## Quick Overview
 
-The goal of this project is to provide a frontend to start executables contained in packages of the package manager [Conan](https://conan.io/). It also contains a local package explorer view, which is handy on Windows to browse short paths and navigate quickly. A Search Dialog for browsing packages is also integrated.
+The goal of this project is to provide a standalone Graphical User Interface (GUI) to
+* Start executables contained in packages of the package manager [Conan](https://conan.io/)
+* Browse the local package cache
+* Search Packages in remotes
+* Configure Remotes and Profiles
 
 It is end-user oriented and focuses on using packages, rather then developing them. It can be used on Windows and Linux x64 platforms.
 
