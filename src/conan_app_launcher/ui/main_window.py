@@ -12,6 +12,7 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, D
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE, WINDOW_SIZE)
+from conan_app_launcher.ui.views.app_grid.tab import TabGrid
 from conan_app_launcher.ui.views.conan_conf.conan_conf import ConanConfigView
 from conan_app_launcher.ui.widgets import WideMessageBox, AnimatedToggle
 from PyQt5.QtCore import Qt, QRect, pyqtSignal, pyqtSlot
@@ -210,6 +211,7 @@ class MainWindow(FluentWindow):
         msg.setDetailedText(path_list)
         msg.setStandardButtons(WideMessageBox.Yes | WideMessageBox.Cancel)
         msg.setIcon(WideMessageBox.Question)
+        msg.setWidth(800)
         reply = msg.exec_()
         if reply == WideMessageBox.Yes:
             for path in paths:
@@ -236,19 +238,19 @@ class MainWindow(FluentWindow):
 
     @pyqtSlot()
     def on_add_link(self):
-        tab = self.app_grid.tab_widget.currentWidget()
+        tab: TabGrid = self.app_grid.tab_widget.currentWidget() # type: ignore
         tab.app_links[0].open_app_link_add_dialog()
 
     @pyqtSlot()
     def on_reorder(self):
-        tab = self.app_grid.tab_widget.currentWidget()
+        tab: TabGrid = self.app_grid.tab_widget.currentWidget() # type: ignore
         tab.app_links[0].on_move()
 
     @pyqtSlot()
     def display_versions_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         # status is changed only after this is done, so the state must be negated
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_VERSIONS, status)
         self.app_grid.re_init_all_app_links(force=True)
@@ -256,7 +258,7 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def apply_display_users_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_USERS, status)
         self.app_grid.re_init_all_app_links(force=True)
@@ -264,21 +266,21 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def display_channels_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_CHANNELS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
     @pyqtSlot()
     def quicklaunch_grid_mode_toggled(self):
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(APPLIST_ENABLED, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
     @pyqtSlot()
     def quicklaunch_cbox_mode_toggled(self):
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(ENABLE_APP_COMBO_BOXES, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
