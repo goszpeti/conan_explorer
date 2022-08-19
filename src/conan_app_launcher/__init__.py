@@ -3,6 +3,8 @@ Contains all basic constants used in the application.
 No imports from own modules allowed! This is done to resolve circular dependencies.
 """
 import os
+import shutil
+import platform
 try: # from Python 3.8
     from importlib.metadata import distribution
     from importlib.metadata import PackageNotFoundError
@@ -51,5 +53,18 @@ DEBUG_LEVEL = int(os.getenv("CAL_DEBUG_LEVEL", "0"))
 base_path = Path(__file__).absolute().parent
 asset_path = base_path / "assets"
 # to be used for all default paths of configuration files, which will be used for multiple versions
-user_save_path = Path().home()
+# noninvasive storage, legacy will be moved
+legacy_user_save_path = Path().home()
+user_save_path =  Path(os.getenv("XDG_CONFIG_HOME", str(legacy_user_save_path))) / PKG_NAME if platform.system() == "Linux" \
+    else Path(os.getenv("APPDATA", str(legacy_user_save_path))) / PKG_NAME
 
+# user path migration
+if user_save_path != legacy_user_save_path:
+    os.makedirs(str(user_save_path), exist_ok=True)
+    if (legacy_user_save_path / SETTINGS_FILE_NAME).exists():
+        shutil.move(str(legacy_user_save_path / SETTINGS_FILE_NAME),
+                    str(user_save_path / SETTINGS_FILE_NAME))
+
+    if (legacy_user_save_path / DEFAULT_UI_CFG_FILE_NAME).exists():
+        shutil.move(str(legacy_user_save_path / DEFAULT_UI_CFG_FILE_NAME),
+                    str(user_save_path / DEFAULT_UI_CFG_FILE_NAME))

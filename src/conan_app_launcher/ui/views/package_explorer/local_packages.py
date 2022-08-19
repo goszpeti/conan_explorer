@@ -10,7 +10,7 @@ from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.ui.common import (AsyncLoader, FileSystemModel,
                                           get_themed_asset_image)
 from conan_app_launcher.ui.common.model import re_register_signal
-from conan_app_launcher.ui.data import UiAppLinkConfig
+from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog
 from conan_app_launcher.ui.views import AppGridView
 from conan_app_launcher.ui.widgets import RoundedMenu

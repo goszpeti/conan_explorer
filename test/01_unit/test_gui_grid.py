@@ -15,7 +15,7 @@ from time import sleep
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_USERS,
                                          ENABLE_APP_COMBO_BOXES)
-from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
+from conan_app_launcher.ui.config import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.views.app_grid.app_link import AppLinkBase, ListAppLink, GridAppLink
 from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \

@@ -73,8 +73,11 @@ class TreeModel(QAbstractItemModel):
 
     def __init__(self, checkable=False, *args, **kwargs):
         super(TreeModel, self).__init__(*args, **kwargs)
-        self.root_item: TreeModelItem
+        self.root_item = TreeModelItem([])
         self._checkable = checkable
+
+    def clear(self):
+        self.root_item.child_items.clear()
 
     def columnCount(self, parent):  # override
         if parent.isValid():

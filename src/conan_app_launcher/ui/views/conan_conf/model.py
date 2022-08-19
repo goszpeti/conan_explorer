@@ -1,9 +1,8 @@
 
-from typing import Dict, List
-
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon
+from conan_app_launcher.ui.common import (TreeModel, TreeModelItem,
+                                          get_platform_icon)
 from conans.client.cache.remote_registry import Remote
 from conans.errors import ConanException
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt
@@ -28,34 +27,6 @@ class RemotesTableModel(TreeModel):
     def __init__(self, *args, **kwargs):
         super(RemotesTableModel, self).__init__(checkable=True, *args, **kwargs)
         self.root_item = TreeModelItem(["Name", "URL", "SSL", "User", "Authenticated"])
-
-    def get_remotes_from_same_server(self, remote: Remote):
-        remote_groups = self.get_remote_groups()
-        for remotes in remote_groups.values():
-            for check_remote in remotes:
-                if check_remote == remote:
-                    return remotes
-        return None
-
-    def get_remote_groups(self) -> Dict[str, List[Remote]]:
-        """
-        Try to group similar URLs(currently only for artifactory links) 
-        and return them in a dict grouped by the full URL.
-        """
-        remote_groups: Dict[str, List[Remote]] = {}
-        for remote in app.conan_api.get_remotes(include_disabled=True):
-            if "artifactory" in remote.url:
-                # try to determine root address
-                possible_base_url = "/".join(remote.url.split("/")[0:3])
-                if not remote_groups.get(possible_base_url):
-                    remote_groups[possible_base_url] = [remote]
-                else:
-                    remotes = remote_groups[possible_base_url]
-                    remotes.append(remote)
-                    remote_groups.update({possible_base_url: remotes})
-            else:
-                remote_groups[remote.url] = [remote]
-        return remote_groups
 
     def setup_model_data(self):
         self.root_item.child_items = []

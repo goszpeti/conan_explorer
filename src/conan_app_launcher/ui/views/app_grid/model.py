@@ -10,7 +10,7 @@ from conan_app_launcher import (
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_image
-from conan_app_launcher.ui.data import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
+from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
 
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QObject

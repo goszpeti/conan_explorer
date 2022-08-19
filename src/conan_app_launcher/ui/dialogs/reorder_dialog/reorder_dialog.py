@@ -1,6 +1,7 @@
 
+import abc
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Protocol, Union
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
@@ -11,9 +12,7 @@ from PyQt5.QtGui import QIcon
 from .reorder_dialog_ui import Ui_rearrange_dialog
 
 current_dir = Path(__file__).parent
-
-
-class ReorderingModel(QAbstractListModel):
+class ReorderingModel(Protocol):
 
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
         ...

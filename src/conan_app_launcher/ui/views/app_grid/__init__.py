@@ -4,7 +4,7 @@ import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import APPLIST_ENABLED  # using global module pattern
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
-from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
+from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
 from PyQt5.QtCore import Qt, pyqtBoundSignal
