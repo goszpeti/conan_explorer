@@ -68,23 +68,20 @@ class AppEditDialog(QDialog):
             self._ui.executable_browse_button.setEnabled(False)
             self._ui.icon_browse_button.setEnabled(False)
             return
-        _, self._temp_package_path = app.conan_api.get_best_matching_package_path(
-            ConanFileReference.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
-
-        if self._temp_package_path.exists():
-            self._ui.executable_browse_button.setEnabled(True)
-            self._ui.icon_browse_button.setEnabled(True)
-        else:
-            self._ui.executable_browse_button.setEnabled(False)
-            self._ui.icon_browse_button.setEnabled(False)
+        self._ui.executable_browse_button.setEnabled(True)
+        self._ui.icon_browse_button.setEnabled(True)
 
     def on_install_clicked(self):
         dialog = ConanInstallDialog(self, self._ui.conan_ref_line_edit.text(), self._pkg_installed_signal)
         dialog.show()
 
     def on_executable_browse_clicked(self):
+        _, temp_package_path = app.conan_api.get_best_matching_package_path(
+            ConanFileReference.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
+        if not temp_package_path.exists(): # default path
+            temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",
-                                       directory=str(self._temp_package_path))
+                                       directory=str(temp_package_path))
                                       # filter="Images (*.ico *.png *.jpg)")
         dialog.setFileMode(QFileDialog.ExistingFile)
         # TODO restrict to the package directory, or emit Error dialog and call anew
