@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 from conans.client.cache.remote_registry import Remote
 from conans.client.output import ConanOutput
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from typing import TypedDict
 else:
     try:

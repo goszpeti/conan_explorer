@@ -24,7 +24,7 @@ from PyQt5.QtWidgets import (QAbstractItemView, QAction, QApplication,
 from .model import PROFILE_TYPE, REF_TYPE, PackageTreeItem, PkgSelectModel
 from .package_explorer_ui import Ui_Form
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
 
 

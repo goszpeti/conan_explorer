@@ -9,7 +9,7 @@ from packaging.version import Version
 from . import (UiAppGridConfig, UiAppLinkConfig, UiConfig, UiConfigInterface,
                UiTabConfig)
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from typing import TypedDict
 else:
     try:

@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (QAction, QInputDialog, QMessageBox, QTabWidget,
 from .model import UiAppLinkModel, UiTabModel
 from .tab import TabBase, TabGrid, TabList
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
 
 

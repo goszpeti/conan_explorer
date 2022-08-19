@@ -10,7 +10,7 @@ except ImportError:
 
 from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES, SettingsInterface
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from typing import TypedDict
     from .conan import ConanApi
 else:

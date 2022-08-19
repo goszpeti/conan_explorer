@@ -10,7 +10,7 @@ from conan_app_launcher import INVALID_CONAN_REF, PathLike
 
 UI_CONFIG_JSON_TYPE = "json"
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from ..views.app_grid.model import UiAppLinkModel, UiTabModel
 
 

@@ -17,6 +17,7 @@ exclude_lines =
     pragma: no cover
     def __repr__
     if self\.debug
+    if TYPE_CHECKING:
     # Don't complain if tests don't hit defensive assertion code:
     raise AssertionError
     raise NotImplementedError
