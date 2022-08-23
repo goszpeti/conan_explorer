@@ -2,7 +2,7 @@ import platform
 import shutil
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
 from conans.client.cache.remote_registry import Remote
 from conans.client.output import ConanOutput
@@ -500,15 +500,19 @@ class ConanCleanup():
 
     def __init__(self, conan_api: ConanApi) -> None:
         self._conan_api = conan_api
+        self.orphaned_references: Set[str] = set()
+        self.orphaned_packages: Set[str] = set()
 
-    def get_cleanup_cache_paths(self) -> List[str]:
+    def get_cleanup_cache_paths(self) -> Set[str]:
         """ Get a list of orphaned short path and cache folders """
         # Blessed are the users Microsoft products!
         if platform.system() != "Windows":
-            return []
-        return self.get_orphaned_references() + self.get_orphaned_packages()
+            return set()
+        self.find_orphaned_references()
+        self.find_orphaned_packages()
+        return self.orphaned_references.union(self.orphaned_packages)
 
-    def get_orphaned_references(self):
+    def find_orphaned_references(self):
         del_list = []
         for ref in self._conan_api.client_cache.all_refs():
             ref_cache = self._conan_api.client_cache.package_layout(ref)
@@ -525,9 +529,9 @@ class ConanCleanup():
                     Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}")
                     if pkg_id_dir:
                         del_list.append(str(pkg_id_dir))
-        return del_list
+        self.orphaned_references = set(del_list)
 
-    def get_orphaned_packages(self):
+    def find_orphaned_packages(self):
         """ Reverse search for orphaned packages on windows short paths """
         del_list = []
         short_path_folders = [f for f in self._conan_api.get_short_path_root().iterdir() if f.is_dir()]
@@ -542,7 +546,7 @@ class ConanCleanup():
                         del_list.append(str(short_path))
                 except Exception:
                     Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")
-        return del_list
+        self.orphaned_packages = set(del_list)
 
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:

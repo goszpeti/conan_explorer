@@ -24,9 +24,9 @@ from ..common import get_themed_asset_image
 from ..widgets import AnimatedToggle
 
 LEFT_MENU_MIN_WIDTH = 80
-LEFT_MENU_MAX_WIDTH = 330
+LEFT_MENU_MAX_WIDTH = 330 # need to check with max font size
 RIGHT_MENU_MIN_WIDTH = 0
-RIGHT_MENU_MAX_WIDTH = 340
+RIGHT_MENU_MAX_WIDTH = 350 # need to check with max font size
 
 
 def gen_obj_name(name: str) -> str:
@@ -449,9 +449,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.toggle_right_menu()
 
     def toggle_right_menu(self):
-        # reset general settings state TODO
-        # self.ui.right_menu_bottom_back_button.click()
-
         width = self.ui.right_menu_frame.width()
         if width == RIGHT_MENU_MIN_WIDTH:
             width_to_set = RIGHT_MENU_MAX_WIDTH

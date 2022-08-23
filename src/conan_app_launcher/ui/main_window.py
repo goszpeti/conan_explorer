@@ -25,7 +25,6 @@ from .model import UiApplicationModel
 from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
 from .views.about_page import AboutPage
 
-
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
 
@@ -156,7 +155,7 @@ class MainWindow(FluentWindow):
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
         new_size = app.active_settings.get_int(FONT_SIZE) + 1
-        if new_size > 14:
+        if new_size > 18:
             return
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)
@@ -196,14 +195,18 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
-        paths = ConanCleanup(app.conan_api).get_cleanup_cache_paths()
+        cleaner = ConanCleanup(app.conan_api)
+        loader = AsyncLoader(self)
+        loader.async_loading(self, cleaner.get_cleanup_cache_paths, )
+        loader.wait_for_finished()
+        paths = cleaner.orphaned_packages.union(cleaner.orphaned_references)
         if not paths:
             self.write_log("INFO: Nothing found in cache to clean up.")
             return
         if len(paths) > 1:
             path_list = "\n".join(paths)
         else:
-            path_list = paths[0]
+            path_list = str(paths)
 
         msg = WideMessageBox(parent=self)
         msg.setWindowTitle("Delete folders")
@@ -212,6 +215,7 @@ class MainWindow(FluentWindow):
         msg.setStandardButtons(WideMessageBox.Yes | WideMessageBox.Cancel)
         msg.setIcon(WideMessageBox.Question)
         msg.setWidth(800)
+        msg.setMaximumHeight(600)
         reply = msg.exec_()
         if reply == WideMessageBox.Yes:
             for path in paths:
@@ -232,7 +236,6 @@ class MainWindow(FluentWindow):
             app.active_settings.set(LAST_CONFIG_FILE, new_file)
             # model loads incrementally
             self.model.loadf(new_file)
-
             # conan works, model can be loaded
             self.app_grid.re_init(self.model.app_grid)  # loads tabs
 

@@ -14,6 +14,11 @@ from .reorder_dialog_ui import Ui_rearrange_dialog
 current_dir = Path(__file__).parent
 class ReorderingModel(Protocol):
 
+    def index(self, row, column, parent):
+        ...
+
+    def columnCount(self, parent: QModelIndex = ...) -> int: ...
+
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
         ...
 
@@ -30,8 +35,6 @@ class ReorderDialog(QDialog):
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "rearrange.png")))
         
         self._controller = ReorderController(self._ui.list_view, model)
-
-        self._ui.list_view.setModel(model)
 
         self._ui.list_view.setUpdatesEnabled(True)
         self._ui.list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
