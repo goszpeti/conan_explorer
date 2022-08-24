@@ -18,7 +18,7 @@ class ConanRemoteController():
         self.conan_remotes_updated = conan_remotes_updated
 
     def update(self):
-        self.model.clear()
+        self.model = RemotesTableModel()
         # save selected remote, if triggering a re-init
         sel_remote = self.get_selected_remote()
         self._remote_reorder_controller = ReorderController(self.view, self.model)
@@ -114,8 +114,3 @@ class ConanRemoteController():
             else:
                 remote_groups[remote.url] = [remote]
         return remote_groups
-
-
-
-class ConanProfileController():
-    pass

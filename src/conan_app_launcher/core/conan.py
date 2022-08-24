@@ -69,13 +69,13 @@ class ConanApi():
         self.conan: ConanAPIV1
         self.client_cache: ClientCache
         self.info_cache: ConanInfoCache
-        self._short_path_root = Path("NULL")
-        self.init_api()
         self.client_version = client_version
+        self._short_path_root = Path("NULL")
 
     def init_api(self):
         """ Instantiate the internal Conan api. In some cases it needs to be instatiated anew. """
-        self.conan, _, _ = ConanAPIV1.factory()
+        self.conan= ConanAPIV1(output=ConanOutput(LoggerWriter(
+            Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
         self.conan.user_io = UserIO(out=ConanOutput(LoggerWriter(
             Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
         self.conan.create_app()
@@ -199,12 +199,11 @@ class ConanApi():
     def get_path_or_auto_install(self, conan_ref: ConanFileReference, conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
         """ Return the pkg_id and package folder of a conan reference 
         and auto-install it with the best matching package, if it is not available """
-
-        pkg_id, path = self.get_best_matching_package_path(conan_ref, conan_options)
-        if pkg_id:
-            return pkg_id, path
-
-        Logger().info(f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed.")
+        if not update:
+            pkg_id, path = self.get_best_matching_package_path(conan_ref, conan_options)
+            if pkg_id:
+                return pkg_id, path
+            Logger().info(f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed.")
 
         pkg_id, path = self.install_best_matching_package(conan_ref, conan_options, update=update)
         return pkg_id, path

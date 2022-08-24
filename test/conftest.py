@@ -142,7 +142,7 @@ def start_conan_server():
         print("ADDING CONAN REMOTE")
         os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
         os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
-
+        os.system(f"conan remote enable {TEST_REMOTE_NAME}")
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
         return

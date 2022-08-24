@@ -1,1 +1,1 @@
-from .local_packages import LocalConanPackageExplorer
+from .package_explorer import LocalConanPackageExplorer

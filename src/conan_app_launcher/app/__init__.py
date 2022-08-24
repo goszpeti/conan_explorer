@@ -54,7 +54,9 @@ def run_application():
     app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
     main_window.setWindowIcon(app_icon)
 
+    conan_api.init_api()
     main_window.show()  # show first, then load appsgrid with progress bar
+
     main_window.load()
     main_window.installEventFilter(main_window)
 

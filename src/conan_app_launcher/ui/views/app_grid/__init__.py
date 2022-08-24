@@ -7,7 +7,7 @@ from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt5.QtCore import Qt, pyqtBoundSignal
+from PyQt5.QtCore import Qt, pyqtBoundSignal, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QInputDialog, QMessageBox, QTabWidget,
                              QVBoxLayout, QWidget)
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 
 class AppGridView(QWidget):
+    load_signal = pyqtSignal()
 
     def __init__(self, parent, model: "UiAppGridModel", conan_pkg_installed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
         super().__init__(parent)
@@ -43,6 +44,7 @@ class AppGridView(QWidget):
         self.tab_widget.tabBar().tabMoved.connect(self.on_tab_move)
         if self.tab_widget.count() > 0:  # remove the default tab
             self.tab_widget.removeTab(0)
+        self.load_signal.connect(self.load)
 
     def re_init(self, model: "UiAppGridModel", offset=0):
         """ To be called, when a new config file is loaded """

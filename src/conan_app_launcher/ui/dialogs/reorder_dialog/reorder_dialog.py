@@ -35,6 +35,7 @@ class ReorderDialog(QDialog):
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "rearrange.png")))
         
         self._controller = ReorderController(self._ui.list_view, model)
+        self._ui.list_view.setModel(model)
 
         self._ui.list_view.setUpdatesEnabled(True)
         self._ui.list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
@@ -53,8 +54,6 @@ class ReorderController():
     def __init__(self, view: Union[QListView, QTreeView], model: ReorderingModel) -> None:
         self._view = view
         self._model = model
-        
-        self._view.setModel(model)
 
     def move_up(self):
         """ Moves the selected item(s) up in the list """

@@ -143,7 +143,7 @@ def test_local_package_explorer(base_fixture, ui_no_refs_config_fixture, qtbot, 
 
     # test open export folder
     Logger().debug("open export folder")
-    import conan_app_launcher.ui.views.package_explorer.local_packages as lp
+    import conan_app_launcher.ui.views.package_explorer.package_explorer as lp
     mocker.patch.object(lp, 'open_in_file_manager')
     lpe.on_open_export_folder_requested()
     lp.open_in_file_manager.assert_called_once_with(conanfile)

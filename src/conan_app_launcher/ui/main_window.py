@@ -138,17 +138,27 @@ class MainWindow(FluentWindow):
         config_source_str = str(config_source)
         if not config_source:
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
+        self.restore_window_state()
 
         # model loads incrementally
         loader = AsyncLoader(self)
-        loader.async_loading(self, self.model.loadf, (config_source_str,))
+        loader.async_loading(self, self._load_job, (config_source_str,))
         loader.wait_for_finished()
 
         # model loaded, now load the gui elements, which have a static model
-        self.app_grid.re_init(self.model.app_grid)
+        # self.app_grid.re_init(self.model.app_grid)
 
-        # Other modules are currently loaded on demand.
-        self.restore_window_state()
+
+    def _load_job(self, config_source_str):
+        # load ui file definitions
+        self.model.loadf(config_source_str)
+
+        # now actually load the views - this need signals, to execue in the gui thread
+        self.app_grid.model = self.model.app_grid
+        self.app_grid.load_signal.emit()
+        self.conan_config.load_signal.emit()
+        # loads the remotes in the search dialog
+        self.conan_remotes_updated.emit()
 
 
     @pyqtSlot()

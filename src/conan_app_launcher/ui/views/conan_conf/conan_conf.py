@@ -1,55 +1,63 @@
 import platform
 import subprocess
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import escape_venv
 from conan_app_launcher.ui.common import get_themed_asset_image
-from conan_app_launcher.ui.dialogs import ReorderController
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
-from PyQt5.QtCore import Qt, QModelIndex, QItemSelectionModel, pyqtBoundSignal
+from PyQt5.QtCore import Qt, pyqtBoundSignal, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QApplication, QDialog, QWidget, QMessageBox
 
 from .conan_conf_ui import Ui_Form
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
-from .model import ProfilesModel, RemotesModelItem, RemotesTableModel
-from .controller import ConanProfileController, ConanRemoteController
+from .model import ProfilesModel
+from .controller import ConanRemoteController
 
 class ConanConfigView(QDialog):
+
+    load_signal = pyqtSignal()
 
     def __init__(self, parent: Optional[QWidget], conan_remotes_updated: Optional[pyqtBoundSignal] = None):
         # Add minimize and maximize buttons
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         self._ui = Ui_Form()
         self._ui.setupUi(self)
+        self.config_file_path = Path("NULL")
+        self.profiles_path = Path("NULL")
+        self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, conan_remotes_updated)
+        self._init_remotes_tab()
+        self._init_profiles_tab()
+        self.load_signal.connect(self.__load)
 
+    def __load(self):
         self.config_file_path = Path(app.conan_api.client_cache.conan_conf_path)
         self.profiles_path = Path(app.conan_api.client_cache.default_profile_path).parent
-        self._init_info_tab()
-        self._init_remotes_tab(conan_remotes_updated)
-        self._init_profiles_tab()
-        self._init_config_file_tab()
-        self._init_settings_yml_tab()
+        self._load_info_tab()
+        self._load_remotes_tab()
+        self._load_profiles_tab()
+        self._load_config_file_tab()
+        self._load_settings_yml_tab()
 
         # always show first tab on start
         self._ui.config_tab_widget.tabBar().setCurrentIndex(0)
 
-    def _init_info_tab(self):
+    def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(app.conan_api.client_version)
 
         # setup system version outside of own venv
         with escape_venv():
             try:  # move to conan?
-                out = subprocess.check_output("conan --version").decode("utf-8")
+                out = subprocess.check_output("conan --version", shell=True).decode("utf-8")
                 conan_sys_version = out.lower().split("version ")[1].rstrip()
             except Exception:
                 conan_sys_version = "Unknown"
             try:  # move to conan?
-                out = subprocess.check_output("python --version").decode("utf-8")
+                out = subprocess.check_output("python --version", shell=True).decode("utf-8")
                 python_sys_version = out.lower().split("python ")[1].rstrip()
             except Exception:
                 python_sys_version = "Unknown"
@@ -62,13 +70,13 @@ class ConanConfigView(QDialog):
         self._ui.conan_usr_cache_value_label.setText(str(app.conan_api.get_short_path_root()))
         self._ui.conan_storage_path_value_label.setText(app.conan_api.client_cache.store)
 
-    def _init_settings_yml_tab(self):
+    def _load_settings_yml_tab(self):
         try:
             self._ui.settings_file_text_browser.setText(Path(app.conan_api.client_cache.settings_path).read_text())
         except Exception:
             Logger().error("Cannot read settings.yaml file!")
 
-    def _init_config_file_tab(self):
+    def _load_config_file_tab(self):
         try:
             self._ui.config_file_text_browser.setText(self.config_file_path.read_text())
             self._ui.save_config_file_button.clicked.connect(self.save_config_file)
@@ -76,16 +84,18 @@ class ConanConfigView(QDialog):
             Logger().error("Cannot read Conan config file!")
 
     def _init_profiles_tab(self):
-        profiles_model = ProfilesModel()
         self.profiles_cntx_menu = RoundedMenu()
-
-        self._ui.profiles_list_view.setModel(profiles_model)
-        self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
         self._ui.profiles_list_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.profiles_list_view.customContextMenuRequested.connect(
             self.on_profile_context_menu_requested)
         self._init_profile_context_menu()
         self._ui.save_profile_button.clicked.connect(self.save_profile_file)
+
+    def _load_profiles_tab(self):
+        profiles_model = ProfilesModel()
+        self._ui.profiles_list_view.setModel(profiles_model)
+        self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
+
 
     def _init_profile_context_menu(self):
         self._copy_profile_action = QAction("Copy profile name", self)
@@ -125,9 +135,12 @@ class ConanConfigView(QDialog):
 
 # Remote
 
-    def _init_remotes_tab(self, conan_remotes_updated):
-        self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, conan_remotes_updated)
+    def _load_remotes_tab(self):
+        
         self._remotes_controller.update() # TODO update once on show
+
+    def _init_remotes_tab(self):
+
         self._remotes_cntx_menu = RoundedMenu()
         self._ui.remote_refresh_button.clicked.connect(self._remotes_controller.update)
         self._ui.remote_move_down_button.setIcon(QIcon(get_themed_asset_image("icons/arrow_down.png")))

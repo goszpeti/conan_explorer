@@ -56,7 +56,8 @@ class ConanInstallDialog(QDialog):
             auto_install_checked = True
         ref_text = self._ui.conan_ref_line_edit.text()
         conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": {},
-                                                    "options": {}, "update": update_check_state, "auto_install": auto_install_checked}
+                                                    "options": {}, "update": update_check_state,
+                                                    "auto_install": auto_install_checked}
 
         app.conan_worker.put_ref_in_install_queue(conan_worker_element, self.emit_conan_pkg_signal_callback)
 

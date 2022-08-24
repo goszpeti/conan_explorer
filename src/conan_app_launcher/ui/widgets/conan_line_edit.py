@@ -25,14 +25,17 @@ class ConanRefLineEdit(QLineEdit):
 
         self._completion_thread = None
         self._loading_cbk = None
-        self._remote_refs = app.conan_api.info_cache.get_all_remote_refs()  # takes a while to get
-
+        self._remote_refs = []
         self.setCompleter(completer)
+        self.textChanged.connect(self.on_text_changed)
+
+    def showEvent(self, event):
+        app.conan_api.info_cache.get_all_remote_refs()  # takes a while to get
         combined_refs = set()
         combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
         combined_refs.update(self._remote_refs)
         self.completer().model().setStringList(list(combined_refs)) # type: ignore
-        self.textChanged.connect(self.on_text_changed)
+        super().showEvent(event)
 
     def __del__(self):
         if self._completion_thread:

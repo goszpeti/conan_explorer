@@ -47,8 +47,6 @@ class ConanSearchDialog(QDialog):
         # init remotes list
         if self.conan_remotes_updated:
             self.conan_remotes_updated.connect(self._init_remotes)
-        else:  # call at least once
-            self._init_remotes()
         self._pkg_result_model = PkgSearchModel()
         self._pkg_result_loader = AsyncLoader(self)
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -67,9 +65,6 @@ class ConanSearchDialog(QDialog):
         icon = QIcon(get_themed_asset_image("icons/search_packages.png"))
         self._init_pkg_context_menu()
         self._ui.search_icon.setPixmap(icon.pixmap(20, 20))
-
-    def load(self):  # TODO define interface for views
-        pass
 
     def _enable_search_button(self):
         """ Enable search button from minimum 3 characters onwards"""
