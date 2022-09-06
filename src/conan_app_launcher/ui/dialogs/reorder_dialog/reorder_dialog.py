@@ -1,7 +1,7 @@
 
 import abc
 from pathlib import Path
-from typing import Optional, Protocol, Union
+from typing import Optional, Union
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
@@ -10,6 +10,11 @@ from PyQt5.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTre
 from PyQt5.QtGui import QIcon
 
 from .reorder_dialog_ui import Ui_rearrange_dialog
+
+try:
+    from typing_extensions import Protocol
+except ImportError:
+    from typing import Protocol
 
 current_dir = Path(__file__).parent
 class ReorderingModel(Protocol):
