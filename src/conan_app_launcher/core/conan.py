@@ -93,6 +93,7 @@ class ConanApi():
         except Exception as error:
             Logger().debug(str(error))
         self.info_cache = ConanInfoCache(base_path, self.get_all_local_refs())
+        return self
 
     ### General commands ###
 

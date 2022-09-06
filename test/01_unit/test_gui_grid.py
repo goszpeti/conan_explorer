@@ -116,13 +116,15 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
         exe_rel_path = "bin\\python.exe"
     else:
         exe_rel_path = "bin/python"
-    selection = diag._temp_package_path / exe_rel_path
+    _, temp_package_path = app.conan_api.get_best_matching_package_path(
+        CFR.loads(diag._ui.conan_ref_line_edit.text()), diag.resolve_conan_options())
+    selection = temp_package_path / exe_rel_path
     mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(selection)])
     diag._ui.executable_browse_button.clicked.emit()
-    assert diag._ui.exec_path_line_edit.text() == exe_rel_path
+    assert diag._ui.exec_path_line_edit.text() == exe_rel_path.replace("\\", "/")
 
     # negative test
     selection = base_fixture.testdata_path / "nofile.json"
@@ -135,7 +137,7 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
                         return_value=QtWidgets.QMessageBox.Accepted)
     diag._ui.executable_browse_button.clicked.emit()
     # entry not changed
-    assert diag._ui.exec_path_line_edit.text() == exe_rel_path
+    assert diag._ui.exec_path_line_edit.text() == exe_rel_path.replace("\\", "/")
 
     # open button 
     # absolute
@@ -148,7 +150,7 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
     assert diag._ui.icon_line_edit.text() == str(icon_path)
 
     # relative to package
-    icon_pkg_path = diag._temp_package_path / "icon.png"
+    icon_pkg_path = temp_package_path / "icon.png"
     # copy icon to pkg
     shutil.copyfile(str(icon_path), str(icon_pkg_path))
 
@@ -159,11 +161,6 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
     diag._ui.icon_browse_button.clicked.emit()
     assert diag._ui.icon_line_edit.text() == "icon.png"
     os.unlink(str(icon_pkg_path))
-
-    # simulate pressing backspace - buttons should disable
-    diag._ui.conan_ref_line_edit.setText(TEST_REF[0:-1])
-    assert not diag._ui.executable_browse_button.isEnabled()
-    assert not diag._ui.icon_browse_button.isEnabled()
 
 
 def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
@@ -268,13 +265,12 @@ def test_AppLink_open(base_fixture, qtbot):
     elif platform.system() == "Windows":
         # check windowname of process - default shell spawns with path as windowname
         # DOES NOT WORK with Windows Terminal in 11 -> has no title
-        ret = check_output(f'tasklist /fi "WINDOWTITLE eq {str(sys.executable)}"')
-        assert "python.exe" in ret.decode("utf-8")
+        ret = check_output(f'tasklist /fi "WINDOWTITLE eq Conan Launch: {str(sys.executable)}"')
+        assert "cmd.exe" in ret.decode("utf-8")
         lines = ret.decode("utf-8").splitlines()
         line = lines[3].replace(" ", "")
-        pid = line.split("python.exe")[1].split("Console")[0]
+        pid = line.split("cmd.exe")[1].split("Console")[0]
         os.system("taskkill /PID " + pid)
-
 
 def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     """

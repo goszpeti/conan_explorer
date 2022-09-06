@@ -108,7 +108,7 @@
         <number>1</number>
        </property>
        <property name="topMargin">
-        <number>0</number>
+        <number>1</number>
        </property>
        <property name="rightMargin">
         <number>6</number>
@@ -655,7 +655,7 @@ p, li { white-space: pre-wrap; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>766</height>
+                  <height>765</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="right_menu_scroll_area_widgets_layout">
@@ -879,7 +879,7 @@ p, li { white-space: pre-wrap; }
               <number>3</number>
              </property>
              <property name="topMargin">
-              <number>10</number>
+              <number>0</number>
              </property>
              <property name="rightMargin">
               <number>3</number>

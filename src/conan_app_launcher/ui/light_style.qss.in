@@ -148,11 +148,6 @@ QFrame#left_menu_frame {
     border-top-left-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
 
-QLabel#title_label {
-    font: bold;
-    font-size: {{MAIN_FONT_SIZE + 2 }}pt;
-}
-
 QFrame#left_menu_frame QPushButton {
     border-radius: 5px;
     margin: 2px;
@@ -173,6 +168,11 @@ QFrame#left_menu_frame QPushButton:pressed {
 
 QFrame#left_menu_frame QPushButton:checked {
     background-color: #A8A8A8;
+}
+
+QLabel#title_label {
+    font: bold;
+    font-size: {{MAIN_FONT_SIZE + 2 }}pt;
 }
 
 /* Right Frame Subwidgets */

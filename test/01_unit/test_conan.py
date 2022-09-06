@@ -57,7 +57,7 @@ def test_empty_cleanup_cache(base_fixture):
     """
     os.environ["CONAN_USER_HOME"] = str(Path(tempfile.gettempdir()) / "._myconan_home")
     os.environ["CONAN_USER_HOME_SHORT"] = str(Path(tempfile.gettempdir()) / "._myconan_short")
-    paths = ConanCleanup(ConanApi()).get_cleanup_cache_paths()
+    paths = ConanCleanup(ConanApi().init_api()).get_cleanup_cache_paths()
     assert not paths
     os.environ.pop("CONAN_USER_HOME")
     os.environ.pop("CONAN_USER_HOME_SHORT")
@@ -70,8 +70,7 @@ def test_conan_find_remote_pkg(base_fixture):
     default settings.
     """
     os.system(f"conan remove {TEST_REF} -f")
-    conan = ConanApi()
-    conan.init_api()
+    conan = ConanApi().init_api()
     default_settings = dict(conan.client_cache.default_profile.settings)
 
     pkgs = conan.get_matching_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
@@ -90,8 +89,7 @@ def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     Empty list must be returned and the error be logged.
     """
     os.system(f"conan remove {TEST_REF} -f")
-    conan = ConanApi()
-    conan.init_api()
+    conan = ConanApi().init_api()
     pkg = conan.get_matching_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"BogusOption": "True"})
     assert not pkg
 
@@ -102,8 +100,7 @@ def test_conan_find_local_pkg(base_fixture):
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
     os.system(f"conan install {TEST_REF} -u")
-    conan = ConanApi()
-    conan.init_api()
+    conan = ConanApi().init_api()
     pkgs = conan.find_best_matching_packages(ConanFileReference.loads(TEST_REF))
     assert len(pkgs) == 1
 
@@ -115,8 +112,7 @@ def test_get_path_or_install(base_fixture):
     """
     dir_to_check = "bin"
     os.system(f"conan remove {TEST_REF} -f")
-    conan = ConanApi()
-    conan.init_api()
+    conan = ConanApi().init_api()
     # Gets package path / installs the package
     id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
@@ -132,8 +128,7 @@ def test_get_path_or_install_manual_options(capsys):
     """
     # This package has an option "shared" and is fairly small.
     os.system(f"conan remove {TEST_REF} -f")
-    conan = ConanApi()
-    conan.init_api()
+    conan = ConanApi().init_api()
     id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {"shared": "True"})
     if platform.system() == "Windows":
         assert (package_folder / "bin" / "python.exe").is_file()
@@ -149,8 +144,7 @@ def test_install_with_any_settings(mocker, capfd):
     # mock the remote response
     os.system(f"conan remove {TEST_REF} -f")
     # Create the "any" package
-    conan = ConanApi()
-    conan.init_api()
+    conan = ConanApi().init_api()
     assert conan.install_package(
         ConanFileReference.loads(TEST_REF),
         {'id': '325c44fdb228c32b3de52146f3e3ff8d94dddb60', 'options': {}, 'settings': {
@@ -170,8 +164,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     conan_create_and_upload(conanfile, ref)
     os.system(f"conan remove {ref} -f")
 
-    conan = ConanApi()
-    conan.init_api()
+    conan = ConanApi().init_api()
 
     id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(ref))
     assert (package_folder / "bin").is_dir()
@@ -186,7 +179,7 @@ def test_resolve_default_options(base_fixture):
     Test, if different kind of types of default options can be converted to a dict
     Dict is expected.
     """
-    conan = ConanApi()
+    conan = ConanApi().init_api()
 
     str_val = "option=value"
     ret = conan._resolve_default_options(str_val)
@@ -220,8 +213,7 @@ def test_create_key_value_list(base_fixture):
 
 def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
-    conan = ConanApi()
-    conan.init_api()
+    conan = ConanApi().init_api()
     res = conan.search_recipe_alternatives_in_remotes(ConanFileReference.loads(TEST_REF))
     ref = ConanFileReference.loads(TEST_REF)  # need to convert @_/_
     assert str(ref) in str(res)
@@ -241,7 +233,7 @@ def test_conan_worker(base_fixture, mocker):
     mock_func = mocker.patch('conan_app_launcher.core.ConanApi.get_path_or_auto_install')
     import conan_app_launcher.app as app
 
-    conan_worker = ConanWorker(ConanApi(), app.active_settings)
+    conan_worker = ConanWorker(ConanApi().init_api(), app.active_settings)
     conan_worker.update_all_info(conan_refs, None)
     time.sleep(3)
     conan_worker.finish_working()

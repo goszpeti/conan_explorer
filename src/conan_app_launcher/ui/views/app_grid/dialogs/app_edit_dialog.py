@@ -101,14 +101,18 @@ class AppEditDialog(QDialog):
             return True
 
     def on_icon_browse_clicked(self):
+        _, temp_package_path = app.conan_api.get_best_matching_package_path(
+            ConanFileReference.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
+        if not temp_package_path.exists():  # default path
+            temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",
-                                       directory=str(self._temp_package_path),
+                             directory=str(temp_package_path),
                                        filter="Images (*.ico *.png *.jpg)")
         dialog.setFileMode(QFileDialog.ExistingFile)
         if dialog.exec_() == QFileDialog.Accepted:
             icon_path = Path(dialog.selectedFiles()[0])
             try:
-                icon_rel_path = icon_path.relative_to(self._temp_package_path)
+                icon_rel_path = icon_path.relative_to(temp_package_path)
                 self._ui.icon_line_edit.setText(str(icon_rel_path))
             except Exception:
                 # errors, if it does not resolve
@@ -141,10 +145,6 @@ class AppEditDialog(QDialog):
            msg.setIcon(QMessageBox.Critical)
            msg.exec_()
            return
-        # TODO validate path?
-#        if not self.exe_path_valid(Path(self._ui.exec_path_line_edit.text())):
-#            return
-
         # write back app info
         self._model.name = self._ui.name_line_edit.text()
         self._model.conan_ref = self._ui.conan_ref_line_edit.text()

@@ -1,4 +1,5 @@
 @echo off
+title Conan Launch: {{COMMAND}}
 {{COMMAND}}
 if %errorlevel% equ 0 exit /b
 echo "Error, press Enter to close the terminal."
