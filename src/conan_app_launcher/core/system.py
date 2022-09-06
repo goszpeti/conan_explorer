@@ -9,10 +9,11 @@ from distutils import version
 from pathlib import Path
 from typing import List
 import sys
+from jinja2 import Template
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher import asset_path, PKG_NAME
 
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
-from  conans import tools
 
 @contextmanager
 def escape_venv():
@@ -106,16 +107,9 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
         if platform.system() == "Windows":
             return execute_cmd(cmd, is_console_app)
         elif platform.system() == "Linux":
-            if is_console_app:
-                # Sadly, there is no default way to do this, because of the miriad terminal emulators available
-                # Use the default distro emulator, with x-terminal-emulator
-                # (sudo update-alternatives --config x-terminal-emulator)
-                # This works only on debian distros.
-                cmd = ["x-terminal-emulator", "-e", str(executable)]
             if args:
                 cmd += args.strip().split(" ")
-            proc = subprocess.Popen(cmd)
-            return proc.pid
+            return execute_cmd(cmd, is_console_app)
     Logger().warning(f"No executable {str(executable)} to start.")
     return 0
 
@@ -127,14 +121,45 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
         creationflags = 0
         if is_console_app:
             creationflags = subprocess.CREATE_NEW_CONSOLE
+            cmd = [generate_launch_script(cmd)]
         # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
         proc = subprocess.Popen(cmd, creationflags=creationflags)
         return proc.pid
     elif platform.system() == "Linux":
+        if is_console_app:
+            # Sadly, there is no default way to do this, because of the miriad terminal emulators available
+            # Use the default distro emulator, with x-terminal-emulator
+            # (sudo update-alternatives --config x-terminal-emulator)
+            # This works only on debian distros.
+            cmd = [generate_launch_script(cmd)]
+            cmd = ["x-terminal-emulator", "-e"] + cmd
         proc = subprocess.Popen(cmd)
         return proc.pid
     return 0
 
+def generate_launch_script(cmd: List[str]) -> str:
+    import tempfile
+    launch_templ_file = ""
+    
+    if platform.system() == 'Windows':
+        launch_templ_file = "launch.bat.in"
+        temp_fd, temp_path_str =  tempfile.mkstemp(".bat")
+    elif platform.system() == "Linux":
+        launch_templ_file = "launch.sh.in"
+        temp_fd, temp_path_str = tempfile.mkstemp(".sh", prefix=PKG_NAME, text=True)
+    else:
+        Logger().warning(f"Not supported OS.")
+        return ""
+    launch_templ_path = asset_path / launch_templ_file
+    with open(launch_templ_path, "r") as fd:
+        launch_template = Template(fd.read())
+    launch_content = launch_template.render(COMMAND=" ".join(cmd))
+    with os.fdopen(temp_fd, 'w') as f:
+        f.write(launch_content)
+    # TODO chmod +x
+    if platform.system() == 'Linux':
+        os.system(f"chmod +x {temp_path_str}")
+    return temp_path_str
 
 def open_file(file: Path):
     """ Open files with their associated programs """

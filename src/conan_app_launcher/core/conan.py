@@ -70,7 +70,7 @@ class ConanApi():
         self.client_cache: ClientCache
         self.info_cache: ConanInfoCache
         self.client_version = client_version
-        self._short_path_root = Path("NULL")
+        self._short_path_root = Path("Unknown")
 
     def init_api(self):
         """ Instantiate the internal Conan api. In some cases it needs to be instatiated anew. """

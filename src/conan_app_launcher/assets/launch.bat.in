@@ -1,0 +1,5 @@
+@echo off
+{{COMMAND}}
+if %errorlevel% equ 0 exit /b
+echo "Error, press Enter to close the terminal."
+set /p input=

@@ -2,6 +2,7 @@ import sys
 from distutils.file_util import copy_file
 from pathlib import Path
 from test.conftest import TEST_REF_OFFICIAL
+import conan_app_launcher.app as app  # using global module pattern
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
@@ -14,6 +15,7 @@ def test_executable_eval(base_fixture):
     Tests, that the executable setter works on all cases.
     Expects correct file, error messoge on wrong file an error message on no file.
     """
+    app.conan_api.init_api()
     exe = Path(sys.executable)
 
     app_config = UiAppLinkConfig("AppName", executable=exe.name)
@@ -33,6 +35,7 @@ def test_icon_eval(base_fixture, tmp_path, qtbot):
     Expects package relative file, config-file rel. file, automaticaly extracted file,
     and error message and default icon on no file.
     """
+    app.conan_api.init_api()
 
     # copy icons to tmp_path to fake package path
     copy_file(str(asset_path / "icons" / "icon.ico"), tmp_path)
@@ -68,6 +71,8 @@ def test_official_release(base_fixture):
     Test, if an official reference in the format name/1.0.0@_/_ works correctly.
     Expects the same option name and value as given to the constructor.
     """
+    app.conan_api.init_api()
+
     conan_ref_short = str(CFR.loads(TEST_REF_OFFICIAL))
     app_config = UiAppLinkConfig("AppName", conan_ref=TEST_REF_OFFICIAL)
     app_link = UiAppLinkModel().load(app_config, None)

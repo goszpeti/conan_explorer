@@ -22,7 +22,6 @@ class AppEditDialog(QDialog):
         super().__init__(parent=parent, flags=flags)
         self._model = model
         self._pkg_installed_signal = pkg_installed_signal
-        self._temp_package_path = Path("NULL") # pkg path of the currently entered pkg
 
         # without baseinstance, dialog would further needed to be configured
         self._ui = Ui_Dialog()
@@ -88,7 +87,7 @@ class AppEditDialog(QDialog):
         if dialog.exec_() == QFileDialog.Accepted:
             exe_path = Path(dialog.selectedFiles()[0])
             try:
-                exe_rel_path = exe_path.relative_to(self._temp_package_path)
+                exe_rel_path = exe_path.relative_to(temp_package_path)
             except Exception:
                 msg = QMessageBox(parent=self)
                 msg.setWindowTitle("Invalid selection")
@@ -97,7 +96,8 @@ class AppEditDialog(QDialog):
                 msg.setIcon(QMessageBox.Critical)
                 msg.exec_()
                 return False
-            self._ui.exec_path_line_edit.setText(str(exe_rel_path))
+            # use as_posix to always get forward slashes in the relpath
+            self._ui.exec_path_line_edit.setText(exe_rel_path.as_posix())
             return True
 
     def on_icon_browse_clicked(self):

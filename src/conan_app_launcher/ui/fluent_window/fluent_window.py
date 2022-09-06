@@ -248,8 +248,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         from .fluent_window_ui import Ui_MainWindow  # need to resolve circular import
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        if is_windows_11(): # To hide black edges around the border rounding
-            self.setAttribute(Qt.WA_TranslucentBackground, True)
 
         self.main_general_settings_menu = SideSubMenu(
             self.ui.right_menu_bottom_content_sw, "General Settings", True)
@@ -258,6 +256,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint |
                             Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
+        if is_windows_11() or platform.system() == "Linux": # To hide black edges around the border rounding
+            self.setAttribute(Qt.WA_TranslucentBackground, True)
+
         self._use_native_windows_fcns = True if platform.system() == "Windows" and native_windows_fcns else False
         # all buttons and widgets to be able to shown on the main page (from settings and left menu)
         self.page_widgets = FluentWindow.PageStore()
@@ -268,6 +269,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self._resize_point = QPoint()
         self._last_geometry = QRect()
         self.title_text = title_text
+        self.drag_position = None
 
         self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
         menu_margins = self.ui.left_menu_bottom_subframe.layout().contentsMargins()
@@ -325,6 +327,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 self.maximize_restore()
             # qt move
             if event.buttons() == Qt.LeftButton:
+                if self.drag_position is None:
+                    return
                 self.move(self.pos() + event.globalPos() - self.drag_position)
                 self.drag_position = event.globalPos()
                 event.accept()

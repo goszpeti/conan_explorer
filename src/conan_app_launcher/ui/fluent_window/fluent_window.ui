@@ -280,7 +280,7 @@
                       </iconset>
                      </property>
                      <property name="flat">
-                      <bool>false</bool>
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -300,6 +300,9 @@
                        <normalon>../assets/icons/restore.png</normalon>
                       </iconset>
                      </property>
+                     <property name="flat">
+                      <bool>true</bool>
+                     </property>
                     </widget>
                    </item>
                    <item>
@@ -317,6 +320,9 @@
                       <iconset>
                        <normalon>../assets/icons/minus.png</normalon>
                       </iconset>
+                     </property>
+                     <property name="flat">
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -1054,6 +1060,9 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="checked">
                 <bool>false</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
                </property>
               </widget>
              </item>

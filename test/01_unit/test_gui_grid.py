@@ -82,11 +82,13 @@ def test_AppEditDialog_display_values(base_fixture, qtbot):
 def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
     """
     Test, if the browse executable and icon button works:
-    - buttons are only enabled, if an installed reference is entered
+    - buttons are always enabled (behavior change from conditional disable)
     - opens the dialog in the package folder
     - resolves the correct relative path for executables and forbids non-package-folder paths
     - resolves the correct relative path for executables and sets non-package-folder paths to the abs. path
     """
+    app.conan_api.init_api()
+
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico", conan_options={})
@@ -99,9 +101,9 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
 
     qtbot.waitExposed(root_obj)
 
-    # assert buttons are disabled (invalid ref)
-    assert not diag._ui.executable_browse_button.isEnabled()
-    assert not diag._ui.icon_browse_button.isEnabled()
+    # assert buttons are enabled - UPDATE: buttons are not disabled
+    assert diag._ui.executable_browse_button.isEnabled()
+    assert diag._ui.icon_browse_button.isEnabled()
 
     # enter an installed reference
     diag._ui.conan_ref_line_edit.setText(TEST_REF)
@@ -168,7 +170,7 @@ def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
     """
     Test, if the entered data is written correctly.
     """
-    import conan_app_launcher.app as app
+    app.conan_api.init_api()
 
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
@@ -235,6 +237,8 @@ def test_AppLink_open(base_fixture, qtbot):
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
+    app.conan_api.init_api()
+
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable=Path(sys.executable).name)
     app_model = UiAppLinkModel().load(app_config, None)
@@ -277,6 +281,7 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path. Use python executable for testing.
     """
+    app.conan_api.init_api()
 
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable="python")
@@ -296,7 +301,7 @@ def test_AppLink_cbox_switch(base_fixture, qtbot):
     """
     Test, that changing the version resets the channel and user correctly
     """
-    import conan_app_launcher.app as app
+    app.conan_api.init_api()
 
     # all versions have different user and channel names, so we can distinguish them
     conanfile = str(base_fixture.testdata_path / "conan" / "multi" / "conanfile.py")

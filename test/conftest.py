@@ -74,7 +74,9 @@ def check_if_process_running(process_name, kill=False):
 
 def create_test_ref(ref, paths, create_params=[""], update=False):
     native_ref = ConanFileReference.loads(ref).full_str()
-    pkgs = ConanApi().search_query_in_remotes(native_ref)
+    conan = ConanApi()
+    conan.init_api()
+    pkgs = conan.search_query_in_remotes(native_ref)
 
     if not update:
         for pkg in pkgs:
@@ -119,6 +121,7 @@ def start_conan_server():
     paths = PathSetup()
     profiles_path = paths.testdata_path / "conan" / "profile"
     conan = ConanApi()
+    conan.init_api()
     os.makedirs(conan.client_cache.profiles_path, exist_ok=True)
     shutil.copy(str(profiles_path / platform.system().lower()),  conan.client_cache.default_profile_path)
 

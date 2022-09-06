@@ -27,8 +27,8 @@ class ConanConfigView(QDialog):
         super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
         self._ui = Ui_Form()
         self._ui.setupUi(self)
-        self.config_file_path = Path("NULL")
-        self.profiles_path = Path("NULL")
+        self.config_file_path = Path("Unknown")
+        self.profiles_path = Path("Unknown")
         self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, conan_remotes_updated)
         self._init_remotes_tab()
         self._init_profiles_tab()
@@ -57,7 +57,10 @@ class ConanConfigView(QDialog):
             except Exception:
                 conan_sys_version = "Unknown"
             try:  # move to conan?
-                out = subprocess.check_output("python --version", shell=True).decode("utf-8")
+                python_exe_name = "python"
+                if platform.system() == "Linux":
+                    python_exe_name = "python3"
+                out = subprocess.check_output(f"{python_exe_name} --version", shell=True).decode("utf-8")
                 python_sys_version = out.lower().split("python ")[1].rstrip()
             except Exception:
                 python_sys_version = "Unknown"

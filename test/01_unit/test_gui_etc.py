@@ -28,6 +28,7 @@ def test_edit_line_conan(base_fixture, light_theme_fixture, qtbot):
     """ Test, that the line edit validates on edit
     and displays the local packages instantly and the remote ones after a delay
     """
+    app.conan_api.init_api()
     os.system(f"conan remove {TEST_REF} -f")
     root_obj = QtWidgets.QWidget()
     widget = ConanRefLineEdit(root_obj)
@@ -56,6 +57,8 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
     """ 
     Tests, that the Conan Install dialog can install references, packages and the update and auto_install flag works.
     """
+    app.conan_api.init_api()
+
     root_obj = QtWidgets.QWidget()
     cfr = ConanFileReference.loads(TEST_REF)
 
