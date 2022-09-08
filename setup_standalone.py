@@ -78,6 +78,9 @@ executables = [Executable("./src/conan_app_launcher/__main__.py",
                           base=base, target_name="conan_app_launcher",
                           icon=icon, shortcut_name=app_name,
                           shortcut_dir="DesktopFolder",
+                          ),
+               Executable(".venv/Lib/site-packages/conans/conan.py",
+                          target_name="conan",
                           )]
 
 setup(
