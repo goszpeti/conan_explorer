@@ -33,9 +33,13 @@ except PackageNotFoundError: # pragma: no cover
     AUTHOR = ""
 
 ICON_SIZE = 64 # Icon size (width and height) in pixels on an Applink
+MAX_FONT_SIZE = 18
+MIN_FONT_SIZE = 8
 INVALID_CONAN_REF = "Invalid/NA@NA/NA" # used to indicate a conan reference is invalid
-SETTINGS_FILE_NAME = ".cal_config" # for storing application settings
-DEFAULT_UI_CFG_FILE_NAME = "cal_ui.json"  # for legacy 0.X support
+SETTINGS_FILE_NAME = "settings" # for storing application settings
+LEGACY_SETTINGS_FILE_NAME = ".cal_config"  # for backwards compatibility till 1.4.1
+DEFAULT_UI_CFG_FILE_NAME = "ui_cfg" # no extension from 1.4.1
+LEGACY_UI_CFG_FILE_NAME = "cal_ui.json"  # for backwards compatibility till 1.4.1
 CONAN_LOG_PREFIX = "CONAN: " # logger uses this to indicate a log comes from Conan
 
 # Feature flags
@@ -58,13 +62,15 @@ legacy_user_save_path = Path().home()
 user_save_path =  Path(os.getenv("XDG_CONFIG_HOME", str(legacy_user_save_path))) / PKG_NAME if platform.system() == "Linux" \
     else Path(os.getenv("APPDATA", str(legacy_user_save_path))) / PKG_NAME
 
-# user path migration
+# user path migration - move settings and default gui file
+# ui file loading will handle patching the settings, if the default gui file was used
 if user_save_path != legacy_user_save_path:
     os.makedirs(str(user_save_path), exist_ok=True)
-    if (legacy_user_save_path / SETTINGS_FILE_NAME).exists():
-        shutil.move(str(legacy_user_save_path / SETTINGS_FILE_NAME),
-                    str(user_save_path / SETTINGS_FILE_NAME))
-
-    if (legacy_user_save_path / DEFAULT_UI_CFG_FILE_NAME).exists():
-        shutil.move(str(legacy_user_save_path / DEFAULT_UI_CFG_FILE_NAME),
-                    str(user_save_path / DEFAULT_UI_CFG_FILE_NAME))
+    if (legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME).exists():
+        print(f"INFO: Moving application settings file from {str(user_save_path)} to {str(legacy_user_save_path)}")
+        shutil.move(str(legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME),
+                    str(user_save_path / (SETTINGS_FILE_NAME + ".ini")))
+    if (legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME).exists():
+        print(f"INFO: Moving default ui config file from {str(user_save_path)} to {str(legacy_user_save_path)}")
+        shutil.move(str(legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME),
+                    str(user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")))

@@ -105,13 +105,13 @@
       </property>
       <layout class="QGridLayout" name="main_frame_layout">
        <property name="leftMargin">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="topMargin">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="rightMargin">
-        <number>6</number>
+        <number>3</number>
        </property>
        <property name="bottomMargin">
         <number>1</number>
@@ -276,7 +276,7 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../assets/icons/close.png</normalon>
+                       <normalon>../../../../../../Users/peter/.designer/assets/icons/close.png</normalon>
                       </iconset>
                      </property>
                      <property name="flat">
@@ -297,7 +297,7 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../assets/icons/restore.png</normalon>
+                       <normalon>../../../../../../Users/peter/.designer/assets/icons/restore.png</normalon>
                       </iconset>
                      </property>
                      <property name="flat">
@@ -318,7 +318,7 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../assets/icons/minus.png</normalon>
+                       <normalon>../../../../../../Users/peter/.designer/assets/icons/minus.png</normalon>
                       </iconset>
                      </property>
                      <property name="flat">
@@ -528,7 +528,7 @@
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>2</number>
+                  <number>1</number>
                  </property>
                  <item>
                   <widget class="QTextBrowser" name="console">
@@ -655,7 +655,7 @@ p, li { white-space: pre-wrap; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>765</height>
+                  <height>766</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="right_menu_scroll_area_widgets_layout">
@@ -876,7 +876,7 @@ p, li { white-space: pre-wrap; }
               <number>15</number>
              </property>
              <property name="leftMargin">
-              <number>3</number>
+              <number>0</number>
              </property>
              <property name="topMargin">
               <number>0</number>
@@ -938,7 +938,7 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="icon">
                 <iconset>
-                 <normaloff>../assets/icons/menu_stripes.png</normaloff>../assets/icons/menu_stripes.png</iconset>
+                 <normaloff>../../../../../../Users/peter/.designer/assets/icons/menu_stripes.png</normaloff>../../../../../../Users/peter/.designer/assets/icons/menu_stripes.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -976,7 +976,7 @@ p, li { white-space: pre-wrap; }
             </property>
             <layout class="QVBoxLayout" name="left_menu_middle_subframe_layout">
              <property name="leftMargin">
-              <number>3</number>
+              <number>0</number>
              </property>
              <property name="rightMargin">
               <number>3</number>
@@ -1000,7 +1000,7 @@ p, li { white-space: pre-wrap; }
               <number>5</number>
              </property>
              <property name="leftMargin">
-              <number>3</number>
+              <number>0</number>
              </property>
              <property name="topMargin">
               <number>0</number>
@@ -1046,7 +1046,7 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="icon">
                 <iconset>
-                 <normalon>../assets/icons/settings.png</normalon>
+                 <normalon>../../../../../../Users/peter/.designer/assets/icons/settings.png</normalon>
                 </iconset>
                </property>
                <property name="iconSize">

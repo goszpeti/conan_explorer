@@ -47,8 +47,11 @@ class JsonUiConfig(UiConfigInterface):
         else:
             Logger().info(f'UiConfig: Using {self._json_file_path}')
 
-    T = TypeVar('T', bound=Union[UiTabConfig, UiAppLinkConfig])
+    @classmethod
+    def get_file_ext(cls):
+        return ".json"
 
+    T = TypeVar('T', bound=Union[UiTabConfig, UiAppLinkConfig])
     @staticmethod
     def _convert_to_config_type(dict: Dict[str, Any], config_type: Type[T]) -> T:
         """ Convert the dict to the class representations. 

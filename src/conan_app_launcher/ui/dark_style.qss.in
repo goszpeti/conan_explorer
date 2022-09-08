@@ -151,12 +151,10 @@ QLabel#about_label {
 
 /* Left Frame Subwidgets */
 
-QLabel#title_label {
-    font: bold;
-    font-size: {{MAIN_FONT_SIZE + 2 }}pt;
-}
 QFrame#left_menu_frame {
     background-color: #202020;
+    border-bottom-left-radius: {{WINDOW_BORDER_RADIUS}}px;
+    border-top-left-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
 
 QFrame#left_menu_frame QPushButton {
@@ -180,7 +178,10 @@ QFrame#left_menu_frame QPushButton:pressed {
 QFrame#left_menu_frame QPushButton:checked {
     background-color: #474747;
 }
-
+QLabel#title_label {
+    font: bold;
+    font-size: {{MAIN_FONT_SIZE + 2}}pt;
+}
 
 /* Right Frame Subwidgets */
 

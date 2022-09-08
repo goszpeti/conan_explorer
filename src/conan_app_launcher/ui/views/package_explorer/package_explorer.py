@@ -440,7 +440,7 @@ class LocalConanPackageExplorer(QWidget):
         rel_path = file_path.relative_to(pkg_path)
 
         app_config = UiAppLinkConfig(
-            name="NewLink", conan_ref=self.get_selected_conan_ref(), executable=str(rel_path))
+            name="NewLink", conan_ref=str(self._current_ref), executable=str(rel_path))
         self.page_widgets.get_page_by_type(AppGridView).open_new_app_dialog_from_extern(app_config)
 
     def on_open_file_in_file_manager(self, model_index):

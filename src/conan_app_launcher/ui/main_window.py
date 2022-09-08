@@ -3,7 +3,7 @@ from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import PathLike, user_save_path
+from conan_app_launcher import MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, user_save_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS,
@@ -165,7 +165,7 @@ class MainWindow(FluentWindow):
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
         new_size = app.active_settings.get_int(FONT_SIZE) + 1
-        if new_size > 18:
+        if new_size > MAX_FONT_SIZE:
             return
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)
@@ -174,7 +174,7 @@ class MainWindow(FluentWindow):
     def on_font_size_decreased(self):
         """ Decrease font size by 2. Ignore if font gets too small. """
         new_size = app.active_settings.get_int(FONT_SIZE) - 1
-        if new_size < 8:
+        if new_size < MIN_FONT_SIZE:
             return
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)

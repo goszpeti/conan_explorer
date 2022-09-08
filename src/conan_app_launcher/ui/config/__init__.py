@@ -61,11 +61,24 @@ def ui_config_factory(type: str, source: PathLike) -> "UiConfigInterface":
     return implementation
 
 
+def get_ui_config_file_ext(type: str) -> str:
+    if type == UI_CONFIG_JSON_TYPE:
+        from .json_file import JsonUiConfig
+        file_ext = JsonUiConfig.get_file_ext()
+    else:
+        raise NotImplementedError
+    return file_ext
+
+
 class UiConfigInterface(ABC):
     """
     Abstract Class to implement ui config mechanism.
     Source artefact should be passed by constructor an and is not changeable.
     """
+
+    @classmethod
+    def get_file_ext(cls) -> str:  # enter file extesnion like .yaml
+        raise NotImplementedError
 
     @abstractmethod
     def load(self) -> UiConfig:
