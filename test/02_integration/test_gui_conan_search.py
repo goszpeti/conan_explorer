@@ -110,3 +110,4 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
     assert id == main_window.local_package_explorer.get_selected_conan_pkg_info().get("id", "")
 
     search_dialog.hide()
+    main_window.close()

@@ -67,6 +67,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
 
     found_pkg = app.conan_api.find_best_local_package(cfr)
     assert not found_pkg.get("id", "")
+    main_gui.close()
 
 
 def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_fixture):

@@ -120,10 +120,16 @@ class ConanWorker():
                     else:
                         pkg_id, _ = self._conan_api.install_reference(conan_ref, conan_settings, conan_options, update=update)
             except Exception:
-                self._conan_install_queue.task_done()
+                try:
+                    self._conan_install_queue.task_done()
+                except ValueError:
+                    pass # don't care about calling too many times
                 continue
             Logger().debug("Finish working on " + ref_pkg_id)
-            self._conan_install_queue.task_done()
+            try:
+                self._conan_install_queue.task_done()
+            except ValueError:
+                pass  # don't care about calling too many times
         # batch emitting signal - easier when many packages are 
         # in queue and no difference if there is only one
         if info_callback and not self._shutdown_requested:

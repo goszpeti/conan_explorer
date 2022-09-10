@@ -47,7 +47,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
-
+    main_gui.conan_remotes_updated.emit()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 
@@ -169,7 +169,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
     assert edited_remote_item.remote.verify_ssl == False
 
     os.system("conan remote remove Edited")
-
+    main_gui.close()
 
 def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     # Test login with the local remote
@@ -220,3 +220,4 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     assert app.conan_api.get_remote_user_info("local") == ("demo", True)
     # assert password is empty (does not really test, if it worked correctly)
     assert conan_conf_view.remote_login_dialog._ui.password_line_edit.text() == ""
+    main_gui.close()

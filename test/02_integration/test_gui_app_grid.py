@@ -42,7 +42,7 @@ def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.app_grid.on_tab_rename(0)
     # text must be the same
     assert main_gui.app_grid.tab_widget.tabBar().tabText(0) == new_text
-
+    main_gui.close()
 
 def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     """ Test, that Add Tab function adds a new tab """
@@ -73,7 +73,7 @@ def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count + 1
     assert len(config_tabs) == prev_count + 1
-
+    main_gui.close()
 
 def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     """ Test, that Remove Tab actually removes a tab. Last tab must not be deletable. """
@@ -113,7 +113,7 @@ def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count - 1
     assert len(config_tabs) == prev_count - 1
-
+    main_gui.close()
 
 def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
     """ Test, that the config file is saved, when the tab is moved. """
@@ -135,7 +135,7 @@ def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert config_tabs[0].name == "Extra"
     assert config_tabs[1].name == "Basics"
-
+    main_gui.close()
 
 def test_edit_AppLink(qtbot, base_fixture, ui_config_fixture, mocker):
     """ Test, that Edit AppLink Dialog saves all the configured data s"""
@@ -184,7 +184,7 @@ def test_edit_AppLink(qtbot, base_fixture, ui_config_fixture, mocker):
     assert len(config_tabs[0].apps) == prev_count
     if app.conan_worker:  # manual wait for worker
         app.conan_worker.finish_working()
-
+    main_gui.close()
 
 def test_remove_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that Remove Applink removes and AppLink and the last one is not deletable """
@@ -221,7 +221,7 @@ def test_remove_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     app_link = tabs[1].app_links[0]
     app_link.remove()
     assert len(apps) == 1
-
+    main_gui.close()
 
 def test_add_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Tests, that the Edit App Dialog wotks for adding a new Link """
@@ -274,7 +274,7 @@ def test_add_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     vt = tab._edit_app_dialog._ui.conan_ref_line_edit._completion_thread
     if vt and vt.is_alive():
         vt.join()
-
+    main_gui.close()
 
 def test_move_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that the move dialog works and correctly updates the AppGrid. There are 2 apps on the loaded tab. """
@@ -313,7 +313,7 @@ def test_move_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     # click up again - nothing should happen
     move_dialog._ui.move_up_button.clicked.emit()
     assert apps_model[0].name == app_link.model.name
-
+    main_gui.close()
 
 def test_multiple_apps_ungreying(qtbot, base_fixture):
     """
