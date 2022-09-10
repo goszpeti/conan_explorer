@@ -144,6 +144,7 @@ ClickableIcon:pressed {
 
 QFrame#left_menu_frame {
     background-color: #d3d3d3;
+    margin-top: 1px;
     border-bottom-left-radius: {{WINDOW_BORDER_RADIUS}}px;
     border-top-left-radius: {{WINDOW_BORDER_RADIUS}}px;
 }

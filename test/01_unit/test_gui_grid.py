@@ -48,6 +48,7 @@ def test_AppEditDialog_display_values(base_fixture, qtbot):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
+    app.conan_api.init_api()
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico", conan_options={"a": "b", "c": "True", "d": "10"})
@@ -258,7 +259,7 @@ def test_AppLink_open(base_fixture, qtbot):
         for process in psutil.process_iter():
             try:
                 if process_name.lower() in process.name().lower():
-                    assert "python" in process.cmdline()[2]
+                    assert "conan_app_launcher" in process.cmdline()[2]
                     process.kill()
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass

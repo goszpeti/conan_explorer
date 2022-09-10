@@ -40,10 +40,10 @@ def test_save_to_file(base_fixture):
     parser.read(temp_ini_path, encoding="utf-8")
 
     # assert set settings
-    assert parser.get(sets._GENERAL_SECTION_NAME, LAST_CONFIG_FILE) == last_config_file
+    assert parser.get("General", LAST_CONFIG_FILE) == last_config_file
 
     # assert, that original entries remain untouched
     assert parser.get("MyCustomSection", "MyCustomKey") == "123"
-    assert parser.get(sets._GENERAL_SECTION_NAME, "MyCustomKey2") == "abcd"
+    assert parser.get("General", "MyCustomKey2") == "abcd"
     # delete tempfile
     os.remove(temp_ini_path)

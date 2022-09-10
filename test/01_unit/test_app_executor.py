@@ -55,7 +55,7 @@ def test_open_in_file_manager(base_fixture, mocker):
             open_in_file_manager(current_file_path)
             time.sleep(2)
             # Does not work in CI :( - On Windows the window title is that of the opened directory name, so we can easily test, if it opened
-            pid = get_window_pid(current_file_path.parent.name)
+            pid = get_window_pid(str(current_file_path.parent))
             assert pid > 0
             proc = psutil.Process(pid)
             proc.kill()
@@ -143,7 +143,7 @@ def test_start_cli_option_app(base_fixture):
         assert pid > 0
         time.sleep(1)
         ret = check_output(f'tasklist /fi "PID eq {str(pid)}"')
-        assert "python.exe" in ret.decode("utf-8")
+        assert "cmd.exe" in ret.decode("utf-8")
         os.system("taskkill /PID " + str(pid))
 
 

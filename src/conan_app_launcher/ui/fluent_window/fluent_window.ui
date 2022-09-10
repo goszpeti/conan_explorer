@@ -81,7 +81,7 @@
      <number>0</number>
     </property>
     <property name="leftMargin">
-     <number>3</number>
+     <number>2</number>
     </property>
     <property name="topMargin">
      <number>1</number>
@@ -879,7 +879,7 @@ p, li { white-space: pre-wrap; }
               <number>0</number>
              </property>
              <property name="topMargin">
-              <number>0</number>
+              <number>1</number>
              </property>
              <property name="rightMargin">
               <number>3</number>
@@ -904,6 +904,12 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="styleSheet">
                 <string notr="true">font: bold</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+               </property>
+               <property name="margin">
+                <number>0</number>
                </property>
                <property name="indent">
                 <number>3</number>
