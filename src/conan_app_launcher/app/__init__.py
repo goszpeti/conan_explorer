@@ -5,6 +5,7 @@ import sys
 from conan_app_launcher import SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
 from conan_app_launcher.core import ConanApi, ConanWorker
 from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsInterface, settings_factory
+from .logger import Logger
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -37,7 +38,11 @@ def run_application():
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
     QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
-
+    try:
+        QtWidgets.QApplication.setHighDpiScaleFactorRoundingPolicy(
+            QtCore.Qt.HighDpiScaleFactorRoundingPolicy.RoundPreferFloor)
+    except:
+        Logger().debug("Can't set DPI Rounding")
     qt_app = QtWidgets.QApplication([])
     activate_theme(qt_app)
 

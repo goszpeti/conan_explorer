@@ -47,7 +47,8 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
         self.progress_dialog.setLabelText(loading_text)
         # Window flags to disable close button
-        self.progress_dialog.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        self.progress_dialog.setWindowFlags(Qt.Window | Qt.WindowTitleHint |
+                                            Qt.CustomizeWindowHint)  # | Qt.X11BypassWindowManagerHint
         self.progress_dialog.setWindowTitle("Loading...")
         self.progress_dialog.setCancelButton(None)
         self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash

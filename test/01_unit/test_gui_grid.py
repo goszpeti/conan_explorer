@@ -254,24 +254,25 @@ def test_AppLink_open(base_fixture, qtbot):
     qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
     sleep(5)  # wait for terminal to spawn
     # check pid of created process
+    found_process = None
     if platform.system() == "Linux":
         process_name = "x-terminal-emulator"
-        for process in psutil.process_iter():
-            try:
-                if process_name.lower() in process.name().lower():
-                    assert "conan_app_launcher" in process.cmdline()[2]
-                    process.kill()
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                pass
     elif platform.system() == "Windows":
-        # check windowname of process - default shell spawns with path as windowname
-        # DOES NOT WORK with Windows Terminal in 11 -> has no title
-        ret = check_output(f'tasklist /fi "WINDOWTITLE eq Conan Launch: {str(sys.executable)}"')
-        assert "cmd.exe" in ret.decode("utf-8")
-        lines = ret.decode("utf-8").splitlines()
-        line = lines[3].replace(" ", "")
-        pid = line.split("cmd.exe")[1].split("Console")[0]
-        os.system("taskkill /PID " + pid)
+        process_name = "cmd"
+    for process in psutil.process_iter():
+        try:
+            if process_name.lower() in process.name().lower():
+                try:
+                    if "conan_app_launcher" in process.cmdline()[2]:
+                        found_process = process
+                    break
+                except:
+                    pass
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    if found_process:
+        found_process.kill()
+
 
 def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     """

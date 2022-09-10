@@ -28,7 +28,7 @@ def get_display_scaling():
     if platform.system() == "Windows":
         return ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
     else: # TODO not yet implemented for Linux
-        return 2
+        return 2.2
 
 
 LEFT_MENU_MIN_WIDTH = 80

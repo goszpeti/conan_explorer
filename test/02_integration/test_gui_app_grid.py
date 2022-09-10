@@ -19,7 +19,6 @@ from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
-
 def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     """ Test, that rename dialog change the name """
     from pytestqt.plugin import _qapp_instance
@@ -142,6 +141,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     """ Test, that Edit AppLink Dialog saves all the configured data s"""
     from pytestqt.plugin import _qapp_instance
     app.active_settings.set(APPLIST_ENABLED, False)
+    app.active_settings.set(ENABLE_APP_COMBO_BOXES, False)
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()

@@ -1,5 +1,6 @@
 #!/bin/sh
-if {{COMMAND}} ; then
+if {{COMMAND}}
+then
     exit
 else
     echo "Error, press Enter to close the terminal."

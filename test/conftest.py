@@ -184,6 +184,7 @@ def base_fixture(request):
 
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
     app.conan_api = ConanApi()
+    app.conan_api.init_api()
     app.conan_worker = ConanWorker(app.conan_api, app.active_settings)
 
     yield paths

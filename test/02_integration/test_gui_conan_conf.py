@@ -57,7 +57,7 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
 
     # changes to conan conf page
     main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
-    remotes_model = conan_conf_view._remotes_model
+    remotes_model = conan_conf_view._remotes_controller.model
     assert remotes_model
 
     #### 1. check, that the test remotes are in the list
@@ -74,7 +74,7 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
             assert remote_item.item_data[4] == "False"
 
     #### 2. Select new remote
-    assert conan_conf_view._select_remote("local3")
+    assert conan_conf_view._remotes_controller._select_remote("local3")
 
     #### 3. Test Disable/Enable
     conan_conf_view._ui.remote_toggle_disabled.click()
@@ -92,11 +92,11 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
             assert not remote.disabled
     # 4. Move last remote up, check order
     last_item = remotes_model.root_item.child_items[-1]
-    assert conan_conf_view._select_remote(last_item.remote.name)
+    assert conan_conf_view._remotes_controller._select_remote(last_item.remote.name)
     
     conan_conf_view._ui.remote_move_up_button.click()
     sleep(1)
-    remotes_model = conan_conf_view._remotes_model
+    remotes_model = conan_conf_view._remotes_controller.model
     second_last_item = remotes_model.root_item.child_items[-2]
 
     assert second_last_item.remote.name == last_item.remote.name
@@ -104,38 +104,38 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
     # 5. Move this remote down, check order
     conan_conf_view._ui.remote_move_down_button.click()
     sleep(1)
-    remotes_model = conan_conf_view._remotes_model
+    remotes_model = conan_conf_view._remotes_controller.model
     last_item = remotes_model.root_item.child_items[-1]
     assert second_last_item.remote.name == last_item.remote.name
 
     # 6. Add a new remote via cli -> push refresh -> new remote should appear
     os.system("conan remote add local4 http://127.0.0.1:9303/ false")
     conan_conf_view._ui.remote_refresh_button.click()
-    assert conan_conf_view._select_remote("local4")
+    assert conan_conf_view._remotes_controller._select_remote("local4")
 
     # 7. Delete the new remote
     # mock cancel -> nothing should change
     # mock OK
-    remotes_count = conan_conf_view._remotes_model.root_item.child_count()
+    remotes_count = conan_conf_view._remotes_controller.model.root_item.child_count()
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Cancel)
     conan_conf_view._ui.remote_remove.click()
-    assert conan_conf_view._select_remote("local4")
-    assert conan_conf_view._remotes_model.root_item.child_count() == remotes_count
+    assert conan_conf_view._remotes_controller._select_remote("local4")
+    assert conan_conf_view._remotes_controller.model.root_item.child_count() == remotes_count
 
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
     conan_conf_view._ui.remote_remove.click()
-    assert conan_conf_view._remotes_model.root_item.child_count()  == remotes_count - 1
+    assert conan_conf_view._remotes_controller.model.root_item.child_count()  == remotes_count - 1
 
     # 8. Add a new remote via button/dialog -> save
     # mock cancel -> nothing should change
     # mock OK
-    remotes_count = conan_conf_view._remotes_model.root_item.child_count()
+    remotes_count = conan_conf_view._remotes_controller.model.root_item.child_count()
     mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Rejected)
     conan_conf_view._ui.remote_add.click()
-    assert conan_conf_view._remotes_model.root_item.child_count() == remotes_count
+    assert conan_conf_view._remotes_controller.model.root_item.child_count() == remotes_count
 
     mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
@@ -143,11 +143,11 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
     # can't easily call this, while dialog is opened - so call it on the saved, but now hidden dialog manually
     conan_conf_view.remote_edit_dialog.save()
     conan_conf_view.remote_edit_dialog.save() # save a second time (errors under the hood), to see if Exception from conan is handled
-    conan_conf_view._init_remotes_model()
-    assert conan_conf_view._remotes_model.root_item.child_count() == remotes_count + 1
+    conan_conf_view._remotes_controller.update()
+    assert conan_conf_view._remotes_controller.model.root_item.child_count() == remotes_count + 1
 
     # 9. Edit the remote -> changes should be reflected in the model
-    assert conan_conf_view._select_remote("New")
+    assert conan_conf_view._remotes_controller._select_remote("New")
     mock_diag = mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
     conan_conf_view.on_remote_edit(None)
@@ -163,8 +163,8 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
     conan_conf_view.remote_edit_dialog._ui.verify_ssl_checkbox.setChecked(False)
     conan_conf_view.remote_edit_dialog.save()
     conan_conf_view._ui.remote_refresh_button.click()
-    assert conan_conf_view._select_remote("Edited")
-    edited_remote_item = conan_conf_view._get_selected_remote()
+    assert conan_conf_view._remotes_controller._select_remote("Edited")
+    edited_remote_item = conan_conf_view._remotes_controller.get_selected_remote()
     assert edited_remote_item
     assert edited_remote_item.remote.url == "http://127.0.0.1:9305/"
     assert edited_remote_item.remote.verify_ssl == False
@@ -189,7 +189,7 @@ def test_conan_config_view_remote_login(base_fixture, ui_no_refs_config_fixture,
     # changes to conan conf page
     main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
     # select local, invoke dialog, click cancel -> remote user info should not change
-    assert conan_conf_view._select_remote(TEST_REMOTE_NAME)
+    assert conan_conf_view._remotes_controller._select_remote(TEST_REMOTE_NAME)
     mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteLoginDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Rejected)
     conan_conf_view._ui.remote_login.click()

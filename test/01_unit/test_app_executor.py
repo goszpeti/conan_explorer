@@ -12,9 +12,8 @@ from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 import conan_app_launcher  # for mocker
 import psutil
 from conan_app_launcher.core.system import (execute_app, open_file,
-                                                 open_in_file_manager,
-                                                 run_file)
-
+                                            open_in_file_manager, run_file)
+from conan_app_launcher import PKG_NAME
 
 def test_choose_run_file(base_fixture, tmp_path, mocker):
     """
@@ -137,7 +136,7 @@ def test_start_cli_option_app(base_fixture):
         # check pid of created process
         proc = psutil.Process(pid)
         assert proc.name() == "x-terminal-emulator"
-        assert "python" in proc.cmdline()[2]
+        assert PKG_NAME in proc.cmdline()[2]
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         assert pid > 0
@@ -173,7 +172,7 @@ def test_start_app_with_args_cli_option(base_fixture):
 
     executable = Path(sys.executable)
     is_console_app = True
-    args = f"-c f=open(r'{str(test_file)}','w');f.write('test');f.close()"
+    args = f"-c \"f=open(r'{str(test_file)}','w');f.write('test');f.close()\""
     execute_app(executable, is_console_app, args)
 
     time.sleep(5)  # wait for terminal to spawn

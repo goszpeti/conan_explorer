@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\repos\conan_app_launcher\src\conan_app_launcher\ui\fluent_window\fluent_window.ui'
+# Form implementation generated from reading ui file '/mnt/c/Repos/conan_app_launcher/src/conan_app_launcher/ui/fluent_window/fluent_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -109,7 +109,7 @@ class Ui_MainWindow(object):
         self.close_button.setMinimumSize(QtCore.QSize(50, 30))
         self.close_button.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("c:\\repos\\conan_app_launcher\\src\\conan_app_launcher\\ui\\fluent_window\\../../../../../../Users/peter/.designer/assets/icons/close.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon1.addPixmap(QtGui.QPixmap("/mnt/c/Repos/conan_app_launcher/src/conan_app_launcher/ui/fluent_window/../../../../../../Users/peter/.designer/assets/icons/close.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.close_button.setIcon(icon1)
         self.close_button.setFlat(True)
         self.close_button.setObjectName("close_button")
@@ -118,7 +118,7 @@ class Ui_MainWindow(object):
         self.restore_max_button.setMinimumSize(QtCore.QSize(50, 30))
         self.restore_max_button.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("c:\\repos\\conan_app_launcher\\src\\conan_app_launcher\\ui\\fluent_window\\../../../../../../Users/peter/.designer/assets/icons/restore.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon2.addPixmap(QtGui.QPixmap("/mnt/c/Repos/conan_app_launcher/src/conan_app_launcher/ui/fluent_window/../../../../../../Users/peter/.designer/assets/icons/restore.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.restore_max_button.setIcon(icon2)
         self.restore_max_button.setFlat(True)
         self.restore_max_button.setObjectName("restore_max_button")
@@ -127,7 +127,7 @@ class Ui_MainWindow(object):
         self.minimize_button.setMinimumSize(QtCore.QSize(50, 30))
         self.minimize_button.setText("")
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("c:\\repos\\conan_app_launcher\\src\\conan_app_launcher\\ui\\fluent_window\\../../../../../../Users/peter/.designer/assets/icons/minus.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon3.addPixmap(QtGui.QPixmap("/mnt/c/Repos/conan_app_launcher/src/conan_app_launcher/ui/fluent_window/../../../../../../Users/peter/.designer/assets/icons/minus.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.minimize_button.setIcon(icon3)
         self.minimize_button.setFlat(True)
         self.minimize_button.setObjectName("minimize_button")
@@ -356,7 +356,7 @@ class Ui_MainWindow(object):
         self.left_menu_top_subframe.setFrameShadow(QtWidgets.QFrame.Raised)
         self.left_menu_top_subframe.setObjectName("left_menu_top_subframe")
         self.left_menu_top_subframe_layout = QtWidgets.QVBoxLayout(self.left_menu_top_subframe)
-        self.left_menu_top_subframe_layout.setContentsMargins(0, 1, 3, 0)
+        self.left_menu_top_subframe_layout.setContentsMargins(0, 5, 3, 0)
         self.left_menu_top_subframe_layout.setSpacing(15)
         self.left_menu_top_subframe_layout.setObjectName("left_menu_top_subframe_layout")
         self.title_label = QtWidgets.QLabel(self.left_menu_top_subframe)
@@ -381,7 +381,7 @@ class Ui_MainWindow(object):
         self.toggle_left_menu_button.setMaximumSize(QtCore.QSize(64, 45))
         self.toggle_left_menu_button.setText("")
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("c:\\repos\\conan_app_launcher\\src\\conan_app_launcher\\ui\\fluent_window\\../../../../../../Users/peter/.designer/assets/icons/menu_stripes.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap("/mnt/c/Repos/conan_app_launcher/src/conan_app_launcher/ui/fluent_window/../../../../../../Users/peter/.designer/assets/icons/menu_stripes.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toggle_left_menu_button.setIcon(icon4)
         self.toggle_left_menu_button.setIconSize(QtCore.QSize(32, 32))
         self.toggle_left_menu_button.setCheckable(False)
@@ -414,7 +414,7 @@ class Ui_MainWindow(object):
         self.settings_button.setMaximumSize(QtCore.QSize(64, 16777215))
         self.settings_button.setText("")
         icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap("c:\\repos\\conan_app_launcher\\src\\conan_app_launcher\\ui\\fluent_window\\../../../../../../Users/peter/.designer/assets/icons/settings.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon5.addPixmap(QtGui.QPixmap("/mnt/c/Repos/conan_app_launcher/src/conan_app_launcher/ui/fluent_window/../../../../../../Users/peter/.designer/assets/icons/settings.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
         self.settings_button.setIcon(icon5)
         self.settings_button.setIconSize(QtCore.QSize(32, 32))
         self.settings_button.setCheckable(True)

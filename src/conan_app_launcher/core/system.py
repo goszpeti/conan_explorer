@@ -104,11 +104,6 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
         cmd = [str(executable)]
         if args:
             cmd += args.strip().split(" ")
-        if platform.system() == "Windows":
-            return execute_cmd(cmd, is_console_app)
-        elif platform.system() == "Linux":
-            if args:
-                cmd += args.strip().split(" ")
             return execute_cmd(cmd, is_console_app)
     Logger().warning(f"No executable {str(executable)} to start.")
     return 0
@@ -143,7 +138,7 @@ def generate_launch_script(cmd: List[str]) -> str:
     
     if platform.system() == 'Windows':
         launch_templ_file = "launch.bat.in"
-        temp_fd, temp_path_str =  tempfile.mkstemp(".bat")
+        temp_fd, temp_path_str = tempfile.mkstemp(".bat", prefix=PKG_NAME, text=True)
     elif platform.system() == "Linux":
         launch_templ_file = "launch.sh.in"
         temp_fd, temp_path_str = tempfile.mkstemp(".sh", prefix=PKG_NAME, text=True)

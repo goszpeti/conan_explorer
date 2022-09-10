@@ -26,8 +26,8 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     cfr = ConanFileReference.loads(TEST_REF)
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
-    from pytestqt.plugin import _qapp_instance
     main_window = MainWindow(_qapp_instance)
+    main_window.conan_remotes_updated.emit()
     search_dialog = main_window.search_dialog
     qtbot.addWidget(main_window)
     main_window.show()
@@ -48,8 +48,9 @@ def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
     # assert basic view
     model = search_dialog._pkg_result_model
     assert model
-    assert search_dialog._ui.search_results_tree_view.findChildren(QtCore.QObject)
     assert search_dialog._ui.search_results_tree_view.model().columnCount() == 3  # fixed 3 coloumns
+    # while True:
+    #     _qapp_instance.processEvents()
 
     assert model.root_item.item_data[0] == "Packages"
     assert model.root_item.child_count() == 3
