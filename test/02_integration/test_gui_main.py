@@ -129,7 +129,11 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     # shortpaths is enabled in conanfile
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
     os.system(f"conan create {conanfile} {ref}")
+
     pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
+    remotes = conan.get_remotes()
+    Logger().debug("Remotes:" + repr(remotes))
+    time.sleep(1)
     assert pkg["id"]
     pkg_dir_to_delete = conan.get_package_folder(ConanFileReference.loads(ref), pkg["id"])
 
