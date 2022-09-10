@@ -104,7 +104,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
         cmd = [str(executable)]
         if args:
             cmd += args.strip().split(" ")
-            return execute_cmd(cmd, is_console_app)
+        return execute_cmd(cmd, is_console_app)
     Logger().warning(f"No executable {str(executable)} to start.")
     return 0
 
