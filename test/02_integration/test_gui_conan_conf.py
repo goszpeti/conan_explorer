@@ -42,7 +42,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
     os.system("conan remote remove local4")
     os.system("conan remote remove New")
     os.system("conan remote remove Edited")
-
+    sleep(1)
     main_gui = main_window.MainWindow(_qapp_instance)
 
     try:
@@ -183,6 +183,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
+    main_gui.conan_remotes_updated.emit()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
