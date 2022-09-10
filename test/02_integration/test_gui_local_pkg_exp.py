@@ -17,7 +17,7 @@ Qt = QtCore.Qt
 #    _qapp_instance.processEvents()
 
 
-def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
+def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     """ Test, that the delete package dialog deletes a reference with id, 
     without id and cancel does nothing"""
     from pytestqt.plugin import _qapp_instance
@@ -69,7 +69,7 @@ def test_delete_package_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     assert not found_pkg.get("id", "")
 
 
-def test_local_package_explorer(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_fixture):
     """
     Test Local Pacakge Explorer functions.
     1. Change to Page, check if the installed package is in the list.
@@ -217,3 +217,4 @@ def test_local_package_explorer(base_fixture, ui_no_refs_config_fixture, qtbot, 
                         return_value=QtWidgets.QMessageBox.Yes)
     lpe.on_file_delete()  # check new file?
     assert not (root_path / config_path.name).exists()
+

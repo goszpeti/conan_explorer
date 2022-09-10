@@ -137,7 +137,7 @@ def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
     assert config_tabs[1].name == "Basics"
 
 
-def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
+def test_edit_AppLink(qtbot, base_fixture, ui_config_fixture, mocker):
     """ Test, that Edit AppLink Dialog saves all the configured data s"""
     from pytestqt.plugin import _qapp_instance
     app.active_settings.set(APPLIST_ENABLED, False)
@@ -186,7 +186,7 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
         app.conan_worker.finish_working()
 
 
-def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+def test_remove_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that Remove Applink removes and AppLink and the last one is not deletable """
     from pytestqt.plugin import _qapp_instance
     app.active_settings.set(APPLIST_ENABLED, False)
@@ -223,7 +223,7 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert len(apps) == 1
 
 
-def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+def test_add_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Tests, that the Edit App Dialog wotks for adding a new Link """
     from pytestqt.plugin import _qapp_instance
     app.active_settings.set(APPLIST_ENABLED, False)
@@ -276,7 +276,7 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
         vt.join()
 
 
-def test_move_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+def test_move_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that the move dialog works and correctly updates the AppGrid. There are 2 apps on the loaded tab. """
     from pytestqt.plugin import _qapp_instance
     
@@ -315,7 +315,7 @@ def test_move_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     assert apps_model[0].name == app_link.model.name
 
 
-def test_multiple_apps_ungreying(base_fixture, qtbot):
+def test_multiple_apps_ungreying(qtbot, base_fixture):
     """
     Test, that apps ungrey, after their packages are loaded.
     Set greyed attribute of the underlying app button expected.

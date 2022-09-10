@@ -26,7 +26,7 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
+def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
     """ Test, that when no condig file is set,
     a new tab with a new default app is automatically added."""
     from pytestqt.plugin import _qapp_instance
@@ -54,7 +54,7 @@ def test_startup_no_config(base_fixture, ui_config_fixture, qtbot):
             assert test_app.model.name == "New App"
 
 
-def test_startup_with_existing_config_and_open_menu(base_fixture, ui_config_fixture, qtbot):
+def test_startup_with_existing_config_and_open_menu(qtbot, base_fixture, ui_config_fixture):
     """
     Test, that loading a config file and opening the about menu, and clicking on OK
     The about dialog showing is expected.
@@ -106,7 +106,7 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
     app.conan_worker.finish_working(3)
 
 
-def test_conan_cache_with_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
+def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker):
     """
     Test, that clicking on on open config file and selecting a file writes it back to settings.
     Same file as selected expected in settings.

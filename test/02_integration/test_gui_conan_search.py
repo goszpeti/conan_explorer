@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 Qt = QtCore.Qt
 
 
-def test_conan_search_dialog(base_fixture, qtbot, mock_clipboard, mocker):
+def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
     """ Tests, that the Conan search dialog:
     - search button does not work under 3 characters
     - can find the test packages from the name

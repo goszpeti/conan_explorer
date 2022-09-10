@@ -18,8 +18,7 @@ Qt = QtCore.Qt
 #    _qapp_instance.processEvents()
 
 
-
-def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """
     Test Local Pacakge Explorer functions.
     Add 2 remotes in addition to the local one.
@@ -171,7 +170,8 @@ def test_conan_config_view_remotes(base_fixture, ui_no_refs_config_fixture, qtbo
 
     os.system("conan remote remove Edited")
 
-def test_conan_config_view_remote_login(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+
+def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     # Test login with the local remote
     from pytestqt.plugin import _qapp_instance
     os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
