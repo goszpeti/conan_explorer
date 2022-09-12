@@ -303,7 +303,10 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         self.ui.toggle_left_menu_button.clicked.connect(self.toggle_left_menu)
         self.ui.settings_button.clicked.connect(self.toggle_right_menu)
+
+        # clear default strings
         self.ui.page_info_label.setText("")
+        self.ui.title_label.setText("")
 
         # initial maximize state
         self.set_restore_max_button_state()
@@ -466,7 +469,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             width_to_set = RIGHT_MENU_MIN_WIDTH
             self.ui.settings_button.setChecked(False)
-
         self.right_anim = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")
         self.right_anim.setDuration(200)
         self.right_anim.setStartValue(width)

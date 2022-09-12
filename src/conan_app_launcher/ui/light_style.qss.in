@@ -302,7 +302,7 @@ QScrollBar:vertical {
     width: 10px;
     margin: 0px 0px 0px 0px;
 }
-QScrollBar::handle:vertical {
+QScrollBar::handle {
     min-height: 0px;
     border-radius: 0px;
     background: #BCBCBC;
@@ -324,8 +324,32 @@ QScrollBar::sub-line:vertical {
      subcontrol-position: top;
      subcontrol-origin: margin;
  }
- QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+ QScrollBar::add-page, QScrollBar::sub-page {
      background: transparent;
+ }
+
+ QScrollBar:horizontal {
+    border: 0px solid transparent;
+    background: transparent;
+    height: 12px;
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:horizontal:hover {
+    min-height: 0px;
+    height: 14px;
+    background: #A8A8A8;
+}
+QScrollBar::add-line:horizontal {
+    height: 0px;
+    background: transparent;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:horizontal {
+     background: transparent;
+     height: 0px;
+     subcontrol-position: top;
+     subcontrol-origin: margin;
  }
 
 QSplitter::handle {
