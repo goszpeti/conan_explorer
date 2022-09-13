@@ -332,10 +332,11 @@ class LocalConanPackageExplorer(QWidget):
         self.open_terminal_action.triggered.connect(self.on_open_terminal_in_dir)
 
         self.file_cntx_menu.addSeparator()
-
+        # TODO QAction::event: Ambiguous shortcut overload: Ctrl+V
         self.copy_action = QAction("Copy", self)
         self.copy_action.setIcon(QIcon(get_themed_asset_image("icons/copy.png")))
         self.copy_action.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_C))
+        self.copy_action.setShortcutContext(Qt.WidgetWithChildrenShortcut)
         self.file_cntx_menu.addAction(self.copy_action)
         # for the shortcut to work, the action has to be added to a higher level widget
         self.addAction(self.copy_action)
@@ -344,7 +345,7 @@ class LocalConanPackageExplorer(QWidget):
         self.paste_action = QAction("Paste", self)
         self.paste_action.setIcon(QIcon(get_themed_asset_image("icons/paste.png")))
         self.paste_action.setShortcut(QKeySequence("Ctrl+v"))  # Qt.CTRL + Qt.Key_V))
-        self.paste_action.setShortcutContext(Qt.ApplicationShortcut)
+        self.paste_action.setShortcutContext(Qt.WidgetWithChildrenShortcut)
         self.addAction(self.paste_action)
         self.file_cntx_menu.addAction(self.paste_action)
         self.paste_action.triggered.connect(self.on_file_paste)
@@ -353,6 +354,7 @@ class LocalConanPackageExplorer(QWidget):
         self.delete_action.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
         self.delete_action.setShortcut(QKeySequence(Qt.Key_Delete))
         self.file_cntx_menu.addAction(self.delete_action)
+        self.delete_action.setShortcutContext(Qt.WidgetWithChildrenShortcut)
         self.addAction(self.delete_action)
         self.delete_action.triggered.connect(self.on_file_delete)
 

@@ -46,6 +46,9 @@ class AppGridView(QWidget):
             self.tab_widget.removeTab(0)
         self.load_signal.connect(self.load)
 
+    def apply_theme(self):
+        self.re_init(self.model)
+
     def re_init(self, model: "UiAppGridModel", offset=0):
         """ To be called, when a new config file is loaded """
         self.model = model

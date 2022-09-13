@@ -80,12 +80,10 @@ class TabBase(QWidget):
         self._edit_app_dialog = AppEditDialog(new_model, parent=self)
         reply = self._edit_app_dialog.exec_()
         if reply == AppEditDialog.Accepted:
-            app_link = self._app_link_type(None, self, new_model)
-            app_link.load()
-            app_link.model.update_from_cache()
-            self.add_app_link_to_tab(app_link)
-            self.model.save()  # TODO this should happen on apps.append
-            return app_link  # for testing
+            self.model.apps.append(new_model)
+            self.model.save()
+            self.redraw(force=True)
+            return new_model # for testing
         return None
 
     def add_app_link_to_tab(self, app_link: AppLinkBase):
@@ -227,7 +225,7 @@ class TabList(TabBase):
         """ To be called from a child AppLink """
         self.app_links.append(app_link)
         self.model.apps.append(app_link.model)
-        self.tab_layout.insertWidget(len(self.app_links)-2, app_link)
+        self.tab_layout.insertWidget(-1, app_link) # -1 is end
         self.tab_layout.update()
 
     def load_apps_from_model(self, force_reload=False, offset=0):

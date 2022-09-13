@@ -87,7 +87,6 @@ class ConanConfigView(QDialog):
             Logger().error("Cannot read Conan config file!")
 
     def _init_profiles_tab(self):
-        self.profiles_cntx_menu = RoundedMenu()
         self._ui.profiles_list_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self._ui.profiles_list_view.customContextMenuRequested.connect(
             self.on_profile_context_menu_requested)
@@ -101,6 +100,7 @@ class ConanConfigView(QDialog):
 
 
     def _init_profile_context_menu(self):
+        self.profiles_cntx_menu = RoundedMenu()
         self._copy_profile_action = QAction("Copy profile name", self)
         self._copy_profile_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
         self.profiles_cntx_menu.addAction(self._copy_profile_action)
@@ -110,6 +110,10 @@ class ConanConfigView(QDialog):
         """ Resize remote view columns automatically if window size changes """
         super().resizeEvent(a0)
         self._remotes_controller.resize_remote_columns()
+
+    def apply_theme(self):
+        self._init_profile_context_menu()
+        self._init_remote_context_menu()
 
 # Profile
 
@@ -143,8 +147,6 @@ class ConanConfigView(QDialog):
         self._remotes_controller.update() # TODO update once on show
 
     def _init_remotes_tab(self):
-
-        self._remotes_cntx_menu = RoundedMenu()
         self._ui.remote_refresh_button.clicked.connect(self._remotes_controller.update)
         self._ui.remote_move_down_button.setIcon(QIcon(get_themed_asset_image("icons/arrow_down.png")))
         self._ui.remote_login.clicked.connect(self.on_remotes_login)
@@ -171,6 +173,7 @@ class ConanConfigView(QDialog):
         self._remotes_cntx_menu.exec_(self._ui.remotes_tree_view.mapToGlobal(position))
 
     def _init_remote_context_menu(self):
+        self._remotes_cntx_menu = RoundedMenu()
         self._copy_remote_action = QAction("Copy remote name", self)
         self._copy_remote_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
         self._remotes_cntx_menu.addAction(self._copy_remote_action)

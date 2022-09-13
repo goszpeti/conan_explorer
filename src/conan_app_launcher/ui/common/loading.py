@@ -45,6 +45,7 @@ class AsyncLoader(QtCore.QObject):
         self.finished = False
 
         self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
+        # TODO set position in middle of window!
         self.progress_dialog.setLabelText(loading_text)
         # Window flags to disable close button
         self.progress_dialog.setWindowFlags(Qt.Window | Qt.WindowTitleHint |

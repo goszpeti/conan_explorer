@@ -247,6 +247,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 buttons.append(button)
             return buttons
 
+        def get_all_pages(self):
+            pages = []
+            for _, (_, page, _, _), in self._page_widgets.items():
+                pages.append(page)
+            return pages
+
         def add_new_page(self, name, button, page, right_sub_menu):
             self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu, name)
 
@@ -405,7 +411,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         page = self.page_widgets.get_page_by_name(obj_name)
         # switch page_stacked_widget to the saved page
         self.ui.page_stacked_widget.setCurrentWidget(page)
-        # TODO change button stylings - reset old selections and highlight new one
+        # change button stylings - reset old selections and highlight new one
         for button in self.page_widgets.get_all_buttons():
             button.setChecked(False)
 

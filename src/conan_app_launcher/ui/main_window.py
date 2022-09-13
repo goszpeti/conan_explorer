@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 from shutil import rmtree
 from typing import Optional
@@ -182,7 +183,6 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def on_theme_changed(self):
         # wait 0,5 seconds, so all animations can finish
-        import datetime
         start = datetime.datetime.now()
         while datetime.datetime.now() - start <= datetime.timedelta(milliseconds=600):
             QApplication.processEvents()
@@ -197,10 +197,8 @@ class MainWindow(FluentWindow):
 
         # all icons must be reloaded
         self.apply_theme()
-        self.local_package_explorer.apply_theme()
-        self.app_grid.re_init(self.model.app_grid)  # needs a whole reload because models need to be reinitialized
-        if self.search_dialog:
-            self.search_dialog.apply_theme()
+        for page in self.page_widgets.get_all_pages():
+            page.apply_theme()
 
     @pyqtSlot()
     def open_cleanup_cache_dialog(self):

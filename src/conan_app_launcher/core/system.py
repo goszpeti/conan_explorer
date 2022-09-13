@@ -151,7 +151,6 @@ def generate_launch_script(cmd: List[str]) -> str:
     launch_content = launch_template.render(COMMAND=" ".join(cmd))
     with os.fdopen(temp_fd, 'w') as f:
         f.write(launch_content)
-    # TODO chmod +x
     if platform.system() == 'Linux':
         os.system(f"chmod +x {temp_path_str}")
     return temp_path_str
