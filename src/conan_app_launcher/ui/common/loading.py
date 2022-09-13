@@ -56,10 +56,10 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog.setFixedWidth(300)
         # set position in middle of window
         qapp: QtWidgets.QApplication = QtWidgets.QApplication.instance()
-        qtRectangle = self.progress_dialog.frameGeometry()
-        qtRectangle.moveCenter(qapp.activeWindow().frameGeometry().center())
-        self.progress_dialog.move(qtRectangle.topLeft())
-
+        rectangle = self.progress_dialog.frameGeometry()
+        if qapp.activeWindow():
+            rectangle.moveCenter(qapp.activeWindow().frameGeometry().center())
+            self.progress_dialog.move(rectangle.topLeft())
         self.progress_dialog.show()
 
         if bool(os.getenv("DISABLE_ASYNC_LOADER")):
