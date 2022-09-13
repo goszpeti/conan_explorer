@@ -252,7 +252,7 @@ def test_add_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
 
     mocker.patch.object(AppEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
-    new_app_link: AppLinkBase = tab.open_app_link_add_dialog(app_model)
+    new_app_link = tab.open_app_link_add_dialog(app_model)
     assert new_app_link
     assert tab._edit_app_dialog._ui.name_line_edit.text()
 
@@ -261,10 +261,8 @@ def test_add_AppLink(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     # check that the gui has updated
     apps = tab_model.apps
     assert len(apps) == prev_count + 1
-    assert new_app_link.model.name == "NewApp"
-    assert new_app_link._app_name.text() == "NewApp"
-    assert new_app_link._app_channel.isHidden()
-    assert new_app_link.model.package_folder.exists()
+    assert new_app_link.name == "NewApp"
+    assert new_app_link.package_folder.exists()
 
     # check, that the config file has updated
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
