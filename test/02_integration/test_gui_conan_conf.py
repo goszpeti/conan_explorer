@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from time import sleep
 import conan_app_launcher
+from conan_app_launcher.core.conan import ConanApi
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL, TEST_REMOTE_NAME, TEST_REMOTE_URL
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -48,7 +49,6 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
     try:
         main_gui.show()
         main_gui.load(ui_no_refs_config_fixture)
-        main_gui.conan_remotes_updated.emit()
         qtbot.addWidget(main_gui)
         qtbot.waitExposed(main_gui, timeout=3000)
 
@@ -57,10 +57,12 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
 
         # changes to conan conf page
         main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
+        conan_conf_view._remotes_controller.update()
         remotes_model = conan_conf_view._remotes_controller.model
         assert remotes_model
 
         #### 1. check, that the test remotes are in the list
+        assert len(remotes_model.root_item.child_items) >= 3
         for remote_item in remotes_model.root_item.child_items:
             if remote_item.item_data[0] == TEST_REMOTE_NAME:
                 assert remote_item.item_data[1] in TEST_REMOTE_URL
@@ -183,22 +185,24 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
-    main_gui.conan_remotes_updated.emit()
 
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
 
     app.conan_worker.finish_working()
     conan_conf_view = main_gui.conan_config
+    conan = ConanApi().init_api()
+    conan_conf_view._remotes_controller.update()
 
     # changes to conan conf page
     main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
     # select local, invoke dialog, click cancel -> remote user info should not change
     assert conan_conf_view._remotes_controller._select_remote(TEST_REMOTE_NAME)
+
     mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteLoginDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Rejected)
     conan_conf_view._ui.remote_login.click()
-    assert app.conan_api.get_remote_user_info(TEST_REMOTE_NAME) == ("demo", True)  # still logged in
+    assert conan.get_remote_user_info(TEST_REMOTE_NAME) == ("demo", True)  # still logged in
 
     # evaluate dialog, after it closed
     assert conan_conf_view.remote_login_dialog._ui.remote_list.count() == 1
@@ -210,11 +214,11 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     conan_conf_view.remote_login_dialog._ui.password_line_edit.setText("wrong")
     conan_conf_view.remote_login_dialog.save()
     # throws error on console, but still logged in
-    assert app.conan_api.get_remote_user_info("local") == ("demo", True)
+    assert conan.get_remote_user_info("local") == ("demo", True)
     
     # log out with cli
-    os.system("conan user --clean")
-    assert app.conan_api.get_remote_user_info("local") == ("None", False)
+    assert os.system("conan user --clean") == 0
+    assert conan.get_remote_user_info("local") == ("None", False)
 
     # now enter the correct password and call save
     conan_conf_view.remote_login_dialog._ui.name_line_edit.setText("demo")
@@ -222,7 +226,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     conan_conf_view.remote_login_dialog.save()
 
     # logged in
-    assert app.conan_api.get_remote_user_info("local") == ("demo", True)
+    assert conan.get_remote_user_info("local") == ("demo", True)
     # assert password is empty (does not really test, if it worked correctly)
     assert conan_conf_view.remote_login_dialog._ui.password_line_edit.text() == ""
     main_gui.close()
