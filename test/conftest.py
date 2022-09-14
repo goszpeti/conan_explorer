@@ -1,3 +1,4 @@
+import distutils.sysconfig
 import configparser
 import ctypes
 import os
@@ -25,9 +26,17 @@ from conan_app_launcher.ui.main_window import MainWindow
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
+def get_scripts_path():
+    scripts_path = Path(distutils.sysconfig.get_config_var("BINDIR"))
+    if platform.system() == "Windows":
+        if not (scripts_path / "conan_app_launcher.exe").exists():
+            scripts_path = Path(distutils.sysconfig.get_config_var("BINDIR")) / "Scripts"
+    return scripts_path
+
+
+exe_ext = ".exe" if platform.system() == "Windows" else ""
 conan_server_thread = None
-import distutils.sysconfig
-conan_path_str = str(Path(distutils.sysconfig.get_config_var("BINDIR")) / "Scripts" /"conan.exe") if platform.system() == "Windows" else str(Path(distutils.sysconfig.get_config_var("BINDIR")) / "conan")
+conan_path_str = str(get_scripts_path() / ("conan" + exe_ext))
 assert os.path.exists(conan_path_str)
 # setup conan test server
 TEST_REF = "example/9.9.9@local/testing"
@@ -46,12 +55,14 @@ def is_ci_job():
         return True
     return False
 
+
 def get_window_pid(title):
     import win32process
     import win32gui
     hwnd = win32gui.FindWindow(None, title)
     _, pid = win32process.GetWindowThreadProcessId(hwnd)
     return pid
+
 
 class PathSetup():
     """ Get the important paths form the source repo. """
@@ -181,7 +192,7 @@ def base_fixture(request):
     """
     paths = PathSetup()
     os.environ["CONAN_REVISIONS_ENABLED"] = "1"
-    os.environ["DISABLE_ASYNC_LOADER"] = "True" # for code coverage to work
+    os.environ["DISABLE_ASYNC_LOADER"] = "True"  # for code coverage to work
     import conan_app_launcher.app as app
 
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
@@ -202,7 +213,7 @@ def base_fixture(request):
     if (base_path / ConanInfoCache.CACHE_FILE_NAME).exists():
         try:
             os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
-        except PermissionError: # just Windows things...
+        except PermissionError:  # just Windows things...
             time.sleep(5)
             os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
 

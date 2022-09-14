@@ -29,7 +29,7 @@ def test_rename_tab_dialog(qtbot, ui_no_refs_config_fixture, mocker):
     main_gui.load(ui_no_refs_config_fixture)
 
     qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    qtbot.waitExposed(main_gui, timeout=5000)
 
     new_text = "My Text"
 
@@ -87,7 +87,7 @@ def test_remove_tab_dialog(qtbot, ui_no_refs_config_fixture, mocker):
     main_gui.load(ui_no_refs_config_fixture)
 
     qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    qtbot.waitExposed(main_gui, timeout=5000)
 
     id_to_delete = 0
     text = main_gui.app_grid.tab_widget.tabBar().tabText(id_to_delete)
