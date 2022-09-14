@@ -9,7 +9,7 @@ from subprocess import PIPE, STDOUT, check_output, run
 import time
 from pathlib import Path
 from shutil import rmtree
-
+from test.conftest import conan_path_str
 from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, user_save_path
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanCleanup
@@ -114,7 +114,6 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     Same file as selected expected in settings.
     """
     # TEST SETUP
-
     if not platform.system() == "Windows":  # Feature only "available" on Windows
         return
     from conans.util.windows import CONAN_REAL_PATH
@@ -129,7 +128,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
         pass
     # shortpaths is enabled in conanfile
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
-    ret = os.system(f"conan create {conanfile} {ref}")
+    ret = os.system(f"{conan_path_str} create {conanfile} {ref}")
     assert ret == 0
 
     pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
@@ -152,7 +151,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
     except Exception:
         pass
-    ret = run(f"conan create {conanfile} {ref}", stdout=PIPE, stderr=STDOUT, shell=True)
+    ret = run(f"{conan_path_str} create {conanfile} {ref}", stdout=PIPE, stderr=STDOUT, shell=True)
     output = ""
     if ret.stderr:
         output += ret.stderr.decode("utf-8")

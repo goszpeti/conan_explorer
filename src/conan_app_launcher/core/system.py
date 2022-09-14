@@ -5,7 +5,7 @@ import os
 import platform
 import shutil
 import subprocess
-from distutils import version
+from packaging import version
 from pathlib import Path
 from typing import List
 import sys
@@ -17,6 +17,12 @@ WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
 
 @contextmanager
 def escape_venv():
+    # don't do this while testing! if it errors or the gui is closed, while this is running,
+    #  the whole testrun will be compromised!
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        yield
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        return
     path_var = os.environ.get("PATH", "")
     bin_path = Path(sys.executable).parent
     import re
@@ -35,7 +41,7 @@ def escape_venv():
 
 def is_windows_11():
     """ Main version number is still 10 - thanks MS! """
-    if platform.system() == "Windows" and version.StrictVersion(platform.version()) >= version.StrictVersion("10.0.22000"):
+    if platform.system() == "Windows" and version.parse(platform.version()) >= version.parse("10.0.22000"):
         return True
     return False
 
