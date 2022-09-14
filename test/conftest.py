@@ -184,6 +184,17 @@ def ConanServer():
 
 
 @pytest.fixture
+def app_qt_fixture(qtbot):
+    yield qtbot
+    import conan_app_launcher.app as app
+    # remove logger, so the logger doesn't log into nonexistant qt gui
+    remove_qt_logger(logger.Logger(), MainWindow.qt_logger_name)
+    # finish worker - otherwise errors and crashes will occur!
+    if app.conan_worker:
+        app.conan_worker.finish_working(3)
+
+
+@pytest.fixture
 def base_fixture(request):
     """
     Set up the global variables to be able to start the application.

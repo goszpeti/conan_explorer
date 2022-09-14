@@ -148,7 +148,6 @@ class AppGridView(QWidget):
     def load(self, offset=0):
         """ Creates new layout """
         for tab_config in self.model.tabs:
-
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             tab = self.get_tab_type()(parent=self.tab_widget, model=tab_config)
             self.tab_widget.addTab(tab, tab_config.name)
