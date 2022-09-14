@@ -6,6 +6,8 @@ name: Python Tests
 on:
   push:
     branches: [master]
+    paths:
+      - "src/**/*"
   pull_request:
     branches: [master]
 
@@ -69,7 +71,7 @@ jobs:
       # QT_LOGGING_RULES=: "*.debug=true"
       QT_DEBUG_PLUGINS: 1
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up a display for gui in Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -83,9 +85,10 @@ jobs:
           sudo apt install lxterminal nautilus x11-utils mousepad
           sudo apt install dbus-x11 at-spi2-core
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
+          cache: 'pip' # caching pip dependencies
       - name: Install specific conan version
         if: matrix.conan != 'latest'
         run: | # markupsafe is a workaround fix for broken conan dependencies

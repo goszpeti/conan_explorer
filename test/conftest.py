@@ -27,8 +27,8 @@ from PyQt5 import QtCore, QtWidgets
 
 conan_server_thread = None
 import distutils.sysconfig
-conan_path_str = str(Path(distutils.sysconfig.get_config_var("BINDIR")) / "conan")
-
+conan_path_str = str(Path(distutils.sysconfig.get_config_var("BINDIR")) / "Scripts" /"conan.exe") if platform.system() == "Windows" else str(Path(distutils.sysconfig.get_config_var("BINDIR")) / "conan")
+assert os.path.exists(conan_path_str)
 # setup conan test server
 TEST_REF = "example/9.9.9@local/testing"
 TEST_REF_OFFICIAL = "example/1.0.0@_/_"

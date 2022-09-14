@@ -55,6 +55,7 @@ class ConanConfigView(QDialog):
                 out = subprocess.check_output("conan --version", shell=True).decode("utf-8")
                 conan_sys_version = out.lower().split("version ")[1].rstrip()
             except Exception:
+                Logger().debug("Conan version unknown...")
                 conan_sys_version = "Unknown"
             try:  # move to conan?
                 python_exe_name = "python"

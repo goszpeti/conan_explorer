@@ -10,11 +10,6 @@ from conan_app_launcher.ui import main_window
 from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
-# For debug:
-# from pytestqt.plugin import _qapp_instance
-# while True:
-#    _qapp_instance.processEvents()
-
 
 def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """
@@ -31,7 +26,6 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
     9. Edit the remote -> changes should be reflected in the model
     10. Delete the remote
     """
-    from conan_app_launcher.app.logger import Logger
     from pytestqt.plugin import _qapp_instance
     # add 2 more remotes
     os.system(f"{conan_path_str} remote add local2 http://127.0.0.1:9301/ false")
