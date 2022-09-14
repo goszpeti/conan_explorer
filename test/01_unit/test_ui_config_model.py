@@ -29,7 +29,7 @@ def test_executable_eval(base_fixture):
     assert app_link.get_executable_path() == Path("NULL")
 
 
-def test_icon_eval(base_fixture, tmp_path, qtbot):
+def test_icon_eval(tmp_path, qtbot, base_fixture):
     """
     Tests, that the icon setter works on all cases.
     Expects package relative file, config-file rel. file, automaticaly extracted file,
@@ -58,7 +58,7 @@ def test_icon_eval(base_fixture, tmp_path, qtbot):
     assert not app_link.get_icon().isNull()
 
 
-def test_icon_eval_wrong_path(base_fixture, tmp_path, qtbot):
+def test_icon_eval_wrong_path(tmp_path, qtbot, base_fixture):
     """ Test, that a nonexistant path sets to default (check for error removed) """
 
     app_link = UiAppLinkModel("AppName", icon=str(Path.home() / "nonexistant.png"), executable="abc")

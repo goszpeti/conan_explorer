@@ -19,7 +19,8 @@ from PyQt5 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
-def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
+
+def test_rename_tab_dialog(qtbot, ui_no_refs_config_fixture, mocker):
     """ Test, that rename dialog change the name """
     from pytestqt.plugin import _qapp_instance
 
@@ -44,7 +45,8 @@ def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     assert main_gui.app_grid.tab_widget.tabBar().tabText(0) == new_text
     main_gui.close()
 
-def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
+
+def test_add_tab_dialog(qtbot, ui_no_refs_config_fixture, mocker):
     """ Test, that Add Tab function adds a new tab """
     from pytestqt.plugin import _qapp_instance
 
@@ -75,7 +77,8 @@ def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     assert len(config_tabs) == prev_count + 1
     main_gui.close()
 
-def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
+
+def test_remove_tab_dialog(qtbot, ui_no_refs_config_fixture, mocker):
     """ Test, that Remove Tab actually removes a tab. Last tab must not be deletable. """
     from pytestqt.plugin import _qapp_instance
 
@@ -115,7 +118,8 @@ def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     assert len(config_tabs) == prev_count - 1
     main_gui.close()
 
-def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
+
+def test_tab_move_is_saved(qtbot, ui_no_refs_config_fixture):
     """ Test, that the config file is saved, when the tab is moved. """
     from pytestqt.plugin import _qapp_instance
 

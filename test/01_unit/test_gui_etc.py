@@ -24,7 +24,7 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-def test_edit_line_conan(base_fixture, light_theme_fixture, qtbot):
+def test_edit_line_conan(qtbot, base_fixture, light_theme_fixture):
     """ Test, that the line edit validates on edit
     and displays the local packages instantly and the remote ones after a delay
     """
@@ -52,7 +52,7 @@ def test_edit_line_conan(base_fixture, light_theme_fixture, qtbot):
     assert TEST_REF in widget._remote_refs
 
 
-def test_conan_install_dialog(base_fixture, qtbot, mocker):
+def test_conan_install_dialog(qtbot, base_fixture, mocker):
     """ 
     Tests, that the Conan Install dialog can install references, packages and the update and auto_install flag works.
     """
@@ -94,7 +94,7 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
                                                 "options": {}, "update": True, "auto_install": False}
 
 
-def test_about_dialog(base_fixture, qtbot):
+def test_about_dialog(qtbot, base_fixture):
     """
     Test the about dialog separately.
     Check, that the app name is visible and it is hidden after clicking OK:
@@ -108,7 +108,7 @@ def test_about_dialog(base_fixture, qtbot):
     assert "Conan App Launcher" in widget._text.text()
 
 
-def test_bug_dialog(base_fixture, qtbot, mocker):
+def test_bug_dialog(qtbot, base_fixture, mocker):
     """ Test, that the report generates the dialog correctly and fills out the info """
 
     # generate a traceback by raising an error

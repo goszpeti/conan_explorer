@@ -29,7 +29,7 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-def test_applink_word_wrap(base_fixture, qtbot):
+def test_applink_word_wrap(qtbot, base_fixture):
     """ Check custom word wrap of App Link"""
 
     # max length > actual length -> no change
@@ -44,7 +44,7 @@ def test_applink_word_wrap(base_fixture, qtbot):
                                  10) == "VeryLongAp\npLinkNamet\noTestColum\nnCalculati\non 111111"
 
 
-def test_AppEditDialog_display_values(base_fixture, qtbot):
+def test_AppEditDialog_display_values(qtbot, base_fixture):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
@@ -80,7 +80,7 @@ def test_AppEditDialog_display_values(base_fixture, qtbot):
     assert app_info.name == "test"
 
 
-def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
+def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     """
     Test, if the browse executable and icon button works:
     - buttons are always enabled (behavior change from conditional disable)
@@ -164,7 +164,7 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
     os.unlink(str(icon_pkg_path))
 
 
-def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
+def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
     """
     Test, if the entered data is written correctly.
     """
@@ -230,7 +230,7 @@ def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
     mock_install_func.assert_called()
 
 
-def test_AppLink_open(base_fixture, qtbot):
+def test_AppLink_open(qtbot, base_fixture):
     """
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
@@ -274,7 +274,7 @@ def test_AppLink_open(base_fixture, qtbot):
         found_process.kill()
 
 
-def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
+def test_AppLink_icon_update_from_executable(qtbot, base_fixture):
     """
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path. Use python executable for testing.
@@ -295,7 +295,7 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     assert not app_ui._app_button._greyed_out
 
 
-def test_AppLink_cbox_switch(base_fixture, qtbot):
+def test_AppLink_cbox_switch(qtbot, base_fixture):
     """
     Test, that changing the version resets the channel and user correctly
     """
