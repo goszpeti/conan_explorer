@@ -162,7 +162,8 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     diag._ui.icon_browse_button.clicked.emit()
     assert diag._ui.icon_line_edit.text() == "icon.png"
     os.unlink(str(icon_pkg_path))
-
+    diag._ui.conan_ref_line_edit._completion_thread.join(1)
+    root_obj.close()
 
 def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
     """
@@ -228,6 +229,7 @@ def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
 
     mock_version_func.assert_called()
     mock_install_func.assert_called()
+    diag._ui.conan_ref_line_edit._completion_thread.join(1)
 
 
 def test_AppLink_open(qtbot, base_fixture):

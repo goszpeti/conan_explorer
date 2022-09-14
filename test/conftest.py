@@ -195,7 +195,7 @@ def app_qt_fixture(qtbot):
 
 
 @pytest.fixture
-def base_fixture(request):
+def base_fixture():
     """
     Set up the global variables to be able to start the application.
     Needs to be used, if the tested component uses the global Logger.
