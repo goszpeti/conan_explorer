@@ -5,6 +5,7 @@ so the qtbot is usable to inspect gui objects.
 
 import os
 import platform
+from subprocess import PIPE, STDOUT, check_output, run
 import time
 from pathlib import Path
 from shutil import rmtree
@@ -151,8 +152,13 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
     except Exception:
         pass
-    os.system(f"conan create {conanfile} {ref}")
-
+    ret = run(f"conan create {conanfile} {ref}", stdout=PIPE, stderr=STDOUT, shell=True)
+    output = ""
+    if ret.stderr:
+        output += ret.stderr.decode("utf-8")
+    if ret.stdout:
+       output += ret.stdout.decode("utf-8")
+    assert ret.returncode == 0, output
     exp_folder = conan.get_export_folder(ConanFileReference.loads(ref))
     pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
     pkg_cache_folder = os.path.abspath(os.path.join(exp_folder, "..", "package", pkg["id"]))
