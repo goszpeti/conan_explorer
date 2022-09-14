@@ -4,7 +4,7 @@ from pathlib import Path
 from time import sleep
 import conan_app_launcher
 from conan_app_launcher.core.conan import ConanApi
-from test.conftest import TEST_REF, TEST_REF_OFFICIAL, TEST_REMOTE_NAME, TEST_REMOTE_URL
+from test.conftest import TEST_REF, TEST_REF_OFFICIAL, TEST_REMOTE_NAME, TEST_REMOTE_URL, conan_path_str
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
@@ -37,12 +37,12 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
     from conan_app_launcher.app.logger import Logger
     from pytestqt.plugin import _qapp_instance
     # add 2 more remotes
-    os.system("conan remote add local2 http://127.0.0.1:9301/ false")
-    os.system("conan remote add local3 http://127.0.0.1:9302/ false")
+    os.system(f"{conan_path_str} remote add local2 http://127.0.0.1:9301/ false")
+    os.system(f"{conan_path_str} remote add local3 http://127.0.0.1:9302/ false")
     # remove potentially created remotes from this testcase
-    os.system("conan remote remove local4")
-    os.system("conan remote remove New")
-    os.system("conan remote remove Edited")
+    os.system(f"{conan_path_str} remote remove local4")
+    os.system(f"{conan_path_str} remote remove New")
+    os.system(f"{conan_path_str} remote remove Edited")
     sleep(1)
     main_gui = main_window.MainWindow(_qapp_instance)
 
@@ -111,7 +111,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         assert second_last_item.remote.name == last_item.remote.name
 
         # 6. Add a new remote via cli -> push refresh -> new remote should appear
-        os.system("conan remote add local4 http://127.0.0.1:9303/ false")
+        os.system(f"{conan_path_str} remote add local4 http://127.0.0.1:9303/ false")
         conan_conf_view._ui.remote_refresh_button.click()
         assert conan_conf_view._remotes_controller._select_remote("local4")
 
@@ -171,16 +171,16 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         assert edited_remote_item.remote.url == "http://127.0.0.1:9305/"
         assert edited_remote_item.remote.verify_ssl == False
     finally:
-        os.system("conan remote remove Edited")
-        os.system("conan remote remove local2")
-        os.system("conan remote remove local3")
-        os.system("conan remote remove local4")
+        os.system(f"{conan_path_str} remote remove Edited")
+        os.system(f"{conan_path_str} remote remove local2")
+        os.system(f"{conan_path_str} remote remove local3")
+        os.system(f"{conan_path_str} remote remove local4")
         main_gui.close()
 
 def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     # Test login with the local remote
     from pytestqt.plugin import _qapp_instance
-    os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
+    os.system(f"{conan_path_str} user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
@@ -217,7 +217,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     assert conan.get_remote_user_info("local") == ("demo", True)
     
     # log out with cli
-    assert os.system("conan user --clean") == 0
+    assert os.system(f"{conan_path_str} user --clean") == 0
     assert conan.get_remote_user_info("local") == ("None", False)
 
     # now enter the correct password and call save
