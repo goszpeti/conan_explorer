@@ -26,7 +26,8 @@ from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
 conan_server_thread = None
-conan_path_str = str(Path(sys.executable).parent / "conan")
+import distutils.sysconfig
+conan_path_str = str(Path(distutils.sysconfig.get_config_var("BINDIR")) / "conan")
 
 # setup conan test server
 TEST_REF = "example/9.9.9@local/testing"

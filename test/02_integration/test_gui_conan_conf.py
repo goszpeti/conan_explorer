@@ -1,16 +1,13 @@
 
 import os
-from pathlib import Path
 from time import sleep
 import conan_app_launcher
 from conan_app_launcher.core.conan import ConanApi
-from test.conftest import TEST_REF, TEST_REF_OFFICIAL, TEST_REMOTE_NAME, TEST_REMOTE_URL, conan_path_str
+from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, conan_path_str
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt, QItemSelectionModel, QModelIndex
 
 Qt = QtCore.Qt
 # For debug:
