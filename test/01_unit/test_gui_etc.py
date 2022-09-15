@@ -103,9 +103,9 @@ def test_about_dialog(app_qt_fixture, base_fixture):
     """
     root_obj = QtWidgets.QWidget()
     widget = AboutPage(root_obj)
-    qtbot.addWidget(root_obj)
+    app_qt_fixture.addWidget(root_obj)
     widget.show()
-    qtbot.waitExposed(widget)
+    app_qt_fixture.waitExposed(widget)
 
     assert "Conan App Launcher" in widget._text.text()
 
