@@ -99,7 +99,6 @@ class ConanConfigView(QDialog):
         self._ui.profiles_list_view.setModel(profiles_model)
         self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
 
-
     def _init_profile_context_menu(self):
         self.profiles_cntx_menu = RoundedMenu()
         self._copy_profile_action = QAction("Copy profile name", self)

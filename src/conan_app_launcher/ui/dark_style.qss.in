@@ -436,6 +436,9 @@ QMenu,RoundedMenu{
 QMenu::item:selected,RoundedMenu::item:selected{
     background-color: #5c5c5c; 
 }
+QMenu::item:disabled,RoundedMenu::item:disabled{
+    color: #A8A8A8;
+}
 
 QLineEdit {
     border-width: 1px;

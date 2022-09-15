@@ -49,7 +49,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         # changes to conan conf page
         main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
         conan_conf_view._remotes_controller.update()
-        remotes_model = conan_conf_view._remotes_controller.model
+        remotes_model = conan_conf_view._remotes_controller._model
         assert remotes_model
 
         #### 1. check, that the test remotes are in the list
@@ -89,7 +89,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         
         conan_conf_view._ui.remote_move_up_button.click()
         sleep(1)
-        remotes_model = conan_conf_view._remotes_controller.model
+        remotes_model = conan_conf_view._remotes_controller._model
         second_last_item = remotes_model.root_item.child_items[-2]
 
         assert second_last_item.remote.name == last_item.remote.name
@@ -97,7 +97,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         # 5. Move this remote down, check order
         conan_conf_view._ui.remote_move_down_button.click()
         sleep(1)
-        remotes_model = conan_conf_view._remotes_controller.model
+        remotes_model = conan_conf_view._remotes_controller._model
         last_item = remotes_model.root_item.child_items[-1]
         assert second_last_item.remote.name == last_item.remote.name
 
@@ -109,26 +109,26 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         # 7. Delete the new remote
         # mock cancel -> nothing should change
         # mock OK
-        remotes_count = conan_conf_view._remotes_controller.model.root_item.child_count()
+        remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
         mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                             return_value=QtWidgets.QMessageBox.Cancel)
         conan_conf_view._ui.remote_remove.click()
         assert conan_conf_view._remotes_controller._select_remote("local4")
-        assert conan_conf_view._remotes_controller.model.root_item.child_count() == remotes_count
+        assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
         mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                             return_value=QtWidgets.QMessageBox.Yes)
         conan_conf_view._ui.remote_remove.click()
-        assert conan_conf_view._remotes_controller.model.root_item.child_count()  == remotes_count - 1
+        assert conan_conf_view._remotes_controller._model.root_item.child_count()  == remotes_count - 1
 
         # 8. Add a new remote via button/dialog -> save
         # mock cancel -> nothing should change
         # mock OK
-        remotes_count = conan_conf_view._remotes_controller.model.root_item.child_count()
+        remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
         mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
                             return_value=QtWidgets.QDialog.Rejected)
         conan_conf_view._ui.remote_add.click()
-        assert conan_conf_view._remotes_controller.model.root_item.child_count() == remotes_count
+        assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
         mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
                             return_value=QtWidgets.QDialog.Accepted)
@@ -137,7 +137,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         conan_conf_view.remote_edit_dialog.save()
         conan_conf_view.remote_edit_dialog.save() # save a second time (errors under the hood), to see if Exception from conan is handled
         conan_conf_view._remotes_controller.update()
-        assert conan_conf_view._remotes_controller.model.root_item.child_count() == remotes_count + 1
+        assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count + 1
 
         # 9. Edit the remote -> changes should be reflected in the model
         assert conan_conf_view._remotes_controller._select_remote("New")

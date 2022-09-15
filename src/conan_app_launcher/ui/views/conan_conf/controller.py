@@ -1,33 +1,33 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.dialogs import ReorderController
 from conans.client.cache.remote_registry import Remote
-from PyQt5.QtCore import QModelIndex, QItemSelectionModel
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QModelIndex, QItemSelectionModel, pyqtBoundSignal
+from PyQt5.QtWidgets import QApplication, QTreeView
 
 from conan_app_launcher.ui.views.conan_conf.model import RemotesModelItem, RemotesTableModel
 
 
 class ConanRemoteController():
 
-    def __init__(self, view, conan_remotes_updated) -> None:
-        self.view = view
-        self.model = RemotesTableModel()
+    def __init__(self, view: QTreeView, conan_remotes_updated: Optional[pyqtBoundSignal]) -> None:
+        self._view = view
+        self._model = RemotesTableModel()
         self.conan_remotes_updated = conan_remotes_updated
 
     def update(self):
-        self.model = RemotesTableModel()
+        self._model = RemotesTableModel()
         # save selected remote, if triggering a re-init
         sel_remote = self.get_selected_remote()
-        self._remote_reorder_controller = ReorderController(self.view, self.model)
+        self._remote_reorder_controller = ReorderController(self._view, self._model)
 
-        self.model.setup_model_data()
-        self.view.setItemsExpandable(False)
-        self.view.setRootIsDecorated(False)
-        self.view.setModel(self.model)
-        self.view.expandAll()
+        self._model.setup_model_data()
+        self._view.setItemsExpandable(False)
+        self._view.setRootIsDecorated(False)
+        self._view.setModel(self._model)
+        self._view.expandAll()
         self.resize_remote_columns()
 
         if sel_remote:
@@ -36,18 +36,18 @@ class ConanRemoteController():
             self.conan_remotes_updated.emit()
 
     def resize_remote_columns(self):
-        self.view.resizeColumnToContents(4)
-        self.view.resizeColumnToContents(3)
-        self.view.resizeColumnToContents(2)
-        self.view.resizeColumnToContents(1)
-        self.view.resizeColumnToContents(0)
+        self._view.resizeColumnToContents(4)
+        self._view.resizeColumnToContents(3)
+        self._view.resizeColumnToContents(2)
+        self._view.resizeColumnToContents(1)
+        self._view.resizeColumnToContents(0)
 
     def _select_remote(self, remote_name: str) -> bool:
         """ Selects a remote in the view and returns true if it exists. """
         row_remote_to_sel = -1
         row = 0
         remote_item = None
-        for remote_item in self.model.root_item.child_items:
+        for remote_item in self._model.root_item.child_items:
             if remote_item.item_data[0] == remote_name:
                 row_remote_to_sel = row
                 break
@@ -55,9 +55,9 @@ class ConanRemoteController():
         if row_remote_to_sel < 0:
             Logger().debug("No remote to select")
             return False
-        sel_model = self.view.selectionModel()
-        for column in range(self.model.columnCount(QModelIndex())):
-            index = self.model.index(row_remote_to_sel, column, QModelIndex())
+        sel_model = self._view.selectionModel()
+        for column in range(self._model.columnCount(QModelIndex())):
+            index = self._model.index(row_remote_to_sel, column, QModelIndex())
             sel_model.select(index, QItemSelectionModel.Select)
         return True
 
@@ -75,7 +75,7 @@ class ConanRemoteController():
         self.update()
 
     def get_selected_remote(self) -> Union[RemotesModelItem, None]:
-        indexes = self.view.selectedIndexes()
+        indexes = self._view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug(f"No selected item for context action")
             return None
