@@ -107,7 +107,7 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
 
     # check check open in local pkg explorer
     search_dialog.on_show_in_pkg_exp()
-    assert id == main_window.local_package_explorer.get_selected_conan_pkg_info().get("id", "")
+    assert id == main_window.local_package_explorer._pkg_sel_ctrl.get_selected_conan_pkg_info().get("id", "")
 
     search_dialog.hide()
     main_window.close()
