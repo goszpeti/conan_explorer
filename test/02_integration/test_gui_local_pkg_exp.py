@@ -37,7 +37,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     lpe = main_gui.local_package_explorer
 
     main_gui.page_widgets.get_button_by_type(type(lpe)).click()   # changes to local explorer page
-    lpe._pkg_sel_model_loader.wait_for_finished()
+    lpe._pkg_sel_ctrl._loader.wait_for_finished()
     app.conan_worker.finish_working()
 
     # check cancel does nothing
@@ -50,7 +50,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
 
     # check without pkg id
     dialog.button(dialog.Yes).clicked.emit()
-    lpe._pkg_sel_model_loader.wait_for_finished()
+    lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
     # check, that the package is deleted
     found_pkg = app.conan_api.find_best_local_package(cfr)
@@ -62,8 +62,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     dialog.show()
     dialog.button(dialog.Yes).clicked.emit()
 
-    lpe._pkg_sel_model_loader.wait_for_finished()
-
+    lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
     found_pkg = app.conan_api.find_best_local_package(cfr)
     assert not found_pkg.get("id", "")
@@ -103,13 +102,13 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     lpe = main_gui.local_package_explorer
 
     main_gui.page_widgets.get_button_by_type(type(lpe)).click()   # changes to local explorer page   
-    lpe._pkg_sel_model_loader.wait_for_finished()
+    lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
     # restart reload (check for thread safety)
     lpe._ui.refresh_button.clicked.emit()
-    lpe._pkg_sel_model_loader.wait_for_finished()
+    lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
-    pkg_sel_model = lpe.pkg_sel_model
+    pkg_sel_model = lpe._pkg_sel_ctrl._model
     assert pkg_sel_model
     assert lpe._ui.package_select_view.model().columnCount() == 1
 
@@ -124,62 +123,63 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     assert found_tst_pkg
 
     # select package (ref, not profile)
-    assert lpe.select_local_package_from_ref(TEST_REF, refresh=True)
+    assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF, refresh=True)
     Logger().debug("Selected ref")
-    assert not lpe.fs_model  # view not changed
+    assert not lpe._pkg_file_exp_ctrl._model  # view not changed
 
     # ensure, that we select the pkg with the correct options
     Logger().debug("Select pkg")
-    assert lpe.select_local_package_from_ref(TEST_REF + ":" + id, refresh=True)
+    assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + id, refresh=True)
 
-    assert lpe.fs_model  # view selected -> fs_model is set
-    assert Path(lpe.fs_model.rootPath()) == pkg_path
+    assert lpe._pkg_file_exp_ctrl._model  # view selected -> fs_model is set
+    assert Path(lpe._pkg_file_exp_ctrl._model.rootPath()) == pkg_path
 
     ### Test pkg reference context menu functions ###
     # test copy ref
     Logger().debug("test copy ref")
-    lpe.on_copy_ref_requested()
+    lpe._pkg_sel_ctrl.on_copy_ref_requested()
     assert QtWidgets.QApplication.clipboard().text() == str(cfr)
     conanfile = app.conan_api.get_conanfile_path(cfr)
 
     # test open export folder
     Logger().debug("open export folder")
-    import conan_app_launcher.ui.views.package_explorer.package_explorer as lp
-    mocker.patch.object(lp, 'open_in_file_manager')
-    lpe.on_open_export_folder_requested()
-    lp.open_in_file_manager.assert_called_once_with(conanfile)
+    import conan_app_launcher.ui.views.package_explorer.controller as lc
+
+    mocker.patch.object(lc, 'open_in_file_manager')
+    lpe._pkg_sel_ctrl.on_open_export_folder_requested()
+    lc.open_in_file_manager.assert_called_once_with(conanfile)
 
     # test show conanfile
     Logger().debug("open show conanfile")
-    mocker.patch.object(lp, 'open_file')
-    lpe.on_show_conanfile_requested()
-    lp.open_file.assert_called_once_with(conanfile)
+    mocker.patch.object(lc, 'open_file')
+    lpe._pkg_sel_ctrl.on_show_conanfile_requested()
+    lc.open_file.assert_called_once_with(conanfile)
 
     #### Test file context menu functions ###
     # select a file
     Logger().debug("select a file")
 
-    root_path = Path(lpe.fs_model.rootPath())
+    root_path = Path(lpe._pkg_file_exp_ctrl._model.rootPath())
     file = root_path / "conaninfo.txt"
-    sel_idx = lpe.fs_model.index(str(file), 0)
+    sel_idx = lpe._pkg_file_exp_ctrl._model.index(str(file), 0)
     lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
 
     # check copy as path - don't check the clipboard, it has issues in windows with qtbot
-    cp_text = lpe.on_copy_file_as_path()
+    cp_text = lpe._pkg_file_exp_ctrl.on_copy_file_as_path()
     assert Path(cp_text) == file
 
     # check open terminal
     Logger().debug("open terminal")
 
-    pid = lpe.on_open_terminal_in_dir()
+    pid = lpe._pkg_file_exp_ctrl.on_open_terminal_in_dir()
     assert pid > 0
     import signal
     os.kill(pid, signal.SIGTERM)
 
     # check "open in file manager"
     Logger().debug("open in file manager")
-    lpe.on_open_file_in_file_manager(None)
-    lp.open_in_file_manager.assert_called_with(Path(cp_text))
+    lpe._pkg_file_exp_ctrl.on_open_file_in_file_manager(None)
+    lc.open_in_file_manager.assert_called_with(Path(cp_text))
 
     # check "Add AppLink to AppGrid"
     mocker.patch.object(QtWidgets.QInputDialog, 'exec_',
@@ -188,14 +188,14 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
                         return_value="Basics")
     mocker.patch.object(AppEditDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
 
-    lpe.on_add_app_link_from_file()
+    lpe._pkg_file_exp_ctrl.on_add_app_link_from_file()
     # assert that the link has been created
     last_app_link = main_gui.app_grid.model.tabs[0].apps[-1]
     assert last_app_link.executable == "conaninfo.txt"
     assert str(last_app_link.conan_file_reference) == str(cfr)
 
     # Check copy
-    mime_file = lpe.on_file_copy()
+    mime_file = lpe._pkg_file_exp_ctrl.on_file_copy()
     mime_file_text = mime_file.toString()
     assert "file://" in mime_file_text and cp_text in mime_file_text
 
@@ -206,16 +206,16 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     url = QtCore.QUrl.fromLocalFile(str(config_path))
     data.setUrls([url])
     _qapp_instance.clipboard().setMimeData(data)
-    lpe.on_file_paste()  # check new file
+    lpe._pkg_file_exp_ctrl.on_file_paste()  # check new file
     assert (root_path / config_path.name).exists()
 
     # check delete
     Logger().debug("delete")
-    sel_idx = lpe.fs_model.index(
+    sel_idx = lpe._pkg_file_exp_ctrl._model.index(
         str(root_path / config_path.name), 0)  # (0, 0, QtCore.QModelIndex())
     lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
     mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
                         return_value=QtWidgets.QMessageBox.Yes)
-    lpe.on_file_delete()  # check new file?
+    lpe._pkg_file_exp_ctrl.on_file_delete()  # check new file?
     assert not (root_path / config_path.name).exists()
 

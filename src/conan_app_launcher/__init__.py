@@ -66,11 +66,14 @@ user_save_path =  Path(os.getenv("XDG_CONFIG_HOME", str(legacy_user_save_path)))
 # ui file loading will handle patching the settings, if the default gui file was used
 if user_save_path != legacy_user_save_path:
     os.makedirs(str(user_save_path), exist_ok=True)
-    if (legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME).exists():
+    # don't copy if the migrated files already exist
+    if (legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME).exists() and \
+        not (user_save_path / (SETTINGS_FILE_NAME + ".ini")).exists():
         print(f"INFO: Moving application settings file from {str(user_save_path)} to {str(legacy_user_save_path)}")
         shutil.move(str(legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME),
                     str(user_save_path / (SETTINGS_FILE_NAME + ".ini")))
-    if (legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME).exists():
+    if (legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME).exists() and \
+        not (user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")).exists():
         print(f"INFO: Moving default ui config file from {str(user_save_path)} to {str(legacy_user_save_path)}")
         shutil.move(str(legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME),
                     str(user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")))
