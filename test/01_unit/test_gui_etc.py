@@ -7,7 +7,7 @@ import platform
 import sys
 import traceback
 from conan_app_launcher.ui.common.theming import get_user_theme_color
-from test.conftest import TEST_REF
+from test.conftest import TEST_REF, app_qt_fixture
 
 import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
@@ -24,16 +24,16 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-def test_edit_line_conan(base_fixture, light_theme_fixture, qtbot):
+def test_edit_line_conan(app_qt_fixture, base_fixture, light_theme_fixture):
     """ Test, that the line edit validates on edit
     and displays the local packages instantly and the remote ones after a delay
     """
     os.system(f"conan remove {TEST_REF} -f")
     root_obj = QtWidgets.QWidget()
     widget = ConanRefLineEdit(root_obj)
-    qtbot.addWidget(root_obj)
+    app_qt_fixture.addWidget(root_obj)
     widget.show()
-    qtbot.waitExposed(widget)
+    app_qt_fixture.waitExposed(widget)
     # test recipe ref without revision
     widget.setText(TEST_REF)
     assert ConanRefLineEdit.VALID_COLOR_LIGHT in widget.styleSheet()
@@ -50,12 +50,15 @@ def test_edit_line_conan(base_fixture, light_theme_fixture, qtbot):
     # test autocompletion (very implicit)
     widget._completion_thread.join(10)
     assert TEST_REF in widget._remote_refs
+    widget.close()
 
 
-def test_conan_install_dialog(base_fixture, qtbot, mocker):
+def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     """ 
     Tests, that the Conan Install dialog can install references, packages and the update and auto_install flag works.
     """
+    app.conan_api.init_api()
+
     root_obj = QtWidgets.QWidget()
     cfr = ConanFileReference.loads(TEST_REF)
 
@@ -63,9 +66,9 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
 
     conan_install_dialog = ConanInstallDialog(root_obj, TEST_REF + ":" + id)
-    qtbot.addWidget(root_obj)
+    app_qt_fixture.addWidget(root_obj)
     conan_install_dialog.show()
-    qtbot.waitExposed(conan_install_dialog)
+    app_qt_fixture.waitExposed(conan_install_dialog)
 
     # with update flag
     conan_install_dialog._ui.update_check_box.setCheckState(Qt.Checked)
@@ -90,23 +93,24 @@ def test_conan_install_dialog(base_fixture, qtbot, mocker):
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
                                                 "options": {}, "update": True, "auto_install": False}
+    conan_install_dialog.close()
 
 
-def test_about_dialog(base_fixture, qtbot):
+def test_about_dialog(app_qt_fixture, base_fixture):
     """
     Test the about dialog separately.
     Check, that the app name is visible and it is hidden after clicking OK:
     """
     root_obj = QtWidgets.QWidget()
     widget = AboutPage(root_obj)
-    qtbot.addWidget(root_obj)
+    app_qt_fixture.addWidget(root_obj)
     widget.show()
-    qtbot.waitExposed(widget)
+    app_qt_fixture.waitExposed(widget)
 
     assert "Conan App Launcher" in widget._text.text()
 
 
-def test_bug_dialog(base_fixture, qtbot, mocker):
+def test_bug_dialog(qtbot, base_fixture, mocker):
     """ Test, that the report generates the dialog correctly and fills out the info """
 
     # generate a traceback by raising an error

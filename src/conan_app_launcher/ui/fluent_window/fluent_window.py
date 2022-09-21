@@ -1,5 +1,4 @@
 import platform
-from re import T
 
 if platform.system() == "Windows":
     import ctypes
@@ -23,11 +22,19 @@ from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
 from ..common import get_themed_asset_image
 from ..widgets import AnimatedToggle
 
-LEFT_MENU_MIN_WIDTH = 80
-LEFT_MENU_MAX_WIDTH = 330
-RIGHT_MENU_MIN_WIDTH = 0
-RIGHT_MENU_MAX_WIDTH = 340
 
+
+def get_display_scaling():
+    if platform.system() == "Windows":
+        return ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
+    else: # TODO not yet implemented for Linux
+        return 2.2
+
+
+LEFT_MENU_MIN_WIDTH = 80
+LEFT_MENU_MAX_WIDTH = int(310 + 20*(2/get_display_scaling()))
+RIGHT_MENU_MIN_WIDTH = 0
+RIGHT_MENU_MAX_WIDTH = int(200 + 200*(2/get_display_scaling()))
 
 def gen_obj_name(name: str) -> str:
     """ Generates an object name from a menu title or name (spaces to underscores and lowercase) """
@@ -240,6 +247,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 buttons.append(button)
             return buttons
 
+        def get_all_pages(self):
+            pages = []
+            for _, (_, page, _, _), in self._page_widgets.items():
+                pages.append(page)
+            return pages
+
         def add_new_page(self, name, button, page, right_sub_menu):
             self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu, name)
 
@@ -248,8 +261,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         from .fluent_window_ui import Ui_MainWindow  # need to resolve circular import
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        if is_windows_11(): # To hide black edges around the border rounding
-            self.setAttribute(Qt.WA_TranslucentBackground, True)
 
         self.main_general_settings_menu = SideSubMenu(
             self.ui.right_menu_bottom_content_sw, "General Settings", True)
@@ -258,6 +269,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint |
                             Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
+        if is_windows_11() or platform.system() == "Linux": # To hide black edges around the border rounding
+            self.setAttribute(Qt.WA_TranslucentBackground, True)
+
         self._use_native_windows_fcns = True if platform.system() == "Windows" and native_windows_fcns else False
         # all buttons and widgets to be able to shown on the main page (from settings and left menu)
         self.page_widgets = FluentWindow.PageStore()
@@ -268,6 +282,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self._resize_point = QPoint()
         self._last_geometry = QRect()
         self.title_text = title_text
+        self.drag_position = None
 
         self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
         menu_margins = self.ui.left_menu_bottom_subframe.layout().contentsMargins()
@@ -294,7 +309,10 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         self.ui.toggle_left_menu_button.clicked.connect(self.toggle_left_menu)
         self.ui.settings_button.clicked.connect(self.toggle_right_menu)
+
+        # clear default strings
         self.ui.page_info_label.setText("")
+        self.ui.title_label.setText("")
 
         # initial maximize state
         self.set_restore_max_button_state()
@@ -325,6 +343,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 self.maximize_restore()
             # qt move
             if event.buttons() == Qt.LeftButton:
+                if self.drag_position is None:
+                    return
                 self.move(self.pos() + event.globalPos() - self.drag_position)
                 self.drag_position = event.globalPos()
                 event.accept()
@@ -391,7 +411,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         page = self.page_widgets.get_page_by_name(obj_name)
         # switch page_stacked_widget to the saved page
         self.ui.page_stacked_widget.setCurrentWidget(page)
-        # TODO change button stylings - reset old selections and highlight new one
+        # change button stylings - reset old selections and highlight new one
         for button in self.page_widgets.get_all_buttons():
             button.setChecked(False)
 
@@ -449,16 +469,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.toggle_right_menu()
 
     def toggle_right_menu(self):
-        # reset general settings state TODO
-        # self.ui.right_menu_bottom_back_button.click()
-
         width = self.ui.right_menu_frame.width()
         if width == RIGHT_MENU_MIN_WIDTH:
             width_to_set = RIGHT_MENU_MAX_WIDTH
         else:
             width_to_set = RIGHT_MENU_MIN_WIDTH
             self.ui.settings_button.setChecked(False)
-
         self.right_anim = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")
         self.right_anim.setDuration(200)
         self.right_anim.setStartValue(width)

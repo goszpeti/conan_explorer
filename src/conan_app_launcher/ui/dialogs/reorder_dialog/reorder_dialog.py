@@ -1,4 +1,5 @@
 
+import abc
 from pathlib import Path
 from typing import Optional, Union
 
@@ -10,10 +11,18 @@ from PyQt5.QtGui import QIcon
 
 from .reorder_dialog_ui import Ui_rearrange_dialog
 
+try:
+    from typing_extensions import Protocol
+except ImportError:
+    from typing import Protocol
+
 current_dir = Path(__file__).parent
+class ReorderingModel(Protocol):
 
+    def index(self, row, column, parent):
+        ...
 
-class ReorderingModel(QAbstractListModel):
+    def columnCount(self, parent: QModelIndex = ...) -> int: ...
 
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
         ...
@@ -31,7 +40,6 @@ class ReorderDialog(QDialog):
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "rearrange.png")))
         
         self._controller = ReorderController(self._ui.list_view, model)
-
         self._ui.list_view.setModel(model)
 
         self._ui.list_view.setUpdatesEnabled(True)
@@ -51,8 +59,6 @@ class ReorderController():
     def __init__(self, view: Union[QListView, QTreeView], model: ReorderingModel) -> None:
         self._view = view
         self._model = model
-        
-        self._view.setModel(model)
 
     def move_up(self):
         """ Moves the selected item(s) up in the list """

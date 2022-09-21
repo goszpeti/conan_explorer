@@ -18,10 +18,10 @@ if platform.system() == "Windows":
 
 ### Global variables ###
 
-active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
+active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, 
+                                    user_save_path / (SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE))
 conan_api = ConanApi()
 conan_worker = ConanWorker(conan_api, active_settings)
-
 
 def run_application():
     """ Start the Qt application and load the main window """
@@ -37,15 +37,13 @@ def run_application():
     # apply Qt attributes (only possible before QApplication is created)
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
+    QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
     try:
         QtWidgets.QApplication.setHighDpiScaleFactorRoundingPolicy(
             QtCore.Qt.HighDpiScaleFactorRoundingPolicy.RoundPreferFloor)
     except:
         Logger().debug("Can't set DPI Rounding")
-    QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
-
     qt_app = QtWidgets.QApplication([])
-
     activate_theme(qt_app)
 
     from conan_app_launcher.ui.main_window import MainWindow
@@ -54,7 +52,9 @@ def run_application():
     app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
     main_window.setWindowIcon(app_icon)
 
+    conan_api.init_api()
     main_window.show()  # show first, then load appsgrid with progress bar
+
     main_window.load()
     main_window.installEventFilter(main_window)
 

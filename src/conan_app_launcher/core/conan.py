@@ -2,12 +2,12 @@ import platform
 import shutil
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
 from conans.client.cache.remote_registry import Remote
 from conans.client.output import ConanOutput
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from typing import TypedDict
 else:
     try:
@@ -69,13 +69,13 @@ class ConanApi():
         self.conan: ConanAPIV1
         self.client_cache: ClientCache
         self.info_cache: ConanInfoCache
-        self._short_path_root = Path("NULL")
-        self.init_api()
         self.client_version = client_version
+        self._short_path_root = Path("Unknown")
 
     def init_api(self):
         """ Instantiate the internal Conan api. In some cases it needs to be instatiated anew. """
-        self.conan, _, _ = ConanAPIV1.factory()
+        self.conan= ConanAPIV1(output=ConanOutput(LoggerWriter(
+            Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
         self.conan.user_io = UserIO(out=ConanOutput(LoggerWriter(
             Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
         self.conan.create_app()
@@ -93,6 +93,7 @@ class ConanApi():
         except Exception as error:
             Logger().debug(str(error))
         self.info_cache = ConanInfoCache(base_path, self.get_all_local_refs())
+        return self
 
     ### General commands ###
 
@@ -199,12 +200,11 @@ class ConanApi():
     def get_path_or_auto_install(self, conan_ref: ConanFileReference, conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
         """ Return the pkg_id and package folder of a conan reference 
         and auto-install it with the best matching package, if it is not available """
-
-        pkg_id, path = self.get_best_matching_package_path(conan_ref, conan_options)
-        if pkg_id:
-            return pkg_id, path
-
-        Logger().info(f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed.")
+        if not update:
+            pkg_id, path = self.get_best_matching_package_path(conan_ref, conan_options)
+            if pkg_id:
+                return pkg_id, path
+            Logger().info(f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed.")
 
         pkg_id, path = self.install_best_matching_package(conan_ref, conan_options, update=update)
         return pkg_id, path
@@ -500,15 +500,19 @@ class ConanCleanup():
 
     def __init__(self, conan_api: ConanApi) -> None:
         self._conan_api = conan_api
+        self.orphaned_references: Set[str] = set()
+        self.orphaned_packages: Set[str] = set()
 
-    def get_cleanup_cache_paths(self) -> List[str]:
+    def get_cleanup_cache_paths(self) -> Set[str]:
         """ Get a list of orphaned short path and cache folders """
         # Blessed are the users Microsoft products!
         if platform.system() != "Windows":
-            return []
-        return self.get_orphaned_references() + self.get_orphaned_packages()
+            return set()
+        self.find_orphaned_references()
+        self.find_orphaned_packages()
+        return self.orphaned_references.union(self.orphaned_packages)
 
-    def get_orphaned_references(self):
+    def find_orphaned_references(self):
         del_list = []
         for ref in self._conan_api.client_cache.all_refs():
             ref_cache = self._conan_api.client_cache.package_layout(ref)
@@ -525,9 +529,9 @@ class ConanCleanup():
                     Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}")
                     if pkg_id_dir:
                         del_list.append(str(pkg_id_dir))
-        return del_list
+        self.orphaned_references = set(del_list)
 
-    def get_orphaned_packages(self):
+    def find_orphaned_packages(self):
         """ Reverse search for orphaned packages on windows short paths """
         del_list = []
         short_path_folders = [f for f in self._conan_api.get_short_path_root().iterdir() if f.is_dir()]
@@ -542,7 +546,7 @@ class ConanCleanup():
                         del_list.append(str(short_path))
                 except Exception:
                     Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")
-        return del_list
+        self.orphaned_packages = set(del_list)
 
 
 def _create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:

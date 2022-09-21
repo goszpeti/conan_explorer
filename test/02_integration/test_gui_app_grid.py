@@ -3,14 +3,14 @@ import os
 import tempfile
 from pathlib import Path
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
-from test.conftest import TEST_REF
+from test.conftest import TEST_REF, app_qt_fixture
 
 import conan_app_launcher.app as app
 from conan_app_launcher.settings import *
 from conan_app_launcher.settings.ini_file import IniSettings
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.data import UiAppLinkConfig
-from conan_app_launcher.ui.data.json_file import JsonUiConfig
+from conan_app_launcher.ui.config import UiAppLinkConfig
+from conan_app_launcher.ui.config.json_file import JsonUiConfig
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.views.app_grid.tab import (AppEditDialog, AppLinkBase,
                                                         TabGrid)
@@ -20,7 +20,7 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
+def test_rename_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that rename dialog change the name """
     from pytestqt.plugin import _qapp_instance
 
@@ -28,8 +28,8 @@ def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    app_qt_fixture.addWidget(main_gui)
+    app_qt_fixture.waitExposed(main_gui, timeout=5000)
 
     new_text = "My Text"
 
@@ -45,7 +45,7 @@ def test_rename_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     assert main_gui.app_grid.tab_widget.tabBar().tabText(0) == new_text
 
 
-def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
+def test_add_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that Add Tab function adds a new tab """
     from pytestqt.plugin import _qapp_instance
 
@@ -53,8 +53,8 @@ def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    app_qt_fixture.addWidget(main_gui)
+    app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
     new_text = "My New Tab"
     prev_count = main_gui.app_grid.tab_widget.tabBar().count()
@@ -76,7 +76,7 @@ def test_add_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     assert len(config_tabs) == prev_count + 1
 
 
-def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
+def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that Remove Tab actually removes a tab. Last tab must not be deletable. """
     from pytestqt.plugin import _qapp_instance
 
@@ -84,8 +84,8 @@ def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    app_qt_fixture.addWidget(main_gui)
+    app_qt_fixture.waitExposed(main_gui, timeout=5000)
 
     id_to_delete = 0
     text = main_gui.app_grid.tab_widget.tabBar().tabText(id_to_delete)
@@ -114,9 +114,10 @@ def test_remove_tab_dialog(ui_no_refs_config_fixture, qtbot, mocker):
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count - 1
     assert len(config_tabs) == prev_count - 1
+    main_gui.close()
 
 
-def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
+def test_tab_move_is_saved(app_qt_fixture, ui_no_refs_config_fixture):
     """ Test, that the config file is saved, when the tab is moved. """
     from pytestqt.plugin import _qapp_instance
 
@@ -124,8 +125,8 @@ def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    app_qt_fixture.addWidget(main_gui)
+    app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
     assert main_gui.app_grid.tab_widget.tabBar().tabText(0) == "Basics"
     main_gui.app_grid.tab_widget.tabBar().moveTab(0, 1)  # move basics to the right
@@ -136,19 +137,21 @@ def test_tab_move_is_saved(ui_no_refs_config_fixture, qtbot):
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert config_tabs[0].name == "Extra"
     assert config_tabs[1].name == "Basics"
+    main_gui.close()
 
 
-def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
+def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
     """ Test, that Edit AppLink Dialog saves all the configured data s"""
     from pytestqt.plugin import _qapp_instance
     app.active_settings.set(APPLIST_ENABLED, False)
+    app.active_settings.set(ENABLE_APP_COMBO_BOXES, False)
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_config_fixture)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    app_qt_fixture.addWidget(main_gui)
+    app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
     tabs = main_gui.app_grid.tab_widget.findChildren(TabGrid)
     tab_model = tabs[1].model
@@ -184,9 +187,10 @@ def test_edit_AppLink(base_fixture, ui_config_fixture, qtbot, mocker):
     assert len(config_tabs[0].apps) == prev_count
     if app.conan_worker:  # manual wait for worker
         app.conan_worker.finish_working()
+    main_gui.close()
 
 
-def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+def test_remove_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that Remove Applink removes and AppLink and the last one is not deletable """
     from pytestqt.plugin import _qapp_instance
     app.active_settings.set(APPLIST_ENABLED, False)
@@ -195,8 +199,8 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    app_qt_fixture.addWidget(main_gui)
+    app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
     tabs = main_gui.app_grid.tab_widget.findChildren(TabGrid)
     tab_model = tabs[1].model
@@ -221,9 +225,10 @@ def test_remove_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     app_link = tabs[1].app_links[0]
     app_link.remove()
     assert len(apps) == 1
+    main_gui.close()
 
 
-def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+def test_add_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Tests, that the Edit App Dialog wotks for adding a new Link """
     from pytestqt.plugin import _qapp_instance
     app.active_settings.set(APPLIST_ENABLED, False)
@@ -237,8 +242,8 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    app_qt_fixture.addWidget(main_gui)
+    app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
     tabs = main_gui.app_grid.tab_widget.findChildren(TabGrid)
     tab = tabs[1]
@@ -252,7 +257,7 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
 
     mocker.patch.object(AppEditDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
-    new_app_link: AppLinkBase = tab.open_app_link_add_dialog(app_model)
+    new_app_link = tab.open_app_link_add_dialog(app_model)
     assert new_app_link
     assert tab._edit_app_dialog._ui.name_line_edit.text()
 
@@ -261,10 +266,8 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     # check that the gui has updated
     apps = tab_model.apps
     assert len(apps) == prev_count + 1
-    assert new_app_link.model.name == "NewApp"
-    assert new_app_link._app_name.text() == "NewApp"
-    assert new_app_link._app_channel.isHidden()
-    assert new_app_link.model.package_folder.exists()
+    assert new_app_link.name == "NewApp"
+    assert new_app_link.package_folder.exists()
 
     # check, that the config file has updated
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
@@ -274,9 +277,10 @@ def test_add_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     vt = tab._edit_app_dialog._ui.conan_ref_line_edit._completion_thread
     if vt and vt.is_alive():
         vt.join()
+    main_gui.close()
 
 
-def test_move_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
+def test_move_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that the move dialog works and correctly updates the AppGrid. There are 2 apps on the loaded tab. """
     from pytestqt.plugin import _qapp_instance
     
@@ -286,8 +290,8 @@ def test_move_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    app_qt_fixture.addWidget(main_gui)
+    app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
     tabs = main_gui.app_grid.tab_widget.findChildren(TabGrid)
     tab: TabGrid = tabs[1]
@@ -313,9 +317,10 @@ def test_move_AppLink(base_fixture, ui_no_refs_config_fixture, qtbot, mocker):
     # click up again - nothing should happen
     move_dialog._ui.move_up_button.clicked.emit()
     assert apps_model[0].name == app_link.model.name
+    main_gui.close()
 
 
-def test_multiple_apps_ungreying(base_fixture, qtbot):
+def test_multiple_apps_ungreying(app_qt_fixture, base_fixture):
     """
     Test, that apps ungrey, after their packages are loaded.
     Set greyed attribute of the underlying app button expected.
@@ -337,8 +342,8 @@ def test_multiple_apps_ungreying(base_fixture, qtbot):
     main_gui.show()
     main_gui.load()
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
+    app_qt_fixture.addWidget(main_gui)
+    app_qt_fixture.waitExposed(main_gui, timeout=3000)
     # check app icons first two should be ungreyed, third is invalid->not ungreying
     for tab in main_gui.app_grid.tab_widget.findChildren(TabGrid):
         for test_app in tab.app_links:

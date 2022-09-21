@@ -22,7 +22,6 @@ class AppEditDialog(QDialog):
         super().__init__(parent=parent, flags=flags)
         self._model = model
         self._pkg_installed_signal = pkg_installed_signal
-        self._temp_package_path = Path("NULL") # pkg path of the currently entered pkg
 
         # without baseinstance, dialog would further needed to be configured
         self._ui = Ui_Dialog()
@@ -68,30 +67,27 @@ class AppEditDialog(QDialog):
             self._ui.executable_browse_button.setEnabled(False)
             self._ui.icon_browse_button.setEnabled(False)
             return
-        _, self._temp_package_path = app.conan_api.get_best_matching_package_path(
-            ConanFileReference.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
-
-        if self._temp_package_path.exists():
-            self._ui.executable_browse_button.setEnabled(True)
-            self._ui.icon_browse_button.setEnabled(True)
-        else:
-            self._ui.executable_browse_button.setEnabled(False)
-            self._ui.icon_browse_button.setEnabled(False)
+        self._ui.executable_browse_button.setEnabled(True)
+        self._ui.icon_browse_button.setEnabled(True)
 
     def on_install_clicked(self):
         dialog = ConanInstallDialog(self, self._ui.conan_ref_line_edit.text(), self._pkg_installed_signal)
         dialog.show()
 
     def on_executable_browse_clicked(self):
+        _, temp_package_path = app.conan_api.get_best_matching_package_path(
+            ConanFileReference.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
+        if not temp_package_path.exists(): # default path
+            temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",
-                                       directory=str(self._temp_package_path))
+                                       directory=str(temp_package_path))
                                       # filter="Images (*.ico *.png *.jpg)")
         dialog.setFileMode(QFileDialog.ExistingFile)
         # TODO restrict to the package directory, or emit Error dialog and call anew
         if dialog.exec_() == QFileDialog.Accepted:
             exe_path = Path(dialog.selectedFiles()[0])
             try:
-                exe_rel_path = exe_path.relative_to(self._temp_package_path)
+                exe_rel_path = exe_path.relative_to(temp_package_path)
             except Exception:
                 msg = QMessageBox(parent=self)
                 msg.setWindowTitle("Invalid selection")
@@ -100,18 +96,23 @@ class AppEditDialog(QDialog):
                 msg.setIcon(QMessageBox.Critical)
                 msg.exec_()
                 return False
-            self._ui.exec_path_line_edit.setText(str(exe_rel_path))
+            # use as_posix to always get forward slashes in the relpath
+            self._ui.exec_path_line_edit.setText(exe_rel_path.as_posix())
             return True
 
     def on_icon_browse_clicked(self):
+        _, temp_package_path = app.conan_api.get_best_matching_package_path(
+            ConanFileReference.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
+        if not temp_package_path.exists():  # default path
+            temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",
-                                       directory=str(self._temp_package_path),
+                             directory=str(temp_package_path),
                                        filter="Images (*.ico *.png *.jpg)")
         dialog.setFileMode(QFileDialog.ExistingFile)
         if dialog.exec_() == QFileDialog.Accepted:
             icon_path = Path(dialog.selectedFiles()[0])
             try:
-                icon_rel_path = icon_path.relative_to(self._temp_package_path)
+                icon_rel_path = icon_path.relative_to(temp_package_path)
                 self._ui.icon_line_edit.setText(str(icon_rel_path))
             except Exception:
                 # errors, if it does not resolve
@@ -144,10 +145,6 @@ class AppEditDialog(QDialog):
            msg.setIcon(QMessageBox.Critical)
            msg.exec_()
            return
-        # TODO validate path?
-#        if not self.exe_path_valid(Path(self._ui.exec_path_line_edit.text())):
-#            return
-
         # write back app info
         self._model.name = self._ui.name_line_edit.text()
         self._model.conan_ref = self._ui.conan_ref_line_edit.text()

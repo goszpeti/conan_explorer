@@ -4,10 +4,10 @@ import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import APPLIST_ENABLED  # using global module pattern
 from conan_app_launcher.ui.common.icon import get_themed_asset_image
-from conan_app_launcher.ui.data import UiAppLinkConfig, UiTabConfig
+from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt5.QtCore import Qt, pyqtBoundSignal
+from PyQt5.QtCore import Qt, pyqtBoundSignal, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QInputDialog, QMessageBox, QTabWidget,
                              QVBoxLayout, QWidget)
@@ -15,11 +15,12 @@ from PyQt5.QtWidgets import (QAction, QInputDialog, QMessageBox, QTabWidget,
 from .model import UiAppLinkModel, UiTabModel
 from .tab import TabBase, TabGrid, TabList
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
 
 
 class AppGridView(QWidget):
+    load_signal = pyqtSignal()
 
     def __init__(self, parent, model: "UiAppGridModel", conan_pkg_installed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
         super().__init__(parent)
@@ -43,6 +44,10 @@ class AppGridView(QWidget):
         self.tab_widget.tabBar().tabMoved.connect(self.on_tab_move)
         if self.tab_widget.count() > 0:  # remove the default tab
             self.tab_widget.removeTab(0)
+        self.load_signal.connect(self.load)
+
+    def apply_theme(self):
+        self.re_init(self.model)
 
     def re_init(self, model: "UiAppGridModel", offset=0):
         """ To be called, when a new config file is loaded """
@@ -143,7 +148,6 @@ class AppGridView(QWidget):
     def load(self, offset=0):
         """ Creates new layout """
         for tab_config in self.model.tabs:
-
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
             tab = self.get_tab_type()(parent=self.tab_widget, model=tab_config)
             self.tab_widget.addTab(tab, tab_config.name)

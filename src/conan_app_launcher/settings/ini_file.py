@@ -10,6 +10,25 @@ from . import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS, DISPL
                ENABLE_APP_COMBO_BOXES, FONT_SIZE, GUI_STYLE, GUI_STYLE_LIGHT,
                LAST_CONFIG_FILE, WINDOW_SIZE, SettingsInterface)
 
+def application_settings_spec() -> Dict[str, Dict[str, Any]]:
+    _GENERAL_SECTION_NAME = "General"
+    _VIEW_SECTION_NAME = "View"
+    return {
+    _GENERAL_SECTION_NAME: {
+            LAST_CONFIG_FILE: "",
+            },
+    _VIEW_SECTION_NAME: {
+            FONT_SIZE: 12,
+            GUI_STYLE: GUI_STYLE_LIGHT,
+            ENABLE_APP_COMBO_BOXES: False,
+            APPLIST_ENABLED: True,
+            DISPLAY_APP_CHANNELS: True,
+            DISPLAY_APP_USERS: False,
+            DISPLAY_APP_VERSIONS: True,
+            WINDOW_SIZE: "0,0,800,600",
+            CONSOLE_SPLIT_SIZES: "413,126"
+            },
+        }
 
 class IniSettings(SettingsInterface):
     """
@@ -18,11 +37,9 @@ class IniSettings(SettingsInterface):
     All entries need to be entered in the default values, no runtime registration.
     Settings should be accessed via their constant name.
     """
-    # internal constants
-    _GENERAL_SECTION_NAME = "General"
-    _VIEW_SECTION_NAME = "View"
 
-    def __init__(self, ini_file_path: Optional[PathLike], auto_save=True):
+    def __init__(self, ini_file_path: Optional[PathLike], auto_save=True, 
+                 default_values=application_settings_spec()):
         """
         Read config.ini file to load settings.
         Create, if not existing, but the directory must already exist!
@@ -44,22 +61,7 @@ class IniSettings(SettingsInterface):
             self._logger.info(f'Settings: Using {self._ini_file_path}')
 
         ### default setting values ###
-        self._values: Dict[str, Dict[str, Any]] = {
-            self._GENERAL_SECTION_NAME: {
-                LAST_CONFIG_FILE: "",
-            },
-            self._VIEW_SECTION_NAME: {
-                FONT_SIZE: 12,
-                GUI_STYLE: GUI_STYLE_LIGHT,
-                ENABLE_APP_COMBO_BOXES: False,
-                APPLIST_ENABLED: True,
-                DISPLAY_APP_CHANNELS: True,
-                DISPLAY_APP_USERS: False,
-                DISPLAY_APP_VERSIONS: True,
-                WINDOW_SIZE: "0,0,800,600",
-                CONSOLE_SPLIT_SIZES: "413,126"
-            },
-        }
+        self._values: Dict[str, Dict[str, Any]] = default_values
 
         self._read_ini()
 

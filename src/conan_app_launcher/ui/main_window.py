@@ -1,9 +1,10 @@
+import datetime
 from pathlib import Path
 from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import PathLike, user_save_path
+from conan_app_launcher import MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, user_save_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan import ConanCleanup
 from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS,
@@ -12,6 +13,7 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, D
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE, WINDOW_SIZE)
+from conan_app_launcher.ui.views.app_grid.tab import TabGrid
 from conan_app_launcher.ui.views.conan_conf.conan_conf import ConanConfigView
 from conan_app_launcher.ui.widgets import WideMessageBox, AnimatedToggle
 from PyQt5.QtCore import Qt, QRect, pyqtSignal, pyqtSlot
@@ -23,7 +25,6 @@ from .fluent_window import FluentWindow, SideSubMenu
 from .model import UiApplicationModel
 from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
 from .views.about_page import AboutPage
-
 
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
@@ -138,24 +139,34 @@ class MainWindow(FluentWindow):
         config_source_str = str(config_source)
         if not config_source:
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
+        self.restore_window_state()
 
         # model loads incrementally
         loader = AsyncLoader(self)
-        loader.async_loading(self, self.model.loadf, (config_source_str,))
+        loader.async_loading(self, self._load_job, (config_source_str,))
         loader.wait_for_finished()
 
         # model loaded, now load the gui elements, which have a static model
-        self.app_grid.re_init(self.model.app_grid)
+        # self.app_grid.re_init(self.model.app_grid)
 
-        # Other modules are currently loaded on demand.
-        self.restore_window_state()
+
+    def _load_job(self, config_source_str):
+        # load ui file definitions
+        self.model.loadf(config_source_str)
+
+        # now actually load the views - this need signals, to execue in the gui thread
+        self.app_grid.model = self.model.app_grid
+        self.app_grid.load_signal.emit()
+        self.conan_config.load_signal.emit()
+        # loads the remotes in the search dialog
+        self.conan_remotes_updated.emit()
 
 
     @pyqtSlot()
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
         new_size = app.active_settings.get_int(FONT_SIZE) + 1
-        if new_size > 14:
+        if new_size > MAX_FONT_SIZE:
             return
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)
@@ -164,7 +175,7 @@ class MainWindow(FluentWindow):
     def on_font_size_decreased(self):
         """ Decrease font size by 2. Ignore if font gets too small. """
         new_size = app.active_settings.get_int(FONT_SIZE) - 1
-        if new_size < 8:
+        if new_size < MIN_FONT_SIZE:
             return
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)
@@ -172,7 +183,6 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def on_theme_changed(self):
         # wait 0,5 seconds, so all animations can finish
-        import datetime
         start = datetime.datetime.now()
         while datetime.datetime.now() - start <= datetime.timedelta(milliseconds=600):
             QApplication.processEvents()
@@ -187,22 +197,24 @@ class MainWindow(FluentWindow):
 
         # all icons must be reloaded
         self.apply_theme()
-        self.local_package_explorer.apply_theme()
-        self.app_grid.re_init(self.model.app_grid)  # needs a whole reload because models need to be reinitialized
-        if self.search_dialog:
-            self.search_dialog.apply_theme()
+        for page in self.page_widgets.get_all_pages():
+            page.apply_theme()
 
     @pyqtSlot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
-        paths = ConanCleanup(app.conan_api).get_cleanup_cache_paths()
+        cleaner = ConanCleanup(app.conan_api)
+        loader = AsyncLoader(self)
+        loader.async_loading(self, cleaner.get_cleanup_cache_paths, )
+        loader.wait_for_finished()
+        paths = cleaner.orphaned_packages.union(cleaner.orphaned_references)
         if not paths:
             self.write_log("INFO: Nothing found in cache to clean up.")
             return
         if len(paths) > 1:
             path_list = "\n".join(paths)
         else:
-            path_list = paths[0]
+            path_list = str(paths)
 
         msg = WideMessageBox(parent=self)
         msg.setWindowTitle("Delete folders")
@@ -210,6 +222,8 @@ class MainWindow(FluentWindow):
         msg.setDetailedText(path_list)
         msg.setStandardButtons(WideMessageBox.Yes | WideMessageBox.Cancel)
         msg.setIcon(WideMessageBox.Question)
+        msg.setWidth(800)
+        msg.setMaximumHeight(600)
         reply = msg.exec_()
         if reply == WideMessageBox.Yes:
             for path in paths:
@@ -230,25 +244,24 @@ class MainWindow(FluentWindow):
             app.active_settings.set(LAST_CONFIG_FILE, new_file)
             # model loads incrementally
             self.model.loadf(new_file)
-
             # conan works, model can be loaded
             self.app_grid.re_init(self.model.app_grid)  # loads tabs
 
     @pyqtSlot()
     def on_add_link(self):
-        tab = self.app_grid.tab_widget.currentWidget()
+        tab: TabGrid = self.app_grid.tab_widget.currentWidget() # type: ignore
         tab.app_links[0].open_app_link_add_dialog()
 
     @pyqtSlot()
     def on_reorder(self):
-        tab = self.app_grid.tab_widget.currentWidget()
+        tab: TabGrid = self.app_grid.tab_widget.currentWidget() # type: ignore
         tab.app_links[0].on_move()
 
     @pyqtSlot()
     def display_versions_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         # status is changed only after this is done, so the state must be negated
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_VERSIONS, status)
         self.app_grid.re_init_all_app_links(force=True)
@@ -256,7 +269,7 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def apply_display_users_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_USERS, status)
         self.app_grid.re_init_all_app_links(force=True)
@@ -264,21 +277,21 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def display_channels_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_CHANNELS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
     @pyqtSlot()
     def quicklaunch_grid_mode_toggled(self):
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(APPLIST_ENABLED, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
     @pyqtSlot()
     def quicklaunch_cbox_mode_toggled(self):
-        sender_toggle: AnimatedToggle = self.sender()
+        sender_toggle: AnimatedToggle = self.sender() # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(ENABLE_APP_COMBO_BOXES, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())

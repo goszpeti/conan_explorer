@@ -1,10 +1,11 @@
 
+from pathlib import Path
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, user_save_path)
+from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, LEGACY_UI_CFG_FILE_NAME, user_save_path, legacy_user_save_path)
 from conan_app_launcher.settings import LAST_CONFIG_FILE
-from conan_app_launcher.ui.data import (UI_CONFIG_JSON_TYPE, UiConfig,
+from conan_app_launcher.ui.config import (UI_CONFIG_JSON_TYPE, UiConfig, get_ui_config_file_ext,
                                         ui_config_factory, UiConfigInterface)
 from .views.app_grid.model import UiAppGridModel
 
@@ -46,10 +47,11 @@ class UiApplicationModel(UiConfig):
     def loadf(self, config_source: str) -> "UiApplicationModel":
         """ Load model and submodels from specified file source """
         # empty ui config, create it in user path
-        default_config_file_path = user_save_path / DEFAULT_UI_CFG_FILE_NAME
-        if not config_source or not default_config_file_path.exists():
+        file_ext = get_ui_config_file_ext(self.CONFIG_TYPE)
+        default_config_file_path = user_save_path / (DEFAULT_UI_CFG_FILE_NAME + file_ext)
+        if not config_source or legacy_user_save_path / (LEGACY_UI_CFG_FILE_NAME) == Path(config_source):
             config_source = str(default_config_file_path)
-        app.active_settings.set(LAST_CONFIG_FILE, str(config_source))
+            app.active_settings.set(LAST_CONFIG_FILE, str(config_source))
 
         self._ui_config_data = ui_config_factory(self.CONFIG_TYPE, config_source)
         ui_config = self._ui_config_data.load()

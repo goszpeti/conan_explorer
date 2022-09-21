@@ -21,9 +21,8 @@ from PyQt5.QtWidgets import (QAction, QComboBox, QDialog, QFrame, QHBoxLayout,
                              QSizePolicy, QVBoxLayout, QWidget)
 
 from .dialogs import AppEditDialog
-from abc import ABC
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:
     from.tab import TabBase, TabGrid, TabList
 
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"

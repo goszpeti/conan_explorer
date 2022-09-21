@@ -16,7 +16,7 @@ class WideMessageBox(QMessageBox):
     """ MessageBox with more width """
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._width = 150   # default
+        self._width = 600   # default
 
     def setWidth(self, width):
         self._width = width
@@ -25,5 +25,4 @@ class WideMessageBox(QMessageBox):
         _result = super().resizeEvent(event)
 
         self.setFixedWidth(self._width)
-
         return _result

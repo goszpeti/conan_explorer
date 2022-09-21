@@ -1,6 +1,7 @@
 """ Common ui classes, and functions """
 
 import os
+from time import sleep
 from typing import Any, Callable, Optional, Tuple
 
 from conan_app_launcher import DEBUG_LEVEL
@@ -53,6 +54,12 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog.setRange(0, 0)
         self.progress_dialog.setMinimumDuration(1000)
         self.progress_dialog.setFixedWidth(300)
+        # set position in middle of window
+        qapp: QtWidgets.QApplication = QtWidgets.QApplication.instance()
+        rectangle = self.progress_dialog.frameGeometry()
+        if qapp.activeWindow():
+            rectangle.moveCenter(qapp.activeWindow().frameGeometry().center())
+            self.progress_dialog.move(rectangle.topLeft())
         self.progress_dialog.show()
 
         if bool(os.getenv("DISABLE_ASYNC_LOADER")):
@@ -64,7 +71,7 @@ class AsyncLoader(QtCore.QObject):
             return
 
         self.worker = Worker(work_task, worker_args)
-        self.load_thread = QtCore.QThread()
+        self.load_thread = QtCore.QThread(dialog_parent)
         self.load_thread.setObjectName(f"loader_thread_{str(self)}")
         self.worker.moveToThread(self.load_thread)
         self.load_thread.started.connect(self.worker.work)
@@ -89,4 +96,5 @@ class AsyncLoader(QtCore.QObject):
         Logger().debug("Wait for loading thread...")
         # execute once
         while not self.finished:
+            sleep(0.01)
             QtWidgets.QApplication.processEvents()

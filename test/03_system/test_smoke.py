@@ -41,7 +41,7 @@ def test_main_loop(base_fixture):
     Start the actual executable, to test, that the entrypoints are correctly specified.
     """
 
-    settings_file_path = Path.home() / conan_app_launcher.SETTINGS_FILE_NAME
+    settings_file_path = Path.home() / (conan_app_launcher.SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE)
     settings = settings_factory(SETTINGS_INI_TYPE, settings_file_path)
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
@@ -63,7 +63,7 @@ def test_main_loop(base_fixture):
                     found_process = True
                     process.kill()
                     break
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            except Exception:
                 pass
         time.sleep(2)
         assert found_process

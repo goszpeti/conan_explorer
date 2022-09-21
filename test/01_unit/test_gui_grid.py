@@ -15,7 +15,7 @@ from time import sleep
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_USERS,
                                          ENABLE_APP_COMBO_BOXES)
-from conan_app_launcher.ui.data import UiAppGridConfig, UiTabConfig
+from conan_app_launcher.ui.config import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.views.app_grid.app_link import AppLinkBase, ListAppLink, GridAppLink
 from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
@@ -29,7 +29,7 @@ from PyQt5 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-def test_applink_word_wrap(base_fixture, qtbot):
+def test_applink_word_wrap(qtbot, base_fixture):
     """ Check custom word wrap of App Link"""
 
     # max length > actual length -> no change
@@ -44,10 +44,11 @@ def test_applink_word_wrap(base_fixture, qtbot):
                                  10) == "VeryLongAp\npLinkNamet\noTestColum\nnCalculati\non 111111"
 
 
-def test_AppEditDialog_display_values(base_fixture, qtbot):
+def test_AppEditDialog_display_values(qtbot, base_fixture):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
+    app.conan_api.init_api()
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico", conan_options={"a": "b", "c": "True", "d": "10"})
@@ -79,14 +80,16 @@ def test_AppEditDialog_display_values(base_fixture, qtbot):
     assert app_info.name == "test"
 
 
-def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
+def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     """
     Test, if the browse executable and icon button works:
-    - buttons are only enabled, if an installed reference is entered
+    - buttons are always enabled (behavior change from conditional disable)
     - opens the dialog in the package folder
     - resolves the correct relative path for executables and forbids non-package-folder paths
     - resolves the correct relative path for executables and sets non-package-folder paths to the abs. path
     """
+    app.conan_api.init_api()
+
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
                                icon="//myicon.ico", conan_options={})
@@ -99,9 +102,9 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
 
     qtbot.waitExposed(root_obj)
 
-    # assert buttons are disabled (invalid ref)
-    assert not diag._ui.executable_browse_button.isEnabled()
-    assert not diag._ui.icon_browse_button.isEnabled()
+    # assert buttons are enabled - UPDATE: buttons are not disabled
+    assert diag._ui.executable_browse_button.isEnabled()
+    assert diag._ui.icon_browse_button.isEnabled()
 
     # enter an installed reference
     diag._ui.conan_ref_line_edit.setText(TEST_REF)
@@ -114,13 +117,15 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
         exe_rel_path = "bin\\python.exe"
     else:
         exe_rel_path = "bin/python"
-    selection = diag._temp_package_path / exe_rel_path
+    _, temp_package_path = app.conan_api.get_best_matching_package_path(
+        CFR.loads(diag._ui.conan_ref_line_edit.text()), diag.resolve_conan_options())
+    selection = temp_package_path / exe_rel_path
     mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
                         return_value=QtWidgets.QDialog.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(selection)])
     diag._ui.executable_browse_button.clicked.emit()
-    assert diag._ui.exec_path_line_edit.text() == exe_rel_path
+    assert diag._ui.exec_path_line_edit.text() == exe_rel_path.replace("\\", "/")
 
     # negative test
     selection = base_fixture.testdata_path / "nofile.json"
@@ -133,7 +138,7 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
                         return_value=QtWidgets.QMessageBox.Accepted)
     diag._ui.executable_browse_button.clicked.emit()
     # entry not changed
-    assert diag._ui.exec_path_line_edit.text() == exe_rel_path
+    assert diag._ui.exec_path_line_edit.text() == exe_rel_path.replace("\\", "/")
 
     # open button 
     # absolute
@@ -146,7 +151,7 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
     assert diag._ui.icon_line_edit.text() == str(icon_path)
 
     # relative to package
-    icon_pkg_path = diag._temp_package_path / "icon.png"
+    icon_pkg_path = temp_package_path / "icon.png"
     # copy icon to pkg
     shutil.copyfile(str(icon_path), str(icon_pkg_path))
 
@@ -157,18 +162,14 @@ def test_AppEditDialog_browse_buttons(base_fixture, qtbot, mocker):
     diag._ui.icon_browse_button.clicked.emit()
     assert diag._ui.icon_line_edit.text() == "icon.png"
     os.unlink(str(icon_pkg_path))
+    diag._ui.conan_ref_line_edit._completion_thread.join(1)
+    root_obj.close()
 
-    # simulate pressing backspace - buttons should disable
-    diag._ui.conan_ref_line_edit.setText(TEST_REF[0:-1])
-    assert not diag._ui.executable_browse_button.isEnabled()
-    assert not diag._ui.icon_browse_button.isEnabled()
-
-
-def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
+def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
     """
     Test, if the entered data is written correctly.
     """
-    import conan_app_launcher.app as app
+    app.conan_api.init_api()
 
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
@@ -228,13 +229,16 @@ def test_AppEditDialog_save_values(base_fixture, qtbot, mocker):
 
     mock_version_func.assert_called()
     mock_install_func.assert_called()
+    diag._ui.conan_ref_line_edit._completion_thread.join(1)
 
 
-def test_AppLink_open(base_fixture, qtbot):
+def test_AppLink_open(qtbot, base_fixture):
     """
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
     """
+    app.conan_api.init_api()
+
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable=Path(sys.executable).name)
     app_model = UiAppLinkModel().load(app_config, None)
@@ -252,31 +256,32 @@ def test_AppLink_open(base_fixture, qtbot):
     qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
     sleep(5)  # wait for terminal to spawn
     # check pid of created process
+    found_process = None
     if platform.system() == "Linux":
         process_name = "x-terminal-emulator"
-        for process in psutil.process_iter():
-            try:
-                if process_name.lower() in process.name().lower():
-                    assert "python" in process.cmdline()[2]
-                    process.kill()
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                pass
     elif platform.system() == "Windows":
-        # check windowname of process - default shell spawns with path as windowname
-        # DOES NOT WORK with Windows Terminal in 11 -> has no title
-        ret = check_output(f'tasklist /fi "WINDOWTITLE eq {str(sys.executable)}"')
-        assert "python.exe" in ret.decode("utf-8")
-        lines = ret.decode("utf-8").splitlines()
-        line = lines[3].replace(" ", "")
-        pid = line.split("python.exe")[1].split("Console")[0]
-        os.system("taskkill /PID " + pid)
+        process_name = "cmd"
+    for process in psutil.process_iter():
+        try:
+            if process_name.lower() in process.name().lower():
+                try:
+                    if "conan_app_launcher" in process.cmdline()[2]:
+                        found_process = process
+                    break
+                except:
+                    pass
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    if found_process:
+        found_process.kill()
 
 
-def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
+def test_AppLink_icon_update_from_executable(qtbot, base_fixture):
     """
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path. Use python executable for testing.
     """
+    app.conan_api.init_api()
 
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable="python")
@@ -292,11 +297,11 @@ def test_AppLink_icon_update_from_executable(base_fixture, qtbot):
     assert not app_ui._app_button._greyed_out
 
 
-def test_AppLink_cbox_switch(base_fixture, qtbot):
+def test_AppLink_cbox_switch(qtbot, base_fixture):
     """
     Test, that changing the version resets the channel and user correctly
     """
-    import conan_app_launcher.app as app
+    app.conan_api.init_api()
 
     # all versions have different user and channel names, so we can distinguish them
     conanfile = str(base_fixture.testdata_path / "conan" / "multi" / "conanfile.py")

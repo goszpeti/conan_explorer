@@ -38,3 +38,7 @@ class AboutPage(QWidget):
         layout.addWidget(self._text)
         layout.addItem(QSpacerItem(
             20, 600, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+    def apply_theme(self):
+        # no themed icons
+        pass

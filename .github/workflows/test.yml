@@ -6,6 +6,8 @@ name: Python Tests
 on:
   push:
     branches: [master]
+    paths:
+      - "src/**/*"
   pull_request:
     branches: [master]
 
@@ -69,7 +71,7 @@ jobs:
       # QT_LOGGING_RULES=: "*.debug=true"
       QT_DEBUG_PLUGINS: 1
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up a display for gui in Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -83,9 +85,10 @@ jobs:
           sudo apt install lxterminal nautilus x11-utils mousepad
           sudo apt install dbus-x11 at-spi2-core
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
+          # cache: 'pip' # caching pip dependencies - needs requirements .txt
       - name: Install specific conan version
         if: matrix.conan != 'latest'
         run: | # markupsafe is a workaround fix for broken conan dependencies
@@ -94,7 +97,6 @@ jobs:
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
-          pip install pyqt5==5.15.6
           pip install -e .[test]
       - name: Update remote
         run: |
@@ -103,9 +105,13 @@ jobs:
         run: |
           pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
       - name: Execute integration with pytest
+        env:
+            SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
           pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
       - name: Execute system with pytest # Reinstall into site-packages to find install and pkg problems
+        env:
+            SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
           pip install .[test]
           pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append

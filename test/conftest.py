@@ -1,3 +1,4 @@
+import distutils.sysconfig
 import configparser
 import ctypes
 import os
@@ -25,8 +26,18 @@ from conan_app_launcher.ui.main_window import MainWindow
 from conans.model.ref import ConanFileReference
 from PyQt5 import QtCore, QtWidgets
 
-conan_server_thread = None
+def get_scripts_path():
+    scripts_path = Path(distutils.sysconfig.get_config_var("BINDIR"))
+    if platform.system() == "Windows":
+        if not (scripts_path / "conan_app_launcher.exe").exists():
+            scripts_path = Path(distutils.sysconfig.get_config_var("BINDIR")) / "Scripts"
+    return scripts_path
 
+
+exe_ext = ".exe" if platform.system() == "Windows" else ""
+conan_server_thread = None
+conan_path_str = str(get_scripts_path() / ("conan" + exe_ext))
+assert os.path.exists(conan_path_str)
 # setup conan test server
 TEST_REF = "example/9.9.9@local/testing"
 TEST_REF_OFFICIAL = "example/1.0.0@_/_"
@@ -44,12 +55,14 @@ def is_ci_job():
         return True
     return False
 
+
 def get_window_pid(title):
     import win32process
     import win32gui
     hwnd = win32gui.FindWindow(None, title)
     _, pid = win32process.GetWindowThreadProcessId(hwnd)
     return pid
+
 
 class PathSetup():
     """ Get the important paths form the source repo. """
@@ -74,7 +87,9 @@ def check_if_process_running(process_name, kill=False):
 
 def create_test_ref(ref, paths, create_params=[""], update=False):
     native_ref = ConanFileReference.loads(ref).full_str()
-    pkgs = ConanApi().search_query_in_remotes(native_ref)
+    conan = ConanApi()
+    conan.init_api()
+    pkgs = conan.search_query_in_remotes(native_ref)
 
     if not update:
         for pkg in pkgs:
@@ -119,6 +134,7 @@ def start_conan_server():
     paths = PathSetup()
     profiles_path = paths.testdata_path / "conan" / "profile"
     conan = ConanApi()
+    conan.init_api()
     os.makedirs(conan.client_cache.profiles_path, exist_ok=True)
     shutil.copy(str(profiles_path / platform.system().lower()),  conan.client_cache.default_profile_path)
 
@@ -142,7 +158,7 @@ def start_conan_server():
         print("ADDING CONAN REMOTE")
         os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
         os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
-
+        os.system(f"conan remote enable {TEST_REMOTE_NAME}")
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
         return
@@ -168,7 +184,18 @@ def ConanServer():
 
 
 @pytest.fixture
-def base_fixture(request):
+def app_qt_fixture(qtbot):
+    yield qtbot
+    import conan_app_launcher.app as app
+    # remove logger, so the logger doesn't log into nonexistant qt gui
+    remove_qt_logger(logger.Logger(), MainWindow.qt_logger_name)
+    # finish worker - otherwise errors and crashes will occur!
+    if app.conan_worker:
+        app.conan_worker.finish_working(3)
+
+
+@pytest.fixture
+def base_fixture():
     """
     Set up the global variables to be able to start the application.
     Needs to be used, if the tested component uses the global Logger.
@@ -176,11 +203,12 @@ def base_fixture(request):
     """
     paths = PathSetup()
     os.environ["CONAN_REVISIONS_ENABLED"] = "1"
-    os.environ["DISABLE_ASYNC_LOADER"] = "True" # for code coverage to work
+    os.environ["DISABLE_ASYNC_LOADER"] = "True"  # for code coverage to work
     import conan_app_launcher.app as app
 
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / SETTINGS_FILE_NAME)
     app.conan_api = ConanApi()
+    app.conan_api.init_api()
     app.conan_worker = ConanWorker(app.conan_api, app.active_settings)
 
     yield paths
@@ -196,7 +224,7 @@ def base_fixture(request):
     if (base_path / ConanInfoCache.CACHE_FILE_NAME).exists():
         try:
             os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
-        except PermissionError: # just Windows things...
+        except PermissionError:  # just Windows things...
             time.sleep(5)
             os.remove(base_path / ConanInfoCache.CACHE_FILE_NAME)
 

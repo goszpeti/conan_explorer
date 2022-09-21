@@ -81,7 +81,7 @@
      <number>0</number>
     </property>
     <property name="leftMargin">
-     <number>3</number>
+     <number>2</number>
     </property>
     <property name="topMargin">
      <number>1</number>
@@ -105,13 +105,13 @@
       </property>
       <layout class="QGridLayout" name="main_frame_layout">
        <property name="leftMargin">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="topMargin">
         <number>0</number>
        </property>
        <property name="rightMargin">
-        <number>6</number>
+        <number>3</number>
        </property>
        <property name="bottomMargin">
         <number>1</number>
@@ -222,7 +222,7 @@
                  <number>0</number>
                 </property>
                 <property name="rightMargin">
-                 <number>0</number>
+                 <number>3</number>
                 </property>
                 <property name="bottomMargin">
                  <number>0</number>
@@ -276,11 +276,11 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../assets/icons/close.png</normalon>
+                       <normalon>../../../../../../Users/peter/.designer/assets/icons/close.png</normalon>
                       </iconset>
                      </property>
                      <property name="flat">
-                      <bool>false</bool>
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -297,8 +297,11 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../assets/icons/restore.png</normalon>
+                       <normalon>../../../../../../Users/peter/.designer/assets/icons/restore.png</normalon>
                       </iconset>
+                     </property>
+                     <property name="flat">
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -315,8 +318,11 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../assets/icons/minus.png</normalon>
+                       <normalon>../../../../../../Users/peter/.designer/assets/icons/minus.png</normalon>
                       </iconset>
+                     </property>
+                     <property name="flat">
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -347,9 +353,12 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QHBoxLayout" name="center_frame_layout">
+         <layout class="QHBoxLayout" name="center_frame_layout" stretch="0,1">
           <property name="spacing">
            <number>0</number>
+          </property>
+          <property name="sizeConstraint">
+           <enum>QLayout::SetNoConstraint</enum>
           </property>
           <property name="leftMargin">
            <number>0</number>
@@ -472,6 +481,12 @@
                        <property name="frameShadow">
                         <enum>QFrame::Plain</enum>
                        </property>
+                       <property name="horizontalScrollBarPolicy">
+                        <enum>Qt::ScrollBarAsNeeded</enum>
+                       </property>
+                       <property name="horizontalScrollMode">
+                        <enum>QAbstractItemView::ScrollPerPixel</enum>
+                       </property>
                       </widget>
                      </item>
                     </layout>
@@ -522,7 +537,7 @@
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>2</number>
+                  <number>1</number>
                  </property>
                  <item>
                   <widget class="QTextBrowser" name="console">
@@ -584,7 +599,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="QFrame" name="right_menu_frame">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -599,6 +614,12 @@ p, li { white-space: pre-wrap; }
              <size>
               <width>0</width>
               <height>16777215</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
              </size>
             </property>
             <property name="frameShape">
@@ -618,7 +639,7 @@ p, li { white-space: pre-wrap; }
               <number>4</number>
              </property>
              <property name="bottomMargin">
-              <number>0</number>
+              <number>5</number>
              </property>
              <item>
               <widget class="QScrollArea" name="right_menu_scroll_area">
@@ -628,6 +649,12 @@ p, li { white-space: pre-wrap; }
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
                <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
                </property>
@@ -635,7 +662,7 @@ p, li { white-space: pre-wrap; }
                 <enum>Qt::ScrollBarAsNeeded</enum>
                </property>
                <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
+                <enum>Qt::ScrollBarAsNeeded</enum>
                </property>
                <property name="sizeAdjustPolicy">
                 <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -649,8 +676,14 @@ p, li { white-space: pre-wrap; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>766</height>
+                  <height>744</height>
                  </rect>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
                 </property>
                 <layout class="QVBoxLayout" name="right_menu_scroll_area_widgets_layout">
                  <property name="spacing">
@@ -846,7 +879,7 @@ p, li { white-space: pre-wrap; }
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>0</number>
+           <number>3</number>
           </property>
           <property name="topMargin">
            <number>0</number>
@@ -873,7 +906,7 @@ p, li { white-space: pre-wrap; }
               <number>3</number>
              </property>
              <property name="topMargin">
-              <number>10</number>
+              <number>5</number>
              </property>
              <property name="rightMargin">
               <number>3</number>
@@ -899,8 +932,17 @@ p, li { white-space: pre-wrap; }
                <property name="styleSheet">
                 <string notr="true">font: bold</string>
                </property>
+               <property name="text">
+                <string>App Title</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+               </property>
+               <property name="margin">
+                <number>0</number>
+               </property>
                <property name="indent">
-                <number>3</number>
+                <number>5</number>
                </property>
               </widget>
              </item>
@@ -932,7 +974,7 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="icon">
                 <iconset>
-                 <normaloff>../assets/icons/menu_stripes.png</normaloff>../assets/icons/menu_stripes.png</iconset>
+                 <normaloff>../../../../../../Users/peter/.designer/assets/icons/menu_stripes.png</normaloff>../../../../../../Users/peter/.designer/assets/icons/menu_stripes.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -1040,7 +1082,7 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="icon">
                 <iconset>
-                 <normalon>../assets/icons/settings.png</normalon>
+                 <normalon>../../../../../../Users/peter/.designer/assets/icons/settings.png</normalon>
                 </iconset>
                </property>
                <property name="iconSize">
@@ -1054,6 +1096,9 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="checked">
                 <bool>false</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
                </property>
               </widget>
              </item>

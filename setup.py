@@ -13,7 +13,7 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = "conan-app-launcher"
-VERSION = "1.4.0"
+VERSION = "1.4.1"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
@@ -22,7 +22,8 @@ PYTHON_REQUIRES = ">=3.6.0"  # still support Ubuntu 18
 # What packages are required for this module to be executed?
 REQUIRES = [
     'PyQt5-sip==12.9.1 ; python_version<"3.7"',
-    "PyQt5>=5.13.0",  # GPLv3 (Windows and Ubuntu 20.04 use 5.14 minimally)
+    'PyQt5==5.13.0 ; python_version<"3.7"', # GPLv3 (Windows and Ubuntu 20.04 use 5.14 minimally)
+    'PyQt5>=5.13.0 ; python_version>="3.7"',
     "conan>=1.24, <2",  # MIT License
     "jsonschema>=3.2.0, <4",  # MIT License
     'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)
