@@ -92,7 +92,7 @@ class Ui_MainWindow(object):
         self.top_center_right_frame.setMinimumSize(QtCore.QSize(0, 0))
         self.top_center_right_frame.setObjectName("top_center_right_frame")
         self.verticalLayout_10 = QtWidgets.QVBoxLayout(self.top_center_right_frame)
-        self.verticalLayout_10.setContentsMargins(9, 0, 0, 0)
+        self.verticalLayout_10.setContentsMargins(9, 0, 3, 0)
         self.verticalLayout_10.setSpacing(0)
         self.verticalLayout_10.setObjectName("verticalLayout_10")
         self.window_btns_frame = QtWidgets.QFrame(self.top_center_right_frame)
