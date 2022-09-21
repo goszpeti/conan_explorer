@@ -97,7 +97,6 @@ jobs:
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
-          pip install pyqt5==5.15.6
           pip install -e .[test]
       - name: Update remote
         run: |
