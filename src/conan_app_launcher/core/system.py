@@ -1,9 +1,10 @@
 """ OS Abstraction Layer for all file based functions """
 
 from contextlib import contextmanager
+from distutils.dir_util import copy_tree, remove_tree
+from distutils.file_util import copy_file
 import os
 import platform
-import shutil
 import subprocess
 from packaging import version
 from pathlib import Path
@@ -14,6 +15,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher import asset_path, PKG_NAME
 
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
+
 
 @contextmanager
 def escape_venv():
@@ -36,7 +38,6 @@ def escape_venv():
     finally:
         os.environ.clear()
         os.environ.update(old_env)
-    
 
 
 def is_windows_11():
@@ -138,10 +139,11 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
         return proc.pid
     return 0
 
+
 def generate_launch_script(cmd: List[str]) -> str:
     import tempfile
     launch_templ_file = ""
-    
+
     if platform.system() == 'Windows':
         launch_templ_file = "launch.bat.in"
         temp_fd, temp_path_str = tempfile.mkstemp(".bat", prefix=PKG_NAME, text=True)
@@ -161,6 +163,7 @@ def generate_launch_script(cmd: List[str]) -> str:
         os.system(f"chmod +x {temp_path_str}")
     return temp_path_str
 
+
 def open_file(file: Path):
     """ Open files with their associated programs """
     if file.absolute().is_file():
@@ -168,3 +171,37 @@ def open_file(file: Path):
             os.startfile(str(file))
         elif platform.system() == "Linux":
             subprocess.Popen(("xdg-open", str(file)))
+
+
+def delete_path(dst: Path):
+    try:
+        if dst.is_file():
+            os.remove(dst)
+        elif dst.is_dir():
+            remove_tree(str(dst), verbose=1)
+    except Exception as e:
+        Logger().warning(f"Can't delete {str(dst)}: {str(e)}")
+
+
+def copy_path(src: Path, dst: Path):
+    try:
+        if src.is_file():
+            copy_file(str(src), str(dst))
+        else:
+            copy_tree(str(src), str(dst))
+    except Exception as e:
+        Logger().warning(f"Can't copy {str(src)} to {str(dst)}: {str(e)}")
+
+
+def calc_paste_same_dir_name(dst: Path, index=1):
+    if dst.exists():
+        new_path = dst.with_stem(f"{dst.stem} ({str(index+1)})")
+        possible_path = calc_paste_same_dir_name(new_path, index+1)
+        if possible_path == Path("NULL"):
+            return new_path
+        else:
+            return dst
+    else:
+        if index == 1:  # if file does not exist
+            return dst
+        return Path("NULL")

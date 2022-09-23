@@ -1,15 +1,13 @@
-from typing import TYPE_CHECKING, Dict
-from conan_app_launcher.core.conan import ConanPkg
+import os
+from typing import TYPE_CHECKING
 
 from conan_app_launcher.ui.common import (get_themed_asset_image)
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.views.package_explorer.controller import PackageFileExplorerController, PackageSelectionController
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt5.QtCore import (Qt, pyqtSignal, QModelIndex, pyqtBoundSignal)
+from PyQt5.QtCore import (Qt, pyqtSignal, pyqtBoundSignal)
 from PyQt5.QtGui import QIcon, QKeySequence, QShowEvent, QResizeEvent
 from PyQt5.QtWidgets import (QAction, QWidget)
-from conans.model.ref import ConanFileReference
-from conan_app_launcher.app.logger import Logger
 
 from .package_explorer_ui import Ui_Form
 
@@ -29,7 +27,7 @@ class LocalConanPackageExplorer(QWidget):
             self, self._ui.package_select_view, self._ui.package_filter_edit, self.conan_pkg_selected, conan_pkg_removed, page_widgets)
         self._pkg_file_exp_ctrl = PackageFileExplorerController(
             self, self._ui.package_file_view, self._ui.package_path_label, self.conan_pkg_selected, conan_pkg_removed, page_widgets)
-
+        self.file_cntx_menu = None
         self._ui.refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
 
         # connect pkg selection controller
@@ -95,6 +93,8 @@ class LocalConanPackageExplorer(QWidget):
         self.select_cntx_menu.exec_(self._ui.package_select_view.mapToGlobal(position))
 
     def _init_pkg_file_context_menu(self):
+        if self.file_cntx_menu:
+            return
         self.file_cntx_menu = RoundedMenu()
 
         self.open_fm_action = QAction("Show in File Manager", self)
@@ -147,8 +147,13 @@ class LocalConanPackageExplorer(QWidget):
         self.add_link_action.triggered.connect(self._pkg_file_exp_ctrl.on_add_app_link_from_file)
 
     def on_file_context_menu_requested(self, position):
+        if not self.file_cntx_menu:
+            return
+        path = self._pkg_file_exp_ctrl.get_selected_pkg_path()
+        self.add_link_action.setEnabled(True)
+        if os.path.isdir(path):
+            self.add_link_action.setDisabled(True)
         self.file_cntx_menu.exec_(self._ui.package_file_view.mapToGlobal(position))
 
     def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
         return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref, refresh)
-   

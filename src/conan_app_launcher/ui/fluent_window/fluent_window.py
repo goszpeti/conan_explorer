@@ -482,10 +482,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.right_anim.setEasingCurve(QEasingCurve.InOutQuart)
         self.right_anim.start()
 
-    def mousePressEvent(self, event):  # override
-        """ Helper for moving window to know mouse position """
-        self.drag_position = event.globalPos()
-
     def nativeEvent(self, eventType, message): # override
         """ Platform native events """
         if self._use_native_windows_fcns:
@@ -504,14 +500,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 self.handle_resize_cursor(event)  # cursor position control for cursor shape setup
         elif isinstance(event, QMouseEvent):
             if event.type() == event.MouseButtonPress:
+                if not event.button() == Qt.LeftButton:
+                    return super().eventFilter(source, event)
                 self._resize_press = 1
                 self._resize_point = self.mapToGlobal(event.pos())  # save the starting point of resize
                 self._last_geometry = self.geometry()
-            elif event.type() == event.MouseButtonRelease:  # reset cursor after move
+                self.resizing(event)
                 self._resize_press = 0
-            elif event.type() == event.MouseMove:
-                if self.cursor().shape() != Qt.ArrowCursor:
-                    self.resizing(event)
 
         return super().eventFilter(source, event)
 
@@ -551,55 +546,28 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self._resize_direction = ResizeDirection.bottom_right
             self.setCursor(Qt.SizeFDiagCursor)
         else:  # no resize
+            self._resize_direction = ResizeDirection.default
             self.setCursor(Qt.ArrowCursor)
 
     def resizing(self, event):
+        window = self.window().windowHandle()
         if self._resize_direction == ResizeDirection.top:
-            current_point = self.mapToGlobal(event.pos()) - self._resize_point
-            new_height = self._last_geometry.height() - current_point.y()
-            if new_height > self.minimumHeight():
-                self.setGeometry(self._last_geometry.x(), self._last_geometry.y() +
-                                 current_point.y(), self._last_geometry.width(), new_height)
+            window.startSystemResize(Qt.TopEdge)
         elif self._resize_direction == ResizeDirection.bottom:
-            current_point = self.mapToGlobal(event.pos()) - self._resize_point
-            new_height = self._last_geometry.height() + current_point.y()
-            self.resize(self._last_geometry.width(), new_height)
+            window.startSystemResize(Qt.BottomEdge)
         elif self._resize_direction == ResizeDirection.right:
-            current_point = self.mapToGlobal(event.pos()) - self._resize_point
-            new_width = self._last_geometry.width() + current_point.x()
-            self.resize(new_width, self._last_geometry.height())
+            window.startSystemResize(Qt.RightEdge)
         elif self._resize_direction == ResizeDirection.left:
-            current_point = self.mapToGlobal(event.pos()) - self._resize_point
-            new_width = self._last_geometry.width() - current_point.x()
-            if new_width > self.minimumWidth():
-                self.setGeometry(self._last_geometry.x() + current_point.x(),
-                                 self._last_geometry.y(), new_width, self._last_geometry.height())
+            window.startSystemResize(Qt.LeftEdge)
         elif self._resize_direction == ResizeDirection.top_right:
-            current_point = self.mapToGlobal(event.pos()) - self._resize_point
-            new_width = self._last_geometry.width() + current_point.x()
-            new_height = self._last_geometry.height() - current_point.y()
-            if new_height > self.minimumHeight():
-                self.setGeometry(self._last_geometry.x(), self._last_geometry.y() +
-                                 current_point.y(), new_width, new_height)
+            window.startSystemResize(Qt.TopEdge | Qt.RightEdge)
         elif self._resize_direction == ResizeDirection.bottom_right:
-            current_point = self.mapToGlobal(event.pos()) - self._resize_point
-            new_width = self._last_geometry.width() + current_point.x()
-            new_height = self._last_geometry.height() + current_point.y()
-            self.setGeometry(self._last_geometry.x(), self._last_geometry.y(), new_width, new_height)
+            window.startSystemResize(Qt.BottomEdge | Qt.RightEdge)
         elif self._resize_direction == ResizeDirection.bottom_left:
-            current_point = self.mapToGlobal(event.pos()) - self._resize_point
-            new_width = self._last_geometry.width() - current_point.x()
-            new_height = self._last_geometry.height() + current_point.y()
-            if new_width > self.minimumWidth():
-                self.setGeometry(self._last_geometry.x() + current_point.x(),
-                                 self._last_geometry.y(), new_width, new_height)
+            window.startSystemResize(Qt.BottomEdge | Qt.LeftEdge)
         elif self._resize_direction == ResizeDirection.top_left:
-            current_point = self.mapToGlobal(event.pos()) - self._resize_point
-            new_width = self._last_geometry.width() - current_point.x()
-            new_height = self._last_geometry.height() - current_point.y()
-            if new_height > self.minimumHeight() and new_width > self.minimumWidth():
-                self.setGeometry(self._last_geometry.x() + current_point.x(),
-                                 self._last_geometry.y() + current_point.y(), new_width, new_height)
+            window.startSystemResize(Qt.TopEdge | Qt.LeftEdge)
+
 
     def maximize_restore(self, a0=False):  # dummy arg to be used as an event slot
         if self.isMaximized():
