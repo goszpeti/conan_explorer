@@ -1,18 +1,21 @@
 """ OS Abstraction Layer for all file based functions """
 
-from contextlib import contextmanager
-from distutils.dir_util import copy_tree, remove_tree
-from distutils.file_util import copy_file
 import os
 import platform
+import shutil
 import subprocess
-from packaging import version
+import sys
+from contextlib import contextmanager
+# TODO find replacements for deprecated distutils functions
+from distutils.dir_util import copy_tree, remove_tree
+from distutils.file_util import copy_file
 from pathlib import Path
 from typing import List
-import sys
-from jinja2 import Template
+
+from conan_app_launcher import PKG_NAME, asset_path
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher import asset_path, PKG_NAME
+from jinja2 import Template
+from packaging import version
 
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
 
