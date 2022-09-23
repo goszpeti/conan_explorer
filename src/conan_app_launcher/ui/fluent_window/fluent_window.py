@@ -58,13 +58,13 @@ class ResizeDirection(Enum):
     bottom_right = 8
 class ThemedWidget():
     def __init__(self) -> None:
-        self._icon_map: Dict[Union[QPushButton, QLabel], str] = {}  # for re-theming
+        self._icon_map: Dict[QPushButton, str] = {}  # for re-theming
 
     @property
     def icon_map(self):
         return self._icon_map
 
-    def add_themed_icon(self, widget: Union[QPushButton, QLabel], asset_rel_path: str):
+    def add_themed_icon(self, widget: QPushButton, asset_rel_path: str):
         widget.setIcon(QIcon(get_themed_asset_image(asset_rel_path)))
         self.icon_map[widget] = asset_rel_path
 
@@ -89,7 +89,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         self.title = title
         self.is_top_level = is_top_level
         self.set_title(title)
-        self._content_layout = self.ui.side_menu_content_frame.layout()
+        self._content_layout = self.ui.content_frame_layout
         self.add_themed_icon(self.ui.side_menu_title_button, "icons/back.png")
 
         if is_top_level:
@@ -176,7 +176,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         return button
 
     def add_button_menu_entry(self, name: str, target: Callable, asset_icon: str = "",
-                              shortcut: Optional[QKeySequence] = None, shortcut_parent=None):
+                              shortcut: Optional[QKeySequence] = None, shortcut_parent: Optional[QWidget]=None):
         """ Adds a button with an icon and links with a callable. Optionally can have a key shortcut. """
         button = QPushButton(self)
         button.setMinimumSize(QSize(64, 50))
@@ -193,6 +193,8 @@ class SideSubMenu(QWidget, ThemedWidget):
 
         if not shortcut:
             return button
+        assert shortcut_parent, "Add shortcut_parent if shortcut is True!"
+
         # use global shortcut instead of button.setShortcut -> Works from anywhere
         shortcut_obj = QShortcut(shortcut, shortcut_parent)
         shortcut_obj.activated.connect(target)
@@ -326,7 +328,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
         for submenu in self.ui.right_menu_top_content_sw.findChildren(SideSubMenu):
             submenu.reload_themed_icons()
 
-    def move_window(self, event):
+    def move_window(self, a0):
+        event = a0
         # do nothing if the resize function is active
         if self.cursor().shape() != Qt.ArrowCursor:
             self.eventFilter(self, event)  # call this to be able to resize
@@ -340,7 +343,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             # if maximized, return to normal be able to move
             if self.isMaximized():
-                self.maximize_restore()
+                self.maximize_restore(None)
             # qt move
             if event.buttons() == Qt.LeftButton:
                 if self.drag_position is None:
@@ -568,8 +571,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         elif self._resize_direction == ResizeDirection.top_left:
             window.startSystemResize(Qt.TopEdge | Qt.LeftEdge)
 
-
-    def maximize_restore(self, a0=False):  # dummy arg to be used as an event slot
+    def maximize_restore(self, a0=None):  # dummy arg to be used as an event slot
         if self.isMaximized():
             self.showNormal()
         else:

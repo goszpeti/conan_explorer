@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 if platform.system() == "Windows":
     # Workaround for Windows, so that on the taskbar the
     # correct icon will be shown (and not the default python icon).
-    from PyQt5.QtWinExtras import QtWin
+    from PyQt5.QtWinExtras import QtWin  # type: ignore - no type info
     MY_APP_ID = 'ConanAppLauncher.' + __version__
     QtWin.setCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 

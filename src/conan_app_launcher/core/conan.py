@@ -86,7 +86,7 @@ class ConanApi():
             raise NotImplementedError
         # Experimental fast search - Conan search_packages is VERY slow
         # HACK: Removed the  @api_method decorator by getting the original function from the closure attribute
-        self.search_packages = self.conan.search_packages.__closure__[0].cell_contents
+        self.search_packages = self.conan.search_packages.__closure__[0].cell_contents  # type: ignore
         # don't hang on startup
         try:  # use try-except because of Conan 1.24 envvar errors in tests
             self.remove_locks()
@@ -127,7 +127,7 @@ class ConanApi():
         # only need to get once
         if self._short_path_root.exists() or platform.system() != "Windows":
             return self._short_path_root
-        temp_dir: str = path_shortener(tempfile.mkdtemp(), True)
+        temp_dir = str(path_shortener(tempfile.mkdtemp(), True))
         gen_short_path = Path(temp_dir)
         short_path_root = gen_short_path.parents[1]
         shutil.rmtree(gen_short_path.parent, ignore_errors=True)
@@ -373,7 +373,7 @@ class ConanApi():
         found_pkgs: List[ConanPkg] = []
         default_settings: Dict[str, str] = {}
         try:
-            default_settings = dict(self.client_cache.default_profile.settings)
+            default_settings = dict(self.client_cache.default_profile.settings)  # type: ignore - dynamic prop is ok in try-catch
             query = f"(arch=None OR arch={default_settings.get('arch')})" \
                     f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"\
@@ -519,7 +519,7 @@ class ConanCleanup():
             try:
                 package_ids = ref_cache.package_ids()
             except Exception:
-                package_ids = ref_cache.packages_ids()  # old API of Conan
+                package_ids = ref_cache.packages_ids()  # type: ignore - old API of Conan
             for pkg_id in package_ids:
                 short_path_dir = self._conan_api.get_package_folder(ref, pkg_id)
                 pkg_id_dir = None

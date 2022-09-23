@@ -3,26 +3,21 @@ from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
-try:
-    from typing_extensions import Protocol
-except ImportError:
-    from typing import Protocol
 
 from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES, SettingsInterface
 
 if TYPE_CHECKING:
-    from typing import TypedDict
+    from typing import TypedDict, Protocol
     from .conan import ConanApi
 else:
     try:
-        from typing import TypedDict
+        from typing import TypedDict, Protocol
     except ImportError:
-        from typing_extensions import TypedDict
+        from typing_extensions import TypedDict, Protocol
 
 from conan_app_launcher import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
 from conan_app_launcher.app.logger import Logger
 from conans.model.ref import ConanFileReference, PackageReference
-
 
 class ConanWorkerElement(TypedDict):
     ref_pkg_id: str  # format in <ref>:<id>. Id is optional. If id is used options, settings and auto_isntall is ignored

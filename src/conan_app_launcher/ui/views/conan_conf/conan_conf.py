@@ -36,7 +36,7 @@ class ConanConfigView(QDialog):
 
     def __load(self):
         self.config_file_path = Path(app.conan_api.client_cache.conan_conf_path)
-        self.profiles_path = Path(app.conan_api.client_cache.default_profile_path).parent
+        self.profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
         self._load_info_tab()
         self._load_remotes_tab()
         self._load_profiles_tab()
@@ -72,7 +72,7 @@ class ConanConfigView(QDialog):
         self._ui.python_sys_version_value_label.setText(python_sys_version)
         self._ui.conan_usr_home_value_label.setText(app.conan_api.client_cache.cache_folder)
         self._ui.conan_usr_cache_value_label.setText(str(app.conan_api.get_short_path_root()))
-        self._ui.conan_storage_path_value_label.setText(app.conan_api.client_cache.store)
+        self._ui.conan_storage_path_value_label.setText(str(app.conan_api.client_cache.store))
 
     def _load_settings_yml_tab(self):
         try:
