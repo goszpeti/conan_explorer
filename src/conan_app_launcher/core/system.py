@@ -212,7 +212,7 @@ def calc_paste_same_dir_name(dst: Path, index=1):
     If a file with a higher number exists it will ignore it.
     """
     if dst.exists():
-        new_path = dst.with_stem(f"{dst.stem} ({str(index+1)})")
+        new_path = dst.with_name(f"{dst.stem} ({str(index+1)}){dst.suffix}")
         possible_path = calc_paste_same_dir_name(new_path, index+1)
         if possible_path == Path("NULL"):
             return new_path
