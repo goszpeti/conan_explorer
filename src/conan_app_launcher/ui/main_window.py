@@ -111,7 +111,7 @@ class MainWindow(FluentWindow):
         self.main_general_settings_menu.add_button_menu_entry(
             "Remove Locks", app.conan_api.remove_locks, "icons/remove-lock.png")
         self.main_general_settings_menu.add_button_menu_entry(
-            "Clean Conan Cache", self.open_cleanup_cache_dialog, "icons/cleanup")
+            "Clean Conan Cache", self.open_cleanup_cache_dialog, "icons/cleanup.png")
         self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
 
