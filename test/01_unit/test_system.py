@@ -5,17 +5,22 @@ import subprocess
 import sys
 import tempfile
 import time
+from distutils.dir_util import remove_tree
 from pathlib import Path
 from subprocess import check_output
 from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 
 import conan_app_launcher  # for mocker
 import psutil
-from conan_app_launcher.core.system import (execute_app, open_file,
-                                            open_in_file_manager, run_file)
 from conan_app_launcher import PKG_NAME
+from conan_app_launcher.core.system import (calc_paste_same_dir_name,
+                                            copy_path_with_overwrite,
+                                            delete_path, execute_app,
+                                            open_file, open_in_file_manager,
+                                            run_file)
 
-def test_choose_run_file(base_fixture, tmp_path, mocker):
+
+def test_choose_run_file(tmp_path, mocker):
     """
     Tests, that the function call is propagated correctly
     Existing path with a filesize > 0 expected
@@ -40,7 +45,7 @@ def test_choose_run_file(base_fixture, tmp_path, mocker):
     conan_app_launcher.core.system.open_file.assert_called_once_with(test_file)
 
 
-def test_open_in_file_manager(base_fixture, mocker):
+def test_open_in_file_manager(mocker):
     """ Test, that on calling open_in_file_manager a file explorer actually opens """
     current_file_path = Path(__file__)
 
@@ -70,7 +75,7 @@ def test_open_in_file_manager(base_fixture, mocker):
         os.system("pkill nautilus")
 
 
-def test_choose_run_script(base_fixture, tmp_path, mocker):
+def test_choose_run_script(tmp_path, mocker):
     """
     Tests, that the function call is propagated correctly
     Existing path with a filesize > 0 expected
@@ -96,7 +101,7 @@ def test_choose_run_script(base_fixture, tmp_path, mocker):
     conan_app_launcher.core.system.execute_app.assert_called_once_with(test_file, False, "")
 
 
-def test_choose_run_exe(base_fixture, tmp_path, mocker):
+def test_choose_run_exe(tmp_path, mocker):
     """
     Test, that run_file will call execute_app with the correct argumnenst.
     Mock away the actual calls.
@@ -120,7 +125,7 @@ def test_choose_run_exe(base_fixture, tmp_path, mocker):
     conan_app_launcher.core.system.execute_app.assert_called_once_with(test_file, False, "")
 
 
-def test_start_cli_option_app(base_fixture):
+def test_start_cli_option_app():
     """
     Test, that starting with the option is_console_app
     will spawn a terminal.
@@ -146,7 +151,7 @@ def test_start_cli_option_app(base_fixture):
         os.system("taskkill /PID " + str(pid))
 
 
-def test_start_app_with_args_non_cli(base_fixture):
+def test_start_app_with_args_non_cli():
     """
     Test that the CLI args will be correctly passed to a non-console app, 
     by writing out a file in a shell cmd and check, if the file has been created.
@@ -181,7 +186,7 @@ def test_start_app_with_args_cli_option(base_fixture):
     os.remove(test_file)
 
 
-def test_start_script(base_fixture, tmp_path):
+def test_start_script(tmp_path):
     """
     Test, that calling a batch script will be actually execute,
     by checking if it will write a file. Windows only!
@@ -201,7 +206,7 @@ def test_start_script(base_fixture, tmp_path):
     assert res_file.is_file()
 
 
-def test_open_file(base_fixture):
+def test_open_file():
     """ Test file opener by opening a text file and checking for the app to spawn"""
     test_file = Path(tempfile.gettempdir(), "test.inf")
     with open(str(test_file), "w") as f:
@@ -227,3 +232,96 @@ def test_open_file(base_fixture):
         pid = line.split(default_app)[1].split("console")[0]
         os.system("taskkill /PID " + pid)
     os.remove(test_file)
+
+
+def test_copy_paste():
+    """ 
+    1. Copy file in same dir (renaming)
+    2. Copy non-empty dir in same dir (renaming)
+    3. Copy file in other dir (non-overwrite)
+    4. Copy file in other dir (overwrite)
+    5. Copy non-empty dir in other dir (non-overwrite)
+    6. Copy non-empty dir in other dir (overwrite)
+    """
+    # setup a test file
+    test_file = Path(tempfile.mkdtemp()) / "test.inf"
+    test_file_content = "test"
+    with open(str(test_file), "w") as f:
+        f.write(test_file_content)
+
+    # 1. Copy file in same dir(renaming)
+    new_path = calc_paste_same_dir_name(test_file)
+    assert new_path != test_file
+    assert "(2)" in new_path.stem
+
+    copy_path_with_overwrite(test_file, new_path)
+    assert new_path.exists()
+    assert test_file_content == new_path.read_text()
+    os.remove(new_path)
+
+    # setup a test dir with a file
+    test_dir = Path(tempfile.mkdtemp()) / "test_dir"
+    os.makedirs(test_dir)
+    test_dir_file = test_dir / "test.inf"
+    with open(str(test_dir_file), "w") as f:
+        f.write(test_file_content)
+
+    # 2. Copy non-empty dir in same dir(renaming)
+    new_path = calc_paste_same_dir_name(test_dir)
+    assert new_path != test_dir
+    assert "(2)" in new_path.stem
+    copy_path_with_overwrite(test_dir, new_path)
+    assert new_path.exists()
+    assert test_file_content == (new_path / test_file.name).read_text()
+    remove_tree(str(new_path), verbose=1)
+
+    # 3. Copy file in other dir(non-overwrite)
+    new_dir_path = Path(tempfile.mkdtemp())
+    copy_path_with_overwrite(test_file, new_dir_path)
+    new_file_path = new_dir_path / test_file.name
+    assert new_file_path.exists()
+    assert test_file_content == new_file_path.read_text()
+
+    # 4. Copy file in other dir(overwrite)
+    # Use the previously copied file
+    test_file_overwrite_content = "test2"
+    assert test_file_overwrite_content != test_file_content
+    with open(str(test_file), "w") as f:
+        f.write(test_file_overwrite_content)
+    copy_path_with_overwrite(test_file, new_dir_path)
+    assert test_file_overwrite_content == new_file_path.read_text()
+
+    # 5. Copy non-empty dir in other dir(non-overwrite)
+    new_dir_path = Path(tempfile.mkdtemp()) / test_dir.name
+    copy_path_with_overwrite(test_dir, new_dir_path)
+    assert new_dir_path.exists()
+    assert test_file_content == (new_dir_path / test_file.name).read_text()
+
+    # 6. Copy non-empty dir in other dir(overwrite)
+    # Use the previously copied dir
+    with open(str(test_dir_file), "w") as f:
+        f.write(test_file_overwrite_content)
+    copy_path_with_overwrite(test_dir, new_dir_path)
+    assert test_file_overwrite_content == (new_dir_path / test_file.name).read_text()
+    
+def test_delete():
+    """ 
+    1. Delete file
+    2. Delete non-empty directory
+    """
+    # 1. Delete file
+    test_file = Path(tempfile.mkdtemp()) / "test.inf"
+    test_file_content = "test"
+    with open(str(test_file), "w") as f:
+        f.write(test_file_content)
+    delete_path(test_file)
+    assert not test_file.exists()
+
+    # 2. Delete non-empty directory
+    test_dir = Path(tempfile.mkdtemp()) / "test_dir"
+    os.makedirs(test_dir)
+    test_dir_file = test_dir / "test.inf"
+    with open(str(test_dir_file), "w") as f:
+        f.write("test")
+    delete_path(test_dir)
+    assert not test_dir.exists()

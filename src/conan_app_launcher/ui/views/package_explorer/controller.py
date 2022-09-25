@@ -7,7 +7,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.core.system import calc_paste_same_dir_name, copy_path, delete_path
+from conan_app_launcher.core.system import calc_paste_same_dir_name, copy_path_with_overwrite, delete_path
 from conan_app_launcher.ui.common import (AsyncLoader, FileSystemModel)
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
@@ -323,7 +323,7 @@ class PackageFileExplorerController(QObject):
     def paste_path(self, src: Path, dst: Path):
         if src == dst:  # same target -> create numbered copies
             new_dst = calc_paste_same_dir_name(dst)
-            copy_path(src, new_dst)
+            copy_path_with_overwrite(src, new_dst)
         else:
             if dst.exists():
                 msg = QMessageBox(parent=self._view)
@@ -333,9 +333,9 @@ class PackageFileExplorerController(QObject):
                 msg.setIcon(QMessageBox.Warning)
                 reply = msg.exec_()
                 if reply == QMessageBox.Yes:
-                    copy_path(src, dst)
+                    copy_path_with_overwrite(src, dst)
             else:
-                copy_path(src, dst)
+                copy_path_with_overwrite(src, dst)
 
     def on_add_app_link_from_file(self):
         file_path = Path(self.get_selected_pkg_path())

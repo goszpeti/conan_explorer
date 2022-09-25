@@ -177,6 +177,10 @@ def open_file(file: Path):
 
 
 def delete_path(dst: Path):
+    """
+    Delete file or (non-empty) folder recursively. 
+    Exceptions will be caught and message logged to stdout.
+    """
     try:
         if dst.is_file():
             os.remove(dst)
@@ -186,7 +190,12 @@ def delete_path(dst: Path):
         Logger().warning(f"Can't delete {str(dst)}: {str(e)}")
 
 
-def copy_path(src: Path, dst: Path):
+def copy_path_with_overwrite(src: Path, dst: Path):
+    """
+    Copy files/directories while overwriting possible files and adding missing ones.
+    Directories will be copied from under source, so you may need to add the orig. folder name, if you want that!
+    Exceptions will be caught and message logged to stdout.
+    """
     try:
         if src.is_file():
             copy_file(str(src), str(dst))
@@ -197,6 +206,11 @@ def copy_path(src: Path, dst: Path):
 
 
 def calc_paste_same_dir_name(dst: Path, index=1):
+    """
+    Create a name for a file like /file.txt -> /file (2).txt.
+    It will find the next empty number.
+    If a file with a higher number exists it will ignore it.
+    """
     if dst.exists():
         new_path = dst.with_stem(f"{dst.stem} ({str(index+1)})")
         possible_path = calc_paste_same_dir_name(new_path, index+1)
