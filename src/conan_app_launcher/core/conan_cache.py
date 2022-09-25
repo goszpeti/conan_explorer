@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from conan_app_launcher import INVALID_CONAN_REF
 from conan_app_launcher.app.logger import Logger
@@ -16,7 +16,7 @@ class ConanInfoCache():
 
     CACHE_FILE_NAME = "cache.json"
 
-    def __init__(self, cache_dir: Path, local_refs: List[ConanFileReference] = None):
+    def __init__(self, cache_dir: Path, local_refs: Optional[List[ConanFileReference]]=None):
         if not local_refs:
             local_refs = []
         self._cache_file = cache_dir / self.CACHE_FILE_NAME

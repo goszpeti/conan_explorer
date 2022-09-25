@@ -39,7 +39,7 @@ class UiApplicationModel(UiConfig):
 
         return self
 
-    def emit_conan_pkg_signal_callback(self, conan_ref, pkg_id):
+    def emit_conan_pkg_signal_callback(self, conan_ref: str, pkg_id: str):
         if not self.conan_pkg_installed:
             return
         self.conan_pkg_installed.emit(conan_ref, pkg_id)

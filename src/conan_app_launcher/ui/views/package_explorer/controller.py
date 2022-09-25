@@ -7,6 +7,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
+from conan_app_launcher.core.system import calc_paste_same_dir_name, copy_path_with_overwrite, delete_path
 from conan_app_launcher.ui.common import (AsyncLoader, FileSystemModel)
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
@@ -128,20 +129,26 @@ class PackageSelectionController(QObject):
         if self._model:
             self._model.proxy_model.setFilterWildcard(text)
 
-    def find_item_in_pkg_sel_model(self, conan_ref: str) -> int:
+    def find_item_in_pkg_sel_model(self, conan_ref: str, pkg_id="") -> int:
         # find the row with the matching reference
         if not self._model:
             return False
         for ref_row in range(self._model.root_item.child_count()):
             item = self._model.root_item.child_items[ref_row]
             if item.item_data[0] == conan_ref:
-                return ref_row
+                if pkg_id:
+                    for pkg_row in range(item.child_count()):
+                        pkg_item = item.child_items[pkg_row]
+                        if pkg_item.item_data[0].get("id") == pkg_id:
+                            return ref_row
+                    return -1
+                else:
+                    return ref_row
         return -1
 
-    def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
+    def select_local_package_from_ref(self, conan_ref: str) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
         self._page_widgets.get_button_by_type(type(self.parent())).click()  # changes to this page and loads
-       # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
         self._loader.wait_for_finished()
 
         if not self._model:  # guard
@@ -157,12 +164,12 @@ class PackageSelectionController(QObject):
             conan_ref = split_ref[0]
             pkg_id = split_ref[1]
 
-        if self.find_item_in_pkg_sel_model(conan_ref) == -1:  # TODO  also need pkg id
+        if self.find_item_in_pkg_sel_model(conan_ref, pkg_id) == -1:
             self.refresh_pkg_selection_view()
 
         # wait for model to be loaded
         self._loader.wait_for_finished()
-        ref_row = self.find_item_in_pkg_sel_model(conan_ref)
+        ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
         if ref_row == -1:
             Logger().debug(f"Cannot find {conan_ref} in Local Package Explorer for selection")
             return False
@@ -265,33 +272,30 @@ class PackageFileExplorerController(QObject):
         run_file(file_path, True, args="")
 
     def on_copy_file_as_path(self) -> str:
-        file = self._get_selected_pkg_file()
+        file = self.get_selected_pkg_path()
         QApplication.clipboard().setText(file)
         return file
 
     def on_open_terminal_in_dir(self) -> int:
-        selected_path = Path(self._get_selected_pkg_file())
+        selected_path = Path(self.get_selected_pkg_path())
         if selected_path.is_file():
             selected_path = selected_path.parent
         return open_cmd_in_path(selected_path)
 
     def on_file_delete(self):
-        file = self._get_selected_pkg_file()
+        path_to_delete = Path(self.get_selected_pkg_path())
         msg = QMessageBox(parent=self._view)
         msg.setWindowTitle("Delete file")
-        msg.setText("Are you sure, you want to delete this file\t")
+        msg.setText("Are you sure, you want to permanently delete this file/folder?\t")
         msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
         msg.setIcon(QMessageBox.Warning)
         reply = msg.exec_()
         if reply != QMessageBox.Yes:
             return
-        try:
-            os.remove(file)
-        except Exception as e:
-            Logger().warning(f"Can't delete {file}: {str(e)}")
+        delete_path(Path(path_to_delete))
 
     def on_file_copy(self) -> Optional[QUrl]:
-        file = self._get_selected_pkg_file()
+        file = self.get_selected_pkg_path()
         if not file:
             return None
         data = QMimeData()
@@ -312,19 +316,35 @@ class PackageFileExplorerController(QObject):
             # try to copy
             if not url.isLocalFile():
                 continue
-            file = self._get_selected_pkg_file()
-            if not file:
+            sel_item_path = self.get_selected_pkg_path()
+            if not sel_item_path:
                 return
-            if os.path.isfile(file):
-                directory = os.path.dirname(file)
+            if self._is_selected_item_expanded():
+                dst_dir_path = Path(sel_item_path)
             else:
-                directory = file
-            # if nothing selected -> root
-            new_path = os.path.join(directory, url.fileName())
-            QFile(url.toLocalFile()).copy(new_path)
+                dst_dir_path = Path(sel_item_path).parent
+            new_path_str = os.path.join(dst_dir_path, url.fileName())
+            self.paste_path(Path(url.toLocalFile()), Path(new_path_str))
+
+    def paste_path(self, src: Path, dst: Path):
+        if src == dst:  # same target -> create numbered copies
+            new_dst = calc_paste_same_dir_name(dst)
+            copy_path_with_overwrite(src, new_dst)
+        else:
+            if dst.exists():
+                msg = QMessageBox(parent=self._view)
+                msg.setWindowTitle("Overwrite file/folder")
+                msg.setText("Are you sure, you want to overwrite this file/folder?\t")
+                msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+                msg.setIcon(QMessageBox.Warning)
+                reply = msg.exec_()
+                if reply == QMessageBox.Yes:
+                    copy_path_with_overwrite(src, dst)
+            else:
+                copy_path_with_overwrite(src, dst)
 
     def on_add_app_link_from_file(self):
-        file_path = Path(self._get_selected_pkg_file())
+        file_path = Path(self.get_selected_pkg_path())
         if not file_path.is_file():
             Logger().error("Please select a file, not a directory!")
             return
@@ -342,7 +362,7 @@ class PackageFileExplorerController(QObject):
         self._page_widgets.get_page_by_type(AppGridView).open_new_app_dialog_from_extern(app_config)
 
     def on_open_file_in_file_manager(self, model_index):
-        file_path = Path(self._get_selected_pkg_file())
+        file_path = Path(self.get_selected_pkg_path())
         open_in_file_manager(file_path)
 
     def _get_pkg_file_source_item(self) -> Optional[QModelIndex]:
@@ -352,14 +372,21 @@ class PackageFileExplorerController(QObject):
             return None
         return self._view.selectedIndexes()[0]
 
-    def _get_selected_pkg_file(self) -> str:
+    def get_selected_pkg_path(self) -> str:
         if not self._model:
             return ""
         file_view_index = self._get_pkg_file_source_item()
+        # if nothing selected return root
         if not file_view_index:
                 return self._model.rootPath()
-        # FIXME file_view_index.model() ?
         return self._model.fileInfo(file_view_index).absoluteFilePath()
+
+    def _is_selected_item_expanded(self):
+        file_view_index = self._get_pkg_file_source_item()
+        # if nothing selected return root
+        if not file_view_index:
+                return False
+        return self._view.isExpanded(file_view_index)
 
     def resize_file_columns(self):
         self._view.resizeColumnToContents(3)
