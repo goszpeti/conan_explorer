@@ -129,20 +129,26 @@ class PackageSelectionController(QObject):
         if self._model:
             self._model.proxy_model.setFilterWildcard(text)
 
-    def find_item_in_pkg_sel_model(self, conan_ref: str) -> int:
+    def find_item_in_pkg_sel_model(self, conan_ref: str, pkg_id="") -> int:
         # find the row with the matching reference
         if not self._model:
             return False
         for ref_row in range(self._model.root_item.child_count()):
             item = self._model.root_item.child_items[ref_row]
             if item.item_data[0] == conan_ref:
-                return ref_row
+                if pkg_id:
+                    for pkg_row in range(item.child_count()):
+                        pkg_item = item.child_items[pkg_row]
+                        if pkg_item.item_data[0].get("id") == pkg_id:
+                            return ref_row
+                    return -1
+                else:
+                    return ref_row
         return -1
 
-    def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
+    def select_local_package_from_ref(self, conan_ref: str) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view"""
         self._page_widgets.get_button_by_type(type(self.parent())).click()  # changes to this page and loads
-       # needed, if refresh==True, so the async loader can finish, otherwise the QtThread can't be deleted
         self._loader.wait_for_finished()
 
         if not self._model:  # guard
@@ -158,12 +164,12 @@ class PackageSelectionController(QObject):
             conan_ref = split_ref[0]
             pkg_id = split_ref[1]
 
-        if self.find_item_in_pkg_sel_model(conan_ref) == -1:  # TODO  also need pkg id
+        if self.find_item_in_pkg_sel_model(conan_ref, pkg_id) == -1:
             self.refresh_pkg_selection_view()
 
         # wait for model to be loaded
         self._loader.wait_for_finished()
-        ref_row = self.find_item_in_pkg_sel_model(conan_ref)
+        ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
         if ref_row == -1:
             Logger().debug(f"Cannot find {conan_ref} in Local Package Explorer for selection")
             return False

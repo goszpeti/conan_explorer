@@ -155,5 +155,5 @@ class LocalConanPackageExplorer(QWidget):
             self.add_link_action.setDisabled(True)
         self.file_cntx_menu.exec_(self._ui.package_file_view.mapToGlobal(position))
 
-    def select_local_package_from_ref(self, conan_ref: str, refresh=False) -> bool:
-        return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref, refresh)
+    def select_local_package_from_ref(self, conan_ref: str) -> bool:
+        return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref)

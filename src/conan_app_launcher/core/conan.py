@@ -254,7 +254,6 @@ class ConanApi():
 
     def get_local_pkg_from_id(self, pkg_ref: PackageReference) -> ConanPkg:
         """ Returns an installed pkg from reference and id """
-
         package = None
         for package in self.get_local_pkgs_from_ref(pkg_ref.ref):
             if package.get("id", "") == pkg_ref.id:

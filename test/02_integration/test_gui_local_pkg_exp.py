@@ -1,6 +1,7 @@
 
 import os
 from pathlib import Path
+import platform
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -75,17 +76,18 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     1. Change to Page, check if the installed package is in the list.
     2. Select a ref, nothing should change.
     3. Expand ref and select the pkg, fileview should open.
-    Test context menu functions of Pkg Selection View
-    1. Copy ref - Copy conan reference to clipboard (no pkg id!)
-    2. Open export folder - Opens in file manager
-    3. Show Conanfile - Opens in default texteditor
-    Test context menu functions of File View
-    1. Copy file as path - on clipboard
-    2. Open terminal - in the same folder as file or the selected folder
-    3. Open in File Manager
-    4. Copy - copy file to clipboard (MIME)
-    5. Paste - paste file from  clipboard (MIME)
-    6. Delete file
+        Test context menu functions of Pkg Selection View
+        1. Copy ref - Copy conan reference to clipboard (no pkg id!)
+        2. Open export folder - Opens in file manager
+        3. Show Conanfile - Opens in default texteditor
+        Test context menu functions of File View
+        1. Copy file as path - on clipboard
+        2. Open terminal - in the same folder as file or the selected folder
+        3. Open in File Manager
+        4. Copy - copy file to clipboard (MIME)
+        5. Paste - paste file from  clipboard (MIME)
+        6. Delete file
+    4. Select another package view
     """
     from conan_app_launcher.app.logger import Logger
     from pytestqt.plugin import _qapp_instance
@@ -123,13 +125,13 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     assert found_tst_pkg
 
     # select package (ref, not profile)
-    assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF, refresh=True)
+    assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF)
     Logger().debug("Selected ref")
     assert not lpe._pkg_file_exp_ctrl._model  # view not changed
 
     # ensure, that we select the pkg with the correct options
     Logger().debug("Select pkg")
-    assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + id, refresh=True)
+    assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + id)
 
     assert lpe._pkg_file_exp_ctrl._model  # view selected -> fs_model is set
     assert Path(lpe._pkg_file_exp_ctrl._model.rootPath()) == pkg_path
@@ -219,3 +221,22 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     lpe._pkg_file_exp_ctrl.on_file_delete()  # check new file?
     assert not (root_path / config_path.name).exists()
 
+
+    # Switch to another package view
+    # need new id
+    profiles_path = base_fixture.testdata_path / "conan" / "profile"
+    if platform.system() == "Windows": 
+
+        os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/linux")
+    else:
+        os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/windows")
+
+    pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
+    another_id = ""
+    for pkg in pkgs:
+        if pkg.get("id") != id:
+            another_id = pkg.get("id")
+    assert another_id
+    another_pkg_path = app.conan_api.get_package_folder(cfr, another_id)
+    assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + another_id)
+    assert Path(lpe._pkg_file_exp_ctrl._model.rootPath()) == another_pkg_path

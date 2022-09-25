@@ -121,7 +121,7 @@ class ConanSearchDialog(QDialog):
         if not self.page_widgets:
             return
         self.page_widgets.get_page_by_type(LocalConanPackageExplorer).select_local_package_from_ref(
-            item.get_conan_ref(), refresh=True)
+            item.get_conan_ref())
 
     def resizeEvent(self, a0) -> None:  # override QtGui.QResizeEvent
         super().resizeEvent(a0)
