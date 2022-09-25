@@ -334,7 +334,6 @@ class PackageFileExplorerController(QObject):
                 reply = msg.exec_()
                 if reply == QMessageBox.Yes:
                     copy_path(src, dst)
-                return
             else:
                 copy_path(src, dst)
 

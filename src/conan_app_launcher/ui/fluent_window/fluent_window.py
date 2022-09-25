@@ -503,7 +503,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 self.handle_resize_cursor(event)  # cursor position control for cursor shape setup
         elif isinstance(event, QMouseEvent):
             if event.type() == event.MouseButtonPress:
-                if not event.button() == Qt.LeftButton:
+                if event.button() != Qt.LeftButton:
                     return super().eventFilter(source, event)
                 self._resize_press = 1
                 self._resize_point = self.mapToGlobal(event.pos())  # save the starting point of resize
