@@ -95,8 +95,8 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 * PyQt5 >= 5.13.0 
 * conan >= 1.24.0
 
-> **Warning** Deprecation of Python 3.6
-> From version 2.0.0 Python 3.6 will not be supported anymore, because support end-of-life has been reached.
+> **Warning** **Deprecation of Python 3.6**  
+> From version 2.0.0 Python 3.6 will not be supported anymore, because it's end-of-life has been reached.
 
 ## Toolchain
 
