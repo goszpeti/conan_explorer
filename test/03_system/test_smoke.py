@@ -23,7 +23,7 @@ def test_main_loop_mock(base_fixture, mocker):
     """
 
     main_ui_mock = mocker.patch("conan_app_launcher.ui.main_window.MainWindow")
-    qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec_")
+    qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec")
     # delayed import necessary, so the mocker can patch the object before
     from conan_app_launcher import __main__
 

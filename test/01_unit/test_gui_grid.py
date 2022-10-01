@@ -64,7 +64,7 @@ def test_AppEditDialog_display_values(qtbot, base_fixture):
     # assert values
     assert diag._ui.name_line_edit.text() == app_info.name
     assert diag._ui.conan_ref_line_edit.text() == str(app_info.conan_ref)
-    assert diag._ui.exec_path_line_edit.text() == app_info.executable
+    assert diag._ui.execpath_line_edit.text() == app_info.executable
     assert diag._ui.is_console_app_checkbox.isChecked() == app_info.is_console_application
     assert diag._ui.icon_line_edit.text() == app_info.icon
     assert diag._ui.args_line_edit.text() == app_info.args
@@ -120,31 +120,31 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     _, temp_package_path = app.conan_api.get_best_matching_package_path(
         CFR.loads(diag._ui.conan_ref_line_edit.text()), diag.resolve_conan_options())
     selection = temp_package_path / exe_rel_path
-    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(selection)])
     diag._ui.executable_browse_button.clicked.emit()
-    assert diag._ui.exec_path_line_edit.text() == exe_rel_path.replace("\\", "/")
+    assert diag._ui.execpath_line_edit.text() == exe_rel_path.replace("\\", "/")
 
     # negative test
     selection = base_fixture.testdata_path / "nofile.json"
-    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(selection)])
     
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.Accepted)
     diag._ui.executable_browse_button.clicked.emit()
     # entry not changed
-    assert diag._ui.exec_path_line_edit.text() == exe_rel_path.replace("\\", "/")
+    assert diag._ui.execpath_line_edit.text() == exe_rel_path.replace("\\", "/")
 
     # open button 
     # absolute
     icon_path = app.asset_path / "icons" / "about.png"
-    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(icon_path)])
     diag._ui.icon_browse_button.clicked.emit()
@@ -155,8 +155,8 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     # copy icon to pkg
     shutil.copyfile(str(icon_path), str(icon_pkg_path))
 
-    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(icon_pkg_path)])
     diag._ui.icon_browse_button.clicked.emit()
@@ -193,7 +193,7 @@ def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
     # edit dialog
     diag._ui.name_line_edit.setText("NewName")
     diag._ui.conan_ref_line_edit.setText(TEST_REF)
-    diag._ui.exec_path_line_edit.setText("include/zlib.h")
+    diag._ui.execpath_line_edit.setText("include/zlib.h")
     diag._ui.is_console_app_checkbox.setChecked(True)
     diag._ui.icon_line_edit.setText("//Myico.ico")
     diag._ui.args_line_edit.setText("--help -kw=value")
@@ -211,7 +211,7 @@ def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
     # assert that all infos where saved
     assert diag._ui.name_line_edit.text() == model.name
     assert diag._ui.conan_ref_line_edit.text() == TEST_REF  # internal representation will strip @_/_
-    assert diag._ui.exec_path_line_edit.text() == model.executable
+    assert diag._ui.execpath_line_edit.text() == model.executable
     assert diag._ui.is_console_app_checkbox.isChecked() == model.is_console_application
     assert diag._ui.icon_line_edit.text() == model.icon
     assert diag._ui.args_line_edit.text() == model.args

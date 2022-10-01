@@ -14,6 +14,6 @@ if DEBUG_LEVEL > 0:
             if py_ui_file.exists() and py_ui_file.stat().st_mtime > ui_file.stat().st_mtime:
                 continue
             Logger().debug("Converting " + str(py_ui_file))
-            os.system(f"pyuic5 -o {str(py_ui_file)} {str(ui_file)}")
+            os.system(f"pyuic6 -o {str(py_ui_file)} {str(ui_file)}")
         except Exception as e:
             Logger().warning(f"Can't convert {str(py_ui_file)}: {str(e)}")

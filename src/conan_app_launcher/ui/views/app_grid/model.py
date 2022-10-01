@@ -13,8 +13,9 @@ from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file,
 from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conans.model.ref import ConanFileReference
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
-from PyQt5.QtGui import QIcon
+# from PyQt6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
+from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
 
 class UiAppGridModel(UiAppGridConfig, QObject):
 
@@ -76,13 +77,13 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
 
     # override QAbstractListModel methods - used for rearrange functions
     def data(self, index, role):
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return self.apps[index.row()].name
-        if role == Qt.UserRole:
+        if role == Qt.ItemDataRole.UserRole:
             return self.apps[index.row()]
 
     def setData(self, index, value, role):
-        if role == Qt.UserRole:
+        if role == Qt.ItemDataRole.UserRole:
             self.apps[index.row()] = value
 
     def rowCount(self, parent=None) -> int:

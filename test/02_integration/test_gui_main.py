@@ -95,8 +95,8 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
 
     # TEST ACTION
     selection = str(Path.home() / "new_config.json")
-    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[selection])
     main_gui.page_widgets.get_side_menu_by_type(type(main_gui.app_grid)).get_menu_entry_by_name("Open Layout File").click()
@@ -174,8 +174,8 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Yes)
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
 
     button: QtWidgets.QPushButton = main_gui.main_general_settings_menu.get_menu_entry_by_name("Clean Conan Cache")
     button.click()

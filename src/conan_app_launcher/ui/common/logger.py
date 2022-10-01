@@ -3,7 +3,7 @@ from threading import Lock
 
 from conan_app_launcher import CONAN_LOG_PREFIX
 from conan_app_launcher.app.logger import Logger
-from PyQt5.QtCore import pyqtBoundSignal
+from PyQt6.QtCore import pyqtBoundSignal
 
 
 class QtLogHandler(logging.Handler):

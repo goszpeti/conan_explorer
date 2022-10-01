@@ -1,16 +1,16 @@
-from PyQt5.QtCore import (QEasingCurve, QPoint, QPointF, QPropertyAnimation,
+from PyQt6.QtCore import (QEasingCurve, QPoint, QPointF, QPropertyAnimation,
                           QRectF, QSequentialAnimationGroup, QSize, Qt,
-                          pyqtProperty, pyqtSlot)
-from PyQt5.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen
-from PyQt5.QtWidgets import QCheckBox
+                          pyqtProperty, pyqtSlot) # type: ignore
+from PyQt6.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen
+from PyQt6.QtWidgets import QCheckBox
 
 
 class AnimatedToggle(QCheckBox):
 
-    _transparent_pen = QPen(Qt.transparent)
-    _light_grey_pen = QPen(Qt.lightGray)
+    _transparent_pen = QPen(Qt.GlobalColor.transparent)
+    _light_grey_pen = QPen(Qt.GlobalColor.lightGray)
 
-    def __init__(self, parent=None, bar_color=Qt.gray, checked_color="#00B0FF", handle_color=Qt.white, 
+    def __init__(self, parent=None, bar_color=Qt.GlobalColor.gray, checked_color="#00B0FF", handle_color=Qt.GlobalColor.white,
                  pulse_unchecked_color="#44999999", pulse_checked_color="#4400B0EE"):
 
         super().__init__(parent)
@@ -31,7 +31,7 @@ class AnimatedToggle(QCheckBox):
         self._pulse_radius = 0
 
         self.handle_anim = QPropertyAnimation(self, b"handle_position", self)
-        self.handle_anim.setEasingCurve(QEasingCurve.InOutCubic)
+        self.handle_anim.setEasingCurve(QEasingCurve.Type.InOutCubic)
         self.handle_anim.setDuration(200)  # ms
 
         self.pulse_anim = QPropertyAnimation(self, b"pulse_radius", self)
@@ -90,13 +90,13 @@ class AnimatedToggle(QCheckBox):
         handle_radius = round(0.2* cont_rect.height())
 
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         painter.setPen(self._transparent_pen)
         bar_rect = QRectF(0, 0,
             cont_rect.width() - handle_radius, 0.40 * cont_rect.height()
         )
-        bar_rect.moveCenter(cont_rect.center())
+        bar_rect.moveCenter(QPointF(cont_rect.center()))
         rounding = bar_rect.height() / 2
 
         # the handle will move along this line
@@ -104,7 +104,7 @@ class AnimatedToggle(QCheckBox):
 
         x_pos = cont_rect.x() + handle_radius + trail_length * self._handle_position
 
-        if self.pulse_anim.state() == QPropertyAnimation.Running:
+        if self.pulse_anim.state() == QPropertyAnimation.State.Running:
             painter.setBrush(
                 self._pulse_checked_animation if
                 self.isChecked() else self._pulse_unchecked_animation)

@@ -1,6 +1,7 @@
 from typing import Any, Callable, List
-from PyQt5.QtCore import Qt, QAbstractItemModel, QModelIndex, pyqtBoundSignal
-from PyQt5.QtWidgets import QFileSystemModel
+from PyQt6.QtCore import Qt, QAbstractItemModel, QModelIndex, pyqtBoundSignal
+from PyQt6.QtGui import QFileSystemModel
+
 
 def re_register_signal(signal: pyqtBoundSignal, slot: Callable):
     try:  # need to be removed, otherwise will be called multiple times
@@ -10,19 +11,23 @@ def re_register_signal(signal: pyqtBoundSignal, slot: Callable):
         pass
     signal.connect(slot)
 
+
 class FileSystemModel(QFileSystemModel):
     """ This fixes an issue with the header not being centered vertically """
-    def __init__(self, h_align=Qt.AlignLeft | Qt.AlignVCenter, v_align=Qt.AlignVCenter, parent=None):
+
+    def __init__(self, h_align=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, 
+                    v_align=Qt.AlignmentFlag.AlignVCenter, parent=None):
         super().__init__(parent)
-        self.alignments = {Qt.Horizontal: h_align, Qt.Vertical: v_align}
+        self.alignments = {Qt.Orientation.Horizontal: h_align, Qt.Orientation.Vertical: v_align}
 
     def headerData(self, section, orientation, role):
-        if role == Qt.TextAlignmentRole:
+        if role == Qt.ItemDataRole.TextAlignmentRole:
             return self.alignments[orientation]
-        elif role == Qt.DecorationRole:
+        elif role == Qt.ItemDataRole.DecorationRole:
             return None
         else:
             return QFileSystemModel.headerData(self, section, orientation, role)
+
 
 class TreeModelItem(object):
     """
@@ -30,7 +35,7 @@ class TreeModelItem(object):
     Implemented like the default QT example.
     """
 
-    def __init__(self, data:List[Any], parent=None, lazy_loading=False):
+    def __init__(self, data: List[Any], parent=None, lazy_loading=False):
         self.parent_item = parent
         self.item_data = data
         self.child_items = []
@@ -116,10 +121,10 @@ class TreeModel(QAbstractItemModel):
 
     def flags(self, index):  # override
         if not index.isValid():
-            return Qt.NoItemFlags
-        flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+            return Qt.ItemFlag.NoItemFlags
+        flags = Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
         if self._checkable:
-            flags = flags | Qt.ItemIsUserCheckable
+            flags = flags | Qt.ItemFlag.ItemIsUserCheckable
         return flags
 
     def parent(self, index):  # override
@@ -135,7 +140,7 @@ class TreeModel(QAbstractItemModel):
         return self.createIndex(parent_item.row(), 0, parent_item)
 
     def headerData(self, section, orientation, role):  # override
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
             return self.root_item.data(section)
 
         return None
@@ -144,7 +149,7 @@ class TreeModel(QAbstractItemModel):
         if not index.isValid():
             return False
         item = index.internalPointer()
-        return not item.is_loaded # enabled, if lazy loading is enabled
+        return not item.is_loaded  # enabled, if lazy loading is enabled
 
     def fetchMore(self, index):
         item = index.internalPointer()

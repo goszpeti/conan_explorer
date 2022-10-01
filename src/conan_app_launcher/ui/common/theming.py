@@ -8,7 +8,7 @@ from conan_app_launcher.settings import FONT_SIZE, GUI_STYLE, GUI_STYLE_DARK
 from conan_app_launcher.app.logger import Logger
 
 from jinja2 import Template
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 
 
 def configure_theme(qss_template_path: Path, font_size_pt: int, user_color: str, window_border_radius: int) -> str:

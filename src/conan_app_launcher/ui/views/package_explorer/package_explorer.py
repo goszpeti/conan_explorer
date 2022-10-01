@@ -5,9 +5,9 @@ from conan_app_launcher.ui.common import (get_themed_asset_image)
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.views.package_explorer.controller import PackageFileExplorerController, PackageSelectionController
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt5.QtCore import (Qt, pyqtSignal, pyqtBoundSignal)
-from PyQt5.QtGui import QIcon, QKeySequence, QShowEvent, QResizeEvent
-from PyQt5.QtWidgets import (QAction, QWidget)
+from PyQt6.QtCore import (Qt, pyqtSignal, pyqtBoundSignal)
+from PyQt6.QtGui import QIcon, QKeySequence, QShowEvent, QResizeEvent, QAction
+from PyQt6.QtWidgets import QWidget
 
 from .package_explorer_ui import Ui_Form
 
@@ -31,8 +31,8 @@ class LocalConanPackageExplorer(QWidget):
         self._ui.refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
 
         # connect pkg selection controller
-        self._ui.package_select_view.header().setSortIndicator(0, Qt.AscendingOrder)
-        self._ui.package_select_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._ui.package_select_view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
+        self._ui.package_select_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.package_select_view.customContextMenuRequested.connect(
             self.on_selection_context_menu_requested)
         self._init_selection_context_menu()
@@ -90,7 +90,7 @@ class LocalConanPackageExplorer(QWidget):
         self.remove_ref_action.triggered.connect(self._pkg_sel_ctrl.on_remove_ref_requested)
 
     def on_selection_context_menu_requested(self, position):
-        self.select_cntx_menu.exec_(self._ui.package_select_view.mapToGlobal(position))
+        self.select_cntx_menu.exec(self._ui.package_select_view.mapToGlobal(position))
 
     def _init_pkg_file_context_menu(self):
         if self.file_cntx_menu:
@@ -116,8 +116,8 @@ class LocalConanPackageExplorer(QWidget):
         # TODO QAction::event: Ambiguous shortcut overload: Ctrl+V
         self.copy_action = QAction("Copy", self)
         self.copy_action.setIcon(QIcon(get_themed_asset_image("icons/copy.png")))
-        self.copy_action.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_C))
-        self.copy_action.setShortcutContext(Qt.WidgetWithChildrenShortcut)
+        self.copy_action.setShortcut(QKeySequence("Ctrl+c"))
+        self.copy_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self.file_cntx_menu.addAction(self.copy_action)
         # for the shortcut to work, the action has to be added to a higher level widget
         self.addAction(self.copy_action)
@@ -126,16 +126,16 @@ class LocalConanPackageExplorer(QWidget):
         self.paste_action = QAction("Paste", self)
         self.paste_action.setIcon(QIcon(get_themed_asset_image("icons/paste.png")))
         self.paste_action.setShortcut(QKeySequence("Ctrl+v"))  # Qt.CTRL + Qt.Key_V))
-        self.paste_action.setShortcutContext(Qt.WidgetWithChildrenShortcut)
+        self.paste_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self.addAction(self.paste_action)
         self.file_cntx_menu.addAction(self.paste_action)
         self.paste_action.triggered.connect(self._pkg_file_exp_ctrl.on_file_paste)
 
         self.delete_action = QAction("Delete", self)
         self.delete_action.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
-        self.delete_action.setShortcut(QKeySequence(Qt.Key_Delete))
+        self.delete_action.setShortcut(QKeySequence(Qt.Key.Key_Delete))
         self.file_cntx_menu.addAction(self.delete_action)
-        self.delete_action.setShortcutContext(Qt.WidgetWithChildrenShortcut)
+        self.delete_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self.addAction(self.delete_action)
         self.delete_action.triggered.connect(self._pkg_file_exp_ctrl.on_file_delete)
 
@@ -153,7 +153,7 @@ class LocalConanPackageExplorer(QWidget):
         self.add_link_action.setEnabled(True)
         if os.path.isdir(path):
             self.add_link_action.setDisabled(True)
-        self.file_cntx_menu.exec_(self._ui.package_file_view.mapToGlobal(position))
+        self.file_cntx_menu.exec(self._ui.package_file_view.mapToGlobal(position))
 
     def select_local_package_from_ref(self, conan_ref: str) -> bool:
         return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref)

@@ -114,14 +114,14 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         # mock cancel -> nothing should change
         # mock OK
         remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
-        mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
+        mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                             return_value=QtWidgets.QMessageBox.Cancel)
         conan_conf_view._ui.remote_remove.click()
         assert conan_conf_view._remotes_controller._select_remote("local4")
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
-        mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                            return_value=QtWidgets.QMessageBox.Yes)
+        mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                            return_value=QtWidgets.QMessageBox.StandardButton.Yes)
         conan_conf_view._ui.remote_remove.click()
         assert conan_conf_view._remotes_controller._model.root_item.child_count()  == remotes_count - 1
 
@@ -129,13 +129,13 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         # mock cancel -> nothing should change
         # mock OK
         remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
-        mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
+        mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec',
                             return_value=QtWidgets.QDialog.Rejected)
         conan_conf_view._ui.remote_add.click()
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
-        mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
-                            return_value=QtWidgets.QDialog.Accepted)
+        mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec',
+                            return_value=QtWidgets.QDialog.DialogCode.Accepted)
         conan_conf_view._ui.remote_add.click()
         # can't easily call this, while dialog is opened - so call it on the saved, but now hidden dialog manually
         conan_conf_view.remote_edit_dialog.save()
@@ -145,8 +145,8 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
 
         # 9. Edit the remote -> changes should be reflected in the model
         assert conan_conf_view._remotes_controller._select_remote("New")
-        mock_diag = mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec_',
-                            return_value=QtWidgets.QDialog.Accepted)
+        mock_diag = mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec',
+                            return_value=QtWidgets.QDialog.DialogCode.Accepted)
         conan_conf_view.on_remote_edit(None)
         mock_diag.assert_called_once()
 
@@ -194,7 +194,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     # select local, invoke dialog, click cancel -> remote user info should not change
     assert conan_conf_view._remotes_controller._select_remote(TEST_REMOTE_NAME)
 
-    mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteLoginDialog, 'exec_',
+    mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteLoginDialog, 'exec',
                         return_value=QtWidgets.QDialog.Rejected)
     conan_conf_view._ui.remote_login.click()
     assert conan.get_remote_user_info(TEST_REMOTE_NAME) == ("demo", True)  # still logged in

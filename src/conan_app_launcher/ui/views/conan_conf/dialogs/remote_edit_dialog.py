@@ -7,9 +7,9 @@ from conan_app_launcher import asset_path
 from conans.client.cache.remote_registry import Remote
 from conan_app_launcher.app.logger import Logger
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QWidget
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QDialog, QWidget
 
 from .remote_edit_dialog_ui import Ui_Dialog
 
@@ -18,8 +18,8 @@ current_dir = Path(__file__).parent
 
 class RemoteEditDialog(QDialog):
 
-    def __init__(self, remote: Remote, new_remote=False, parent: Optional[QWidget] = None, flags=Qt.WindowFlags()):
-        super().__init__(parent=parent, flags=flags)
+    def __init__(self, remote: Remote, new_remote=False, parent: Optional[QWidget] = None):
+        super().__init__(parent=parent)
         self._remote = remote
         self._new_remote = new_remote
 

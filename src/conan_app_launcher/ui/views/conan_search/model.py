@@ -6,8 +6,8 @@ from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_image
 from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtBoundSignal
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import Qt, pyqtSlot, pyqtBoundSignal
 
 from conan_app_launcher.ui.common.loading import AsyncLoader
 
@@ -122,7 +122,7 @@ class PkgSearchModel(TreeModel):
         if not index.isValid():
             return None
         item: SearchedPackageTreeItem = index.internalPointer()
-        if role == Qt.DecorationRole:
+        if role == Qt.ItemDataRole.DecorationRole:
             if index.column() != 0:  # only display icon for first column
                 return
             if item.type == REF_TYPE:
@@ -130,9 +130,9 @@ class PkgSearchModel(TreeModel):
             if item.type == PROFILE_TYPE:
                 profile_name = item.data(2)
                 return get_platform_icon(profile_name)
-        elif role == Qt.DisplayRole:
+        elif role == Qt.ItemDataRole.DisplayRole:
             return item.data(index.column())
-        elif role == Qt.FontRole and item.is_installed:
+        elif role == Qt.ItemDataRole.FontRole and item.is_installed:
             font = QtGui.QFont()
             font.setBold(True)
             return font

@@ -13,9 +13,9 @@ from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog
 from conan_app_launcher.ui.views import AppGridView
-from PyQt5.QtCore import (QFile, QItemSelectionModel, QMimeData, QModelIndex,
+from PyQt6.QtCore import (QFile, QItemSelectionModel, QMimeData, QModelIndex,
                           Qt, QUrl, QObject, pyqtBoundSignal)
-from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QLabel,
+from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QLabel,
                              QMessageBox, QWidget, QTreeView, QLineEdit)
 
 from .model import PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem, PkgSelectModel
@@ -193,7 +193,7 @@ class PackageSelectionController(QObject):
 
         view_index = view_model.mapFromSource(internal_sel_index)
         self._view.scrollTo(view_index)
-        sel_model.select(view_index, QItemSelectionModel.ClearAndSelect)
+        sel_model.select(view_index, QItemSelectionModel.SelectionFlag.ClearAndSelect)
         sel_model.currentRowChanged.emit(proxy_index, internal_sel_index)
         Logger().debug(f"Selecting {view_index.data()} in Local Package Explorer")
 
@@ -236,20 +236,20 @@ class PackageFileExplorerController(QObject):
             return
         self._model = FileSystemModel()
         self._model.setRootPath(str(pkg_path))
-        self._model.sort(0, Qt.AscendingOrder)
+        self._model.sort(0, Qt.SortOrder.AscendingOrder)
         re_register_signal(self._model.fileRenamed, self.on_file_double_click)
         self._view.setModel(self._model)
         self._view.setRootIndex(self._model.index(str(pkg_path)))
         self._view.setColumnHidden(2, True)  # file type
         self._model.layoutChanged.connect(self.resize_file_columns)
-        self._view.header().setSortIndicator(0, Qt.AscendingOrder)
+        self._view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
         re_register_signal(self._view.doubleClicked,
                            self.on_file_double_click)
         # disable edit on double click, since we want to open
-        self._view.setEditTriggers(QAbstractItemView.EditKeyPressed)
+        self._view.setEditTriggers(QAbstractItemView.EditTrigger.EditKeyPressed)
         self._pkg_path_label.setText(str(pkg_path))
 
-        self._view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.resize_file_columns()
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
@@ -287,10 +287,10 @@ class PackageFileExplorerController(QObject):
         msg = QMessageBox(parent=self._view)
         msg.setWindowTitle("Delete file")
         msg.setText("Are you sure, you want to permanently delete this file/folder?\t")
-        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-        msg.setIcon(QMessageBox.Warning)
-        reply = msg.exec_()
-        if reply != QMessageBox.Yes:
+        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
+        msg.setIcon(QMessageBox.Icon.Warning)
+        reply = msg.exec()
+        if reply != QMessageBox.StandardButton.Yes:
             return
         delete_path(Path(path_to_delete))
 
@@ -335,10 +335,10 @@ class PackageFileExplorerController(QObject):
                 msg = QMessageBox(parent=self._view)
                 msg.setWindowTitle("Overwrite file/folder")
                 msg.setText("Are you sure, you want to overwrite this file/folder?\t")
-                msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-                msg.setIcon(QMessageBox.Warning)
-                reply = msg.exec_()
-                if reply == QMessageBox.Yes:
+                msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
+                msg.setIcon(QMessageBox.Icon.Warning)
+                reply = msg.exec()
+                if reply == QMessageBox.StandardButton.Yes:
                     copy_path_with_overwrite(src, dst)
             else:
                 copy_path_with_overwrite(src, dst)

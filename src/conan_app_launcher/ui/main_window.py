@@ -13,18 +13,19 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, D
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE, WINDOW_SIZE)
-from conan_app_launcher.ui.views.app_grid.tab import TabGrid
-from conan_app_launcher.ui.views.conan_conf.conan_conf import ConanConfigView
-from conan_app_launcher.ui.widgets import WideMessageBox, AnimatedToggle
-from PyQt5.QtCore import Qt, QRect, pyqtSignal, pyqtSlot
-from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QApplication, QFileDialog
+
+from PyQt6.QtCore import Qt, QRect, pyqtSignal, pyqtSlot
+from PyQt6.QtGui import QKeySequence
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow
 
 from .common import AsyncLoader, activate_theme, init_qt_logger, remove_qt_logger
 from .fluent_window import FluentWindow, SideSubMenu
 from .model import UiApplicationModel
-from .views import AppGridView, ConanSearchDialog, LocalConanPackageExplorer
+from .views import AppGridView, LocalConanPackageExplorer, ConanSearchDialog, ConanConfigView
 from .views.about_page import AboutPage
+from conan_app_launcher.ui.views.app_grid.tab import TabGrid
+from conan_app_launcher.ui.widgets import WideMessageBox, AnimatedToggle
+
 
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
@@ -43,7 +44,7 @@ class MainWindow(FluentWindow):
     qt_logger_name = "qt_logger"
 
     def __init__(self, qt_app: QApplication):
-        super().__init__("Conan App Launcher")
+        super().__init__(title_text="Conan App Launcher")
         self._qt_app = qt_app
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
 
@@ -72,7 +73,7 @@ class MainWindow(FluentWindow):
 
     def _init_right_menu(self):
 
-        # Right Settings menu
+        #Right Settings menu
         quicklaunch_submenu = self.page_widgets.get_side_menu_by_type(type(self.app_grid))
         if quicklaunch_submenu:
             quicklaunch_submenu.add_button_menu_entry(
@@ -100,9 +101,9 @@ class MainWindow(FluentWindow):
         self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/package_settings.png")
 
         view_settings_submenu.add_button_menu_entry(
-            "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence(Qt.CTRL + Qt.Key_Plus), self)
+            "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence("CTRL++"), self)
         view_settings_submenu.add_button_menu_entry(
-            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence(Qt.CTRL + Qt.Key_Minus), self)
+            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence("CTRL+-"), self)
 
         dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
         view_settings_submenu.add_toggle_menu_entry("Dark Mode", self.on_theme_changed, dark_mode_enabled)
@@ -110,8 +111,8 @@ class MainWindow(FluentWindow):
         self.main_general_settings_menu.add_menu_line()
         self.main_general_settings_menu.add_button_menu_entry(
             "Remove Locks", app.conan_api.remove_locks, "icons/remove-lock.png")
-        self.main_general_settings_menu.add_button_menu_entry(
-            "Clean Conan Cache", self.open_cleanup_cache_dialog, "icons/cleanup.png")
+        # self.main_general_settings_menu.add_button_menu_entry(
+        #     "Clean Conan Cache", self.open_cleanup_cache_dialog, "icons/cleanup.png")
         self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
 
@@ -147,7 +148,7 @@ class MainWindow(FluentWindow):
         loader.wait_for_finished()
 
         # model loaded, now load the gui elements, which have a static model
-        # self.app_grid.re_init(self.model.app_grid)
+        self.app_grid.re_init(self.model.app_grid)
 
 
     def _load_job(self, config_source_str):
@@ -220,12 +221,12 @@ class MainWindow(FluentWindow):
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(WideMessageBox.Yes | WideMessageBox.Cancel)
-        msg.setIcon(WideMessageBox.Question)
+        msg.setStandardButtons(WideMessageBox.StandardButton.Yes | WideMessageBox.StandardButton.Cancel)
+        msg.setIcon(WideMessageBox.Icon.Question)
         msg.setWidth(800)
         msg.setMaximumHeight(600)
-        reply = msg.exec_()
-        if reply == WideMessageBox.Yes:
+        reply = msg.exec()
+        if reply == WideMessageBox.StandardButton.Yes:
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
@@ -238,8 +239,8 @@ class MainWindow(FluentWindow):
             dialog_path = config_file_path.parent
         dialog = QFileDialog(parent=self, caption="Select JSON Config File",
                              directory=str(dialog_path), filter="JSON files (*.json)")
-        dialog.setFileMode(QFileDialog.ExistingFile)
-        if dialog.exec_() == QFileDialog.Accepted:
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        if dialog.exec() == QFileDialog.DialogCode.Accepted:
             new_file = dialog.selectedFiles()[0]
             app.active_settings.set(LAST_CONFIG_FILE, new_file)
             # model loads incrementally

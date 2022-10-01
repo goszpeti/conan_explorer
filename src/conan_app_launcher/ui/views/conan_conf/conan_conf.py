@@ -9,9 +9,9 @@ from conan_app_launcher.core.system import escape_venv
 from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
-from PyQt5.QtCore import Qt, pyqtBoundSignal, pyqtSignal
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction, QApplication, QDialog, QWidget, QMessageBox
+from PyQt6.QtCore import Qt, pyqtBoundSignal, pyqtSignal
+from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox
 
 from .conan_conf_ui import Ui_Form
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
@@ -24,7 +24,7 @@ class ConanConfigView(QDialog):
 
     def __init__(self, parent: Optional[QWidget], conan_remotes_updated: Optional[pyqtBoundSignal] = None):
         # Add minimize and maximize buttons
-        super().__init__(parent,  Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
+        super().__init__(parent,  Qt.WindowType.WindowSystemMenuHint | Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.config_file_path = Path("Unknown")
@@ -88,7 +88,7 @@ class ConanConfigView(QDialog):
             Logger().error("Cannot read Conan config file!")
 
     def _init_profiles_tab(self):
-        self._ui.profiles_list_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._ui.profiles_list_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.profiles_list_view.customContextMenuRequested.connect(
             self.on_profile_context_menu_requested)
         self._init_profile_context_menu()
@@ -132,7 +132,7 @@ class ConanConfigView(QDialog):
         self._ui.profiles_text_browser.setText(profile_content)
 
     def on_profile_context_menu_requested(self, position):
-        self.profiles_cntx_menu.exec_(self._ui.profiles_list_view.mapToGlobal(position))
+        self.profiles_cntx_menu.exec(self._ui.profiles_list_view.mapToGlobal(position))
 
     def save_profile_file(self):
         view_index = self._ui.profiles_list_view.selectedIndexes()[0]
@@ -159,7 +159,7 @@ class ConanConfigView(QDialog):
         self._ui.remote_remove.setIcon(QIcon(get_themed_asset_image("icons/minus_rounded.png")))
 
         self._ui.remotes_tree_view.doubleClicked.connect(self.on_remote_edit)
-        self._ui.remotes_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._ui.remotes_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.remotes_tree_view.customContextMenuRequested.connect(
             self.on_remote_context_menu_requested)
         self._ui.remote_refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
@@ -170,7 +170,7 @@ class ConanConfigView(QDialog):
         self._init_remote_context_menu()
 
     def on_remote_context_menu_requested(self, position):
-        self._remotes_cntx_menu.exec_(self._ui.remotes_tree_view.mapToGlobal(position))
+        self._remotes_cntx_menu.exec(self._ui.remotes_tree_view.mapToGlobal(position))
 
     def _init_remote_context_menu(self):
         self._remotes_cntx_menu = RoundedMenu()
@@ -209,8 +209,8 @@ class ConanConfigView(QDialog):
         if not remote_item:
             return
         self.remote_edit_dialog = RemoteEditDialog(remote_item.remote, False, self)
-        reply = self.remote_edit_dialog.exec_()
-        if reply == QDialog.Accepted:
+        reply = self.remote_edit_dialog.exec()
+        if reply == QDialog.DialogCode.Accepted:
             self._remotes_controller.update()
 
     def on_remotes_login(self):
@@ -221,15 +221,15 @@ class ConanConfigView(QDialog):
         if not remotes:
             return
         self.remote_login_dialog = RemoteLoginDialog(remotes, self)
-        reply = self.remote_login_dialog.exec_()
-        if reply == QDialog.Accepted:
+        reply = self.remote_login_dialog.exec()
+        if reply == QDialog.DialogCode.Accepted:
                 self._remotes_controller.update()
 
     def on_remote_add(self, model_index):
         new_remote = Remote("New", "", True, False)
         self.remote_edit_dialog = RemoteEditDialog(new_remote, True, self)
-        reply = self.remote_edit_dialog.exec_()
-        if reply == QDialog.Accepted:
+        reply = self.remote_edit_dialog.exec()
+        if reply == QDialog.DialogCode.Accepted:
             self._remotes_controller.update()
 
     def on_remote_remove(self, model_index):
@@ -239,10 +239,10 @@ class ConanConfigView(QDialog):
         message_box = QMessageBox(parent=self)  # self.parentWidget())
         message_box.setWindowTitle("Delete Remove")
         message_box.setText(f"Are you sure, you want to delete the remote {remote_item.remote.name}?")
-        message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        message_box.setIcon(QMessageBox.Question)
-        reply = message_box.exec_()
-        if reply == QMessageBox.Yes:
+        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setIcon(QMessageBox.Icon.Question)
+        reply = message_box.exec()
+        if reply == QMessageBox.StandardButton.Yes:
             app.conan_api.conan.remote_remove(remote_item.remote.name)
             self._remotes_controller.update()
 

@@ -7,14 +7,14 @@ from conan_app_launcher.core import ConanApi, ConanWorker
 from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsInterface, settings_factory
 from .logger import Logger
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 if platform.system() == "Windows":
     # Workaround for Windows, so that on the taskbar the
     # correct icon will be shown (and not the default python icon).
-    from PyQt5.QtWinExtras import QtWin  # type: ignore - no type info
+    from ctypes import windll  # Only exists on Windows.
     MY_APP_ID = 'ConanAppLauncher.' + __version__
-    QtWin.setCurrentProcessExplicitAppUserModelID(MY_APP_ID)
+    windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 
 ### Global variables ###
 
@@ -26,17 +26,13 @@ conan_worker = ConanWorker(conan_api, active_settings)
 def run_application():
     """ Start the Qt application and load the main window """
     # Overwrite the excepthook with our own - this will provide a method to report bugs for the user
-    from conan_app_launcher.ui.dialogs import show_bug_dialog_exc_hook
     from conan_app_launcher.ui.common import activate_theme
-    sys.excepthook = show_bug_dialog_exc_hook
 
     if platform.system() == "Darwin":
         print("Mac OS is currently not supported.")
         sys.exit(1)
 
     # apply Qt attributes (only possible before QApplication is created)
-    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
     QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
     try:
         QtWidgets.QApplication.setHighDpiScaleFactorRoundingPolicy(
@@ -44,6 +40,8 @@ def run_application():
     except:
         Logger().debug("Can't set DPI Rounding")
     qt_app = QtWidgets.QApplication([])
+    from conan_app_launcher.ui.dialogs import show_bug_dialog_exc_hook
+    sys.excepthook = show_bug_dialog_exc_hook  # dialog needs qt_app
     activate_theme(qt_app)
 
     from conan_app_launcher.ui.main_window import MainWindow
@@ -58,9 +56,9 @@ def run_application():
     main_window.load()
     main_window.installEventFilter(main_window)
 
-    qt_app.exec_()
+    qt_app.exec()
 
-    main_window.save_window_state()
+    # TODO main_window.save_window_state()
     # cancel conan worker tasks on exit - this can possibly cancel an ongoing install task
     if conan_worker:
        conan_worker.finish_working(10)

@@ -4,8 +4,8 @@ from typing import Callable, List
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
 from conans.model.ref import ConanFileReference, PackageReference
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtWidgets import QLineEdit, QCompleter
+from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtWidgets import QLineEdit, QCompleter
 
 
 class ConanRefLineEdit(QLineEdit):
@@ -21,7 +21,7 @@ class ConanRefLineEdit(QLineEdit):
         self.validator_enabled = validator_enabled
         self.is_valid = False
         completer = QCompleter([], self)
-        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
         self._completion_thread = None
         self._loading_cbk = None

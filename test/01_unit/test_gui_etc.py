@@ -71,7 +71,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     app_qt_fixture.waitExposed(conan_install_dialog)
 
     # with update flag
-    conan_install_dialog._ui.update_check_box.setCheckState(Qt.Checked)
+    conan_install_dialog._ui.update_check_box.setCheckState(Qt.CheckState.Checked)
     mock_install_func = mocker.patch(
         'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_install_queue')
     conan_install_dialog._ui.button_box.accepted.emit()
@@ -81,7 +81,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 
     # check only ref
-    conan_install_dialog._ui.update_check_box.setCheckState(Qt.Unchecked)
+    conan_install_dialog._ui.update_check_box.setCheckState(Qt.CheckState.Unchecked)
     conan_install_dialog._ui.conan_ref_line_edit.setText(TEST_REF)
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
@@ -89,7 +89,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 
     # check ref without autoupdate
-    conan_install_dialog._ui.auto_install_check_box.setCheckState(Qt.Unchecked)
+    conan_install_dialog._ui.auto_install_check_box.setCheckState(Qt.CheckState.Unchecked)
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
                                                 "options": {}, "update": True, "auto_install": False}
@@ -120,8 +120,8 @@ def test_bug_dialog(qtbot, base_fixture, mocker):
         exc_info = sys.exc_info()
 
     # mock away dialog OK
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Ok)
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.Ok)
 
     with pytest.raises(SystemExit) as excinfo:
         # call hook manually

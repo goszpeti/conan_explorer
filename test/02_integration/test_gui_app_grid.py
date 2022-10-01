@@ -92,9 +92,9 @@ def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     prev_count = main_gui.app_grid.tab_widget.tabBar().count()
     assert prev_count > 1, "Test won't work with one tab"
 
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Yes)
-    mocker.patch.object(QtWidgets.QMenu, 'exec_',
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
+    mocker.patch.object(QtWidgets.QMenu, 'exec',
                         return_value=None)
     tab_rect = main_gui.app_grid.tab_widget.tabBar().tabRect(id_to_delete)
     menu = main_gui.app_grid.on_tab_context_menu_requested(tab_rect.center())
@@ -108,8 +108,8 @@ def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     assert len(config_tabs) == prev_count - 1
 
     # press no
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.No)
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.No)
     main_gui.app_grid.on_tab_remove(0)
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count - 1
@@ -160,7 +160,7 @@ def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
     app_link: AppLinkBase = tabs[1].app_links[0]
 
     # check that no changes happens on cancel
-    mocker.patch.object(AppEditDialog, 'exec_',
+    mocker.patch.object(AppEditDialog, 'exec',
                         return_value=QtWidgets.QDialog.Rejected)
     app_link.open_edit_dialog()
     config_tabs = JsonUiConfig(ui_config_fixture).load().app_grid.tabs
@@ -171,7 +171,7 @@ def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
     app_config = UiAppLinkConfig(name="NewApp", conan_ref=TEST_REF,
                                  executable="bin/exe")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
-    mocker.patch.object(AppEditDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(AppEditDialog, 'exec', return_value=QtWidgets.QDialog.DialogCode.Accepted)
     app_link.open_edit_dialog(app_model)
 
     # check that the gui has updated
@@ -207,8 +207,8 @@ def test_remove_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture,
     apps_model = tab_model.apps
     prev_count = len(apps_model)
 
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Yes)
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     app_link = tabs[1].app_links[0]
     app_link.remove()
 
@@ -255,8 +255,8 @@ def test_add_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mo
                                  executable="conanmanifest.txt")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
 
-    mocker.patch.object(AppEditDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(AppEditDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     new_app_link = tab.open_app_link_add_dialog(app_model)
     assert new_app_link
     assert tab._edit_app_dialog._ui.name_line_edit.text()

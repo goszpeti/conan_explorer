@@ -82,13 +82,13 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
     # check copy recipe ref
     # select ref
     sel_model = search_dialog._ui.search_results_tree_view.selectionModel()
-    sel_model.select(ref_view_index, QtCore.QItemSelectionModel.ClearAndSelect)
+    sel_model.select(ref_view_index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
     search_dialog._search_controller.on_copy_ref_requested()
     mock_clipboard.setText.assert_called_with(TEST_REF)
 
     # check copy id ref
     # select id
-    sel_model.select(pkg_view_index, QtCore.QItemSelectionModel.ClearAndSelect)
+    sel_model.select(pkg_view_index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
     search_dialog._search_controller.on_copy_ref_requested()
     mock_clipboard.setText.assert_called_with(TEST_REF + ":" + id)
 

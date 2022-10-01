@@ -5,9 +5,9 @@ from typing import Optional, Union
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
-from PyQt5.QtCore import Qt, QItemSelectionModel, QAbstractListModel, QModelIndex
-from PyQt5.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
-from PyQt5.QtGui import QIcon
+from PyQt6.QtCore import Qt, QItemSelectionModel, QAbstractListModel, QModelIndex
+from PyQt6.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
+from PyQt6.QtGui import QIcon
 
 from .reorder_dialog_ui import Ui_rearrange_dialog
 
@@ -32,8 +32,8 @@ class ReorderingModel(Protocol):
 
 class ReorderDialog(QDialog):
 
-    def __init__(self, model: ReorderingModel, parent: Optional[QWidget], flags=Qt.WindowFlags()):
-        super().__init__(parent=parent, flags=flags)
+    def __init__(self, model: ReorderingModel, parent: Optional[QWidget]):
+        super().__init__(parent=parent)
         self._ui = Ui_rearrange_dialog()
         self._ui.setupUi(self)
 
@@ -43,8 +43,8 @@ class ReorderDialog(QDialog):
         self._ui.list_view.setModel(model)
 
         self._ui.list_view.setUpdatesEnabled(True)
-        self._ui.list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self._ui.list_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self._ui.list_view.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self._ui.list_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         self._ui.move_up_button.clicked.connect(self._controller.move_up)
         self._ui.move_down_button.clicked.connect(self._controller.move_down)
@@ -84,7 +84,7 @@ class ReorderController():
                 # for all columns
                 for column in range(self._model.columnCount(QModelIndex())):
                     index = self._model.index(row-1, column, QModelIndex())
-                    self._view.selectionModel().select(index, QItemSelectionModel.Select)
+                    self._view.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
         except Exception as e:
             print(e)
 
@@ -113,7 +113,7 @@ class ReorderController():
                 # for all columns
                 for column in range(self._model.columnCount(QModelIndex())):
                     index = self._model.index(row+1, column, QModelIndex())
-                    self._view.selectionModel().select(index, QItemSelectionModel.Select)
+                    self._view.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
         except Exception as e:
             print(e)
 

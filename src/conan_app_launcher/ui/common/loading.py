@@ -6,8 +6,8 @@ from typing import Any, Callable, Optional, Tuple
 
 from conan_app_launcher import DEBUG_LEVEL
 from conan_app_launcher.app.logger import Logger
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt6 import QtCore, QtWidgets
+from PyQt6.QtCore import Qt
 
 
 class Worker(QtCore.QObject):
@@ -47,7 +47,8 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
         self.progress_dialog.setLabelText(loading_text)
         # Window flags to disable close button
-        self.progress_dialog.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.CustomizeWindowHint)
+        self.progress_dialog.setWindowFlags(
+            Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint)
         self.progress_dialog.setWindowTitle("Loading...")
         self.progress_dialog.setCancelButton(None)
         self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
@@ -55,7 +56,7 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog.setMinimumDuration(1000)
         self.progress_dialog.setFixedWidth(330)
         # set position in middle of window
-        qapp: QtWidgets.QApplication = QtWidgets.QApplication.instance()
+        qapp: QtWidgets.QApplication = QtWidgets.QApplication.instance() # type: ignore
         rectangle = self.progress_dialog.frameGeometry()
         if qapp.activeWindow():
             rectangle.moveCenter(qapp.activeWindow().frameGeometry().center())

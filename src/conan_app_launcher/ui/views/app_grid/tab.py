@@ -3,8 +3,8 @@ from typing import List, Optional
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import APPLIST_ENABLED
 from conan_app_launcher.ui.fluent_window import RIGHT_MENU_MAX_WIDTH
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy, QFrame,
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy, QFrame,
                              QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
 
 from .app_link import AppLinkBase, GridAppLink, ListAppLink
@@ -28,7 +28,7 @@ class TabBase(QWidget):
         self._initialized = False
         self._columns_count = 0
         self._v_spacer = QSpacerItem(
-            20, 2000, QSizePolicy.Minimum, QSizePolicy.Expanding)
+            20, 2000, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
     def init_app_grid(self):
         self.setObjectName("tab_" + self.model.name)
@@ -36,20 +36,18 @@ class TabBase(QWidget):
         # this is a dummy, because tab_scroll_area needs a layout
         self.tab_layout = QVBoxLayout(self)
         self.tab_layout.setContentsMargins(0, 0, 0, 0)
-        self.tab_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.tab_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.tab_layout.setSizeConstraint(QLayout.SetMinimumSize)
+        self.tab_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
         self.setLayout(self.tab_layout)
 
         # makes it possible to have a scroll bar
         self.tab_scroll_area = QScrollArea(self)
         self.tab_scroll_area.setContentsMargins(0, 0, 0, 0)
-        self.tab_scroll_area.setFrameStyle(QFrame.NoFrame)
+        self.tab_scroll_area.setFrameStyle(QFrame.Shape.NoFrame)
 
         #self.tab_scroll_area.setSizePolicy(size_policy)
-        self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.tab_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.tab_scroll_area.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.tab_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.tab_scroll_area.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
         #self.tab_scroll_area.setUpdatesEnabled(True)
         self.tab_scroll_area.setWidgetResizable(True)
         # this holds all the app links, which are layouts
@@ -78,8 +76,8 @@ class TabBase(QWidget):
             new_model.parent = self.model
         # save for testing
         self._edit_app_dialog = AppEditDialog(new_model, parent=self)
-        reply = self._edit_app_dialog.exec_()
-        if reply == AppEditDialog.Accepted:
+        reply = self._edit_app_dialog.exec()
+        if reply == AppEditDialog.DialogCode.Accepted:
             self.model.apps.append(new_model)
             self.model.save()
             self.redraw(force=True)
@@ -131,16 +129,16 @@ class TabGrid(TabBase):
         self.tab_layout = QGridLayout(self.tab_scroll_area_widgets)
         # set minimum on vertical is needed, so the app links shrink,
         # when a dropdown is hidden
-        size_policy = QSizePolicy(QSizePolicy.Minimum,
-                                    QSizePolicy.Minimum)
-        self.tab_layout.setSizeConstraint(QLayout.SetMinimumSize)  # SetMinimumSize needed!
+        size_policy = QSizePolicy(QSizePolicy.Policy.Minimum,
+                                    QSizePolicy.Policy.Minimum)
+        self.tab_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)  # SetMinimumSize needed!
 
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
 
         self.tab_scroll_area_widgets.setSizePolicy(size_policy)
-        self.tab_scroll_area_widgets.setLayoutDirection(Qt.LeftToRight)
-        self.tab_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.tab_scroll_area_widgets.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.tab_layout.setSizeConstraint(QLayout.SizeConstraint.SetDefaultConstraint)
         self.tab_layout.setSpacing(self.SPACING)
         self.tab_layout.setContentsMargins(0, 0, 5, 0)
 
@@ -185,7 +183,7 @@ class TabGrid(TabBase):
         # spacer for compressing app links, when hiding cboxes
         self.tab_layout.addItem(self._v_spacer, row + 1, 0)
         self.tab_layout.addItem(QSpacerItem(
-            2000, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), max_columns+1, 0, 0, 0)
+            2000, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum), max_columns+1, 0, 0, 0)
         self.tab_layout.setColumnStretch(max_columns+1, 1)
 
 
@@ -198,14 +196,14 @@ class TabList(TabBase):
     def init_app_grid(self):
         super().init_app_grid()
         self.tab_layout = QVBoxLayout(self.tab_scroll_area_widgets)
-        size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
-                                    QSizePolicy.MinimumExpanding)
+        size_policy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding,
+                                    QSizePolicy.Policy.MinimumExpanding)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
 
         self.tab_scroll_area_widgets.setSizePolicy(size_policy)
-        self.tab_scroll_area_widgets.setLayoutDirection(Qt.LeftToRight)
-        self.tab_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.tab_scroll_area_widgets.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
+        self.tab_layout.setSizeConstraint(QLayout.SizeConstraint.SetDefaultConstraint)
         self.tab_layout.setSpacing(self.SPACING)
         self.tab_layout.setContentsMargins(0, 0, 5, 0)
 

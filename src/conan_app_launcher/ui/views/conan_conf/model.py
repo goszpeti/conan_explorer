@@ -5,8 +5,8 @@ from conan_app_launcher.ui.common import (TreeModel, TreeModelItem,
                                           get_platform_icon)
 from conans.client.cache.remote_registry import Remote
 from conans.errors import ConanException
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt
-from PyQt5.QtGui import QFont
+from PyQt6.QtCore import QAbstractListModel, QModelIndex, Qt
+from PyQt6.QtGui import QFont
 
 
 class RemotesModelItem(TreeModelItem):
@@ -44,14 +44,14 @@ class RemotesTableModel(TreeModel):
         if not index.isValid():
             return None
         item = index.internalPointer()
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             try:
                 return item.data(index.column())
             except Exception:
                 return ""
 
         if isinstance(item, RemotesModelItem):
-            if role == Qt.FontRole and item.remote.disabled:
+            if role == Qt.ItemDataRole.FontRole and item.remote.disabled:
                 font = QFont()
                 font.setItalic(True)
                 return font
@@ -86,11 +86,11 @@ class ProfilesModel(QAbstractListModel):
         self._profiles = app.conan_api.conan.profile_list()
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             text = self._profiles[index.row()]
             return text
         # platform logo
-        if role == Qt.DecorationRole:
+        if role == Qt.ItemDataRole.DecorationRole:
             text = self._profiles[index.row()]
             return get_platform_icon(text)
 

@@ -14,9 +14,9 @@ from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.widgets import ClickableIcon, RoundedMenu
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QFontMetrics, QFont
-from PyQt5.QtWidgets import (QAction, QComboBox, QDialog, QFrame, QHBoxLayout,
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon, QFontMetrics, QFont, QAction
+from PyQt6.QtWidgets import (QComboBox, QDialog, QFrame, QHBoxLayout,
                              QLabel, QLayout, QMessageBox, QPushButton,
                              QSizePolicy, QVBoxLayout, QWidget)
 
@@ -72,7 +72,7 @@ class AppLinkBase(QFrame):
 
         # add sub widgets
         self._app_button.setMinimumHeight(self.icon_size + 10)
-        self._app_button.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._app_button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
 
         # connect signals
@@ -120,7 +120,7 @@ class AppLinkBase(QFrame):
     def on_move(self):
         move_dialog = ReorderDialog(parent=self, model=self.model.parent)
         ret = move_dialog.exec()
-        if ret == QDialog.Accepted:
+        if ret == QDialog.DialogCode.Accepted:
             self._parent_tab.redraw(force=True)
 
     def delete(self):
@@ -167,7 +167,7 @@ class AppLinkBase(QFrame):
         return name
     
     def on_context_menu_requested(self, position):
-        self.menu.exec_(self._app_button.mapToGlobal(position))
+        self.menu.exec(self._app_button.mapToGlobal(position))
 
     def on_open_in_file_manager(self):
         open_in_file_manager(self.model.get_executable_path().parent)
@@ -189,8 +189,8 @@ class AppLinkBase(QFrame):
         if model:
             self.model = model
         edit_app_dialog = AppEditDialog(self.model, parent=self)
-        reply = edit_app_dialog.exec_()
-        if reply == AppEditDialog.Accepted:
+        reply = edit_app_dialog.exec()
+        if reply == AppEditDialog.DialogCode.Accepted:
             # grey icon, so update from cache can ungrey it, if the path is correct
             self._app_button.grey_icon()
             self.model.update_from_cache()
@@ -204,19 +204,19 @@ class AppLinkBase(QFrame):
             msg = QMessageBox(parent=self)  # self._parent_tab
             msg.setWindowTitle("Info")
             msg.setText("Can't delete the last link!")
-            msg.setStandardButtons(QMessageBox.Ok)
-            msg.setIcon(QMessageBox.Information)
-            msg.exec_()
+            msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.exec()
             return
 
         # confirmation dialog
         message_box = QMessageBox(parent=self) # self.parentWidget())
         message_box.setWindowTitle("Delete app link")
         message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}\"?")
-        message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        message_box.setIcon(QMessageBox.Question)
-        reply = message_box.exec_()
-        if reply == QMessageBox.Yes:
+        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setIcon(QMessageBox.Icon.Question)
+        reply = message_box.exec()
+        if reply == QMessageBox.StandardButton.Yes:
             self.hide()
             self.model.parent.apps.remove(self.model)
             self._parent_tab.app_links.remove(self)
@@ -272,8 +272,8 @@ class ListAppLink(AppLinkBase):
         self.setMinimumHeight(120)
         self.setMaximumHeight(120)
 
-        size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
-                                    QSizePolicy.Fixed)
+        size_policy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding,
+                                    QSizePolicy.Policy.Fixed)
         self.setSizePolicy(size_policy)
 
         self._left_frame = QFrame(self)
@@ -286,10 +286,10 @@ class ListAppLink(AppLinkBase):
         self._center_right_frame.setLayout(QVBoxLayout(self._center_right_frame))
         self._right_frame.setLayout(QVBoxLayout(self._right_frame))
 
-        self._left_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self._center_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self._center_right_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self._right_frame.layout().setSizeConstraint(QLayout.SetMinAndMaxSize)
+        self._left_frame.layout().setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
+        self._center_frame.layout().setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
+        self._center_right_frame.layout().setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
+        self._right_frame.layout().setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
 
         self._left_frame.setMaximumWidth(self.max_width())
         self._left_frame.setMinimumWidth(self.max_width())
@@ -314,10 +314,10 @@ class ListAppLink(AppLinkBase):
         self._center_right_frame.layout().addWidget(self._app_user)
         self._center_right_frame.layout().addWidget(self._app_channel)
 
-        self._app_name.setAlignment(Qt.AlignLeft)
-        self._app_version.setAlignment(Qt.AlignCenter)
-        self._app_user.setAlignment(Qt.AlignCenter)
-        self._app_channel.setAlignment(Qt.AlignCenter)
+        self._app_name.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self._app_version.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._app_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._app_channel.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self._app_name.setMinimumWidth(2*self.max_width())
         self._app_button.setMinimumWidth(self.max_width())
@@ -340,8 +340,8 @@ class ListAppLink(AppLinkBase):
         self.layout().addWidget(self._right_frame)
         self.layout().setStretch(1,1) # enbales stretching of app_name
 
-        self._app_name.setSizePolicy(QSizePolicy(QSizePolicy.Expanding,
-                         QSizePolicy.Fixed))
+        self._app_name.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding,
+                         QSizePolicy.Policy.Fixed))
 
         self._app_version.setSizePolicy(size_policy)
         self._app_user.setSizePolicy(size_policy)
@@ -379,8 +379,8 @@ class GridAppLink(AppLinkBase):
     def _init_app_link(self):
         self.layout().setSpacing(3)
         self.setMaximumWidth(self.max_width())
-        size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
-                                  QSizePolicy.Expanding)
+        size_policy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding,
+                                  QSizePolicy.Policy.Expanding)
         self._app_button = ClickableIcon(self, asset_path / "icons" / "app.png")  # _left_frame
         self._app_name = QLabel(self)
         if self._combo_boxes_enabled:
@@ -391,10 +391,10 @@ class GridAppLink(AppLinkBase):
             self._app_version = QLabel(self)
             self._app_user = QLabel(self)
             self._app_channel = QLabel(self)
-            self._app_version.setAlignment(Qt.AlignHCenter)
-            self._app_user.setAlignment(Qt.AlignHCenter)
-            self._app_channel.setAlignment(Qt.AlignHCenter)
-        self._app_name.setAlignment(Qt.AlignHCenter)
+            self._app_version.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+            self._app_user.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+            self._app_channel.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self._app_name.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         self.layout().addWidget(self._app_button)
         self.layout().addWidget(self._app_name)
@@ -408,8 +408,8 @@ class GridAppLink(AppLinkBase):
 
         self._app_button.setSizePolicy(size_policy)
         self._app_name.setSizePolicy(size_policy)
-        size_policy = QSizePolicy(QSizePolicy.MinimumExpanding,
-                                  QSizePolicy.Fixed)
+        size_policy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding,
+                                  QSizePolicy.Policy.Fixed)
         self._app_version.setSizePolicy(size_policy)
         self._app_user.setSizePolicy(size_policy)
         self._app_channel.setSizePolicy(size_policy)
@@ -479,7 +479,7 @@ class GridAppLink(AppLinkBase):
                 self._app_channel.addItems(self.model.channels)
                 # add tooltip for channels, in case it is too long
                 for i in range(0, len(self.model.channels)):
-                    self._app_channel.setItemData(i+1, self.model.channels[i], Qt.ToolTipRole)
+                    self._app_channel.setItemData(i+1, self.model.channels[i], Qt.ItemDataRole.ToolTipRole)
                 self._app_channel.setCurrentIndex(0)
             else:
                 # remove entry NA after setting something other - NA should always have index 0
@@ -539,4 +539,4 @@ class GridAppLink(AppLinkBase):
 
         # add tooltip for channels, in case it is too long
         for i in range(0, len(self.model.channels)):
-            self._app_channel.setItemData(i, self.model.channels[i], Qt.ToolTipRole)
+            self._app_channel.setItemData(i, self.model.channels[i], Qt.ItemDataRole.ToolTipRole)

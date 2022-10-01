@@ -7,9 +7,9 @@ from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
 from conans.client.cache.remote_registry import Remote
 from conan_app_launcher.ui.common import AsyncLoader
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QWidget, QListWidgetItem
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QDialog, QWidget, QListWidgetItem
 
 from .remote_login_dialog_ui import Ui_Dialog
 
@@ -24,8 +24,8 @@ class RemoteLoginDialog(QDialog):
     After the dialog is closed, it will be overwritten by a long string.
     """
 
-    def __init__(self, remotes: List[Remote], parent: Optional[QWidget], flags=Qt.WindowFlags()):
-        super().__init__(parent=parent, flags=flags)
+    def __init__(self, remotes: List[Remote], parent: Optional[QWidget]):
+        super().__init__(parent=parent)
         self._remotes = remotes
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
@@ -40,7 +40,7 @@ class RemoteLoginDialog(QDialog):
         for remote in remotes:
             item = QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-            item.setCheckState(Qt.Checked)
+            item.setCheckState(Qt.CheckState.Checked)
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "login.png")))
         self._ui.button_box.accepted.connect(self.save)
 

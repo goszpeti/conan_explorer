@@ -5,9 +5,9 @@ from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt5.QtCore import QPoint, Qt, pyqtBoundSignal, pyqtSlot
-from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import (QAction, QDialog, QListWidgetItem,
+from PyQt6.QtCore import QPoint, Qt, pyqtBoundSignal, pyqtSlot
+from PyQt6.QtGui import QIcon, QKeySequence, QAction
+from PyQt6.QtWidgets import (QDialog, QListWidgetItem,
                              QWidget)
 
 from .conan_search_ui import Ui_Form
@@ -19,7 +19,7 @@ class ConanSearchDialog(QDialog):
                  conan_pkg_removed: Optional[pyqtBoundSignal] = None, conan_remotes_updated: Optional[pyqtBoundSignal] = None,
                  page_widgets: Optional[FluentWindow.PageStore] = None):
         # Add minimize and maximize buttons
-        super().__init__(parent, Qt.WindowSystemMenuHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
+        super().__init__(parent, Qt.WindowType.WindowSystemMenuHint | Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
         self.page_widgets = page_widgets
         self.conan_pkg_installed = conan_pkg_installed
         self.conan_pkg_removed = conan_pkg_removed
@@ -41,12 +41,14 @@ class ConanSearchDialog(QDialog):
         self._ui.search_line.validator_enabled = False
         self._ui.search_line.textChanged.connect(self._enable_search_button)
 
-        self._ui.search_button.setShortcut(QKeySequence(Qt.Key_Return))
+        self._ui.search_button.setShortcut(QKeySequence(Qt.Key.Key_Return))
 
         # init remotes list
         if self.conan_remotes_updated:
             self.conan_remotes_updated.connect(self._init_remotes)
-        self._ui.search_results_tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        else:
+            self._init_remotes
+        self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self.apply_theme()
 
@@ -55,8 +57,8 @@ class ConanSearchDialog(QDialog):
         self._ui.remote_list.clear()
         for remote in remotes:
             item = QListWidgetItem(remote.name, self._ui.remote_list)
-            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-            item.setCheckState(Qt.Checked)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(Qt.CheckState.Unchecked)
 
     def apply_theme(self):
         icon = QIcon(get_themed_asset_image("icons/search_packages.png"))
@@ -110,7 +112,7 @@ class ConanSearchDialog(QDialog):
             self.show_in_pkg_exp_action.setEnabled(True)
         else:
             self.show_in_pkg_exp_action.setEnabled(False)
-        self.select_cntx_menu.exec_(self._ui.search_results_tree_view.mapToGlobal(position))
+        self.select_cntx_menu.exec(self._ui.search_results_tree_view.mapToGlobal(position))
 
     @pyqtSlot()
     def on_show_in_pkg_exp(self):

@@ -7,9 +7,9 @@ from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt5.QtCore import Qt, pyqtBoundSignal, pyqtSignal
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QAction, QInputDialog, QMessageBox, QTabWidget,
+from PyQt6.QtCore import Qt, pyqtBoundSignal, pyqtSignal
+from PyQt6.QtGui import QIcon, QAction
+from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget,
                              QVBoxLayout, QWidget)
 
 from .model import UiAppLinkModel, UiTabModel
@@ -29,14 +29,14 @@ class AppGridView(QWidget):
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.tab_widget = QTabWidget(self)
         self.tab_widget.setContentsMargins(0, 0, 0, 0)
-        self.tab_widget.setElideMode(Qt.ElideLeft)
+        self.tab_widget.setElideMode(Qt.TextElideMode.ElideLeft)
         self.tab_widget.setUsesScrollButtons(True)
         self.layout().addWidget(self.tab_widget)
 
         self.model = model
         conan_pkg_installed.connect(self.update_conan_info)
 
-        self.tab_widget.tabBar().setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tab_widget.tabBar().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tab_widget.tabBar().setContentsMargins(0, 0, 0, 0)
         self.tab_widget.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
 
@@ -95,7 +95,7 @@ class AppGridView(QWidget):
         menu.addAction(new_tab_action)
         new_tab_action.triggered.connect(self.on_new_tab)
 
-        menu.exec_(self.tab_widget.tabBar().mapToGlobal(position))
+        menu.exec(self.tab_widget.tabBar().mapToGlobal(position))
         return self.menu  # for testing
 
     def on_new_tab(self):
@@ -134,10 +134,10 @@ class AppGridView(QWidget):
         msg = QMessageBox(parent=self)
         msg.setWindowTitle("Delete tab")
         msg.setText("Are you sure, you want to delete this tab?\t")
-        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-        msg.setIcon(QMessageBox.Question)
-        reply = msg.exec_()
-        if reply == QMessageBox.Yes:
+        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
+        msg.setIcon(QMessageBox.Icon.Question)
+        reply = msg.exec()
+        if reply == QMessageBox.StandardButton.Yes:
             self.tab_widget.removeTab(index)
             self.model.tabs.remove(self.model.tabs[index])
             self.model.save()
@@ -164,7 +164,7 @@ class AppGridView(QWidget):
         dialog.setLabelText("Choose a tab for the new AppLink!")
         dialog.setComboBoxItems(tab_list)
         dialog.setWindowTitle("New AppLink")
-        if dialog.exec_() == QInputDialog.Accepted:
+        if dialog.exec() == QInputDialog.DialogCode.Accepted:
             answer = dialog.textValue()
             for tab in self.get_tabs():
                 if answer == tab.model.name:

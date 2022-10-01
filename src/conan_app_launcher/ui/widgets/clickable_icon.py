@@ -5,9 +5,9 @@ from typing import Optional
 
 from conan_app_launcher import ICON_SIZE
 
-from PyQt5.QtCore import pyqtSignal, QSize, Qt
-from PyQt5.QtWidgets import QPushButton, QGraphicsColorizeEffect, QGraphicsPixmapItem
-from PyQt5.QtGui import QColor, QIcon, QPixmap
+from PyQt6.QtCore import pyqtSignal, QSize, Qt
+from PyQt6.QtWidgets import QPushButton, QGraphicsColorizeEffect, QGraphicsPixmapItem
+from PyQt6.QtGui import QColor, QIcon, QPixmap
 
 class ClickableIcon(QPushButton):
     """
@@ -17,7 +17,8 @@ class ClickableIcon(QPushButton):
     # this signal is used to connect to backend functions.
     clicked = pyqtSignal()
 
-    def __init__(self, parent, image=Path("NULL"), flags=Qt.WindowFlags(), icon_size=ICON_SIZE):
+    # TODO flags
+    def __init__(self, parent, image=Path("NULL"), icon_size=ICON_SIZE):
         super().__init__(parent=parent)
 
         self._greyed_out = True  # Must be ungreyed, when available
@@ -29,7 +30,6 @@ class ClickableIcon(QPushButton):
         self.setFlat(True)
         self.setIconSize(QSize(icon_size, icon_size))
         self.grey_icon()
-        self.setWindowFlags(flags)
 
     def ungrey_icon(self):
         self._greyed_out = False
@@ -69,11 +69,11 @@ class ClickableIcon(QPushButton):
         else:
             pixmap = QPixmap(str(self._image)).toImage()
             icon = QPixmap.fromImage(pixmap).scaled(
-                ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation)
+                ICON_SIZE, ICON_SIZE, transformMode=Qt.TransformationMode.SmoothTransformation)
             self._ic = QIcon(icon)
             self.setIcon(self._ic)
 
     def mouseReleaseEvent(self, event):  # override QPushButton to allow the clicked event
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.clicked.emit()
         return super().mouseReleaseEvent(event)

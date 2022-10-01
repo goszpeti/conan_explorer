@@ -21,7 +21,7 @@ PYTHON_REQUIRES = ">=3.7.0"
 
 # What packages are required for this module to be executed?
 REQUIRES = [
-    'PyQt5>=5.13.0 ; python_version>="3.7"',
+    'PyQt6>=6.3.1',
     "conan>=1.24, <2",  # MIT License
     "jsonschema>=3.2.0, <4",  # MIT License
     'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)
@@ -31,10 +31,10 @@ REQUIRES = [
 ]
 
 TEST_REQUIRES = [
-    "pytest==6.2.5",
-    "pytest-cov==3.0.0",
-    "pytest-mock==3.6.1",
-    "pytest-qt==4.0.2",
+    "pytest==7.1.3",
+    "pytest-cov==4.0.0",
+    "pytest-mock==3.9.0",
+    "pytest-qt==4.1.0",
     "psutil",
     "pywin32; sys_platform=='win32'"
 ]
@@ -43,7 +43,7 @@ DEV_REQUIRES = [
     "autopep8", # formatter
     "rope", # refactoring
     "debugpy", # Qt thread debugging
-    "PyQt5-stubs" # type hints
+#    "PyQt5-stubs" # type hints
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

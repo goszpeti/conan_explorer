@@ -164,7 +164,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     root_path = Path(lpe._pkg_file_exp_ctrl._model.rootPath())
     file = root_path / "conaninfo.txt"
     sel_idx = lpe._pkg_file_exp_ctrl._model.index(str(file), 0)
-    lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
+    lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
 
     # check copy as path - don't check the clipboard, it has issues in windows with qtbot
     cp_text = lpe._pkg_file_exp_ctrl.on_copy_file_as_path()
@@ -184,11 +184,11 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     lc.open_in_file_manager.assert_called_with(Path(cp_text))
 
     # check "Add AppLink to AppGrid"
-    mocker.patch.object(QtWidgets.QInputDialog, 'exec_',
+    mocker.patch.object(QtWidgets.QInputDialog, 'exec',
                         return_value=QtWidgets.QInputDialog.Accepted)
     mocker.patch.object(QtWidgets.QInputDialog, 'textValue',
                         return_value="Basics")
-    mocker.patch.object(AppEditDialog, 'exec_', return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(AppEditDialog, 'exec', return_value=QtWidgets.QDialog.DialogCode.Accepted)
 
     lpe._pkg_file_exp_ctrl.on_add_app_link_from_file()
     # assert that the link has been created
@@ -215,9 +215,9 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     Logger().debug("delete")
     sel_idx = lpe._pkg_file_exp_ctrl._model.index(
         str(root_path / config_path.name), 0)  # (0, 0, QtCore.QModelIndex())
-    lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.ClearAndSelect)
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Yes)
+    lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     lpe._pkg_file_exp_ctrl.on_file_delete()  # check new file?
     assert not (root_path / config_path.name).exists()
 

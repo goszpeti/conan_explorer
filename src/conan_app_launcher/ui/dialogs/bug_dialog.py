@@ -7,7 +7,7 @@ import sys
 import traceback
 
 from conan_app_launcher import REPO_URL, __version__, base_path
-from PyQt5.QtCore import Qt
+from PyQt6.QtCore import Qt
 
 from conan_app_launcher.ui.widgets import WideMessageBox
 
@@ -50,12 +50,12 @@ def bug_reporting_dialog(excvalue, tb):
     #dialog.setStyleSheet("QLabel{width: 300px; min-width: 300px; max-width: 300px;text-align:center}")
     dialog.setWindowTitle("Application Crash - Bug Report")
     dialog.setText(html_crash_text)
-    dialog.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
+    dialog.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
     dialog.setDetailedText(error_text)
-    dialog.setStandardButtons(WideMessageBox.Ok)
-    dialog.setIcon(WideMessageBox.Warning)
+    dialog.setStandardButtons(WideMessageBox.StandardButton.Ok)
+    dialog.setIcon(WideMessageBox.Icon.Warning)
     dialog.setWidth(800)
-    dialog.exec_()
+    dialog.exec()
     return dialog  # for testing
 
 

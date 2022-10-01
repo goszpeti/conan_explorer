@@ -4,8 +4,8 @@ import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.dialogs import ReorderController
 from conans.client.cache.remote_registry import Remote
-from PyQt5.QtCore import QModelIndex, QItemSelectionModel, pyqtBoundSignal
-from PyQt5.QtWidgets import QApplication, QTreeView
+from PyQt6.QtCore import QModelIndex, QItemSelectionModel, pyqtBoundSignal
+from PyQt6.QtWidgets import QApplication, QTreeView
 
 from conan_app_launcher.ui.views.conan_conf.model import RemotesModelItem, RemotesTableModel
 

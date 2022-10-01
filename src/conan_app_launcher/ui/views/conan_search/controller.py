@@ -6,8 +6,8 @@ from conan_app_launcher.core import open_file
 from conan_app_launcher.ui.common import AsyncLoader
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from conans.model.ref import ConanFileReference
-from PyQt5.QtCore import Qt, pyqtSlot, pyqtBoundSignal, QObject
-from PyQt5.QtWidgets import (QApplication, QTreeView, QLineEdit, QPushButton, QTextBrowser, QListWidget)
+from PyQt6.QtCore import Qt, pyqtSlot, pyqtBoundSignal, QObject
+from PyQt6.QtWidgets import (QApplication, QTreeView, QLineEdit, QPushButton, QTextBrowser, QListWidget)
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
@@ -51,7 +51,7 @@ class ConanSearchController(QObject):
         """ After conan search adjust the view """
         self._view.setModel(self._model.proxy_model)
         self._resize_package_columns()
-        self._view.sortByColumn(1, Qt.AscendingOrder)  # sort by remote at default
+        self._view.sortByColumn(1, Qt.SortOrder.AscendingOrder)  # sort by remote at default
         self._view.selectionModel().selectionChanged.connect(self.on_package_selected)
 
     @pyqtSlot()
@@ -96,7 +96,7 @@ class ConanSearchController(QObject):
             item = self._remote_list.item(i)
             if item is None:
                 continue
-            if item.checkState() == Qt.Checked:
+            if item.checkState() == Qt.CheckState.Checked:
                 selected_remotes.append(item.text())
         return selected_remotes
 

@@ -3,9 +3,9 @@ from typing import Optional
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common import get_themed_asset_image
-from PyQt5.QtCore import QSize, Qt, pyqtBoundSignal
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QWidget
+from PyQt6.QtCore import QSize, Qt, pyqtBoundSignal
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QDialog, QWidget
 
 from .conan_install_ui import Ui_Dialog
 
@@ -49,10 +49,10 @@ class ConanInstallDialog(QDialog):
 
     def on_install(self):
         update_check_state = False
-        if self._ui.update_check_box.checkState() == Qt.Checked:
+        if self._ui.update_check_box.checkState() == Qt.CheckState.Checked:
             update_check_state = True
         auto_install_checked = False
-        if self._ui.auto_install_check_box.checkState() == Qt.Checked:
+        if self._ui.auto_install_check_box.checkState() == Qt.CheckState.Checked:
             auto_install_checked = True
         ref_text = self._ui.conan_ref_line_edit.text()
         conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": {},
