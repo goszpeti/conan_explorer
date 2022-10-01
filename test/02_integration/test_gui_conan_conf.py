@@ -46,6 +46,10 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         app.conan_worker.finish_working()
         conan_conf_view = main_gui.conan_config
 
+        # test revisions
+        # Revisions are on via env-var
+        assert conan_conf_view._ui.revision_enabled_checkbox.checkState()
+
         # changes to conan conf page
         main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
         conan_conf_view._remotes_controller.update()
