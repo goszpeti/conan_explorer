@@ -272,7 +272,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         def add_new_page(self, name, button, page, right_sub_menu):
             self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu, name)
 
-    def __init__(self, title_text: str = "", native_windows_fcns=True, rounded_corners=True):
+    def __init__(self, title_text: str = "", native_windows_fcns=True):
         super().__init__()
         from .fluent_window_ui import Ui_MainWindow  # need to resolve circular import
         self.ui = Ui_MainWindow()
@@ -298,7 +298,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self._resize_point = QPoint()
         self._last_geometry = QRect()
         self.title_text = title_text
-        self.drag_position = None
+        self.drag_position: Optional[QPoint] = None
 
         self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
         menu_margins = self.ui.left_menu_bottom_subframe.layout().contentsMargins()
@@ -334,19 +334,20 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.set_restore_max_button_state()
         self.enable_windows_native_animations()
         self._native_filter = NativeEventFilter()
-        # QCoreApplication.instance().installNativeEventFilter(self._native_filter)
 
     def nativeEvent(self, eventType, message):  # override
         """ Platform native events """
         retval, result = super(QMainWindow, self).nativeEvent(eventType, message)
         if str(eventType) == "b'windows_generic_MSG'":
-
-            # retval, result = super(QMainWindow, self).nativeEvent(eventType, message)
             message.setsize(8)
             msg = MSG.from_address(message.__int__())
             if msg.message == 131:  # ignore WM_NCCALCSIZE event. Suppresses native Window drawing of title-bar.
                 return True, 0
         return retval, 0
+
+    def mousePressEvent(self, event: QMouseEvent):  # override
+        """ Helper for moving window to know mouse position (Non Windows) """
+        self.drag_position = event.globalPosition().toPoint()
 
     def apply_theme(self):
         """ This function must be able to reload all icons from the left and right menu bar. """
@@ -356,7 +357,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         for submenu in self.ui.right_menu_top_content_sw.findChildren(SideSubMenu):
             submenu.reload_themed_icons()
 
-    def move_window(self, a0):
+    def move_window(self, a0: QMouseEvent):
         event = a0
         # do nothing if the resize function is active
         if self.cursor().shape() != Qt.CursorShape.ArrowCursor:
@@ -376,8 +377,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if event.buttons() == Qt.MouseButton.LeftButton:
                 if self.drag_position is None:
                     return
-                self.move(self.pos() + event.globalPos() - self.drag_position)
-                self.drag_position = event.globalPos()
+                self.move(self.pos() + event.globalPosition().toPoint() - self.drag_position)
+                self.drag_position = event.globalPosition().toPoint()
                 event.accept()
 
     def enable_windows_native_animations(self):
