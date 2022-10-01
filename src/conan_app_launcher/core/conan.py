@@ -149,11 +149,14 @@ class ConanApi():
         return Path("NULL")
 
     def get_conanfile_path(self, conan_ref: ConanFileReference) -> Path:
-        if conan_ref not in self.get_all_local_refs():
-            self.conan.info(self.generate_canonical_ref(conan_ref))
-        layout = self.client_cache.package_layout(conan_ref)
-        if layout:
-            return Path(layout.conanfile())
+        try:
+            if conan_ref not in self.get_all_local_refs():
+                self.conan.info(self.generate_canonical_ref(conan_ref))
+            layout = self.client_cache.package_layout(conan_ref)
+            if layout:
+                return Path(layout.conanfile())
+        except Exception as e:
+            Logger().error(f"Can't get conanfile: {str(e)}")
         return Path("NULL")
 
     ### Install related methods ###
