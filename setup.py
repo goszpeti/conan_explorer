@@ -21,7 +21,7 @@ PYTHON_REQUIRES = ">=3.7.0"
 
 # What packages are required for this module to be executed?
 REQUIRES = [
-    'PyQt6>=6.3.1',
+    'PyQt6>=6.3.0',
     "conan>=1.24, <2",  # MIT License
     "jsonschema>=3.2.0, <4",  # MIT License
     'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)

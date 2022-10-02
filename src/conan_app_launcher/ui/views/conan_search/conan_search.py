@@ -47,7 +47,7 @@ class ConanSearchDialog(QDialog):
         if self.conan_remotes_updated:
             self.conan_remotes_updated.connect(self._init_remotes)
         else:
-            self._init_remotes
+            self._init_remotes()
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self.apply_theme()
@@ -58,7 +58,7 @@ class ConanSearchDialog(QDialog):
         for remote in remotes:
             item = QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            item.setCheckState(Qt.CheckState.Unchecked)
+            item.setCheckState(Qt.CheckState.Checked)
 
     def apply_theme(self):
         icon = QIcon(get_themed_asset_image("icons/search_packages.png"))
