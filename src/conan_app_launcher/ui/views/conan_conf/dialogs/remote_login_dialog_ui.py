@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(355, 182)
+        Dialog.resize(429, 273)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -87,6 +87,7 @@ class Ui_Dialog(object):
         self.button_box.setStandardButtons(QtWidgets.QDialogButtonBox.StandardButton.Cancel|QtWidgets.QDialogButtonBox.StandardButton.Ok)
         self.button_box.setObjectName("button_box")
         self.verticalLayout.addWidget(self.button_box)
+        self.verticalLayout.setStretch(0, 1)
 
         self.retranslateUi(Dialog)
         self.button_box.rejected.connect(Dialog.reject) # type: ignore

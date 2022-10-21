@@ -256,5 +256,8 @@ class ConanConfigView(QDialog):
 
     def save_config_file(self):
         self.config_file_path.write_text(self._ui.config_file_text_browser.toPlainText())
-
-
+        # restart conan api to apply changes internally
+        app.conan_api.init_api()
+        Logger().info("Applying Changes to Conan...")
+        # re-init info tab to show the changes
+        self._load_info_tab()
