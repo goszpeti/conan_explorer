@@ -6,11 +6,11 @@ name: Python Tests
 on:
   push:
     branches:
-      - main
+      - master
       - 'release/**'
   pull_request:
     branches:
-      - main
+      - master
       - 'release/**'
   workflow_dispatch:
 
