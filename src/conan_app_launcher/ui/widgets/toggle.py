@@ -30,11 +30,11 @@ class AnimatedToggle(QCheckBox):
 
         self._pulse_radius = 0
 
-        self.handle_anim = QPropertyAnimation(self, b"handle_position", self)
+        self.handle_anim = QPropertyAnimation(self, b"handle_position", self)  # type: ignore
         self.handle_anim.setEasingCurve(QEasingCurve.Type.InOutCubic)
         self.handle_anim.setDuration(200)  # ms
 
-        self.pulse_anim = QPropertyAnimation(self, b"pulse_radius", self)
+        self.pulse_anim = QPropertyAnimation(self, b"pulse_radius", self)  # type: ignore
         self.pulse_anim.setDuration(300)  # ms
         self.pulse_anim.setStartValue(10)
         self.pulse_anim.setEndValue(20)
@@ -53,7 +53,7 @@ class AnimatedToggle(QCheckBox):
         return self.contentsRect().contains(pos)
 
     @pyqtProperty(float)
-    def handle_position(self):
+    def handle_position(self):  # type: ignore
         return self._handle_position
 
     @handle_position.setter
@@ -67,7 +67,7 @@ class AnimatedToggle(QCheckBox):
         self.update()
 
     @pyqtProperty(float)
-    def pulse_radius(self):
+    def pulse_radius(self): # type: ignore
         return self._pulse_radius
 
     @pulse_radius.setter

@@ -12,8 +12,8 @@ from conan_app_launcher.app import asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import is_windows_11
 
-from PyQt6.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
-                          QPropertyAnimation, QRect, QSize, Qt, QCoreApplication, QAbstractNativeEventFilter)
+from PyQt6.QtCore import (QEasingCurve, QEvent, QObject, QPoint, QByteArray,
+                          QPropertyAnimation, QRect, QSize, Qt)
 from PyQt6.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap, QShortcut
 from PyQt6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
                              QPushButton, QSizePolicy,
@@ -44,21 +44,6 @@ def gen_obj_name(name: str) -> str:
 class WidgetNotFoundException(Exception):
     """ Raised, when a widget searched for, ist in the parent container. """
     pass
-
-
-class NativeEventFilter(QAbstractNativeEventFilter):
-
-    def nativeEventFilter(self, eventType, message):  # override
-        """ Platform native events """
-        # retval, result = super(QMainWindow, self).nativeEvent(eventType, message)
-        # return retval, result
-        # if self._use_native_windows_fcns:
-        if message.getsize() > -1:
-            msg = MSG.from_address(message.__int__())
-            if msg.message == 131:  # ignore WM_NCCALCSIZE event. Suppresses native Window drawing of title-bar.
-                return True, 0
-        return False, 0
-        # return super().nativeEvent(eventType, message)
 
 class ResizeDirection(Enum):
     default = 0
@@ -134,7 +119,11 @@ class SideSubMenu(QWidget, ThemedWidget):
             self.ui.side_menu_content_frame.setMaximumHeight(4096)
 
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
-        return self.findChildren(QWidget, gen_obj_name(name))[0]
+        # type: ignore
+        entry = self.findChildren(QWidget, gen_obj_name(name))
+        if len(entry) > 1:
+            return entry[0]
+        return None
 
     def add_custom_menu_entry(self, widget: QWidget, name: Optional[str] = None):
         """ Very basic custom entry, no extra functions """
@@ -333,7 +322,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         # initial maximize state
         self.set_restore_max_button_state()
         self.enable_windows_native_animations()
-        self._native_filter = NativeEventFilter()
 
     def nativeEvent(self, eventType, message):  # override
         """ Platform native events """
@@ -353,9 +341,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """ This function must be able to reload all icons from the left and right menu bar. """
         self.reload_themed_icons()
         for submenu in self.ui.right_menu_bottom_content_sw.findChildren(SideSubMenu):
-            submenu.reload_themed_icons()
+            submenu.reload_themed_icons() # type: ignore
         for submenu in self.ui.right_menu_top_content_sw.findChildren(SideSubMenu):
-            submenu.reload_themed_icons()
+            submenu.reload_themed_icons()  # type: ignore
 
     def move_window(self, a0: QMouseEvent):
         event = a0
@@ -377,7 +365,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if event.buttons() == Qt.MouseButton.LeftButton:
                 if self.drag_position is None:
                     return
-                self.move(self.pos() + event.globalPosition().toPoint() - self.drag_position)
+                self.move(self.pos() + event.globalPosition().toPoint() - self.drag_position)  # type: ignore
                 self.drag_position = event.globalPosition().toPoint()
                 event.accept()
 
@@ -473,7 +461,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             width_to_set = LEFT_MENU_MIN_WIDTH
             maximize = False
 
-        self.left_anim = QPropertyAnimation(self.ui.left_menu_frame, b"minimumWidth")
+        self.left_anim = QPropertyAnimation(self.ui.left_menu_frame, b"minimumWidth")  # type: ignore
         self.left_anim.setDuration(200)
         self.left_anim.setStartValue(width)
         self.left_anim.setEndValue(width_to_set)
@@ -509,7 +497,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             width_to_set = RIGHT_MENU_MIN_WIDTH
             self.ui.settings_button.setChecked(False)
-        self.right_anim = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")
+        self.right_anim = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth") # type: ignore
         self.right_anim.setDuration(200)
         self.right_anim.setStartValue(width)
         self.right_anim.setEndValue(width_to_set)
@@ -548,28 +536,28 @@ class FluentWindow(QMainWindow, ThemedWidget):
         width = self.width()
         height = self.height()
 
-        if position in QRect(top_left.x() + x_offset, top_left.y(), width - 2*x_offset, y_offset):
+        if QRect(top_left.x() + x_offset, top_left.y(), width - 2*x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top
             self.setCursor(Qt.CursorShape.SizeVerCursor)
-        elif position in QRect(bottom_left.x() + x_offset, bottom_left.y(), width - 2*x_offset, -y_offset):
+        elif QRect(bottom_left.x() + x_offset, bottom_left.y(), width - 2*x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom
             self.setCursor(Qt.CursorShape.SizeVerCursor)
-        elif position in QRect(top_right.x() - x_offset, top_right.y() + y_offset, x_offset, height - 2*y_offset):
+        elif QRect(top_right.x() - x_offset, top_right.y() + y_offset, x_offset, height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.right
             self.setCursor(Qt.CursorShape.SizeHorCursor)
-        elif position in QRect(top_left.x() + x_offset, top_left.y() + y_offset, -x_offset, height - 2*y_offset):
+        elif QRect(top_left.x() + x_offset, top_left.y() + y_offset, -x_offset, height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.left
             self.setCursor(Qt.CursorShape.SizeHorCursor)
-        elif position in QRect(top_right.x(), top_right.y(), -x_offset, y_offset):
+        elif QRect(top_right.x(), top_right.y(), -x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_right
             self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        elif position in QRect(bottom_left.x(), bottom_left.y(), x_offset, -y_offset):
+        elif QRect(bottom_left.x(), bottom_left.y(), x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_left
             self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        elif position in QRect(top_left.x(), top_left.y(), x_offset, y_offset):
+        elif QRect(top_left.x(), top_left.y(), x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_left
             self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-        elif position in QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset):
+        elif QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_right
             self.setCursor(Qt.CursorShape.SizeFDiagCursor)
         else:  # no resize

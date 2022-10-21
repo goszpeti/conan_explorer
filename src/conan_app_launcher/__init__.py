@@ -6,11 +6,9 @@ import os
 import shutil
 import platform
 try: # from Python 3.8
-    from importlib.metadata import distribution
-    from importlib.metadata import PackageNotFoundError
+    from importlib.metadata import distribution, PackageNotFoundError
 except ImportError:
-    from importlib_metadata import distribution
-    from importlib_metadata import PackageNotFoundError
+    from importlib_metadata import distribution, PackageNotFoundError  # type: ignore
 
 from pathlib import Path
 from typing import TypeVar

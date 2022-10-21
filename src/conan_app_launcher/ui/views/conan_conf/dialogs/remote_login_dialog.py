@@ -39,7 +39,7 @@ class RemoteLoginDialog(QDialog):
         # fill up remote checkbox list
         for remote in remotes:
             item = QListWidgetItem(remote.name, self._ui.remote_list)
-            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             item.setCheckState(Qt.CheckState.Checked)
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "login.png")))
         self._ui.button_box.accepted.connect(self.save)

@@ -37,7 +37,7 @@ class ConanInstallDialog(QDialog):
         """
         self._ui.conan_ref_line_edit.adjustSize()
         self.adjustSize()
-        h_offset = (self.size() - self._ui.conan_ref_line_edit.size()).width()
+        h_offset = (self.size() - self._ui.conan_ref_line_edit.size()).width() # type: ignore
         width = self._ui.conan_ref_line_edit.fontMetrics().boundingRect(self._ui.conan_ref_line_edit.text()).width()
         self.resize(QSize(width + h_offset + 15, self.height()))  # 15 margin
 

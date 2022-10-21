@@ -4,27 +4,31 @@ from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, user_save_path
+from conan_app_launcher import (MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike,
+                                user_save_path)
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan import ConanCleanup
-from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS,
+from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES,
+                                         DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
-                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE, WINDOW_SIZE)
-
-from PyQt6.QtCore import Qt, QRect, pyqtSignal, pyqtSlot
+                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE,
+                                         WINDOW_SIZE)
+from conan_app_launcher.ui.views.app_grid.tab import TabGrid
+from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
+from PyQt6.QtCore import QRect, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QKeySequence
-from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow
+from PyQt6.QtWidgets import QApplication, QFileDialog
 
-from .common import AsyncLoader, activate_theme, init_qt_logger, remove_qt_logger
+from .common import (AsyncLoader, activate_theme, init_qt_logger,
+                     remove_qt_logger)
 from .fluent_window import FluentWindow, SideSubMenu
 from .model import UiApplicationModel
-from .views import AppGridView, LocalConanPackageExplorer, ConanSearchDialog, ConanConfigView
+from .views import (AppGridView, ConanConfigView, ConanSearchDialog,
+                    LocalConanPackageExplorer)
 from .views.about_page import AboutPage
-from conan_app_launcher.ui.views.app_grid.tab import TabGrid
-from conan_app_launcher.ui.widgets import WideMessageBox, AnimatedToggle
 
 
 class MainWindow(FluentWindow):
@@ -55,7 +59,7 @@ class MainWindow(FluentWindow):
         self.about_page = AboutPage(self)
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
         self.local_package_explorer = LocalConanPackageExplorer(self, self.conan_pkg_removed, self.page_widgets)
-        self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed, self.conan_pkg_removed, 
+        self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed, self.conan_pkg_removed,
                                                self.conan_remotes_updated, self.page_widgets)
         self.conan_config = ConanConfigView(self, self.conan_remotes_updated)
         self._init_left_menu()
@@ -73,7 +77,7 @@ class MainWindow(FluentWindow):
 
     def _init_right_menu(self):
 
-        #Right Settings menu
+        # Right Settings menu
         quicklaunch_submenu = self.page_widgets.get_side_menu_by_type(type(self.app_grid))
         if quicklaunch_submenu:
             quicklaunch_submenu.add_button_menu_entry(
@@ -150,7 +154,6 @@ class MainWindow(FluentWindow):
         # model loaded, now load the gui elements, which have a static model
         self.app_grid.re_init(self.model.app_grid)
 
-
     def _load_job(self, config_source_str):
         # load ui file definitions
         self.model.loadf(config_source_str)
@@ -161,7 +164,6 @@ class MainWindow(FluentWindow):
         self.conan_config.load_signal.emit()
         # loads the remotes in the search dialog
         self.conan_remotes_updated.emit()
-
 
     @pyqtSlot()
     def on_font_size_increased(self):
@@ -250,19 +252,19 @@ class MainWindow(FluentWindow):
 
     @pyqtSlot()
     def on_add_link(self):
-        tab: TabGrid = self.app_grid.tab_widget.currentWidget() # type: ignore
+        tab: TabGrid = self.app_grid.tab_widget.currentWidget()  # type: ignore
         tab.app_links[0].open_app_link_add_dialog()
 
     @pyqtSlot()
     def on_reorder(self):
-        tab: TabGrid = self.app_grid.tab_widget.currentWidget() # type: ignore
+        tab: TabGrid = self.app_grid.tab_widget.currentWidget()  # type: ignore
         tab.app_links[0].on_move()
 
     @pyqtSlot()
     def display_versions_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         # status is changed only after this is done, so the state must be negated
-        sender_toggle: AnimatedToggle = self.sender() # type: ignore
+        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_VERSIONS, status)
         self.app_grid.re_init_all_app_links(force=True)
@@ -270,7 +272,7 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def apply_display_users_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender() # type: ignore
+        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_USERS, status)
         self.app_grid.re_init_all_app_links(force=True)
@@ -278,21 +280,21 @@ class MainWindow(FluentWindow):
     @pyqtSlot()
     def display_channels_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender() # type: ignore
+        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(DISPLAY_APP_CHANNELS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
     @pyqtSlot()
     def quicklaunch_grid_mode_toggled(self):
-        sender_toggle: AnimatedToggle = self.sender() # type: ignore
+        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(APPLIST_ENABLED, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
     @pyqtSlot()
     def quicklaunch_cbox_mode_toggled(self):
-        sender_toggle: AnimatedToggle = self.sender() # type: ignore
+        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(ENABLE_APP_COMBO_BOXES, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
@@ -308,7 +310,7 @@ class MainWindow(FluentWindow):
         if sizes_str.lower() == "maximized":
             self.showMaximized()
         else:
-            split_sizes_int = [0,0,800,600]
+            split_sizes_int = [0, 0, 800, 600]
             try:
                 split_sizes = sizes_str.strip().split(",")
                 split_sizes_int = [int(size) for size in split_sizes]
@@ -341,5 +343,5 @@ class MainWindow(FluentWindow):
         sizes = self.ui.content_footer_splitter.sizes()
         if len(sizes) < 2:
             Logger().warning(f"Can't save splitter size")
-        sizes_str=f"{int(sizes[0])},{int(sizes[1])}"
+        sizes_str = f"{int(sizes[0])},{int(sizes[1])}"
         app.active_settings.set(CONSOLE_SPLIT_SIZES, sizes_str)

@@ -7,22 +7,26 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
 from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.core.system import calc_paste_same_dir_name, copy_path_with_overwrite, delete_path
-from conan_app_launcher.ui.common import (AsyncLoader, FileSystemModel)
+from conan_app_launcher.core.system import (calc_paste_same_dir_name,
+                                            copy_path_with_overwrite,
+                                            delete_path)
+from conan_app_launcher.ui.common import AsyncLoader, FileSystemModel
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog
 from conan_app_launcher.ui.views import AppGridView
-from PyQt6.QtCore import (QFile, QItemSelectionModel, QMimeData, QModelIndex,
-                          Qt, QUrl, QObject, pyqtBoundSignal)
+from PyQt6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
+                          Qt, QUrl, pyqtBoundSignal)
 from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QLabel,
-                             QMessageBox, QWidget, QTreeView, QLineEdit)
+                             QLineEdit, QMessageBox, QTreeView, QWidget)
 
-from .model import PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem, PkgSelectModel
+from .model import (PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem,
+                    PkgSelectModel)
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
-from conans.model.ref import ConanFileReference, PackageReference
+
+from conans.model.ref import ConanFileReference
 
 
 class PackageSelectionController(QObject):
@@ -187,7 +191,7 @@ class PackageSelectionController(QObject):
             for i in range(len(item.child_items)):
                 if item.child_items[i].item_data[0].get("id", "") == pkg_id:
                     break
-            internal_sel_index = proxy_index.child(i, 0)
+            internal_sel_index = proxy_index.child(i, 0) # type: ignore
         else:
             internal_sel_index = proxy_index
 
@@ -237,14 +241,13 @@ class PackageFileExplorerController(QObject):
         self._model = FileSystemModel()
         self._model.setRootPath(str(pkg_path))
         self._model.sort(0, Qt.SortOrder.AscendingOrder)
-        re_register_signal(self._model.fileRenamed, self.on_file_double_click)
+        re_register_signal(self._model.fileRenamed, self.on_file_double_click)  # type: ignore
         self._view.setModel(self._model)
         self._view.setRootIndex(self._model.index(str(pkg_path)))
         self._view.setColumnHidden(2, True)  # file type
         self._model.layoutChanged.connect(self.resize_file_columns)
         self._view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
-        re_register_signal(self._view.doubleClicked,
-                           self.on_file_double_click)
+        re_register_signal(self._view.doubleClicked, self.on_file_double_click)  # type: ignore
         # disable edit on double click, since we want to open
         self._view.setEditTriggers(QAbstractItemView.EditTrigger.EditKeyPressed)
         self._pkg_path_label.setText(str(pkg_path))
@@ -264,7 +267,7 @@ class PackageFileExplorerController(QObject):
         self._current_ref = ""
         self._current_pkg = None
         self._pkg_path_label.setText("")
-        self._view.setModel(None)
+        self._view.setModel(None)  # type: ignore
         self._pkg_path_label.setText("")
 
     def on_file_double_click(self, model_index):

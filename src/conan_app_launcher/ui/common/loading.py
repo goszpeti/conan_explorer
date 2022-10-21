@@ -50,7 +50,7 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog.setWindowFlags(
             Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint)
         self.progress_dialog.setWindowTitle("Loading...")
-        self.progress_dialog.setCancelButton(None)
+        self.progress_dialog.setCancelButton(None) # type: ignore
         self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
         self.progress_dialog.setRange(0, 0)
         self.progress_dialog.setMinimumDuration(1000)

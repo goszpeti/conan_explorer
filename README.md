@@ -92,7 +92,7 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 
 ### Main dependencies
 
-* PyQt6 >= 5.13.0 
+* PyQt6 >= 6.3.0
 * conan >= 1.24.0
 
 > **Warning** **Deprecation of Python 3.6**  
