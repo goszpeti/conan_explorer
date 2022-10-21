@@ -5,11 +5,16 @@ name: Python Tests
 
 on:
   push:
-    branches: [master]
+    branches:
+      - main
+      - 'releases/**'
     paths:
       - "src/**/*"
   pull_request:
-    branches: [master]
+    branches:
+      - main
+      - 'releases/**'
+  workflow_dispatch:
 
 jobs:
   test:
