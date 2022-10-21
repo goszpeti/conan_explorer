@@ -1,8 +1,8 @@
 """
-A simple setup script to create an executable using PyQt5. This also
+A simple setup script to create an executable using PyQt6. This also
 demonstrates the method for creating a Windows executable that does not have
 an associated console.
-PyQt5app.py is a very simple type of PyQt5 application
+PyQt6app.py is a very simple type of PyQt6 application
 Run the build process by running the command 'python setup.py build'
 If everything works well you should find a subdirectory in the build
 subdirectory that contains the files needed to run the application
@@ -23,7 +23,7 @@ else:
     # platforms - QtGui
     # mediaservice - QtMultimedia
     # printsupport - QtPrintSupport
-    include_files = get_qt_plugins_paths("PyQt5", "platforms") + get_qt_plugins_paths("PyQt5", "styles")
+    include_files = get_qt_plugins_paths("PyQt6", "platforms") + get_qt_plugins_paths("PyQt6", "styles")
 
 # base="Win32GUI" should be used only for Windows GUI app
 base = None
@@ -37,7 +37,7 @@ build_exe_options = {
     "libicudata.so.66", "libgtk-3.so.0", "libQt5Quick.so.5", "libQt5Qml.so.5", "libicui18n.so.66", "libicui18n.so.66",
     "libQt5Network.so.5", "libQt5QmlModels.so.5"],
     "include_files": include_files,
-    "zip_include_packages" : ['PyQt5', "conans"]
+    "zip_include_packages" : ['PyQt6', "conans"]
 }
 
 icon = "src/conan_app_launcher/assets/icons/icon.ico"

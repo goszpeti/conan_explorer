@@ -43,7 +43,7 @@ DEV_REQUIRES = [
     "autopep8", # formatter
     "rope", # refactoring
     "debugpy", # Qt thread debugging
-#    "PyQt5-stubs" # type hints
+#    "PyQt6-stubs" # type hints
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

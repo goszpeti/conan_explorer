@@ -24,7 +24,7 @@ from conan_app_launcher.ui.common import remove_qt_logger
 from conan_app_launcher.ui.main_window import MainWindow
 
 from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 def get_scripts_path():
     scripts_path = Path(distutils.sysconfig.get_config_var("BINDIR"))
@@ -44,10 +44,6 @@ TEST_REF_OFFICIAL = "example/1.0.0@_/_"
 SKIP_CREATE_CONAN_TEST_DATA = strtobool(os.getenv("SKIP_CREATE_CONAN_TEST_DATA", "False"))
 TEST_REMOTE_NAME = "local"
 TEST_REMOTE_URL = "http://127.0.0.1:9300/"
-
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps)
-
 
 def is_ci_job():
     """ Test runs in CI environment """
@@ -266,7 +262,7 @@ def ui_no_refs_config_fixture(base_fixture):
 
 @pytest.fixture
 def mock_clipboard(mocker):
-    from PyQt5.QtWidgets import QApplication
+    from PyQt6.QtWidgets import QApplication
     mocker.patch.object(QApplication, 'clipboard')
     clipboard = mock.MagicMock()
     clipboard.supportsSelection.return_value = True

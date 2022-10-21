@@ -69,7 +69,7 @@ Currently testing and compatibility is only endured for Debian based distros, sp
 
 1. Qt for Python must be installed with the native package manager, like:
 
-    sudo apt install python3-pyqt5
+    sudo apt install python3-PyQt6
 
 2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type "x-terminal-emulator" to get a list of available terminals.
 
@@ -92,7 +92,7 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 
 ### Main dependencies
 
-* PyQt5 >= 5.13.0 
+* PyQt6 >= 5.13.0 
 * conan >= 1.24.0
 
 > **Warning** **Deprecation of Python 3.6**  
@@ -113,7 +113,7 @@ Agreement for Icons8](https://icons8.com/vue-static/landings/pricing/icons8-lice
 * Using Conan Package Manager Icon by Conan.io developers under [MIT License](<http://opensource.org/licenses/mit-license.php>), via Wikimedia Commons
 
 ##### PyPi runtime dependencies
-* PyQt5 by Riverbank Computing Limited, [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+* PyQt6 by Riverbank Computing Limited, [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 * Conan by JFrog LTD under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 * jsonschema by Julian Berman under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 * Using a modified version of Toggle Widget from QtWidgets (https://github.com/pythonguis/python-qtwidgets) under [MIT License](<http://opensource.org/licenses/mit-license.php>)
