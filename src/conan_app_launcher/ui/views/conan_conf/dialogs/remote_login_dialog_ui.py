@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(355, 182)
+        Dialog.resize(429, 273)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -89,6 +89,7 @@ class Ui_Dialog(object):
         self.button_box.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.button_box.setObjectName("button_box")
         self.verticalLayout.addWidget(self.button_box)
+        self.verticalLayout.setStretch(0, 1)
 
         self.retranslateUi(Dialog)
         self.button_box.rejected.connect(Dialog.reject) # type: ignore
