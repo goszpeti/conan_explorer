@@ -95,6 +95,9 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 * PyQt5 >= 5.13.0 
 * conan >= 1.24.0
 
+> **Warning** **Deprecation of Python 3.6**  
+> From version 2.0.0 Python 3.6 will not be supported anymore, because it's end-of-life has been reached.
+
 ## Toolchain
 
 This project uses Python with Qt as a frontend using the PyQt integration.
@@ -118,6 +121,5 @@ Agreement for Icons8](https://icons8.com/vue-static/landings/pricing/icons8-lice
 ##### PyPi backports for older Python versions
 * importlib-metadata by Jason R. Coombs under [ Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * typing-extensions by Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee under [Python Software Foundation License(PSF)](https://docs.python.org/3/license.html)
-* dataclasses by Eric V. Smith under [ Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 

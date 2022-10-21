@@ -24,7 +24,6 @@ jobs:
       matrix:
         name:
           [
-            "ubuntu-py36",
             "ubuntu-py37",
             "ubuntu-py38",
             "ubuntu-py39",
@@ -33,10 +32,6 @@ jobs:
             "ubuntu-py310-conan1.28.0",
           ]
         include:
-          - name: "ubuntu-py36"
-            python: "3.6"
-            conan: "latest"
-            os: ubuntu-latest
           - name: "ubuntu-py37"
             python: "3.7"
             os: ubuntu-latest
@@ -156,6 +151,6 @@ jobs:
             -Dsonar.exclusions=**/*_ui.py
             -Dsonar.tests=./test
             -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.python.version=3.6,3.7,3.8,3.9
+            -Dsonar.python.version=3.7,3.8,3.9
             -Dsonar.python.coverage.reportPaths=cov/cov-*.xml
             -Dsonar.python.xunit.reportPath=results/result-*-ubuntu-py39.xml
