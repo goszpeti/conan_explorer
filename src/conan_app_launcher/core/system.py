@@ -65,29 +65,34 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
 
 def open_in_file_manager(file_path: Path):
     """ Show file in file manager. """
-    if platform.system() == "Linux":
-        # no standardized select functionailty.
-        # However xdg-open on a dir will open the folder in the default file explorer.
-        dir_to_view = file_path.parent if file_path.is_file() else file_path
-        return subprocess.Popen(("xdg-open", str(dir_to_view)))
-    elif platform.system() == "Windows":
-        # select switch for highlighting
-        creationflags = 0
-        if version.parse(platform.python_version()) >= version.parse("3.7.0"):
-            creationflags = subprocess.CREATE_NO_WINDOW  # available since 3.7
-        return subprocess.Popen("explorer /select," + str(file_path), creationflags=creationflags)
-
+    try:
+        if platform.system() == "Linux":
+            # no standardized select functionailty.
+            # However xdg-open on a dir will open the folder in the default file explorer.
+            dir_to_view = file_path.parent if file_path.is_file() else file_path
+            return subprocess.Popen(("xdg-open", str(dir_to_view)))
+        elif platform.system() == "Windows":
+            # select switch for highlighting
+            creationflags = 0
+            if version.parse(platform.python_version()) >= version.parse("3.7.0"):
+                creationflags = subprocess.CREATE_NO_WINDOW  # available since 3.7
+            return subprocess.Popen("explorer /select," + str(file_path), creationflags=creationflags)
+    except Exception as e:
+        Logger().error(f"Can't show path in file-manager: {str(e)}")
 
 def open_cmd_in_path(file_path: Path) -> int:
     """ Open a terminal in the selected folder. """
-    if platform.system() == "Linux":
-        return execute_cmd(["x-terminal-emulator", "-e", "cd", f"{str(file_path)}", "bash"], True)
-    elif platform.system() == "Windows":
-        cmd_path = shutil.which("cmd")
-        if cmd_path:
-            return execute_app(Path(cmd_path), True, f"/k cd {str(file_path)}")
-    return 0
-
+    try:
+        if platform.system() == "Linux":
+            return execute_cmd(["x-terminal-emulator", "-e", '"', "cd", f"{str(file_path)}", "&&", "bash", '"'], True)
+        elif platform.system() == "Windows":
+            cmd_path = shutil.which("cmd")
+            if cmd_path:
+                return execute_app(Path(cmd_path), True, f"/k cd {str(file_path)}")
+        return 0
+    except Exception as e:
+        Logger().error(f"Can't open cmd in path: {str(e)}")
+        return 0
 
 def is_file_executable(file_path: Path) -> bool:
     """ Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
@@ -121,27 +126,30 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
 
 def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
     """ Generic process execute method. Returns pid. """
-    # Linux call errors on creationflags argument, so the calls must be separated
-    if platform.system() == "Windows":
-        creationflags = 0
-        if is_console_app:
-            creationflags = subprocess.CREATE_NEW_CONSOLE
-            cmd = [generate_launch_script(cmd)]
-        # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
-        proc = subprocess.Popen(cmd, creationflags=creationflags)
-        return proc.pid
-    elif platform.system() == "Linux":
-        if is_console_app:
-            # Sadly, there is no default way to do this, because of the miriad terminal emulators available
-            # Use the default distro emulator, with x-terminal-emulator
-            # (sudo update-alternatives --config x-terminal-emulator)
-            # This works only on debian distros.
-            cmd = [generate_launch_script(cmd)]
-            cmd = ["x-terminal-emulator", "-e"] + cmd
-        proc = subprocess.Popen(cmd)
-        return proc.pid
-    return 0
-
+    try:
+        # Linux call errors on creationflags argument, so the calls must be separated
+        if platform.system() == "Windows":
+            creationflags = 0
+            if is_console_app:
+                creationflags = subprocess.CREATE_NEW_CONSOLE
+                cmd = [generate_launch_script(cmd)]
+            # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
+            proc = subprocess.Popen(cmd, creationflags=creationflags)
+            return proc.pid
+        elif platform.system() == "Linux":
+            if is_console_app:
+                # Sadly, there is no default way to do this, because of the miriad terminal emulators available
+                # Use the default distro emulator, with x-terminal-emulator
+                # (sudo update-alternatives --config x-terminal-emulator)
+                # This works only on debian distros.
+                cmd = [generate_launch_script(cmd)]
+                cmd = ["x-terminal-emulator", "-e"] + cmd
+            proc = subprocess.Popen(cmd)
+            return proc.pid
+        return 0
+    except Exception as e:
+        Logger().error(f"Can't execute cmd: {str(e)}")
+        return 0
 
 def generate_launch_script(cmd: List[str]) -> str:
     import tempfile
@@ -169,12 +177,15 @@ def generate_launch_script(cmd: List[str]) -> str:
 
 def open_file(file: Path):
     """ Open files with their associated programs """
-    if file.absolute().is_file():
-        if platform.system() == 'Windows':
-            os.startfile(str(file))
-        elif platform.system() == "Linux":
-            subprocess.Popen(("xdg-open", str(file)))
-
+    try:
+        if file.absolute().is_file():
+            if platform.system() == 'Windows':
+                os.startfile(str(file))
+            elif platform.system() == "Linux":
+                subprocess.Popen(("xdg-open", str(file)))
+    except Exception as e:
+        Logger().error(f"Can't open file: {str(e)}")
+        return 0
 
 def delete_path(dst: Path):
     """
