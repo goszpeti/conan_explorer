@@ -320,6 +320,10 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.set_restore_max_button_state()
         self.enable_windows_native_animations()
 
+    def mousePressEvent(self, event):  # override
+        """ Helper for moving window on Linux to know mouse position """
+        self.drag_position = event.globalPos()
+
     def apply_theme(self):
         """ This function must be able to reload all icons from the left and right menu bar. """
         self.reload_themed_icons()
