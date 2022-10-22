@@ -3,16 +3,12 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from conan_app_launcher import PathLike
+from conan_app_launcher import PathLike, base_path
 from conan_app_launcher.app.logger import Logger
 
 from . import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS,
-               ENABLE_APP_COMBO_BOXES, FONT_SIZE, GUI_STYLE, GUI_STYLE_LIGHT,
-               LAST_CONFIG_FILE, WINDOW_SIZE, SettingsInterface)
-
-GENERAL_SECTION_NAME = "General"
-VIEW_SECTION_NAME = "View"
-PLUGINS_SECTION_NAME = "Plugins"
+               ENABLE_APP_COMBO_BOXES, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_LIGHT,
+               LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
 
 def application_settings_spec() -> Dict[str, Dict[str, Any]]:
     return {
@@ -31,7 +27,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
             CONSOLE_SPLIT_SIZES: "413,126"
             },
     PLUGINS_SECTION_NAME: {
-        "local_package_explorer": "conan_app_launcher.ui.views.package_explorer.LocalConanPackageExplorer"
+        "built-in": str(base_path / "ui" / "plugins.ini")
     }
 
 }
@@ -75,8 +71,8 @@ class IniSettings(SettingsInterface):
     def set_auto_save(self, value):
         self._auto_save = value
 
-    def get_settings_from_node(self, name: str) -> Tuple[str]:
-        return tuple(self._values.get(name, {}).keys())
+    def get_settings_from_node(self, node: str) -> Tuple[str]:
+        return tuple(self._values.get(node, {}).keys())
 
     def get(self, name: str) -> Union[str, int, float, bool]:
         """ Get a specific setting """
@@ -116,6 +112,10 @@ class IniSettings(SettingsInterface):
                     break
         if self._auto_save:
             self.save()
+
+    def add(self, setting_name: str, value: Union[str, int, float, bool], section_name: str):
+        self._values[section_name][setting_name] = value
+        self.save()
 
     def save(self):
         """ Save all user modifiable settings to file. """

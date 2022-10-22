@@ -46,6 +46,9 @@ class AppGridView(QWidget):
             self.tab_widget.removeTab(0)
         self.load_signal.connect(self.load)
 
+    def reload_themed_icons(self):
+        self.apply_theme()
+
     def apply_theme(self):
         self.re_init(self.model)
 

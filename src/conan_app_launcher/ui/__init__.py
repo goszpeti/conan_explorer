@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 
 from conan_app_launcher.app.logger import Logger
+from .main_window import BaseSignals
+from .fluent_window.plugins import PluginInterface, PluginFile, PluginDescription
 
 # compile uic files, if needed
 from conan_app_launcher import DEBUG_LEVEL

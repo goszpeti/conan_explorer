@@ -10,10 +10,18 @@ import conan_app_launcher.app as app
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using global module pattern
 
 
-def get_themed_asset_image(image_rel_path: str) -> str:
+def get_themed_asset_image(image_path: str) -> str:
+    asset_path = Path("NULL")
+    if (app.asset_path / image_path).exists(): # relative path
+        asset_path = app.asset_path / image_path
+    else: # absolute path
+        asset_path = Path(image_path)
+        if not asset_path.exists():
+            Logger().warning(f"Can't find image: {str(asset_path)}")
+
     if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
-        return get_inverted_asset_image(app.asset_path / image_rel_path)
-    return str(app.asset_path / image_rel_path)
+        return get_inverted_asset_image(asset_path)
+    return str(asset_path)
 
 
 def get_inverted_asset_image(image_path: Path):

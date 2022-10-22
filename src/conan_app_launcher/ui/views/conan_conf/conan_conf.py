@@ -7,9 +7,10 @@ import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import escape_venv
 from conan_app_launcher.ui.common import get_themed_asset_image
+from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
-from PyQt6.QtCore import Qt, pyqtBoundSignal, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox
 
@@ -18,18 +19,19 @@ from .dialogs import RemoteEditDialog, RemoteLoginDialog
 from .model import ProfilesModel
 from .controller import ConanRemoteController
 
-class ConanConfigView(QDialog):
+
+class ConanConfigView(PluginInterface):
 
     load_signal = pyqtSignal()
 
-    def __init__(self, parent: Optional[QWidget], conan_remotes_updated: Optional[pyqtBoundSignal] = None):
-        # Add minimize and maximize buttons
-        super().__init__(parent,  Qt.WindowType.WindowSystemMenuHint | Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
+    def __init__(self, parent: QWidget, base_signals: "BaseSignals",
+                 page_widgets: Optional["FluentWindow.PageStore"] = None):
+        super().__init__(parent)
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.config_file_path = Path("Unknown")
         self.profiles_path = Path("Unknown")
-        self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, conan_remotes_updated)
+        self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, base_signals.conan_remotes_updated)
         self._init_remotes_tab()
         self._init_profiles_tab()
         self.load_signal.connect(self.__load)
@@ -110,6 +112,9 @@ class ConanConfigView(QDialog):
         """ Resize remote view columns automatically if window size changes """
         super().resizeEvent(a0)
         self._remotes_controller.resize_remote_columns()
+
+    def reload_themed_icons(self):
+        self.apply_theme()
 
     def apply_theme(self):
         self._init_profile_context_menu()

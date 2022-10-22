@@ -1,29 +1,32 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui.common import get_themed_asset_image
-from conan_app_launcher.ui.fluent_window import FluentWindow
+from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt6.QtCore import QPoint, Qt, pyqtBoundSignal, pyqtSlot
+from PyQt6.QtCore import QPoint, Qt, pyqtSlot
 from PyQt6.QtGui import QIcon, QKeySequence, QAction
-from PyQt6.QtWidgets import (QDialog, QListWidgetItem,
-                             QWidget)
+from PyQt6.QtWidgets import (QListWidgetItem, QWidget)
 
 from .conan_search_ui import Ui_Form
 from .controller import ConanSearchController
 
-class ConanSearchDialog(QDialog):
 
-    def __init__(self, parent: Optional[QWidget], conan_pkg_installed: Optional[pyqtBoundSignal] = None,
-                 conan_pkg_removed: Optional[pyqtBoundSignal] = None, conan_remotes_updated: Optional[pyqtBoundSignal] = None,
-                 page_widgets: Optional[FluentWindow.PageStore] = None):
+if TYPE_CHECKING:
+    from conan_app_launcher.ui.fluent_window import FluentWindow
+    from conan_app_launcher.ui.main_window import BaseSignals
+
+class ConanSearchView(PluginInterface):
+
+    def __init__(self, parent: QWidget, base_signals: "BaseSignals", 
+                 page_widgets: Optional["FluentWindow.PageStore"] = None):
         # Add minimize and maximize buttons
-        super().__init__(parent, Qt.WindowType.WindowSystemMenuHint | Qt.WindowType.WindowMaximizeButtonHint | Qt.WindowType.WindowCloseButtonHint)
+        PluginInterface.__init__(self, parent)
         self.page_widgets = page_widgets
-        self.conan_pkg_installed = conan_pkg_installed
-        self.conan_pkg_removed = conan_pkg_removed
-        self.conan_remotes_updated = conan_remotes_updated
+        self.conan_pkg_installed = base_signals.conan_pkg_installed
+        self.conan_pkg_removed = base_signals.conan_pkg_removed
+        self.conan_remotes_updated = base_signals.conan_remotes_updated
 
         self._ui = Ui_Form()
         self._ui.setupUi(self)
@@ -34,7 +37,7 @@ class ConanSearchDialog(QDialog):
 
         self._search_controller = ConanSearchController(
             self._ui.search_results_tree_view, self._ui.search_line, self._ui.search_button, self._ui.remote_list,
-            self._ui.package_info_text, conan_pkg_installed, conan_pkg_removed)
+            self._ui.package_info_text, self.conan_pkg_installed, self.conan_pkg_removed)
 
         self._ui.search_button.clicked.connect(self._search_controller.on_search)
         self._ui.search_button.setEnabled(False)
@@ -50,7 +53,9 @@ class ConanSearchDialog(QDialog):
             self._init_remotes()
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
-        self.apply_theme()
+        self._init_pkg_context_menu()
+        self.add_themed_icon(self._ui.search_icon, "icons/search_packages.png", size=(20,20))
+
 
     def _init_remotes(self):
         remotes = app.conan_api.get_remotes()
@@ -61,10 +66,7 @@ class ConanSearchDialog(QDialog):
             item.setCheckState(Qt.CheckState.Checked)
 
     def apply_theme(self):
-        icon = QIcon(get_themed_asset_image("icons/search_packages.png"))
-        self._init_pkg_context_menu()
-        self._ui.search_icon.setPixmap(icon.pixmap(20, 20))
-
+        pass
     def _enable_search_button(self):
         """ Enable search button from minimum 3 characters onwards"""
         if len(self._ui.search_line.text()) > 2:
@@ -77,7 +79,7 @@ class ConanSearchDialog(QDialog):
         self.select_cntx_menu = RoundedMenu()
 
         self.copy_ref_action = QAction("Copy reference", self)
-        self.copy_ref_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
+        self.add_themed_icon(self.copy_ref_action, "icons/copy_link.png")
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self._search_controller.on_copy_ref_requested)
 

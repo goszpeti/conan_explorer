@@ -1,6 +1,9 @@
+from dataclasses import dataclass
 import datetime
+import importlib
 from pathlib import Path
 from shutil import rmtree
+import sys
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -14,21 +17,28 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
-                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE,
+                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, 
                                          WINDOW_SIZE)
+from conan_app_launcher.ui.fluent_window.plugins import PluginFile
 from conan_app_launcher.ui.views.app_grid.tab import TabGrid
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
-from PyQt6.QtCore import QRect, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QRect, pyqtSignal, pyqtSlot, pyqtBoundSignal
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import QApplication, QFileDialog
 
 from .common import (AsyncLoader, activate_theme, init_qt_logger,
                      remove_qt_logger)
-from .fluent_window import FluentWindow, SideSubMenu
+from .fluent_window import FluentWindow, SideSubMenu, PluginInterface
 from .model import UiApplicationModel
-from .views import (AppGridView, ConanConfigView, ConanSearchDialog,
-                    LocalConanPackageExplorer)
-from .views.about_page import AboutPage
+from .views import AppGridView, AboutPage, PluginsPage
+
+# Signal names
+@dataclass
+class BaseSignals():
+    """ Dict of base signals, wich is passed down to the Views """
+    conan_pkg_installed: pyqtBoundSignal  # conan_ref, pkg_id
+    conan_pkg_removed: pyqtBoundSignal  # conan_ref, pkg_ids
+    conan_remotes_updated: pyqtBoundSignal
 
 
 class MainWindow(FluentWindow):
@@ -39,10 +49,6 @@ class MainWindow(FluentWindow):
     conan_pkg_removed = pyqtSignal(str, str)  # conan_ref, pkg_ids
     conan_remotes_updated = pyqtSignal()
 
-    display_versions_changed = pyqtSignal()
-    display_channels_changed = pyqtSignal()
-    display_users_changed = pyqtSignal()
-
     log_console_message = pyqtSignal(str)  # str arg is the message
 
     qt_logger_name = "qt_logger"
@@ -50,6 +56,7 @@ class MainWindow(FluentWindow):
     def __init__(self, qt_app: QApplication):
         super().__init__(title_text="Conan App Launcher")
         self._qt_app = qt_app
+        self._base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed, self.conan_remotes_updated)
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
 
         # connect logger to console widget to log possible errors at init
@@ -57,20 +64,16 @@ class MainWindow(FluentWindow):
         self.log_console_message.connect(self.write_log)
 
         self.about_page = AboutPage(self)
+        self.plugins_page = PluginsPage(self)
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
-        self.local_package_explorer = LocalConanPackageExplorer(self, self.conan_pkg_removed, self.page_widgets)
-        self.search_dialog = ConanSearchDialog(self, self.conan_pkg_installed, self.conan_pkg_removed,
-                                               self.conan_remotes_updated, self.page_widgets)
-        self.conan_config = ConanConfigView(self, self.conan_remotes_updated)
         self._init_left_menu()
         self._init_right_menu()
+        self.load_plugins()
 
     def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", is_upper_menu=True, page_widget=self.app_grid,
                                  create_page_menu=True)
-        self.add_left_menu_entry("Local Package Explorer", "icons/package.png", True, self.local_package_explorer)
-        self.add_left_menu_entry("Conan Search", "icons/search_packages.png", True, self.search_dialog)
-        self.add_left_menu_entry("Conan Config", "icons/package_settings.png", True, self.conan_config)
+        # self.add_left_menu_entry("Conan Config", "icons/package_settings.png", True, self.conan_config)
 
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
@@ -100,6 +103,7 @@ class MainWindow(FluentWindow):
             quicklaunch_submenu.add_toggle_menu_entry(
                 "Show channel", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
 
+        self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.png")
         view_settings_submenu = SideSubMenu(self.ui.right_menu_bottom_content_sw, "View")
 
         self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/package_settings.png")
@@ -139,13 +143,28 @@ class MainWindow(FluentWindow):
             return
         self.app_grid.re_init_all_app_links()
 
+    def load_plugins(self): # TODO move to fluent window?
+        for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
+            plugin_path = app.active_settings.get_string(plugin_group_name)
+            plugins = PluginFile.read_file(plugin_path)
+            for plugin in plugins:
+                try:
+                    import_path = Path(plugin.import_path)
+                    sys.path.append(str(import_path.parent))
+                    module_ = importlib.import_module(import_path.stem)
+                    class_ = getattr(module_, plugin.plugin_class)
+                    plugin_object: PluginInterface = class_(self, self._base_signals, self.page_widgets)
+                    self.add_left_menu_entry(plugin.name, plugin.icon, True, plugin_object)
+                except Exception as e:
+                    Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
+
+
     def load(self, config_source: Optional[PathLike] = None):
         """ Load all application gui elements specified in the GUI config (file) """
         config_source_str = str(config_source)
         if not config_source:
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
         self.restore_window_state()
-
         # model loads incrementally
         loader = AsyncLoader(self)
         loader.async_loading(self, self._load_job, (config_source_str,))
@@ -155,11 +174,13 @@ class MainWindow(FluentWindow):
     def _load_job(self, config_source_str):
         # load ui file definitions
         self.model.loadf(config_source_str)
-
-        # now actually load the views - this need signals, to execue in the gui thread
+        # now actually load the views - this need signals, to execute in the gui thread
         self.app_grid.model = self.model.app_grid
-        self.app_grid.load_signal.emit()
-        self.conan_config.load_signal.emit()
+        for page in self.page_widgets.get_all_pages():
+            try:
+                page.load_signal.emit()
+            except:
+                print("error")
         # loads the remotes in the search dialog
         self.conan_remotes_updated.emit()
 
@@ -199,7 +220,7 @@ class MainWindow(FluentWindow):
         # all icons must be reloaded
         self.apply_theme()
         for page in self.page_widgets.get_all_pages():
-            page.apply_theme()
+            page.reload_themed_icons()
 
     @pyqtSlot()
     def open_cleanup_cache_dialog(self):

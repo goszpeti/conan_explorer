@@ -3,9 +3,10 @@ from typing import TYPE_CHECKING
 
 from conan_app_launcher.ui.common import (get_themed_asset_image)
 from conan_app_launcher.ui.common.model import re_register_signal
+from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.views.package_explorer.controller import PackageFileExplorerController, PackageSelectionController
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt6.QtCore import (Qt, pyqtSignal, pyqtBoundSignal)
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QIcon, QKeySequence, QShowEvent, QResizeEvent, QAction
 from PyQt6.QtWidgets import QWidget
 
@@ -13,20 +14,23 @@ from .package_explorer_ui import Ui_Form
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
+    from conan_app_launcher.ui.main_window import BaseSignals
 
 
-class LocalConanPackageExplorer(QWidget):
+class LocalConanPackageExplorer(PluginInterface):
     conan_pkg_selected = pyqtSignal(str, dict)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
 
-    def __init__(self, parent: QWidget, conan_pkg_removed: pyqtBoundSignal, page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: QWidget, base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self._page_widgets = page_widgets
         self._pkg_sel_ctrl = PackageSelectionController(
-            self, self._ui.package_select_view, self._ui.package_filter_edit, self.conan_pkg_selected, conan_pkg_removed, page_widgets)
+            self, self._ui.package_select_view, self._ui.package_filter_edit, 
+            self.conan_pkg_selected, base_signals.conan_pkg_removed, page_widgets)
         self._pkg_file_exp_ctrl = PackageFileExplorerController(
-            self, self._ui.package_file_view, self._ui.package_path_label, self.conan_pkg_selected, conan_pkg_removed, page_widgets)
+            self, self._ui.package_file_view, self._ui.package_path_label, 
+            self.conan_pkg_selected, base_signals.conan_pkg_removed, page_widgets)
         self.file_cntx_menu = None
         self._ui.refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
 

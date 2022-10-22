@@ -5,7 +5,7 @@ if platform.system() == "Windows":
     from ctypes.wintypes import MSG
 
 from enum import Enum
-from typing import Callable, Dict, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Protocol, Tuple, Type, TypeVar, TypedDict, Union, runtime_checkable
 
 # uses Logger, settings and theming related functions
 from conan_app_launcher import AUTOCLOSE_SIDE_MENU
@@ -23,12 +23,14 @@ from PyQt6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
 from ..common import get_themed_asset_image
 from ..widgets import AnimatedToggle
 
+if TYPE_CHECKING:
+    from .plugins import PluginInterface
 
 
 def get_display_scaling():
     if platform.system() == "Windows":
         return ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
-    else: # TODO not yet implemented for Linux
+    else:  # TODO not yet implemented for Linux
         return 2.2
 
 
@@ -36,6 +38,7 @@ LEFT_MENU_MIN_WIDTH = 80
 LEFT_MENU_MAX_WIDTH = int(310 + 20*(2/get_display_scaling()))
 RIGHT_MENU_MIN_WIDTH = 0
 RIGHT_MENU_MAX_WIDTH = int(200 + 200*(2/get_display_scaling()))
+
 
 def gen_obj_name(name: str) -> str:
     """ Generates an object name from a menu title or name (spaces to underscores and lowercase) """
@@ -45,6 +48,7 @@ def gen_obj_name(name: str) -> str:
 class WidgetNotFoundException(Exception):
     """ Raised, when a widget searched for, ist in the parent container. """
     pass
+
 
 class ResizeDirection(Enum):
     default = 0
@@ -56,30 +60,62 @@ class ResizeDirection(Enum):
     top_right = 6
     bottom_left = 7
     bottom_right = 8
-class ThemedWidget():
-    def __init__(self) -> None:
-        self._icon_map: Dict[QPushButton, str] = {}  # for re-theming
 
-    @property
-    def icon_map(self):
-        return self._icon_map
 
-    def add_themed_icon(self, widget: QPushButton, asset_rel_path: str):
-        widget.setIcon(QIcon(get_themed_asset_image(asset_rel_path)))
-        self.icon_map[widget] = asset_rel_path
+@runtime_checkable
+class CanSetIconWidgetProtocol(Protocol):
+    def setIcon(self, icon: QIcon) -> None: ...
+
+
+@runtime_checkable
+class CanSetPixmapWidgetProtocol(Protocol):
+    def setPixmap(self, a0: QPixmap) -> None: ...
+
+
+class ThemedWidget(QWidget):
+    class IconInfo(TypedDict):
+        asset_path: str
+        size: Optional[Tuple[int, int]]
+
+    def __init__(self, parent=None) -> None:
+        if parent is not None:  # signals, it is already a widget
+            super().__init__(parent)
+        self._icon_map: Dict[Union[CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol],
+                             ThemedWidget.IconInfo] = {}  # widget: {name, size} for re-theming
+
+    def add_themed_icon(self, widget: Union[CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol],
+                        asset_path: str, size: Optional[Tuple[int, int]] = None):
+        """ 
+        Applies an icon to a widget and inverts it, when theming is toggled to dark mode.
+        For that reload_themed_icons must be called.
+        Size only applies for pixmaps.
+        """
+        icon = QIcon(get_themed_asset_image(asset_path))
+        if isinstance(widget, CanSetIconWidgetProtocol):
+            widget.setIcon(icon)
+        elif isinstance(widget, CanSetPixmapWidgetProtocol):
+            if size is None:
+                size = (20, 20)
+            widget.setPixmap(icon.pixmap(*size))
+        self._icon_map[widget] = {"asset_path": asset_path, "size": size}
 
     def reload_themed_icons(self):
-        for widget, asset_rel_path in self.icon_map.items():
-            widget.setIcon(QIcon(get_themed_asset_image(asset_rel_path)))
+        for widget, info in self._icon_map.items():
+            asset_rel_path = info["asset_path"]
+            size = info["size"]
+            icon = QIcon(get_themed_asset_image(asset_rel_path))
+            if isinstance(widget, CanSetIconWidgetProtocol):
+                widget.setIcon(icon)
+            elif isinstance(widget, CanSetPixmapWidgetProtocol):
+                widget.setPixmap(icon.pixmap(*size))
 
 
-class SideSubMenu(QWidget, ThemedWidget):
+class SideSubMenu(ThemedWidget):
     TOGGLE_WIDTH = 70
     TOGGLE_HEIGHT = 50
 
     def __init__(self, parent_stacked_widget: QStackedWidget, title: str = "", is_top_level=False):
-        QWidget.__init__(self, parent_stacked_widget)
-        ThemedWidget.__init__(self)
+        super().__init__(parent_stacked_widget)
         from .side_menu_ui import Ui_SideMenu  # need to resolve circular import
         self.ui = Ui_SideMenu()
         self.ui.setupUi(self)
@@ -94,8 +130,6 @@ class SideSubMenu(QWidget, ThemedWidget):
 
         if is_top_level:
             self.ui.side_menu_title_button.hide()  # off per default
- 
-    # def findChildren()
 
     def set_title(self, title: str):
         self.ui.side_menu_title_label.setText(title)
@@ -121,7 +155,7 @@ class SideSubMenu(QWidget, ThemedWidget):
             self.ui.side_menu_content_frame.setMaximumHeight(4096)
 
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
-        return self.findChild(QWidget, gen_obj_name(name)) # type:ignore
+        return self.findChild(QWidget, gen_obj_name(name))  # type:ignore
 
     def add_custom_menu_entry(self, widget: QWidget, name: Optional[str] = None):
         """ Very basic custom entry, no extra functions """
@@ -177,7 +211,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         return button
 
     def add_button_menu_entry(self, name: str, target: Callable, asset_icon: str = "",
-                              shortcut: Optional[QKeySequence] = None, shortcut_parent: Optional[QWidget]=None):
+                              shortcut: Optional[QKeySequence] = None, shortcut_parent: Optional[QWidget] = None):
         """ Adds a button with an icon and links with a callable. Optionally can have a key shortcut. """
         button = QPushButton(self)
         button.setMinimumSize(QSize(64, 50))
@@ -225,24 +259,24 @@ class FluentWindow(QMainWindow, ThemedWidget):
         def get_display_name_by_name(self, name: str) -> str:
             return self._page_widgets[gen_obj_name(name)][3]
 
-        def get_side_menu_by_type(self, type: Type) -> "Optional[SideSubMenu]":
+        def get_side_menu_by_type(self, type_name: Type) -> "Optional[SideSubMenu]":
             for _, (_, page, menu, _) in self._page_widgets.items():
-                if isinstance(page, type):
+                if isinstance(page, type_name):
                     return menu
-            raise WidgetNotFoundException(f"{type} not in page_widgets!")
+            raise WidgetNotFoundException(f"{type_name} not in page_widgets!")
 
-        def get_button_by_type(self, type: Type) -> QPushButton:
+        def get_button_by_type(self, type_name: Type) -> QPushButton:
             for _, (button, page, _, _) in self._page_widgets.items():
-                if isinstance(page, type):
+                if isinstance(page, type_name):
                     return button
-            raise WidgetNotFoundException(f"{type} not in page_widgets!")
+            raise WidgetNotFoundException(f"{type_name} not in page_widgets!")
 
         T = TypeVar('T')
-        def get_page_by_type(self, type: Type[T]) -> T:
+        def get_page_by_type(self, type_name: Type[T]) -> T:
             for _, (_, page, _, _), in self._page_widgets.items():
-                if isinstance(page, type):
-                    return page
-            raise WidgetNotFoundException(f"{type} not in page_widgets!")
+                if page.__class__.__name__ == type_name.__name__:
+                    return page # type: ignore
+            raise WidgetNotFoundException(f"{type_name} not in page_widgets!")
 
         def get_all_buttons(self):
             buttons = []
@@ -250,7 +284,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 buttons.append(button)
             return buttons
 
-        def get_all_pages(self):
+        def get_all_pages(self) -> List["PluginInterface"]:
             pages = []
             for _, (_, page, _, _), in self._page_widgets.items():
                 pages.append(page)
@@ -260,7 +294,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu, name)
 
     def __init__(self, title_text: str = "", native_windows_fcns=True):
-        super().__init__()
+        QMainWindow.__init__(self)
+        ThemedWidget.__init__(self, None)
         from .fluent_window_ui import Ui_MainWindow  # need to resolve circular import
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -272,7 +307,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowSystemMenuHint |
                             Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowMaximizeButtonHint)
-        if is_windows_11() or platform.system() == "Linux": # To hide black edges around the border rounding
+        if is_windows_11() or platform.system() == "Linux":  # To hide black edges around the border rounding
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
         self._use_native_windows_fcns = True if platform.system() == "Windows" and native_windows_fcns else False
@@ -339,7 +374,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """ This function must be able to reload all icons from the left and right menu bar. """
         self.reload_themed_icons()
         for submenu in self.ui.right_menu_bottom_content_sw.findChildren(SideSubMenu):
-            submenu.reload_themed_icons() # type: ignore
+            submenu.reload_themed_icons()  # type: ignore
         for submenu in self.ui.right_menu_top_content_sw.findChildren(SideSubMenu):
             submenu.reload_themed_icons()  # type: ignore
 
@@ -446,7 +481,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.ui.right_menu_top_content_sw.setCurrentWidget(side_menu)
         if AUTOCLOSE_SIDE_MENU:
             if self.ui.settings_button.isChecked():
-               self.toggle_right_menu()
+                self.toggle_right_menu()
 
     def toggle_left_menu(self):
         width = self.ui.left_menu_frame.width()
@@ -495,13 +530,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             width_to_set = RIGHT_MENU_MIN_WIDTH
             self.ui.settings_button.setChecked(False)
-        self.right_anim = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth") # type: ignore
+        self.right_anim = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")  # type: ignore
         self.right_anim.setDuration(200)
         self.right_anim.setStartValue(width)
         self.right_anim.setEndValue(width_to_set)
         self.right_anim.setEasingCurve(QEasingCurve.Type.InOutQuart)
         self.right_anim.start()
-
 
     def eventFilter(self, source: QObject, event: QEvent):  # override
         """ Implements window resizing """

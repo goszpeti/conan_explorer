@@ -210,7 +210,7 @@ class ConanApi():
             pkg_id, path = self.get_best_matching_package_path(conan_ref, conan_options)
             if pkg_id:
                 return pkg_id, path
-            Logger().info(f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed.")
+            Logger().info(f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed. Searching for packages to install...")
 
         pkg_id, path = self.install_best_matching_package(conan_ref, conan_options, update=update)
         return pkg_id, path

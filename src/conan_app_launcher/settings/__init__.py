@@ -2,9 +2,13 @@
 """ Use constants in class, so they don't need to be separately accessed """
 
 from abc import ABC, abstractmethod
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 from conan_app_launcher import PathLike
+
+GENERAL_SECTION_NAME = "General"
+VIEW_SECTION_NAME = "View"
+PLUGINS_SECTION_NAME = "Plugins"
 
 # Constants for option names (value is the entry name/id)
 # General
@@ -62,8 +66,8 @@ class SettingsInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_settings_from_node(self, name: str) -> Tuple[str]:
-        """ Get all settings names from a hierachical leaf.
+    def get_settings_from_node(self, node: str) -> Tuple[str]:
+        """ Get all settings names from a hierachical node.
         If it is non-hierarchical, the name arg should be ignored and all settings returned.
         """
         raise NotImplementedError
@@ -95,5 +99,10 @@ class SettingsInterface(ABC):
 
     @abstractmethod
     def set(self, setting_name: str, value: Union[str, int, float, bool]):
-        """ Set the value of a specific setting """
+        """ Set the value of an existing setting """
+        raise NotImplementedError
+
+    @abstractmethod
+    def add(self, setting_name: str, value: Union[str, int, float, bool], node: Optional[str]=None):
+        """ Add a new setting """
         raise NotImplementedError

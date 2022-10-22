@@ -3,9 +3,10 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
                              QVBoxLayout, QWidget)
+from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 
 
-class AboutPage(QWidget):
+class AboutPage(PluginInterface):
     """ Defines About page """
     html_content = f"""
     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
@@ -41,6 +42,4 @@ class AboutPage(QWidget):
         layout.addItem(QSpacerItem(
             20, 600, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
-    def apply_theme(self):
-        # no themed icons
-        pass
+
