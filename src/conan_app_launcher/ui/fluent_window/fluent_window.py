@@ -95,6 +95,7 @@ class SideSubMenu(QWidget, ThemedWidget):
         if is_top_level:
             self.ui.side_menu_title_button.hide()  # off per default
  
+    # def findChildren()
 
     def set_title(self, title: str):
         self.ui.side_menu_title_label.setText(title)
@@ -120,11 +121,7 @@ class SideSubMenu(QWidget, ThemedWidget):
             self.ui.side_menu_content_frame.setMaximumHeight(4096)
 
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
-        # type: ignore
-        entry = self.findChildren(QWidget, gen_obj_name(name))
-        if len(entry) >= 1:
-            return entry[0] # type: ignore
-        return None
+        return self.findChild(QWidget, gen_obj_name(name)) # type:ignore
 
     def add_custom_menu_entry(self, widget: QWidget, name: Optional[str] = None):
         """ Very basic custom entry, no extra functions """

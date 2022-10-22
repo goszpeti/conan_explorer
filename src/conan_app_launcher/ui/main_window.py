@@ -115,8 +115,8 @@ class MainWindow(FluentWindow):
         self.main_general_settings_menu.add_menu_line()
         self.main_general_settings_menu.add_button_menu_entry(
             "Remove Locks", app.conan_api.remove_locks, "icons/remove-lock.png")
-        # self.main_general_settings_menu.add_button_menu_entry(
-        #     "Clean Conan Cache", self.open_cleanup_cache_dialog, "icons/cleanup.png")
+        self.main_general_settings_menu.add_button_menu_entry(
+            "Clean Conan Cache", self.open_cleanup_cache_dialog, "icons/cleanup.png")
         self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
 
@@ -151,8 +151,6 @@ class MainWindow(FluentWindow):
         loader.async_loading(self, self._load_job, (config_source_str,))
         loader.wait_for_finished()
 
-        # model loaded, now load the gui elements, which have a static model
-        self.app_grid.re_init(self.model.app_grid)
 
     def _load_job(self, config_source_str):
         # load ui file definitions

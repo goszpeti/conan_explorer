@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Type, TypeVar, Union
 
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
@@ -49,13 +49,17 @@ class AppGridView(QWidget):
     def apply_theme(self):
         self.re_init(self.model)
 
+    T = TypeVar('T')
+    def findChildren(self, type: Type[T]) -> List[T]:
+        return super().findChildren(type) # type: ignore
+
     def re_init(self, model: "UiAppGridModel", offset=0):
         """ To be called, when a new config file is loaded """
         self.model = model
-        # delete all tabs
-        tab_count = self.tab_widget.count()
-        for i in range(tab_count, 0, -1):
-            self.tab_widget.removeTab(i-1)
+        # clear all tabs and flag them for later deletion
+        self.tab_widget.clear()
+        for tab in self.get_tabs():
+            tab.deleteLater()
         self.load(offset)
 
     def re_init_all_app_links(self, force=False):
@@ -64,7 +68,7 @@ class AppGridView(QWidget):
 
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add
-        current_tab = self.tab_widget.widget(self.tab_widget.currentIndex())
+        current_tab: TabBase = self.tab_widget.widget(self.tab_widget.currentIndex()) # type: ignore
         current_tab.open_app_link_add_dialog()
 
     def on_tab_move(self):
@@ -143,7 +147,7 @@ class AppGridView(QWidget):
             self.model.save()
 
     def get_tabs(self) -> List[Union[TabGrid, TabList]]:
-        return self.tab_widget.findChildren(self.get_tab_type())
+        return self.findChildren(self.get_tab_type())
 
     def load(self, offset=0):
         """ Creates new layout """

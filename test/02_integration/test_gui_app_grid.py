@@ -2,6 +2,8 @@
 import os
 import tempfile
 from pathlib import Path
+from time import sleep
+from typing import List
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from test.conftest import TEST_REF, app_qt_fixture
 
@@ -153,7 +155,7 @@ def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
     app_qt_fixture.addWidget(main_gui)
     app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
-    tabs = main_gui.app_grid.tab_widget.findChildren(TabGrid)
+    tabs = main_gui.app_grid.get_tabs()
     tab_model = tabs[1].model
     apps_model = tab_model.apps
     prev_count = len(apps_model)
@@ -202,7 +204,7 @@ def test_remove_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture,
     app_qt_fixture.addWidget(main_gui)
     app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
-    tabs = main_gui.app_grid.tab_widget.findChildren(TabGrid)
+    tabs = main_gui.app_grid.get_tabs()
     tab_model = tabs[1].model
     apps_model = tab_model.apps
     prev_count = len(apps_model)
@@ -245,7 +247,7 @@ def test_add_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mo
     app_qt_fixture.addWidget(main_gui)
     app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
-    tabs = main_gui.app_grid.tab_widget.findChildren(TabGrid)
+    tabs = main_gui.app_grid.get_tabs()
     tab = tabs[1]
     tab_model = tab.model
     apps_model = tab_model.apps
@@ -293,15 +295,15 @@ def test_move_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, m
     app_qt_fixture.addWidget(main_gui)
     app_qt_fixture.waitExposed(main_gui, timeout=3000)
 
-    tabs = main_gui.app_grid.tab_widget.findChildren(TabGrid)
-    tab: TabGrid = tabs[1]
+    tabs = main_gui.app_grid.get_tabs()
+    tab = tabs[1]
     tab_model = tab.model
     apps_model = tab_model.apps
     app_link = tab.app_links[0]
     move_dialog = ReorderDialog(parent=main_gui, model=tab_model)
     move_dialog.show()
     sel_idx = tab_model.index(0, 0, QtCore.QModelIndex())
-    move_dialog._ui.list_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.Select)
+    move_dialog._ui.list_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.Select)
     move_dialog._ui.move_down_button.clicked.emit()
     # check model
     assert apps_model[1].name == app_link.model.name
@@ -310,7 +312,7 @@ def test_move_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, m
     assert apps_model[1].name == app_link.model.name
     # now the element is deselcted - select the same element again (now row 1)
     sel_idx = tab_model.index(1, 0, QtCore.QModelIndex())
-    move_dialog._ui.list_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.Select)
+    move_dialog._ui.list_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.Select)
     # now move back
     move_dialog._ui.move_up_button.clicked.emit()
     assert apps_model[0].name == app_link.model.name
@@ -345,7 +347,7 @@ def test_multiple_apps_ungreying(app_qt_fixture, base_fixture):
     app_qt_fixture.addWidget(main_gui)
     app_qt_fixture.waitExposed(main_gui, timeout=3000)
     # check app icons first two should be ungreyed, third is invalid->not ungreying
-    for tab in main_gui.app_grid.tab_widget.findChildren(TabGrid):
+    for tab in main_gui.app_grid.get_tabs():
         for test_app in tab.app_links:
             if test_app.model.name in ["App1 with spaces", "App1 new"]:
                 assert not test_app._app_button._greyed_out, repr(test_app.model.__dict__)
