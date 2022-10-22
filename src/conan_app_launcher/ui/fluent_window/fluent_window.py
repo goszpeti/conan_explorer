@@ -8,11 +8,12 @@ from enum import Enum
 from typing import Callable, Dict, Optional, Tuple, Type, TypeVar, Union
 
 # uses Logger, settings and theming related functions
+from conan_app_launcher import AUTOCLOSE_SIDE_MENU
 from conan_app_launcher.app import asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import is_windows_11
 
-from PyQt6.QtCore import (QEasingCurve, QEvent, QObject, QPoint, QByteArray,
+from PyQt6.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
                           QPropertyAnimation, QRect, QSize, Qt)
 from PyQt6.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap, QShortcut
 from PyQt6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
@@ -121,8 +122,8 @@ class SideSubMenu(QWidget, ThemedWidget):
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
         # type: ignore
         entry = self.findChildren(QWidget, gen_obj_name(name))
-        if len(entry) > 1:
-            return entry[0]
+        if len(entry) >= 1:
+            return entry[0] # type: ignore
         return None
 
     def add_custom_menu_entry(self, widget: QWidget, name: Optional[str] = None):
@@ -439,16 +440,16 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.page_title.setText(self.page_widgets.get_display_name_by_name(obj_name))
         self.ui.page_info_label.setText("")
 
+        # update page settings view
         side_menu = self.page_widgets.get_side_menu_by_name(obj_name)
         if not side_menu:
-            # check page settings at minimize if not needed
             self.ui.right_menu_top_content_sw.hide()
         else:
             self.ui.right_menu_top_content_sw.show()
             self.ui.right_menu_top_content_sw.setCurrentWidget(side_menu)
-
-        if self.ui.settings_button.isChecked():
-           self.toggle_right_menu()
+        if AUTOCLOSE_SIDE_MENU:
+            if self.ui.settings_button.isChecked():
+               self.toggle_right_menu()
 
     def toggle_left_menu(self):
         width = self.ui.left_menu_frame.width()
