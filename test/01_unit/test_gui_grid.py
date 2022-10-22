@@ -75,7 +75,7 @@ def test_AppEditDialog_display_values(qtbot, base_fixture):
     diag._ui.name_line_edit.setText("NewName")
 
     # press cancel - no values should be saved
-    qtbot.mouseClick(diag._ui.button_box.buttons()[1], Qt.LeftButton)
+    qtbot.mouseClick(diag._ui.button_box.buttons()[1], Qt.MouseButton.LeftButton)
 
     assert app_info.name == "test"
 
@@ -88,6 +88,8 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     - resolves the correct relative path for executables and forbids non-package-folder paths
     - resolves the correct relative path for executables and sets non-package-folder paths to the abs. path
     """
+    os.system(f"conan install {TEST_REF}") # need local package
+
     app.conan_api.init_api()
 
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
@@ -135,7 +137,7 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
                         return_value=[str(selection)])
     
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                        return_value=QtWidgets.QMessageBox.Accepted)
+                        return_value=QtWidgets.QMessageBox.DialogCode.Accepted)
     diag._ui.executable_browse_button.clicked.emit()
     # entry not changed
     assert diag._ui.execpath_line_edit.text() == exe_rel_path.replace("\\", "/")
@@ -253,7 +255,7 @@ def test_AppLink_open(qtbot, base_fixture):
     qtbot.addWidget(root_obj)
 
     qtbot.waitExposed(root_obj)
-    qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
+    qtbot.mouseClick(app_ui._app_button, Qt.MouseButton.LeftButton)
     sleep(5)  # wait for terminal to spawn
     # check pid of created process
     found_process = None

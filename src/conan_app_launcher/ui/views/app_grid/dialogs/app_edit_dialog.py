@@ -60,7 +60,13 @@ class AppEditDialog(QDialog):
 
         # for some reason OK is not connected at default
         self._ui.button_box.accepted.connect(self.save_data)
+        self._ui.button_box.accepted.connect(self.cleanup)
+        self._ui.button_box.rejected.connect(self.cleanup)
+
         self.adjustSize()
+
+    def cleanup(self) -> None:
+        self._ui.conan_ref_line_edit.cleanup()
 
     def toggle_browse_buttons(self):
         if not self._ui.conan_ref_line_edit.is_valid:

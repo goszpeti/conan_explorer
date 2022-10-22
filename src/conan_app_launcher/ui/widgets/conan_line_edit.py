@@ -37,7 +37,7 @@ class ConanRefLineEdit(QLineEdit):
         self.completer().model().setStringList(list(combined_refs)) # type: ignore
         super().showEvent(event)
 
-    def __del__(self):
+    def cleanup(self):
         if self._completion_thread:
             self._completion_thread.join(1)
 
