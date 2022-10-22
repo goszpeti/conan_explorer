@@ -2,7 +2,7 @@
 """ Use constants in class, so they don't need to be separately accessed """
 
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Tuple, Union
 
 from conan_app_launcher import PathLike
 
@@ -59,6 +59,13 @@ class SettingsInterface(ABC):
     @abstractmethod
     def save(self):
         """ Save all user modifiable settings. """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_settings_from_node(self, name: str) -> Tuple[str]:
+        """ Get all settings names from a hierachical leaf.
+        If it is non-hierarchical, the name arg should be ignored and all settings returned.
+        """
         raise NotImplementedError
 
     @abstractmethod

@@ -1,7 +1,7 @@
 import configparser
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from conan_app_launcher import PathLike
 from conan_app_launcher.app.logger import Logger
@@ -10,14 +10,16 @@ from . import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS, DISPL
                ENABLE_APP_COMBO_BOXES, FONT_SIZE, GUI_STYLE, GUI_STYLE_LIGHT,
                LAST_CONFIG_FILE, WINDOW_SIZE, SettingsInterface)
 
+GENERAL_SECTION_NAME = "General"
+VIEW_SECTION_NAME = "View"
+PLUGINS_SECTION_NAME = "Plugins"
+
 def application_settings_spec() -> Dict[str, Dict[str, Any]]:
-    _GENERAL_SECTION_NAME = "General"
-    _VIEW_SECTION_NAME = "View"
     return {
-    _GENERAL_SECTION_NAME: {
+    GENERAL_SECTION_NAME: {
             LAST_CONFIG_FILE: "",
             },
-    _VIEW_SECTION_NAME: {
+    VIEW_SECTION_NAME: {
             FONT_SIZE: 12,
             GUI_STYLE: GUI_STYLE_LIGHT,
             ENABLE_APP_COMBO_BOXES: False,
@@ -28,18 +30,23 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
             WINDOW_SIZE: "0,0,800,600",
             CONSOLE_SPLIT_SIZES: "413,126"
             },
-        }
+    PLUGINS_SECTION_NAME: {
+        "local_package_explorer": "conan_app_launcher.ui.views.package_explorer.LocalConanPackageExplorer"
+    }
+
+}
 
 class IniSettings(SettingsInterface):
     """
     Settings mechanism with an ini file to use as a storage.
     File and entries are automatically created from the default value of the class.
-    All entries need to be entered in the default values, no runtime registration.
+    User defined keys are now allowed for nodes specified incustom_key_enabled_sections.
     Settings should be accessed via their constant name.
     """
 
     def __init__(self, ini_file_path: Optional[PathLike], auto_save=True, 
-                 default_values=application_settings_spec()):
+                 default_values=application_settings_spec(),
+                 custom_key_enabled_sections = [PLUGINS_SECTION_NAME]):
         """
         Read config.ini file to load settings.
         Create, if not existing, but the directory must already exist!
@@ -50,7 +57,7 @@ class IniSettings(SettingsInterface):
         else:
             self._ini_file_path = Path(ini_file_path)
         self._auto_save = auto_save
-
+        self._custom_key_enabled_sections = custom_key_enabled_sections
         self._logger = Logger()
         self._parser = configparser.ConfigParser()
         # create Settings ini file, if not available for first start
@@ -67,6 +74,9 @@ class IniSettings(SettingsInterface):
 
     def set_auto_save(self, value):
         self._auto_save = value
+
+    def get_settings_from_node(self, name: str) -> Tuple[str]:
+        return tuple(self._values.get(name, {}).keys())
 
     def get(self, name: str) -> Union[str, int, float, bool]:
         """ Get a specific setting """
@@ -121,15 +131,19 @@ class IniSettings(SettingsInterface):
         update_needed = False
         try:
             self._parser.read(self._ini_file_path, encoding="UTF-8")
-            for section in self._values.keys():
-                if not self._values[section]:  # empty section - this is a user filled dict
-                    update_needed |= self._read_dict_setting(section)
-                for setting in self._values[section]:
-                    update_needed |= self._read_setting(setting, section)
+            for section_name in self._values.keys():
+                setting_keys = set(list(self._values[section_name].keys()))
+                if section_name in self._custom_key_enabled_sections:
+                    setting_keys = setting_keys.union(set(self._get_section(section_name).keys()))
+                if not self._values[section_name]:  # empty section - this is a user filled dict
+                    update_needed |= self._read_dict_setting(section_name)
+                for setting in setting_keys:
+                    update_needed |= self._read_setting(setting, section_name)
+                
         except Exception as e:
             Logger().error(
                 f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
-            os.remove(str(self._ini_file_path))  # let an exeception to the user, file can't be deleted
+            # os.remove(str(self._ini_file_path))  # let an exeception to the user, file can't be deleted
 
         # write file - to record defaults, if missing
         if not update_needed:
@@ -159,7 +173,10 @@ class IniSettings(SettingsInterface):
         Returns, if file needs tobe updated
         """
         section = self._get_section(section_name)
-        default_value = self.get(setting_name)
+        try:
+            default_value = self.get(setting_name)
+        except:
+            default_value = ""
         if isinstance(default_value, dict):  # no dicts supported directly
             return False
 
@@ -182,7 +199,7 @@ class IniSettings(SettingsInterface):
         # autosave must be disabled, otherwise we overwrite the other settings in the file
         auto_save = self._auto_save
         self._auto_save = False
-        self.set(setting_name, value)
+        self._values[section_name][setting_name] = value
         self._auto_save = auto_save
         return False
 

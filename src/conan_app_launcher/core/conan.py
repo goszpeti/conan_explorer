@@ -4,18 +4,21 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
-from conans.client.cache.remote_registry import Remote
 from conans.client.output import ConanOutput
 
 if TYPE_CHECKING:
     from typing import TypedDict
+
+    from conans.client.cache.remote_registry import Remote
 else:
     try:
         from typing import TypedDict
     except ImportError:
         from typing_extensions import TypedDict
+
+from conans.client.conan_api import (ClientCache, ConanAPIV1, UserIO,
+                                     client_version)
 from conans.errors import ConanException
-from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO, client_version
 from conans.model.ref import ConanFileReference, PackageReference
 from conans.paths.package_layouts.package_editable_layout import \
     PackageEditableLayout
@@ -101,7 +104,7 @@ class ConanApi():
         self.conan.remove_locks()
         Logger().info("Removed Conan cache locks.")
 
-    def get_remotes(self, include_disabled=False) -> List[Remote]:
+    def get_remotes(self, include_disabled=False) -> List["Remote"]:
         remotes = []
         try:
             if include_disabled:

@@ -5,30 +5,37 @@ import tempfile
 from pathlib import Path
 
 from conan_app_launcher.settings import *
-from conan_app_launcher.settings.ini_file import IniSettings
+from conan_app_launcher.settings.ini_file import IniSettings, PLUGINS_SECTION_NAME
+from test.conftest import PathSetup
 
 
-def test_read_from_file(base_fixture):
+def test_read_from_file():
     """
     Tests, that the settings file is read by using a string setting.
     Correct setting value expected.
     """
-    sets = IniSettings(base_fixture.testdata_path / "settings/read/config.ini")
+    paths = PathSetup()
+
+    sets = IniSettings(paths.testdata_path / "settings/read/config.ini")
     assert sets.get(LAST_CONFIG_FILE) == "C:/work/app_config.json"
     assert sets.get_bool(DISPLAY_APP_CHANNELS) == False
     assert sets.get_bool(DISPLAY_APP_VERSIONS) == False
     assert sets.get_bool(DISPLAY_APP_USERS) == False
+    assert "local_package_explorer" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
+    assert "conan_search" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
 
 
-def test_save_to_file(base_fixture):
+def test_save_to_file():
     """
     Tests, that writing a value works and untouched entries remain.
     Correctly read back setting value expected.
     """
+    paths = PathSetup()
+
     # copy testdata to temp
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
-    shutil.copy(base_fixture.testdata_path / "settings/write/config.ini", temp_dir)
+    shutil.copy(paths.testdata_path / "settings/write/config.ini", temp_dir)
     sets = IniSettings(Path(temp_ini_path))
 
     last_config_file = "D:/file.ini"

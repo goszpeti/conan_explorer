@@ -14,13 +14,13 @@ from subprocess import CalledProcessError, check_output
 from threading import Thread
 from unittest import mock
 
-import conan_app_launcher.app.logger as logger
 import psutil
 import pytest
+import conan_app_launcher.app as app # resolve circular dependencies
 from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path
 from conan_app_launcher.core import ConanApi, ConanInfoCache, ConanWorker
-from conan_app_launcher.settings import *
 from conan_app_launcher.ui.common import remove_qt_logger
+from conan_app_launcher.settings import *
 from conan_app_launcher.ui.main_window import MainWindow
 
 from conans.model.ref import ConanFileReference
@@ -184,7 +184,7 @@ def app_qt_fixture(qtbot):
     yield qtbot
     import conan_app_launcher.app as app
     # remove logger, so the logger doesn't log into nonexistant qt gui
-    remove_qt_logger(logger.Logger(), MainWindow.qt_logger_name)
+    remove_qt_logger(app.Logger(), MainWindow.qt_logger_name)
     # finish worker - otherwise errors and crashes will occur!
     if app.conan_worker:
         app.conan_worker.finish_working(3)
@@ -211,7 +211,7 @@ def base_fixture():
     # Teardown
 
     # remove logger, so the logger doesn't log into nonexistant qt gui
-    remove_qt_logger(logger.Logger(), MainWindow.qt_logger_name)
+    remove_qt_logger(app.Logger(), MainWindow.qt_logger_name)
     # finish worker - otherwise errors and crashes will occur!
     if app.conan_worker:
         app.conan_worker.finish_working(3)
