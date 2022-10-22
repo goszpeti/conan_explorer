@@ -1,16 +1,14 @@
-from conan_app_launcher.app.logger import Logger
-import conan_app_launcher.app as app
-
-import os
 import configparser
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional
-from PyQt6.QtWidgets import QWidget
 
-from PyQt6.QtCore import (pyqtSignal, pyqtBoundSignal)
-
+import conan_app_launcher.app as app
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QWidget
 
 from .fluent_window import ThemedWidget
 

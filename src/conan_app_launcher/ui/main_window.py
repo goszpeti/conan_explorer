@@ -1,9 +1,9 @@
-from dataclasses import dataclass
 import datetime
 import importlib
+import sys
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import rmtree
-import sys
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
@@ -17,20 +17,21 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES,
                                          DISPLAY_APP_VERSIONS,
                                          ENABLE_APP_COMBO_BOXES, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
-                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, 
-                                         WINDOW_SIZE)
+                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE,
+                                         PLUGINS_SECTION_NAME, WINDOW_SIZE)
 from conan_app_launcher.ui.fluent_window.plugins import PluginFile
 from conan_app_launcher.ui.views.app_grid.tab import TabGrid
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
-from PyQt6.QtCore import QRect, pyqtSignal, pyqtSlot, pyqtBoundSignal
+from PyQt6.QtCore import QRect, pyqtBoundSignal, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtWidgets import QApplication, QFileDialog
 
 from .common import (AsyncLoader, activate_theme, init_qt_logger,
                      remove_qt_logger)
-from .fluent_window import FluentWindow, SideSubMenu, PluginInterface
+from .fluent_window import FluentWindow, PluginInterface, SideSubMenu
 from .model import UiApplicationModel
-from .views import AppGridView, AboutPage, PluginsPage
+from .views import AboutPage, AppGridView, PluginsPage
+
 
 # Signal names
 @dataclass
