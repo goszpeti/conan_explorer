@@ -229,9 +229,9 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     # need new id
     profiles_path = base_fixture.testdata_path / "conan" / "profile"
     if platform.system() == "Windows": 
-        os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/linux")
+        assert 0 == os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/linux")
     else:
-        os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/windows")
+        assert 0 == os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/windows")
 
     pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
     print(f"Found packages: {str(pkgs)}")
