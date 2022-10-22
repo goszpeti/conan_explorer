@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import platform
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL
+import pytest_check as check
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
@@ -94,6 +95,8 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
 
     cfr = ConanFileReference.loads(TEST_REF)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
+    assert id
+    assert pkg_path.exists()
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
@@ -209,7 +212,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     data.setUrls([url])
     _qapp_instance.clipboard().setMimeData(data)
     lpe._pkg_file_exp_ctrl.on_file_paste()  # check new file
-    assert (root_path / config_path.name).exists()
+    check.is_true((root_path / config_path.name).exists())
 
     # check delete
     Logger().debug("delete")
@@ -219,19 +222,20 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     lpe._pkg_file_exp_ctrl.on_file_delete()  # check new file?
-    assert not (root_path / config_path.name).exists()
+    check.is_false((root_path / config_path.name).exists())
 
 
     # Switch to another package view
     # need new id
     profiles_path = base_fixture.testdata_path / "conan" / "profile"
     if platform.system() == "Windows": 
-
         os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/linux")
     else:
         os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/windows")
 
     pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
+    print(f"Found packages: {str(pkgs)}")
+    assert len(pkgs)
     another_id = ""
     for pkg in pkgs:
         if pkg.get("id") != id:
