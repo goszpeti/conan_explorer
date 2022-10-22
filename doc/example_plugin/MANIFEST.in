@@ -1,0 +1,2 @@
+include LICENSE
+global-include *.ui *png *ini
