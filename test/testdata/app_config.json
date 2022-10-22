@@ -9,17 +9,14 @@
                     "conan_ref": "example/9.9.9@local/testing",
                     "executable": "bin/python",
                     "icon": "NonExistantIcon.png",
-                    "is_console_application": true,
                     "args": "-n name",
-                    "conan_options": []
+                    "conan_options": [],
+                    "is_console_application": true
                 },
                 {
                     "name": "App2",
                     "conan_ref": "example/1.0.0@_/_",
                     "executable": "bin/python",
-                    "icon": "icon.ico",
-                    "is_console_application": false,
-                    "args": "",
                     "conan_options": [
                         {
                             "name": "shared",
@@ -29,7 +26,8 @@
                             "name": "Option2",
                             "value": "Value2"
                         }
-                    ]
+                    ],
+                    "icon": "icon.ico"
                 }
             ]
         },
@@ -40,9 +38,7 @@
                     "name": "App2",
                     "conan_ref": "example/1.0.0@_/_",
                     "executable": "bin/app2.exe",
-                    "icon": "./myicon.png",
-                    "is_console_application": false,
-                    "args": "",
+                    "icon": "//myicon.png",
                     "conan_options": []
                 }
             ]
