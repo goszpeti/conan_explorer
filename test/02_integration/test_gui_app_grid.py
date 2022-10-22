@@ -161,7 +161,7 @@ def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
 
     # check that no changes happens on cancel
     mocker.patch.object(AppEditDialog, 'exec',
-                        return_value=QtWidgets.QDialog.Rejected)
+                        return_value=QtWidgets.QDialog.DialogCode.Rejected)
     app_link.open_edit_dialog()
     config_tabs = JsonUiConfig(ui_config_fixture).load().app_grid.tabs
     assert config_tabs[0].name == tab_model.name == "Basics"  # just safety that it is the same tab

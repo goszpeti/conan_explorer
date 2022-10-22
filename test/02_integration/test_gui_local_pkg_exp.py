@@ -44,13 +44,13 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     # check cancel does nothing
     dialog = ConanRemoveDialog(None, TEST_REF_OFFICIAL, "", None)
     dialog.show()
-    dialog.button(dialog.Cancel).clicked.emit()
+    dialog.button(dialog.StandardButton.Cancel).clicked.emit()
 
     found_pkg = app.conan_api.find_best_local_package(cfr)
     assert found_pkg.get("id", "")
 
     # check without pkg id
-    dialog.button(dialog.Yes).clicked.emit()
+    dialog.button(dialog.StandardButton.Yes).clicked.emit()
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
     # check, that the package is deleted
@@ -61,7 +61,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     os.system(f"conan install {TEST_REF_OFFICIAL}")
     dialog = ConanRemoveDialog(None, TEST_REF_OFFICIAL, found_pkg.get("id", ""), None)
     dialog.show()
-    dialog.button(dialog.Yes).clicked.emit()
+    dialog.button(dialog.StandardButton.Yes).clicked.emit()
 
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
@@ -185,7 +185,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
 
     # check "Add AppLink to AppGrid"
     mocker.patch.object(QtWidgets.QInputDialog, 'exec',
-                        return_value=QtWidgets.QInputDialog.Accepted)
+                        return_value=QtWidgets.QInputDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QInputDialog, 'textValue',
                         return_value="Basics")
     mocker.patch.object(AppEditDialog, 'exec', return_value=QtWidgets.QDialog.DialogCode.Accepted)

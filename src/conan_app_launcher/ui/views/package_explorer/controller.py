@@ -191,7 +191,7 @@ class PackageSelectionController(QObject):
             for i in range(len(item.child_items)):
                 if item.child_items[i].item_data[0].get("id", "") == pkg_id:
                     break
-            internal_sel_index = proxy_index.child(i, 0) # type: ignore
+            internal_sel_index = self._model.index(i, 0, proxy_index)
         else:
             internal_sel_index = proxy_index
 

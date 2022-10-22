@@ -115,7 +115,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         # mock OK
         remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
         mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                            return_value=QtWidgets.QMessageBox.Cancel)
+                            return_value=QtWidgets.QMessageBox.StandardButton.Cancel)
         conan_conf_view._ui.remote_remove.click()
         assert conan_conf_view._remotes_controller._select_remote("local4")
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
@@ -130,7 +130,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixtur
         # mock OK
         remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
         mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteEditDialog, 'exec',
-                            return_value=QtWidgets.QDialog.Rejected)
+                            return_value=QtWidgets.QDialog.DialogCode.Rejected)
         conan_conf_view._ui.remote_add.click()
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
@@ -195,7 +195,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     assert conan_conf_view._remotes_controller._select_remote(TEST_REMOTE_NAME)
 
     mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteLoginDialog, 'exec',
-                        return_value=QtWidgets.QDialog.Rejected)
+                        return_value=QtWidgets.QDialog.DialogCode.Rejected)
     conan_conf_view._ui.remote_login.click()
     assert conan.get_remote_user_info(TEST_REMOTE_NAME) == ("demo", True)  # still logged in
 

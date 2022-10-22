@@ -2,10 +2,11 @@ from threading import Thread
 from typing import Callable, List
 
 import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
 from conans.model.ref import ConanFileReference, PackageReference
-from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.QtWidgets import QLineEdit, QCompleter
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QCompleter, QLineEdit
 
 
 class ConanRefLineEdit(QLineEdit):
@@ -88,11 +89,14 @@ class ConanRefLineEdit(QLineEdit):
     def load_completion(self, text: str):
         recipes = app.conan_api.search_query_in_remotes(f"{text}*")  # can take very long time
         if app.conan_api: # program can shut down and conan_api destroyed
-            app.conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
-            self.completion_finished.emit()
-            self._remote_refs = app.conan_api.info_cache.get_all_remote_refs()
-            # add two list together -> filter is applied later
-            current_completions: List[str] = self.completer().model().stringList() # type: ignore
-            new_completions = set(self._remote_refs + current_completions)
-            if len(new_completions) > len(current_completions):
-                self.completer().model().setStringList(list(new_completions)) # type: ignore
+            try:
+                app.conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
+                self.completion_finished.emit()
+                self._remote_refs = app.conan_api.info_cache.get_all_remote_refs()
+                # add two list together -> filter is applied later
+                current_completions: List[str] = self.completer().model().stringList() # type: ignore
+                new_completions = set(self._remote_refs + current_completions)
+                if len(new_completions) > len(current_completions):
+                    self.completer().model().setStringList(list(new_completions)) # type: ignore
+            except Exception as e:
+                Logger().error(f"Failed load completion: {str(e)}")
