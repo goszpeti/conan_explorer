@@ -224,13 +224,16 @@ class Ui_MainWindow(object):
         self.console.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.console.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
         self.console.setAutoFormatting(QtWidgets.QTextEdit.AutoFormattingFlag.AutoAll)
+        self.console.setTabChangesFocus(True)
         self.console.setReadOnly(True)
         self.console.setHtml("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.875pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>")
-        # self.console.setTabStopWidth(200)
+"hr { height: 1px; border-width: 0; }\n"
+"li.unchecked::marker { content: \"\\2610\"; }\n"
+"li.checked::marker { content: \"\\2612\"; }\n"
+"</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:\'MS Shell Dlg 2\'; font-size:7.875pt;\"><br /></p></body></html>")
         self.console.setOpenExternalLinks(True)
         self.console.setObjectName("console")
         self.page_footer_layout.addWidget(self.console)
@@ -265,7 +268,7 @@ class Ui_MainWindow(object):
         self.right_menu_scroll_area.setWidgetResizable(True)
         self.right_menu_scroll_area.setObjectName("right_menu_scroll_area")
         self.right_menu_scroll_area_widgets = QtWidgets.QWidget()
-        self.right_menu_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 93, 744))
+        self.right_menu_scroll_area_widgets.setGeometry(QtCore.QRect(0, 0, 93, 743))
         self.right_menu_scroll_area_widgets.setMinimumSize(QtCore.QSize(0, 0))
         self.right_menu_scroll_area_widgets.setObjectName("right_menu_scroll_area_widgets")
         self.right_menu_scroll_area_widgets_layout = QtWidgets.QVBoxLayout(self.right_menu_scroll_area_widgets)
@@ -369,7 +372,6 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setBold(True)
         font.setItalic(False)
-        font.setWeight(75)
         self.title_label.setFont(font)
         self.title_label.setStyleSheet("font: bold")
         self.title_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom|QtCore.Qt.AlignmentFlag.AlignLeading|QtCore.Qt.AlignmentFlag.AlignLeft)
