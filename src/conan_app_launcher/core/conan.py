@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Dict, List, Set
 import conans
 
 from conan_app_launcher.app.logger import Logger
-if conans.__version__.startswith("1"):
+
+try:
     from conans.model.ref import ConanFileReference, PackageReference
     from conans.paths.package_layouts.package_editable_layout import \
         PackageEditableLayout
-
-else:
+except:
     from conans.model.recipe_ref import RecipeReference as ConanFileReference
     from conans.model.package_ref import RecipeReference as PackageReference
 
@@ -53,7 +53,6 @@ class LoggerWriter:
     def flush(self):
         """ For interface compatiblity """
         pass
-
 
 class ConanCleanup():
 

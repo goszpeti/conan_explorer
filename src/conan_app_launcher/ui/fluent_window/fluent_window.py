@@ -5,11 +5,15 @@ if platform.system() == "Windows":
     from ctypes.wintypes import MSG
 
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union, runtime_checkable
-try:
-    from typing_extensions import Protocol, TypedDict
-except ImportError:
-    from typing import Protocol, TypedDict
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+
+if TYPE_CHECKING:
+    from typing import TypedDict, Protocol
+else:
+    try:
+        from typing_extensions import Protocol, TypedDict, runtime_checkable
+    except ImportError:
+        from typing import Protocol, TypedDict, runtime_checkable
 
 # uses Logger, settings and theming related functions
 from conan_app_launcher import AUTOCLOSE_SIDE_MENU

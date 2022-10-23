@@ -8,7 +8,7 @@ from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES, SettingsInterfac
 
 if TYPE_CHECKING:
     from typing import TypedDict, Protocol
-    from .conan import ConanApi
+    from ..core import ConanApi
 else:
     try:
         from typing import TypedDict, Protocol
