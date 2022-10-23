@@ -195,7 +195,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     # select local, invoke dialog, click cancel -> remote user info should not change
     assert conan_conf_view._remotes_controller._select_remote(TEST_REMOTE_NAME)
 
-    mocker.patch.object(conan_app_launcher.ui.views.conan_conf.dialogs.RemoteLoginDialog, 'exec',
+    mocker.patch.object(QtWidgets.QDialog, 'exec',
                         return_value=QtWidgets.QDialog.DialogCode.Rejected)
     conan_conf_view._ui.remote_login.click()
     assert conan.get_remote_user_info(TEST_REMOTE_NAME) == ("demo", True)  # still logged in
