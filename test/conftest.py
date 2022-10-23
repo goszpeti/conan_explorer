@@ -24,7 +24,6 @@ from conan_app_launcher.settings import *
 from conan_app_launcher.ui.main_window import MainWindow
 
 from conans.model.ref import ConanFileReference
-from PyQt6 import QtCore, QtWidgets
 
 def get_scripts_path():
     scripts_path = Path(distutils.sysconfig.get_config_var("BINDIR"))

@@ -99,6 +99,16 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     assert id
     assert pkg_path.exists()
+    # Switch to another package view
+    # need new id
+    profiles_path = base_fixture.testdata_path / "conan" / "profile"
+    print("*** Installing package from other platform ***")
+    if platform.system() == "Windows":
+        assert 0 == os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/linux")
+    else:
+        assert 0 == os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/windows")
+
+
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
@@ -225,15 +235,6 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     lpe._pkg_file_exp_ctrl.on_file_delete()  # check new file?
     check.is_false((root_path / config_path.name).exists())
-
-
-    # Switch to another package view
-    # need new id
-    profiles_path = base_fixture.testdata_path / "conan" / "profile"
-    if platform.system() == "Windows": 
-        assert 0 == os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/linux")
-    else:
-        assert 0 == os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/windows")
 
     pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
     print(f"Found packages: {str(pkgs)}")
