@@ -15,7 +15,7 @@ import psutil
 from conan_app_launcher import PKG_NAME
 from conan_app_launcher.core.system import (calc_paste_same_dir_name,
                                             copy_path_with_overwrite,
-                                            delete_path, execute_app,
+                                            delete_path, execute_app, find_program_in_windows,
                                             open_file, open_in_file_manager,
                                             run_file)
 
@@ -325,3 +325,13 @@ def test_delete():
         f.write("test")
     delete_path(test_dir)
     assert not test_dir.exists()
+
+
+def test_find_program_in_registry():
+
+    found_path = find_program_in_windows("Git", True)
+    if platform.system == "Linux":
+        assert not found_path
+    else:
+        assert os.path.exists(found_path)
+ 
