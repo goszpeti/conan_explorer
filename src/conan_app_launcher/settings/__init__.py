@@ -13,6 +13,7 @@ PLUGINS_SECTION_NAME = "Plugins"
 # Constants for option names (value is the entry name/id)
 # General
 LAST_CONFIG_FILE = "last_config_file"
+FILE_EDITOR_EXECUTABLE = "file_editor"
 # Views
 DISPLAY_APP_VERSIONS = "disp_app_versions"
 DISPLAY_APP_USERS = "disp_app_users"

@@ -15,10 +15,11 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES,
                                          DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
-                                         ENABLE_APP_COMBO_BOXES, FONT_SIZE,
+                                         ENABLE_APP_COMBO_BOXES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
                                          GUI_STYLE, GUI_STYLE_DARK,
                                          GUI_STYLE_LIGHT, LAST_CONFIG_FILE,
                                          PLUGINS_SECTION_NAME, WINDOW_SIZE)
+from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
 from conan_app_launcher.ui.fluent_window.plugins import PluginFile
 from conan_app_launcher.ui.views.app_grid.tab import TabGrid
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
@@ -64,6 +65,7 @@ class MainWindow(FluentWindow):
         init_qt_logger(Logger(), self.qt_logger_name, self.log_console_message)
         self.log_console_message.connect(self.write_log)
 
+        # Default pages
         self.about_page = AboutPage(self)
         self.plugins_page = PluginsPage(self)
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
@@ -104,7 +106,8 @@ class MainWindow(FluentWindow):
             quicklaunch_submenu.add_toggle_menu_entry(
                 "Show channel", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
 
-        self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.png")
+        self.main_general_settings_menu.add_button_menu_entry("Select file editor",
+                                                              self.open_file_editor_selection_dialog, "icons/edit_file.png")
         view_settings_submenu = SideSubMenu(self.ui.right_menu_bottom_content_sw, "View")
 
         self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/package_settings.png")
@@ -118,11 +121,12 @@ class MainWindow(FluentWindow):
         view_settings_submenu.add_toggle_menu_entry("Dark Mode", self.on_theme_changed, dark_mode_enabled)
 
         self.main_general_settings_menu.add_menu_line()
-        self.main_general_settings_menu.add_button_menu_entry(
-            "Remove Locks", app.conan_api.remove_locks, "icons/remove-lock.png")
-        self.main_general_settings_menu.add_button_menu_entry(
-            "Clean Conan Cache", self.open_cleanup_cache_dialog, "icons/cleanup.png")
+        self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
+                                                                app.conan_api.remove_locks, "icons/remove-lock.png")
+        self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",
+                                                                self.open_cleanup_cache_dialog, "icons/cleanup.png")
         self.main_general_settings_menu.add_menu_line()
+        self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.png")
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
 
     def closeEvent(self, event):  # override QMainWindow
@@ -269,6 +273,12 @@ class MainWindow(FluentWindow):
             self.model.loadf(new_file)
             # conan works, model can be loaded
             self.app_grid.re_init(self.model.app_grid)  # loads tabs
+
+    @pyqtSlot()
+    def open_file_editor_selection_dialog(self):
+        dialog = FileEditorSelDialog(self)
+        if dialog.exec() == QFileDialog.DialogCode.Accepted:
+            app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
 
     @pyqtSlot()
     def on_add_link(self):

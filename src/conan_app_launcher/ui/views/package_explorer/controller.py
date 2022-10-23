@@ -9,7 +9,8 @@ from conan_app_launcher.core import (open_cmd_in_path, open_file,
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.core.system import (calc_paste_same_dir_name,
                                             copy_path_with_overwrite,
-                                            delete_path)
+                                            delete_path, execute_cmd)
+from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common import AsyncLoader, FileSystemModel
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
@@ -284,6 +285,13 @@ class PackageFileExplorerController(QObject):
         if selected_path.is_file():
             selected_path = selected_path.parent
         return open_cmd_in_path(selected_path)
+
+    def on_edit_file(self):
+        selected_path = Path(self.get_selected_pkg_path())
+        if not selected_path.is_file():
+            return
+        editor = app.active_settings.get_string(FILE_EDITOR_EXECUTABLE)
+        execute_cmd([editor, str(selected_path)], False)
 
     def on_file_delete(self):
         path_to_delete = Path(self.get_selected_pkg_path())

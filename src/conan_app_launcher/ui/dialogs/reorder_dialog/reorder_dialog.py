@@ -1,24 +1,26 @@
 
 import abc
 from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
-from PyQt6.QtCore import Qt, QItemSelectionModel, QAbstractListModel, QModelIndex
+from PyQt6.QtCore import QItemSelectionModel, QModelIndex
 from PyQt6.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
 from PyQt6.QtGui import QIcon
 
 from .reorder_dialog_ui import Ui_rearrange_dialog
 
-try:
-    from typing_extensions import Protocol
-except ImportError:
+if TYPE_CHECKING:
     from typing import Protocol
+else:
+    try:
+        from typing import Protocol
+    except ImportError:
+        from typing_extensions import Protocol
 
 current_dir = Path(__file__).parent
 class ReorderingModel(Protocol):
-
     def index(self, row, column, parent):
         ...
 

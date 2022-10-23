@@ -4,8 +4,6 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 
-from conans.client.output import ConanOutput
-
 if TYPE_CHECKING:
     from typing import TypedDict
 
@@ -18,6 +16,7 @@ else:
 
 from conans.client.conan_api import (ClientCache, ConanAPIV1, UserIO,
                                      client_version)
+from conans.client.output import ConanOutput
 from conans.errors import ConanException
 from conans.model.ref import ConanFileReference, PackageReference
 from conans.paths.package_layouts.package_editable_layout import \

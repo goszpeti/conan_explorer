@@ -5,15 +5,17 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from conan_app_launcher import PathLike, base_path
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.core.system import get_default_file_editor
 
 from . import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS,
-               ENABLE_APP_COMBO_BOXES, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_LIGHT,
+               ENABLE_APP_COMBO_BOXES, FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_LIGHT,
                LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
 
 def application_settings_spec() -> Dict[str, Dict[str, Any]]:
     return {
     GENERAL_SECTION_NAME: {
             LAST_CONFIG_FILE: "",
+        FILE_EDITOR_EXECUTABLE: get_default_file_editor(),
             },
     VIEW_SECTION_NAME: {
             FONT_SIZE: 12,

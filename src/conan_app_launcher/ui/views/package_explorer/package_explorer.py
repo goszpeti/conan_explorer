@@ -111,6 +111,12 @@ class LocalConanPackageExplorer(PluginInterface):
         self.file_cntx_menu.addAction(self.copy_as_path_action)
         self.copy_as_path_action.triggered.connect(self._pkg_file_exp_ctrl.on_copy_file_as_path)
 
+        self.open_terminal_action = QAction("Edit file", self)
+        self.open_terminal_action.setIcon(QIcon(get_themed_asset_image("icons/edit_file.png")))
+        self.file_cntx_menu.addAction(self.open_terminal_action)
+        self.open_terminal_action.triggered.connect(self._pkg_file_exp_ctrl.on_edit_file)
+
+
         self.open_terminal_action = QAction("Open terminal here", self)
         self.open_terminal_action.setIcon(QIcon(get_themed_asset_image("icons/cmd.png")))
         self.file_cntx_menu.addAction(self.open_terminal_action)

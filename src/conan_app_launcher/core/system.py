@@ -233,3 +233,43 @@ def calc_paste_same_dir_name(dst: Path, index=1):
         if index == 1:  # if file does not exist
             return dst
         return Path("NULL")
+
+def get_default_file_editor():
+    if platform.system() == "Windows":
+        editor_executable = find_program_in_windows("Notepad++", partial_match=True, key_to_find="DisplayIcon")
+        if Path(editor_executable).exists():
+            return editor_executable
+        return "notepad.exe"
+    else:
+        return "gedit" # distro dependent, but make something
+
+
+def find_program_in_windows(app_name: str, partial_match=False, key_to_find="InstallLocation") -> str:
+    if not platform.system() == "Windows":
+        return ""
+
+    import winreg
+    arch_keys = {winreg.KEY_WOW64_32KEY, winreg.KEY_WOW64_64KEY}
+    for arch_key in arch_keys:
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
+                r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", 0, winreg.KEY_READ | arch_key)
+        for i in range(0, winreg.QueryInfoKey(key)[0]):
+            sub_key_name = winreg.EnumKey(key, i)
+            sub_key = winreg.OpenKey(key, sub_key_name)
+            try:
+                current_app_name = winreg.QueryValueEx(sub_key, "DisplayName")[0]
+                if partial_match:
+                    if app_name in current_app_name:
+                        location = winreg.QueryValueEx(sub_key, key_to_find)[0]
+                        sub_key.Close()
+                        return location
+                if app_name == app_name:
+                    sub_key.Close()
+                    return winreg.QueryValueEx(sub_key, 'InstallLocation')[0]
+            except OSError as e:
+                pass
+            finally:
+                sub_key.Close()
+    return ""
+
+

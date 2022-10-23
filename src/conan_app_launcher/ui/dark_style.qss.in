@@ -81,7 +81,7 @@ QFrame#content_frame .QFrame {
     border-radius: 7px;
 }
 
-QFrame#content_frame .QPushButton,
+QFrame#content_frame,QDialog .QPushButton,
 QToolButton {
     border-radius: 5px;
     margin: 2px;
@@ -91,18 +91,18 @@ QToolButton {
     min-width: 30px;
 }
 
-QFrame#content_frame .QPushButton:hover,
+QFrame#content_frame,QDialog .QPushButton:hover,
 QToolButton:hover {
     background-color: #5c5c5c;
 }
 
-QFrame#content_frame .QPushButton:pressed,
+QFrame#content_frame,QDialog .QPushButton:pressed,
 QToolButton:pressed {
     padding-top: 5px;
     background-color: #696969;
 }
 
-QFrame#content_frame .QPushButton:checked,
+QFrame#content_frame,QDialog .QPushButton:checked,
 QToolButton:checked {
     background-color: #5c5c5c;
 }
