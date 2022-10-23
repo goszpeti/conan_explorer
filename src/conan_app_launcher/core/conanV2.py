@@ -7,24 +7,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 from conan_app_launcher.core.conan import ConanPkg
 
 if TYPE_CHECKING:
-    from typing import TypedDict
-
     from conans.client.cache.remote_registry import Remote
-else:
-    try:
-        from typing import TypedDict
-    except ImportError:
-        from typing_extensions import TypedDict
-import conans
-# if conans.__version__.startswith("1"):
-#     from conans.client.conan_api import (ClientCache, ConanAPI, UserIO,
-#                                          client_version)
-#     from conans.client.output import ConanOutput
-#     from conans.errors import ConanException
-#     from conans.model.ref import ConanFileReference, PackageReference
-#     from conans.paths.package_layouts.package_editable_layout import \
-#         PackageEditableLayout
-# else:
+
 from conan.api.conan_api import ConanAPIV2, client_version
 from conans.client.cache.cache import ClientCache
 from conans.client.userio import UserInput
