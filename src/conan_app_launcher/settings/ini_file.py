@@ -1,7 +1,7 @@
 import configparser
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 from conan_app_launcher import PathLike, base_path
 from conan_app_launcher.app.logger import Logger

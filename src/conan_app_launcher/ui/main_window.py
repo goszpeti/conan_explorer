@@ -131,6 +131,7 @@ class MainWindow(FluentWindow):
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
+        self.app_grid.setEnabled(False)  # disable app_grid to signal shutdown
         try:
             self.log_console_message.disconnect(self.write_log)
         except Exception:

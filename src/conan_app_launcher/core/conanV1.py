@@ -2,7 +2,7 @@ import platform
 import shutil
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from conan_app_launcher.core.conan import ConanPkg, LoggerWriter, create_key_value_pair_list
 
@@ -16,7 +16,7 @@ from conans.model.ref import ConanFileReference, PackageReference
 
 
 try:
-    from conans.util.windows import CONAN_REAL_PATH, path_shortener
+    from conans.util.windows import path_shortener
 except Exception:
     pass
 
