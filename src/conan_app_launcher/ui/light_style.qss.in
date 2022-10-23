@@ -113,6 +113,32 @@ QToolButton:checked {
     background-color: #A8A8A8;
 }
 
+QDialog .QPushButton,
+QToolButton {
+    border-radius: 5px;
+    margin: 2px;
+    text-align: middle;
+    background-color: #d3d3d3;
+    padding: 3px;
+    min-width: 30px;
+}
+
+QDialog .QPushButton:hover,
+QToolButton:hover {
+    background-color: #B7B7B7;
+}
+
+QDialog .QPushButton:pressed,
+QToolButton:pressed {
+    padding-top: 5px;
+    background-color: #A8A8A8;
+}
+
+QDialog .QPushButton:checked,
+QToolButton:checked {
+    background-color: #A8A8A8;
+}
+
 AppLinkBase {
     background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #5a88b6, stop:1 #6699CC);
     border-radius: 7px;

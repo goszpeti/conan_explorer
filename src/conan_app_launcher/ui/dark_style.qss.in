@@ -81,7 +81,7 @@ QFrame#content_frame .QFrame {
     border-radius: 7px;
 }
 
-QFrame#content_frame,QDialog .QPushButton,
+QFrame#content_frame .QPushButton,
 QToolButton {
     border-radius: 5px;
     margin: 2px;
@@ -91,18 +91,44 @@ QToolButton {
     min-width: 30px;
 }
 
-QFrame#content_frame,QDialog .QPushButton:hover,
+QFrame#content_frame .QPushButton:hover,
 QToolButton:hover {
     background-color: #5c5c5c;
 }
 
-QFrame#content_frame,QDialog .QPushButton:pressed,
+QFrame#content_frame .QPushButton:pressed,
 QToolButton:pressed {
     padding-top: 5px;
     background-color: #696969;
 }
 
-QFrame#content_frame,QDialog .QPushButton:checked,
+QFrame#content_frame .QPushButton:checked,
+QToolButton:checked {
+    background-color: #5c5c5c;
+}
+
+QDialog .QPushButton,
+QToolButton {
+    border-radius: 5px;
+    margin: 2px;
+    text-align: middle;
+    background-color: #474747;
+    padding: 3px;
+    min-width: 30px;
+}
+
+QDialog .QPushButton:hover,
+QToolButton:hover {
+    background-color: #5c5c5c;
+}
+
+QDialog .QPushButton:pressed,
+QToolButton:pressed {
+    padding-top: 5px;
+    background-color: #696969;
+}
+
+QDialog .QPushButton:checked,
 QToolButton:checked {
     background-color: #5c5c5c;
 }
