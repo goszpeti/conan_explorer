@@ -7,7 +7,7 @@ from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
-from conans.model.ref import ConanFileReference
+from conan_app_launcher.core.conan import ConanFileReference
 
 from PyQt6.QtCore import pyqtBoundSignal, Qt
 from PyQt6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox

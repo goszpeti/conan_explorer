@@ -5,7 +5,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_image
-from conans.model.ref import ConanFileReference
+from conan_app_launcher.core.conan import ConanFileReference
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import Qt, pyqtSlot, pyqtBoundSignal
 

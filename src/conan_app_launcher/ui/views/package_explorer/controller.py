@@ -6,7 +6,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
-from conan_app_launcher.core.conan import ConanPkg
+from conan_app_launcher.core.conan import ConanPkg, ConanFileReference
 from conan_app_launcher.core.system import (calc_paste_same_dir_name,
                                             copy_path_with_overwrite,
                                             delete_path, execute_cmd)
@@ -27,7 +27,6 @@ from .model import (PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem,
 if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
 
-from conans.model.ref import ConanFileReference
 
 
 class PackageSelectionController(QObject):

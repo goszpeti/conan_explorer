@@ -5,7 +5,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import open_file
 from conan_app_launcher.ui.common import AsyncLoader
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
-from conans.model.ref import ConanFileReference
+from conan_app_launcher.core.conan import ConanFileReference
 from PyQt6.QtCore import Qt, pyqtSlot, pyqtBoundSignal, QObject
 from PyQt6.QtWidgets import (QApplication, QTreeView, QLineEdit, QPushButton, QTextBrowser, QListWidget)
 

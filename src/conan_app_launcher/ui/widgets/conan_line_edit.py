@@ -4,7 +4,7 @@ from typing import Callable, List
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
-from conans.model.ref import ConanFileReference, PackageReference
+from conan_app_launcher.core.conan import ConanFileReference, PackageReference
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QCompleter, QLineEdit
 

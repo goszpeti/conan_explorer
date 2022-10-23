@@ -7,7 +7,7 @@ from test.conftest import TEST_REF, conan_create_and_upload
 from typing import List
 
 from conan_app_launcher.core.conan import (ConanApi, ConanCleanup,
-                                           _create_key_value_pair_list)
+                                           create_key_value_pair_list)
 from conan_app_launcher.core.conan_worker import (ConanWorker,
                                                   ConanWorkerElement)
 from conans import __version__
@@ -201,13 +201,13 @@ def test_create_key_value_list(base_fixture):
     "Any" values are ignored. (case insensitive)
     """
     inp = {"Key1": "Value1"}
-    res = _create_key_value_pair_list(inp)
+    res = create_key_value_pair_list(inp)
     assert res == ["Key1=Value1"]
     inp = {"Key1": "Value1", "Key2": "Value2"}
-    res = _create_key_value_pair_list(inp)
+    res = create_key_value_pair_list(inp)
     assert res == ["Key1=Value1", "Key2=Value2"]
     inp = {"Key1": "Value1", "Key2": "Any"}
-    res = _create_key_value_pair_list(inp)
+    res = create_key_value_pair_list(inp)
     assert res == ["Key1=Value1"]
 
 
