@@ -10,6 +10,8 @@ from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
 from conans.model.ref import ConanFileReference
+from conan_app_launcher.ui.views import LocalConanPackageExplorer
+
 from PyQt6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -36,7 +38,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
-    lpe = main_gui.local_package_explorer
+    lpe = main_gui.page_widgets.get_page_by_type(LocalConanPackageExplorer)
 
     main_gui.page_widgets.get_button_by_type(type(lpe)).click()   # changes to local explorer page
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
@@ -104,7 +106,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
     app.conan_worker.finish_working()
-    lpe = main_gui.local_package_explorer
+    lpe = main_gui.page_widgets.get_page_by_type(LocalConanPackageExplorer)
 
     main_gui.page_widgets.get_button_by_type(type(lpe)).click()   # changes to local explorer page   
     lpe._pkg_sel_ctrl._loader.wait_for_finished()

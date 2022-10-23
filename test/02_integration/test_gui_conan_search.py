@@ -6,6 +6,8 @@ import conan_app_launcher.app as app
 from conan_app_launcher.ui.main_window import MainWindow
 from conans.model.ref import ConanFileReference
 from PyQt6 import QtCore
+from conan_app_launcher.ui.views import ConanSearchView
+from conan_app_launcher.ui.views import LocalConanPackageExplorer
 
 Qt = QtCore.Qt
 
@@ -28,7 +30,8 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     main_window = MainWindow(_qapp_instance)
     main_window.conan_remotes_updated.emit()
-    search_dialog = main_window.search_dialog
+    search_dialog = main_window.page_widgets.get_page_by_type(ConanSearchView)
+
     qtbot.addWidget(main_window)
     main_window.show()
     qtbot.waitExposed(main_window)
@@ -94,21 +97,23 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
 
     # check install
     mock_install_dialog = mocker.patch(
-        "conan_app_launcher.ui.views.conan_search.controller.ConanInstallDialog")
+        "conan_search.controller.ConanInstallDialog")
     search_dialog._search_controller.on_install_pkg_requested()
     mock_install_dialog.assert_called_with(search_dialog._search_controller._view, 
                                            TEST_REF + ":" + id, search_dialog._search_controller.conan_pkg_installed)
 
     # check show conanfile
     mock_open_file = mocker.patch(
-        "conan_app_launcher.ui.views.conan_search.controller.open_file")
+        "conan_search.controller.open_file")
     search_dialog._search_controller.on_show_conanfile_requested()
     conanfile = app.conan_api.get_export_folder(cfr) / "conanfile.py"
     mock_open_file.assert_called_with(conanfile)
 
     # check check open in local pkg explorer
     search_dialog.on_show_in_pkg_exp()
-    assert id == main_window.local_package_explorer._pkg_sel_ctrl.get_selected_conan_pkg_info().get("id", "")
+    lpe = main_window.page_widgets.get_page_by_type(LocalConanPackageExplorer)
+
+    assert id == lpe._pkg_sel_ctrl.get_selected_conan_pkg_info().get("id", "")
 
     search_dialog.hide()
     main_window.close()

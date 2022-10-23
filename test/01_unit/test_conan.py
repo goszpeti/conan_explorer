@@ -6,7 +6,8 @@ from pathlib import Path
 from test.conftest import TEST_REF, conan_create_and_upload
 from typing import List
 
-from conan_app_launcher.core.conan import (ConanApi, ConanCleanup,
+from conan_app_launcher.core import ConanApi
+from conan_app_launcher.core.conan import (ConanCleanup,
                                            create_key_value_pair_list)
 from conan_app_launcher.core.conan_worker import (ConanWorker,
                                                   ConanWorkerElement)

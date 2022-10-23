@@ -14,8 +14,7 @@ from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.config.json_file import JsonUiConfig
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
-from conan_app_launcher.ui.views.app_grid.tab import (AppEditDialog, AppLinkBase,
-                                                        TabGrid)
+from conan_app_launcher.ui.views.app_grid.tab import (AppEditDialog, AppLinkBase)
 from conans.model.ref import ConanFileReference
 from PyQt6 import QtCore, QtWidgets
 

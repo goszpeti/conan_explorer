@@ -1,5 +1,5 @@
 from pathlib import Path
-from platform import platform
+import platform
 from typing import TYPE_CHECKING, Dict, List, Set
 import conans
 
