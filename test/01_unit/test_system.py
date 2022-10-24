@@ -330,7 +330,7 @@ def test_delete():
 def test_find_program_in_registry():
 
     found_path = find_program_in_windows("Git", True)
-    if platform.system == "Linux":
+    if platform.system() == "Linux":
         assert not found_path
     else:
         assert os.path.exists(found_path)
