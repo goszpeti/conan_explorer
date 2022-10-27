@@ -30,7 +30,7 @@ jobs:
             "ubuntu-py310",
             "windows-py311",
             "ubuntu-py38-conan1.24.0",
-            "ubuntu-py310-conan1.28.0",
+            "ubuntu-py310-conan1.48.2",
           ]
         include:
           - name: "ubuntu-py37"
@@ -61,10 +61,10 @@ jobs:
             os: ubuntu-latest
             conan: "1.24.0"
             use_coverage: true
-          - name: "ubuntu-py310-conan1.28.0"
-            python: "3.10"
+          - name: "ubuntu-py310-conan1.48.2"
+            python: "3.11"
             os: ubuntu-latest
-            conan: "1.28.2"
+            conan: "1.48.2"
             use_coverage: true
 
     env:

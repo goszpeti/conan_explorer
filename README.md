@@ -96,7 +96,7 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 * conan >= 1.24.0
 
 > **Warning** **Deprecation of Python 3.6**  
-> From version 2.0.0 Python 3.6 will not be supported anymore, because it's end-of-life has been reached.
+> From version 2.0.0 Python 3.6 will not be supported anymore, because end-of-life support has been reached.
 
 ## Toolchain
 
@@ -114,7 +114,7 @@ Agreement for Icons8](https://icons8.com/vue-static/landings/pricing/icons8-lice
 
 ##### PyPi runtime dependencies
 * PyQt6 by Riverbank Computing Limited, [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
-* Conan by JFrog LTD under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+* Conan by JFrog LTD under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 * jsonschema by Julian Berman under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 * Using a modified version of Toggle Widget from QtWidgets (https://github.com/pythonguis/python-qtwidgets) under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 
