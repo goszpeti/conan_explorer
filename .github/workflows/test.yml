@@ -27,7 +27,8 @@ jobs:
             "ubuntu-py37",
             "ubuntu-py38",
             "ubuntu-py39",
-            "windows-py310",
+            "ubuntu-py310",
+            "windows-py311",
             "ubuntu-py38-conan1.24.0",
             "ubuntu-py310-conan1.28.0",
           ]
@@ -45,8 +46,13 @@ jobs:
             use_coverage: true
             conan: "latest"
             os: ubuntu-latest
-          - name: "windows-py310"
+          - name: "ubuntu-py310"
             python: "3.10"
+            use_coverage: true
+            conan: "latest"
+            os: ubuntu-latest
+          - name: "windows-py311"
+            python: "3.11"
             os: windows-latest
             use_coverage: true
             conan: "latest"
