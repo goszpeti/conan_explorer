@@ -244,7 +244,7 @@ def test_AppLink_open(qtbot, base_fixture):
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable=Path(sys.executable).name)
     app_model = UiAppLinkModel().load(app_config, None)
-    app_model.set_package_info(Path(sys.executable).parent)
+    app_model.set_package_folder(Path(sys.executable).parent)
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
@@ -288,7 +288,7 @@ def test_AppLink_icon_update_from_executable(qtbot, base_fixture):
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable="python")
     app_model = UiAppLinkModel().load(app_config, None)
-    app_model.set_package_info(Path(sys.executable).parent)
+    app_model.set_package_folder(Path(sys.executable).parent)
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")

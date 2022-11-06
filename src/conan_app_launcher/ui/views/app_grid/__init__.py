@@ -7,6 +7,8 @@ from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
+from conan_app_launcher.core.conan import ConanFileReference, PackageReference
+
 from PyQt6.QtCore import Qt, pyqtBoundSignal, pyqtSignal
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget,
@@ -180,12 +182,21 @@ class AppGridView(QWidget):
             return
         try:
             for tab in self.get_tabs():
-                for app in tab.app_links:
+                for app_link in tab.app_links:
                     # Catch shutdown
                     if not self.isEnabled():
                         return
-                    app.model.update_from_cache()
-                    app.update_conan_info()
+                    if app_link.model.conan_ref == conan_ref:
+                        # reverse lookup - don't update an icon with other options
+                        pkg_info = app.conan_api.get_local_pkg_from_id(PackageReference.loads(conan_ref + ":" + pkg_id))
+                        if app_link.model.conan_options: # only compare options, if user explicitly set them
+                            # user options should be a subset of full pkg options
+                            if not app_link.model.conan_options.items() <= pkg_info.get("options", {}).items():
+                                continue
+                        if pkg_id:
+                            app_link.model.set_package_folder(app.conan_api.get_package_folder(ConanFileReference.loads(conan_ref), pkg_id))
+                        app_link.model.update_from_cache()
+                        app_link.update_conan_info()
 
         except Exception as e:
             Logger().error(f"Can't update AppGrid with conan info {str(e)}")

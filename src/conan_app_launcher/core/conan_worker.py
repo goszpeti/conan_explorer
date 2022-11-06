@@ -114,7 +114,7 @@ class ConanWorker():
                         pkg_id, _ = self._conan_api.get_path_or_auto_install(conan_ref, conan_options, update)
                     else:
                         pkg_id, _ = self._conan_api.install_reference(conan_ref, conan_settings, conan_options, update=update)
-            except Exception:
+            except Exception as e:
                 try:
                     self._conan_install_queue.task_done()
                 except ValueError:
@@ -125,13 +125,12 @@ class ConanWorker():
                 self._conan_install_queue.task_done()
             except ValueError:
                 pass  # don't care about calling too many times
-        # batch emitting signal - easier when many packages are 
-        # in queue and no difference if there is only one
-        if info_callback and not self._shutdown_requested:
-            try:
-                info_callback(str(conan_ref), pkg_id)
-            except Exception as e:
-                Logger().error(str(e))
+            if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:
+                if info_callback and not self._shutdown_requested:
+                    try:
+                        info_callback(self._conan_api.generate_canonical_ref(conan_ref), pkg_id)
+                    except Exception as e:
+                        Logger().error(str(e))
 
     def _work_on_conan_versions_queue(self):
         """ Get all version and channel combination of a package from all remotes. """

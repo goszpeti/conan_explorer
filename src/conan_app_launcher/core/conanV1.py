@@ -100,6 +100,8 @@ class ConanApi():
 
     def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """
+        if not package_id: # will give the base path ortherwise
+            return Path("NULL")
         try:
             layout = self.client_cache.package_layout(conan_ref)
             return Path(layout.package(PackageReference(conan_ref, package_id)))
@@ -318,13 +320,13 @@ class ConanApi():
                     return package
         return {"id": ""}
 
-    def get_matching_package_in_remotes(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> List[ConanPkg]:
+    def get_matching_package_in_remotes(self, conan_ref: ConanFileReference, conan_options: Dict[str, str] = {}) -> List[ConanPkg]:
         """ Find a package with options in the remotes """
         for remote in self.get_remotes():
-            packages = self.find_best_matching_packages(conan_ref, input_options, remote.name)
+            packages = self.find_best_matching_packages(conan_ref, conan_options, remote.name)
             if packages:
                 return packages
-        Logger().info(f"Can't find a matching package '<b>{str(conan_ref)}</b>' in the remotes")
+        Logger().info(f"Can't find a package '<b>{str(conan_ref)}</b>' with options {conan_options} in the remotes")
         return []
 
     def find_best_matching_packages(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {},
@@ -361,8 +363,6 @@ class ConanApi():
             found_pkgs = list(filter(lambda pkg: input_options.items() <=
                                      pkg.get("options", {}).items(), found_pkgs))
             if not found_pkgs:
-                Logger().warning(
-                    f"Can't find a matching package '{str(conan_ref)}' for options {str(input_options)}")
                 return found_pkgs
         # get a set of existing options and reduce default options with them
         min_opts_set = set(map(lambda pkg: frozenset(tuple(pkg.get("options", {}).keys())), found_pkgs))

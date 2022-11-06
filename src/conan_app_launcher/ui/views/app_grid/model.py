@@ -155,10 +155,10 @@ class UiAppLinkModel(UiAppLinkConfig):
         self.set_available_packages(app.conan_api.info_cache.get_similar_pkg_refs(
             self._conan_file_reference.name, user="*"))
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
-            self.set_package_info(app.conan_api.info_cache.get_local_package_path(self._conan_file_reference))
+            self.set_package_folder(app.conan_api.info_cache.get_local_package_path(self._conan_file_reference))
         elif not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
             _, package_folder = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
-            self.set_package_info(package_folder)
+            self.set_package_folder(package_folder)
 
     def register_update_callback(self, update_func: Callable):
         """ This callback can be used to update the gui after new conan info was received """
@@ -368,6 +368,12 @@ class UiAppLinkModel(UiAppLinkConfig):
             icon_path = icon_path.resolve()
         except Exception as e:
             Logger().debug(f"Can't reslolve path of {str(icon_path)}: {str(e)}")
+        if not icon_path.exists():
+            if self.get_executable_path().exists():
+                icon = "app.png"
+            else:
+                icon = "no-access.png"
+            icon_path = Path(get_themed_asset_image("icons/" + icon))
         return icon_path
 
     def get_icon(self) -> QIcon:
@@ -381,13 +387,13 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         # default icon, until package path is updated
         if icon.isNull():
-            icon_path = get_themed_asset_image("icons/no-access.png")
+            icon_path = get_themed_asset_image("icons/app.png")
             icon = get_icon_from_image_file(Path(icon_path))
             if self._icon:  # user input given -> warning
                 Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
         return icon
 
-    def set_package_info(self, package_folder: Path):
+    def set_package_folder(self, package_folder: Path):
         """
         Sets package path and all dependent paths.
         Use, when conan operation is done and paths can be validated.
@@ -398,6 +404,10 @@ class UiAppLinkModel(UiAppLinkConfig):
             if self.package_folder != package_folder:
                 app.conan_api.info_cache.update_local_package_path(self._conan_file_reference, package_folder)
         self.package_folder = package_folder
+        if not package_folder.exists():
+            Logger().warning(
+                f"Can't find any package for <b>{str(self.conan_ref)}<b> and options {repr(self.conan_options)}")
+
 
         # call registered update callback
         if self._update_cbk_func:

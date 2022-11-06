@@ -229,9 +229,8 @@ class AppLinkBase(QFrame):
         pass
       
     def update_icon(self):
-        if self.model.get_executable_path().is_file():
-            self._app_button.set_icon(self.model.get_icon())
-            self._app_button.ungrey_icon()
+        self._app_button.set_icon(self.model.get_icon())
+        self._app_button.ungrey_icon()
 
     def update_versions_info_visible(self):
         if app.active_settings.get(DISPLAY_APP_VERSIONS):
@@ -255,7 +254,7 @@ class AppLinkBase(QFrame):
         """ Callback for opening the executable on click """
         if not self.model.get_executable_path().is_file():
             Logger().error(
-                f"Can't find file in package {self.model.conan_ref}:\n    {str(self.model.get_executable_path())}")
+                f"Can't find file in package {self.model.conan_ref}:\n    {str(self.model._executable)}")
         run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
 
 class ListAppLink(AppLinkBase):
@@ -299,7 +298,7 @@ class ListAppLink(AppLinkBase):
         self._right_frame.setMinimumWidth(200)
         self._right_frame.setMaximumWidth(200)
 
-        self._app_button = ClickableIcon(self, asset_path / "icons" / "app.png")
+        self._app_button = ClickableIcon(self, asset_path / "icons" / "no-access.png")
         self._left_frame.layout().addWidget(self._app_button)
 
         self._app_name = QLabel(self._left_frame)

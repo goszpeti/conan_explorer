@@ -22,7 +22,7 @@ def test_executable_eval(base_fixture):
     app_link = UiAppLinkModel()
     app_link.load(app_config, None)
 
-    app_link.set_package_info(exe.parent)  # trigger set
+    app_link.set_package_folder(exe.parent)  # trigger set
     assert app_link.get_executable_path() == exe
 
     app_link.executable = ""
@@ -44,7 +44,7 @@ def test_icon_eval(tmp_path, qtbot, base_fixture):
     # relative to package with // notation - migrate from old setting
     app_config = UiAppLinkConfig("AppName", icon="//icon.ico")
     app_link = UiAppLinkModel().load(app_config, None)
-    app_link.set_package_info(tmp_path)  # trigger set
+    app_link.set_package_folder(tmp_path)  # trigger set
     assert not app_link.get_icon().isNull()
     assert str(app_link._eval_icon_path()) == str(tmp_path / "icon.ico")
 
