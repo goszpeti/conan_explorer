@@ -5,9 +5,10 @@ from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common import get_themed_asset_image
 from PyQt6.QtCore import QSize, Qt, pyqtBoundSignal
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QDialog, QWidget
+from PyQt6.QtWidgets import QDialog, QWidget, QTreeWidgetItem
 
 from .conan_install_ui import Ui_Dialog
+from conans.model.ref import ConanFileReference, PackageReference
 
 
 class ConanInstallDialog(QDialog):
@@ -26,9 +27,19 @@ class ConanInstallDialog(QDialog):
         self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_auto_install_on_pkg_ref)
         self._ui.button_box.accepted.connect(self.on_install)
         self._ui.auto_install_check_box.setChecked(True)  # default state
-
+        self._profiles = app.conan_api.conan.profile_list()
+        self._ref_info = app.conan_api.conan.info(app.conan_api.generate_canonical_ref(ConanFileReference.loads("qt/6.3.1@_/_")))
+        self._ref_info[0].root.dependencies[0].dst.conanfile
+        options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
         self._ui.conan_ref_line_edit.setText(conan_ref)
+        self._ui.profile_cbox.addItems(self._profiles)
+        for name, value in options:
+            item = QTreeWidgetItem()
+            item.setData(0, 0, name)
+            item.setData(1, 0, value)
+
+            self._ui.options_widget.addTopLevelItem(item)
         self.adjust_to_size()
 
     def adjust_to_size(self):

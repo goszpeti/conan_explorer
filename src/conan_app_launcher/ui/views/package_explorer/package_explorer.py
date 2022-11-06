@@ -21,18 +21,20 @@ class LocalConanPackageExplorer(PluginInterface):
     conan_pkg_selected = pyqtSignal(str, dict)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
 
     def __init__(self, parent: QWidget, base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
-        super().__init__(parent)
+        super().__init__(parent, base_signals)
         self._ui = Ui_Form()
         self._ui.setupUi(self)
-        self._page_widgets = page_widgets
+        self.load_signal.connect(self.load)
+
+    def load(self):
         self._pkg_sel_ctrl = PackageSelectionController(
             self, self._ui.package_select_view, self._ui.package_filter_edit, 
-            self.conan_pkg_selected, base_signals.conan_pkg_removed, page_widgets)
+            self.conan_pkg_selected, self._base_signals.conan_pkg_removed, self._page_widgets)
         self._pkg_file_exp_ctrl = PackageFileExplorerController(
             self, self._ui.package_file_view, self._ui.package_path_label, 
-            self.conan_pkg_selected, base_signals.conan_pkg_removed, page_widgets)
+            self.conan_pkg_selected, self._base_signals.conan_pkg_removed, self._page_widgets)
         self.file_cntx_menu = None
-        self._ui.refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
+        self.set_themed_icon(self._ui.refresh_button, "icons/refresh.png")
 
         # connect pkg selection controller
         self._ui.package_select_view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
@@ -63,8 +65,8 @@ class LocalConanPackageExplorer(PluginInterface):
         self._pkg_file_exp_ctrl.resize_file_columns()
         super().resizeEvent(a0)
 
-    def apply_theme(self):
-        self._ui.refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
+    def reload_themed_icons(self):
+        super().reload_themed_icons()
         self._init_selection_context_menu()
         self._init_pkg_file_context_menu()
 
