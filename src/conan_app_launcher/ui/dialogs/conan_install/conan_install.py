@@ -28,7 +28,8 @@ class ConanInstallDialog(QDialog):
         self._ui.button_box.accepted.connect(self.on_install)
         self._ui.auto_install_check_box.setChecked(True)  # default state
         self._profiles = app.conan_api.conan.profile_list()
-        self._ref_info = app.conan_api.conan.info(app.conan_api.generate_canonical_ref(ConanFileReference.loads("qt/6.3.1@_/_")))
+        self._ref_info = app.conan_api.conan.info(
+            app.conan_api.generate_canonical_ref(ConanFileReference.loads(conan_ref)))
         self._ref_info[0].root.dependencies[0].dst.conanfile
         options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
