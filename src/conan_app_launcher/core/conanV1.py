@@ -230,6 +230,15 @@ class ConanApi():
                 return package
         return {"id": ""}
 
+    def get_local_pkg_from_path(self, conan_ref: ConanFileReference, path: Path):
+        """ For reverse lookup - give info from path """
+        found_package = None
+        for package in self.get_local_pkgs_from_ref(conan_ref):
+            if self.get_package_folder(conan_ref, package.get("id", "")) == path:
+                found_package = package
+                break
+        return found_package
+
     def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> ConanPkg:
         """ Find a package in the local cache """
         packages = self.find_best_matching_packages(conan_ref, input_options)

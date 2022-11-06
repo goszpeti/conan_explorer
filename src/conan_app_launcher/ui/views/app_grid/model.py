@@ -139,8 +139,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         if trigger_update:
             self.lock_changes = False  # don't trigger updates to worker - will be done in batch
 
-        super().__init__(config.name, config.conan_ref, config.executable, config.icon,
-                         config.is_console_application, config.args, config.conan_options)
+        super().__init__(config.name, config.executable, config.icon,
+                         config.is_console_application, config.args, config.conan_options, config.conan_ref)
         self.lock_changes = False  # unlock for futher use now that everything is loaded
         return self
 
@@ -148,14 +148,22 @@ class UiAppLinkModel(UiAppLinkConfig):
         if self.parent:  # delegate to top
             self.parent.save()
 
-    def update_from_cache(self):
+    def load_from_cache(self):
         if not app.conan_api:
             return
         # get all info from cache
         self.set_available_packages(app.conan_api.info_cache.get_similar_pkg_refs(
             self._conan_file_reference.name, user="*"))
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
-            self.set_package_folder(app.conan_api.info_cache.get_local_package_path(self._conan_file_reference))
+            pkg_path = app.conan_api.info_cache.get_local_package_path(self._conan_file_reference)
+            if self.conan_options:
+                pkg_info = app.conan_api.get_local_pkg_from_path(self._conan_file_reference, pkg_path)
+                # user options should be a subset of full pkg options
+                if pkg_info:
+                    if not self.conan_options.items() <= pkg_info.get("options", {}).items():
+                        return
+            self.set_package_folder(pkg_path)
+            # app.conan_api.get_local_pkg_from_id
         elif not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
             _, package_folder = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
             self.set_package_folder(package_folder)
@@ -186,7 +194,7 @@ class UiAppLinkModel(UiAppLinkConfig):
                 and self._conan_file_reference.channel != self.INVALID_DESCR):  # don't put it for init
             # invalidate old entries, which are dependent on the conan ref - only for none invalid refs
             self._conan_ref = new_value
-            self.update_from_cache()
+            self.load_from_cache()
             if self.parent and self.parent.parent and not self.lock_changes:
                 self.trigger_conan_update()
         self._conan_ref = new_value
@@ -407,7 +415,6 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not package_folder.exists():
             Logger().warning(
                 f"Can't find any package for <b>{str(self.conan_ref)}<b> and options {repr(self.conan_options)}")
-
 
         # call registered update callback
         if self._update_cbk_func:

@@ -17,12 +17,12 @@ if TYPE_CHECKING:
 @dataclass
 class UiAppLinkConfig():
     name: str = "New App"
-    conan_ref: str = INVALID_CONAN_REF
     executable: str = ""
     icon: str = ""
     is_console_application: bool = False
     args: str = ""
     conan_options: Dict[str, str] = field(default_factory=dict)
+    conan_ref: str = INVALID_CONAN_REF
 
 
 @dataclass

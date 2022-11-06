@@ -114,7 +114,7 @@ class AppLinkBase(QFrame):
         self.menu.addAction(self.reorder_action)
 
     def load(self):
-        self.model.register_update_callback(self.update_conan_info)
+        self.model.register_update_callback(self.apply_conan_info)
         self._apply_new_config()
 
     def on_move(self):
@@ -180,7 +180,7 @@ class AppLinkBase(QFrame):
         self.update_users_info_visible()
         self.update_channels_info_visible()
 
-        self.update_conan_info()  # initial update with offline information
+        self.apply_conan_info()  # update with offline information
 
     def open_app_link_add_dialog(self):
         self._parent_tab.open_app_link_add_dialog()
@@ -193,7 +193,7 @@ class AppLinkBase(QFrame):
         if reply == AppEditDialog.DialogCode.Accepted:
             # grey icon, so update from cache can ungrey it, if the path is correct
             self._app_button.grey_icon()
-            self.model.update_from_cache()
+            self.model.load_from_cache()
             # now apply gui config with resolved paths
             self._apply_new_config()
         del edit_app_dialog  # call delete manually for faster thread cleanup
@@ -224,7 +224,7 @@ class AppLinkBase(QFrame):
             self.model.save()
             self._parent_tab.redraw(force=True)
 
-    def update_conan_info(self):
+    def apply_conan_info(self):
         """ Update with new conan data """
         pass
       
@@ -356,7 +356,7 @@ class ListAppLink(AppLinkBase):
         super()._init_app_link()
 
 
-    def update_conan_info(self):
+    def apply_conan_info(self):
         """ Update with new conan data """ # TODO should be in model!
         self.update_icon()
         self._app_version.setText(self.model.version)
@@ -460,7 +460,7 @@ class GridAppLink(AppLinkBase):
         if self.model.user != self._app_user.currentText():
             self.model.lock_changes = True
             if self.model.user == self.model.INVALID_DESCR:
-                self.model.update_from_cache()
+                self.model.load_from_cache()
                 # update user to match version
                 self._app_user.clear()  # reset cbox
                 users = self.model.users
@@ -496,10 +496,9 @@ class GridAppLink(AppLinkBase):
         self.model.lock_changes = False
         self._lock_cboxes = False
 
-    def update_conan_info(self):
+    def apply_conan_info(self):
         """ Update with new conan data """
         self.update_icon()
-
         if not self._combo_boxes_enabled:  # set text instead
             self._app_version.setText(self.model.version)
             self._app_user.setText(self.model.user)

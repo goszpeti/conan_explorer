@@ -186,6 +186,9 @@ class AppGridView(QWidget):
                     # Catch shutdown
                     if not self.isEnabled():
                         return
+                    if not conan_ref: # unspecific reload
+                        app_link.model.load_from_cache()
+
                     if app_link.model.conan_ref == conan_ref:
                         # reverse lookup - don't update an icon with other options
                         pkg_info = app.conan_api.get_local_pkg_from_id(PackageReference.loads(conan_ref + ":" + pkg_id))
@@ -195,8 +198,8 @@ class AppGridView(QWidget):
                                 continue
                         if pkg_id:
                             app_link.model.set_package_folder(app.conan_api.get_package_folder(ConanFileReference.loads(conan_ref), pkg_id))
-                        app_link.model.update_from_cache()
-                        app_link.update_conan_info()
+                        app_link.model.load_from_cache()
+                    app_link.apply_conan_info()
 
         except Exception as e:
             Logger().error(f"Can't update AppGrid with conan info {str(e)}")
