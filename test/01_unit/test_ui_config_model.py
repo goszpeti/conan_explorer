@@ -58,12 +58,12 @@ def test_icon_eval(tmp_path, qtbot, base_fixture):
     assert not app_link.get_icon().isNull()
 
 
-def test_icon_eval_wrong_path(tmp_path, qtbot, base_fixture):
+def test_icon_eval_wrong_path(tmp_path, qtbot, base_fixture, light_theme_fixture):
     """ Test, that a nonexistant path sets to default (check for error removed) """
 
     app_link = UiAppLinkModel("AppName", icon=str(Path.home() / "nonexistant.png"), executable="abc")
     assert not app_link.get_icon().isNull()
-    assert str(app_link._eval_icon_path()) == str(Path.home() / "nonexistant.png")
+    assert str(app_link._eval_icon_path()) == str(asset_path / "icons" / "no-access.png")
 
 
 def test_official_release(base_fixture):
