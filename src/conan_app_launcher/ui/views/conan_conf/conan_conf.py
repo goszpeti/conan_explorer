@@ -24,19 +24,19 @@ class ConanConfigView(PluginInterface):
 
     load_signal = pyqtSignal()
 
-    def __init__(self, parent: QWidget, base_signals: "BaseSignals",
-                 page_widgets: Optional["FluentWindow.PageStore"] = None):
-        super().__init__(parent)
+    def __init__(self, parent: QWidget, base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"]=None):
+        super().__init__(parent, base_signals)
         self._ui = Ui_Form()
         self._ui.setupUi(self)
+        self.load_signal.connect(self.load)
         self.config_file_path = Path("Unknown")
         self.profiles_path = Path("Unknown")
-        self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, base_signals.conan_remotes_updated)
+
+    def load(self):
+
+        self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, self._base_signals.conan_remotes_updated)
         self._init_remotes_tab()
         self._init_profiles_tab()
-        self.load_signal.connect(self.__load)
-
-    def __load(self):
         self.config_file_path = Path(app.conan_api.client_cache.conan_conf_path)
         self.profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
         self._load_info_tab()
@@ -114,9 +114,7 @@ class ConanConfigView(PluginInterface):
         self._remotes_controller.resize_remote_columns()
 
     def reload_themed_icons(self):
-        self.apply_theme()
-
-    def apply_theme(self):
+        super().reload_themed_icons()
         self._init_profile_context_menu()
         self._init_remote_context_menu()
 
@@ -148,29 +146,27 @@ class ConanConfigView(PluginInterface):
 # Remote
 
     def _load_remotes_tab(self):
-        
-        self._remotes_controller.update() # TODO update once on show
+        self._remotes_controller.update()
 
     def _init_remotes_tab(self):
         self._ui.remote_refresh_button.clicked.connect(self._remotes_controller.update)
-        self._ui.remote_move_down_button.setIcon(QIcon(get_themed_asset_image("icons/arrow_down.png")))
+        self.set_themed_icon(self._ui.remote_refresh_button, "icons/refresh.png")
         self._ui.remote_login.clicked.connect(self.on_remotes_login)
-        self._ui.remote_login.setIcon(QIcon(get_themed_asset_image("icons/login.png")))
+        self.set_themed_icon(self._ui.remote_login, "icons/login.png")
         self._ui.remote_toggle_disabled.clicked.connect(self.on_remote_disable)
-        self._ui.remote_toggle_disabled.setIcon(QIcon(get_themed_asset_image("icons/hide.png")))
+        self.set_themed_icon(self._ui.remote_toggle_disabled, "icons/hide.png")
         self._ui.remote_add.clicked.connect(self.on_remote_add)
-        self._ui.remote_add.setIcon(QIcon(get_themed_asset_image("icons/plus_rounded.png")))
+        self.set_themed_icon(self._ui.remote_add, "icons/plus_rounded.png")
         self._ui.remote_remove.clicked.connect(self.on_remote_remove)
-        self._ui.remote_remove.setIcon(QIcon(get_themed_asset_image("icons/minus_rounded.png")))
+        self.set_themed_icon(self._ui.remote_remove, "icons/minus_rounded.png")
+        self._ui.remote_move_up_button.clicked.connect(self._remotes_controller.move_up)
+        self.set_themed_icon(self._ui.remote_move_up_button, "icons/arrow_up.png")
+        self._ui.remote_move_down_button.clicked.connect(self._remotes_controller.move_down)
+        self.set_themed_icon(self._ui.remote_move_down_button, "icons/arrow_down.png")
 
         self._ui.remotes_tree_view.doubleClicked.connect(self.on_remote_edit)
         self._ui.remotes_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self._ui.remotes_tree_view.customContextMenuRequested.connect(
-            self.on_remote_context_menu_requested)
-        self._ui.remote_refresh_button.setIcon(QIcon(get_themed_asset_image("icons/refresh.png")))
-        self._ui.remote_move_up_button.setIcon(QIcon(get_themed_asset_image("icons/arrow_up.png")))
-        self._ui.remote_move_down_button.clicked.connect(self._remotes_controller.move_down)
-        self._ui.remote_move_up_button.clicked.connect(self._remotes_controller.move_up)
+        self._ui.remotes_tree_view.customContextMenuRequested.connect(self.on_remote_context_menu_requested)
 
         self._init_remote_context_menu()
 

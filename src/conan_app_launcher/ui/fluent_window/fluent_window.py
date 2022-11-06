@@ -91,7 +91,7 @@ class ThemedWidget(QWidget):
         self._icon_map: Dict[Union[CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol],
                              ThemedWidget.IconInfo] = {}  # widget: {name, size} for re-theming
 
-    def add_themed_icon(self, widget: Union[CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol],
+    def set_themed_icon(self, widget: Union[CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol],
                         asset_path: str, size: Optional[Tuple[int, int]] = None):
         """ 
         Applies an icon to a widget and inverts it, when theming is toggled to dark mode.
@@ -134,7 +134,7 @@ class SideSubMenu(ThemedWidget):
         self.is_top_level = is_top_level
         self.set_title(title)
         self._content_layout = self.ui.content_frame_layout
-        self.add_themed_icon(self.ui.side_menu_title_button, "icons/back.png")
+        self.set_themed_icon(self.ui.side_menu_title_button, "icons/back.png")
 
         if is_top_level:
             self.ui.side_menu_title_button.hide()  # off per default
@@ -149,7 +149,7 @@ class SideSubMenu(ThemedWidget):
         """
         if not self.is_top_level:
             return False
-        self.add_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
+        self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
         self.ui.side_menu_title_button.clicked.connect(self.on_expand_minimize)  # off per default
         return True
 
@@ -157,9 +157,9 @@ class SideSubMenu(ThemedWidget):
         """ The title button can be used to minimize a submenu """
         if self.ui.side_menu_content_frame.height() > 0:
             self.ui.side_menu_content_frame.setMaximumHeight(0)
-            self.add_themed_icon(self.ui.side_menu_title_button, "icons/forward.png")
+            self.set_themed_icon(self.ui.side_menu_title_button, "icons/forward.png")
         else:
-            self.add_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
+            self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
             self.ui.side_menu_content_frame.setMaximumHeight(4096)
 
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
@@ -225,7 +225,7 @@ class SideSubMenu(ThemedWidget):
         button.setMinimumSize(QSize(64, 50))
         button.setMaximumHeight(50)
         if asset_icon:
-            self.add_themed_icon(button, asset_icon)
+            self.set_themed_icon(button, asset_icon)
         button.setIconSize(QSize(32, 32))
         button.setText(name)
         button.setStyleSheet(f"text-align:left")
@@ -339,11 +339,14 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.settings_button.setMinimumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
         self.ui.settings_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
 
-        self.add_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.png")
-        self.add_themed_icon(self.ui.settings_button, "icons/settings.png")
+        self.set_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.png")
+        self.set_themed_icon(self.ui.settings_button, "icons/settings.png")
 
-        self.ui.minimize_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "minus.png"))))
-        self.ui.close_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "close.png"))))
+        self.set_themed_icon(self.ui.minimize_button, "icons/minus.png")
+        self.set_themed_icon(self.ui.close_button, "icons/close.png")
+
+        # self.ui.minimize_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "minus.png"))))
+        # self.ui.close_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "close.png"))))
         # window buttons
         self.ui.restore_max_button.clicked.connect(self.maximize_restore)
         self.ui.minimize_button.clicked.connect(self.showMinimized)
@@ -381,6 +384,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def apply_theme(self):
         """ This function must be able to reload all icons from the left and right menu bar. """
         self.reload_themed_icons()
+        self.set_restore_max_button_state(force=True)
         for submenu in self.ui.right_menu_bottom_content_sw.findChildren(SideSubMenu):
             submenu.reload_themed_icons()  # type: ignore
         for submenu in self.ui.right_menu_top_content_sw.findChildren(SideSubMenu):
@@ -427,7 +431,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
     def add_left_menu_entry(self, name: str, asset_icon: str, is_upper_menu: bool, page_widget: QWidget, create_page_menu=False):
         button = QPushButton("", self.ui.left_menu_frame)
-        self.add_themed_icon(button, asset_icon)
+        self.set_themed_icon(button, asset_icon)
         button.setObjectName(gen_obj_name(name))
         size_policy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         size_policy.setHeightForWidth(button.sizePolicy().hasHeightForWidth())
@@ -629,16 +633,16 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             self.showMaximized()
 
-    def set_restore_max_button_state(self):
+    def set_restore_max_button_state(self, force=False):
         if self.isMaximized():
-            if self.ui.restore_max_button.icon().themeName() == "restore":
+            if self.ui.restore_max_button.icon().themeName() == "restore" and not force:
                 return
-            icon = QIcon(QPixmap(str(asset_path / "icons" / "restore.png")))
+            icon = QIcon(QPixmap(get_themed_asset_image(str(asset_path / "icons" / "restore.png"))))
             icon.setThemeName("restore")
             self.ui.restore_max_button.setIcon(icon)
         else:
-            if self.ui.restore_max_button.icon().themeName() == "maximize":
+            if self.ui.restore_max_button.icon().themeName() == "maximize" and not force:
                 return
-            icon = QIcon(QPixmap(str(asset_path / "icons" / "maximize.png")))
+            icon = QIcon(QPixmap(get_themed_asset_image(str(asset_path / "icons" / "maximize.png"))))
             icon.setThemeName("maximize")
             self.ui.restore_max_button.setIcon(icon)

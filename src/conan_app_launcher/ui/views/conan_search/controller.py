@@ -1,5 +1,5 @@
 import pprint
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import open_file
@@ -10,7 +10,8 @@ from PyQt6.QtCore import Qt, pyqtSlot, pyqtBoundSignal, QObject
 from PyQt6.QtWidgets import (QApplication, QTreeView, QLineEdit, QPushButton, QTextBrowser, QListWidget)
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
-
+if TYPE_CHECKING:
+    from conan_app_launcher.ui.main_window import BaseSignals
 
 class ConanSearchController(QObject):
 

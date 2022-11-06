@@ -47,9 +47,6 @@ class AppGridView(QWidget):
         self.load_signal.connect(self.load)
 
     def reload_themed_icons(self):
-        self.apply_theme()
-
-    def apply_theme(self):
         self.re_init(self.model)
 
     T = TypeVar('T')

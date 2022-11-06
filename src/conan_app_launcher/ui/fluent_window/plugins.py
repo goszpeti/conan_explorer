@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 class PluginDescription():
     name: str
     version: str
+    author: str
     icon: str
     import_path: str
     plugin_class: str
@@ -66,7 +67,9 @@ class PluginFile():
                 plugin_class = plugin_info.get("plugin_class")
                 assert plugin_class, "field 'plugin_class' is required"
                 description = plugin_info.get("description", "")
-                desc = PluginDescription(name, version, icon, import_path, plugin_class, description)
+                author = plugin_info.get("author", "Unknown")
+
+                desc = PluginDescription(name, version, author, icon, import_path, plugin_class, description)
                 plugins.append(desc)
             except Exception as e:
                 Logger().error(f"Can't read {section} plugin information from {path}: {str(e)}.")
@@ -96,7 +99,7 @@ class PluginInterface(ThemedWidget):
     # This is used for asynchronous loading.
     load_signal = pyqtSignal()
 
-    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"] = None, page_widgets: Optional["FluentWindow.PageStore"] = None) -> None:
+    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"]=None, page_widgets: Optional["FluentWindow.PageStore"]=None) -> None:
         ThemedWidget.__init__(self, parent)
         self._base_signals = base_signals
         self._page_widgets = page_widgets

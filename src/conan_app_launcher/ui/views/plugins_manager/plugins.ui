@@ -14,62 +14,15 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QTreeWidget" name="treeWidget">
-     <column>
-      <property name="text">
-       <string>Path</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Version</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Author</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Description</string>
-      </property>
-     </column>
-     <item>
-      <property name="text">
-       <string>dir/plugins.ini</string>
-      </property>
-      <item>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normalon>../../assets/icons/about.png</normalon>
-        </iconset>
-       </property>
-       <property name="text">
-        <string>MY Plugin</string>
-       </property>
-       <property name="text">
-        <string>0.1.1</string>
-       </property>
-       <property name="text">
-        <string>Myself</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </item>
-     </item>
-    </widget>
-   </item>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item row="0" column="1" rowspan="2">
     <widget class="QFrame" name="frame">
      <property name="frameShape">
@@ -79,8 +32,14 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="add_plugin_button">
         <property name="text">
          <string>Add new Plugin</string>
         </property>
@@ -92,7 +51,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="toggle_plugin_button">
         <property name="text">
          <string>Enable / Disable</string>
         </property>
@@ -104,7 +63,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="remove_plugin_button">
         <property name="text">
          <string>Remove Plugin</string>
         </property>
@@ -116,7 +75,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="verticalSpacer">
+       <spacer name="vertical_spacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -130,6 +89,9 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QTreeView" name="plugins_tree_view"/>
    </item>
   </layout>
  </widget>

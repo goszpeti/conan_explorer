@@ -17,45 +17,44 @@ if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
     from conan_app_launcher.ui.main_window import BaseSignals
 
+
 class ConanSearchView(PluginInterface):
 
-    def __init__(self, parent: QWidget, base_signals: "BaseSignals", 
+    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"],
                  page_widgets: Optional["FluentWindow.PageStore"] = None):
         # Add minimize and maximize buttons
-        PluginInterface.__init__(self, parent)
-        self.page_widgets = page_widgets
-        self.conan_pkg_installed = base_signals.conan_pkg_installed
-        self.conan_pkg_removed = base_signals.conan_pkg_removed
-        self.conan_remotes_updated = base_signals.conan_remotes_updated
+        super().__init__(parent, base_signals, page_widgets)
 
         self._ui = Ui_Form()
         self._ui.setupUi(self)
+        self.load_signal.connect(self.load)
 
-        # init search bar
-        icon = QIcon(str(app.asset_path / "icons/icon.ico"))
-        self.setWindowIcon(icon)
+    def load(self):
+        conan_pkg_installed = None
+        conan_pkg_removed = None
+        if self._base_signals:
+            conan_pkg_installed = self._base_signals.conan_pkg_installed
+            conan_pkg_removed = self._base_signals.conan_pkg_removed
 
         self._search_controller = ConanSearchController(
             self._ui.search_results_tree_view, self._ui.search_line, self._ui.search_button, self._ui.remote_list,
-            self._ui.package_info_text, self.conan_pkg_installed, self.conan_pkg_removed)
+            self._ui.package_info_text, conan_pkg_installed, conan_pkg_removed)
 
         self._ui.search_button.clicked.connect(self._search_controller.on_search)
         self._ui.search_button.setEnabled(False)
         self._ui.search_line.validator_enabled = False
         self._ui.search_line.textChanged.connect(self._enable_search_button)
-
         self._ui.search_button.setShortcut(QKeySequence(Qt.Key.Key_Return))
 
         # init remotes list
-        if self.conan_remotes_updated:
-            self.conan_remotes_updated.connect(self._init_remotes)
+        if self._base_signals:
+            self._base_signals.conan_remotes_updated.connect(self._init_remotes)
         else:
             self._init_remotes()
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
-        self.add_themed_icon(self._ui.search_icon, "icons/search_packages.png", size=(20,20))
-
+        self.set_themed_icon(self._ui.search_icon, "icons/search_packages.png", size=(20, 20))
 
     def _init_remotes(self):
         remotes = app.conan_api.get_remotes()
@@ -65,8 +64,6 @@ class ConanSearchView(PluginInterface):
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             item.setCheckState(Qt.CheckState.Checked)
 
-    def apply_theme(self):
-        pass
     def _enable_search_button(self):
         """ Enable search button from minimum 3 characters onwards"""
         if len(self._ui.search_line.text()) > 2:
@@ -79,7 +76,7 @@ class ConanSearchView(PluginInterface):
         self.select_cntx_menu = RoundedMenu()
 
         self.copy_ref_action = QAction("Copy reference", self)
-        self.add_themed_icon(self.copy_ref_action, "icons/copy_link.png")
+        self.set_themed_icon(self.copy_ref_action, "icons/copy_link.png")
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self._search_controller.on_copy_ref_requested)
 
@@ -122,12 +119,11 @@ class ConanSearchView(PluginInterface):
         item = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view)
         if not item:
             return
-        if not self.page_widgets:
+        if not self._page_widgets:
             return
-        self.page_widgets.get_page_by_type(LocalConanPackageExplorer).select_local_package_from_ref(
+        self._page_widgets.get_page_by_type(LocalConanPackageExplorer).select_local_package_from_ref(
             item.get_conan_ref())
 
     def resizeEvent(self, a0) -> None:  # override QtGui.QResizeEvent
         super().resizeEvent(a0)
         self._search_controller._resize_package_columns()
-
