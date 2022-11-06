@@ -21,7 +21,7 @@ except Exception:
     pass
 
 from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF,
-                                SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path)
+                                SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, user_save_path)
 from conan_app_launcher.app.logger import Logger
 
 from .conan_cache import ConanInfoCache
@@ -57,7 +57,7 @@ class ConanApi():
             self.remove_locks()
         except Exception as error:
             Logger().debug(str(error))
-        self.info_cache = ConanInfoCache(base_path, self.get_all_local_refs())
+        self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
         return self
 
     ### General commands ###
