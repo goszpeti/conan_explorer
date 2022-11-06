@@ -21,7 +21,7 @@ class LocalConanPackageExplorer(PluginInterface):
     conan_pkg_selected = pyqtSignal(str, dict)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
 
     def __init__(self, parent: QWidget, base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
-        super().__init__(parent, base_signals)
+        super().__init__(parent, base_signals, page_widgets)
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)
