@@ -40,7 +40,11 @@ class RemoteLoginDialog(QDialog):
         for remote in remotes:
             item = QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-            item.setCheckState(Qt.Checked)
+            if not remote.disabled:
+                item.setCheckState(Qt.Checked)
+            else:
+                item.setCheckState(Qt.Unchecked)
+
         self.setWindowIcon(QIcon(str(asset_path / "icons" / "login.png")))
         self._ui.button_box.accepted.connect(self.save)
 
@@ -57,6 +61,11 @@ class RemoteLoginDialog(QDialog):
         for remote in self._remotes:
             # will be canceled after the first error, so no lockout will occur, because of multiple incorrect logins
             # error is printed on the console
+            items = self._ui.remote_list.findItems(remote.name, Qt.MatchExactly)
+            if len(items) != 1:
+                Logger().error(f"Can't retrieve {remote.name} info from ui.")
+            if not items[0].checkState():
+                continue
             try:
                 app.conan_api.conan.authenticate(self._ui.name_line_edit.text(),
                                                 self._ui.password_line_edit.text(), remote.name)
