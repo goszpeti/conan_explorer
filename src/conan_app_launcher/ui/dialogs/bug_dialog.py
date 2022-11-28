@@ -6,7 +6,7 @@ import platform
 import sys
 import traceback
 
-from conan_app_launcher import REPO_URL, __version__, base_path
+from conan_app_launcher import REPO_URL, __version__, user_save_path
 from PyQt5.QtCore import Qt
 
 from conan_app_launcher.ui.widgets import WideMessageBox
@@ -62,7 +62,7 @@ def bug_reporting_dialog(excvalue, tb):
 def show_bug_dialog_exc_hook(exctype, excvalue, tb):
     print("Application crashed")
     error_text = f"ERROR: {str(exctype)} {excvalue}"
-    with open(base_path / "crash.log", "w") as fd:
+    with open(user_save_path / "crash.log", "w") as fd:
         fd.write(error_text + "\n")
         traceback.print_tb(tb, limit=10, file=fd)
     # print it too the console too
