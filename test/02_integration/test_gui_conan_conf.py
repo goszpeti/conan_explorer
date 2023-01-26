@@ -7,7 +7,7 @@ from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, conan_path_str
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
-from PyQt6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 from conan_app_launcher.ui.views.conan_conf import ConanConfigView
 
 Qt = QtCore.Qt

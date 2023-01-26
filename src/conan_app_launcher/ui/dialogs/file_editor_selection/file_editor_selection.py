@@ -1,7 +1,7 @@
 
 from pathlib import Path
 from .file_editor_selector_ui import Ui_Form
-from PyQt6.QtWidgets import QDialog, QFileDialog
+from PySide6.QtWidgets import QDialog, QFileDialog
 import conan_app_launcher.app as app
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 

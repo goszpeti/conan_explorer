@@ -3,8 +3,8 @@ from typing import List, Optional
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import APPLIST_ENABLED
 from conan_app_launcher.ui.fluent_window import RIGHT_MENU_MAX_WIDTH
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy, QFrame,
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy, QFrame,
                              QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
 
 from .app_link import AppLinkBase, GridAppLink, ListAppLink

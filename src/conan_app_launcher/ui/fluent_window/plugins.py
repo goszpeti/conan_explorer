@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, List, Optional
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QWidget
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget
 
 from .fluent_window import ThemedWidget
 
@@ -97,7 +97,7 @@ class PluginInterface(ThemedWidget):
     # Return a signal, which will be called, when the Ui should load.
     # Connect this to your actual load method.
     # This is used for asynchronous loading.
-    load_signal = pyqtSignal()
+    load_signal = Signal()
 
     def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"]=None, page_widgets: Optional["FluentWindow.PageStore"]=None) -> None:
         ThemedWidget.__init__(self, parent)

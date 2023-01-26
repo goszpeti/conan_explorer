@@ -3,16 +3,16 @@ from typing import Optional
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common import get_themed_asset_image
-from PyQt6.QtCore import QSize, Qt, pyqtBoundSignal
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QDialog, QWidget, QTreeWidgetItem
+from PySide6.QtCore import QSize, Qt, SignalInstance
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem
 
 from .conan_install_ui import Ui_Dialog
 from conans.model.ref import ConanFileReference, PackageReference
 
 
 class ConanInstallDialog(QDialog):
-    def __init__(self, parent: Optional[QWidget], conan_ref: str, pkg_installed_signal: Optional[pyqtBoundSignal] = None):
+    def __init__(self, parent: Optional[QWidget], conan_ref: str, pkg_installed_signal: Optional[SignalInstance] = None):
         """ conan_ref can be in full ref format with <ref>:<id> """
         super().__init__(parent)
         self._ui = Ui_Dialog()

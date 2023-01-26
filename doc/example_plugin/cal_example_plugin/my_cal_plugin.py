@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Optional
 
 from conan_app_launcher.ui import BaseSignals, PluginInterface
-from PyQt6 import uic
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
+from PySide6 import uic
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
 
 current_dir = Path(__file__).parent
 

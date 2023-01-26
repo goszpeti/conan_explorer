@@ -8,9 +8,9 @@ from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_image
 from conan_app_launcher.core.conan import ConanFileReference
-from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtCore import Qt, pyqtSlot, pyqtBoundSignal
-from PyQt6.QtCore import Qt, QAbstractItemModel, QModelIndex, pyqtBoundSignal
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt, Slot, SignalInstance
+from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
 
 from conan_app_launcher.ui.common.loading import AsyncLoader
 from conan_app_launcher.ui.fluent_window.plugins import PluginDescription, PluginFile

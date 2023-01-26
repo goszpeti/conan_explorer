@@ -6,13 +6,13 @@ from typing import Any, Callable, Optional, Tuple
 
 from conan_app_launcher import DEBUG_LEVEL
 from conan_app_launcher.app.logger import Logger
-from PyQt6 import QtCore, QtWidgets
-from PyQt6.QtCore import Qt
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtCore import Qt
 
 
 class Worker(QtCore.QObject):
     """ Generic worker for Qt, which can call any function with args """
-    finished = QtCore.pyqtSignal()
+    finished = QtCore.Signal()
 
     def __init__(self, func, args: Tuple[Any, ...] = ()):
         super().__init__()

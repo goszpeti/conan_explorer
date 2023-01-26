@@ -22,7 +22,7 @@ from conan_app_launcher.ui.views.app_grid.tab import TabGrid
 import conan_app_launcher.app as app  # using global module pattern
 
 from conans.model.ref import ConanFileReference
-from PyQt6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 

@@ -7,7 +7,8 @@ from conan_app_launcher.core import ConanApi, ConanWorker
 from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsInterface, settings_factory
 from .logger import Logger
 
-from PyQt6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
+
 
 if platform.system() == "Windows":
     # Workaround for Windows, so that on the taskbar the

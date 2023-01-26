@@ -9,16 +9,16 @@ from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from conan_app_launcher.core.conan import ConanFileReference
 
-from PyQt6.QtCore import pyqtBoundSignal, Qt
-from PyQt6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
-from PyQt6.QtGui import QIcon
+from PySide6.QtCore import SignalInstance, Qt
+from PySide6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
+from PySide6.QtGui import QIcon
 
 from .app_edit_dialog_ui import Ui_Dialog
 
 class AppEditDialog(QDialog):
 
     def __init__(self,  model: UiAppLinkModel, parent: Optional[QWidget], 
-                 pkg_installed_signal: Optional[pyqtBoundSignal] = None):
+                 pkg_installed_signal: Optional[SignalInstance] = None):
         super().__init__(parent=parent)
         self._model = model
         self._pkg_installed_signal = pkg_installed_signal

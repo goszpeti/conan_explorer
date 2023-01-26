@@ -5,8 +5,8 @@ from conan_app_launcher.ui.common import (TreeModel, TreeModelItem,
                                           get_platform_icon)
 from conans.client.cache.remote_registry import Remote
 from conans.errors import ConanException
-from PyQt6.QtCore import QAbstractListModel, QModelIndex, Qt
-from PyQt6.QtGui import QFont
+from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt
+from PySide6.QtGui import QFont
 
 
 class RemotesModelItem(TreeModelItem):

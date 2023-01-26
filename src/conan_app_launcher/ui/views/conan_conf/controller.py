@@ -4,15 +4,15 @@ import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.dialogs import ReorderController
 from conans.client.cache.remote_registry import Remote
-from PyQt6.QtCore import QModelIndex, QItemSelectionModel, pyqtBoundSignal
-from PyQt6.QtWidgets import QApplication, QTreeView
+from PySide6.QtCore import QModelIndex, QItemSelectionModel, SignalInstance
+from PySide6.QtWidgets import QApplication, QTreeView
 
 from conan_app_launcher.ui.views.conan_conf.model import RemotesModelItem, RemotesTableModel
 
 
 class ConanRemoteController():
 
-    def __init__(self, view: QTreeView, conan_remotes_updated: Optional[pyqtBoundSignal]) -> None:
+    def __init__(self, view: QTreeView, conan_remotes_updated: Optional[SignalInstance]) -> None:
         self._view = view
         self._model = RemotesTableModel()
         self.conan_remotes_updated = conan_remotes_updated

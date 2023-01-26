@@ -2,14 +2,14 @@ from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from PyQt6.QtCore import pyqtBoundSignal
-from PyQt6.QtWidgets import QMessageBox, QWidget
+from PySide6.QtCore import SignalInstance
+from PySide6.QtWidgets import QMessageBox, QWidget
 
 
 class ConanRemoveDialog(QMessageBox):
 
     def __init__(self, parent: Optional[QWidget],  conan_ref: str, pkg_id: str,
-                 conan_pkg_removed: Optional[pyqtBoundSignal] = None):
+                 conan_pkg_removed: Optional[SignalInstance] = None):
         super().__init__(parent)
         self._conan_ref = conan_ref
         self._pkg_id = pkg_id

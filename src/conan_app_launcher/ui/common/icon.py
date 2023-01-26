@@ -2,9 +2,9 @@ from pathlib import Path
 
 from conan_app_launcher import ICON_SIZE
 from conan_app_launcher.app.logger import Logger
-from PyQt6.QtCore import QFileInfo, Qt
-from PyQt6.QtGui import QIcon, QPixmap, QImage
-from PyQt6.QtWidgets import QFileIconProvider
+from PySide6.QtCore import QFileInfo, Qt
+from PySide6.QtGui import QIcon, QPixmap, QImage
+from PySide6.QtWidgets import QFileIconProvider
 
 import conan_app_launcher.app as app
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using global module pattern
@@ -42,7 +42,7 @@ def get_icon_from_image_file(image_path: Path) -> QIcon:
     else:
         pixmap = QPixmap(str(image_path)).toImage()
         icon = QPixmap.fromImage(pixmap).scaled(
-            ICON_SIZE, ICON_SIZE, transformMode=Qt.TransformationMode.SmoothTransformation)
+            ICON_SIZE, ICON_SIZE, mode=Qt.TransformationMode.SmoothTransformation)
         return QIcon(icon)
 
 

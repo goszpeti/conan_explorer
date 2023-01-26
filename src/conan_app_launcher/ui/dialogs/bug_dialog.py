@@ -7,7 +7,7 @@ import sys
 import traceback
 
 from conan_app_launcher import REPO_URL, __version__, user_save_path
-from PyQt6.QtCore import Qt
+from PySide6.QtCore import Qt
 
 from conan_app_launcher.ui.widgets import WideMessageBox
 

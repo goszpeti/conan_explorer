@@ -5,11 +5,10 @@ from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt6.QtCore import QPoint, Qt, pyqtSlot
-from PyQt6.QtGui import QIcon, QKeySequence, QAction
-from PyQt6.QtWidgets import (QListWidgetItem, QWidget)
+from PySide6.QtCore import QPoint, Qt, Slot
+from PySide6.QtGui import QIcon, QKeySequence, QAction
+from PySide6.QtWidgets import (QListWidgetItem, QWidget)
 
-from .conan_search_ui import Ui_Form
 from .controller import ConanSearchController
 
 
@@ -24,7 +23,7 @@ class ConanSearchView(PluginInterface):
                  page_widgets: Optional["FluentWindow.PageStore"] = None):
         # Add minimize and maximize buttons
         super().__init__(parent, base_signals, page_widgets)
-
+        from .conan_search_ui import Ui_Form
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)
@@ -96,7 +95,7 @@ class ConanSearchView(PluginInterface):
         self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
         self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 
-    @pyqtSlot(QPoint)
+    @Slot(QPoint)
     def on_pkg_context_menu_requested(self, position: QPoint):
         """ 
         Executes, when context menu is requested. 
@@ -113,7 +112,7 @@ class ConanSearchView(PluginInterface):
             self.show_in_pkg_exp_action.setEnabled(False)
         self.select_cntx_menu.exec(self._ui.search_results_tree_view.mapToGlobal(position))
 
-    @pyqtSlot()
+    @Slot()
     def on_show_in_pkg_exp(self):
         """ Switch to the main gui and select the item (ref or pkg) in the Local Package Explorer. """
         item = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view)

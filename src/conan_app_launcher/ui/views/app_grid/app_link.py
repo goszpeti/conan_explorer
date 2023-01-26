@@ -14,9 +14,9 @@ from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.widgets import ClickableIcon, RoundedMenu
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon, QFontMetrics, QFont, QAction
-from PyQt6.QtWidgets import (QComboBox, QDialog, QFrame, QHBoxLayout,
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon, QFontMetrics, QFont, QAction
+from PySide6.QtWidgets import (QComboBox, QDialog, QFrame, QHBoxLayout,
                              QLabel, QLayout, QMessageBox, QPushButton,
                              QSizePolicy, QVBoxLayout, QWidget)
 

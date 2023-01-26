@@ -6,11 +6,10 @@ from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.views.package_explorer.controller import PackageFileExplorerController, PackageSelectionController
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QIcon, QKeySequence, QShowEvent, QResizeEvent, QAction
-from PyQt6.QtWidgets import QWidget
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QIcon, QKeySequence, QShowEvent, QResizeEvent, QAction
+from PySide6.QtWidgets import QWidget
 
-from .package_explorer_ui import Ui_Form
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
@@ -18,10 +17,11 @@ if TYPE_CHECKING:
 
 
 class LocalConanPackageExplorer(PluginInterface):
-    conan_pkg_selected = pyqtSignal(str, dict)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
+    conan_pkg_selected = Signal(str, dict)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
 
     def __init__(self, parent: QWidget, base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent, base_signals, page_widgets)
+        from .package_explorer_ui import Ui_Form
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)

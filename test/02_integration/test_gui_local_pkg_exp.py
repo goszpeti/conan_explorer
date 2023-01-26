@@ -12,7 +12,7 @@ from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
 from conans.model.ref import ConanFileReference
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 
-from PyQt6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 # For debug:

@@ -92,7 +92,7 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 
 ### Main dependencies
 
-* PyQt6 >= 6.3.0
+* Pyside6 >= 6.4.0
 * conan >= 1.24.0
 
 > **Warning** **Deprecation of Python 3.6**  
@@ -106,6 +106,9 @@ An IDE configuration is available for VsCode.
 See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for Static Code Analysis.
 
 ## Licenses of used libraries and code
+
+> **Warning** **Change of License to LGPL**
+> From version 2.0.0 the project will use the LGPL 3.0 license to cleanly comply with PySide6.
 
 #### Resources
 * Using icons by https://icons8.com under [Universal Multimedia Licensing

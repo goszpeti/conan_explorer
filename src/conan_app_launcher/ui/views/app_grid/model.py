@@ -13,9 +13,9 @@ from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file,
 from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.core.conan import ConanFileReference
 
-# from PyQt6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
-from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
+# from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
 
 class UiAppGridModel(UiAppGridConfig, QObject):
 

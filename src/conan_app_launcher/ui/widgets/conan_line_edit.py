@@ -5,13 +5,13 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
 from conan_app_launcher.core.conan import ConanFileReference, PackageReference
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtWidgets import QCompleter, QLineEdit
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QCompleter, QLineEdit
 
 
 class ConanRefLineEdit(QLineEdit):
     """ Adds completions for Conan references and a validator. """
-    completion_finished = pyqtSignal()
+    completion_finished = Signal()
     MINIMUM_CHARS_FOR_QUERY = 4
     INVALID_COLOR = "LightCoral"
     VALID_COLOR_LIGHT = "#37efba"  # light green

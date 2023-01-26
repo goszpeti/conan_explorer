@@ -21,10 +21,10 @@ from conan_app_launcher.app import asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import is_windows_11
 
-from PyQt6.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
+from PySide6.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
                           QPropertyAnimation, QRect, QSize, Qt)
-from PyQt6.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap, QShortcut
-from PyQt6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
+from PySide6.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap, QShortcut
+from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
                              QPushButton, QSizePolicy,
                              QStackedWidget, QVBoxLayout, QWidget)
 
@@ -371,7 +371,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """ Platform native events """
         retval, result = super(QMainWindow, self).nativeEvent(eventType, message)
         if str(eventType) == "b'windows_generic_MSG'":
-            message.setsize(8)
+            #message.setsize(8)
             msg = MSG.from_address(message.__int__())
             if msg.message == 131:  # ignore WM_NCCALCSIZE event. Suppresses native Window drawing of title-bar.
                 return True, 0

@@ -11,7 +11,7 @@ import platform
 import conan_app_launcher
 from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
                                          settings_factory)
-from PyQt6 import QtWidgets
+from PySide6 import QtWidgets
 
 from test.conftest import check_if_process_running
 import psutil

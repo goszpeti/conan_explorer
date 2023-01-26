@@ -1,9 +1,9 @@
 from typing import Any, Callable, List
-from PyQt6.QtCore import Qt, QAbstractItemModel, QModelIndex, pyqtBoundSignal
-from PyQt6.QtGui import QFileSystemModel
+from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
+from PySide6.QtWidgets import QFileSystemModel
 
 
-def re_register_signal(signal: pyqtBoundSignal, slot: Callable):
+def re_register_signal(signal: SignalInstance, slot: Callable):
     try:  # need to be removed, otherwise will be called multiple times
         signal.disconnect()
     except TypeError:

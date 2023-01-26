@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Optional
 from conan_app_launcher import AUTHOR, REPO_URL, __version__, asset_path
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
                              QVBoxLayout, QWidget)
-from PyQt6.QtCore import QPoint, Qt, pyqtSlot
-from PyQt6.QtGui import QIcon, QKeySequence, QAction
-from PyQt6.QtWidgets import (QListWidgetItem, QWidget)
+from PySide6.QtCore import QPoint, Qt, Slot
+from PySide6.QtGui import QIcon, QKeySequence, QAction
+from PySide6.QtWidgets import (QListWidgetItem, QWidget)
 from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.widgets import RoundedMenu
 from .controller import PluginController
@@ -43,7 +43,7 @@ class PluginsPage(PluginInterface):
     #     self._remotes_cntx_menu.addAction(self._copy_remote_action)
     #     self._copy_remote_action.triggered.connect(self.on_copy_remote_name_requested)
 
-    # @pyqtSlot(QPoint)
+    # @Slot(QPoint)
     # def on_pkg_context_menu_requested(self, position: QPoint):
     #     """ 
     #     Executes, when context menu is requested. 

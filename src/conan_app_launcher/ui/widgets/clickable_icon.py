@@ -5,9 +5,9 @@ from typing import Optional
 
 from conan_app_launcher import ICON_SIZE
 
-from PyQt6.QtCore import pyqtSignal, QSize, Qt
-from PyQt6.QtWidgets import QPushButton, QGraphicsColorizeEffect, QGraphicsPixmapItem
-from PyQt6.QtGui import QColor, QIcon, QPixmap
+from PySide6.QtCore import Signal, QSize, Qt
+from PySide6.QtWidgets import QPushButton, QGraphicsColorizeEffect, QGraphicsPixmapItem
+from PySide6.QtGui import QColor, QIcon, QPixmap
 
 class ClickableIcon(QPushButton):
     """
@@ -15,7 +15,7 @@ class ClickableIcon(QPushButton):
     Has advanced icon handling for displaying the best matching icon.
     """
     # this signal is used to connect to backend functions.
-    clicked = pyqtSignal()
+    clicked = Signal()
 
     # TODO flags
     def __init__(self, parent, image=Path("NULL"), icon_size=ICON_SIZE):
@@ -69,7 +69,7 @@ class ClickableIcon(QPushButton):
         else:
             pixmap = QPixmap(str(self._image)).toImage()
             icon = QPixmap.fromImage(pixmap).scaled(
-                ICON_SIZE, ICON_SIZE, transformMode=Qt.TransformationMode.SmoothTransformation)
+                ICON_SIZE, ICON_SIZE, mode=Qt.TransformationMode.SmoothTransformation)
             self._ic = QIcon(icon)
             self.setIcon(self._ic)
 

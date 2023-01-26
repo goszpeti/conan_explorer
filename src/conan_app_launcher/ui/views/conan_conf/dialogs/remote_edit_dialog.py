@@ -7,9 +7,9 @@ from conan_app_launcher import asset_path
 from conans.client.cache.remote_registry import Remote
 from conan_app_launcher.app.logger import Logger
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QDialog, QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QDialog, QWidget
 
 from .remote_edit_dialog_ui import Ui_Dialog
 

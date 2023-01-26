@@ -16,9 +16,9 @@ from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog
 from conan_app_launcher.ui.views import AppGridView
-from PyQt6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
-                          Qt, QUrl, pyqtBoundSignal)
-from PyQt6.QtWidgets import (QAbstractItemView, QApplication, QLabel,
+from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
+                          Qt, QUrl, SignalInstance)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QLabel,
                              QLineEdit, QMessageBox, QTreeView, QWidget)
 
 from .model import (PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem,
@@ -31,8 +31,8 @@ if TYPE_CHECKING:
 
 class PackageSelectionController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, package_filter_edit: QLineEdit, conan_pkg_selected: pyqtBoundSignal,
-                 conan_pkg_removed: pyqtBoundSignal, page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: QWidget, view: QTreeView, package_filter_edit: QLineEdit, conan_pkg_selected: SignalInstance,
+                 conan_pkg_removed: SignalInstance, page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._conan_pkg_removed = conan_pkg_removed
         self._conan_pkg_selected = conan_pkg_selected
@@ -215,7 +215,7 @@ class PackageSelectionController(QObject):
 
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QLabel, conan_pkg_selected: pyqtBoundSignal, conan_pkg_removed: pyqtBoundSignal, page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QLabel, conan_pkg_selected: SignalInstance, conan_pkg_removed: SignalInstance, page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._model = None
         self._page_widgets = page_widgets

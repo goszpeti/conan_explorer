@@ -1,8 +1,8 @@
-from PyQt6.QtCore import (QEasingCurve, QPoint, QPointF, QPropertyAnimation,
+from PySide6.QtCore import (QEasingCurve, QPoint, QPointF, QPropertyAnimation,
                           QRectF, QSequentialAnimationGroup, QSize, Qt,
-                          pyqtProperty, pyqtSlot) # type: ignore
-from PyQt6.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen
-from PyQt6.QtWidgets import QCheckBox
+                          Property, Slot) # type: ignore
+from PySide6.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen
+from PySide6.QtWidgets import QCheckBox
 
 
 class AnimatedToggle(QCheckBox):
@@ -52,7 +52,7 @@ class AnimatedToggle(QCheckBox):
     def hitButton(self, pos: QPoint):
         return self.contentsRect().contains(pos)
 
-    @pyqtProperty(float)
+    @Property(float)
     def handle_position(self):  # type: ignore
         return self._handle_position
 
@@ -66,7 +66,7 @@ class AnimatedToggle(QCheckBox):
         self._handle_position = pos
         self.update()
 
-    @pyqtProperty(float)
+    @Property(float)
     def pulse_radius(self): # type: ignore
         return self._pulse_radius
 
@@ -75,7 +75,7 @@ class AnimatedToggle(QCheckBox):
         self._pulse_radius = pos
         self.update()
 
-    @pyqtSlot(int)
+    @Slot(int)
     def handle_state_change(self, value):
         self.animations_group.stop()
         if value:

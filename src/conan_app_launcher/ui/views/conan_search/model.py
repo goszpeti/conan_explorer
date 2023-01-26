@@ -6,8 +6,8 @@ from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan import ConanPkg
 from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_image
 from conan_app_launcher.core.conan import ConanFileReference
-from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtCore import Qt, pyqtSlot, pyqtBoundSignal
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt, Slot, SignalInstance
 
 from conan_app_launcher.ui.common.loading import AsyncLoader
 
@@ -78,7 +78,7 @@ class SearchedPackageTreeItem(TreeModelItem):
 
 class PkgSearchModel(TreeModel):
 
-    def __init__(self, conan_pkg_installed: Optional[pyqtBoundSignal] = None, conan_pkg_removed: Optional[pyqtBoundSignal] = None, *args, **kwargs):
+    def __init__(self, conan_pkg_installed: Optional[SignalInstance] = None, conan_pkg_removed: Optional[SignalInstance] = None, *args, **kwargs):
         super(PkgSearchModel, self).__init__(*args, **kwargs)
         self.root_item = SearchedPackageTreeItem(["Packages", "Remote(s)", "Quick Profile"])
         self.proxy_model = QtCore.QSortFilterProxyModel()  # for sorting
@@ -164,11 +164,11 @@ class PkgSearchModel(TreeModel):
             return QtCore.QModelIndex()
         return self.index(ref_row, 0, QtCore.QModelIndex())
 
-    @pyqtSlot(str, str)
+    @Slot(str, str)
     def mark_pkg_as_installed(self, conan_ref: str, pkg_id: str):
         self._set_pkg_install_status(conan_ref, pkg_id, True)
 
-    @pyqtSlot(str, str)
+    @Slot(str, str)
     def mark_pkg_as_not_installed(self, conan_ref: str, pkg_id: str):
         self._set_pkg_install_status(conan_ref, pkg_id, False)
 

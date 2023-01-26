@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
-from PyQt6.QtCore import QItemSelectionModel, QModelIndex
-from PyQt6.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
-from PyQt6.QtGui import QIcon
+from PySide6.QtCore import QItemSelectionModel, QModelIndex
+from PySide6.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
+from PySide6.QtGui import QIcon
 
 from .reorder_dialog_ui import Ui_rearrange_dialog
 

@@ -23,9 +23,9 @@ from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection i
 from conan_app_launcher.ui.fluent_window.plugins import PluginFile
 from conan_app_launcher.ui.views.app_grid.tab import TabGrid
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
-from PyQt6.QtCore import QRect, pyqtBoundSignal, pyqtSignal, pyqtSlot
-from PyQt6.QtGui import QKeySequence
-from PyQt6.QtWidgets import QApplication, QFileDialog
+from PySide6.QtCore import QRect, SignalInstance, Signal, Slot
+from PySide6.QtGui import QKeySequence
+from PySide6.QtWidgets import QApplication, QFileDialog
 
 from .common import (AsyncLoader, activate_theme, init_qt_logger,
                      remove_qt_logger)
@@ -38,20 +38,20 @@ from .views import AboutPage, AppGridView, PluginsPage
 @dataclass
 class BaseSignals():
     """ Dict of base signals, wich is passed down to the Views """
-    conan_pkg_installed: pyqtBoundSignal  # conan_ref, pkg_id
-    conan_pkg_removed: pyqtBoundSignal  # conan_ref, pkg_ids
-    conan_remotes_updated: pyqtBoundSignal
+    conan_pkg_installed: SignalInstance  # conan_ref, pkg_id
+    conan_pkg_removed: SignalInstance  # conan_ref, pkg_ids
+    conan_remotes_updated: SignalInstance
 
 
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
 
     # signals for inter page communication
-    conan_pkg_installed = pyqtSignal(str, str)  # conan_ref, pkg_id
-    conan_pkg_removed = pyqtSignal(str, str)  # conan_ref, pkg_ids
-    conan_remotes_updated = pyqtSignal()
+    conan_pkg_installed = Signal(str, str)  # conan_ref, pkg_id
+    conan_pkg_removed = Signal(str, str)  # conan_ref, pkg_ids
+    conan_remotes_updated = Signal()
 
-    log_console_message = pyqtSignal(str)  # str arg is the message
+    log_console_message = Signal(str)  # str arg is the message
 
     qt_logger_name = "qt_logger"
 
@@ -190,7 +190,7 @@ class MainWindow(FluentWindow):
         # loads the remotes in the search dialog
         self.conan_remotes_updated.emit()
 
-    @pyqtSlot()
+    @Slot()
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
         new_size = app.active_settings.get_int(FONT_SIZE) + 1
@@ -199,7 +199,7 @@ class MainWindow(FluentWindow):
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)
 
-    @pyqtSlot()
+    @Slot()
     def on_font_size_decreased(self):
         """ Decrease font size by 2. Ignore if font gets too small. """
         new_size = app.active_settings.get_int(FONT_SIZE) - 1
@@ -208,7 +208,7 @@ class MainWindow(FluentWindow):
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)
 
-    @pyqtSlot()
+    @Slot()
     def on_theme_changed(self):
         # wait 0,5 seconds, so all animations can finish
         start = datetime.datetime.now()
@@ -228,7 +228,7 @@ class MainWindow(FluentWindow):
         for page in self.page_widgets.get_all_pages():
             page.reload_themed_icons()
 
-    @pyqtSlot()
+    @Slot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         cleaner = ConanCleanup(app.conan_api)
@@ -257,7 +257,7 @@ class MainWindow(FluentWindow):
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
-    @pyqtSlot()
+    @Slot()
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
         dialog_path = user_save_path
@@ -275,23 +275,23 @@ class MainWindow(FluentWindow):
             # conan works, model can be loaded
             self.app_grid.re_init(self.model.app_grid)  # loads tabs
 
-    @pyqtSlot()
+    @Slot()
     def open_file_editor_selection_dialog(self):
         dialog = FileEditorSelDialog(self)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
 
-    @pyqtSlot()
+    @Slot()
     def on_add_link(self):
         tab: TabGrid = self.app_grid.tab_widget.currentWidget()  # type: ignore
         tab.app_links[0].open_app_link_add_dialog()
 
-    @pyqtSlot()
+    @Slot()
     def on_reorder(self):
         tab: TabGrid = self.app_grid.tab_widget.currentWidget()  # type: ignore
         tab.app_links[0].on_move()
 
-    @pyqtSlot()
+    @Slot()
     def display_versions_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         # status is changed only after this is done, so the state must be negated
@@ -300,7 +300,7 @@ class MainWindow(FluentWindow):
         app.active_settings.set(DISPLAY_APP_VERSIONS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
-    @pyqtSlot()
+    @Slot()
     def apply_display_users_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
@@ -308,7 +308,7 @@ class MainWindow(FluentWindow):
         app.active_settings.set(DISPLAY_APP_USERS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
-    @pyqtSlot()
+    @Slot()
     def display_channels_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
@@ -316,21 +316,21 @@ class MainWindow(FluentWindow):
         app.active_settings.set(DISPLAY_APP_CHANNELS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
-    @pyqtSlot()
+    @Slot()
     def quicklaunch_grid_mode_toggled(self):
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(APPLIST_ENABLED, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
-    @pyqtSlot()
+    @Slot()
     def quicklaunch_cbox_mode_toggled(self):
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
         status = sender_toggle.isChecked()
         app.active_settings.set(ENABLE_APP_COMBO_BOXES, status)
         self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
-    @pyqtSlot(str)
+    @Slot(str)
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self.ui.console.append(text)

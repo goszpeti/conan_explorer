@@ -261,7 +261,7 @@ def ui_no_refs_config_fixture(base_fixture):
 
 @pytest.fixture
 def mock_clipboard(mocker):
-    from PyQt6.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication
     mocker.patch.object(QApplication, 'clipboard')
     clipboard = mock.MagicMock()
     clipboard.supportsSelection.return_value = True

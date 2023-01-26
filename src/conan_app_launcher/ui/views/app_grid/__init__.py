@@ -9,9 +9,9 @@ from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.core.conan import ConanFileReference, PackageReference
 
-from PyQt6.QtCore import Qt, pyqtBoundSignal, pyqtSignal
-from PyQt6.QtGui import QIcon, QAction
-from PyQt6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget,
+from PySide6.QtCore import Qt, SignalInstance, Signal
+from PySide6.QtGui import QIcon, QAction
+from PySide6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget,
                              QVBoxLayout, QWidget)
 
 from .model import UiAppLinkModel, UiTabModel
@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 
 
 class AppGridView(QWidget):
-    load_signal = pyqtSignal()
+    load_signal = Signal()
 
-    def __init__(self, parent, model: "UiAppGridModel", conan_pkg_installed: pyqtBoundSignal, page_widgets: FluentWindow.PageStore):
+    def __init__(self, parent, model: "UiAppGridModel", conan_pkg_installed: SignalInstance, page_widgets: FluentWindow.PageStore):
         super().__init__(parent)
         self.page_widgets = page_widgets
         self.setLayout(QVBoxLayout(self))

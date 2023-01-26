@@ -2,8 +2,8 @@ from .conan_line_edit import ConanRefLineEdit
 from .clickable_icon import ClickableIcon
 from .toggle import AnimatedToggle
 
-from PyQt6.QtWidgets import QMenu, QMessageBox
-from PyQt6.QtCore import Qt
+from PySide6.QtWidgets import QMenu, QMessageBox
+from PySide6.QtCore import Qt
 
 class RoundedMenu(QMenu):
     def __init__(self) -> None:
