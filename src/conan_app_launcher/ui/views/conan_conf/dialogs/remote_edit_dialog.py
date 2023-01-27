@@ -11,7 +11,6 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget
 
-from .remote_edit_dialog_ui import Ui_Dialog
 
 current_dir = Path(__file__).parent
 
@@ -20,6 +19,7 @@ class RemoteEditDialog(QDialog):
 
     def __init__(self, remote: Remote, new_remote=False, parent: Optional[QWidget] = None):
         super().__init__(parent=parent)
+        from .remote_edit_dialog_ui import Ui_Dialog
         self._remote = remote
         self._new_remote = new_remote
 

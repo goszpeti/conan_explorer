@@ -126,6 +126,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
 
 def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
     """ Generic process execute method. Returns pid. """
+    command_path = Path(cmd[0]).parent
     try:
         # Linux call errors on creationflags argument, so the calls must be separated
         if platform.system() == "Windows":
@@ -134,7 +135,7 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
                 creationflags = subprocess.CREATE_NEW_CONSOLE
                 cmd = [generate_launch_script(cmd)]
             # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
-            proc = subprocess.Popen(cmd, creationflags=creationflags)
+            proc = subprocess.Popen(cmd, creationflags=creationflags, cwd=str(command_path))
             return proc.pid
         elif platform.system() == "Linux":
             if is_console_app:
@@ -144,7 +145,7 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
                 # This works only on debian distros.
                 cmd = [generate_launch_script(cmd)]
                 cmd = ["x-terminal-emulator", "-e"] + cmd
-            proc = subprocess.Popen(cmd)
+            proc = subprocess.Popen(cmd, cwd=str(command_path))
             return proc.pid
         return 0
     except Exception as e:

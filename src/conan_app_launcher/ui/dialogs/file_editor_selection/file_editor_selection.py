@@ -1,6 +1,5 @@
 
 from pathlib import Path
-from .file_editor_selector_ui import Ui_Form
 from PySide6.QtWidgets import QDialog, QFileDialog
 import conan_app_launcher.app as app
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
@@ -9,6 +8,7 @@ class FileEditorSelDialog(QDialog):
 
     def __init__(self, parent) -> None:
         super().__init__(parent=parent)
+        from .file_editor_selector_ui import Ui_Form
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.setWindowTitle("File Editor Selection")

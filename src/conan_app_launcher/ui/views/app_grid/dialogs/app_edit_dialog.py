@@ -7,13 +7,12 @@ from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
-from conan_app_launcher.core.conan import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanFileReference
 
 from PySide6.QtCore import SignalInstance, Qt
 from PySide6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
 from PySide6.QtGui import QIcon
 
-from .app_edit_dialog_ui import Ui_Dialog
 
 class AppEditDialog(QDialog):
 
@@ -22,6 +21,7 @@ class AppEditDialog(QDialog):
         super().__init__(parent=parent)
         self._model = model
         self._pkg_installed_signal = pkg_installed_signal
+        from .app_edit_dialog_ui import Ui_Dialog
 
         # without baseinstance, dialog would further needed to be configured
         self._ui = Ui_Dialog()
@@ -37,6 +37,7 @@ class AppEditDialog(QDialog):
         self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started_info)
         self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished_info)
         self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_browse_buttons)
+        self._ui.conan_ref_line_edit.setMinimumWidth(500)
 
         # fill up current info
         self._ui.name_line_edit.setText(self._model.name)
@@ -62,8 +63,6 @@ class AppEditDialog(QDialog):
         self._ui.button_box.accepted.connect(self.save_data)
         self._ui.button_box.accepted.connect(self.cleanup)
         self._ui.button_box.rejected.connect(self.cleanup)
-
-        self.adjustSize()
 
     def cleanup(self) -> None:
         self._ui.conan_ref_line_edit.cleanup()

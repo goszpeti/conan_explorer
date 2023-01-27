@@ -18,8 +18,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QFrame,
     QGridLayout, QGroupBox, QHBoxLayout, QHeaderView,
     QLabel, QListView, QPushButton, QScrollArea,
-    QSizePolicy, QSpacerItem, QSplitter, QTabWidget,
-    QTextBrowser, QTreeView, QVBoxLayout, QWidget)
+    QSizePolicy, QSpacerItem, QTabWidget, QTextBrowser,
+    QTreeView, QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -44,108 +44,108 @@ class Ui_Form(object):
         self.info_scroll_area.setWidgetResizable(True)
         self.info_contents = QWidget()
         self.info_contents.setObjectName(u"info_contents")
-        self.info_contents.setGeometry(QRect(0, 0, 608, 434))
+        self.info_contents.setGeometry(QRect(0, 0, 608, 431))
         self.verticalLayout_7 = QVBoxLayout(self.info_contents)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.groupBox = QGroupBox(self.info_contents)
-        self.groupBox.setObjectName(u"groupBox")
-        self.gridLayout_2 = QGridLayout(self.groupBox)
+        self.versions_box = QGroupBox(self.info_contents)
+        self.versions_box.setObjectName(u"versions_box")
+        self.gridLayout_2 = QGridLayout(self.versions_box)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.conan_cur_version_label = QLabel(self.groupBox)
+        self.conan_cur_version_label = QLabel(self.versions_box)
         self.conan_cur_version_label.setObjectName(u"conan_cur_version_label")
 
         self.gridLayout_2.addWidget(self.conan_cur_version_label, 0, 0, 1, 1)
 
-        self.conan_cur_version_value_label = QLabel(self.groupBox)
+        self.conan_cur_version_value_label = QLabel(self.versions_box)
         self.conan_cur_version_value_label.setObjectName(u"conan_cur_version_value_label")
         self.conan_cur_version_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
         self.gridLayout_2.addWidget(self.conan_cur_version_value_label, 0, 1, 1, 1)
 
-        self.python_cur_version_label = QLabel(self.groupBox)
+        self.python_cur_version_label = QLabel(self.versions_box)
         self.python_cur_version_label.setObjectName(u"python_cur_version_label")
 
         self.gridLayout_2.addWidget(self.python_cur_version_label, 1, 0, 1, 1)
 
-        self.conan_sys_version_value_label = QLabel(self.groupBox)
+        self.conan_sys_version_value_label = QLabel(self.versions_box)
         self.conan_sys_version_value_label.setObjectName(u"conan_sys_version_value_label")
         self.conan_sys_version_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
         self.gridLayout_2.addWidget(self.conan_sys_version_value_label, 2, 1, 1, 1)
 
-        self.conan_sys_version_label = QLabel(self.groupBox)
+        self.conan_sys_version_label = QLabel(self.versions_box)
         self.conan_sys_version_label.setObjectName(u"conan_sys_version_label")
 
         self.gridLayout_2.addWidget(self.conan_sys_version_label, 2, 0, 1, 1)
 
-        self.python_cur_version_value_label = QLabel(self.groupBox)
+        self.python_cur_version_value_label = QLabel(self.versions_box)
         self.python_cur_version_value_label.setObjectName(u"python_cur_version_value_label")
 
         self.gridLayout_2.addWidget(self.python_cur_version_value_label, 1, 1, 1, 1)
 
-        self.python_sys_version_label = QLabel(self.groupBox)
+        self.python_sys_version_label = QLabel(self.versions_box)
         self.python_sys_version_label.setObjectName(u"python_sys_version_label")
 
         self.gridLayout_2.addWidget(self.python_sys_version_label, 3, 0, 1, 1)
 
-        self.python_sys_version_value_label = QLabel(self.groupBox)
+        self.python_sys_version_value_label = QLabel(self.versions_box)
         self.python_sys_version_value_label.setObjectName(u"python_sys_version_value_label")
 
         self.gridLayout_2.addWidget(self.python_sys_version_value_label, 3, 1, 1, 1)
 
 
-        self.verticalLayout_7.addWidget(self.groupBox)
+        self.verticalLayout_7.addWidget(self.versions_box)
 
-        self.groupBox_2 = QGroupBox(self.info_contents)
-        self.groupBox_2.setObjectName(u"groupBox_2")
-        self.gridLayout = QGridLayout(self.groupBox_2)
+        self.paths_box = QGroupBox(self.info_contents)
+        self.paths_box.setObjectName(u"paths_box")
+        self.gridLayout = QGridLayout(self.paths_box)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.conan_usr_home_label = QLabel(self.groupBox_2)
+        self.conan_usr_home_label = QLabel(self.paths_box)
         self.conan_usr_home_label.setObjectName(u"conan_usr_home_label")
 
         self.gridLayout.addWidget(self.conan_usr_home_label, 0, 0, 1, 1)
 
-        self.conan_usr_home_value_label = QLabel(self.groupBox_2)
+        self.conan_usr_home_value_label = QLabel(self.paths_box)
         self.conan_usr_home_value_label.setObjectName(u"conan_usr_home_value_label")
         self.conan_usr_home_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
         self.gridLayout.addWidget(self.conan_usr_home_value_label, 0, 1, 1, 1)
 
-        self.conan_storage_path_label = QLabel(self.groupBox_2)
+        self.conan_storage_path_label = QLabel(self.paths_box)
         self.conan_storage_path_label.setObjectName(u"conan_storage_path_label")
 
         self.gridLayout.addWidget(self.conan_storage_path_label, 1, 0, 1, 1)
 
-        self.conan_storage_path_value_label = QLabel(self.groupBox_2)
+        self.conan_storage_path_value_label = QLabel(self.paths_box)
         self.conan_storage_path_value_label.setObjectName(u"conan_storage_path_value_label")
         self.conan_storage_path_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
         self.gridLayout.addWidget(self.conan_storage_path_value_label, 1, 1, 1, 1)
 
-        self.conan_usr_cache_label = QLabel(self.groupBox_2)
+        self.conan_usr_cache_label = QLabel(self.paths_box)
         self.conan_usr_cache_label.setObjectName(u"conan_usr_cache_label")
 
         self.gridLayout.addWidget(self.conan_usr_cache_label, 2, 0, 1, 1)
 
-        self.conan_usr_cache_value_label = QLabel(self.groupBox_2)
+        self.conan_usr_cache_value_label = QLabel(self.paths_box)
         self.conan_usr_cache_value_label.setObjectName(u"conan_usr_cache_value_label")
         self.conan_usr_cache_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
         self.gridLayout.addWidget(self.conan_usr_cache_value_label, 2, 1, 1, 1)
 
 
-        self.verticalLayout_7.addWidget(self.groupBox_2)
+        self.verticalLayout_7.addWidget(self.paths_box)
 
-        self.groupBox_3 = QGroupBox(self.info_contents)
-        self.groupBox_3.setObjectName(u"groupBox_3")
-        self.gridLayout_3 = QGridLayout(self.groupBox_3)
+        self.features_box = QGroupBox(self.info_contents)
+        self.features_box.setObjectName(u"features_box")
+        self.gridLayout_3 = QGridLayout(self.features_box)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.revision_enabled_label = QLabel(self.groupBox_3)
+        self.revision_enabled_label = QLabel(self.features_box)
         self.revision_enabled_label.setObjectName(u"revision_enabled_label")
 
         self.gridLayout_3.addWidget(self.revision_enabled_label, 0, 0, 1, 1)
 
-        self.revision_enabled_checkbox = QCheckBox(self.groupBox_3)
+        self.revision_enabled_checkbox = QCheckBox(self.features_box)
         self.revision_enabled_checkbox.setObjectName(u"revision_enabled_checkbox")
         self.revision_enabled_checkbox.setEnabled(False)
         self.revision_enabled_checkbox.setCheckable(True)
@@ -153,7 +153,7 @@ class Ui_Form(object):
         self.gridLayout_3.addWidget(self.revision_enabled_checkbox, 0, 1, 1, 1)
 
 
-        self.verticalLayout_7.addWidget(self.groupBox_3)
+        self.verticalLayout_7.addWidget(self.features_box)
 
         self.verticalSpacer = QSpacerItem(20, 800, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -168,14 +168,64 @@ class Ui_Form(object):
         self.remotes.setObjectName(u"remotes")
         self.verticalLayout_4 = QVBoxLayout(self.remotes)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.frame_3 = QFrame(self.remotes)
-        self.frame_3.setObjectName(u"frame_3")
-        self.frame_3.setFrameShape(QFrame.StyledPanel)
-        self.frame_3.setFrameShadow(QFrame.Raised)
-        self.gridLayout_4 = QGridLayout(self.frame_3)
+        self.remotes_frame = QFrame(self.remotes)
+        self.remotes_frame.setObjectName(u"remotes_frame")
+        self.remotes_frame.setFrameShape(QFrame.StyledPanel)
+        self.remotes_frame.setFrameShadow(QFrame.Raised)
+        self.gridLayout_4 = QGridLayout(self.remotes_frame)
         self.gridLayout_4.setObjectName(u"gridLayout_4")
         self.gridLayout_4.setContentsMargins(0, -1, 0, -1)
-        self.remotes_tree_view = QTreeView(self.frame_3)
+        self.remotes_buttons_frame = QFrame(self.remotes_frame)
+        self.remotes_buttons_frame.setObjectName(u"remotes_buttons_frame")
+        self.remotes_buttons_frame.setStyleSheet(u"QPushButton {Text-align:left}")
+        self.remotes_buttons_frame.setFrameShape(QFrame.StyledPanel)
+        self.remotes_buttons_frame.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_8 = QVBoxLayout(self.remotes_buttons_frame)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.verticalLayout_8.setContentsMargins(0, -1, 0, -1)
+        self.remote_refresh_button = QPushButton(self.remotes_buttons_frame)
+        self.remote_refresh_button.setObjectName(u"remote_refresh_button")
+
+        self.verticalLayout_8.addWidget(self.remote_refresh_button)
+
+        self.remote_move_up_button = QPushButton(self.remotes_buttons_frame)
+        self.remote_move_up_button.setObjectName(u"remote_move_up_button")
+
+        self.verticalLayout_8.addWidget(self.remote_move_up_button)
+
+        self.remote_move_down_button = QPushButton(self.remotes_buttons_frame)
+        self.remote_move_down_button.setObjectName(u"remote_move_down_button")
+
+        self.verticalLayout_8.addWidget(self.remote_move_down_button)
+
+        self.remote_login = QPushButton(self.remotes_buttons_frame)
+        self.remote_login.setObjectName(u"remote_login")
+
+        self.verticalLayout_8.addWidget(self.remote_login)
+
+        self.remote_toggle_disabled = QPushButton(self.remotes_buttons_frame)
+        self.remote_toggle_disabled.setObjectName(u"remote_toggle_disabled")
+
+        self.verticalLayout_8.addWidget(self.remote_toggle_disabled)
+
+        self.remote_add = QPushButton(self.remotes_buttons_frame)
+        self.remote_add.setObjectName(u"remote_add")
+
+        self.verticalLayout_8.addWidget(self.remote_add)
+
+        self.remote_remove = QPushButton(self.remotes_buttons_frame)
+        self.remote_remove.setObjectName(u"remote_remove")
+
+        self.verticalLayout_8.addWidget(self.remote_remove)
+
+        self.remotes_btns_spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_8.addItem(self.remotes_btns_spacer)
+
+
+        self.gridLayout_4.addWidget(self.remotes_buttons_frame, 0, 1, 1, 1)
+
+        self.remotes_tree_view = QTreeView(self.remotes_frame)
         self.remotes_tree_view.setObjectName(u"remotes_tree_view")
         self.remotes_tree_view.setFrameShape(QFrame.NoFrame)
         self.remotes_tree_view.setDragEnabled(True)
@@ -184,101 +234,67 @@ class Ui_Form(object):
 
         self.gridLayout_4.addWidget(self.remotes_tree_view, 0, 0, 1, 1)
 
-        self.frame_4 = QFrame(self.frame_3)
-        self.frame_4.setObjectName(u"frame_4")
-        self.frame_4.setStyleSheet(u"QPushButton {Text-align:left}")
-        self.frame_4.setFrameShape(QFrame.StyledPanel)
-        self.frame_4.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_8 = QVBoxLayout(self.frame_4)
-        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
-        self.verticalLayout_8.setContentsMargins(0, -1, 0, -1)
-        self.remote_refresh_button = QPushButton(self.frame_4)
-        self.remote_refresh_button.setObjectName(u"remote_refresh_button")
 
-        self.verticalLayout_8.addWidget(self.remote_refresh_button)
-
-        self.remote_move_up_button = QPushButton(self.frame_4)
-        self.remote_move_up_button.setObjectName(u"remote_move_up_button")
-
-        self.verticalLayout_8.addWidget(self.remote_move_up_button)
-
-        self.remote_move_down_button = QPushButton(self.frame_4)
-        self.remote_move_down_button.setObjectName(u"remote_move_down_button")
-
-        self.verticalLayout_8.addWidget(self.remote_move_down_button)
-
-        self.remote_login = QPushButton(self.frame_4)
-        self.remote_login.setObjectName(u"remote_login")
-
-        self.verticalLayout_8.addWidget(self.remote_login)
-
-        self.remote_toggle_disabled = QPushButton(self.frame_4)
-        self.remote_toggle_disabled.setObjectName(u"remote_toggle_disabled")
-
-        self.verticalLayout_8.addWidget(self.remote_toggle_disabled)
-
-        self.remote_add = QPushButton(self.frame_4)
-        self.remote_add.setObjectName(u"remote_add")
-
-        self.verticalLayout_8.addWidget(self.remote_add)
-
-        self.remote_remove = QPushButton(self.frame_4)
-        self.remote_remove.setObjectName(u"remote_remove")
-
-        self.verticalLayout_8.addWidget(self.remote_remove)
-
-        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.verticalLayout_8.addItem(self.verticalSpacer_2)
-
-
-        self.gridLayout_4.addWidget(self.frame_4, 0, 1, 1, 1)
-
-
-        self.verticalLayout_4.addWidget(self.frame_3)
+        self.verticalLayout_4.addWidget(self.remotes_frame)
 
         self.config_tab_widget.addTab(self.remotes, "")
         self.profiles = QWidget()
         self.profiles.setObjectName(u"profiles")
         self.verticalLayout_5 = QVBoxLayout(self.profiles)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.splitter = QSplitter(self.profiles)
-        self.splitter.setObjectName(u"splitter")
-        self.splitter.setOrientation(Qt.Vertical)
-        self.profiles_list_view = QListView(self.splitter)
+        self.profiles_layout = QGridLayout()
+        self.profiles_layout.setObjectName(u"profiles_layout")
+        self.profiles_list_view = QListView(self.profiles)
         self.profiles_list_view.setObjectName(u"profiles_list_view")
         self.profiles_list_view.setFrameShape(QFrame.NoFrame)
         self.profiles_list_view.setMovement(QListView.Free)
         self.profiles_list_view.setUniformItemSizes(True)
-        self.splitter.addWidget(self.profiles_list_view)
-        self.profiles_text_browser = QTextBrowser(self.splitter)
+
+        self.profiles_layout.addWidget(self.profiles_list_view, 0, 0, 1, 1)
+
+        self.profiles_buttons_frame = QFrame(self.profiles)
+        self.profiles_buttons_frame.setObjectName(u"profiles_buttons_frame")
+        self.profiles_buttons_frame.setStyleSheet(u"QPushButton {Text-align:left}")
+        self.profiles_buttons_frame.setFrameShape(QFrame.StyledPanel)
+        self.profiles_buttons_frame.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_9 = QVBoxLayout(self.profiles_buttons_frame)
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.verticalLayout_9.setContentsMargins(0, -1, 0, -1)
+        self.profile_refresh_button = QPushButton(self.profiles_buttons_frame)
+        self.profile_refresh_button.setObjectName(u"profile_refresh_button")
+
+        self.verticalLayout_9.addWidget(self.profile_refresh_button)
+
+        self.profile_add_button = QPushButton(self.profiles_buttons_frame)
+        self.profile_add_button.setObjectName(u"profile_add_button")
+
+        self.verticalLayout_9.addWidget(self.profile_add_button)
+
+        self.profile_remove_button = QPushButton(self.profiles_buttons_frame)
+        self.profile_remove_button.setObjectName(u"profile_remove_button")
+
+        self.verticalLayout_9.addWidget(self.profile_remove_button)
+
+        self.profile_save_button = QPushButton(self.profiles_buttons_frame)
+        self.profile_save_button.setObjectName(u"profile_save_button")
+
+        self.verticalLayout_9.addWidget(self.profile_save_button)
+
+        self.profiles_btns_spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_9.addItem(self.profiles_btns_spacer)
+
+
+        self.profiles_layout.addWidget(self.profiles_buttons_frame, 0, 1, 2, 1)
+
+        self.profiles_text_browser = QTextBrowser(self.profiles)
         self.profiles_text_browser.setObjectName(u"profiles_text_browser")
         self.profiles_text_browser.setReadOnly(False)
-        self.splitter.addWidget(self.profiles_text_browser)
 
-        self.verticalLayout_5.addWidget(self.splitter)
-
-        self.frame_2 = QFrame(self.profiles)
-        self.frame_2.setObjectName(u"frame_2")
-        self.frame_2.setMinimumSize(QSize(0, 0))
-        self.frame_2.setFrameShape(QFrame.StyledPanel)
-        self.frame_2.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_2 = QHBoxLayout(self.frame_2)
-        self.horizontalLayout_2.setSpacing(0)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.save_profile_button = QPushButton(self.frame_2)
-        self.save_profile_button.setObjectName(u"save_profile_button")
-
-        self.horizontalLayout_2.addWidget(self.save_profile_button)
-
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
+        self.profiles_layout.addWidget(self.profiles_text_browser, 1, 0, 1, 1)
 
 
-        self.verticalLayout_5.addWidget(self.frame_2)
+        self.verticalLayout_5.addLayout(self.profiles_layout)
 
         self.config_tab_widget.addTab(self.profiles, "")
         self.config = QWidget()
@@ -292,25 +308,25 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addWidget(self.config_file_text_browser)
 
-        self.frame = QFrame(self.config)
-        self.frame.setObjectName(u"frame")
-        self.frame.setFrameShape(QFrame.StyledPanel)
-        self.frame.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout = QHBoxLayout(self.frame)
+        self.config_btns_frame = QFrame(self.config)
+        self.config_btns_frame.setObjectName(u"config_btns_frame")
+        self.config_btns_frame.setFrameShape(QFrame.StyledPanel)
+        self.config_btns_frame.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout = QHBoxLayout(self.config_btns_frame)
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.save_config_file_button = QPushButton(self.frame)
-        self.save_config_file_button.setObjectName(u"save_config_file_button")
+        self.config_file_save_button = QPushButton(self.config_btns_frame)
+        self.config_file_save_button.setObjectName(u"config_file_save_button")
 
-        self.horizontalLayout.addWidget(self.save_config_file_button)
+        self.horizontalLayout.addWidget(self.config_file_save_button)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.config_btns_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout.addItem(self.horizontalSpacer)
+        self.horizontalLayout.addItem(self.config_btns_spacer)
 
 
-        self.verticalLayout_3.addWidget(self.frame)
+        self.verticalLayout_3.addWidget(self.config_btns_frame)
 
         self.config_tab_widget.addTab(self.config, "")
         self.settings_file = QWidget()
@@ -329,7 +345,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(0)
+        self.config_tab_widget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -337,7 +353,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.groupBox.setTitle(QCoreApplication.translate("Form", u"Versions", None))
+        self.versions_box.setTitle(QCoreApplication.translate("Form", u"Versions", None))
         self.conan_cur_version_label.setText(QCoreApplication.translate("Form", u"Current Conan Version:", None))
         self.conan_cur_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
         self.python_cur_version_label.setText(QCoreApplication.translate("Form", u"Current Python Version:", None))
@@ -346,14 +362,14 @@ class Ui_Form(object):
         self.python_cur_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
         self.python_sys_version_label.setText(QCoreApplication.translate("Form", u"System Python Version:", None))
         self.python_sys_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
-        self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"Paths", None))
+        self.paths_box.setTitle(QCoreApplication.translate("Form", u"Paths", None))
         self.conan_usr_home_label.setText(QCoreApplication.translate("Form", u"Conan User Home:", None))
         self.conan_usr_home_value_label.setText("")
         self.conan_storage_path_label.setText(QCoreApplication.translate("Form", u"Conan Storage Path:", None))
         self.conan_storage_path_value_label.setText("")
         self.conan_usr_cache_label.setText(QCoreApplication.translate("Form", u"Conan Short Path Cache:", None))
         self.conan_usr_cache_value_label.setText("")
-        self.groupBox_3.setTitle(QCoreApplication.translate("Form", u"Features", None))
+        self.features_box.setTitle(QCoreApplication.translate("Form", u"Features", None))
         self.revision_enabled_label.setText(QCoreApplication.translate("Form", u"Revisions enabled:", None))
         self.revision_enabled_checkbox.setText("")
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.info_widget), QCoreApplication.translate("Form", u"Info", None))
@@ -365,9 +381,12 @@ class Ui_Form(object):
         self.remote_add.setText(QCoreApplication.translate("Form", u"Add", None))
         self.remote_remove.setText(QCoreApplication.translate("Form", u"Remove", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.remotes), QCoreApplication.translate("Form", u"Remotes", None))
-        self.save_profile_button.setText(QCoreApplication.translate("Form", u"Save", None))
+        self.profile_refresh_button.setText(QCoreApplication.translate("Form", u"Refresh list", None))
+        self.profile_add_button.setText(QCoreApplication.translate("Form", u"Add", None))
+        self.profile_remove_button.setText(QCoreApplication.translate("Form", u"Remove", None))
+        self.profile_save_button.setText(QCoreApplication.translate("Form", u"Save", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.profiles), QCoreApplication.translate("Form", u"Profiles", None))
-        self.save_config_file_button.setText(QCoreApplication.translate("Form", u"Save", None))
+        self.config_file_save_button.setText(QCoreApplication.translate("Form", u"Save", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.config), QCoreApplication.translate("Form", u"Config File", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.settings_file), QCoreApplication.translate("Form", u"Settings YML File", None))
     # retranslateUi

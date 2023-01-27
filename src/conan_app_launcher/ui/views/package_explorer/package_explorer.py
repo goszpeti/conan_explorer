@@ -90,6 +90,11 @@ class LocalConanPackageExplorer(PluginInterface):
         self.select_cntx_menu.addAction(self.show_conanfile_action)
         self.show_conanfile_action.triggered.connect(self._pkg_sel_ctrl.on_show_conanfile_requested)
 
+        self.install_ref_action = QAction("Re(install) package", self)
+        self.install_ref_action.setIcon(QIcon(get_themed_asset_image("icons/download_pkg.png")))
+        self.select_cntx_menu.addAction(self.install_ref_action)
+        self.install_ref_action.triggered.connect(self._pkg_sel_ctrl.on_install_ref_requested)
+
         self.remove_ref_action = QAction("Remove package", self)
         self.remove_ref_action.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
         self.select_cntx_menu.addAction(self.remove_ref_action)

@@ -665,7 +665,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <enum>Qt::ScrollBarAsNeeded</enum>
                </property>
                <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAsNeeded</enum>
+                <enum>Qt::ScrollBarAlwaysOff</enum>
                </property>
                <property name="sizeAdjustPolicy">
                 <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -679,7 +679,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>743</height>
+                  <height>760</height>
                  </rect>
                 </property>
                 <property name="minimumSize">

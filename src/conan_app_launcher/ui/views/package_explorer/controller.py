@@ -6,7 +6,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
-from conan_app_launcher.core.conan import ConanPkg, ConanFileReference
+from conan_app_launcher.core.conan_common import ConanPkg, ConanFileReference
 from conan_app_launcher.core.system import (calc_paste_same_dir_name,
                                             copy_path_with_overwrite,
                                             delete_path, execute_cmd)
@@ -90,6 +90,9 @@ class PackageSelectionController(QObject):
     def on_copy_ref_requested(self):
         conan_ref = self.get_selected_conan_ref()
         QApplication.clipboard().setText(conan_ref)
+
+    def on_install_ref_requested(self):
+        pass # TODO
 
     def on_remove_ref_requested(self):
         source_item = self.get_selected_pkg_source_item()

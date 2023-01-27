@@ -37,6 +37,8 @@ class ConanConfigView(PluginInterface):
         self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, self._base_signals.conan_remotes_updated)
         self._init_remotes_tab()
         self._init_profiles_tab()
+        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.png")
+
         self.config_file_path = Path(app.conan_api.client_cache.conan_conf_path)
         self.profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
         self._load_info_tab()
@@ -85,7 +87,7 @@ class ConanConfigView(PluginInterface):
     def _load_config_file_tab(self):
         try:
             self._ui.config_file_text_browser.setText(self.config_file_path.read_text())
-            self._ui.save_config_file_button.clicked.connect(self.save_config_file)
+            self._ui.config_file_save_button.clicked.connect(self.save_config_file)
         except Exception:
             Logger().error("Cannot read Conan config file!")
 
@@ -94,7 +96,11 @@ class ConanConfigView(PluginInterface):
         self._ui.profiles_list_view.customContextMenuRequested.connect(
             self.on_profile_context_menu_requested)
         self._init_profile_context_menu()
-        self._ui.save_profile_button.clicked.connect(self.save_profile_file)
+        self._ui.profile_save_button.clicked.connect(self.save_profile_file)
+        self.set_themed_icon(self._ui.profile_save_button, "icons/save.png")
+        self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.png")
+        self.set_themed_icon(self._ui.profile_remove_button, "icons/minus_rounded.png")
+        self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.png")
 
     def _load_profiles_tab(self):
         profiles_model = ProfilesModel()

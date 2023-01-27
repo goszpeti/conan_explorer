@@ -32,7 +32,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="info_widget">
       <property name="styleSheet">
@@ -68,12 +68,12 @@
             <x>0</x>
             <y>0</y>
             <width>608</width>
-            <height>434</height>
+            <height>431</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
-            <widget class="QGroupBox" name="groupBox">
+            <widget class="QGroupBox" name="versions_box">
              <property name="title">
               <string>Versions</string>
              </property>
@@ -144,7 +144,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="groupBox_2">
+            <widget class="QGroupBox" name="paths_box">
              <property name="title">
               <string>Paths</string>
              </property>
@@ -204,7 +204,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="groupBox_3">
+            <widget class="QGroupBox" name="features_box">
              <property name="title">
               <string>Features</string>
              </property>
@@ -257,7 +257,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QFrame" name="frame_3">
+        <widget class="QFrame" name="remotes_frame">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -271,24 +271,8 @@
           <property name="rightMargin">
            <number>0</number>
           </property>
-          <item row="0" column="0">
-           <widget class="QTreeView" name="remotes_tree_view">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="dragEnabled">
-             <bool>true</bool>
-            </property>
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectRows</enum>
-            </property>
-            <property name="sortingEnabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
-           <widget class="QFrame" name="frame_4">
+           <widget class="QFrame" name="remotes_buttons_frame">
             <property name="styleSheet">
              <string notr="true">QPushButton {Text-align:left}</string>
             </property>
@@ -355,7 +339,7 @@
               </widget>
              </item>
              <item>
-              <spacer name="verticalSpacer_2">
+              <spacer name="remotes_btns_spacer">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
@@ -370,6 +354,22 @@
             </layout>
            </widget>
           </item>
+          <item row="0" column="0">
+           <widget class="QTreeView" name="remotes_tree_view">
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="dragEnabled">
+             <bool>true</bool>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+            <property name="sortingEnabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -380,93 +380,91 @@
        <string>Profiles</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
        <item>
-        <widget class="QSplitter" name="splitter">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <widget class="QListView" name="profiles_list_view">
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="movement">
-           <enum>QListView::Free</enum>
-          </property>
-          <property name="uniformItemSizes">
-           <bool>true</bool>
-          </property>
-         </widget>
-         <widget class="QTextBrowser" name="profiles_text_browser">
-          <property name="readOnly">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="frame_2">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="save_profile_button">
-            <property name="text">
-             <string>Save</string>
+        <layout class="QGridLayout" name="profiles_layout">
+         <item row="0" column="0">
+          <widget class="QListView" name="profiles_list_view">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="movement">
+            <enum>QListView::Free</enum>
+           </property>
+           <property name="uniformItemSizes">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" rowspan="2">
+          <widget class="QFrame" name="profiles_buttons_frame">
+           <property name="styleSheet">
+            <string notr="true">QPushButton {Text-align:left}</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <property name="leftMargin">
+             <number>0</number>
             </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+            <property name="rightMargin">
+             <number>0</number>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
+            <item>
+             <widget class="QPushButton" name="profile_refresh_button">
+              <property name="text">
+               <string>Refresh list</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="profile_add_button">
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="profile_remove_button">
+              <property name="text">
+               <string>Remove</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="profile_save_button">
+              <property name="text">
+               <string>Save</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="profiles_btns_spacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QTextBrowser" name="profiles_text_browser">
+           <property name="readOnly">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -486,7 +484,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="frame">
+        <widget class="QFrame" name="config_btns_frame">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -510,14 +508,14 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="save_config_file_button">
+           <widget class="QPushButton" name="config_file_save_button">
             <property name="text">
              <string>Save</string>
             </property>
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer">
+           <spacer name="config_btns_spacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>

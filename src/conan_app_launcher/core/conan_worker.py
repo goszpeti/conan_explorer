@@ -17,7 +17,7 @@ else:
 
 from conan_app_launcher import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
 from conan_app_launcher.app.logger import Logger
-from .conan import ConanFileReference, PackageReference
+from .conan_common import ConanFileReference, PackageReference
 
 class ConanWorkerElement(TypedDict):
     ref_pkg_id: str  # format in <ref>:<id>. Id is optional. If id is used options, settings and auto_isntall is ignored

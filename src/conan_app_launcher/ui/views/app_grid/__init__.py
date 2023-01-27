@@ -7,7 +7,7 @@ from conan_app_launcher.ui.common.icon import get_themed_asset_image
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
-from conan_app_launcher.core.conan import ConanFileReference, PackageReference
+from conan_app_launcher.core.conan_common import ConanFileReference, PackageReference
 
 from PySide6.QtCore import Qt, SignalInstance, Signal
 from PySide6.QtGui import QIcon, QAction
@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget,
                              QVBoxLayout, QWidget)
 
 from .model import UiAppLinkModel, UiTabModel
-from .tab import TabBase, TabGrid, TabList
+from .tab import TabBase, TabList #TabGrid
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
@@ -148,7 +148,7 @@ class AppGridView(QWidget):
             self.model.tabs.remove(self.model.tabs[index])
             self.model.save()
 
-    def get_tabs(self) -> List[Union[TabGrid, TabList]]:
+    def get_tabs(self) -> List[Union["TabGrid", TabList]]:
         return self.findChildren(self.get_tab_type())
 
     def load(self, offset=0):

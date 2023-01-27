@@ -11,7 +11,6 @@ from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.widgets import RoundedMenu
 from .controller import PluginController
 
-from .plugins_ui import Ui_Form
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
@@ -21,6 +20,7 @@ class PluginsPage(PluginInterface):
     def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"]=None,
              page_widgets: Optional["FluentWindow.PageStore"]=None):
         super().__init__(parent)
+        from .plugins_ui import Ui_Form
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.setObjectName("plugin_manager")

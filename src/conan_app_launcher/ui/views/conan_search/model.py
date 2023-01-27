@@ -3,9 +3,9 @@ from typing import Dict, List, Optional, Union
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import ConanApi
-from conan_app_launcher.core.conan import ConanPkg
+from conan_app_launcher.core.conan_common import ConanPkg
 from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_image
-from conan_app_launcher.core.conan import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanFileReference
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Slot, SignalInstance
 

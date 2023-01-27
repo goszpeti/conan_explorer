@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from conan_app_launcher import INVALID_CONAN_REF
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.conan import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanFileReference
 
 class ConanInfoCache():
     """

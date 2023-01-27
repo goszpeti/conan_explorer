@@ -139,7 +139,7 @@ QToolButton:checked {
     background-color: #A8A8A8;
 }
 
-AppLinkBase {
+ListAppLink {
     background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #5a88b6, stop:1 #6699CC);
     border-radius: 7px;
 }
@@ -294,14 +294,14 @@ QListView::item:hover, QTreeView::item:hover{
     background: #7fbfff;
 }
 
-QTreeView::item:selected {
+QListView::item:selected, QTreeView::item:selected {
     border: 1px solid #B7B7B7;
 }
-QTreeView::item:selected:active{
+QListView::item:selected:active, QTreeView::item:selected:active{
     color: black;
     background: #6699CC;
 }
-QTreeView::item:selected:!active {
+QListView::item:selected:!active, QTreeView::item:selected:!active {
     background: #4c7399;
 }
 QTreeView::branch:closed:has-children {
@@ -320,7 +320,10 @@ QTreeView::branch:hover:open:has-children:hover {
 
 QTextBrowser {
     background-color: white;
+    selection-color: white;
+    selection-background-color: #6699CC;
 }
+
 
 QScrollBar:vertical {
     border: 0px solid transparent;

@@ -8,7 +8,6 @@ from PySide6.QtCore import QItemSelectionModel, QModelIndex
 from PySide6.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
 from PySide6.QtGui import QIcon
 
-from .reorder_dialog_ui import Ui_rearrange_dialog
 
 if TYPE_CHECKING:
     from typing import Protocol
@@ -35,6 +34,7 @@ class ReorderDialog(QDialog):
 
     def __init__(self, model: ReorderingModel, parent: Optional[QWidget]):
         super().__init__(parent=parent)
+        from .reorder_dialog_ui import Ui_rearrange_dialog
         self._ui = Ui_rearrange_dialog()
         self._ui.setupUi(self)
 

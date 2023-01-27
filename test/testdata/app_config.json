@@ -6,17 +6,19 @@
             "apps": [
                 {
                     "name": "App1 with spaces",
-                    "conan_ref": "example/9.9.9@local/testing",
                     "executable": "bin/python",
                     "icon": "NonExistantIcon.png",
+                    "is_console_application": true,
                     "args": "-n name",
                     "conan_options": [],
-                    "is_console_application": true
+                    "conan_ref": "example/9.9.9@local/testing"
                 },
                 {
                     "name": "App2",
-                    "conan_ref": "example/1.0.0@_/_",
                     "executable": "bin/python",
+                    "icon": "icon.ico",
+                    "is_console_application": false,
+                    "args": "",
                     "conan_options": [
                         {
                             "name": "shared",
@@ -27,7 +29,7 @@
                             "value": "Value2"
                         }
                     ],
-                    "icon": "icon.ico"
+                    "conan_ref": "example/1.0.0@_/_"
                 }
             ]
         },
@@ -36,10 +38,12 @@
             "apps": [
                 {
                     "name": "App2",
-                    "conan_ref": "example/1.0.0@_/_",
                     "executable": "bin/app2.exe",
-                    "icon": "//myicon.png",
-                    "conan_options": []
+                    "icon": "./myicon.png",
+                    "is_console_application": false,
+                    "args": "",
+                    "conan_options": [],
+                    "conan_ref": "example/1.0.0@_/_"
                 }
             ]
         }

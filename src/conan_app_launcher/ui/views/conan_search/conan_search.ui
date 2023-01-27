@@ -15,35 +15,10 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="search_text_button_layout" stretch="0,1,1">
+    <layout class="QHBoxLayout" name="search_text_button_layout" stretch="1,1,0">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
-     <item>
-      <widget class="QLabel" name="search_icon">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>30</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>30</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Icon</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="ConanRefLineEdit" name="search_line">
        <property name="sizePolicy">
@@ -110,6 +85,21 @@
        <property name="text">
         <string>Search</string>
        </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../../assets/icons/search_packages.png</normaloff>../../../assets/icons/search_packages.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="install_button">
+       <property name="text">
+        <string>Install</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../../assets/icons/download_pkg.png</normaloff>../../../assets/icons/download_pkg.png</iconset>
+       </property>
       </widget>
      </item>
     </layout>
@@ -131,7 +121,6 @@
       </property>
       <property name="font">
        <font>
-        <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
@@ -208,7 +197,6 @@
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
@@ -271,7 +259,6 @@
           </property>
           <property name="font">
            <font>
-            <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>

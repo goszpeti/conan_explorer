@@ -8,7 +8,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 if TYPE_CHECKING:
-    from typing import TypedDict, Protocol
+    from typing import TypedDict, Protocol, runtime_checkable
 else:
     try:
         from typing_extensions import Protocol, TypedDict, runtime_checkable
@@ -507,7 +507,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             maximize = False
 
         self.left_anim = QPropertyAnimation(self.ui.left_menu_frame, b"minimumWidth")  # type: ignore
-        self.left_anim.setDuration(200)
+        self.left_anim.setDuration(400)
         self.left_anim.setStartValue(width)
         self.left_anim.setEndValue(width_to_set)
         self.left_anim.setEasingCurve(QEasingCurve.Type.InOutQuart)
@@ -543,7 +543,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             width_to_set = RIGHT_MENU_MIN_WIDTH
             self.ui.settings_button.setChecked(False)
         self.right_anim = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")  # type: ignore
-        self.right_anim.setDuration(200)
+        self.right_anim.setDuration(400)
         self.right_anim.setStartValue(width)
         self.right_anim.setEndValue(width_to_set)
         self.right_anim.setEasingCurve(QEasingCurve.Type.InOutQuart)

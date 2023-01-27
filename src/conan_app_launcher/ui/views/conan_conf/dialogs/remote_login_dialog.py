@@ -11,7 +11,6 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QListWidgetItem
 
-from .remote_login_dialog_ui import Ui_Dialog
 
 current_dir = Path(__file__).parent
 
@@ -27,6 +26,7 @@ class RemoteLoginDialog(QDialog):
     def __init__(self, remotes: List[Remote], parent: Optional[QWidget]):
         super().__init__(parent=parent)
         self._remotes = remotes
+        from .remote_login_dialog_ui import Ui_Dialog
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
 

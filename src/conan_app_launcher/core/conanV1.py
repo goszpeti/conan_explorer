@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
-from conan_app_launcher.core.conan import ConanPkg, LoggerWriter, create_key_value_pair_list
+from conan_app_launcher.core.conan_common import ConanPkg, LoggerWriter, create_key_value_pair_list
 
 if TYPE_CHECKING:
     from conans.client.cache.remote_registry import Remote

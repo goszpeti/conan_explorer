@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QFileSystemModel
 def re_register_signal(signal: SignalInstance, slot: Callable):
     try:  # need to be removed, otherwise will be called multiple times
         signal.disconnect()
-    except TypeError:
+    except RuntimeError:
         # no way to check if it is connected and it will throw an error
         pass
     signal.connect(slot)

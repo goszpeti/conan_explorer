@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy, QFrame,
                              QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
 
-from .app_link import AppLinkBase, GridAppLink, ListAppLink
+from .app_link import ListAppLink # ,GridAppLink
 from .dialogs import AppEditDialog
 from .model import UiAppLinkModel, UiTabModel
 
@@ -23,8 +23,8 @@ class TabBase(QWidget):
     def __init__(self, parent: QTabWidget, model: UiTabModel):
         super().__init__(parent)
         self.model = model
-        self._app_link_type = AppLinkBase
-        self.app_links: List[AppLinkBase] = []  # list of refs to app links
+        self._app_link_type = ListAppLink
+        self.app_links: List[ListAppLink] = []  # list of refs to app links
         self._initialized = False
         self._columns_count = 0
         self._v_spacer = QSpacerItem(
@@ -84,7 +84,7 @@ class TabBase(QWidget):
             return new_model # for testing
         return None
 
-    def add_app_link_to_tab(self, app_link: AppLinkBase):
+    def add_app_link_to_tab(self, app_link: ListAppLink):
         """ To be called from a child AppLink """
         pass
 
@@ -117,79 +117,10 @@ class TabBase(QWidget):
             self.remove_all_app_links(force)
             self.load_apps_from_model(force)
 
-
-class TabGrid(TabBase):
-    def __init__(self, parent: QTabWidget, model: UiTabModel):
-        super().__init__(parent, model)
-        self._app_link_type = GridAppLink
-
-    def init_app_grid(self):
-        super().init_app_grid()
-
-        self.tab_layout = QGridLayout(self.tab_scroll_area_widgets)
-        # set minimum on vertical is needed, so the app links shrink,
-        # when a dropdown is hidden
-        size_policy = QSizePolicy(QSizePolicy.Policy.Minimum,
-                                    QSizePolicy.Policy.Minimum)
-        self.tab_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)  # SetMinimumSize needed!
-
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
-
-        self.tab_scroll_area_widgets.setSizePolicy(size_policy)
-        self.tab_scroll_area_widgets.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
-        self.tab_layout.setSizeConstraint(QLayout.SizeConstraint.SetDefaultConstraint)
-        self.tab_layout.setSpacing(self.SPACING)
-        self.tab_layout.setContentsMargins(0, 0, 5, 0)
-
-        self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
-        self.layout().addWidget(self.tab_scroll_area)
-
-    def add_app_link_to_tab(self, app_link: AppLinkBase):
-        """ To be called from a child AppLink """
-        current_row = int(len(self.model.apps) / self.get_max_columns())  # count from 0
-        current_column = int(len(self.model.apps) % self.get_max_columns())  # count from 0 to count
-
-        self.app_links.append(app_link)
-        self.model.apps.append(app_link.model)
-        self.tab_layout.addWidget(app_link, current_row, current_column)
-        self.tab_layout.setColumnMinimumWidth(current_column, self._app_link_type.max_width() - 8)
-        self.tab_layout.update()
-
-    def get_max_columns(self, offset=0):
-        if self._initialized:
-            width = self.parent().width()
-            max_columns = int((width + offset) / (GridAppLink.max_width()))
-            if max_columns == 0:
-                max_columns = 1
-            return max_columns
-        return 1  # always enable one row
-
-    def load_apps_from_model(self, force_reload=False, offset=0):
-        super().load_apps_from_model()
-        row = 0
-        column = 0
-        max_columns = self.get_max_columns(offset)
-        self._columns_count = max_columns
-        for app_link in self.app_links:
-            # add in order of occurence
-            self.tab_layout.addWidget(app_link, row, column, 1, 1)
-            self.tab_layout.setColumnMinimumWidth(column, app_link.max_width() - (2 * self.SPACING))
-            column += 1
-            if column == max_columns:
-                column = 0
-                row += 1
-            app_link.show()
-        # spacer for compressing app links, when hiding cboxes
-        self.tab_layout.addItem(self._v_spacer, row + 1, 0)
-        self.tab_layout.addItem(QSpacerItem(
-            2000, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum), max_columns+1, 0, 0, 0)
-        self.tab_layout.setColumnStretch(max_columns+1, 1)
-
-
 class TabList(TabBase):
     def __init__(self, parent: QTabWidget, model: UiTabModel):
         super().__init__(parent, model)
+        self._parent_tab = parent
         self._app_link_type = ListAppLink
 
 
@@ -212,14 +143,14 @@ class TabList(TabBase):
 
     def get_max_columns(self, offset=0):
         if self._initialized:
-            width = self.parent().width()
+            width = self._parent_tab.width()
             max_columns = int((width + offset) / (self._app_link_type.max_width()))
             if max_columns == 0:
                 max_columns = 1
             return max_columns
         return 1  # always enable one row
 
-    def add_app_link_to_tab(self, app_link: AppLinkBase):
+    def add_app_link_to_tab(self, app_link: ListAppLink):
         """ To be called from a child AppLink """
         self.app_links.append(app_link)
         self.model.apps.append(app_link.model)

@@ -53,7 +53,8 @@ class ConanSearchView(PluginInterface):
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
-        self.set_themed_icon(self._ui.search_icon, "icons/search_packages.png", size=(20, 20))
+        self.set_themed_icon(self._ui.search_button, "icons/search_packages.png", size=(20, 20))
+        self.set_themed_icon(self._ui.install_button, "icons/download_pkg.png", size=(20, 20))
 
     def _init_remotes(self):
         remotes = app.conan_api.get_remotes()

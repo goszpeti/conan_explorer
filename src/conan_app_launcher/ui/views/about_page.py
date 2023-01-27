@@ -14,9 +14,9 @@ class AboutPage(PluginInterface):
     <style type="text/css"> p, li {{ white-space: pre-wrap; }} a:link {{color: #6699CC;}}</style></head>
     <body style="font-weight:400; font-style:normal;">
         <p style="font-size:18pt"><strong>Conan App Launcher {__version__}</strong></p>
-        <p style="margin: 0px;">Copyright (C), 2022, {AUTHOR}.</p>
+        <p style="margin: 0px;">Copyright (C), 2023, {AUTHOR}.</p>
         <p></p>
-        <p style="margin: 0px;">Powered by: Qt6 via PyQt6 bindings</a>.</p>
+        <p style="margin: 0px;">Powered by: Qt6 via PySide6 bindings</a>.</p>
         <p style="margin: 0px;">For more information visit <a href="{REPO_URL}">{REPO_URL}</a>.</p>
         <p>Icons by <a href="https://icons8.com">https://icons8.com</a>.</p>
         <p></p>

@@ -13,7 +13,7 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = "conan-app-launcher"
-VERSION = "2.0.0-alpha"
+VERSION = "2.0.0-alpha2"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
@@ -21,8 +21,8 @@ PYTHON_REQUIRES = ">=3.7.0"
 
 # What packages are required for this module to be executed?
 REQUIRES = [
-    'PyQt6>=6.3.0',
-    "conan>=1.24, <2",  # MIT License
+    'PySide6-Essentials>=6.3.0', # LGPLv3
+    "conan>=1.24, <2",  # MIT License - Conan 2 not enabled yet
     "jsonschema>=3.2.0, <4",  # MIT License
     'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)
     'typing-extensions>=3.10.0.2, <4; python_version<"3.8"',  # Python Software Foundation License(PSF)
@@ -44,7 +44,6 @@ DEV_REQUIRES = [
     "autopep8", # formatter
     "rope", # refactoring
     "debugpy", # Qt thread debugging
-#    "PyQt6-stubs" # type hints
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -99,7 +98,7 @@ setup(
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",

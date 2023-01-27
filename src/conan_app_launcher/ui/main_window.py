@@ -10,7 +10,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike,
                                 user_save_path)
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.conan import ConanCleanup
+from conan_app_launcher.core.conan_cleanup import ConanCleanup
 from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES,
                                          DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
@@ -21,7 +21,7 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES,
                                          PLUGINS_SECTION_NAME, WINDOW_SIZE)
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
 from conan_app_launcher.ui.fluent_window.plugins import PluginFile
-from conan_app_launcher.ui.views.app_grid.tab import TabGrid
+from conan_app_launcher.ui.views.app_grid.tab import TabList
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
 from PySide6.QtCore import QRect, SignalInstance, Signal, Slot
 from PySide6.QtGui import QKeySequence
@@ -94,10 +94,10 @@ class MainWindow(FluentWindow):
                 "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
             quicklaunch_submenu.add_menu_line()
 
-            quicklaunch_submenu.add_toggle_menu_entry(
-                "Display as Grid or List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
-            quicklaunch_submenu.add_toggle_menu_entry(
-                "Use Combo Boxes in Grid Mode", self.quicklaunch_cbox_mode_toggled, app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES))
+            # quicklaunch_submenu.add_toggle_menu_entry(
+            #     "Display as Grid or List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
+            # quicklaunch_submenu.add_toggle_menu_entry(
+            #     "Use Combo Boxes in Grid Mode", self.quicklaunch_cbox_mode_toggled, app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES))
 
             quicklaunch_submenu.add_toggle_menu_entry(
                 "Show version", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
@@ -275,23 +275,19 @@ class MainWindow(FluentWindow):
             # conan works, model can be loaded
             self.app_grid.re_init(self.model.app_grid)  # loads tabs
 
-    @Slot()
     def open_file_editor_selection_dialog(self):
         dialog = FileEditorSelDialog(self)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
 
-    @Slot()
     def on_add_link(self):
-        tab: TabGrid = self.app_grid.tab_widget.currentWidget()  # type: ignore
+        tab: TabList = self.app_grid.tab_widget.currentWidget()  # type: ignore
         tab.app_links[0].open_app_link_add_dialog()
 
-    @Slot()
     def on_reorder(self):
-        tab: TabGrid = self.app_grid.tab_widget.currentWidget()  # type: ignore
+        tab: TabList = self.app_grid.tab_widget.currentWidget()  # type: ignore
         tab.app_links[0].on_move()
 
-    @Slot()
     def display_versions_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         # status is changed only after this is done, so the state must be negated
@@ -300,7 +296,6 @@ class MainWindow(FluentWindow):
         app.active_settings.set(DISPLAY_APP_VERSIONS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
-    @Slot()
     def apply_display_users_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
@@ -308,7 +303,6 @@ class MainWindow(FluentWindow):
         app.active_settings.set(DISPLAY_APP_USERS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
-    @Slot()
     def display_channels_setting_toggled(self):
         """ Reads the current menu setting, saves it and updates the gui """
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
@@ -316,21 +310,18 @@ class MainWindow(FluentWindow):
         app.active_settings.set(DISPLAY_APP_CHANNELS, status)
         self.app_grid.re_init_all_app_links(force=True)
 
-    @Slot()
-    def quicklaunch_grid_mode_toggled(self):
-        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-        status = sender_toggle.isChecked()
-        app.active_settings.set(APPLIST_ENABLED, status)
-        self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
+    # def quicklaunch_grid_mode_toggled(self):
+    #     sender_toggle: AnimatedToggle = self.sender()  # type: ignore
+    #     status = sender_toggle.isChecked()
+    #     app.active_settings.set(APPLIST_ENABLED, status)
+    #     self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
-    @Slot()
-    def quicklaunch_cbox_mode_toggled(self):
-        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-        status = sender_toggle.isChecked()
-        app.active_settings.set(ENABLE_APP_COMBO_BOXES, status)
-        self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
+    # def quicklaunch_cbox_mode_toggled(self):
+    #     sender_toggle: AnimatedToggle = self.sender()  # type: ignore
+    #     status = sender_toggle.isChecked()
+    #     app.active_settings.set(ENABLE_APP_COMBO_BOXES, status)
+    #     self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
-    @Slot(str)
     def write_log(self, text):
         """ Write the text signaled by the logger """
         self.ui.console.append(text)

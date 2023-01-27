@@ -1,26 +1,27 @@
 from typing import Optional
 
-import conan_app_launcher.app as app  # using global module pattern
+import conan_app_launcher.app as app
+from conan_app_launcher.app.logger import Logger  # using global module pattern
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common import get_themed_asset_image
 from PySide6.QtCore import QSize, Qt, SignalInstance
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem
 
-from .conan_install_ui import Ui_Dialog
 from conans.model.ref import ConanFileReference, PackageReference
 
 
 class ConanInstallDialog(QDialog):
-    def __init__(self, parent: Optional[QWidget], conan_ref: str, pkg_installed_signal: Optional[SignalInstance] = None):
+    def __init__(self, parent: Optional[QWidget], conan_full_ref: str, pkg_installed_signal: Optional[SignalInstance] = None):
         """ conan_ref can be in full ref format with <ref>:<id> """
         super().__init__(parent)
+        from .conan_install_ui import Ui_Dialog
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
         self.pkg_installed_signal = pkg_installed_signal
 
         # init search bar
-        icon = QIcon(get_themed_asset_image("icons/download_pkg.png"))
+        icon = QIcon(str(app.asset_path / "icons/download_pkg.png")) # no themed
         self.setWindowIcon(icon)
         self._ui.install_icon.setPixmap(icon.pixmap(20, 20))
         self._ui.conan_ref_line_edit.validator_enabled = False
@@ -28,12 +29,16 @@ class ConanInstallDialog(QDialog):
         self._ui.button_box.accepted.connect(self.on_install)
         self._ui.auto_install_check_box.setChecked(True)  # default state
         self._profiles = app.conan_api.conan.profile_list()
-        self._ref_info = app.conan_api.conan.info(
-            app.conan_api.generate_canonical_ref(ConanFileReference.loads(conan_ref)))
-        self._ref_info[0].root.dependencies[0].dst.conanfile
-        options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()
+        options = []
+        try:
+            conan_ref = conan_full_ref.split(":")[0]
+            self._ref_info = app.conan_api.conan.info(
+                app.conan_api.generate_canonical_ref(ConanFileReference.loads(conan_ref)))
+            options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()
+        except Exception as e:
+            Logger().warning("Can't determine options of " + conan_ref)
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
-        self._ui.conan_ref_line_edit.setText(conan_ref)
+        self._ui.conan_ref_line_edit.setText(conan_full_ref)
         self._ui.profile_cbox.addItems(self._profiles)
         for name, value in options:
             item = QTreeWidgetItem()
