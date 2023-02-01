@@ -43,10 +43,10 @@ setup(
 
 # Register plugin
 from conan_app_launcher.ui import PluginFile, PluginDescription
+import cal_example_plugin
 # cd away, so that not the current cwd module will be registered, but the site-packages one
 os.chdir(tempfile.gettempdir())
-import cal_example_plugin
 plugin_file_path = str(Path(cal_example_plugin.__file__).parent / "plugin.ini")
-plugin_descr = PluginDescription("My Example Plugin", VERSION, "about.png", "my_cal_plugin.py", "SamplePluginView", DESCRIPTION)
+plugin_descr = PluginDescription("My Example Plugin", VERSION, AUTHOR, "about.png", "my_cal_plugin.py", "SamplePluginView", DESCRIPTION, True)
 PluginFile.write(plugin_file_path, [plugin_descr])
 PluginFile.register("example_plugin", plugin_file_path)
