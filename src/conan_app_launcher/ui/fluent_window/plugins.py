@@ -1,6 +1,7 @@
 import configparser
 import os
 from dataclasses import dataclass
+from distutils.util import strtobool
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional
 
@@ -25,6 +26,7 @@ class PluginDescription():
     import_path: str
     plugin_class: str
     description: str
+    side_menu: bool
 
 class PluginFile():
 
@@ -69,7 +71,8 @@ class PluginFile():
                 description = plugin_info.get("description", "")
                 author = plugin_info.get("author", "Unknown")
 
-                desc = PluginDescription(name, version, author, icon, import_path, plugin_class, description)
+                side_menu = strtobool(plugin_info.get("side_menu", "False"))
+                desc = PluginDescription(name, version, author, icon, import_path, plugin_class, description, side_menu)
                 plugins.append(desc)
             except Exception as e:
                 Logger().error(f"Can't read {section} plugin information from {path}: {str(e)}.")

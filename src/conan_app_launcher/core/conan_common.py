@@ -1,13 +1,14 @@
 from typing import TYPE_CHECKING, Dict, List
 
 from conan_app_launcher.app.logger import Logger
+import conan
 
-try:
+if conan.__version__.startswith("1"):
     from conans.model.ref import ConanFileReference, PackageReference
     from conans.paths.package_layouts.package_editable_layout import \
         PackageEditableLayout
-except:
-    from conans.model.recipe_ref import RecipeReference as ConanFileReference # type: ignore
+if conan.__version__.startswith("2"):
+    from conans.model.recipe_ref import RecipeReference as ConanFileReference  # type: ignore
     from conans.model.package_ref import RecipeReference as PackageReference # type: ignore
 
 try:

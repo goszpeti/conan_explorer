@@ -1,19 +1,19 @@
-from conan_app_launcher import AUTHOR, REPO_URL, __version__, asset_path
+from conan_app_launcher import APP_NAME, AUTHOR, REPO_URL, __version__, asset_path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
                              QVBoxLayout)
-from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
+from conan_app_launcher.ui.fluent_window.plugins import ThemedWidget
 
 
-class AboutPage(PluginInterface):
+class AboutPage(ThemedWidget):
     """ Defines About page """
     html_content = f"""
     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
     <html><head><meta name="qrichtext" content="1" />
     <style type="text/css"> p, li {{ white-space: pre-wrap; }} a:link {{color: #6699CC;}}</style></head>
     <body style="font-weight:400; font-style:normal;">
-        <p style="font-size:18pt"><strong>Conan App Launcher {__version__}</strong></p>
+        <p style="font-size:18pt"><strong>{APP_NAME} {__version__}</strong></p>
         <p style="margin: 0px;">Copyright (C), 2023, {AUTHOR}.</p>
         <p></p>
         <p style="margin: 0px;">Powered by: Qt6 via PySide6 bindings</a>.</p>

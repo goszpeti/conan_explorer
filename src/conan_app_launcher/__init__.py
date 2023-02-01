@@ -19,6 +19,8 @@ PathLike = TypeVar("PathLike", str, Path)
 
 # load metadata from package info - needs to be installed as editable in dev mode!
 PKG_NAME = "conan_app_launcher"
+APP_NAME = "Conan Explorer"
+
 try:
     pkg_info = distribution(PKG_NAME)
     __version__ = pkg_info.version

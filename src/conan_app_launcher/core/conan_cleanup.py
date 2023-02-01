@@ -4,7 +4,6 @@ import platform
 from typing import Set
 import conans
 from conan_app_launcher.app.logger import Logger
-from .conan_common import PackageEditableLayout, CONAN_REAL_PATH
 
 class ConanCleanup():
 
@@ -23,6 +22,7 @@ class ConanCleanup():
         return self.orphaned_references.union(self.orphaned_packages)
 
     def find_orphaned_references(self):
+        from .conan_common import PackageEditableLayout
         del_list = []
         for ref in self._conan_api.client_cache.all_refs():
             ref_cache = self._conan_api.client_cache.package_layout(ref)
@@ -43,6 +43,8 @@ class ConanCleanup():
 
     def find_orphaned_packages(self):
         """ Reverse search for orphaned packages on windows short paths """
+        from .conan_common import CONAN_REAL_PATH
+
         del_list = []
         short_path_folders = [f for f in self._conan_api.get_short_path_root().iterdir() if f.is_dir()]
         for short_path in short_path_folders:

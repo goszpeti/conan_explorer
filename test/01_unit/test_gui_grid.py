@@ -17,7 +17,7 @@ from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_USERS,
                                          ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.config import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.views.app_grid.app_link import AppLinkBase, ListAppLink, GridAppLink
+from conan_app_launcher.ui.views.app_grid.app_link import ListAppLink, ListAppLink
 from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
     AppEditDialog
 from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
@@ -33,14 +33,14 @@ def test_applink_word_wrap(qtbot, base_fixture):
     """ Check custom word wrap of App Link"""
 
     # max length > actual length -> no change
-    assert AppLinkBase.word_wrap("New Link", 10) == "New Link"
+    assert ListAppLink.word_wrap("New Link", 10) == "New Link"
 
     # max length < actual length with one word
-    assert AppLinkBase.word_wrap("VeryLongAppLinkNametoTestColumnCalculation",
+    assert ListAppLink.word_wrap("VeryLongAppLinkNametoTestColumnCalculation",
                                  10) == "VeryLongAp\npLinkNamet\noTestColum\nnCalculati\non"
 
     # max length < actual length with two words
-    assert AppLinkBase.word_wrap("VeryLongAppLinkNametoTestColumnCalculation 111111",
+    assert ListAppLink.word_wrap("VeryLongAppLinkNametoTestColumnCalculation 111111",
                                  10) == "VeryLongAp\npLinkNamet\noTestColum\nnCalculati\non 111111"
 
 

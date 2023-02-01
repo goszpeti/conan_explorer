@@ -7,7 +7,7 @@ from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import (MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike,
+from conan_app_launcher import (APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike,
                                 user_save_path)
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan_cleanup import ConanCleanup
@@ -56,7 +56,7 @@ class MainWindow(FluentWindow):
     qt_logger_name = "qt_logger"
 
     def __init__(self, qt_app: QApplication):
-        super().__init__(title_text="Conan App Launcher")
+        super().__init__(title_text=APP_NAME)
         self._qt_app = qt_app
         self._base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed, self.conan_remotes_updated)
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
@@ -76,36 +76,10 @@ class MainWindow(FluentWindow):
     def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", is_upper_menu=True, page_widget=self.app_grid,
                                  create_page_menu=True)
-        # self.add_left_menu_entry("Conan Config", "icons/package_settings.png", True, self.conan_config)
-
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
 
     def _init_right_menu(self):
-
-        # Right Settings menu
-        quicklaunch_submenu = self.page_widgets.get_side_menu_by_type(type(self.app_grid))
-        if quicklaunch_submenu:
-            quicklaunch_submenu.add_button_menu_entry(
-                "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.png")
-            quicklaunch_submenu.add_button_menu_entry(
-                "Add AppLink", self.on_add_link, "icons/add_link.png")
-            quicklaunch_submenu.add_button_menu_entry(
-                "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
-            quicklaunch_submenu.add_menu_line()
-
-            # quicklaunch_submenu.add_toggle_menu_entry(
-            #     "Display as Grid or List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
-            # quicklaunch_submenu.add_toggle_menu_entry(
-            #     "Use Combo Boxes in Grid Mode", self.quicklaunch_cbox_mode_toggled, app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES))
-
-            quicklaunch_submenu.add_toggle_menu_entry(
-                "Show version", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
-            quicklaunch_submenu.add_toggle_menu_entry(
-                "Show user", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
-            quicklaunch_submenu.add_toggle_menu_entry(
-                "Show channel", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
-
         self.main_general_settings_menu.add_button_menu_entry("Select file editor",
                                                               self.open_file_editor_selection_dialog, "icons/edit_file.png")
         view_settings_submenu = SideSubMenu(self.ui.right_menu_bottom_content_sw, "View")
@@ -160,7 +134,7 @@ class MainWindow(FluentWindow):
                     module_ = importlib.import_module(import_path.stem)
                     class_ = getattr(module_, plugin.plugin_class)
                     plugin_object: PluginInterface = class_(self, self._base_signals, self.page_widgets)
-                    self.add_left_menu_entry(plugin.name, plugin.icon, True, plugin_object)
+                    self.add_left_menu_entry(plugin.name, plugin.icon, True, plugin_object, plugin.side_menu)
                 except Exception as e:
                     Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
 
@@ -257,58 +231,11 @@ class MainWindow(FluentWindow):
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
-    @Slot()
-    def open_config_file_dialog(self):
-        """" Open File Dialog and load config file """
-        dialog_path = user_save_path
-        config_file_path = Path(app.active_settings.get_string(LAST_CONFIG_FILE))
-        if config_file_path.exists():
-            dialog_path = config_file_path.parent
-        dialog = QFileDialog(parent=self, caption="Select JSON Config File",
-                             directory=str(dialog_path), filter="JSON files (*.json)")
-        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        if dialog.exec() == QFileDialog.DialogCode.Accepted:
-            new_file = dialog.selectedFiles()[0]
-            app.active_settings.set(LAST_CONFIG_FILE, new_file)
-            # model loads incrementally
-            self.model.loadf(new_file)
-            # conan works, model can be loaded
-            self.app_grid.re_init(self.model.app_grid)  # loads tabs
-
     def open_file_editor_selection_dialog(self):
         dialog = FileEditorSelDialog(self)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
 
-    def on_add_link(self):
-        tab: TabList = self.app_grid.tab_widget.currentWidget()  # type: ignore
-        tab.app_links[0].open_app_link_add_dialog()
-
-    def on_reorder(self):
-        tab: TabList = self.app_grid.tab_widget.currentWidget()  # type: ignore
-        tab.app_links[0].on_move()
-
-    def display_versions_setting_toggled(self):
-        """ Reads the current menu setting, saves it and updates the gui """
-        # status is changed only after this is done, so the state must be negated
-        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-        status = sender_toggle.isChecked()
-        app.active_settings.set(DISPLAY_APP_VERSIONS, status)
-        self.app_grid.re_init_all_app_links(force=True)
-
-    def apply_display_users_setting_toggled(self):
-        """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-        status = sender_toggle.isChecked()
-        app.active_settings.set(DISPLAY_APP_USERS, status)
-        self.app_grid.re_init_all_app_links(force=True)
-
-    def display_channels_setting_toggled(self):
-        """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-        status = sender_toggle.isChecked()
-        app.active_settings.set(DISPLAY_APP_CHANNELS, status)
-        self.app_grid.re_init_all_app_links(force=True)
 
     # def quicklaunch_grid_mode_toggled(self):
     #     sender_toggle: AnimatedToggle = self.sender()  # type: ignore

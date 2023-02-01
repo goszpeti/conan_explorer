@@ -18,7 +18,7 @@ from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.widgets import AnimatedToggle
 from conan_app_launcher.ui.views.about_page import AboutPage
-from conan_app_launcher.ui.views.app_grid.tab import TabGrid
+from conan_app_launcher.ui.views.app_grid.tab import TabList
 import conan_app_launcher.app as app  # using global module pattern
 
 from conans.model.ref import ConanFileReference

@@ -116,6 +116,7 @@ setup(
     entry_points={
         "gui_scripts": [
             "conan_app_launcher=conan_app_launcher.__main__:run_conan_app_launcher",
+            "conan_explorer=conan_app_launcher.__main__:run_conan_app_launcher",
         ]
     },
 )

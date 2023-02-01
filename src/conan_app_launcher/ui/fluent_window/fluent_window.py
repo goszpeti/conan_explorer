@@ -23,9 +23,9 @@ from conan_app_launcher.core.system import is_windows_11
 
 from PySide6.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
                           QPropertyAnimation, QRect, QSize, Qt)
-from PySide6.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap, QShortcut
+from PySide6.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap, QImage, QShortcut
 from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
-                             QPushButton, QSizePolicy,
+                               QPushButton, QSizePolicy,
                              QStackedWidget, QVBoxLayout, QWidget)
 
 from ..common import get_themed_asset_image
@@ -72,13 +72,11 @@ class ResizeDirection(Enum):
 
 @runtime_checkable
 class CanSetIconWidgetProtocol(Protocol):
-    def setIcon(self, icon: QIcon) -> None: ...
-
+    def setIcon(self, icon: Union[QIcon, QPixmap]) -> None: ...
 
 @runtime_checkable
 class CanSetPixmapWidgetProtocol(Protocol):
-    def setPixmap(self, a0: QPixmap) -> None: ...
-
+    def setPixmap(self, arg__1: Union[QPixmap, QImage, str]) -> None: ...
 
 class ThemedWidget(QWidget):
     class IconInfo(TypedDict):
@@ -138,6 +136,13 @@ class SideSubMenu(ThemedWidget):
 
         if is_top_level:
             self.ui.side_menu_title_button.hide()  # off per default
+
+    def reset_widgets(self):
+        while (self._content_layout.count() > 1):
+            widget = self._content_layout.takeAt(0)
+            if widget in [None, self.ui.side_menu_spacer]:
+                continue
+            self._content_layout.removeItem(widget)
 
     def set_title(self, title: str):
         self.ui.side_menu_title_label.setText(title)

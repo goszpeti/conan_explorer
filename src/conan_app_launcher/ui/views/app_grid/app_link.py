@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QFrame, QHBoxLayout,
 from .dialogs import AppEditDialog
 
 if TYPE_CHECKING:
-    from.tab import TabBase, TabList #TabGrid
+    from.tab import TabList, TabList #TabGrid
 
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"

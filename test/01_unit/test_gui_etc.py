@@ -107,7 +107,7 @@ def test_about_dialog(app_qt_fixture, base_fixture):
     widget.show()
     app_qt_fixture.waitExposed(widget)
 
-    assert "Conan App Launcher" in widget._text.text()
+    assert conan_app_launcher.APP_NAME in widget._text.text()
 
 
 def test_bug_dialog(qtbot, base_fixture, mocker):

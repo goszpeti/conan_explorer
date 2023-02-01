@@ -7,7 +7,6 @@ from .conan_cache import ConanInfoCache
 from .conan_worker import ConanWorker
 from .system import (open_cmd_in_path, open_file, open_in_file_manager, run_file)
 import conan
-# if conan.__version__.startswith("1"):
 try:
     from .conanV1 import ConanApi
 except:

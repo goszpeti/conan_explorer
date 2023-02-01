@@ -13,3 +13,4 @@ cov.xml
 htmlcov/*
 crash.log
 src/conan_app_launcher/cache.json
+doc/example_plugin/cal_example_plugin/plugin.ini

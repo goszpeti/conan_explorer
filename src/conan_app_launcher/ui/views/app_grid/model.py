@@ -154,6 +154,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         # get all info from cache
         self.set_available_packages(app.conan_api.info_cache.get_similar_pkg_refs(
             self._conan_file_reference.name, user="*"))
+        pkg_path = Path("NULL")
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
             pkg_path = app.conan_api.info_cache.get_local_package_path(self._conan_file_reference)
             if self.conan_options:
@@ -162,11 +163,10 @@ class UiAppLinkModel(UiAppLinkConfig):
                 if pkg_info:
                     if not self.conan_options.items() <= pkg_info.get("options", {}).items():
                         return
-            self.set_package_folder(pkg_path)
-            # app.conan_api.get_local_pkg_from_id
-        elif not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
-            _, package_folder = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
-            self.set_package_folder(package_folder)
+        if not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
+            _, pkg_path = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
+       
+        self.set_package_folder(pkg_path)
 
     def register_update_callback(self, update_func: Callable):
         """ This callback can be used to update the gui after new conan info was received """
@@ -219,7 +219,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     @property
     def version(self) -> str:
         """ Version, as specified in the conan ref """
-        return self._conan_file_reference.version
+        return str(self._conan_file_reference.version)
 
     @version.setter
     def version(self, new_value: str):

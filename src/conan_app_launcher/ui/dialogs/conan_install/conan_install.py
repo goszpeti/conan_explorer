@@ -8,7 +8,7 @@ from PySide6.QtCore import QSize, Qt, SignalInstance
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem
 
-from conans.model.ref import ConanFileReference, PackageReference
+from conan_app_launcher.core.conan_common import ConanFileReference, PackageReference
 
 
 class ConanInstallDialog(QDialog):

@@ -14,7 +14,7 @@ from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.config.json_file import JsonUiConfig
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
-from conan_app_launcher.ui.views.app_grid.tab import (AppEditDialog, AppLinkBase)
+from conan_app_launcher.ui.views.app_grid.tab import (AppEditDialog, ListAppLink)
 from conans.model.ref import ConanFileReference
 from PySide6 import QtCore, QtWidgets
 
@@ -158,7 +158,7 @@ def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
     tab_model = tabs[1].model
     apps_model = tab_model.apps
     prev_count = len(apps_model)
-    app_link: AppLinkBase = tabs[1].app_links[0]
+    app_link: ListAppLink = tabs[1].app_links[0]
 
     # check that no changes happens on cancel
     mocker.patch.object(AppEditDialog, 'exec',
@@ -251,7 +251,7 @@ def test_add_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mo
     tab_model = tab.model
     apps_model = tab_model.apps
     prev_count = len(apps_model)
-    app_link: AppLinkBase = tab.app_links[0]
+    app_link: ListAppLink = tab.app_links[0]
     app_config = UiAppLinkConfig(name="NewApp", conan_ref=TEST_REF,
                                  executable="conanmanifest.txt")
     app_model = UiAppLinkModel().load(app_config, app_link.model.parent)
