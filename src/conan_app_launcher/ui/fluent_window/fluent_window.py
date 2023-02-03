@@ -22,11 +22,11 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import is_windows_11
 
 from PySide6.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
-                          QPropertyAnimation, QRect, QSize, Qt)
+                            QPropertyAnimation, QRect, QSize, Qt)
 from PySide6.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap, QImage, QShortcut
 from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
                                QPushButton, QSizePolicy,
-                             QStackedWidget, QVBoxLayout, QWidget)
+                               QStackedWidget, QVBoxLayout, QWidget)
 
 from ..common import get_themed_asset_image
 from ..widgets import AnimatedToggle
@@ -74,9 +74,11 @@ class ResizeDirection(Enum):
 class CanSetIconWidgetProtocol(Protocol):
     def setIcon(self, icon: Union[QIcon, QPixmap]) -> None: ...
 
+
 @runtime_checkable
 class CanSetPixmapWidgetProtocol(Protocol):
     def setPixmap(self, arg__1: Union[QPixmap, QImage, str]) -> None: ...
+
 
 class ThemedWidget(QWidget):
     class IconInfo(TypedDict):
@@ -285,10 +287,11 @@ class FluentWindow(QMainWindow, ThemedWidget):
             raise WidgetNotFoundException(f"{type_name} not in page_widgets!")
 
         T = TypeVar('T')
+
         def get_page_by_type(self, type_name: Type[T]) -> T:
             for _, (_, page, _, _), in self._page_widgets.items():
                 if page.__class__.__name__ == type_name.__name__:
-                    return page # type: ignore
+                    return page  # type: ignore
             raise WidgetNotFoundException(f"{type_name} not in page_widgets!")
 
         def get_all_buttons(self):
@@ -365,7 +368,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.settings_button.clicked.connect(self.toggle_right_menu)
 
         # clear default strings
-        self.ui.page_info_label.setText("")
+        # self.ui.page_info_label.setText("")
         self.ui.title_label.setText("")
 
         # initial maximize state
@@ -376,7 +379,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """ Platform native events """
         retval, result = super(QMainWindow, self).nativeEvent(eventType, message)
         if str(eventType) == "b'windows_generic_MSG'":
-            #message.setsize(8)
+            # message.setsize(8)
             msg = MSG.from_address(message.__int__())
             if msg.message == 131:  # ignore WM_NCCALCSIZE event. Suppresses native Window drawing of title-bar.
                 return True, 0
@@ -487,7 +490,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         sender_button.setChecked(True)
         self.ui.page_title.setText(self.page_widgets.get_display_name_by_name(obj_name))
-        self.ui.page_info_label.setText("")
+        # self.ui.page_info_label.setText("")
 
         # update page settings view
         side_menu = self.page_widgets.get_side_menu_by_name(obj_name)

@@ -8,22 +8,20 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import open_in_file_manager, run_file
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
-                                         DISPLAY_APP_VERSIONS,
-                                         ENABLE_APP_COMBO_BOXES, FONT_SIZE)
-from conan_app_launcher.ui.common import get_themed_asset_image
+                                         DISPLAY_APP_VERSIONS)
+from conan_app_launcher.ui.common import get_themed_asset_image, measure_font_width
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.widgets import ClickableIcon, RoundedMenu
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QFontMetrics, QFont, QAction
-from PySide6.QtWidgets import (QComboBox, QDialog, QFrame, QHBoxLayout,
-                             QLabel, QLayout, QMessageBox, QPushButton,
-                             QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtGui import QIcon, QAction
+from PySide6.QtWidgets import (QDialog, QFrame, QHBoxLayout, QLabel, QLayout,
+                               QMessageBox, QPushButton, QSizePolicy, QVBoxLayout, QWidget)
 
 from .dialogs import AppEditDialog
 
 if TYPE_CHECKING:
-    from.tab import TabList, TabList #TabGrid
+    from .tab import TabList, TabList  # TabGrid
 
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"
@@ -47,7 +45,8 @@ class ListAppLink(QFrame):
     - Reorder App Links
     """
     icon_size: int
-    _max_width = 130
+    MAX_WIDTH = 150
+    MAX_HEIGHT = 150
 
     def __init__(self, parent: Optional[QWidget], parent_tab: "TabList", model: UiAppLinkModel, icon_size=ICON_SIZE):
         super().__init__(parent)
@@ -58,17 +57,16 @@ class ListAppLink(QFrame):
 
         self.setLayout(QHBoxLayout(self))
         self.layout().setSpacing(3)
-        self.setMinimumHeight(130)
-        self.setMaximumHeight(130)
+        self.setMinimumHeight(self.MAX_HEIGHT)
+        self.setMaximumHeight(self.MAX_HEIGHT)
 
-        size_policy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding,
-                                    QSizePolicy.Policy.Fixed)
+        size_policy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
         self.setSizePolicy(size_policy)
 
-        self._left_frame = QFrame(self)
-        self._center_frame = QFrame(self)
-        self._center_right_frame = QFrame(self)
-        self._right_frame = QFrame(self)
+        self._left_frame = QFrame(self)  # contains the app button
+        self._center_frame = QFrame(self)  # contains the name
+        self._center_right_frame = QFrame(self)  # contains data vertically
+        self._right_frame = QFrame(self)  # buttons
 
         self._left_frame.setLayout(QVBoxLayout(self._left_frame))
         self._center_frame.setLayout(QVBoxLayout(self._center_frame))
@@ -127,10 +125,10 @@ class ListAppLink(QFrame):
         self.layout().addWidget(self._center_frame)
         self.layout().addWidget(self._center_right_frame)
         self.layout().addWidget(self._right_frame)
-        self.layout().setStretch(1,1) # enables stretching of app_name
+        self.layout().setStretch(1, 1)  # enables stretching of app_name
 
         self._app_name.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding,
-                         QSizePolicy.Policy.Fixed))
+                                                 QSizePolicy.Policy.Fixed))
 
         self._app_version.setSizePolicy(size_policy)
         self._app_user.setSizePolicy(size_policy)
@@ -156,7 +154,7 @@ class ListAppLink(QFrame):
 
     @classmethod
     def max_width(cls) -> int:
-        return cls._max_width
+        return cls.MAX_WIDTH
 
     def _init_context_menu(self):
         """ Setup context menu. """
@@ -212,24 +210,19 @@ class ListAppLink(QFrame):
         self.split_name_into_lines()
         super().resizeEvent(event)
 
-
     def split_name_into_lines(self):
         """ Calculate, how text can be split into multiple lines, based on the current width"""
         max_width = self._app_name.width()
-        fs = app.active_settings.get_int(FONT_SIZE)
-        font = QFont()
-        font.setPointSize(fs)
-        fm = QFontMetrics(font)
-        px = fm.horizontalAdvance(self._app_name.text())
+        px = measure_font_width(self._app_name.text())
         new_length = int(len(self.model.name) * (max_width-10) / px)
         if len(self._app_name.text().split("\n")[0]) > new_length > len(self.model.name) or \
-               new_length-1 == len(self._app_name.text().split("\n")[0]):
+                new_length-1 == len(self._app_name.text().split("\n")[0]):
             return
         name = self.word_wrap(self.model.name, new_length)
         self._app_name.setText(name)
 
     @staticmethod
-    def word_wrap(text:str, max_length:int) -> str:
+    def word_wrap(text: str, max_length: int) -> str:
         split_name = text.split(" ")
         name = ""  # split long titles
         for word in split_name:
@@ -243,7 +236,7 @@ class ListAppLink(QFrame):
                 new_word = new_word[:-1]  # remove last \n
             name += " " + new_word if name else new_word
         return name
-    
+
     def on_context_menu_requested(self, position):
         self.menu.exec(self._app_button.mapToGlobal(position))
 
@@ -255,8 +248,8 @@ class ListAppLink(QFrame):
         self._app_button.setToolTip(self.model.conan_ref)
         self._app_button.set_icon(self.model.get_icon())
         self.update_versions_info_visible()
-        self.update_users_info_visible()
-        self.update_channels_info_visible()
+        # self.update_users_info_visible()
+        # self.update_channels_info_visible()
 
         self.apply_conan_info()  # update with offline information
 
@@ -288,7 +281,7 @@ class ListAppLink(QFrame):
             return
 
         # confirmation dialog
-        message_box = QMessageBox(parent=self) # self.parentWidget())
+        message_box = QMessageBox(parent=self)  # self.parentWidget())
         message_box.setWindowTitle("Delete app link")
         message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}\"?")
         message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
@@ -302,7 +295,6 @@ class ListAppLink(QFrame):
             self.model.save()
             self._parent_tab.redraw(force=True)
 
-      
     def update_icon(self):
         self._app_button.set_icon(self.model.get_icon())
         self._app_button.ungrey_icon()
@@ -333,8 +325,8 @@ class ListAppLink(QFrame):
         run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
 
     def apply_conan_info(self):
-        """ Update with new conan data """ # TODO should be in model!
+        """ Update with new conan data """
         self.update_icon()
-        self._app_version.setText(self.model.version)
-        self._app_user.setText(self.model.user)
-        self._app_channel.setText(self.model.channel)
+        self._app_version.setText(self.model.conan_ref)
+        self._app_user.setText(str(self.model.package_folder))
+        self._app_channel.setText(str(self.model.conan_options))

@@ -3,13 +3,12 @@ from typing import TYPE_CHECKING, Dict, List
 from conan_app_launcher.app.logger import Logger
 import conan
 
-if conan.__version__.startswith("1"):
+try:
     from conans.model.ref import ConanFileReference, PackageReference
-    from conans.paths.package_layouts.package_editable_layout import \
-        PackageEditableLayout
-if conan.__version__.startswith("2"):
+    from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
+except:
     from conans.model.recipe_ref import RecipeReference as ConanFileReference  # type: ignore
-    from conans.model.package_ref import RecipeReference as PackageReference # type: ignore
+    from conans.model.package_ref import RecipeReference as PackageReference  # type: ignore
 
 try:
     from conans.util.windows import CONAN_REAL_PATH, path_shortener

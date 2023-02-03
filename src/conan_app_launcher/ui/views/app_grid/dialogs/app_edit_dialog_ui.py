@@ -26,7 +26,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(600, 506)
+        Dialog.resize(769, 568)
         sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -57,7 +57,7 @@ class Ui_Dialog(object):
 
         self.args_line_edit = QLineEdit(Dialog)
         self.args_line_edit.setObjectName(u"args_line_edit")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.MinimumExpanding)
+        sizePolicy2 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.args_line_edit.sizePolicy().hasHeightForWidth())
@@ -90,6 +90,7 @@ class Ui_Dialog(object):
 
         self.name_line_edit = QLineEdit(Dialog)
         self.name_line_edit.setObjectName(u"name_line_edit")
+        self.name_line_edit.setMinimumSize(QSize(500, 0))
 
         self.edit_grid.addWidget(self.name_line_edit, 0, 1, 1, 1)
 
@@ -102,21 +103,18 @@ class Ui_Dialog(object):
 
         self.icon_browse_button = QToolButton(Dialog)
         self.icon_browse_button.setObjectName(u"icon_browse_button")
-        sizePolicy4 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.icon_browse_button.sizePolicy().hasHeightForWidth())
-        self.icon_browse_button.setSizePolicy(sizePolicy4)
+        sizePolicy2.setHeightForWidth(self.icon_browse_button.sizePolicy().hasHeightForWidth())
+        self.icon_browse_button.setSizePolicy(sizePolicy2)
 
         self.edit_grid.addWidget(self.icon_browse_button, 6, 2, 1, 1)
 
         self.conan_opts_label = QLabel(Dialog)
         self.conan_opts_label.setObjectName(u"conan_opts_label")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.conan_opts_label.sizePolicy().hasHeightForWidth())
-        self.conan_opts_label.setSizePolicy(sizePolicy5)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.conan_opts_label.sizePolicy().hasHeightForWidth())
+        self.conan_opts_label.setSizePolicy(sizePolicy4)
 
         self.edit_grid.addWidget(self.conan_opts_label, 2, 0, 1, 1)
 
@@ -132,8 +130,8 @@ class Ui_Dialog(object):
 
         self.executable_browse_button = QToolButton(Dialog)
         self.executable_browse_button.setObjectName(u"executable_browse_button")
-        sizePolicy4.setHeightForWidth(self.executable_browse_button.sizePolicy().hasHeightForWidth())
-        self.executable_browse_button.setSizePolicy(sizePolicy4)
+        sizePolicy2.setHeightForWidth(self.executable_browse_button.sizePolicy().hasHeightForWidth())
+        self.executable_browse_button.setSizePolicy(sizePolicy2)
         self.executable_browse_button.setLayoutDirection(Qt.LeftToRight)
 
         self.edit_grid.addWidget(self.executable_browse_button, 3, 2, 1, 1)
@@ -160,11 +158,11 @@ class Ui_Dialog(object):
 
         self.install_button = QPushButton(Dialog)
         self.install_button.setObjectName(u"install_button")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
-        sizePolicy6.setHorizontalStretch(0)
-        sizePolicy6.setVerticalStretch(0)
-        sizePolicy6.setHeightForWidth(self.install_button.sizePolicy().hasHeightForWidth())
-        self.install_button.setSizePolicy(sizePolicy6)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.install_button.sizePolicy().hasHeightForWidth())
+        self.install_button.setSizePolicy(sizePolicy5)
         self.install_button.setFlat(False)
 
         self.edit_grid.addWidget(self.install_button, 7, 1, 1, 1)
@@ -182,11 +180,11 @@ class Ui_Dialog(object):
 
         self.button_box = QDialogButtonBox(Dialog)
         self.button_box.setObjectName(u"button_box")
-        sizePolicy7 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        sizePolicy7.setHorizontalStretch(1)
-        sizePolicy7.setVerticalStretch(1)
-        sizePolicy7.setHeightForWidth(self.button_box.sizePolicy().hasHeightForWidth())
-        self.button_box.setSizePolicy(sizePolicy7)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy6.setHorizontalStretch(1)
+        sizePolicy6.setVerticalStretch(1)
+        sizePolicy6.setHeightForWidth(self.button_box.sizePolicy().hasHeightForWidth())
+        self.button_box.setSizePolicy(sizePolicy6)
         self.button_box.setMinimumSize(QSize(0, 0))
         self.button_box.setOrientation(Qt.Horizontal)
         self.button_box.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
@@ -202,6 +200,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Edit App Link", None))
+        self.args_line_edit.setText("")
         self.execpath_label.setText(QCoreApplication.translate("Dialog", u"Relative path of file to open", None))
         self.conan_opts_text_edit.setHtml(QCoreApplication.translate("Dialog", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"

@@ -80,6 +80,9 @@ QFrame#content_frame .QFrame {
     background-color: transparent;
     border-radius: 7px;
 }
+QFrame#content_frame .QFrame[frameShape="4"] {
+    background: white;
+}
 
 QFrame#content_frame .QPushButton,
 QToolButton {
@@ -105,6 +108,11 @@ QToolButton:pressed {
 QFrame#content_frame .QPushButton:checked,
 QToolButton:checked {
     background-color: #5c5c5c;
+}
+
+QFrame#content_frame .QPushButton:disabled,
+QToolButton:disabled {
+    color: #5c5c5c;
 }
 
 QDialog .QPushButton,
@@ -251,8 +259,6 @@ QLabel#side_menu_title_label {
 }
 
 
-
-
 /* Generic widgets */
 
 QMainWindow{
@@ -286,7 +292,6 @@ QScrollArea{
 QWidget#info_contents {
     background-color: #808086;
 }
-
 
 QMessageBox QPushButton{
     background-color: #474747;

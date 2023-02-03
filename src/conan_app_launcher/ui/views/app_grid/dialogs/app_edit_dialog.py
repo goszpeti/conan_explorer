@@ -5,18 +5,19 @@ from typing import Optional
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.ui.common import measure_font_width
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from conan_app_launcher.core.conan_common import ConanFileReference
 
-from PySide6.QtCore import SignalInstance, Qt
-from PySide6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
+from PySide6.QtCore import SignalInstance
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
 
 
 class AppEditDialog(QDialog):
 
-    def __init__(self,  model: UiAppLinkModel, parent: Optional[QWidget], 
+    def __init__(self,  model: UiAppLinkModel, parent: Optional[QWidget],
                  pkg_installed_signal: Optional[SignalInstance] = None):
         super().__init__(parent=parent)
         self._model = model
@@ -37,7 +38,6 @@ class AppEditDialog(QDialog):
         self._ui.conan_ref_line_edit.set_loading_callback(self.loading_started_info)
         self._ui.conan_ref_line_edit.completion_finished.connect(self.loading_finished_info)
         self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_browse_buttons)
-        self._ui.conan_ref_line_edit.setMinimumWidth(500)
 
         # fill up current info
         self._ui.name_line_edit.setText(self._model.name)
@@ -46,11 +46,15 @@ class AppEditDialog(QDialog):
         self._ui.is_console_app_checkbox.setChecked(self._model.is_console_application)
         self._ui.icon_line_edit.setText(self._model.icon)
         self._ui.args_line_edit.setText(self._model.args)
+        width_to_set = measure_font_width(self._ui.args_line_edit.text()) + 10
+        if width_to_set > self.parentWidget().geometry().width():
+            width_to_set = self.parentWidget().geometry().width
+        self._ui.args_line_edit.setMinimumWidth(width_to_set)
         conan_options_text = ""
         for option in self._model.conan_options:
             conan_options_text += f"{option}={self._model.conan_options.get(option)}\n"
         self._ui.conan_opts_text_edit.setText(conan_options_text)
-        
+
         self._ui.install_button.clicked.connect(self.on_install_clicked)
         self._ui.executable_browse_button.clicked.connect(self.on_executable_browse_clicked)
         self._ui.icon_browse_button.clicked.connect(self.on_icon_browse_clicked)
@@ -82,11 +86,11 @@ class AppEditDialog(QDialog):
     def on_executable_browse_clicked(self):
         _, temp_package_path = app.conan_api.get_best_matching_package_path(
             ConanFileReference.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
-        if not temp_package_path.exists(): # default path
+        if not temp_package_path.exists():  # default path
             temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",
-                                       directory=str(temp_package_path))
-                                      # filter="Images (*.ico *.png *.jpg)")
+                             directory=str(temp_package_path))
+        # filter="Images (*.ico *.png *.jpg)")
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         # TODO restrict to the package directory, or emit Error dialog and call anew
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
@@ -112,7 +116,7 @@ class AppEditDialog(QDialog):
             temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",
                              directory=str(temp_package_path),
-                                       filter="Images (*.ico *.png *.jpg)")
+                             filter="Images (*.ico *.png *.jpg)")
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             icon_path = Path(dialog.selectedFiles()[0])
@@ -139,17 +143,17 @@ class AppEditDialog(QDialog):
             else:
                 Logger().warning(f"Wrong format in option: {line}")
         return conan_options
-                
+
     def save_data(self):
         # check all input validations
         if not self._ui.conan_ref_line_edit.is_valid:
-           msg = QMessageBox(parent=self)
-           msg.setWindowTitle("Invalid Conan Reference")
-           msg.setText(f"The entered Conan reference has an invalid format!")
-           msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-           msg.setIcon(QMessageBox.Icon.Critical)
-           msg.exec()
-           return
+            msg = QMessageBox(parent=self)
+            msg.setWindowTitle("Invalid Conan Reference")
+            msg.setText(f"The entered Conan reference has an invalid format!")
+            msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+            msg.setIcon(QMessageBox.Icon.Critical)
+            msg.exec()
+            return
         # write back app info
         self._model.name = self._ui.name_line_edit.text()
         self._model.conan_ref = self._ui.conan_ref_line_edit.text()

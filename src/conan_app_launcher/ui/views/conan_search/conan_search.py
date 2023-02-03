@@ -5,9 +5,9 @@ from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PySide6.QtCore import QPoint, Qt, Slot
+from PySide6.QtCore import QPoint, Qt, Slot, QParallelAnimationGroup, QPropertyAnimation, QAbstractAnimation, QEasingCurve
 from PySide6.QtGui import QIcon, QKeySequence, QAction
-from PySide6.QtWidgets import (QListWidgetItem, QWidget)
+from PySide6.QtWidgets import QListWidgetItem, QWidget
 
 from .controller import ConanSearchController
 
@@ -55,6 +55,25 @@ class ConanSearchView(PluginInterface):
         self._init_pkg_context_menu()
         self.set_themed_icon(self._ui.search_button, "icons/search_packages.png", size=(20, 20))
         self.set_themed_icon(self._ui.install_button, "icons/download_pkg.png", size=(20, 20))
+
+        self._ui.remote_list.setMinimumHeight(0)
+        self._ui.remote_list.setMaximumHeight(0)
+        self.remote_toggle_animation = QPropertyAnimation(self._ui.remote_list, b"maximumHeight")
+
+        def start_animation(checked):
+            arrow_type = Qt.ArrowType.DownArrow if checked else Qt.ArrowType.RightArrow
+            max_height = self._ui.remote_list.sizeHint().height()
+            start_height = 0 if checked else max_height
+            end_height = max_height if checked else 0
+            self._ui.remote_toggle_button.setArrowType(arrow_type)
+            # self.toggleAnimation.setDirection(direction)
+            self.remote_toggle_animation.setDuration(400)
+            self.remote_toggle_animation.setStartValue(start_height)
+            self.remote_toggle_animation.setEndValue(end_height)
+            self.remote_toggle_animation.setEasingCurve(QEasingCurve.Type.InOutQuart)
+            self.remote_toggle_animation.start()
+
+        self._ui.remote_toggle_button.clicked.connect(start_animation)
 
     def _init_remotes(self):
         remotes = app.conan_api.get_remotes()

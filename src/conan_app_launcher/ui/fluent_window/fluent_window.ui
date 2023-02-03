@@ -238,7 +238,7 @@
                   <property name="maximumSize">
                    <size>
                     <width>150</width>
-                    <height>45</height>
+                    <height>60</height>
                    </size>
                   </property>
                   <property name="layoutDirection">
@@ -268,7 +268,7 @@
                      <property name="minimumSize">
                       <size>
                        <width>50</width>
-                       <height>30</height>
+                       <height>60</height>
                       </size>
                      </property>
                      <property name="text">
@@ -276,7 +276,7 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../../../../../../Users/peter/.designer/assets/icons/close.png</normalon>
+                       <normalon>../../assets/icons/close.png</normalon>
                       </iconset>
                      </property>
                      <property name="flat">
@@ -289,7 +289,7 @@
                      <property name="minimumSize">
                       <size>
                        <width>50</width>
-                       <height>30</height>
+                       <height>60</height>
                       </size>
                      </property>
                      <property name="text">
@@ -297,7 +297,7 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../../../../../../Users/peter/.designer/assets/icons/restore.png</normalon>
+                       <normalon>../../assets/icons/restore.png</normalon>
                       </iconset>
                      </property>
                      <property name="flat">
@@ -310,7 +310,7 @@
                      <property name="minimumSize">
                       <size>
                        <width>50</width>
-                       <height>30</height>
+                       <height>60</height>
                       </size>
                      </property>
                      <property name="text">
@@ -318,7 +318,7 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../../../../../../Users/peter/.designer/assets/icons/minus.png</normalon>
+                       <normalon>../../assets/icons/minus.png</normalon>
                       </iconset>
                      </property>
                      <property name="flat">
@@ -327,13 +327,6 @@
                     </widget>
                    </item>
                   </layout>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="page_info_label">
-                  <property name="text">
-                   <string>Page Info</string>
-                  </property>
                  </widget>
                 </item>
                </layout>
@@ -434,7 +427,7 @@
                   <number>2</number>
                  </property>
                  <property name="topMargin">
-                  <number>5</number>
+                  <number>0</number>
                  </property>
                  <property name="rightMargin">
                   <number>0</number>
@@ -679,7 +672,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>760</height>
+                  <height>751</height>
                  </rect>
                 </property>
                 <property name="minimumSize">

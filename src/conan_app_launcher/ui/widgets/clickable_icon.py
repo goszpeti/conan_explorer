@@ -9,13 +9,12 @@ from PySide6.QtCore import Signal, QSize, Qt
 from PySide6.QtWidgets import QPushButton, QGraphicsColorizeEffect, QGraphicsPixmapItem
 from PySide6.QtGui import QColor, QIcon, QPixmap
 
+
 class ClickableIcon(QPushButton):
     """
     Qt QPushButton with greyable icon, which can react on a mouse click.
     Has advanced icon handling for displaying the best matching icon.
     """
-    # this signal is used to connect to backend functions.
-    clicked = Signal()
 
     # TODO flags
     def __init__(self, parent, image=Path("NULL"), icon_size=ICON_SIZE):
@@ -72,8 +71,3 @@ class ClickableIcon(QPushButton):
                 ICON_SIZE, ICON_SIZE, mode=Qt.TransformationMode.SmoothTransformation)
             self._ic = QIcon(icon)
             self.setIcon(self._ic)
-
-    def mouseReleaseEvent(self, event):  # override QPushButton to allow the clicked event
-        if event.button() == Qt.MouseButton.LeftButton:
-            self.clicked.emit()
-        return super().mouseReleaseEvent(event)

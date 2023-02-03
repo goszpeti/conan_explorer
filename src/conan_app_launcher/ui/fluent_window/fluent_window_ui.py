@@ -109,7 +109,7 @@ class Ui_MainWindow(object):
         self.window_btns_frame = QFrame(self.top_center_right_frame)
         self.window_btns_frame.setObjectName(u"window_btns_frame")
         self.window_btns_frame.setMinimumSize(QSize(0, 35))
-        self.window_btns_frame.setMaximumSize(QSize(150, 45))
+        self.window_btns_frame.setMaximumSize(QSize(150, 60))
         self.window_btns_frame.setLayoutDirection(Qt.RightToLeft)
         self.window_btns_frame.setFrameShape(QFrame.NoFrame)
         self.horizontalLayout_4 = QHBoxLayout(self.window_btns_frame)
@@ -118,9 +118,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.close_button = QPushButton(self.window_btns_frame)
         self.close_button.setObjectName(u"close_button")
-        self.close_button.setMinimumSize(QSize(50, 30))
+        self.close_button.setMinimumSize(QSize(50, 60))
         icon1 = QIcon()
-        icon1.addFile(u"../../../../../../Users/peter/.designer/assets/icons/close.png", QSize(), QIcon.Normal, QIcon.On)
+        icon1.addFile(u"../../assets/icons/close.png", QSize(), QIcon.Normal, QIcon.On)
         self.close_button.setIcon(icon1)
         self.close_button.setFlat(True)
 
@@ -128,9 +128,9 @@ class Ui_MainWindow(object):
 
         self.restore_max_button = QPushButton(self.window_btns_frame)
         self.restore_max_button.setObjectName(u"restore_max_button")
-        self.restore_max_button.setMinimumSize(QSize(50, 30))
+        self.restore_max_button.setMinimumSize(QSize(50, 60))
         icon2 = QIcon()
-        icon2.addFile(u"../../../../../../Users/peter/.designer/assets/icons/restore.png", QSize(), QIcon.Normal, QIcon.On)
+        icon2.addFile(u"../../assets/icons/restore.png", QSize(), QIcon.Normal, QIcon.On)
         self.restore_max_button.setIcon(icon2)
         self.restore_max_button.setFlat(True)
 
@@ -138,9 +138,9 @@ class Ui_MainWindow(object):
 
         self.minimize_button = QPushButton(self.window_btns_frame)
         self.minimize_button.setObjectName(u"minimize_button")
-        self.minimize_button.setMinimumSize(QSize(50, 30))
+        self.minimize_button.setMinimumSize(QSize(50, 60))
         icon3 = QIcon()
-        icon3.addFile(u"../../../../../../Users/peter/.designer/assets/icons/minus.png", QSize(), QIcon.Normal, QIcon.On)
+        icon3.addFile(u"../../assets/icons/minus.png", QSize(), QIcon.Normal, QIcon.On)
         self.minimize_button.setIcon(icon3)
         self.minimize_button.setFlat(True)
 
@@ -148,11 +148,6 @@ class Ui_MainWindow(object):
 
 
         self.verticalLayout_10.addWidget(self.window_btns_frame)
-
-        self.page_info_label = QLabel(self.top_center_right_frame)
-        self.page_info_label.setObjectName(u"page_info_label")
-
-        self.verticalLayout_10.addWidget(self.page_info_label)
 
 
         self.top_center_frame_layout.addWidget(self.top_center_right_frame)
@@ -198,7 +193,7 @@ class Ui_MainWindow(object):
         self.content_frame_layout.setSpacing(0)
         self.content_frame_layout.setObjectName(u"content_frame_layout")
         self.content_frame_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.content_frame_layout.setContentsMargins(2, 5, 0, 5)
+        self.content_frame_layout.setContentsMargins(2, 0, 0, 5)
         self.page_stacked_widget = QStackedWidget(self.content_frame)
         self.page_stacked_widget.setObjectName(u"page_stacked_widget")
         self.page = QWidget()
@@ -307,7 +302,7 @@ class Ui_MainWindow(object):
         self.right_menu_scroll_area.setWidgetResizable(True)
         self.right_menu_scroll_area_widgets = QWidget()
         self.right_menu_scroll_area_widgets.setObjectName(u"right_menu_scroll_area_widgets")
-        self.right_menu_scroll_area_widgets.setGeometry(QRect(0, 0, 93, 760))
+        self.right_menu_scroll_area_widgets.setGeometry(QRect(0, 0, 93, 751))
         self.right_menu_scroll_area_widgets.setMinimumSize(QSize(0, 0))
         self.right_menu_scroll_area_widgets_layout = QVBoxLayout(self.right_menu_scroll_area_widgets)
         self.right_menu_scroll_area_widgets_layout.setSpacing(2)
@@ -508,7 +503,6 @@ class Ui_MainWindow(object):
         self.close_button.setText("")
         self.restore_max_button.setText("")
         self.minimize_button.setText("")
-        self.page_info_label.setText(QCoreApplication.translate("MainWindow", u"Page Info", None))
         self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
         self.title_label.setText(QCoreApplication.translate("MainWindow", u"App Title", None))
