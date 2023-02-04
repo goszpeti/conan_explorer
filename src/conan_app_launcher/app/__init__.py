@@ -19,10 +19,11 @@ if platform.system() == "Windows":
 
 ### Global variables ###
 
-active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE, 
-                                    user_save_path / (SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE))
+active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE,
+                                                      user_save_path / (SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE))
 conan_api = ConanApi()
 conan_worker = ConanWorker(conan_api, active_settings)
+
 
 def run_application():
     """ Start the Qt application and load the main window """
@@ -59,7 +60,7 @@ def run_application():
 
     qt_app.exec()
 
-    # TODO main_window.save_window_state()
+    main_window.save_window_state()
     # cancel conan worker tasks on exit - this can possibly cancel an ongoing install task
     if conan_worker:
-       conan_worker.finish_working(10)
+        conan_worker.finish_working(10)

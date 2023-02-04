@@ -23,19 +23,22 @@ class ConanRefLineEdit(QLineEdit):
         self.is_valid = False
         completer = QCompleter([], self)
         completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        completer.setMaxVisibleItems(10)
+        completer.setModelSorting(QCompleter.ModelSorting.CaseInsensitivelySortedModel)
+        completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
 
         self._completion_thread = None
         self._loading_cbk = None
-        self._remote_refs = []
         self.setCompleter(completer)
+        self.completion_finished.connect(self.completer().complete)
         self.textChanged.connect(self.on_text_changed)
 
     def showEvent(self, event):
         app.conan_api.info_cache.get_all_remote_refs()  # takes a while to get
         combined_refs = set()
         combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
-        combined_refs.update(self._remote_refs)
-        self.completer().model().setStringList(list(combined_refs)) # type: ignore
+        combined_refs.update(app.conan_api.info_cache.get_all_remote_refs())
+        self.completer().model().setStringList(sorted(combined_refs))  # type: ignore
         super().showEvent(event)
 
     def cleanup(self):
@@ -78,7 +81,7 @@ class ConanRefLineEdit(QLineEdit):
         if len(conan_ref) < self.MINIMUM_CHARS_FOR_QUERY:  # skip searching for such broad terms
             return
         # start a query for all similar packages with conan search by starting a new thread for it
-        if not any([entry.startswith(conan_ref) for entry in self._remote_refs]) or not self.is_valid:
+        if not any([entry.startswith(conan_ref) for entry in app.conan_api.info_cache.get_all_remote_refs()]) or not self.is_valid:
             if self._completion_thread and self._completion_thread.is_alive():  # one query at a time
                 return
             self._completion_thread = Thread(target=self.load_completion, args=[conan_ref, ])
@@ -88,15 +91,15 @@ class ConanRefLineEdit(QLineEdit):
 
     def load_completion(self, text: str):
         recipes = app.conan_api.search_query_in_remotes(f"{text}*")  # can take very long time
-        if app.conan_api: # program can shut down and conan_api destroyed
+        if app.conan_api:  # program can shut down and conan_api destroyed
             try:
                 app.conan_api.info_cache.update_remote_package_list(recipes)  # add to cache
-                self.completion_finished.emit()
-                self._remote_refs = app.conan_api.info_cache.get_all_remote_refs()
+                remote_refs = app.conan_api.info_cache.get_all_remote_refs()
                 # add two list together -> filter is applied later
-                current_completions: List[str] = self.completer().model().stringList() # type: ignore
-                new_completions = set(self._remote_refs + current_completions)
+                current_completions: List[str] = self.completer().model().stringList()  # type: ignore
+                new_completions = set(remote_refs + current_completions)
                 if len(new_completions) > len(current_completions):
-                    self.completer().model().setStringList(list(new_completions)) # type: ignore
+                    self.completer().model().setStringList(sorted(new_completions))  # type: ignore
+                self.completion_finished.emit()
             except Exception as e:
                 Logger().error(f"Failed load completion: {str(e)}")

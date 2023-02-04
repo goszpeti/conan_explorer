@@ -4,11 +4,6 @@
             "path": ".."
         }
     ],
-    "extensions": {
-        "recommendations": [
-            "zhoufeng.pyqt-integration"
-        ]
-    },
     "settings": {
         "files.associations": {
             "*.qss.in": "qss"
