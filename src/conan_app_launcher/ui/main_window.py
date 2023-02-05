@@ -74,7 +74,7 @@ class MainWindow(FluentWindow):
         self.load_plugins()
 
     def _init_left_menu(self):
-        self.add_left_menu_entry("Conan Quicklaunch", "icons/grid.png", is_upper_menu=True, page_widget=self.app_grid,
+        self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.png", is_upper_menu=True, page_widget=self.app_grid,
                                  create_page_menu=True)
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
@@ -84,7 +84,7 @@ class MainWindow(FluentWindow):
                                                               self.open_file_editor_selection_dialog, "icons/edit_file.png")
         view_settings_submenu = SideSubMenu(self.ui.right_menu_bottom_content_sw, "View")
 
-        self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/package_settings.png")
+        self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/view.png")
 
         view_settings_submenu.add_button_menu_entry(
             "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence("CTRL++"), self)

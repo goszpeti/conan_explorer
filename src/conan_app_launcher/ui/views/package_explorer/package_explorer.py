@@ -108,7 +108,7 @@ class LocalConanPackageExplorer(PluginInterface):
         self.file_cntx_menu = RoundedMenu()
 
         self.open_fm_action = QAction("Show in File Manager", self)
-        self.set_themed_icon(self.open_fm_action, "icons/explorer.png")
+        self.set_themed_icon(self.open_fm_action, "icons/file_explorer.png")
         self.file_cntx_menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self._pkg_file_exp_ctrl.on_open_file_in_file_manager)
 

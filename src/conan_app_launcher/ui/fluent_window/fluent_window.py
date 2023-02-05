@@ -493,7 +493,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         sender_button.setChecked(True)
         self.ui.page_title.setText(self.page_widgets.get_display_name_by_name(obj_name))
-        # self.ui.page_info_label.setText("")
 
         # update page settings view
         side_menu = self.page_widgets.get_side_menu_by_name(obj_name)

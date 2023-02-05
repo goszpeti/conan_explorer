@@ -10,17 +10,23 @@ from PySide6.QtSvg import QSvgRenderer
 
 import conan_app_launcher.app as app
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using global module pattern
+SELECTED_STYLE = "material" # TODO add settings
 
 
 def get_asset_image_path(image_path: str) -> Path:
-    asset_path = Path("NULL")
-    if (app.asset_path / image_path).exists():  # relative path
-        asset_path = app.asset_path / image_path
-    else:  # absolute path
-        asset_path = Path(image_path)
-        if not asset_path.exists():
-            Logger().warning(f"Can't find image: {str(asset_path)}")
+    asset_path = Path(image_path)
+    if asset_path.exists():  # absolute path - return immediately
+        return asset_path
+
+    image_path = image_path.replace(".png", ".svg")  # TODO
+    asset_path = app.asset_path / image_path
+    if not asset_path.exists(): # try in style
+        asset_path = asset_path.parent / SELECTED_STYLE / asset_path.name
+
+    if not asset_path.exists():
+        Logger().warning(f"Can't find image: {str(asset_path)}")
     return asset_path
+
 
 def get_themed_asset_icon(image_path: str) -> QIcon:
     asset_path = get_asset_image_path(image_path)
@@ -66,19 +72,21 @@ def draw_svg_with_color(svg_path: Path, color="white", scale: float = 1.0) -> Pa
         return Path("NULL")
 
     # read svg as xml and get the drawing
-    with open(svg_path) as svg:
+    with open(svg_path, "r", encoding="utf-8") as svg:
         svg_content = "".join(svg.readlines())
         svg_content = svg_content.replace("\t", "")
     svg_dom = dom.parseString("".join(svg_content))
-    svg_drawing = svg_dom.getElementsByTagName("path")
-
+    svg_paths = svg_dom.getElementsByTagName("path")
     # set color in the dom element
-    svg_drawing[0].setAttribute("fill", color)
-
+    for path in svg_paths:
+        path.setAttribute("fill", color)
+    # also replace possible css
+    xml_text: str = svg_dom.toxml()
+    xml_text = xml_text.replace("#000000", "white")
     # create temporary svg and read into pyqt svg graphics object
     new_svg_path = svg_path.parent /  Path(svg_path.stem + "_" + color + svg_path.suffix)
-    with open(new_svg_path, "w+") as new_svg:
-        new_svg.write(svg_dom.toxml())
+    with open(new_svg_path, "w+", encoding="utf-8") as new_svg:
+        new_svg.write(xml_text)
     return new_svg_path
 
 
@@ -105,12 +113,12 @@ def get_platform_icon(profile_name: str) -> QIcon:
     """
     profile_name = profile_name.lower()
     if "win" in profile_name:  # I hope people have no random win"s" in their profilename
-        return QIcon(get_themed_asset_icon("icons/windows.png"))
+        return QIcon(get_themed_asset_icon("icons/global/windows.png"))
     elif "linux" in profile_name:
-        return QIcon(get_themed_asset_icon("icons/linux.png"))
+        return QIcon(get_themed_asset_icon("icons/global/linux.png"))
     elif "android" in profile_name:
-        return QIcon(get_themed_asset_icon("icons/android.png"))
+        return QIcon(get_themed_asset_icon("icons/global/android.png"))
     elif "macos" in profile_name:
-        return QIcon(get_themed_asset_icon("icons/mac_os.png"))
+        return QIcon(get_themed_asset_icon("icons/global/mac_os.png"))
     else:
         return QIcon(get_themed_asset_icon("icons/default_pkg.png"))

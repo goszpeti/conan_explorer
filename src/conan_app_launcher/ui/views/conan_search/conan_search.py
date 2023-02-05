@@ -52,7 +52,7 @@ class ConanSearchView(PluginInterface):
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
-        self.set_themed_icon(self._ui.search_button, "icons/search_packages.png", size=(20, 20))
+        self.set_themed_icon(self._ui.search_button, "icons/search.png", size=(20, 20))
         self.set_themed_icon(self._ui.install_button, "icons/download_pkg.png", size=(20, 20))
 
         self._ui.remote_list.setMinimumHeight(0)
@@ -109,7 +109,7 @@ class ConanSearchView(PluginInterface):
         self.install_pkg_action.triggered.connect(self._search_controller.on_install_pkg_requested)
 
         self.show_in_pkg_exp_action = QAction("Show in Package Explorer", self)
-        self.set_themed_icon(self.show_in_pkg_exp_action, "icons/search_packages.png")
+        self.set_themed_icon(self.show_in_pkg_exp_action, "icons/global/search_packages.svg")
         self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
         self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 

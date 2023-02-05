@@ -237,7 +237,7 @@
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>150</width>
+                    <width>165</width>
                     <height>60</height>
                    </size>
                   </property>
@@ -267,7 +267,7 @@
                     <widget class="QPushButton" name="close_button">
                      <property name="minimumSize">
                       <size>
-                       <width>50</width>
+                       <width>55</width>
                        <height>60</height>
                       </size>
                      </property>
@@ -288,7 +288,7 @@
                     <widget class="QPushButton" name="restore_max_button">
                      <property name="minimumSize">
                       <size>
-                       <width>50</width>
+                       <width>55</width>
                        <height>60</height>
                       </size>
                      </property>
@@ -309,7 +309,7 @@
                     <widget class="QPushButton" name="minimize_button">
                      <property name="minimumSize">
                       <size>
-                       <width>50</width>
+                       <width>55</width>
                        <height>60</height>
                       </size>
                      </property>
@@ -619,10 +619,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </size>
             </property>
             <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
+             <enum>QFrame::StyledPanel</enum>
             </property>
             <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
+             <enum>QFrame::Sunken</enum>
+            </property>
+            <property name="lineWidth">
+             <number>1</number>
             </property>
             <layout class="QVBoxLayout" name="right_menu_frame_layout">
              <property name="leftMargin">
@@ -672,7 +675,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>751</height>
+                  <height>749</height>
                  </rect>
                 </property>
                 <property name="minimumSize">

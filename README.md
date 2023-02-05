@@ -111,9 +111,14 @@ See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for St
 > From version 2.0.0 the project will use the LGPL 3.0 license to cleanly comply with PySide6.
 
 #### Resources
-* Using icons by https://icons8.com under [Universal Multimedia Licensing
-Agreement for Icons8](https://icons8.com/vue-static/landings/pricing/icons8-license.pdf)
-* Using Conan Package Manager Icon by Conan.io developers under [MIT License](<http://opensource.org/licenses/mit-license.php>), via Wikimedia Commons
+* Conan Package Manager Icon by Conan.io developers under [MIT License](http://opensource.org/licenses/mit-license.php), via Wikimedia Commons
+* [Material icons](https://fonts.google.com/) by Google  under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+* [Fluent icons](https://www.svgrepo.com/collection/fluent-ui-icons-outlined/) by Microsoft  under [MIT License](http://opensource.org/licenses/mit-license.php)
+* [Linux icon](https://www.svgrepo.com/svg/340563/linux-alt) by Carbon Design  under [Apache License](https://opensource.org/licenses/Apache-1.1)
+* [Apple icon](https://www.svgrepo.com/svg/488495/apple) by Klever Space  under [MIT License](http://opensource.org/licenses/mit-license.php)
+* [Windows icon](https://www.svgrepo.com/svg/488736/windows) by Klever Space under [MIT License](http://opensource.org/licenses/mit-license.php)
+* Modified [Package icon](https://www.svgrepo.com/svg/487645/package) by Neuicons [MIT License](http://opensource.org/licenses/mit-license.php)
+* Modified [Open Box icon](https://www.svgrepo.com/svg/383786/open-box-parcel) by wishforge.gamesunder [CC Attribution License](https://creativecommons.org/licenses/by/4.0/legalcode)</li>
 
 ##### PyPi runtime dependencies
 * PyQt6 by Riverbank Computing Limited, [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)

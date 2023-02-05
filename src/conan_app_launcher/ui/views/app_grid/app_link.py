@@ -160,7 +160,7 @@ class ListAppLink(QFrame):
         """ Setup context menu. """
         self.menu = RoundedMenu()
         self.open_fm_action = QAction("Show in File Manager", self)
-        self.open_fm_action.setIcon(QIcon(get_themed_asset_icon("icons/file-explorer.png")))
+        self.open_fm_action.setIcon(QIcon(get_themed_asset_icon("icons/file_explorer.png")))
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
 

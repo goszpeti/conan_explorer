@@ -100,7 +100,7 @@ class ConanConfigView(PluginInterface):
         self._ui.profile_save_button.clicked.connect(self.save_profile_file)
         self.set_themed_icon(self._ui.profile_save_button, "icons/save.png")
         self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.png")
-        self.set_themed_icon(self._ui.profile_remove_button, "icons/minus_rounded.png")
+        self.set_themed_icon(self._ui.profile_remove_button, "icons/delete.png")
         self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.png")
 
     def _load_profiles_tab(self):
@@ -165,7 +165,7 @@ class ConanConfigView(PluginInterface):
         self._ui.remote_add.clicked.connect(self.on_remote_add)
         self.set_themed_icon(self._ui.remote_add, "icons/plus_rounded.png")
         self._ui.remote_remove.clicked.connect(self.on_remote_remove)
-        self.set_themed_icon(self._ui.remote_remove, "icons/minus_rounded.png")
+        self.set_themed_icon(self._ui.remote_remove, "icons/delete.png")
         self._ui.remote_move_up_button.clicked.connect(self._remotes_controller.move_up)
         self.set_themed_icon(self._ui.remote_move_up_button, "icons/arrow_up.png")
         self._ui.remote_move_down_button.clicked.connect(self._remotes_controller.move_down)
@@ -198,7 +198,7 @@ class ConanConfigView(PluginInterface):
         self._add_remote_action.triggered.connect(self.on_remote_add)
 
         self._remove_remote_action = QAction("Remove remote", self)
-        self._remove_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/minus_rounded.png")))
+        self._remove_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
         self._remotes_cntx_menu.addAction(self._remove_remote_action)
         self._remove_remote_action.triggered.connect(self.on_remote_remove)
 

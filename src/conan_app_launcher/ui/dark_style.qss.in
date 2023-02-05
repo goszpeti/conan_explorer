@@ -8,10 +8,9 @@ Usable Macros with Jinja2 syntax:
 Palette:
  - Conan Accent Color:  #6699CC
  - light: #808086
- - light-dark: 696969
+ - light-dark: #696969
  - dark: #5c5c5c
  - darker: #474747
- - almost here: #
  - darkest: #202020
 */
 
@@ -223,6 +222,10 @@ QLabel#title_label {
 QFrame#right_menu_frame * {
     background-color: #808086;
 }
+QFrame#right_menu_frame {
+    border: 1px solid #696969;
+}
+
 
 QLabel#right_menu_top_title_label {
     font-size: {{MAIN_FONT_SIZE + 2}}pt;

@@ -27,18 +27,20 @@ class ConanRefLineEdit(QLineEdit):
         completer.setModelSorting(QCompleter.ModelSorting.CaseInsensitivelySortedModel)
         completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
 
+        self._first_show = True # don't call completer on first show
         self._completion_thread = None
         self._loading_cbk = None
         self.setCompleter(completer)
+
         self.completion_finished.connect(self.completer().complete)
         self.textChanged.connect(self.on_text_changed)
 
     def showEvent(self, event):
-        app.conan_api.info_cache.get_all_remote_refs()  # takes a while to get
         combined_refs = set()
         combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
         combined_refs.update(app.conan_api.info_cache.get_all_remote_refs())
         self.completer().model().setStringList(sorted(combined_refs))  # type: ignore
+
         super().showEvent(event)
 
     def cleanup(self):
@@ -100,6 +102,7 @@ class ConanRefLineEdit(QLineEdit):
                 new_completions = set(remote_refs + current_completions)
                 if len(new_completions) > len(current_completions):
                     self.completer().model().setStringList(sorted(new_completions))  # type: ignore
-                self.completion_finished.emit()
+                    self.completion_finished.emit()
+
             except Exception as e:
                 Logger().error(f"Failed load completion: {str(e)}")

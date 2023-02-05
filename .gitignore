@@ -3,6 +3,7 @@
 .venv*
 
 **/*_inv.png
+**/*_white.svg
 **/__pycache__/**
 *.egg-info
 build/**

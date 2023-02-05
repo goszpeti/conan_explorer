@@ -94,7 +94,7 @@ setup(
         "test": TEST_REQUIRES
     },
     include_package_data=True,
-    license="MIT",
+    license="LGPL v3",
     classifiers=[
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers

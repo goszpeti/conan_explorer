@@ -32,7 +32,7 @@ class PluginsPage(ThemedWidget):
         # self._ui.plugins_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         # self._init_pkg_context_menu()
         self.set_themed_icon(self._ui.add_plugin_button, "icons/plus_rounded.png")
-        self.set_themed_icon(self._ui.remove_plugin_button, "icons/minus_rounded.png")
+        self.set_themed_icon(self._ui.remove_plugin_button, "icons/delete.png")
         self.set_themed_icon(self._ui.toggle_plugin_button, "icons/hide.png")
 
         self._controller.update()
