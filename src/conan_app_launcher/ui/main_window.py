@@ -96,12 +96,12 @@ class MainWindow(FluentWindow):
 
         self.main_general_settings_menu.add_menu_line()
         self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
-                                                                app.conan_api.remove_locks, "icons/remove-lock.png")
+                                                              app.conan_api.remove_locks, "icons/remove-lock.png")
         self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",
-                                                                self.open_cleanup_cache_dialog, "icons/cleanup.png")
+                                                              self.open_cleanup_cache_dialog, "icons/cleanup.png")
         self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.png")
-        self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.png")
+        self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.svg")
 
     def closeEvent(self, event):  # override QMainWindow
         """ Remove qt logger, so it doesn't log into a non existant object """
@@ -123,7 +123,7 @@ class MainWindow(FluentWindow):
             return
         self.app_grid.re_init_all_app_links()
 
-    def load_plugins(self): # TODO move to fluent window?
+    def load_plugins(self):  # TODO move to fluent window?
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
             plugin_path = app.active_settings.get_string(plugin_group_name)
             plugins = PluginFile.read_file(plugin_path)
@@ -138,7 +138,6 @@ class MainWindow(FluentWindow):
                 except Exception as e:
                     Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
 
-
     def load(self, config_source: Optional[PathLike] = None):
         """ Load all application gui elements specified in the GUI config (file) """
         config_source_str = str(config_source)
@@ -149,7 +148,6 @@ class MainWindow(FluentWindow):
         loader = AsyncLoader(self)
         loader.async_loading(self, self._load_job, (config_source_str,))
         loader.wait_for_finished()
-
 
     def _load_job(self, config_source_str):
         # load ui file definitions
@@ -235,7 +233,6 @@ class MainWindow(FluentWindow):
         dialog = FileEditorSelDialog(self)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
-
 
     # def quicklaunch_grid_mode_toggled(self):
     #     sender_toggle: AnimatedToggle = self.sender()  # type: ignore

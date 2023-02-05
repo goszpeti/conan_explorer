@@ -3,7 +3,7 @@ from conan_app_launcher import AUTHOR, REPO_URL, __version__, asset_path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
-                             QVBoxLayout, QWidget)
+                               QVBoxLayout, QWidget)
 from PySide6.QtCore import QPoint, Qt, Slot
 from PySide6.QtGui import QIcon, QKeySequence, QAction
 from PySide6.QtWidgets import (QListWidgetItem, QWidget)
@@ -19,8 +19,8 @@ if TYPE_CHECKING:
 
 class PluginsPage(ThemedWidget):
 
-    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"]=None,
-             page_widgets: Optional["FluentWindow.PageStore"]=None):
+    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"] = None,
+                 page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent)
         from .plugins_ui import Ui_Form
         self._ui = Ui_Form()
@@ -37,18 +37,18 @@ class PluginsPage(ThemedWidget):
 
         self._controller.update()
         # self.set_themed_icon(self._ui.search_icon, "icons/search_packages.png", size=(20,20))
-    
+
     # def _init_remote_context_menu(self):
     #     self._remotes_cntx_menu = RoundedMenu()
     #     self._copy_remote_action = QAction("Copy remote name", self)
-    #     self._copy_remote_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
+    #     self._copy_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.png")))
     #     self._remotes_cntx_menu.addAction(self._copy_remote_action)
     #     self._copy_remote_action.triggered.connect(self.on_copy_remote_name_requested)
 
     # @Slot(QPoint)
     # def on_pkg_context_menu_requested(self, position: QPoint):
-    #     """ 
-    #     Executes, when context menu is requested. 
+    #     """
+    #     Executes, when context menu is requested.
     #     This is done to dynamically grey out some options depending on the item type.
     #     """
     #     item = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view)
@@ -65,4 +65,3 @@ class PluginsPage(ThemedWidget):
     # def resizeEvent(self, a0) -> None:  # override QtGui.QResizeEvent
     #     super().resizeEvent(a0)
     #     self._search_controller._resize_package_columns()
-

@@ -4,7 +4,7 @@ from typing import List, Union
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan_common import ConanPkg
-from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_image, TreeModel, TreeModelItem
+from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_icon, TreeModel, TreeModelItem
 from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
 from PySide6.QtGui import QIcon
 
@@ -100,7 +100,7 @@ class PkgSelectModel(TreeModel):
                 return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
         if role == Qt.ItemDataRole.DecorationRole:
             if item.type == REF_TYPE:
-                return QIcon(get_themed_asset_image("icons/package.png"))
+                return QIcon(get_themed_asset_icon("icons/package.png"))
             if item.type == PROFILE_TYPE:
                 profile_name = self.get_quick_profile_name(item)
                 return get_platform_icon(profile_name)

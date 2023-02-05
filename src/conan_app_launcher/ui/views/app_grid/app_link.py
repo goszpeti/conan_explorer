@@ -9,7 +9,7 @@ from conan_app_launcher.core import open_in_file_manager, run_file
 from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS)
-from conan_app_launcher.ui.common import get_themed_asset_image, measure_font_width
+from conan_app_launcher.ui.common import get_themed_asset_icon, measure_font_width
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.widgets import ClickableIcon, RoundedMenu
@@ -112,8 +112,8 @@ class ListAppLink(QFrame):
 
         self._edit_button = QPushButton("Edit ", self)
         self._remove_button = QPushButton("Remove ", self)
-        self._edit_button.setIcon(QIcon(get_themed_asset_image("icons/edit.png")))
-        self._remove_button.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
+        self._edit_button.setIcon(QIcon(get_themed_asset_icon("icons/edit.png")))
+        self._remove_button.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
         self._edit_button.setMinimumWidth(200)
         self._edit_button.setMaximumWidth(200)
         self._remove_button.setMinimumWidth(200)
@@ -160,31 +160,31 @@ class ListAppLink(QFrame):
         """ Setup context menu. """
         self.menu = RoundedMenu()
         self.open_fm_action = QAction("Show in File Manager", self)
-        self.open_fm_action.setIcon(QIcon(get_themed_asset_image("icons/file-explorer.png")))
+        self.open_fm_action.setIcon(QIcon(get_themed_asset_icon("icons/file-explorer.png")))
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
 
         self.menu.addSeparator()
 
         self.add_action = QAction("Add new App Link", self)
-        self.add_action.setIcon(QIcon(get_themed_asset_image("icons/add_link.png")))
+        self.add_action.setIcon(QIcon(get_themed_asset_icon("icons/add_link.png")))
         self.menu.addAction(self.add_action)
         self.add_action.triggered.connect(self.open_app_link_add_dialog)
 
         self.edit_action = QAction("Edit", self)
-        self.edit_action.setIcon(QIcon(get_themed_asset_image("icons/edit.png")))
+        self.edit_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.png")))
         self.menu.addAction(self.edit_action)
         self.edit_action.triggered.connect(self.open_edit_dialog)
 
         self.remove_action = QAction("Remove App Link", self)
-        self.remove_action.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
+        self.remove_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
         self.menu.addAction(self.remove_action)
         self.remove_action.triggered.connect(self.remove)
 
         self.menu.addSeparator()
 
         self.reorder_action = QAction("Reorder App Links", self)
-        self.reorder_action.setIcon(QIcon(get_themed_asset_image("icons/rearrange.png")))
+        self.reorder_action.setIcon(QIcon(get_themed_asset_icon("icons/rearrange.png")))
         self.reorder_action.triggered.connect(self.on_move)
 
         self.menu.addAction(self.reorder_action)

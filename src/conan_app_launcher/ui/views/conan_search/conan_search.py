@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.ui.common import get_themed_asset_image
 from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
@@ -100,18 +99,17 @@ class ConanSearchView(PluginInterface):
         self.copy_ref_action.triggered.connect(self._search_controller.on_copy_ref_requested)
 
         self.show_conanfile_action = QAction("Show conanfile", self)
-        self.show_conanfile_action.setIcon(QIcon(get_themed_asset_image("icons/file_preview.png")))
+        self.set_themed_icon(self.show_conanfile_action, "icons/file_preview.png")
         self.select_cntx_menu.addAction(self.show_conanfile_action)
         self.show_conanfile_action.triggered.connect(self._search_controller.on_show_conanfile_requested)
 
         self.install_pkg_action = QAction("Install package", self)
-        self.install_pkg_action.setIcon(QIcon(get_themed_asset_image("icons/download_pkg.png")))
+        self.set_themed_icon(self.install_pkg_action, "icons/download_pkg.png")
         self.select_cntx_menu.addAction(self.install_pkg_action)
         self.install_pkg_action.triggered.connect(self._search_controller.on_install_pkg_requested)
 
         self.show_in_pkg_exp_action = QAction("Show in Package Explorer", self)
-        self.show_in_pkg_exp_action.setIcon(QIcon(
-            get_themed_asset_image("icons/search_packages.png")))
+        self.set_themed_icon(self.show_in_pkg_exp_action, "icons/search_packages.png")
         self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
         self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 

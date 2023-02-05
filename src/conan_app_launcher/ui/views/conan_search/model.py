@@ -4,7 +4,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan_common import ConanPkg
-from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_image
+from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_icon
 from conan_app_launcher.core.conan_common import ConanFileReference
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Slot, SignalInstance
@@ -90,7 +90,7 @@ class PkgSearchModel(TreeModel):
         if conan_pkg_removed:
             conan_pkg_removed.connect(self.mark_pkg_as_not_installed)
 
-    def setup_model_data(self, search_query:str, remotes: List[str]):
+    def setup_model_data(self, search_query: str, remotes: List[str]):
         # needs to be ConanFileReference, so we can check with get_all_local_refs directly
         recipes_with_remotes: Dict[ConanFileReference, str] = {}
         for remote in remotes:
@@ -126,7 +126,7 @@ class PkgSearchModel(TreeModel):
             if index.column() != 0:  # only display icon for first column
                 return
             if item.type == REF_TYPE:
-                return QtGui.QIcon(get_themed_asset_image("icons/package.png"))
+                return QtGui.QIcon(get_themed_asset_icon("icons/package.png"))
             if item.type == PROFILE_TYPE:
                 profile_name = item.data(2)
                 return get_platform_icon(profile_name)
@@ -186,7 +186,7 @@ class PkgSearchModel(TreeModel):
             if not pkg_id and not installed:  # if ref was removed, all pkgs are deleted too
                 pkg_item.is_installed = installed
 
-    def fetchMore(self, index): # override
+    def fetchMore(self, index):  # override
         item = index.internalPointer()
         loader = AsyncLoader(self)
         self._loader_widget_parent = QtWidgets.QWidget()

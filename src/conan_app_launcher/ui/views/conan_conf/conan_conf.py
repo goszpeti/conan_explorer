@@ -6,7 +6,7 @@ from typing import Optional
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import escape_venv
-from conan_app_launcher.ui.common import get_themed_asset_image
+from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
@@ -23,7 +23,7 @@ class ConanConfigView(PluginInterface):
 
     load_signal = Signal()
 
-    def __init__(self, parent: QWidget, base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"]=None):
+    def __init__(self, parent: QWidget, base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent, base_signals)
         from .conan_conf_ui import Ui_Form
         self._ui = Ui_Form()
@@ -34,7 +34,8 @@ class ConanConfigView(PluginInterface):
 
     def load(self):
 
-        self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, self._base_signals.conan_remotes_updated)
+        self._remotes_controller = ConanRemoteController(
+            self._ui.remotes_tree_view, self._base_signals.conan_remotes_updated)
         self._init_remotes_tab()
         self._init_profiles_tab()
         self.set_themed_icon(self._ui.config_file_save_button, "icons/save.png")
@@ -110,7 +111,7 @@ class ConanConfigView(PluginInterface):
     def _init_profile_context_menu(self):
         self.profiles_cntx_menu = RoundedMenu()
         self._copy_profile_action = QAction("Copy profile name", self)
-        self._copy_profile_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
+        self._copy_profile_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.png")))
         self.profiles_cntx_menu.addAction(self._copy_profile_action)
         self._copy_profile_action.triggered.connect(self.on_copy_profile_requested)
 
@@ -182,32 +183,32 @@ class ConanConfigView(PluginInterface):
     def _init_remote_context_menu(self):
         self._remotes_cntx_menu = RoundedMenu()
         self._copy_remote_action = QAction("Copy remote name", self)
-        self._copy_remote_action.setIcon(QIcon(get_themed_asset_image("icons/copy_link.png")))
+        self._copy_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.png")))
         self._remotes_cntx_menu.addAction(self._copy_remote_action)
         self._copy_remote_action.triggered.connect(self.on_copy_remote_name_requested)
 
         self._edit_remote_action = QAction("Edit remote", self)
-        self._edit_remote_action.setIcon(QIcon(get_themed_asset_image("icons/edit.png")))
+        self._edit_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.png")))
         self._remotes_cntx_menu.addAction(self._edit_remote_action)
         self._edit_remote_action.triggered.connect(self.on_remote_edit)
 
         self._add_remote_action = QAction("Add new remote", self)
-        self._add_remote_action.setIcon(QIcon(get_themed_asset_image("icons/plus_rounded.png")))
+        self._add_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/plus_rounded.png")))
         self._remotes_cntx_menu.addAction(self._add_remote_action)
         self._add_remote_action.triggered.connect(self.on_remote_add)
 
         self._remove_remote_action = QAction("Remove remote", self)
-        self._remove_remote_action.setIcon(QIcon(get_themed_asset_image("icons/minus_rounded.png")))
+        self._remove_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/minus_rounded.png")))
         self._remotes_cntx_menu.addAction(self._remove_remote_action)
         self._remove_remote_action.triggered.connect(self.on_remote_remove)
 
         self._disable_profile_action = QAction("Disable/Enable remote", self)
-        self._disable_profile_action.setIcon(QIcon(get_themed_asset_image("icons/hide.png")))
+        self._disable_profile_action.setIcon(QIcon(get_themed_asset_icon("icons/hide.png")))
         self._remotes_cntx_menu.addAction(self._disable_profile_action)
         self._disable_profile_action.triggered.connect(self.on_remote_disable)
 
         self._login_remotes_action = QAction("(Multi)Login to remote", self)
-        self._login_remotes_action.setIcon(QIcon(get_themed_asset_image("icons/login.png")))
+        self._login_remotes_action.setIcon(QIcon(get_themed_asset_icon("icons/login.png")))
         self._remotes_cntx_menu.addAction(self._login_remotes_action)
         self._login_remotes_action.triggered.connect(self.on_remotes_login)
 
@@ -230,7 +231,7 @@ class ConanConfigView(PluginInterface):
         self.remote_login_dialog = RemoteLoginDialog(remotes, self)
         reply = self.remote_login_dialog.exec()
         if reply == QDialog.DialogCode.Accepted:
-                self._remotes_controller.update()
+            self._remotes_controller.update()
 
     def on_remote_add(self, model_index):
         new_remote = Remote("New", "", True, False)
@@ -259,7 +260,7 @@ class ConanConfigView(PluginInterface):
     def on_copy_remote_name_requested(self):
         self._remotes_controller.copy_remote_name()
 
-# Conan Config 
+# Conan Config
 
     def save_config_file(self):
         self.config_file_path.write_text(self._ui.config_file_text_browser.toPlainText())

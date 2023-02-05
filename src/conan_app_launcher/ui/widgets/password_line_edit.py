@@ -1,7 +1,8 @@
 from pathlib import Path
 from PySide6.QtWidgets import QLineEdit
-from conan_app_launcher.ui.common import get_themed_asset_image
+from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.ui.common.icon import get_icon_from_image_file
+
 
 class PasswordLineEdit(QLineEdit):
 
@@ -10,8 +11,8 @@ class PasswordLineEdit(QLineEdit):
         # hide per default
         self.setEchoMode(self.EchoMode.Password)
 
-        self.show_icon = get_icon_from_image_file(Path(get_themed_asset_image("icons/show.png")))
-        self.hide_icon = get_icon_from_image_file(Path(get_themed_asset_image("icons/hide.png")))
+        self.show_icon = get_themed_asset_icon("icons/show.png")
+        self.hide_icon = get_themed_asset_icon("icons/hide.png")
 
         self.toggle_show_pw_action = self.addAction(self.show_icon, self.ActionPosition.TrailingPosition)
         self.toggle_show_pw_action.triggered.connect(self.on_toggle_show_password)

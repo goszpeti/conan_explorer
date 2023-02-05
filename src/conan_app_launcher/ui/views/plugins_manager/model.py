@@ -6,7 +6,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan_common import ConanPkg
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
-from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_image
+from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_icon
 from conan_app_launcher.core.conan_common import ConanFileReference
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Slot, SignalInstance
@@ -24,6 +24,7 @@ class PluginFileModelItem(TreeModelItem):
     def __init__(self, file_path: str, parent):
         super().__init__(["built-in", "", "", ""], parent, lazy_loading=False)
 
+
 class PluginModelItem(TreeModelItem):
 
     def __init__(self, plugin: PluginDescription, parent):
@@ -39,7 +40,6 @@ class PluginModel(TreeModel):
         super().__init__(checkable=True, *args, **kwargs)
         self.root_item = TreeModelItem(["Name", "Version", "Author", "Description"])
 
-
     def setup_model_data(self):
         self.root_item.child_items = []
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
@@ -50,7 +50,6 @@ class PluginModel(TreeModel):
             for plugin in plugins:
                 plugin_element = PluginModelItem(plugin, self.root_item)
                 self.root_item.append_child(plugin_element)
-
 
         #     self.root_item.append_child(remote_item)
 
@@ -67,7 +66,7 @@ class PluginModel(TreeModel):
             if index.column() != 0:  # only display icon for first column
                 return
             if isinstance(item, PluginModelItem):
-                return QtGui.QIcon(get_themed_asset_image(item._icon))
+                return get_themed_asset_icon(item._icon)
 
         # if isinstance(item, RemotesModelItem):
         #     if role == Qt.ItemDataRole.FontRole and item.remote.disabled:
@@ -76,6 +75,7 @@ class PluginModel(TreeModel):
         #         return font
 
         return None
+
     def save(self):
         """ Update every remote with new index and thus save to conan remotes file """
         pass

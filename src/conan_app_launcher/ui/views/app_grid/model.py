@@ -9,13 +9,14 @@ from conan_app_launcher import (
     USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_image
+from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_icon
 from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.core.conan_common import ConanFileReference
 
 # from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
+
 
 class UiAppGridModel(UiAppGridConfig, QObject):
 
@@ -165,7 +166,7 @@ class UiAppLinkModel(UiAppLinkConfig):
                         return
         if not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
             _, pkg_path = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
-       
+
         self.set_package_folder(pkg_path)
 
     def register_update_callback(self, update_func: Callable):
@@ -341,7 +342,8 @@ class UiAppLinkModel(UiAppLinkConfig):
                 for match in possible_matches:
                     # don't allow for ambiguity!
                     if match_found:
-                        Logger().error(f"Multiple candidates found for {exe_rel_path} in {self.name}: e.g. {str(match.name)}")
+                        Logger().error(
+                            f"Multiple candidates found for {exe_rel_path} in {self.name}: e.g. {str(match.name)}")
                     match_found = True
                 if not match_found:
                     Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
@@ -381,7 +383,7 @@ class UiAppLinkModel(UiAppLinkConfig):
                 icon = "app.png"
             else:
                 icon = "no-access.png"
-            icon_path = Path(get_themed_asset_image("icons/" + icon))
+            icon_path = Path(get_themed_asset_icon("icons/" + icon))
         return icon_path
 
     def get_icon(self) -> QIcon:
@@ -395,8 +397,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         # default icon, until package path is updated
         if icon.isNull():
-            icon_path = get_themed_asset_image("icons/app.png")
-            icon = get_icon_from_image_file(Path(icon_path))
+            icon = get_themed_asset_icon("icons/app.png")
             if self._icon:  # user input given -> warning
                 Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
         return icon

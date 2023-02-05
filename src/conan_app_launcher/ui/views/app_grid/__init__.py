@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING, List, Type, TypeVar, Union
 import conan_app_launcher.app as app
 from conan_app_launcher import user_save_path
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.settings import APPLIST_ENABLED, DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, LAST_CONFIG_FILE  # using global module pattern
-from conan_app_launcher.ui.common.icon import get_themed_asset_image
+# using global module pattern
+from conan_app_launcher.settings import APPLIST_ENABLED, DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, LAST_CONFIG_FILE
+from conan_app_launcher.ui.common.icon import get_themed_asset_icon
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
@@ -14,10 +15,10 @@ from conan_app_launcher.core.conan_common import ConanFileReference, PackageRefe
 from PySide6.QtCore import Qt, SignalInstance, Signal
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget, QFileDialog,
-                             QVBoxLayout, QWidget)
+                               QVBoxLayout, QWidget)
 
 from .model import UiAppLinkModel, UiTabModel
-from .tab import TabList, TabList #TabGrid
+from .tab import TabList, TabList  # TabGrid
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
@@ -54,8 +55,9 @@ class AppGridView(QWidget):
         self.re_init(self.model)
 
     T = TypeVar('T')
+
     def findChildren(self, type: Type[T]) -> List[T]:
-        return super().findChildren(type) # type: ignore
+        return super().findChildren(type)  # type: ignore
 
     def re_init(self, model: "UiAppGridModel", offset=0):
         """ To be called, when a new config file is loaded """
@@ -72,7 +74,7 @@ class AppGridView(QWidget):
 
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add
-        current_tab: TabList = self.tab_widget.widget(self.tab_widget.currentIndex()) # type: ignore
+        current_tab: TabList = self.tab_widget.widget(self.tab_widget.currentIndex())  # type: ignore
         current_tab.open_app_link_add_dialog()
 
     def on_tab_move(self):
@@ -89,17 +91,17 @@ class AppGridView(QWidget):
         self.menu = menu
 
         rename_action = QAction("Rename", self)
-        rename_action.setIcon(QIcon(get_themed_asset_image("icons/rename.png")))
+        rename_action.setIcon(QIcon(get_themed_asset_icon("icons/rename.png")))
         menu.addAction(rename_action)
         rename_action.triggered.connect(lambda: self.on_tab_rename(index))
 
         remove_action = QAction("Remove", self)
-        remove_action.setIcon(QIcon(get_themed_asset_image("icons/delete.png")))
+        remove_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
         menu.addAction(remove_action)
         remove_action.triggered.connect(lambda: self.on_tab_remove(index))
 
         new_tab_action = QAction("Add new tab", self)
-        new_tab_action.setIcon(QIcon(get_themed_asset_image("icons/plus.png")))
+        new_tab_action.setIcon(QIcon(get_themed_asset_icon("icons/plus.png")))
         menu.addAction(new_tab_action)
         new_tab_action.triggered.connect(self.on_new_tab)
 
@@ -261,24 +263,24 @@ class AppGridView(QWidget):
                     # Catch shutdown
                     if not self.isEnabled():
                         return
-                    if not conan_ref: # unspecific reload
+                    if not conan_ref:  # unspecific reload
                         app_link.model.load_from_cache()
 
                     if app_link.model.conan_ref == conan_ref:
                         # reverse lookup - don't update an icon with other options
                         pkg_info = app.conan_api.get_local_pkg_from_id(PackageReference.loads(conan_ref + ":" + pkg_id))
-                        if app_link.model.conan_options: # only compare options, if user explicitly set them
+                        if app_link.model.conan_options:  # only compare options, if user explicitly set them
                             # user options should be a subset of full pkg options
                             if not app_link.model.conan_options.items() <= pkg_info.get("options", {}).items():
                                 continue
                         if pkg_id:
-                            app_link.model.set_package_folder(app.conan_api.get_package_folder(ConanFileReference.loads(conan_ref), pkg_id))
+                            app_link.model.set_package_folder(app.conan_api.get_package_folder(
+                                ConanFileReference.loads(conan_ref), pkg_id))
                         app_link.model.load_from_cache()
                     app_link.apply_conan_info()
 
         except Exception as e:
             Logger().error(f"Can't update AppGrid with conan info {str(e)}")
-
 
     @classmethod
     def get_tab_type(cls):
@@ -286,5 +288,3 @@ class AppGridView(QWidget):
             return TabList
         else:
             return TabGrid
-
-

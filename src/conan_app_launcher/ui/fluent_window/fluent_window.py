@@ -1,4 +1,7 @@
+from pathlib import Path
 import platform
+
+from conan_app_launcher.ui.common.icon import get_icon_from_image_file
 
 if platform.system() == "Windows":
     import ctypes
@@ -28,7 +31,7 @@ from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
                                QPushButton, QSizePolicy,
                                QStackedWidget, QVBoxLayout, QWidget)
 
-from ..common import get_themed_asset_image
+from ..common import get_themed_asset_icon, get_asset_image_path
 from ..widgets import AnimatedToggle
 
 if TYPE_CHECKING:
@@ -98,7 +101,7 @@ class ThemedWidget(QWidget):
         For that reload_themed_icons must be called.
         Size only applies for pixmaps.
         """
-        icon = QIcon(get_themed_asset_image(asset_path))
+        icon = get_themed_asset_icon(asset_path)
         if isinstance(widget, CanSetIconWidgetProtocol):
             widget.setIcon(icon)
         elif isinstance(widget, CanSetPixmapWidgetProtocol):
@@ -111,11 +114,11 @@ class ThemedWidget(QWidget):
         for widget, info in self._icon_map.items():
             asset_rel_path = info["asset_path"]
             size = info["size"]
-            icon = QIcon(get_themed_asset_image(asset_rel_path))
+            icon = QIcon(get_themed_asset_icon(asset_rel_path))
             if isinstance(widget, CanSetIconWidgetProtocol):
                 widget.setIcon(icon)
             elif isinstance(widget, CanSetPixmapWidgetProtocol):
-                widget.setPixmap(icon.pixmap(*size))
+                widget.setPixmap(icon.pixmap(QSize(*size)))
 
 
 class SideSubMenu(ThemedWidget):
@@ -233,7 +236,7 @@ class SideSubMenu(ThemedWidget):
         button.setMaximumHeight(50)
         if asset_icon:
             self.set_themed_icon(button, asset_icon)
-        button.setIconSize(QSize(32, 32))
+        # button.setIconSize(QSize(32, 32))
         button.setText(name)
         button.setStyleSheet(f"text-align:left")
         # insert before spacer
@@ -351,7 +354,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.set_themed_icon(self.ui.settings_button, "icons/settings.png")
 
         self.set_themed_icon(self.ui.minimize_button, "icons/minus.png")
-        self.set_themed_icon(self.ui.close_button, "icons/close.png")
+        self.set_themed_icon(self.ui.close_button, "icons/close.svg")
 
         # self.ui.minimize_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "minus.png"))))
         # self.ui.close_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "close.png"))))
@@ -645,12 +648,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
         if self.isMaximized():
             if self.ui.restore_max_button.icon().themeName() == "restore" and not force:
                 return
-            icon = QIcon(QPixmap(get_themed_asset_image(str(asset_path / "icons" / "restore.png"))))
+            icon = get_themed_asset_icon("icons/restore.png")
             icon.setThemeName("restore")
             self.ui.restore_max_button.setIcon(icon)
         else:
             if self.ui.restore_max_button.icon().themeName() == "maximize" and not force:
                 return
-            icon = QIcon(QPixmap(get_themed_asset_image(str(asset_path / "icons" / "maximize.png"))))
+            icon = get_themed_asset_icon("icons/maximize.png")
             icon.setThemeName("maximize")
             self.ui.restore_max_button.setIcon(icon)
