@@ -9,7 +9,7 @@ import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QSizePolicy
 
 from .fluent_window import ThemedWidget
 
@@ -106,3 +106,14 @@ class PluginInterface(ThemedWidget):
         ThemedWidget.__init__(self, parent)
         self._base_signals = base_signals
         self._page_widgets = page_widgets
+        #self._base_signals.page_size_changed.emit(self)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy.setVerticalStretch(0)
+        self.setSizePolicy(sizePolicy)
+
+    def resizeEvent(self, a0) -> None:
+        # handles maximum size on resize
+        if not self._base_signals:
+            return
+        self._base_signals.page_size_changed.emit(self)
+

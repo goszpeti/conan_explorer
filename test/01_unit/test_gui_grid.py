@@ -13,8 +13,7 @@ from test.conftest import TEST_REF, check_if_process_running, conan_create_and_u
 from time import sleep
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_USERS,
-                                         ENABLE_APP_COMBO_BOXES)
+from conan_app_launcher.settings import (DISPLAY_APP_USERS, ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.config import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
 from conan_app_launcher.ui.views.app_grid.app_link import ListAppLink, ListAppLink
@@ -323,7 +322,6 @@ def test_AppLink_cbox_switch(qtbot, base_fixture):
     # need cache
     app.active_settings.set(DISPLAY_APP_USERS, True)
     app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
-    app.active_settings.set(APPLIST_ENABLED, False)
 
     app_config = UiAppLinkConfig(name="test", conan_ref="switch_test/1.0.0@user1/channel1",
                                  is_console_application=True, executable="")

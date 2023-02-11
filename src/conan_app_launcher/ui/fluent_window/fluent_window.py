@@ -114,7 +114,7 @@ class ThemedWidget(QWidget):
         for widget, info in self._icon_map.items():
             asset_rel_path = info["asset_path"]
             size = info["size"]
-            icon = QIcon(get_themed_asset_icon(asset_rel_path))
+            icon = get_themed_asset_icon(asset_rel_path)
             if isinstance(widget, CanSetIconWidgetProtocol):
                 widget.setIcon(icon)
             elif isinstance(widget, CanSetPixmapWidgetProtocol):
@@ -188,11 +188,16 @@ class SideSubMenu(ThemedWidget):
         line.setFrameShadow(QFrame.Shadow.Sunken)
         self.add_custom_menu_entry(line, "line")  # TODO give them an index?
 
-    def add_named_custom_entry(self, name: str, widget: QWidget):
+    def add_named_custom_entry(self, name: str, widget: QWidget, asset_icon: str = ""):
         """ Creates a Frame with a text label and a custom widget under it and adds it to the menu """
         label = QLabel(text=name, parent=self)
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
         label.setObjectName(gen_obj_name(name) + "_label")
+        icon = None
+        if asset_icon:
+            icon = QLabel(parent=self)
+            icon.setObjectName(gen_obj_name(name) + "_icon")
+            self.set_themed_icon(icon, asset_icon)
         widget.adjustSize()
         widget.setMinimumHeight(50)
         widget.setMaximumHeight(100)
@@ -209,17 +214,21 @@ class SideSubMenu(ThemedWidget):
             Logger().debug(f"{str(name)} right side menu exceeds max width!")
         frame.layout().setContentsMargins(5, 0, 5, 0)
         frame.layout().setSpacing(4)
+        if icon is not None:
+            frame.layout().addWidget(icon)
         frame.layout().addWidget(label)
         frame.layout().addWidget(widget)
+        frame.layout().setStretch(1, 1)
+        frame.layout().setStretch(2, 1)
         self.add_custom_menu_entry(frame, name)
 
-    def add_toggle_menu_entry(self, name: str, target: Callable, initial_state: bool):
+    def add_toggle_menu_entry(self, name: str, target: Callable, initial_state: bool, asset_icon: str = ""):
         toggle = AnimatedToggle(self)
         toggle.setMinimumSize(self.TOGGLE_WIDTH, self.TOGGLE_HEIGHT)
         toggle.setMaximumSize(self.TOGGLE_WIDTH, self.TOGGLE_HEIGHT)
         toggle.setChecked(initial_state)
         toggle.stateChanged.connect(target)
-        self.add_named_custom_entry(name, toggle)
+        self.add_named_custom_entry(name, toggle, asset_icon)
         return toggle
 
     def add_sub_menu(self, sub_menu: "SideSubMenu", asset_icon: str = ""):

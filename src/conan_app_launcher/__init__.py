@@ -24,8 +24,8 @@ APP_NAME = "Conan Explorer"
 try:
     pkg_info = distribution(PKG_NAME)
     __version__ = pkg_info.version
-    REPO_URL = pkg_info.metadata.get("home-page", "")
-    AUTHOR = pkg_info.metadata.get("author", "")
+    REPO_URL = pkg_info.metadata.get("home-page", "")  # type: ignore
+    AUTHOR = pkg_info.metadata.get("author", "")  # type: ignore
 except PackageNotFoundError: # pragma: no cover
     # For local usecases, when there is no distribution
     __version__ = "1.0.0"

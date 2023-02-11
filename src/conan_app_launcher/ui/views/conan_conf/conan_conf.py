@@ -12,7 +12,7 @@ from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox
+from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QApplication
 
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
 from .model import ProfilesModel

@@ -346,12 +346,12 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QHBoxLayout" name="center_frame_layout" stretch="0,1">
+         <layout class="QHBoxLayout" name="center_frame_layout" stretch="0,0">
           <property name="spacing">
            <number>0</number>
           </property>
           <property name="sizeConstraint">
-           <enum>QLayout::SetNoConstraint</enum>
+           <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <property name="leftMargin">
            <number>0</number>
@@ -376,6 +376,9 @@
             <layout class="QVBoxLayout" name="page_frame_layout" stretch="0">
              <property name="spacing">
               <number>0</number>
+             </property>
+             <property name="sizeConstraint">
+              <enum>QLayout::SetMinAndMaxSize</enum>
              </property>
              <property name="leftMargin">
               <number>0</number>
@@ -430,18 +433,27 @@
                   <number>0</number>
                  </property>
                  <property name="rightMargin">
-                  <number>0</number>
+                  <number>2</number>
                  </property>
                  <property name="bottomMargin">
                   <number>5</number>
                  </property>
                  <item>
                   <widget class="QStackedWidget" name="page_stacked_widget">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
                    <property name="currentIndex">
                     <number>0</number>
                    </property>
                    <widget class="QWidget" name="page">
                     <layout class="QVBoxLayout" name="page_layout">
+                     <property name="sizeConstraint">
+                      <enum>QLayout::SetMaximumSize</enum>
+                     </property>
                      <property name="leftMargin">
                       <number>2</number>
                      </property>
@@ -457,7 +469,7 @@
                      <item>
                       <widget class="QListView" name="listView_2">
                        <property name="sizePolicy">
-                        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                          <horstretch>0</horstretch>
                          <verstretch>0</verstretch>
                         </sizepolicy>
@@ -475,7 +487,7 @@
                         <enum>QFrame::Plain</enum>
                        </property>
                        <property name="horizontalScrollBarPolicy">
-                        <enum>Qt::ScrollBarAsNeeded</enum>
+                        <enum>Qt::ScrollBarAlwaysOff</enum>
                        </property>
                        <property name="horizontalScrollMode">
                         <enum>QAbstractItemView::ScrollPerPixel</enum>
@@ -539,6 +551,12 @@
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>150</height>
+                    </size>
                    </property>
                    <property name="baseSize">
                     <size>

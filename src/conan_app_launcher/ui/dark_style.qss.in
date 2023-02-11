@@ -288,11 +288,11 @@ QTabWidget::tab-bar:bottom {
     bottom: 1px;
 }
 
-QScrollArea{
+QScrollArea, QLabel#logo_label{
     background-color: #808086;
 }
 
-QWidget#info_contents {
+QWidget#info_contents, QWidget#about_contents {
     background-color: #808086;
 }
 

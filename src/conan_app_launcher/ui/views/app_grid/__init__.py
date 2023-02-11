@@ -5,8 +5,8 @@ import conan_app_launcher.app as app
 from conan_app_launcher import user_save_path
 from conan_app_launcher.app.logger import Logger
 # using global module pattern
-from conan_app_launcher.settings import APPLIST_ENABLED, DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, LAST_CONFIG_FILE
 from conan_app_launcher.ui.common.icon import get_themed_asset_icon
+from conan_app_launcher.settings import DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, LAST_CONFIG_FILE  # using global module pattern
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
@@ -122,7 +122,7 @@ class AppGridView(QWidget):
             self.model.tabs.append(tab_model)
             self.model.save()
             # add tab in ui
-            tab = self.get_tab_type()(self.tab_widget, model=tab_model)
+            tab = TabList(self.tab_widget, model=tab_model)
             tab.load()
             self.tab_widget.addTab(tab, text)
 
@@ -152,15 +152,15 @@ class AppGridView(QWidget):
             self.model.tabs.remove(self.model.tabs[index])
             self.model.save()
 
-    def get_tabs(self) -> List[Union["TabGrid", TabList]]:
-        return self.findChildren(self.get_tab_type())
+    def get_tabs(self) -> List[TabList]:
+        return self.findChildren(TabList)
 
     def load(self, offset=0):
         """ Creates new layout """
         self._init_right_menu()
         for tab_config in self.model.tabs:
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = self.get_tab_type()(parent=self.tab_widget, model=tab_config)
+            tab = TabList(parent=self.tab_widget, model=tab_config)
             self.tab_widget.addTab(tab, tab_config.name)
             tab.load(offset)
 
@@ -179,11 +179,6 @@ class AppGridView(QWidget):
         quicklaunch_submenu.add_button_menu_entry(
             "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
         quicklaunch_submenu.add_menu_line()
-
-        # quicklaunch_submenu.add_toggle_menu_entry(
-        #     "Display as Grid or List", self.quicklaunch_grid_mode_toggled, app.active_settings.get_bool(APPLIST_ENABLED))
-        # quicklaunch_submenu.add_toggle_menu_entry(
-        #     "Use Combo Boxes in Grid Mode", self.quicklaunch_cbox_mode_toggled, app.active_settings.get_bool(ENABLE_APP_COMBO_BOXES))
 
         quicklaunch_submenu.add_toggle_menu_entry(
             "Show version", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
@@ -282,9 +277,3 @@ class AppGridView(QWidget):
         except Exception as e:
             Logger().error(f"Can't update AppGrid with conan info {str(e)}")
 
-    @classmethod
-    def get_tab_type(cls):
-        if app.active_settings.get_bool(APPLIST_ENABLED):
-            return TabList
-        else:
-            return TabGrid

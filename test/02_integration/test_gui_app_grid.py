@@ -144,7 +144,6 @@ def test_tab_move_is_saved(app_qt_fixture, ui_no_refs_config_fixture):
 def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
     """ Test, that Edit AppLink Dialog saves all the configured data s"""
     from pytestqt.plugin import _qapp_instance
-    app.active_settings.set(APPLIST_ENABLED, False)
     app.active_settings.set(ENABLE_APP_COMBO_BOXES, False)
 
     main_gui = main_window.MainWindow(_qapp_instance)
@@ -194,7 +193,6 @@ def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
 def test_remove_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that Remove Applink removes and AppLink and the last one is not deletable """
     from pytestqt.plugin import _qapp_instance
-    app.active_settings.set(APPLIST_ENABLED, False)
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
@@ -232,7 +230,6 @@ def test_remove_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture,
 def test_add_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Tests, that the Edit App Dialog wotks for adding a new Link """
     from pytestqt.plugin import _qapp_instance
-    app.active_settings.set(APPLIST_ENABLED, False)
 
     app.active_settings.set(DISPLAY_APP_CHANNELS, False)  # disable, to check if a new app uses it
     app.active_settings.set(DISPLAY_APP_VERSIONS, True)  # disable, to check if a new app uses it
@@ -285,8 +282,6 @@ def test_move_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, m
     """ Test, that the move dialog works and correctly updates the AppGrid. There are 2 apps on the loaded tab. """
     from pytestqt.plugin import _qapp_instance
     
-    app.active_settings.set(APPLIST_ENABLED, False)
-
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load(ui_no_refs_config_fixture)
@@ -334,7 +329,6 @@ def test_multiple_apps_ungreying(app_qt_fixture, base_fixture):
     app.active_settings = IniSettings(Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
-    app.active_settings.set(APPLIST_ENABLED, False)
     app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     # load path into local cache
     app.conan_api.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {})

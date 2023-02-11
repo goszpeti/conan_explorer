@@ -13,6 +13,9 @@ from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using globa
 SELECTED_STYLE = "material" # TODO add settings
 
 
+def get_themed_asset_image(image_path: str) -> str:
+    return str(get_asset_image_path)
+
 def get_asset_image_path(image_path: str) -> Path:
     asset_path = Path(image_path)
     if asset_path.exists():  # absolute path - return immediately

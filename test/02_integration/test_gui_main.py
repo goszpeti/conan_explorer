@@ -228,7 +228,6 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     app.active_settings.set(DISPLAY_APP_VERSIONS, False)
     app.active_settings.set(DISPLAY_APP_USERS, False)
     app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
-    app.active_settings.set(APPLIST_ENABLED, False)
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()

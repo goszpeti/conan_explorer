@@ -11,7 +11,7 @@ from conan_app_launcher import (APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike
                                 user_save_path)
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan_cleanup import ConanCleanup
-from conan_app_launcher.settings import (APPLIST_ENABLED, CONSOLE_SPLIT_SIZES,
+from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES,
                                          DISPLAY_APP_CHANNELS,
                                          DISPLAY_APP_USERS,
                                          DISPLAY_APP_VERSIONS,
@@ -25,7 +25,7 @@ from conan_app_launcher.ui.views.app_grid.tab import TabList
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
 from PySide6.QtCore import QRect, SignalInstance, Signal, Slot
 from PySide6.QtGui import QKeySequence
-from PySide6.QtWidgets import QApplication, QFileDialog
+from PySide6.QtWidgets import QApplication, QFileDialog, QWidget
 
 from .common import (AsyncLoader, activate_theme, init_qt_logger,
                      remove_qt_logger)
@@ -41,7 +41,7 @@ class BaseSignals():
     conan_pkg_installed: SignalInstance  # conan_ref, pkg_id
     conan_pkg_removed: SignalInstance  # conan_ref, pkg_ids
     conan_remotes_updated: SignalInstance
-
+    page_size_changed: SignalInstance
 
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
@@ -50,6 +50,7 @@ class MainWindow(FluentWindow):
     conan_pkg_installed = Signal(str, str)  # conan_ref, pkg_id
     conan_pkg_removed = Signal(str, str)  # conan_ref, pkg_ids
     conan_remotes_updated = Signal()
+    page_size_changed = Signal(QWidget)
 
     log_console_message = Signal(str)  # str arg is the message
 
@@ -58,20 +59,23 @@ class MainWindow(FluentWindow):
     def __init__(self, qt_app: QApplication):
         super().__init__(title_text=APP_NAME)
         self._qt_app = qt_app
-        self._base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed, self.conan_remotes_updated)
+        self._base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed, self.conan_remotes_updated, self.page_size_changed)
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
 
         # connect logger to console widget to log possible errors at init
         init_qt_logger(Logger(), self.qt_logger_name, self.log_console_message)
         self.log_console_message.connect(self.write_log)
-
+        self.page_size_changed.connect(self.resize_page)
         # Default pages
-        self.about_page = AboutPage(self)
+        self.about_page = AboutPage(self, self._base_signals)
         self.plugins_page = PluginsPage(self)
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
         self._init_left_menu()
         self._init_right_menu()
         self.load_plugins()
+
+    def resize_page(self, widget: QWidget):
+        widget.setFixedWidth(self.ui.center_frame.width() - 4)
 
     def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.png", is_upper_menu=True, page_widget=self.app_grid,
@@ -92,7 +96,8 @@ class MainWindow(FluentWindow):
             "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence("CTRL+-"), self)
 
         dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
-        view_settings_submenu.add_toggle_menu_entry("Dark Mode", self.on_theme_changed, dark_mode_enabled)
+        view_settings_submenu.add_toggle_menu_entry(
+            "Dark Mode", self.on_theme_changed, dark_mode_enabled, "icons/dark_mode.png")
 
         self.main_general_settings_menu.add_menu_line()
         self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
@@ -116,12 +121,6 @@ class MainWindow(FluentWindow):
 
     def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent
         super().resizeEvent(a0)
-
-        if app.active_settings.get_bool(APPLIST_ENABLED):  # no redraw necessary
-            return
-        if a0.oldSize().width() == -1:  # initial resize - can be skipped
-            return
-        self.app_grid.re_init_all_app_links()
 
     def load_plugins(self):  # TODO move to fluent window?
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):

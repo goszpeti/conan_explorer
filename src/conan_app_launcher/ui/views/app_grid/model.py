@@ -10,6 +10,7 @@ from conan_app_launcher import (
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_icon
+from conan_app_launcher.ui.common.icon import get_asset_image_path
 from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.core.conan_common import ConanFileReference
 
@@ -383,7 +384,7 @@ class UiAppLinkModel(UiAppLinkConfig):
                 icon = "app.png"
             else:
                 icon = "no-access.png"
-            icon_path = Path(get_themed_asset_icon("icons/" + icon))
+            icon_path = Path(get_asset_image_path("icons/" + icon))
         return icon_path
 
     def get_icon(self) -> QIcon:
