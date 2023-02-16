@@ -15,8 +15,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QLabel, QPushButton,
-    QScrollArea, QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QLabel, QScrollArea,
+    QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -51,11 +51,6 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.logo_label)
 
-        self.pushButton = QPushButton(self.about_contents)
-        self.pushButton.setObjectName(u"pushButton")
-
-        self.verticalLayout.addWidget(self.pushButton)
-
         self.about_label = QLabel(self.about_contents)
         self.about_label.setObjectName(u"about_label")
         self.about_label.setTextFormat(Qt.RichText)
@@ -66,7 +61,7 @@ class Ui_Form(object):
         self.verticalLayout.addWidget(self.about_label)
 
         self.verticalLayout.setStretch(0, 1)
-        self.verticalLayout.setStretch(2, 1)
+        self.verticalLayout.setStretch(1, 1)
         self.about_scroll_area.setWidget(self.about_contents)
 
         self.verticalLayout_2.addWidget(self.about_scroll_area)
@@ -80,7 +75,6 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.logo_label.setText("")
-        self.pushButton.setText(QCoreApplication.translate("Form", u"PushButton", None))
         self.about_label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><br/>Hallo </p></body></html>", None))
     # retranslateUi
 
