@@ -294,13 +294,13 @@ QTabBar::tab:hover {
     background-color: #D3D3D3;
 }
 
-QTabBar::tab: !selected {
+QTabBar::tab:!selected {
     background-color: #BCBCBC;
     margin-top: 2px;
     /* make non-selected tabs look smaller */
 }
 
-QTabBar::tab: !selected:hover {
+QTabBar::tab:!selected:hover {
     background-color: #D3D3D3;
     margin-top: 2px;
     /* make non-selected tabs look smaller */
@@ -331,8 +331,8 @@ QTreeView::item:selected:active {
     background: #6699CC;
 }
 
-QListView::item:selected: !active,
-QTreeView::item:selected: !active {
+QListView::item:selected:!active,
+QTreeView::item:selected:!active {
     background: #4c7399;
 }
 
@@ -448,11 +448,6 @@ QHeaderView::section {
     border-width: 2px;
 }
 
-QProgressBar::chunk {
-    background-color: #6699CC;
-    border-radius: 5px;
-}
-
 QTextBrowser {
     background-color: white;
     border-bottom-right-radius: 7px;
@@ -477,4 +472,9 @@ QMenu::item:selected,RoundedMenu::item:selected{
 QComboBox {
     background-color: #F0F0F0;
     border-radius: 0px;
+}
+
+QProgressBar::chunk {
+    background-color: #6699CC;
+    border-radius: 5px;
 }
