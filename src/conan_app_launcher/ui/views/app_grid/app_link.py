@@ -152,7 +152,9 @@ class ListAppLink(QFrame):
         # self._app_button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         # self._app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
 
-
+        self.adjustSize()
+        self.updateGeometry()
+        pass
         # connect signals
        # self._app_button.clicked.connect(self.on_click)
         # self._init_context_menu()

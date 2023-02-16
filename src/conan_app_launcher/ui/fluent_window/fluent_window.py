@@ -364,9 +364,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         self.set_themed_icon(self.ui.minimize_button, "icons/minus.png")
         self.set_themed_icon(self.ui.close_button, "icons/close.svg")
+        # balance out size incostinensies #TODO setting
+        from ..common.icon import SELECTED_STYLE
+        if SELECTED_STYLE == "material":
+            self.ui.close_button.setIconSize(QSize(20, 20))
+        elif SELECTED_STYLE == "fluent":
+            self.ui.close_button.setIconSize(QSize(16,16))
 
-        # self.ui.minimize_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "minus.png"))))
-        # self.ui.close_button.setIcon(QIcon(QPixmap(str(asset_path / "icons" / "close.png"))))
         # window buttons
         self.ui.restore_max_button.clicked.connect(self.maximize_restore)
         self.ui.minimize_button.clicked.connect(self.showMinimized)

@@ -276,8 +276,14 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../../assets/icons/close.png</normalon>
+                       <normalon>../../assets/icons/material/close.svg</normalon>
                       </iconset>
+                     </property>
+                     <property name="iconSize">
+                      <size>
+                       <width>16</width>
+                       <height>16</height>
+                      </size>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -297,8 +303,14 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../../assets/icons/restore.png</normalon>
+                       <normalon>../../assets/icons/material/restore.svg</normalon>
                       </iconset>
+                     </property>
+                     <property name="iconSize">
+                      <size>
+                       <width>16</width>
+                       <height>16</height>
+                      </size>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -318,8 +330,14 @@
                      </property>
                      <property name="icon">
                       <iconset>
-                       <normalon>../../assets/icons/minus.png</normalon>
+                       <normalon>../../assets/icons/material/minus.svg</normalon>
                       </iconset>
+                     </property>
+                     <property name="iconSize">
+                      <size>
+                       <width>16</width>
+                       <height>16</height>
+                      </size>
                      </property>
                      <property name="flat">
                       <bool>true</bool>

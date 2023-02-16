@@ -96,7 +96,7 @@ class TabList(QWidget):
         # this is a dummy, because tab_scroll_area needs a layout
         self.tab_layout = QVBoxLayout(self)
         self.tab_layout.setContentsMargins(0, 0, 0, 0)
-        self.tab_layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
+        self.tab_layout.setSizeConstraint(QLayout.SizeConstraint.SetDefaultConstraint)
         self.setLayout(self.tab_layout)
 
         # makes it possible to have a scroll bar

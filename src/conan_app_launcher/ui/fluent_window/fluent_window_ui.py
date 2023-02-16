@@ -120,8 +120,9 @@ class Ui_MainWindow(object):
         self.close_button.setObjectName(u"close_button")
         self.close_button.setMinimumSize(QSize(55, 60))
         icon1 = QIcon()
-        icon1.addFile(u"../../assets/icons/close.png", QSize(), QIcon.Normal, QIcon.On)
+        icon1.addFile(u"../../assets/icons/material/close.svg", QSize(), QIcon.Normal, QIcon.On)
         self.close_button.setIcon(icon1)
+        self.close_button.setIconSize(QSize(16, 16))
         self.close_button.setFlat(True)
 
         self.horizontalLayout_4.addWidget(self.close_button)
@@ -130,8 +131,9 @@ class Ui_MainWindow(object):
         self.restore_max_button.setObjectName(u"restore_max_button")
         self.restore_max_button.setMinimumSize(QSize(55, 60))
         icon2 = QIcon()
-        icon2.addFile(u"../../assets/icons/restore.png", QSize(), QIcon.Normal, QIcon.On)
+        icon2.addFile(u"../../assets/icons/material/restore.svg", QSize(), QIcon.Normal, QIcon.On)
         self.restore_max_button.setIcon(icon2)
+        self.restore_max_button.setIconSize(QSize(16, 16))
         self.restore_max_button.setFlat(True)
 
         self.horizontalLayout_4.addWidget(self.restore_max_button)
@@ -140,8 +142,9 @@ class Ui_MainWindow(object):
         self.minimize_button.setObjectName(u"minimize_button")
         self.minimize_button.setMinimumSize(QSize(55, 60))
         icon3 = QIcon()
-        icon3.addFile(u"../../assets/icons/minus.png", QSize(), QIcon.Normal, QIcon.On)
+        icon3.addFile(u"../../assets/icons/material/minus.svg", QSize(), QIcon.Normal, QIcon.On)
         self.minimize_button.setIcon(icon3)
+        self.minimize_button.setIconSize(QSize(16, 16))
         self.minimize_button.setFlat(True)
 
         self.horizontalLayout_4.addWidget(self.minimize_button)
