@@ -364,16 +364,16 @@ QTreeView::branch {
     background: #474747;
 }
 QTreeView::branch:closed:has-children {
-    image: url(icons:forward_w.png);
+    image: url(icons:material/forward_white.svg);
 }
 QTreeView::branch:open:has-children {
-    image: url(icons:expand_w.png);
+    image: url(icons:material/expand_white.svg);
 }
 QTreeView::branch:hover:closed:has-children {
-    image: url(icons:forward_b.png);
+    image: url(icons:material/forward_b.svg);
 }
 QTreeView::branch:hover:open:has-children:hover {
-    image: url(icons:expand_b.png);
+    image: url(icons:material/expand_b.svg);
 }
 QScrollBar:vertical {
     border: 0px solid transparent;
