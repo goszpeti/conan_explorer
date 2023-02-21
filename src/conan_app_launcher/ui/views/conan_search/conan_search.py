@@ -5,7 +5,7 @@ from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
 from PySide6.QtCore import QPoint, Qt, Slot, QParallelAnimationGroup, QPropertyAnimation, QAbstractAnimation, QEasingCurve
-from PySide6.QtGui import QIcon, QKeySequence, QAction
+from PySide6.QtGui import QIcon, QKeySequence, QAction, QShortcut
 from PySide6.QtWidgets import QListWidgetItem, QWidget
 
 from .controller import ConanSearchController
@@ -42,7 +42,9 @@ class ConanSearchView(PluginInterface):
         self._ui.search_button.setEnabled(False)
         self._ui.search_line.validator_enabled = False
         self._ui.search_line.textChanged.connect(self._enable_search_button)
-        self._ui.search_button.setShortcut(QKeySequence(Qt.Key.Key_Return))
+        for key in ("Enter", "Return",):
+            shorcut = QShortcut(key, self)
+            shorcut.activated.connect(self._ui.search_button.animateClick)
 
         # init remotes list
         if self._base_signals:
