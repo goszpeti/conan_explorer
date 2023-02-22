@@ -3,10 +3,11 @@ from typing import Callable, List
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK
 from conan_app_launcher.core.conan_common import ConanFileReference, PackageReference
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit
+
+from conan_app_launcher.ui.common.theming import get_gui_dark_mode
 
 
 class ConanRefLineEdit(QLineEdit):
@@ -72,7 +73,7 @@ class ConanRefLineEdit(QLineEdit):
 
         # color background
         if self.is_valid:
-            if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
+            if get_gui_dark_mode():
                 self.setStyleSheet(f"background: {self.VALID_COLOR_DARK};")
             else:
                 self.setStyleSheet(f"background: {self.VALID_COLOR_LIGHT};")

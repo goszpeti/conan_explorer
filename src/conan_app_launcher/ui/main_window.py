@@ -7,18 +7,16 @@ from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import (APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike,
-                                user_save_path)
+from conan_app_launcher import APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike
+                                
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan_cleanup import ConanCleanup
 from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES,
-                                         DISPLAY_APP_CHANNELS,
-                                         DISPLAY_APP_USERS,
-                                         DISPLAY_APP_VERSIONS,
-                                         ENABLE_APP_COMBO_BOXES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
-                                         GUI_STYLE, GUI_STYLE_DARK,
-                                         GUI_STYLE_LIGHT, LAST_CONFIG_FILE,
+                                         FILE_EDITOR_EXECUTABLE, FONT_SIZE,
+                                         GUI_MODE, GUI_MODE_DARK,
+                                         GUI_MODE_LIGHT, LAST_CONFIG_FILE,
                                          PLUGINS_SECTION_NAME, WINDOW_SIZE)
+from conan_app_launcher.ui.common.theming import get_gui_dark_mode
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
 from conan_app_launcher.ui.fluent_window.plugins import PluginFile
 from conan_app_launcher.ui.views.app_grid.tab import TabList
@@ -95,9 +93,8 @@ class MainWindow(FluentWindow):
         view_settings_submenu.add_button_menu_entry(
             "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence("CTRL+-"), self)
 
-        dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
         view_settings_submenu.add_toggle_menu_entry(
-            "Dark Mode", self.on_theme_changed, dark_mode_enabled, "icons/dark_mode.png")
+            "Dark Mode", self.on_theme_changed, get_gui_dark_mode(), "icons/dark_mode.png")
 
         self.main_general_settings_menu.add_menu_line()
         self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
@@ -186,11 +183,11 @@ class MainWindow(FluentWindow):
         while datetime.datetime.now() - start <= datetime.timedelta(milliseconds=600):
             QApplication.processEvents()
 
-        dark_mode_enabled = True if app.active_settings.get_string(GUI_STYLE) == GUI_STYLE_DARK else False
+        dark_mode_enabled = get_gui_dark_mode()
         if not dark_mode_enabled:
-            app.active_settings.set(GUI_STYLE, GUI_STYLE_DARK)
+            app.active_settings.set(GUI_MODE, GUI_MODE_DARK)
         else:
-            app.active_settings.set(GUI_STYLE, GUI_STYLE_LIGHT)
+            app.active_settings.set(GUI_MODE, GUI_MODE_LIGHT)
 
         activate_theme(self._qt_app)
 
@@ -232,18 +229,6 @@ class MainWindow(FluentWindow):
         dialog = FileEditorSelDialog(self)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
-
-    # def quicklaunch_grid_mode_toggled(self):
-    #     sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-    #     status = sender_toggle.isChecked()
-    #     app.active_settings.set(APPLIST_ENABLED, status)
-    #     self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
-
-    # def quicklaunch_cbox_mode_toggled(self):
-    #     sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-    #     status = sender_toggle.isChecked()
-    #     app.active_settings.set(ENABLE_APP_COMBO_BOXES, status)
-    #     self.app_grid.re_init(self.model.app_grid, self.ui.right_menu_frame.width())
 
     def write_log(self, text):
         """ Write the text signaled by the logger """

@@ -6,7 +6,7 @@ from conan_app_launcher import user_save_path
 from conan_app_launcher.app.logger import Logger
 # using global module pattern
 from conan_app_launcher.ui.common.icon import get_themed_asset_icon
-from conan_app_launcher.settings import DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS, LAST_CONFIG_FILE  # using global module pattern
+from conan_app_launcher.settings import LAST_CONFIG_FILE  # using global module pattern
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
@@ -111,8 +111,7 @@ class AppGridView(QWidget):
     def on_new_tab(self):
         # call tab on_app_link_add
         new_tab_dialog = QInputDialog(self)
-        text, accepted = new_tab_dialog.getText(self, 'Add tab',
-                                                'Enter name:')
+        text, accepted = new_tab_dialog.getText(self, 'Add tab', 'Enter name:')
         if accepted:
             # do nothing on empty text
             if not text:
@@ -130,8 +129,7 @@ class AppGridView(QWidget):
         tab: TabList = self.tab_widget.widget(index)
 
         rename_tab_dialog = QInputDialog(self)
-        text, accepted = rename_tab_dialog.getText(self, 'Rename tab',
-                                                   'Enter new name:', text=tab.model.name)
+        text, accepted = rename_tab_dialog.getText(self, 'Rename tab', 'Enter new name:', text=tab.model.name)
         if accepted:
             tab.model.name = text
             self.tab_widget.setTabText(index, text)
@@ -180,12 +178,12 @@ class AppGridView(QWidget):
             "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
         quicklaunch_submenu.add_menu_line()
 
-        quicklaunch_submenu.add_toggle_menu_entry(
-            "Show version", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
-        quicklaunch_submenu.add_toggle_menu_entry(
-            "Show user", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
-        quicklaunch_submenu.add_toggle_menu_entry(
-            "Show channel", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
+        # quicklaunch_submenu.add_toggle_menu_entry(
+        #     "Show version", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
+        # quicklaunch_submenu.add_toggle_menu_entry(
+        #     "Show user", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
+        # quicklaunch_submenu.add_toggle_menu_entry(
+        #     "Show channel", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
 
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """
@@ -211,28 +209,6 @@ class AppGridView(QWidget):
     def on_reorder(self):
         tab: TabList = self.tab_widget.currentWidget()  # type: ignore
         tab.app_links[0].on_move()
-
-    def display_versions_setting_toggled(self):
-        """ Reads the current menu setting, saves it and updates the gui """
-        # status is changed only after this is done, so the state must be negated
-        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-        status = sender_toggle.isChecked()
-        app.active_settings.set(DISPLAY_APP_VERSIONS, status)
-        self.re_init_all_app_links(force=True)
-
-    def apply_display_users_setting_toggled(self):
-        """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-        status = sender_toggle.isChecked()
-        app.active_settings.set(DISPLAY_APP_USERS, status)
-        self.re_init_all_app_links(force=True)
-
-    def display_channels_setting_toggled(self):
-        """ Reads the current menu setting, saves it and updates the gui """
-        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
-        status = sender_toggle.isChecked()
-        app.active_settings.set(DISPLAY_APP_CHANNELS, status)
-        self.re_init_all_app_links(force=True)
 
     def open_new_app_dialog_from_extern(self, app_config: UiAppLinkConfig):
         """ Called from pacakge explorer, where tab is unknown"""

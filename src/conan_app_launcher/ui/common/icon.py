@@ -9,12 +9,7 @@ from PySide6.QtWidgets import QFileIconProvider
 from PySide6.QtSvg import QSvgRenderer
 
 import conan_app_launcher.app as app
-from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using global module pattern
-SELECTED_STYLE = "material"  # TODO add settings material
-
-
-def get_themed_asset_image(image_path: str) -> str:
-    return str(get_asset_image_path)
+from .theming import get_gui_dark_mode, get_gui_style
 
 def get_asset_image_path(image_path: str) -> Path:
     asset_path = Path(image_path)
@@ -24,7 +19,7 @@ def get_asset_image_path(image_path: str) -> Path:
     image_path = image_path.replace(".png", ".svg")  # TODO
     asset_path = app.asset_path / image_path
     if not asset_path.exists(): # try in style
-        asset_path = asset_path.parent / SELECTED_STYLE / asset_path.name
+        asset_path = asset_path.parent / get_gui_style() / asset_path.name
 
     if not asset_path.exists():
         Logger().warning(f"Can't find image: {str(asset_path)}")
@@ -33,7 +28,7 @@ def get_asset_image_path(image_path: str) -> Path:
 
 def get_themed_asset_icon(image_path: str) -> QIcon:
     asset_path = get_asset_image_path(image_path)
-    if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
+    if get_gui_dark_mode():
         if asset_path.suffix == ".svg":
             asset_path = draw_svg_with_color(asset_path)
         else:

@@ -232,7 +232,7 @@ def base_fixture():
 @pytest.fixture
 def light_theme_fixture(base_fixture):
     import conan_app_launcher.app as app
-    app.active_settings.set(GUI_STYLE, GUI_STYLE_LIGHT)
+    app.active_settings.set(GUI_STYLE, GUI_MODE_LIGHT)
 
 
 def temp_ui_config(config_file_path: Path):

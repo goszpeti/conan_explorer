@@ -1,5 +1,6 @@
 from pathlib import Path
 import platform
+from conan_app_launcher.settings import GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL
 
 from conan_app_launcher.ui.common.icon import get_icon_from_image_file
 
@@ -365,11 +366,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.set_themed_icon(self.ui.minimize_button, "icons/minus.png")
         self.set_themed_icon(self.ui.close_button, "icons/close.svg")
         # balance out size incostinensies #TODO setting
-        from ..common.icon import SELECTED_STYLE
-        if SELECTED_STYLE == "material":
+        from ..common.theming import get_gui_style
+        style = get_gui_style()
+        if style == GUI_STYLE_MATERIAL:
             self.ui.close_button.setIconSize(QSize(20, 20))
-        elif SELECTED_STYLE == "fluent":
-            self.ui.close_button.setIconSize(QSize(16,16))
+        if style == GUI_STYLE_FLUENT:
+            self.ui.close_button.setIconSize(QSize(16, 16))
 
         # window buttons
         self.ui.restore_max_button.clicked.connect(self.maximize_restore)

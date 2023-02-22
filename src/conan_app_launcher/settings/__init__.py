@@ -14,18 +14,17 @@ PLUGINS_SECTION_NAME = "Plugins"
 # General
 LAST_CONFIG_FILE = "last_config_file"
 FILE_EDITOR_EXECUTABLE = "file_editor"
-# Views
-DISPLAY_APP_VERSIONS = "disp_app_versions"
-DISPLAY_APP_USERS = "disp_app_users"
-DISPLAY_APP_CHANNELS = "disp_app_channels"
 
-# enable combobox for app user/channel/version
-ENABLE_APP_COMBO_BOXES = "enable_app_link_combo_boxes"
 FONT_SIZE = "font_size"
 GUI_STYLE = "style"
 # style choices
-GUI_STYLE_DARK = "dark"
-GUI_STYLE_LIGHT = "light"
+GUI_STYLE_MATERIAL = "material"
+GUI_STYLE_FLUENT = "fluent"
+
+GUI_MODE = "mode"
+# mode choices
+GUI_MODE_DARK = "dark"
+GUI_MODE_LIGHT = "light"
 
 WINDOW_SIZE = "window_size"
 CONSOLE_SPLIT_SIZES = "console_split_sizes"

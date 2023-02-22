@@ -4,7 +4,7 @@ from threading import Thread
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
-from conan_app_launcher.settings import ENABLE_APP_COMBO_BOXES, SettingsInterface
+from conan_app_launcher.settings import SettingsInterface
 
 if TYPE_CHECKING:
     from typing import TypedDict, Protocol
@@ -59,13 +59,9 @@ class ConanWorker():
 
         # start getting versions info in a separate thread in a bundled way to get better performance
         self._start_install_worker()
-        if self._settings.get_bool(ENABLE_APP_COMBO_BOXES):
-            self._start_version_worker()
 
     def put_ref_in_version_queue(self, conan_element: ConanWorkerElement, info_callback: Optional[ConanWorkerResultCallback]):
         self._conan_versions_queue.put((conan_element, info_callback))
-        if self._settings.get_bool(ENABLE_APP_COMBO_BOXES):
-            self._start_version_worker()
 
     def put_ref_in_install_queue(self, conan_element: ConanWorkerElement, info_callback: Optional[ConanWorkerResultCallback]):
         """ Add a new entry to work on """

@@ -1,32 +1,29 @@
 import configparser
 import os
 from pathlib import Path
+import platform
 from typing import Any, Dict, Optional, Tuple, Union
 
 from conan_app_launcher import PathLike, base_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import get_default_file_editor
 
-from . import (CONSOLE_SPLIT_SIZES, DISPLAY_APP_CHANNELS, DISPLAY_APP_USERS, DISPLAY_APP_VERSIONS,
-               ENABLE_APP_COMBO_BOXES, FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_LIGHT,
-               LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
+from . import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL,
+               GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
 
 def application_settings_spec() -> Dict[str, Dict[str, Any]]:
     return {
     GENERAL_SECTION_NAME: {
-            LAST_CONFIG_FILE: "",
+        LAST_CONFIG_FILE: "",
         FILE_EDITOR_EXECUTABLE: get_default_file_editor(),
-            },
+    },
     VIEW_SECTION_NAME: {
-            FONT_SIZE: 12,
-            GUI_STYLE: GUI_STYLE_LIGHT,
-            ENABLE_APP_COMBO_BOXES: False,
-            DISPLAY_APP_CHANNELS: True,
-            DISPLAY_APP_USERS: False,
-            DISPLAY_APP_VERSIONS: True,
-            WINDOW_SIZE: "0,0,800,600",
-            CONSOLE_SPLIT_SIZES: "413,126"
-            },
+        FONT_SIZE: 12,
+        GUI_STYLE: GUI_STYLE_FLUENT if platform.system() == "Windows" else GUI_STYLE_MATERIAL,
+        GUI_MODE: GUI_MODE_LIGHT,
+        WINDOW_SIZE: "0,0,800,600",
+        CONSOLE_SPLIT_SIZES: "413,126"
+    },
     PLUGINS_SECTION_NAME: {
         "built-in": str(base_path / "ui" / "plugins.ini")
     }
@@ -144,7 +141,10 @@ class IniSettings(SettingsInterface):
         except Exception as e:
             Logger().error(
                 f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
-            # os.remove(str(self._ini_file_path))  # let an exeception to the user, file can't be deleted
+            try:
+                os.remove(str(self._ini_file_path))  # let an exeception to the user, file can't be deleted
+            except:
+                Logger().error(f"Settings: Can't delete ini file: {str(e)}.")
 
         # write file - to record defaults, if missing
         if not update_needed:

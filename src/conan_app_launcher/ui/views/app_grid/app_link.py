@@ -6,9 +6,6 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import ICON_SIZE, asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import open_in_file_manager, run_file
-from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
-                                         DISPLAY_APP_USERS,
-                                         DISPLAY_APP_VERSIONS)
 from conan_app_launcher.ui.common import get_themed_asset_icon, measure_font_width
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
