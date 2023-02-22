@@ -29,7 +29,7 @@ from PySide6.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
                             QPropertyAnimation, QRect, QSize, Qt)
 from PySide6.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap, QImage, QShortcut
 from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
-                               QPushButton, QSizePolicy,
+                               QPushButton, QSizePolicy, QSpacerItem,
                                QStackedWidget, QVBoxLayout, QWidget)
 
 from ..common import get_themed_asset_icon, get_asset_image_path
@@ -189,7 +189,7 @@ class SideSubMenu(ThemedWidget):
         line.setFrameShadow(QFrame.Shadow.Sunken)
         self.add_custom_menu_entry(line, "line")  # TODO give them an index?
 
-    def add_named_custom_entry(self, name: str, widget: QWidget, asset_icon: str = ""):
+    def add_named_custom_entry(self, name: str, widget: QWidget, asset_icon: str = "", force_v_layout=False):
         """ Creates a Frame with a text label and a custom widget under it and adds it to the menu """
         label = QLabel(text=name, parent=self)
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
@@ -205,19 +205,30 @@ class SideSubMenu(ThemedWidget):
         widget.setObjectName(gen_obj_name(name) + "_widget")
 
         frame = QFrame(self)
-        if label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 30):  # aggressive 30 px padding
-            frame.setLayout(QVBoxLayout(frame))
+        if force_v_layout or label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 30):  # aggressive 30 px padding
+            layout = QVBoxLayout(frame)
+            frame.setLayout(layout)
+            if icon is not None: # in vmode the icomn still needs to be placed in the same row, so we need an extra h-layout
+                horizontal_layout = QHBoxLayout(frame)
+                horizontal_layout.addWidget(icon)
+                horizontal_layout.addWidget(label)
+                horizontal_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+                layout.addLayout(horizontal_layout)
+            else:
+                layout.addWidget(label)
         else:
             frame.setLayout(QHBoxLayout(frame))
+            if icon is not None:
+                frame.layout().addWidget(icon)
+            frame.layout().addWidget(label)
+
         label.setMaximumHeight(50)
 
         if label.width() > RIGHT_MENU_MAX_WIDTH:
             Logger().debug(f"{str(name)} right side menu exceeds max width!")
         frame.layout().setContentsMargins(5, 0, 5, 0)
         frame.layout().setSpacing(4)
-        if icon is not None:
-            frame.layout().addWidget(icon)
-        frame.layout().addWidget(label)
+
         frame.layout().addWidget(widget)
         frame.layout().setStretch(1, 1)
         frame.layout().setStretch(2, 1)

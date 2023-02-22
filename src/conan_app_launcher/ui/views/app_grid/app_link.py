@@ -115,14 +115,6 @@ class ListAppLink(QFrame):
         if ret == QDialog.DialogCode.Accepted:
             self._parent_tab.redraw(force=True)
 
-    def delete(self):
-        pass
-        # self._app_name.close()
-        # self._app_version.close()
-        # self._app_user.close()
-        # self._app_channel.close()
-        # self._app_button.close()
-
     def resizeEvent(self, event):
         self.split_name_into_lines()
         super().resizeEvent(event)
@@ -179,7 +171,7 @@ class ListAppLink(QFrame):
         reply = edit_app_dialog.exec()
         if reply == AppEditDialog.DialogCode.Accepted:
             # grey icon, so update from cache can ungrey it, if the path is correct
-            self._app_button.grey_icon()
+            self._ui.app_button.grey_icon()
             self.model.load_from_cache()
             # now apply gui config with resolved paths
             self._apply_new_config()

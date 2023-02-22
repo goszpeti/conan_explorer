@@ -14,16 +14,15 @@ from conan_app_launcher.core.conan_cleanup import ConanCleanup
 from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES,
                                          FILE_EDITOR_EXECUTABLE, FONT_SIZE,
                                          GUI_MODE, GUI_MODE_DARK,
-                                         GUI_MODE_LIGHT, LAST_CONFIG_FILE,
+                                         GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL, LAST_CONFIG_FILE,
                                          PLUGINS_SECTION_NAME, WINDOW_SIZE)
-from conan_app_launcher.ui.common.theming import get_gui_dark_mode
+from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
 from conan_app_launcher.ui.fluent_window.plugins import PluginFile
-from conan_app_launcher.ui.views.app_grid.tab import TabList
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
-from PySide6.QtCore import QRect, SignalInstance, Signal, Slot
+from PySide6.QtCore import QRect, SignalInstance, Signal
 from PySide6.QtGui import QKeySequence
-from PySide6.QtWidgets import QApplication, QFileDialog, QWidget
+from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QFrame, QVBoxLayout, QRadioButton
 
 from .common import (AsyncLoader, activate_theme, init_qt_logger,
                      remove_qt_logger)
@@ -81,6 +80,27 @@ class MainWindow(FluentWindow):
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
 
+    def _init_style_chooser(self):
+        self._style_chooser_frame = QFrame(self)
+        # self.frame.setFrameShape(QFrame.StyledPanel)
+        # self.frame.setFrameShadow(QFrame.Raised)
+        self._style_chooser_layout = QVBoxLayout(self._style_chooser_frame)
+        self._style_chooser_radio_material = QRadioButton("Material", self._style_chooser_frame)
+        self._style_chooser_layout.addWidget(self._style_chooser_radio_material)
+
+        self._style_chooser_radio_fluent = QRadioButton("Fluent", self._style_chooser_frame)
+        self._style_chooser_layout.addWidget(self._style_chooser_radio_fluent)
+
+        # set initial state
+        if get_gui_style() == GUI_STYLE_MATERIAL:
+            self._style_chooser_radio_material.setChecked(True)
+        elif get_gui_style() == GUI_STYLE_FLUENT:
+            self._style_chooser_radio_fluent.setChecked(True)
+
+        self._style_chooser_radio_material.clicked.connect(self.on_style_changed)
+        self._style_chooser_radio_fluent.clicked.connect(self.on_style_changed)
+
+
     def _init_right_menu(self):
         self.main_general_settings_menu.add_button_menu_entry("Select file editor",
                                                               self.open_file_editor_selection_dialog, "icons/edit_file.png")
@@ -92,9 +112,13 @@ class MainWindow(FluentWindow):
             "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence("CTRL++"), self)
         view_settings_submenu.add_button_menu_entry(
             "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence("CTRL+-"), self)
+        view_settings_submenu.add_menu_line()
 
         view_settings_submenu.add_toggle_menu_entry(
-            "Dark Mode", self.on_theme_changed, get_gui_dark_mode(), "icons/dark_mode.png")
+            "Dark Mode", self.on_dark_mode_changed, get_gui_dark_mode(), "icons/dark_mode.png")
+        self._init_style_chooser()
+        view_settings_submenu.add_named_custom_entry(
+            "Icon Style", self._style_chooser_frame, "icons/global/conan_settings.png", force_v_layout=True)
 
         self.main_general_settings_menu.add_menu_line()
         self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
@@ -158,7 +182,6 @@ class MainWindow(FluentWindow):
         # loads the remotes in the search dialog
         self.conan_remotes_updated.emit()
 
-    @Slot()
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
         new_size = app.active_settings.get_int(FONT_SIZE) + 1
@@ -167,7 +190,6 @@ class MainWindow(FluentWindow):
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)
 
-    @Slot()
     def on_font_size_decreased(self):
         """ Decrease font size by 2. Ignore if font gets too small. """
         new_size = app.active_settings.get_int(FONT_SIZE) - 1
@@ -176,19 +198,32 @@ class MainWindow(FluentWindow):
         app.active_settings.set(FONT_SIZE, new_size)
         activate_theme(self._qt_app)
 
-    @Slot()
-    def on_theme_changed(self):
+    def on_style_changed(self):
         # wait 0,5 seconds, so all animations can finish
         start = datetime.datetime.now()
         while datetime.datetime.now() - start <= datetime.timedelta(milliseconds=600):
             QApplication.processEvents()
+        if self._style_chooser_radio_material.isChecked():
+            app.active_settings.set(GUI_STYLE, GUI_STYLE_MATERIAL)
+        elif self._style_chooser_radio_fluent.isChecked():
+            app.active_settings.set(GUI_STYLE, GUI_STYLE_FLUENT)
+        self.reload_theme()
+    
 
-        dark_mode_enabled = get_gui_dark_mode()
-        if not dark_mode_enabled:
+    def on_dark_mode_changed(self):
+        # wait 0,5 seconds, so all animations can finish
+        start = datetime.datetime.now()
+        while datetime.datetime.now() - start <= datetime.timedelta(milliseconds=600):
+            QApplication.processEvents()
+        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
+        enable_dark_mode = sender_toggle.isChecked()
+        if enable_dark_mode:
             app.active_settings.set(GUI_MODE, GUI_MODE_DARK)
         else:
             app.active_settings.set(GUI_MODE, GUI_MODE_LIGHT)
+        self.reload_theme()
 
+    def reload_theme(self):
         activate_theme(self._qt_app)
 
         # all icons must be reloaded
@@ -196,7 +231,6 @@ class MainWindow(FluentWindow):
         for page in self.page_widgets.get_all_pages():
             page.reload_themed_icons()
 
-    @Slot()
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         cleaner = ConanCleanup(app.conan_api)

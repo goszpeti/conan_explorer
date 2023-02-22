@@ -6,7 +6,7 @@ from conan_app_launcher import user_save_path
 from conan_app_launcher.app.logger import Logger
 # using global module pattern
 from conan_app_launcher.ui.common.icon import get_themed_asset_icon
-from conan_app_launcher.settings import LAST_CONFIG_FILE  # using global module pattern
+from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE  # using global module pattern
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.widgets import RoundedMenu
@@ -55,7 +55,6 @@ class AppGridView(QWidget):
         self.re_init(self.model)
 
     T = TypeVar('T')
-
     def findChildren(self, type: Type[T]) -> List[T]:
         return super().findChildren(type)  # type: ignore
 
@@ -178,12 +177,16 @@ class AppGridView(QWidget):
             "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
         quicklaunch_submenu.add_menu_line()
 
-        # quicklaunch_submenu.add_toggle_menu_entry(
-        #     "Show version", self.display_versions_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_VERSIONS))
-        # quicklaunch_submenu.add_toggle_menu_entry(
-        #     "Show user", self.apply_display_users_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_USERS))
-        # quicklaunch_submenu.add_toggle_menu_entry(
-        #     "Show channel", self.display_channels_setting_toggled, app.active_settings.get_bool(DISPLAY_APP_CHANNELS))
+        quicklaunch_submenu.add_toggle_menu_entry(
+            "Auto-install quicklaunch packages", self.on_toggle_auto_install, app.active_settings.get_bool(AUTO_INSTALL_QUICKLAUNCH_REFS))
+
+    def on_toggle_auto_install(self):
+        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
+        status = sender_toggle.isChecked()
+        app.active_settings.set(AUTO_INSTALL_QUICKLAUNCH_REFS, status)
+        # model loads incrementally
+        self.model.parent.loadf(app.active_settings.get_string(LAST_CONFIG_FILE))
+        self.re_init(self.model)
 
     def open_config_file_dialog(self):
         """" Open File Dialog and load config file """

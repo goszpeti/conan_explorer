@@ -49,7 +49,7 @@ USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH = True  # get pkg paths directly from the cus
 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL = True
 AUTOCLOSE_SIDE_MENU = False
 
-# From ennvar DEBUG - 0: No debug, 1 = debug logging on
+# From ennvar DEBUG - 0: No debug, 1 = debug logging on, 2 = disable true async loading
 DEBUG_LEVEL = int(os.getenv("CAL_DEBUG_LEVEL", "0"))
 
 # Paths to find folders - points to the folder of this file

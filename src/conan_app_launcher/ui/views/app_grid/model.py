@@ -9,6 +9,7 @@ from conan_app_launcher import (
     USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
 from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_icon
 from conan_app_launcher.ui.common.icon import get_asset_image_path
 from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
@@ -202,6 +203,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._conan_ref = new_value
 
     def trigger_conan_update(self):
+        if not app.active_settings.get_bool(AUTO_INSTALL_QUICKLAUNCH_REFS):
+            return
         try:
             conan_worker_element: ConanWorkerElement = {"ref_pkg_id": str(self._conan_ref), "settings": {},
                                                         "options": self.conan_options, "update": True, "auto_install": True}
