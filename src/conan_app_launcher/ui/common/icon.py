@@ -10,7 +10,7 @@ from PySide6.QtSvg import QSvgRenderer
 
 import conan_app_launcher.app as app
 from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using global module pattern
-SELECTED_STYLE = "material" # TODO add settings
+SELECTED_STYLE = "material"  # TODO add settings material
 
 
 def get_themed_asset_image(image_path: str) -> str:
@@ -54,13 +54,7 @@ def get_inverted_asset_image(image_path: Path) -> Path:
 
 
 def get_icon_from_image_file(image_path: Path) -> QIcon:
-    if image_path.suffix == ".ico":
-        return QIcon(str(image_path))
-    else:
-        image = QPixmap(str(image_path)).toImage()
-        pixmap = QPixmap.fromImage(image).scaled(
-            ICON_SIZE, ICON_SIZE, mode=Qt.TransformationMode.SmoothTransformation)
-        return QIcon(pixmap)
+    return QIcon(str(image_path))
 
 
 def draw_svg_with_color(svg_path: Path, color="white", scale: float = 1.0) -> Path:

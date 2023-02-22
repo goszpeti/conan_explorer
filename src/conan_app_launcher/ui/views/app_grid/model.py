@@ -326,7 +326,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     def get_executable_path(self) -> Path:
         if not self._executable or not self.package_folder.exists():
             Logger().debug(f"No file/executable specified for {str(self.name)}")
-            return Path("NULL")
+            return Path("<Unknown>")
         path = Path(self._executable)
         full_path = self.resolve_executable_path(path)
         self._executable_path = full_path

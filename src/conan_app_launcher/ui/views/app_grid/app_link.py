@@ -12,7 +12,7 @@ from conan_app_launcher.settings import (DISPLAY_APP_CHANNELS,
 from conan_app_launcher.ui.common import get_themed_asset_icon, measure_font_width
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
-from conan_app_launcher.ui.widgets import ClickableIcon, RoundedMenu
+from conan_app_launcher.ui.widgets import RoundedMenu
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import (QDialog, QFrame, QHBoxLayout, QLabel, QLayout,
@@ -46,7 +46,6 @@ class ListAppLink(QFrame):
     """
     icon_size: int
     MAX_WIDTH = 150
-    MAX_HEIGHT = 150
 
     def __init__(self, parent: Optional[QWidget], parent_tab: "TabList", model: UiAppLinkModel, icon_size=ICON_SIZE):
         super().__init__(parent)
@@ -54,110 +53,23 @@ class ListAppLink(QFrame):
         self.icon_size = icon_size
         self.model = model
         self._parent_tab = parent_tab  # save parent - don't use qt signals ands slots
-        
-        #self._app_button = ClickableIcon(self, asset_path / "icons" / "no-access.png")
-        #self._app_button.setMaximumWidth(self.max_width())
 
         from .app_link_ui import Ui_Form
         self._ui = Ui_Form()
         self._ui.setupUi(self)
-        # self.setLayout(QHBoxLayout(self))
-        # self.layout().setSpacing(3)
-        # self.setMinimumHeight(self.MAX_HEIGHT)
-        # self.setMaximumHeight(self.MAX_HEIGHT)
 
-        # size_policy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        # self.setSizePolicy(size_policy)
-
-        # self._left_frame = QFrame(self)  # contains the app button
-        # self._center_frame = QFrame(self)  # contains the name
-        # self._center_right_frame = QFrame(self)  # contains data vertically
-        # self._right_frame = QFrame(self)  # buttons
-
-        # self._left_frame.setLayout(QVBoxLayout(self._left_frame))
-        # self._center_frame.setLayout(QVBoxLayout(self._center_frame))
-        # self._center_right_frame.setLayout(QVBoxLayout(self._center_right_frame))
-        # self._right_frame.setLayout(QVBoxLayout(self._right_frame))
-
-        # self._left_frame.layout().setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
-        # self._center_frame.layout().setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
-        # self._center_right_frame.layout().setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
-        # self._right_frame.layout().setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
-
-        # self._left_frame.setMaximumWidth(self.max_width())
-        # self._left_frame.setMinimumWidth(self.max_width())
-        # self._left_frame.layout().setContentsMargins(0, 0, 0, 5)
-        # self._center_frame.setMinimumWidth(200)
-
-        # self._right_frame.setMinimumWidth(200)
-        # self._right_frame.setMaximumWidth(200)
-
-        # self._left_frame.layout().addWidget(self._app_button)
-
-        # self._app_name = QLabel(self._left_frame)
-        # self._app_version = QLabel(self._center_frame)
-        # self._app_user = QLabel(self._center_frame)
-        # self._app_channel = QLabel(self._center_frame)
-        # self._app_version.setMinimumWidth(100)
-
-        # self._center_frame.layout().addWidget(self._app_name)
-
-        # self._center_right_frame.layout().addWidget(self._app_version)
-        # self._center_right_frame.layout().addWidget(self._app_user)
-        # self._center_right_frame.layout().addWidget(self._app_channel)
-
-        # self._app_name.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        # self._app_version.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # self._app_user.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # self._app_channel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        # self._app_name.setMinimumWidth(2*self.max_width())
-        # self._app_button.setMinimumWidth(self.max_width())
-
-        # self._edit_button = QPushButton("Edit ", self)
-        # self._remove_button = QPushButton("Remove ", self)
-        # self._edit_button.setIcon(QIcon(get_themed_asset_icon("icons/edit.png")))
-        # self._remove_button.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
-        # self._edit_button.setMinimumWidth(200)
-        # self._edit_button.setMaximumWidth(200)
-        # self._remove_button.setMinimumWidth(200)
-        # self._remove_button.setMaximumWidth(200)
-
-        # self._right_frame.layout().addWidget(self._edit_button)
-        # self._right_frame.layout().addWidget(self._remove_button)
-        # self.layout().addWidget(self._left_frame)
-        # self.layout().addWidget(self._center_frame)
-        # self.layout().addWidget(self._center_right_frame)
-        # self.layout().addWidget(self._right_frame)
-        # # self.layout().setStretch(1, 1)  # enables stretching of app_name
-
-        # self._app_name.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Expanding,
-        #                                          QSizePolicy.Policy.Fixed))
-
-        # self._app_version.setSizePolicy(size_policy)
-        # self._app_user.setSizePolicy(size_policy)
-        # self._app_channel.setSizePolicy(size_policy)
-
-        # self._left_frame.setSizePolicy(size_policy)
-        # self._center_frame.setSizePolicy(size_policy)
-        # self._center_right_frame.setSizePolicy(size_policy)
-        # self._right_frame.setSizePolicy(size_policy)
-
-        # self._edit_button.clicked.connect(self.open_edit_dialog)
-        # self._remove_button.clicked.connect(self.remove)
-        # self._app_name.setWordWrap(True)
-
-        # # add sub widgets
-        # self._app_button.setMinimumHeight(self.icon_size + 10)
-        # self._app_button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        # self._app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
+        self._ui.edit_button.setIcon(QIcon(get_themed_asset_icon("icons/edit.png")))
+        self._ui.remove_button.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
+        self._ui.app_button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self._ui.app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
 
         self.adjustSize()
         self.updateGeometry()
-        pass
         # connect signals
-       # self._app_button.clicked.connect(self.on_click)
-        # self._init_context_menu()
+        self._ui.app_button.clicked.connect(self.on_click)
+        self._ui.edit_button.clicked.connect(self.open_edit_dialog)
+        self._ui.remove_button.clicked.connect(self.remove)
+        self._init_context_menu()
 
     @classmethod
     def max_width(cls) -> int:
@@ -215,19 +127,19 @@ class ListAppLink(QFrame):
         # self._app_button.close()
 
     def resizeEvent(self, event):
-        # self.split_name_into_lines()
+        self.split_name_into_lines()
         super().resizeEvent(event)
 
     def split_name_into_lines(self):
         """ Calculate, how text can be split into multiple lines, based on the current width"""
-        max_width = self._app_name.width()
-        px = measure_font_width(self._app_name.text())
+        max_width = self._ui.app_name.width()
+        px = measure_font_width(self._ui.app_name.text())
         new_length = int(len(self.model.name) * (max_width-10) / px)
-        if len(self._app_name.text().split("\n")[0]) > new_length > len(self.model.name) or \
-                new_length-1 == len(self._app_name.text().split("\n")[0]):
+        if len(self._ui.app_name.text().split("\n")[0]) > new_length > len(self.model.name) or \
+                new_length-1 == len(self._ui.app_name.text().split("\n")[0]):
             return
         name = self.word_wrap(self.model.name, new_length)
-        self._app_name.setText(name)
+        self._ui.app_name.setText(name)
 
     @staticmethod
     def word_wrap(text: str, max_length: int) -> str:
@@ -246,19 +158,17 @@ class ListAppLink(QFrame):
         return name
 
     def on_context_menu_requested(self, position):
-        self.menu.exec(self._app_button.mapToGlobal(position))
+        self.menu.exec(self._ui.app_button.mapToGlobal(position))
 
     def on_open_in_file_manager(self):
         open_in_file_manager(self.model.get_executable_path().parent)
 
     def _apply_new_config(self):
-        # self._app_name.setText(self.model.name)
-        # self._app_button.setToolTip(self.model.conan_ref)
-        # self._app_button.set_icon(self.model.get_icon())
-
-        # self.update_versions_info_visible()
-        # self.update_users_info_visible()
-        # self.update_channels_info_visible()
+        self._ui.app_name.setText(self.model.name)
+        self._ui.conan_ref_label.setToolTip(self.model.conan_ref)
+        self._ui.app_button.set_icon(self.model.get_icon())
+        self._ui.arguments_value_label.setText(self.model.args)
+        self._ui.open_shell_checkbox.setChecked(self.model.is_console_application)
 
         self.apply_conan_info()  # update with offline information
 
@@ -305,26 +215,8 @@ class ListAppLink(QFrame):
             self._parent_tab.redraw(force=True)
 
     def update_icon(self):
-        self._app_button.set_icon(self.model.get_icon())
-        self._app_button.ungrey_icon()
-
-    def update_versions_info_visible(self):
-        if app.active_settings.get(DISPLAY_APP_VERSIONS):
-            self._app_version.show()
-        else:
-            self._app_version.setHidden(True)
-
-    def update_users_info_visible(self):
-        if app.active_settings.get(DISPLAY_APP_USERS):
-            self._app_user.show()
-        else:
-            self._app_user.setHidden(True)
-
-    def update_channels_info_visible(self):
-        if app.active_settings.get(DISPLAY_APP_CHANNELS):
-            self._app_channel.show()
-        else:
-            self._app_channel.setHidden(True)
+        self._ui.app_button.set_icon(self.model.get_icon())
+        self._ui.app_button.ungrey_icon()
 
     def on_click(self):
         """ Callback for opening the executable on click """
@@ -335,8 +227,5 @@ class ListAppLink(QFrame):
 
     def apply_conan_info(self):
         """ Update with new conan data """
-        # self.update_icon()
-    
-        # self._app_version.setText(self.model.conan_ref)
-        # self._app_user.setText(str(self.model.package_folder))
-        # self._app_channel.setText(str(self.model.conan_options))
+        self.update_icon()
+        self._ui.pkg_path_label.setText(str(self.model.get_executable_path()))
