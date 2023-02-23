@@ -1,40 +1,10 @@
 from pathlib import Path
 
 import xml.dom.minidom as dom
-from conan_app_launcher import ICON_SIZE
 from conan_app_launcher.app.logger import Logger
-from PySide6.QtCore import QFileInfo, Qt, QSize
-from PySide6.QtGui import QIcon, QPixmap, QImage, QPicture, QPainter
+from PySide6.QtCore import QFileInfo
+from PySide6.QtGui import QIcon, QImage
 from PySide6.QtWidgets import QFileIconProvider
-from PySide6.QtSvg import QSvgRenderer
-
-import conan_app_launcher.app as app
-from .theming import get_gui_dark_mode, get_gui_style
-
-def get_asset_image_path(image_path: str) -> Path:
-    asset_path = Path(image_path)
-    if asset_path.exists():  # absolute path - return immediately
-        return asset_path
-
-    image_path = image_path.replace(".png", ".svg")  # TODO
-    asset_path = app.asset_path / image_path
-    if not asset_path.exists(): # try in style
-        asset_path = asset_path.parent / get_gui_style() / asset_path.name
-
-    if not asset_path.exists():
-        Logger().warning(f"Can't find image: {str(asset_path)}")
-    return asset_path
-
-
-def get_themed_asset_icon(image_path: str) -> QIcon:
-    asset_path = get_asset_image_path(image_path)
-    if get_gui_dark_mode():
-        if asset_path.suffix == ".svg":
-            asset_path = draw_svg_with_color(asset_path)
-        else:
-            asset_path = get_inverted_asset_image(asset_path)
-    return get_icon_from_image_file(asset_path)
-
 
 def get_inverted_asset_image(image_path: Path) -> Path:
     """ Inverts a given image and saves it beside the original one with _inv in the name.

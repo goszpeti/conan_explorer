@@ -5,7 +5,7 @@ import conan_app_launcher.app as app
 from conan_app_launcher import user_save_path
 from conan_app_launcher.app.logger import Logger
 # using global module pattern
-from conan_app_launcher.ui.common.icon import get_themed_asset_icon
+from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE  # using global module pattern
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow

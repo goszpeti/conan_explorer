@@ -60,8 +60,8 @@ class ListAppLink(QFrame):
         self._ui.app_button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
 
-        self.adjustSize()
-        self.updateGeometry()
+        # self.adjustSize()
+        # self.updateGeometry()
         # connect signals
         self._ui.app_button.clicked.connect(self.on_click)
         self._ui.edit_button.clicked.connect(self.open_edit_dialog)
@@ -116,19 +116,23 @@ class ListAppLink(QFrame):
             self._parent_tab.redraw(force=True)
 
     def resizeEvent(self, event):
-        self.split_name_into_lines()
+        # self.split_into_lines(self._ui.arguments_value_label, self.model.args)
+        # self.split_into_lines(self._ui.pkg_path_label, str(self.model.get_executable_path()))
+
         super().resizeEvent(event)
 
-    def split_name_into_lines(self):
+    def split_into_lines(self, widget, model_value):
         """ Calculate, how text can be split into multiple lines, based on the current width"""
-        max_width = self._ui.app_name.width()
-        px = measure_font_width(self._ui.app_name.text())
-        new_length = int(len(self.model.name) * (max_width-10) / px)
-        if len(self._ui.app_name.text().split("\n")[0]) > new_length > len(self.model.name) or \
-                new_length-1 == len(self._ui.app_name.text().split("\n")[0]):
+        max_width = widget.width()
+        px = measure_font_width(widget.text())
+        if px == 0:
             return
-        name = self.word_wrap(self.model.name, new_length)
-        self._ui.app_name.setText(name)
+        new_length = int(len(model_value) * (max_width-10) / px)
+        if len(widget.text().split("\n")[0]) > new_length > len(model_value) or \
+                new_length-1 == len(widget.text().split("\n")[0]):
+            return
+        args = self.word_wrap(model_value, new_length)
+        widget.setText(args)
 
     @staticmethod
     def word_wrap(text: str, max_length: int) -> str:
@@ -217,4 +221,4 @@ class ListAppLink(QFrame):
     def apply_conan_info(self):
         """ Update with new conan data """
         self.update_icon()
-        self._ui.pkg_path_label.setText(str(self.model.get_executable_path()))
+        # self._ui.pkg_path_label.setText(str(self.model.get_executable_path()))

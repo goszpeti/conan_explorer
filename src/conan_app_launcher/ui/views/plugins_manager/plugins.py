@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
 from PySide6.QtCore import QPoint, Qt, Slot
 from PySide6.QtGui import QIcon, QKeySequence, QAction
 from PySide6.QtWidgets import (QListWidgetItem, QWidget)
-from conan_app_launcher.ui.fluent_window.plugins import ThemedWidget
+from conan_app_launcher.ui.plugin.plugins import ThemedWidget
 from conan_app_launcher.ui.widgets import RoundedMenu
 from .controller import PluginController
 
@@ -37,6 +37,19 @@ class PluginsPage(ThemedWidget):
 
         self._controller.update()
         # self.set_themed_icon(self._ui.search_icon, "icons/search_packages.png", size=(20,20))
+
+    def on_toggle(self):
+        # load / reload
+        # TODO MOVE load/disable code from main window to plugin! 
+        pass
+
+    def on_add(self):
+        """ Open File dialog with filter for ini files, then load the plugin"""
+        pass
+
+    def on_remove(self):
+        """ Unload plugin and deregister from ini"""
+        pass
 
     # def _init_remote_context_menu(self):
     #     self._remotes_cntx_menu = RoundedMenu()

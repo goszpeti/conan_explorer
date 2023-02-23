@@ -11,7 +11,7 @@ from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget, QSizePolicy
 
-from .fluent_window import ThemedWidget
+from ..fluent_window.fluent_window import ThemedWidget
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
@@ -27,6 +27,31 @@ class PluginDescription():
     plugin_class: str
     description: str
     side_menu: bool
+
+
+class PluginInterface(ThemedWidget):
+    """
+    Class to extend the application with custom views.
+    """
+    # Return a signal, which will be called, when the Ui should load.
+    # Connect this to your actual load method.
+    # This is used for asynchronous loading.
+    load_signal = Signal()
+
+    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"] = None, page_widgets: Optional["FluentWindow.PageStore"] = None) -> None:
+        ThemedWidget.__init__(self, parent)
+        self._base_signals = base_signals
+        self._page_widgets = page_widgets
+        #self._base_signals.page_size_changed.emit(self)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy.setVerticalStretch(0)
+        self.setSizePolicy(sizePolicy)
+
+    def resizeEvent(self, a0) -> None:
+        # handles maximum size on resize
+        if not self._base_signals:
+            return
+        self._base_signals.page_size_changed.emit(self)
 
 class PluginFile():
 
@@ -90,30 +115,4 @@ class PluginFile():
                 parser[section_name][setting] = value
         with open(path, 'w', encoding="utf8") as fd:
             parser.write(fd)
-
-
-
-class PluginInterface(ThemedWidget):
-    """
-    Class to extend the application with custom views.
-    """
-    # Return a signal, which will be called, when the Ui should load.
-    # Connect this to your actual load method.
-    # This is used for asynchronous loading.
-    load_signal = Signal()
-
-    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"]=None, page_widgets: Optional["FluentWindow.PageStore"]=None) -> None:
-        ThemedWidget.__init__(self, parent)
-        self._base_signals = base_signals
-        self._page_widgets = page_widgets
-        #self._base_signals.page_size_changed.emit(self)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy.setVerticalStretch(0)
-        self.setSizePolicy(sizePolicy)
-
-    def resizeEvent(self, a0) -> None:
-        # handles maximum size on resize
-        if not self._base_signals:
-            return
-        self._base_signals.page_size_changed.emit(self)
 

@@ -13,7 +13,7 @@ from PySide6.QtCore import Qt, Slot, SignalInstance
 from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
 
 from conan_app_launcher.ui.common.loading import AsyncLoader
-from conan_app_launcher.ui.fluent_window.plugins import PluginDescription, PluginFile
+from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginFile
 
 REF_TYPE = 0
 PROFILE_TYPE = 1

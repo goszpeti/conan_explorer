@@ -1,61 +1,32 @@
-from pathlib import Path
 import platform
 from conan_app_launcher.settings import GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL
 
-from conan_app_launcher.ui.common.icon import get_icon_from_image_file
+from conan_app_launcher.ui.common.theming import ThemedWidget
+from conan_app_launcher.ui.fluent_window import LEFT_MENU_MAX_WIDTH, LEFT_MENU_MIN_WIDTH, RIGHT_MENU_MAX_WIDTH, RIGHT_MENU_MIN_WIDTH, gen_obj_name
 
 if platform.system() == "Windows":
     import ctypes
     from ctypes.wintypes import MSG
 
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Type, TypeVar
 
-if TYPE_CHECKING:
-    from typing import TypedDict, Protocol, runtime_checkable
-else:
-    try:
-        from typing_extensions import Protocol, TypedDict, runtime_checkable
-    except ImportError:
-        from typing import Protocol, TypedDict, runtime_checkable
 
 # uses Logger, settings and theming related functions
 from conan_app_launcher import AUTOCLOSE_SIDE_MENU
-from conan_app_launcher.app import asset_path
-from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import is_windows_11
 
 from PySide6.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
                             QPropertyAnimation, QRect, QSize, Qt)
-from PySide6.QtGui import QHoverEvent, QIcon, QKeySequence, QMouseEvent, QPixmap, QImage, QShortcut
-from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMainWindow,
-                               QPushButton, QSizePolicy, QSpacerItem,
-                               QStackedWidget, QVBoxLayout, QWidget)
+from PySide6.QtGui import QHoverEvent, QMouseEvent
+from PySide6.QtWidgets import (QMainWindow,
+                               QPushButton, QSizePolicy, QWidget)
 
-from ..common import get_themed_asset_icon, get_asset_image_path
-from ..widgets import AnimatedToggle
+from ..common import get_themed_asset_icon
+from .side_menu import SideSubMenu
 
 if TYPE_CHECKING:
-    from .plugins import PluginInterface
-
-
-def get_display_scaling():
-    if platform.system() == "Windows":
-        return ctypes.windll.shcore.GetScaleFactorForDevice(0) / 100
-    else:  # TODO not yet implemented for Linux
-        return 2.2
-
-
-LEFT_MENU_MIN_WIDTH = 80
-LEFT_MENU_MAX_WIDTH = int(310 + 20*(2/get_display_scaling()))
-RIGHT_MENU_MIN_WIDTH = 0
-RIGHT_MENU_MAX_WIDTH = int(200 + 200*(2/get_display_scaling()))
-
-
-def gen_obj_name(name: str) -> str:
-    """ Generates an object name from a menu title or name (spaces to underscores and lowercase) """
-    return name.replace(" ", "_").lower()
-
+    from ..plugin.plugins import PluginInterface
 
 class WidgetNotFoundException(Exception):
     """ Raised, when a widget searched for, ist in the parent container. """
@@ -72,208 +43,6 @@ class ResizeDirection(Enum):
     top_right = 6
     bottom_left = 7
     bottom_right = 8
-
-
-@runtime_checkable
-class CanSetIconWidgetProtocol(Protocol):
-    def setIcon(self, icon: Union[QIcon, QPixmap]) -> None: ...
-
-
-@runtime_checkable
-class CanSetPixmapWidgetProtocol(Protocol):
-    def setPixmap(self, arg__1: Union[QPixmap, QImage, str]) -> None: ...
-
-
-class ThemedWidget(QWidget):
-    class IconInfo(TypedDict):
-        asset_path: str
-        size: Optional[Tuple[int, int]]
-
-    def __init__(self, parent=None) -> None:
-        if parent is not None:  # signals, it is already a widget
-            super().__init__(parent)
-        self._icon_map: Dict[Union[CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol],
-                             ThemedWidget.IconInfo] = {}  # widget: {name, size} for re-theming
-
-    def set_themed_icon(self, widget: Union[CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol],
-                        asset_path: str, size: Optional[Tuple[int, int]] = None):
-        """ 
-        Applies an icon to a widget and inverts it, when theming is toggled to dark mode.
-        For that reload_themed_icons must be called.
-        Size only applies for pixmaps.
-        """
-        icon = get_themed_asset_icon(asset_path)
-        if isinstance(widget, CanSetIconWidgetProtocol):
-            widget.setIcon(icon)
-        elif isinstance(widget, CanSetPixmapWidgetProtocol):
-            if size is None:
-                size = (20, 20)
-            widget.setPixmap(icon.pixmap(*size))
-        self._icon_map[widget] = {"asset_path": asset_path, "size": size}
-
-    def reload_themed_icons(self):
-        for widget, info in self._icon_map.items():
-            asset_rel_path = info["asset_path"]
-            size = info["size"]
-            icon = get_themed_asset_icon(asset_rel_path)
-            if isinstance(widget, CanSetIconWidgetProtocol):
-                widget.setIcon(icon)
-            elif isinstance(widget, CanSetPixmapWidgetProtocol):
-                widget.setPixmap(icon.pixmap(QSize(*size)))
-
-
-class SideSubMenu(ThemedWidget):
-    TOGGLE_WIDTH = 70
-    TOGGLE_HEIGHT = 50
-
-    def __init__(self, parent_stacked_widget: QStackedWidget, title: str = "", is_top_level=False):
-        super().__init__(parent_stacked_widget)
-        from .side_menu_ui import Ui_SideMenu  # need to resolve circular import
-        self.ui = Ui_SideMenu()
-        self.ui.setupUi(self)
-
-        self.parent_stacked_widget = parent_stacked_widget
-        self.parent_stacked_widget.addWidget(self)
-        self.title = title
-        self.is_top_level = is_top_level
-        self.set_title(title)
-        self._content_layout = self.ui.content_frame_layout
-        self.set_themed_icon(self.ui.side_menu_title_button, "icons/back.png")
-
-        if is_top_level:
-            self.ui.side_menu_title_button.hide()  # off per default
-
-    def reset_widgets(self):
-        while (self._content_layout.count() > 1):
-            widget = self._content_layout.takeAt(0)
-            if widget in [None, self.ui.side_menu_spacer]:
-                continue
-            self._content_layout.removeItem(widget)
-
-    def set_title(self, title: str):
-        self.ui.side_menu_title_label.setText(title)
-
-    def enable_collapsible(self) -> bool:
-        """
-        Enable this side menu being collapsed. The side_menu_title_button will be used for this,
-        so this must be a top level menu, otherwise the back button could not be operated anymore.
-        """
-        if not self.is_top_level:
-            return False
-        self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
-        self.ui.side_menu_title_button.clicked.connect(self.on_expand_minimize)  # off per default
-        return True
-
-    def on_expand_minimize(self):
-        """ The title button can be used to minimize a submenu """
-        if self.ui.side_menu_content_frame.height() > 0:
-            self.ui.side_menu_content_frame.setMaximumHeight(0)
-            self.set_themed_icon(self.ui.side_menu_title_button, "icons/forward.png")
-        else:
-            self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
-            self.ui.side_menu_content_frame.setMaximumHeight(4096)
-
-    def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
-        return self.findChild(QWidget, gen_obj_name(name))  # type:ignore
-
-    def add_custom_menu_entry(self, widget: QWidget, name: Optional[str] = None):
-        """ Very basic custom entry, no extra functions """
-        if name:
-            widget.setObjectName(gen_obj_name(name))
-        self._content_layout.insertWidget(self._content_layout.count() - 1, widget)
-
-    def add_menu_line(self):
-        line = QFrame(self)
-        line.setMidLineWidth(3)
-        line.setFrameShape(QFrame.Shape.HLine)
-        line.setFrameShadow(QFrame.Shadow.Sunken)
-        self.add_custom_menu_entry(line, "line")  # TODO give them an index?
-
-    def add_named_custom_entry(self, name: str, widget: QWidget, asset_icon: str = "", force_v_layout=False):
-        """ Creates a Frame with a text label and a custom widget under it and adds it to the menu """
-        label = QLabel(text=name, parent=self)
-        label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
-        label.setObjectName(gen_obj_name(name) + "_label")
-        icon = None
-        if asset_icon:
-            icon = QLabel(parent=self)
-            icon.setObjectName(gen_obj_name(name) + "_icon")
-            self.set_themed_icon(icon, asset_icon)
-        widget.adjustSize()
-        widget.setMinimumHeight(50)
-        widget.setMaximumHeight(100)
-        widget.setObjectName(gen_obj_name(name) + "_widget")
-
-        frame = QFrame(self)
-        if force_v_layout or label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 30):  # aggressive 30 px padding
-            layout = QVBoxLayout(frame)
-            frame.setLayout(layout)
-            if icon is not None: # in vmode the icomn still needs to be placed in the same row, so we need an extra h-layout
-                horizontal_layout = QHBoxLayout(frame)
-                horizontal_layout.addWidget(icon)
-                horizontal_layout.addWidget(label)
-                horizontal_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
-                layout.addLayout(horizontal_layout)
-            else:
-                layout.addWidget(label)
-        else:
-            frame.setLayout(QHBoxLayout(frame))
-            if icon is not None:
-                frame.layout().addWidget(icon)
-            frame.layout().addWidget(label)
-
-        label.setMaximumHeight(50)
-
-        if label.width() > RIGHT_MENU_MAX_WIDTH:
-            Logger().debug(f"{str(name)} right side menu exceeds max width!")
-        frame.layout().setContentsMargins(5, 0, 5, 0)
-        frame.layout().setSpacing(4)
-
-        frame.layout().addWidget(widget)
-        frame.layout().setStretch(1, 1)
-        frame.layout().setStretch(2, 1)
-        self.add_custom_menu_entry(frame, name)
-
-    def add_toggle_menu_entry(self, name: str, target: Callable, initial_state: bool, asset_icon: str = ""):
-        toggle = AnimatedToggle(self)
-        toggle.setMinimumSize(self.TOGGLE_WIDTH, self.TOGGLE_HEIGHT)
-        toggle.setMaximumSize(self.TOGGLE_WIDTH, self.TOGGLE_HEIGHT)
-        toggle.setChecked(initial_state)
-        toggle.stateChanged.connect(target)
-        self.add_named_custom_entry(name, toggle, asset_icon)
-        return toggle
-
-    def add_sub_menu(self, sub_menu: "SideSubMenu", asset_icon: str = ""):
-        button = self.add_button_menu_entry(sub_menu.title, sub_menu.ui.side_menu_title_button.show, asset_icon)
-        button.clicked.connect(lambda: self.parent_stacked_widget.setCurrentWidget(sub_menu))
-        sub_menu.ui.side_menu_title_button.clicked.connect(lambda: self.parent_stacked_widget.setCurrentWidget(self))
-        return button
-
-    def add_button_menu_entry(self, name: str, target: Callable, asset_icon: str = "",
-                              shortcut: Optional[QKeySequence] = None, shortcut_parent: Optional[QWidget] = None):
-        """ Adds a button with an icon and links with a callable. Optionally can have a key shortcut. """
-        button = QPushButton(self)
-        button.setMinimumSize(QSize(64, 50))
-        button.setMaximumHeight(50)
-        if asset_icon:
-            self.set_themed_icon(button, asset_icon)
-        # button.setIconSize(QSize(32, 32))
-        button.setText(name)
-        button.setStyleSheet(f"text-align:left")
-        # insert before spacer
-        self.add_custom_menu_entry(button, name)
-
-        button.clicked.connect(target)
-
-        if not shortcut:
-            return button
-        assert shortcut_parent, "Add shortcut_parent if shortcut is True!"
-
-        # use global shortcut instead of button.setShortcut -> Works from anywhere
-        shortcut_obj = QShortcut(shortcut, shortcut_parent)
-        shortcut_obj.activated.connect(target)
-        button.setText(f"{button.text()} ({shortcut.toString()})")
-        return button
 
 
 class FluentWindow(QMainWindow, ThemedWidget):

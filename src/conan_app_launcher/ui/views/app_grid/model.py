@@ -10,8 +10,7 @@ from conan_app_launcher import (
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
-from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_icon
-from conan_app_launcher.ui.common.icon import get_asset_image_path
+from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_icon, get_asset_image_path
 from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.core.conan_common import ConanFileReference
 

@@ -18,7 +18,7 @@ from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES,
                                          PLUGINS_SECTION_NAME, WINDOW_SIZE)
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
-from conan_app_launcher.ui.fluent_window.plugins import PluginFile
+from conan_app_launcher.ui.plugin.plugins import PluginFile
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
 from PySide6.QtCore import QRect, SignalInstance, Signal
 from PySide6.QtGui import QKeySequence
@@ -26,7 +26,8 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QFrame, QVBoxL
 
 from .common import (AsyncLoader, activate_theme, init_qt_logger,
                      remove_qt_logger)
-from .fluent_window import FluentWindow, PluginInterface, SideSubMenu
+from .fluent_window import FluentWindow, SideSubMenu
+from .plugin import PluginInterface
 from .model import UiApplicationModel
 from .views import AboutPage, AppGridView, PluginsPage
 

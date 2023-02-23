@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.ui.fluent_window.plugins import PluginInterface
+from conan_app_launcher.ui.plugin.plugins import PluginInterface
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
 from PySide6.QtCore import QPoint, Qt, Slot, QParallelAnimationGroup, QPropertyAnimation, QAbstractAnimation, QEasingCurve

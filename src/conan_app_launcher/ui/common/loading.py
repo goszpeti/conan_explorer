@@ -54,7 +54,7 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
         self.progress_dialog.setRange(0, 0)
         self.progress_dialog.setMinimumDuration(1000)
-        self.progress_dialog.setFixedWidth(330)
+        self.progress_dialog.setFixedWidth(400)
         # set position in middle of window
         qapp: QtWidgets.QApplication = QtWidgets.QApplication.instance() # type: ignore
         rectangle = self.progress_dialog.frameGeometry()
