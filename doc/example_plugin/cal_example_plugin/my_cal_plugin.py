@@ -15,7 +15,7 @@ compile_ui_file_if_newer(current_dir / "example.ui")
 
 class SamplePluginView(PluginInterface):
 
-    def __init__(self, parent: QWidget, base_signals: "BaseSignals", 
+    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"] = None,
                  page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent, base_signals, page_widgets)
         self._base_signals # access to global Qt signals
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # Standalone execution
     app = QApplication([])
     window = QMainWindow()
-    pl = SamplePluginView(window, BaseSignals(None, None, None))
+    pl = SamplePluginView(window)
     window.setGeometry(pl.geometry())
     pl.load_signal.emit()
     window.show()

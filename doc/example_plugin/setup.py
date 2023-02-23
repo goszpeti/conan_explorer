@@ -15,7 +15,7 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = "cal-example-plugin"
-VERSION = "0.0.1"
+VERSION = "0.1.0"
 DESCRIPTION = "Example Plugin"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
@@ -49,4 +49,4 @@ os.chdir(tempfile.gettempdir())
 plugin_file_path = str(Path(cal_example_plugin.__file__).parent / "plugin.ini")
 plugin_descr = PluginDescription("My Example Plugin", VERSION, AUTHOR, "about.png", "my_cal_plugin.py", "SamplePluginView", DESCRIPTION, True)
 PluginFile.write(plugin_file_path, [plugin_descr])
-PluginFile.register("example_plugin", plugin_file_path)
+PluginFile.register(plugin_file_path)
