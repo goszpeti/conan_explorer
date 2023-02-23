@@ -15,7 +15,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QFrame, QGridLayout,
+from PySide6.QtWidgets import (QApplication, QCheckBox, QFormLayout, QFrame,
     QHBoxLayout, QLabel, QLayout, QPushButton,
     QSizePolicy, QVBoxLayout, QWidget)
 
@@ -25,19 +25,17 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1179, 146)
+        Form.resize(1138, 140)
         sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
         Form.setMinimumSize(QSize(0, 140))
-        Form.setMaximumSize(QSize(800000, 159))
-        self.horizontalLayout = QHBoxLayout(Form)
-        self.horizontalLayout.setSpacing(3)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.horizontalLayout.setContentsMargins(-1, 0, -1, 0)
+        Form.setMaximumSize(QSize(1280, 180))
+        self.horizontalLayout_3 = QHBoxLayout(Form)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalLayout_3.setContentsMargins(0, 2, 0, 2)
         self.left_frame = QFrame(Form)
         self.left_frame.setObjectName(u"left_frame")
         self.left_frame.setMinimumSize(QSize(0, 0))
@@ -54,8 +52,8 @@ class Ui_Form(object):
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.app_button.sizePolicy().hasHeightForWidth())
         self.app_button.setSizePolicy(sizePolicy1)
-        self.app_button.setMinimumSize(QSize(150, 120))
-        self.app_button.setMaximumSize(QSize(200, 120))
+        self.app_button.setMinimumSize(QSize(180, 100))
+        self.app_button.setMaximumSize(QSize(180, 100))
 
         self.verticalLayout_2.addWidget(self.app_button)
 
@@ -66,14 +64,15 @@ class Ui_Form(object):
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.app_name.sizePolicy().hasHeightForWidth())
         self.app_name.setSizePolicy(sizePolicy2)
-        self.app_name.setMinimumSize(QSize(200, 0))
+        self.app_name.setMinimumSize(QSize(0, 0))
+        self.app_name.setMaximumSize(QSize(180, 16777215))
         self.app_name.setAlignment(Qt.AlignCenter)
         self.app_name.setWordWrap(True)
 
         self.verticalLayout_2.addWidget(self.app_name)
 
 
-        self.horizontalLayout.addWidget(self.left_frame)
+        self.horizontalLayout_3.addWidget(self.left_frame)
 
         self.central_frame = QFrame(Form)
         self.central_frame.setObjectName(u"central_frame")
@@ -85,77 +84,102 @@ class Ui_Form(object):
         self.central_frame.setMinimumSize(QSize(500, 0))
         self.central_frame.setFrameShape(QFrame.StyledPanel)
         self.central_frame.setFrameShadow(QFrame.Raised)
-        self.gridLayout = QGridLayout(self.central_frame)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.gridLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.gridLayout.setContentsMargins(-1, 4, -1, 0)
-        self.conan_ref_label = QLabel(self.central_frame)
-        self.conan_ref_label.setObjectName(u"conan_ref_label")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.horizontalLayout_2 = QHBoxLayout(self.central_frame)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.frame = QFrame(self.central_frame)
+        self.frame.setObjectName(u"frame")
+        self.frame.setFrameShape(QFrame.StyledPanel)
+        self.frame.setFrameShadow(QFrame.Raised)
+        self.formLayout = QFormLayout(self.frame)
+        self.formLayout.setObjectName(u"formLayout")
+        self.formLayout.setContentsMargins(-1, -1, 0, -1)
+        self.open_shell_checkbox = QCheckBox(self.frame)
+        self.open_shell_checkbox.setObjectName(u"open_shell_checkbox")
+        self.open_shell_checkbox.setEnabled(False)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.conan_ref_label.sizePolicy().hasHeightForWidth())
-        self.conan_ref_label.setSizePolicy(sizePolicy4)
-        self.conan_ref_label.setMinimumSize(QSize(200, 0))
-        self.conan_ref_label.setMaximumSize(QSize(16777215, 16777215))
+        sizePolicy4.setHeightForWidth(self.open_shell_checkbox.sizePolicy().hasHeightForWidth())
+        self.open_shell_checkbox.setSizePolicy(sizePolicy4)
+        self.open_shell_checkbox.setMaximumSize(QSize(16777215, 35))
+        self.open_shell_checkbox.setStyleSheet(u"margin-top:50%; margin-bottom:50%;margin-left: 10%;")
 
-        self.gridLayout.addWidget(self.conan_ref_label, 0, 0, 1, 1)
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.open_shell_checkbox)
 
-        self.line = QFrame(self.central_frame)
-        self.line.setObjectName(u"line")
-        self.line.setFrameShape(QFrame.VLine)
-        self.line.setFrameShadow(QFrame.Sunken)
-
-        self.gridLayout.addWidget(self.line, 1, 2, 1, 1)
-
-        self.line_2 = QFrame(self.central_frame)
-        self.line_2.setObjectName(u"line_2")
-        self.line_2.setFrameShape(QFrame.VLine)
-        self.line_2.setFrameShadow(QFrame.Sunken)
-
-        self.gridLayout.addWidget(self.line_2, 0, 2, 1, 1)
-
-        self.arguments_label = QLabel(self.central_frame)
-        self.arguments_label.setObjectName(u"arguments_label")
-        sizePolicy3.setHeightForWidth(self.arguments_label.sizePolicy().hasHeightForWidth())
-        self.arguments_label.setSizePolicy(sizePolicy3)
-        self.arguments_label.setMinimumSize(QSize(80, 0))
-
-        self.gridLayout.addWidget(self.arguments_label, 1, 4, 1, 2)
-
-        self.arguments_value_label = QLabel(self.central_frame)
-        self.arguments_value_label.setObjectName(u"arguments_value_label")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.arguments_value_label.sizePolicy().hasHeightForWidth())
-        self.arguments_value_label.setSizePolicy(sizePolicy5)
-        self.arguments_value_label.setMinimumSize(QSize(160, 0))
-        self.arguments_value_label.setMaximumSize(QSize(480, 16777215))
-        self.arguments_value_label.setWordWrap(False)
-
-        self.gridLayout.addWidget(self.arguments_value_label, 1, 6, 1, 1)
-
-        self.label = QLabel(self.central_frame)
+        self.label = QLabel(self.frame)
         self.label.setObjectName(u"label")
         sizePolicy3.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
         self.label.setSizePolicy(sizePolicy3)
 
-        self.gridLayout.addWidget(self.label, 1, 0, 1, 1)
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label)
 
-        self.open_shell_checkbox = QCheckBox(self.central_frame)
-        self.open_shell_checkbox.setObjectName(u"open_shell_checkbox")
-        self.open_shell_checkbox.setEnabled(False)
-        sizePolicy5.setHeightForWidth(self.open_shell_checkbox.sizePolicy().hasHeightForWidth())
-        self.open_shell_checkbox.setSizePolicy(sizePolicy5)
-        self.open_shell_checkbox.setMaximumSize(QSize(16777215, 35))
-        self.open_shell_checkbox.setStyleSheet(u"margin-top:50%; margin-bottom:50%;margin-left: 10%;")
+        self.label_2 = QLabel(self.frame)
+        self.label_2.setObjectName(u"label_2")
 
-        self.gridLayout.addWidget(self.open_shell_checkbox, 1, 1, 1, 1)
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_2)
 
-        self.gridLayout.setColumnStretch(5, 1)
+        self.label_3 = QLabel(self.frame)
+        self.label_3.setObjectName(u"label_3")
 
-        self.horizontalLayout.addWidget(self.central_frame)
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.label_3)
+
+        self.label_4 = QLabel(self.frame)
+        self.label_4.setObjectName(u"label_4")
+
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_4)
+
+        self.conan_ref_label = QLabel(self.frame)
+        self.conan_ref_label.setObjectName(u"conan_ref_label")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.conan_ref_label.sizePolicy().hasHeightForWidth())
+        self.conan_ref_label.setSizePolicy(sizePolicy5)
+        self.conan_ref_label.setMinimumSize(QSize(200, 0))
+        self.conan_ref_label.setMaximumSize(QSize(16777215, 16777215))
+
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.conan_ref_label)
+
+
+        self.horizontalLayout_2.addWidget(self.frame)
+
+        self.frame_2 = QFrame(self.central_frame)
+        self.frame_2.setObjectName(u"frame_2")
+        self.frame_2.setFrameShape(QFrame.StyledPanel)
+        self.frame_2.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout = QHBoxLayout(self.frame_2)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.arguments_label = QLabel(self.frame_2)
+        self.arguments_label.setObjectName(u"arguments_label")
+        sizePolicy5.setHeightForWidth(self.arguments_label.sizePolicy().hasHeightForWidth())
+        self.arguments_label.setSizePolicy(sizePolicy5)
+        self.arguments_label.setMinimumSize(QSize(80, 0))
+        self.arguments_label.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
+
+        self.horizontalLayout.addWidget(self.arguments_label)
+
+        self.arguments_value_label = QLabel(self.frame_2)
+        self.arguments_value_label.setObjectName(u"arguments_value_label")
+        sizePolicy6 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.arguments_value_label.sizePolicy().hasHeightForWidth())
+        self.arguments_value_label.setSizePolicy(sizePolicy6)
+        self.arguments_value_label.setMinimumSize(QSize(160, 0))
+        self.arguments_value_label.setMaximumSize(QSize(400, 16777215))
+        self.arguments_value_label.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
+        self.arguments_value_label.setWordWrap(True)
+
+        self.horizontalLayout.addWidget(self.arguments_value_label)
+
+        self.horizontalLayout.setStretch(1, 1)
+
+        self.horizontalLayout_2.addWidget(self.frame_2)
+
+        self.horizontalLayout_2.setStretch(1, 1)
+
+        self.horizontalLayout_3.addWidget(self.central_frame)
 
         self.right_frame = QFrame(Form)
         self.right_frame.setObjectName(u"right_frame")
@@ -164,12 +188,12 @@ class Ui_Form(object):
         self.right_frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout = QVBoxLayout(self.right_frame)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
+        self.verticalLayout.setSizeConstraint(QLayout.SetFixedSize)
         self.verticalLayout.setContentsMargins(-1, 0, -1, 0)
         self.edit_button = QPushButton(self.right_frame)
         self.edit_button.setObjectName(u"edit_button")
-        sizePolicy5.setHeightForWidth(self.edit_button.sizePolicy().hasHeightForWidth())
-        self.edit_button.setSizePolicy(sizePolicy5)
+        sizePolicy4.setHeightForWidth(self.edit_button.sizePolicy().hasHeightForWidth())
+        self.edit_button.setSizePolicy(sizePolicy4)
         self.edit_button.setMinimumSize(QSize(80, 0))
 
         self.verticalLayout.addWidget(self.edit_button)
@@ -183,9 +207,8 @@ class Ui_Form(object):
         self.verticalLayout.addWidget(self.remove_button)
 
 
-        self.horizontalLayout.addWidget(self.right_frame)
+        self.horizontalLayout_3.addWidget(self.right_frame)
 
-        self.horizontalLayout.setStretch(1, 1)
 
         self.retranslateUi(Form)
 
@@ -196,11 +219,14 @@ class Ui_Form(object):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.app_button.setText("")
         self.app_name.setText(QCoreApplication.translate("Form", u"Name", None))
+        self.open_shell_checkbox.setText("")
+        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-weight:700;\">Use terminal:</span></p></body></html>", None))
+        self.label_2.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-weight:700;\">Executable:</span></p></body></html>", None))
+        self.label_3.setText(QCoreApplication.translate("Form", u"bin/python.exe", None))
+        self.label_4.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-weight:700;\">Reference:</span></p></body></html>", None))
         self.conan_ref_label.setText(QCoreApplication.translate("Form", u"example/9.9.9@user/channel", None))
         self.arguments_label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-weight:700;\">Arguments:</span></p></body></html>", None))
         self.arguments_value_label.setText(QCoreApplication.translate("Form", u"-f silver_output -d C:Reposfep_interface_silver3exampledemo_simplesilver_example.description -t standard_data -s fepifsilver_default_system", None))
-        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-weight:700;\">Open terminal:</span></p></body></html>", None))
-        self.open_shell_checkbox.setText("")
         self.edit_button.setText(QCoreApplication.translate("Form", u"Edit", None))
         self.remove_button.setText(QCoreApplication.translate("Form", u"Remove", None))
     # retranslateUi

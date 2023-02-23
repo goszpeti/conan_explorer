@@ -1,14 +1,16 @@
 import configparser
+import importlib
 import os
 from dataclasses import dataclass
 from distutils.util import strtobool
 from pathlib import Path
+import uuid
 from typing import TYPE_CHECKING, List, Optional
 
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, QObject
 from PySide6.QtWidgets import QWidget, QSizePolicy
 
 from ..fluent_window.fluent_window import ThemedWidget
@@ -56,8 +58,14 @@ class PluginInterface(ThemedWidget):
 class PluginFile():
 
     @staticmethod
-    def register(name: str, path: str):
-        app.active_settings.add(name, path, PLUGINS_SECTION_NAME)
+    def register(plugin_path: str):
+        plugin_path_obj = Path(plugin_path)
+        # check, if path already registered
+        for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
+            plugin_file_path = app.active_settings.get_string(plugin_group_name)
+            if Path(plugin_file_path) == plugin_path_obj:
+                return
+        app.active_settings.add(str(uuid.uuid1()), plugin_path, PLUGINS_SECTION_NAME)
 
 
     @staticmethod
@@ -112,7 +120,41 @@ class PluginFile():
             section_name = "PluginDescription" + str(i)
             parser.add_section(section_name)
             for setting, value in infos[i].__dict__.items():
-                parser[section_name][setting] = value
+                parser[section_name][setting] = str(value)
         with open(path, 'w', encoding="utf8") as fd:
             parser.write(fd)
 
+class PluginHandler(QObject):
+    load_plugin = Signal(PluginDescription)
+    unload_plugin = Signal(str) 
+    
+    def __init__(self, parent: Optional[QObject] = ...) -> None:
+        super().__init__(parent)
+
+
+    def load_all_plugins(self):
+        for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
+            plugin_path = app.active_settings.get_string(plugin_group_name)
+            self._load_plugins_from_file(plugin_path)
+
+    def get_same_file_plugins_from_name(self, plugin_name: str) -> List[PluginDescription]:
+        for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
+            plugin_path = app.active_settings.get_string(plugin_group_name)
+            file_plugins = PluginFile.read_file(plugin_path)
+            for plugin in file_plugins:
+                if plugin.name == plugin_name:
+                    return file_plugins
+        return []
+
+    def remove_plugin(self, plugin_name: str):
+        # TODO read, which file contains this
+        self.unload_plugin.emit(plugin_name)
+
+    def add_plugin(self, plugin_path: str):
+        PluginFile.register(plugin_path)
+        self._load_plugins_from_file(plugin_path)
+
+    def _load_plugins_from_file(self, plugin_path: str):
+        file_plugins = PluginFile.read_file(plugin_path)
+        for plugin in file_plugins:
+            self.load_plugin.emit(plugin)

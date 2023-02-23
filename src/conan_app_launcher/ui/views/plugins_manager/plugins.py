@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
 from PySide6.QtCore import QPoint, Qt, Slot
 from PySide6.QtGui import QIcon, QKeySequence, QAction
 from PySide6.QtWidgets import (QListWidgetItem, QWidget)
-from conan_app_launcher.ui.plugin.plugins import ThemedWidget
+from conan_app_launcher.ui.plugin.plugins import PluginHandler, ThemedWidget
 from conan_app_launcher.ui.widgets import RoundedMenu
 from .controller import PluginController
 
@@ -19,9 +19,10 @@ if TYPE_CHECKING:
 
 class PluginsPage(ThemedWidget):
 
-    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"] = None,
+    def __init__(self, parent: QWidget, plugin_handler: PluginHandler, base_signals: Optional["BaseSignals"] = None,
                  page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent)
+        self._plugin_handler = plugin_handler
         from .plugins_ui import Ui_Form
         self._ui = Ui_Form()
         self._ui.setupUi(self)

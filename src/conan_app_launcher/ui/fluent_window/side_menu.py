@@ -83,6 +83,9 @@ class SideSubMenu(ThemedWidget):
         label = QLabel(text=name, parent=self)
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
         label.setObjectName(gen_obj_name(name) + "_label")
+        label.setMaximumHeight(20)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        label.setSizePolicy(sizePolicy)
         icon = None
         if asset_icon:
             icon = QLabel(parent=self)
@@ -103,15 +106,16 @@ class SideSubMenu(ThemedWidget):
                 horizontal_layout.addWidget(label)
                 horizontal_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
                 layout.addLayout(horizontal_layout)
+                layout.setStretch(1, 1)
             else:
                 layout.addWidget(label)
         else:
-            frame.setLayout(QHBoxLayout(frame))
+            layout = QHBoxLayout(frame)
+            frame.setLayout(layout)
             if icon is not None:
-                frame.layout().addWidget(icon)
-            frame.layout().addWidget(label)
-
-        label.setMaximumHeight(50)
+                layout.addWidget(icon)
+            layout.addWidget(label)
+            layout.setStretch(1, 1)
 
         if label.width() > RIGHT_MENU_MAX_WIDTH:
             Logger().debug(f"{str(name)} right side menu exceeds max width!")
@@ -119,8 +123,6 @@ class SideSubMenu(ThemedWidget):
         frame.layout().setSpacing(4)
 
         frame.layout().addWidget(widget)
-        frame.layout().setStretch(1, 1)
-        frame.layout().setStretch(2, 1)
         self.add_custom_menu_entry(frame, name)
 
     def add_toggle_menu_entry(self, name: str, target: Callable, initial_state: bool, asset_icon: str = ""):

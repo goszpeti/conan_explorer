@@ -99,8 +99,17 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 pages.append(page)
             return pages
 
-        def add_new_page(self, name, button, page, right_sub_menu):
+        def add_new_page(self, name: str, button, page, right_sub_menu):
             self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu, name)
+
+        def remove_page_by_name(self, name: str):
+            button, widget, menu, _ = self._page_widgets[gen_obj_name(name)]
+            button.hide()
+            widget.hide()
+            button.deleteLater()
+            widget.deleteLater()
+            if menu:
+                menu.deleteLater()
 
     def __init__(self, title_text: str = "", native_windows_fcns=True):
         QMainWindow.__init__(self)

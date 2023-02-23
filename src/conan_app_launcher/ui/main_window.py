@@ -18,11 +18,11 @@ from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES,
                                          PLUGINS_SECTION_NAME, WINDOW_SIZE)
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
-from conan_app_launcher.ui.plugin.plugins import PluginFile
+from conan_app_launcher.ui.plugin.plugins import PluginFile, PluginHandler
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
 from PySide6.QtCore import QRect, SignalInstance, Signal
 from PySide6.QtGui import QKeySequence
-from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QFrame, QVBoxLayout, QRadioButton
+from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QFrame, QVBoxLayout, QRadioButton, QSizePolicy, QSpacerItem
 
 from .common import (AsyncLoader, activate_theme, init_qt_logger,
                      remove_qt_logger)
@@ -57,20 +57,21 @@ class MainWindow(FluentWindow):
     def __init__(self, qt_app: QApplication):
         super().__init__(title_text=APP_NAME)
         self._qt_app = qt_app
-        self._base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed, self.conan_remotes_updated, self.page_size_changed)
+        self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed, self.conan_remotes_updated, self.page_size_changed)
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
-
+        self._plugin_handler = PluginHandler(self)
         # connect logger to console widget to log possible errors at init
         init_qt_logger(Logger(), self.qt_logger_name, self.log_console_message)
         self.log_console_message.connect(self.write_log)
         self.page_size_changed.connect(self.resize_page)
         # Default pages
-        self.about_page = AboutPage(self, self._base_signals)
-        self.plugins_page = PluginsPage(self)
+        self.about_page = AboutPage(self, self.base_signals)
+        self.plugins_page = PluginsPage(self, self._plugin_handler)
         self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
         self._init_left_menu()
         self._init_right_menu()
-        self.load_plugins()
+
+        self._plugin_handler.load_plugin.connect(self._load_plugin)
 
     def resize_page(self, widget: QWidget):
         widget.setFixedWidth(self.ui.center_frame.width() - 4)
@@ -83,15 +84,11 @@ class MainWindow(FluentWindow):
 
     def _init_style_chooser(self):
         self._style_chooser_frame = QFrame(self)
-        # self.frame.setFrameShape(QFrame.StyledPanel)
-        # self.frame.setFrameShadow(QFrame.Raised)
         self._style_chooser_layout = QVBoxLayout(self._style_chooser_frame)
         self._style_chooser_radio_material = QRadioButton("Material", self._style_chooser_frame)
         self._style_chooser_layout.addWidget(self._style_chooser_radio_material)
-
         self._style_chooser_radio_fluent = QRadioButton("Fluent", self._style_chooser_frame)
         self._style_chooser_layout.addWidget(self._style_chooser_radio_fluent)
-
         # set initial state
         if get_gui_style() == GUI_STYLE_MATERIAL:
             self._style_chooser_radio_material.setChecked(True)
@@ -120,6 +117,7 @@ class MainWindow(FluentWindow):
         self._init_style_chooser()
         view_settings_submenu.add_named_custom_entry(
             "Icon Style", self._style_chooser_frame, "icons/global/conan_settings.png", force_v_layout=True)
+        view_settings_submenu.add_menu_line()
 
         self.main_general_settings_menu.add_menu_line()
         self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
@@ -144,31 +142,32 @@ class MainWindow(FluentWindow):
     def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent
         super().resizeEvent(a0)
 
-    def load_plugins(self):  # TODO move to fluent window?
-        for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
-            plugin_path = app.active_settings.get_string(plugin_group_name)
-            plugins = PluginFile.read_file(plugin_path)
-            for plugin in plugins:
-                try:
-                    import_path = Path(plugin.import_path)
-                    sys.path.append(str(import_path.parent))
-                    module_ = importlib.import_module(import_path.stem)
-                    class_ = getattr(module_, plugin.plugin_class)
-                    plugin_object: PluginInterface = class_(self, self._base_signals, self.page_widgets)
-                    self.add_left_menu_entry(plugin.name, plugin.icon, True, plugin_object, plugin.side_menu)
-                except Exception as e:
-                    Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
-
     def load(self, config_source: Optional[PathLike] = None):
         """ Load all application gui elements specified in the GUI config (file) """
         config_source_str = str(config_source)
         if not config_source:
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
         self.restore_window_state()
+        self._load_plugins()
+
         # model loads incrementally
         loader = AsyncLoader(self)
         loader.async_loading(self, self._load_job, (config_source_str,))
         loader.wait_for_finished()
+
+    def _load_plugins(self):
+        self._plugin_handler.load_all_plugins()
+
+    def _load_plugin(self, plugin):
+        try:
+            import_path = Path(plugin.import_path)
+            sys.path.append(str(import_path.parent))
+            module_ = importlib.import_module(import_path.stem)
+            class_ = getattr(module_, plugin.plugin_class)
+            plugin_object: PluginInterface = class_(self, self.base_signals, self.page_widgets)
+            self.add_left_menu_entry(plugin.name, plugin.icon, True, plugin_object, plugin.side_menu)
+        except Exception as e:
+            Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
 
     def _load_job(self, config_source_str):
         # load ui file definitions

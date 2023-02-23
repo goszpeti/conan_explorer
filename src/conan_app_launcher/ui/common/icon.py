@@ -6,6 +6,7 @@ from PySide6.QtCore import QFileInfo
 from PySide6.QtGui import QIcon, QImage
 from PySide6.QtWidgets import QFileIconProvider
 
+
 def get_inverted_asset_image(image_path: Path) -> Path:
     """ Inverts a given image and saves it beside the original one with _inv in the name.
     To be used for icons to switch between light and dark mode themes. """
@@ -71,8 +72,8 @@ def extract_icon(file_path: Path) -> QIcon:
 
 def get_platform_icon(profile_name: str) -> QIcon:
     """ Return an Icon based on the profile name.
-    TODO: This would be better done with a settings object.
     """
+    from conan_app_launcher.ui.common.theming import get_themed_asset_icon
     profile_name = profile_name.lower()
     if "win" in profile_name:  # I hope people have no random win"s" in their profilename
         return QIcon(get_themed_asset_icon("icons/global/windows.png"))
