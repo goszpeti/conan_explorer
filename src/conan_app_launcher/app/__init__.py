@@ -42,7 +42,7 @@ def run_application():
     except:
         Logger().debug("Can't set DPI Rounding")
     qt_app = QtWidgets.QApplication([])
-    from conan_app_launcher.ui.dialogs import show_bug_dialog_exc_hook
+    from .crash import show_bug_dialog_exc_hook
     sys.excepthook = show_bug_dialog_exc_hook  # dialog needs qt_app
     activate_theme(qt_app)
 
