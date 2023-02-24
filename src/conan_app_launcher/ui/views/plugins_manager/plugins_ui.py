@@ -53,7 +53,7 @@ class Ui_Form(object):
         self.remove_plugin_button = QPushButton(self.frame)
         self.remove_plugin_button.setObjectName(u"remove_plugin_button")
         icon2 = QIcon()
-        icon2.addFile(u"../../assets/icons/delete.png", QSize(), QIcon.Normal, QIcon.On)
+        icon2.addFile(u"../../assets/icons/minus_rounded.png", QSize(), QIcon.Normal, QIcon.On)
         self.remove_plugin_button.setIcon(icon2)
 
         self.verticalLayout.addWidget(self.remove_plugin_button)

@@ -41,7 +41,7 @@ class AsyncLoader(QtCore.QObject):
 
     def async_loading(self, dialog_parent: QtWidgets.QWidget, work_task: Callable, worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,
-                      loading_text: str = "Loading"):
+                      loading_text: str = "Loading", cancel_button=True):
         self.finished = False
 
         self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
@@ -54,10 +54,17 @@ class AsyncLoader(QtCore.QObject):
         self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
         self.progress_dialog.setRange(0, 0)
         self.progress_dialog.setMinimumDuration(1000)
-        self.progress_dialog.setFixedWidth(400)
+        self.progress_dialog.setMinimumWidth(500)
+        self.progress_dialog.setMaximumWidth(600)
+        if cancel_button:
+            self.cancel_button = QtWidgets.QPushButton("Cancel")
+            self.progress_dialog.setCancelButton(self.cancel_button)
+
         # set position in middle of window
         qapp: QtWidgets.QApplication = QtWidgets.QApplication.instance() # type: ignore
         rectangle = self.progress_dialog.frameGeometry()
+        while not qapp.activeWindow():
+            QtWidgets.QApplication.processEvents()
         if qapp.activeWindow():
             rectangle.moveCenter(qapp.activeWindow().frameGeometry().center())
             self.progress_dialog.move(rectangle.topLeft())
@@ -89,6 +96,8 @@ class AsyncLoader(QtCore.QObject):
 
         Logger().debug(f"Start async loading thread for {str(work_task)}")
         self.load_thread.start()
+        if cancel_button:
+            self.cancel_button.clicked.connect(self.load_thread.quit)
 
     def thread_finished(self):
         self.finished = True

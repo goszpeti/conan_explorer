@@ -3,7 +3,7 @@ from typing import List, Optional
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui.fluent_window import RIGHT_MENU_MAX_WIDTH
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy, QFrame,
+from PySide6.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy, QFrame, QApplication,
                              QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
 
 from .app_link import ListAppLink # ,GridAppLink
@@ -23,7 +23,6 @@ class TabList(QWidget):
         super().__init__(parent)
         self.model = model
         self._parent_tab = parent
-        self._app_link_type = ListAppLink
         self.app_links: List[ListAppLink] = []  # list of refs to app links
         self._initialized = False
         self._columns_count = 0
@@ -104,11 +103,9 @@ class TabList(QWidget):
         self.tab_scroll_area.setContentsMargins(0, 0, 0, 0)
         self.tab_scroll_area.setFrameStyle(QFrame.Shape.NoFrame)
 
-        #self.tab_scroll_area.setSizePolicy(size_policy)
         self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.tab_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.tab_scroll_area.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
-        #self.tab_scroll_area.setUpdatesEnabled(True)
         self.tab_scroll_area.setWidgetResizable(True)
         # this holds all the app links, which are layouts
         self.tab_scroll_area_widgets = TabScrollAreaWidgets(self.tab_scroll_area)
@@ -117,7 +114,7 @@ class TabList(QWidget):
         self._initialized = True
 
         self.tab_layout = QVBoxLayout(self.tab_scroll_area_widgets)
-        size_policy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding,
+        size_policy = QSizePolicy(QSizePolicy.Policy.Preferred,
                                     QSizePolicy.Policy.MinimumExpanding)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
@@ -134,7 +131,7 @@ class TabList(QWidget):
     def get_max_columns(self, offset=0):
         if self._initialized:
             width = self._parent_tab.width()
-            max_columns = int((width + offset) / (self._app_link_type.max_width()))
+            max_columns = int((width + offset) / (ListAppLink.max_width()))
             if max_columns == 0:
                 max_columns = 1
             return max_columns
@@ -146,5 +143,4 @@ class TabList(QWidget):
         self.model.apps.append(app_link.model)
         self.tab_layout.insertWidget(-1, app_link) # -1 is end
         self.tab_layout.update()
-
 

@@ -31,7 +31,7 @@ class PluginDescription():
     side_menu: bool
 
 
-class PluginInterface(ThemedWidget):
+class PluginInterfaceV1(ThemedWidget):
     """
     Class to extend the application with custom views.
     """
@@ -54,6 +54,7 @@ class PluginInterface(ThemedWidget):
         if not self._base_signals:
             return
         self._base_signals.page_size_changed.emit(self)
+        super().resizeEvent(a0)
 
 class PluginFile():
 

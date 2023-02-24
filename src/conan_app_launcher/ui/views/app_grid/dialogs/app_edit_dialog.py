@@ -49,6 +49,8 @@ class AppEditDialog(QDialog):
         width_to_set = measure_font_width(self._ui.args_line_edit.text()) + 10
         if width_to_set > self.parentWidget().geometry().width():
             width_to_set = self.parentWidget().geometry().width()
+        if width_to_set < self.parentWidget().geometry().width()/2:
+            width_to_set = int(self.parentWidget().geometry().width()/2)
         self.setMinimumWidth(width_to_set)
         conan_options_text = ""
         for option in self._model.conan_options:

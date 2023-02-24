@@ -9,12 +9,13 @@ from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE  # using global module pattern
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
+from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.core.conan_common import ConanFileReference, PackageReference
 
 from PySide6.QtCore import Qt, SignalInstance, Signal
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget, QFileDialog,
+from PySide6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget, QFileDialog, QSizePolicy,
                                QVBoxLayout, QWidget)
 
 from .model import UiAppLinkModel, UiTabModel
@@ -22,14 +23,14 @@ from .tab import TabList, TabList  # TabGrid
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.views.app_grid.model import UiAppGridModel
+    from conan_app_launcher.ui.main_window import BaseSignals
 
 
-class AppGridView(QWidget):
+class AppGridView(PluginInterfaceV1):
     load_signal = Signal()
 
-    def __init__(self, parent, model: "UiAppGridModel", conan_pkg_installed: SignalInstance, page_widgets: FluentWindow.PageStore):
-        super().__init__(parent)
-        self.page_widgets = page_widgets
+    def __init__(self, parent, model: "UiAppGridModel", base_signals: "BaseSignals", page_widgets: FluentWindow.PageStore):
+        super().__init__(parent, base_signals, page_widgets)
         self.setLayout(QVBoxLayout(self))
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.tab_widget = QTabWidget(self)
@@ -39,7 +40,7 @@ class AppGridView(QWidget):
         self.layout().addWidget(self.tab_widget)
 
         self.model = model
-        conan_pkg_installed.connect(self.update_conan_info)
+        base_signals.conan_pkg_installed.connect(self.update_conan_info)
 
         self.tab_widget.tabBar().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tab_widget.tabBar().setContentsMargins(0, 0, 0, 0)
@@ -50,6 +51,35 @@ class AppGridView(QWidget):
         if self.tab_widget.count() > 0:  # remove the default tab
             self.tab_widget.removeTab(0)
         self.load_signal.connect(self.load)
+
+    def load(self, offset=0):
+        """ Creates new layout """
+        self._init_right_menu()
+        for tab_config in self.model.tabs:
+            # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
+            tab = TabList(parent=self.tab_widget, model=tab_config)
+            self.tab_widget.addTab(tab, tab_config.name)
+            tab.load(offset)
+
+        # always show the first tab first
+        self.tab_widget.setCurrentIndex(0)
+
+    def _init_right_menu(self):
+        # Right Settings menu
+        quicklaunch_submenu = self._page_widgets.get_side_menu_by_type(type(self))
+        assert quicklaunch_submenu
+        quicklaunch_submenu.reset_widgets()
+        quicklaunch_submenu.add_button_menu_entry(
+            "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.png")
+        quicklaunch_submenu.add_button_menu_entry(
+            "Add AppLink", self.on_add_link, "icons/add_link.png")
+        quicklaunch_submenu.add_button_menu_entry(
+            "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
+        quicklaunch_submenu.add_menu_line()
+
+        quicklaunch_submenu.add_toggle_menu_entry(
+            "Auto-install quicklaunch packages", self.on_toggle_auto_install, app.active_settings.get_bool(AUTO_INSTALL_QUICKLAUNCH_REFS))
+
 
     def reload_themed_icons(self):
         self.re_init(self.model)
@@ -151,34 +181,6 @@ class AppGridView(QWidget):
 
     def get_tabs(self) -> List[TabList]:
         return self.findChildren(TabList)
-
-    def load(self, offset=0):
-        """ Creates new layout """
-        self._init_right_menu()
-        for tab_config in self.model.tabs:
-            # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabList(parent=self.tab_widget, model=tab_config)
-            self.tab_widget.addTab(tab, tab_config.name)
-            tab.load(offset)
-
-        # always show the first tab first
-        self.tab_widget.setCurrentIndex(0)
-
-    def _init_right_menu(self):
-        # Right Settings menu
-        quicklaunch_submenu = self.page_widgets.get_side_menu_by_type(type(self))
-        assert quicklaunch_submenu
-        quicklaunch_submenu.reset_widgets()
-        quicklaunch_submenu.add_button_menu_entry(
-            "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.png")
-        quicklaunch_submenu.add_button_menu_entry(
-            "Add AppLink", self.on_add_link, "icons/add_link.png")
-        quicklaunch_submenu.add_button_menu_entry(
-            "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
-        quicklaunch_submenu.add_menu_line()
-
-        quicklaunch_submenu.add_toggle_menu_entry(
-            "Auto-install quicklaunch packages", self.on_toggle_auto_install, app.active_settings.get_bool(AUTO_INSTALL_QUICKLAUNCH_REFS))
 
     def on_toggle_auto_install(self):
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore

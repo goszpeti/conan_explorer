@@ -27,7 +27,7 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QFrame, QVBoxL
 from .common import (AsyncLoader, activate_theme, init_qt_logger,
                      remove_qt_logger)
 from .fluent_window import FluentWindow, SideSubMenu
-from .plugin import PluginInterface
+from .plugin import PluginInterfaceV1
 from .model import UiApplicationModel
 from .views import AboutPage, AppGridView, PluginsPage
 
@@ -67,14 +67,15 @@ class MainWindow(FluentWindow):
         # Default pages
         self.about_page = AboutPage(self, self.base_signals)
         self.plugins_page = PluginsPage(self, self._plugin_handler)
-        self.app_grid = AppGridView(self, self.model.app_grid, self.conan_pkg_installed, self.page_widgets)
+        self.app_grid = AppGridView(self, self.model.app_grid, self.base_signals, self.page_widgets)
         self._init_left_menu()
         self._init_right_menu()
 
         self._plugin_handler.load_plugin.connect(self._load_plugin)
+        self.restore_window_state()
 
     def resize_page(self, widget: QWidget):
-        widget.setFixedWidth(self.ui.center_frame.width() - 4)
+        widget.setMaximumWidth(self.ui.center_frame.width() - 4)
 
     def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.png", is_upper_menu=True, page_widget=self.app_grid,
@@ -147,12 +148,11 @@ class MainWindow(FluentWindow):
         config_source_str = str(config_source)
         if not config_source:
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
-        self.restore_window_state()
         self._load_plugins()
 
         # model loads incrementally
         loader = AsyncLoader(self)
-        loader.async_loading(self, self._load_job, (config_source_str,))
+        loader.async_loading(self, self._load_job, (config_source_str,), cancel_button=False)
         loader.wait_for_finished()
 
     def _load_plugins(self):
@@ -164,7 +164,7 @@ class MainWindow(FluentWindow):
             sys.path.append(str(import_path.parent))
             module_ = importlib.import_module(import_path.stem)
             class_ = getattr(module_, plugin.plugin_class)
-            plugin_object: PluginInterface = class_(self, self.base_signals, self.page_widgets)
+            plugin_object: PluginInterfaceV1 = class_(self, self.base_signals, self.page_widgets)
             self.add_left_menu_entry(plugin.name, plugin.icon, True, plugin_object, plugin.side_menu)
         except Exception as e:
             Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")

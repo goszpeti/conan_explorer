@@ -34,8 +34,11 @@
   <property name="modal">
    <bool>false</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+  <layout class="QFormLayout" name="formLayout">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::ExpandingFieldsGrow</enum>
+   </property>
+   <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="sizeConstraint">
       <enum>QLayout::SetMinAndMaxSize</enum>
@@ -65,40 +68,9 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="ConanRefLineEdit" name="conan_ref_line_edit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>1024</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="maxLength">
-        <number>1024</number>
-       </property>
-       <property name="frame">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
-   <item>
+   <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QLabel" name="label">
@@ -107,12 +79,9 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QComboBox" name="profile_cbox"/>
-     </item>
     </layout>
    </item>
-   <item>
+   <item row="2" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLabel" name="conan_opts_label">
@@ -127,31 +96,9 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QTreeWidget" name="options_widget">
-       <column>
-        <property name="text">
-         <string>name</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>value</string>
-        </property>
-       </column>
-       <item>
-        <property name="text">
-         <string>Option1</string>
-        </property>
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-      </widget>
-     </item>
     </layout>
    </item>
-   <item>
+   <item row="3" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QLabel" name="label_2">
@@ -160,12 +107,9 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QLineEdit" name="lineEdit"/>
-     </item>
     </layout>
    </item>
-   <item>
+   <item row="5" column="0">
     <widget class="QCheckBox" name="auto_install_check_box">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -178,7 +122,7 @@
      </property>
     </widget>
    </item>
-   <item>
+   <item row="6" column="0">
     <widget class="QCheckBox" name="update_check_box">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -191,7 +135,7 @@
      </property>
     </widget>
    </item>
-   <item>
+   <item row="7" column="0">
     <widget class="QDialogButtonBox" name="button_box">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -204,6 +148,65 @@
      </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLineEdit" name="lineEdit"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="QTreeWidget" name="options_widget">
+     <column>
+      <property name="text">
+       <string>name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>value</string>
+      </property>
+     </column>
+     <item>
+      <property name="text">
+       <string>Option1</string>
+      </property>
+      <property name="text">
+       <string>1</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QComboBox" name="profile_cbox"/>
+   </item>
+   <item row="0" column="1">
+    <widget class="ConanRefLineEdit" name="conan_ref_line_edit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>1024</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="maxLength">
+      <number>1024</number>
+     </property>
+     <property name="frame">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

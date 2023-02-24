@@ -4,11 +4,11 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
                              QVBoxLayout)
-from conan_app_launcher.ui.plugin.plugins import PluginInterface
+from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 
 from jinja2 import Template
 
-class AboutPage(PluginInterface):
+class AboutPage(PluginInterfaceV1):
     """ Defines About page """
     html_content = f"""
 

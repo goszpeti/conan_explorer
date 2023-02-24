@@ -4,7 +4,7 @@ from pathlib import Path
 from conan_app_launcher.app.logger import Logger
 from .main_window import BaseSignals
 from .fluent_window import FluentWindow
-from .plugin import PluginInterface, PluginFile, PluginDescription
+from .plugin import PluginInterfaceV1, PluginFile, PluginDescription
 
 
 def compile_ui_file_if_newer(ui_file: Path):

@@ -60,8 +60,6 @@ class ListAppLink(QFrame):
         self._ui.app_button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
 
-        # self.adjustSize()
-        # self.updateGeometry()
         # connect signals
         self._ui.app_button.clicked.connect(self.on_click)
         self._ui.edit_button.clicked.connect(self.open_edit_dialog)
@@ -116,9 +114,7 @@ class ListAppLink(QFrame):
             self._parent_tab.redraw(force=True)
 
     def resizeEvent(self, event):
-        # self.split_into_lines(self._ui.arguments_value_label, self.model.args)
-        # self.split_into_lines(self._ui.pkg_path_label, str(self.model.get_executable_path()))
-
+        self.split_into_lines(self._ui.arguments_value_label, self.model.args)
         super().resizeEvent(event)
 
     def split_into_lines(self, widget, model_value):
@@ -221,4 +217,3 @@ class ListAppLink(QFrame):
     def apply_conan_info(self):
         """ Update with new conan data """
         self.update_icon()
-        # self._ui.pkg_path_label.setText(str(self.model.get_executable_path()))

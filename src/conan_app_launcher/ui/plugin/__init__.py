@@ -1,1 +1,1 @@
-from .plugins import PluginInterface, PluginDescription, PluginFile
+from .plugins import PluginInterfaceV1, PluginDescription, PluginFile

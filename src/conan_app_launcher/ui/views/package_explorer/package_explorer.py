@@ -2,7 +2,7 @@ import os
 from typing import TYPE_CHECKING
 
 from conan_app_launcher.ui.common.model import re_register_signal
-from conan_app_launcher.ui.plugin.plugins import PluginInterface
+from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 from conan_app_launcher.ui.views.package_explorer.controller import PackageFileExplorerController, PackageSelectionController
 from conan_app_launcher.ui.widgets import RoundedMenu
 from PySide6.QtCore import Qt, Signal
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import BaseSignals
 
 
-class LocalConanPackageExplorer(PluginInterface):
+class LocalConanPackageExplorer(PluginInterfaceV1):
     conan_pkg_selected = Signal(str, dict)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
 
     def __init__(self, parent: QWidget, base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):

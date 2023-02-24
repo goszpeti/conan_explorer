@@ -7,7 +7,7 @@ import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import escape_venv
 from conan_app_launcher.ui.common import get_themed_asset_icon
-from conan_app_launcher.ui.plugin.plugins import PluginInterface
+from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
 from PySide6.QtCore import Qt, Signal
@@ -19,7 +19,7 @@ from .model import ProfilesModel
 from .controller import ConanRemoteController
 
 
-class ConanConfigView(PluginInterface):
+class ConanConfigView(PluginInterfaceV1):
 
     load_signal = Signal()
 

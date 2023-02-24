@@ -26,7 +26,7 @@ from ..common import get_themed_asset_icon
 from .side_menu import SideSubMenu
 
 if TYPE_CHECKING:
-    from ..plugin.plugins import PluginInterface
+    from ..plugin.plugins import PluginInterfaceV1
 
 class WidgetNotFoundException(Exception):
     """ Raised, when a widget searched for, ist in the parent container. """
@@ -93,7 +93,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 buttons.append(button)
             return buttons
 
-        def get_all_pages(self) -> List["PluginInterface"]:
+        def get_all_pages(self) -> List["PluginInterfaceV1"]:
             pages = []
             for _, (_, page, _, _), in self._page_widgets.items():
                 pages.append(page)
