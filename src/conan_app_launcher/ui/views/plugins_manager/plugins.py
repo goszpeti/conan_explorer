@@ -24,7 +24,6 @@ class PluginsPage(ThemedWidget):
         self._controller.update()
         self.set_themed_icon(self._ui.add_plugin_button, "icons/plus_rounded.svg")
         self.set_themed_icon(self._ui.remove_plugin_button, "icons/delete.svg")
-        self.set_themed_icon(self._ui.toggle_plugin_button, "icons/hide.svg")
 
         # self.set_themed_icon(self._ui.search_icon, "icons/search_packages.svg", size=(20,20))
         self._ui.plugins_tree_view.selectionModel().selectionChanged.connect(self.on_plugin_selected)
