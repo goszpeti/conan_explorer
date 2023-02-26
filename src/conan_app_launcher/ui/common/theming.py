@@ -1,6 +1,6 @@
 import platform
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, TypedDict, Union
+from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union
 
 import conan_app_launcher.app as app
 from conan_app_launcher import base_path
