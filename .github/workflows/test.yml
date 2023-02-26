@@ -102,12 +102,12 @@ jobs:
           pip install -e .[test]
       - name: Execute unitests with pytest
         run: |
-          pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
+          pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no {{pytest_args}}
       - name: Execute integration with pytest
         env:
             SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
-          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
+          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no {{pytest_args}}
       - name: Execute system with pytest # Reinstall into site-packages to find install and pkg problems
         env:
             SKIP_CREATE_CONAN_TEST_DATA: True
