@@ -67,9 +67,12 @@ Conan Config
 
 Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04.
 
-1. Qt for Python must be installed with the native package manager, like:
-
-    sudo apt install python3-PyQt6
+1. Pip must be updated to at least pip 20.3, so using a venv like this is recommended:
+    sudo apt install python3-venv
+    python3 -m venv .venv 
+    source .venv/bin/activate
+    python3 -m pip install --upgrade pip
+    pip install conan_app_launcher
 
 2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type "x-terminal-emulator" to get a list of available terminals.
 
