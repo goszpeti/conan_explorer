@@ -36,35 +36,35 @@ jobs:
         include:
           - name: "ubuntu-py37"
             python: "3.7"
-            os: ubuntu-latest
+            os: ubuntu-20.04
             conan: "<2"
           - name: "ubuntu-py38"
             python: "3.8"
-            os: ubuntu-latest
+            os: ubuntu-20.04
             conan: "<2"
           - name: "ubuntu-py39"
             python: "3.9"
             conan: "<2"
-            os: ubuntu-latest
+            os: ubuntu-20.04
           - name: "ubuntu-py310"
             python: "3.10"
             conan: "<2"
-            os: ubuntu-latest
+            os: ubuntu-20.04
           - name: "windows-py311"
             python: "3.11"
             os: windows-latest
             conan: "<2"
           - name: "ubuntu-py38-conan1.24.0"
             python: "3.8"
-            os: ubuntu-latest
+            os: ubuntu-20.04
             conan: "==1.24.0"
           - name: "ubuntu-py310-conan1.48.2"
             python: "3.11"
-            os: ubuntu-latest
+            os: ubuntu-20.04
             conan: "==1.48.2"
           - name: "ubuntu-py311-conan2"
             python: "3.11"
-            os: ubuntu-latest
+            os: ubuntu-20.04
             conan: ">=2"
             pytest_args: "-m conanv2"
     env:
@@ -77,13 +77,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up a display for gui in Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt update
           sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 libxcb-shape0
           /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
       - name: Install xterm for testing in Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-20.04'
         run: |  # terminal, file manager, xwininfo, text-editor
           sudo apt install lxterminal nautilus x11-utils mousepad
           sudo apt install dbus-x11 at-spi2-core
@@ -125,7 +125,7 @@ jobs:
     if: always() # eecute, even when tests fail
     needs:
       - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
         with:
