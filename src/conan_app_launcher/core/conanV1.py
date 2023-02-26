@@ -20,7 +20,7 @@ try:
 except Exception:
     pass
 
-from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF,
+from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF, INVALID_PATH,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, user_save_path)
 from conan_app_launcher.app.logger import Logger
 
@@ -101,19 +101,19 @@ class ConanApi():
     def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """
         if not package_id: # will give the base path ortherwise
-            return Path("NULL")
+            return Path(INVALID_PATH)
         try:
             layout = self.client_cache.package_layout(conan_ref)
             return Path(layout.package(PackageReference(conan_ref, package_id)))
         except Exception:  # gotta catch 'em all!
-            return Path("NULL")
+            return Path(INVALID_PATH)
 
     def get_export_folder(self, conan_ref: ConanFileReference) -> Path:
         """ Get the export folder form a reference """
         layout = self.client_cache.package_layout(conan_ref)
         if layout:
             return Path(layout.export())
-        return Path("NULL")
+        return Path(INVALID_PATH)
 
     def get_conanfile_path(self, conan_ref: ConanFileReference) -> Path:
         try:
@@ -124,7 +124,7 @@ class ConanApi():
                 return Path(layout.conanfile())
         except Exception as e:
             Logger().error(f"Can't get conanfile: {str(e)}")
-        return Path("NULL")
+        return Path(INVALID_PATH)
 
     ### Install related methods ###
 
@@ -144,7 +144,7 @@ class ConanApi():
             return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
         except ConanException as error:
             Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
-            return (pkg_id, Path("NULL"))
+            return (pkg_id, Path(INVALID_PATH))
 
     def install_package(self, conan_ref: ConanFileReference, package: ConanPkg, update=True) -> bool:
         """
@@ -184,15 +184,15 @@ class ConanApi():
         packages: List[ConanPkg] = self.get_matching_package_in_remotes(conan_ref, conan_options)
         if not packages:
             self.info_cache.invalidate_remote_package(conan_ref)
-            return ("", Path("NULL"))
+            return ("", Path(INVALID_PATH))
 
         if self.install_package(conan_ref, packages[0], update):
             package = self.find_best_local_package(conan_ref, conan_options)
             pkg_id = package.get("id", "")
             if not pkg_id:
-                return (pkg_id, Path("NULL"))
+                return (pkg_id, Path(INVALID_PATH))
             return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
-        return ("", Path("NULL"))
+        return ("", Path(INVALID_PATH))
 
     # Local References and Packages
 
@@ -200,7 +200,7 @@ class ConanApi():
         package = self.find_best_local_package(conan_ref, conan_options)
         if package.get("id", ""):
             return package.get("id", ""), self.get_package_folder(conan_ref, package.get("id", ""))
-        return "", Path("NULL")
+        return "", Path(INVALID_PATH)
 
     def get_all_local_refs(self) -> List[ConanFileReference]:
         """ Returns all locally installed conan references """

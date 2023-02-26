@@ -1,10 +1,11 @@
 import sys
 from distutils.file_util import copy_file
 from pathlib import Path
+from conan_app_launcher.settings import GUI_STYLE_MATERIAL
 from test.conftest import TEST_REF_OFFICIAL
 import conan_app_launcher.app as app  # using global module pattern
 
-from conan_app_launcher import asset_path
+from conan_app_launcher import INVALID_PATH, asset_path
 from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
                                                           UiAppLinkModel)
 from conans.model.ref import ConanFileReference as CFR
@@ -26,7 +27,7 @@ def test_executable_eval(base_fixture):
     assert app_link.get_executable_path() == exe
 
     app_link.executable = ""
-    assert app_link.get_executable_path() == Path("NULL")
+    assert app_link.get_executable_path() == Path(INVALID_PATH)
 
 
 def test_icon_eval(tmp_path, qtbot, base_fixture):
@@ -39,7 +40,7 @@ def test_icon_eval(tmp_path, qtbot, base_fixture):
 
     # copy icons to tmp_path to fake package path
     copy_file(str(asset_path / "icons" / "icon.ico"), tmp_path)
-    copy_file(str(asset_path / "icons" / "app.png"), tmp_path)
+    copy_file(str(asset_path / "icons" / GUI_STYLE_MATERIAL / "app.svg"), tmp_path)
 
     # relative to package with // notation - migrate from old setting
     app_config = UiAppLinkConfig("AppName", icon="//icon.ico")
@@ -61,9 +62,9 @@ def test_icon_eval(tmp_path, qtbot, base_fixture):
 def test_icon_eval_wrong_path(tmp_path, qtbot, base_fixture, light_theme_fixture):
     """ Test, that a nonexistant path sets to default (check for error removed) """
 
-    app_link = UiAppLinkModel("AppName", icon=str(Path.home() / "nonexistant.png"), executable="abc")
+    app_link = UiAppLinkModel("AppName", icon=str(Path.home() / "nonexistant.svg"), executable="abc")
     assert not app_link.get_icon().isNull()
-    assert str(app_link._eval_icon_path()) == str(asset_path / "icons" / "no-access.png")
+    assert str(app_link._eval_icon_path()) == str(asset_path / "icons" / GUI_STYLE_MATERIAL / "no-access.svg")
 
 
 def test_official_release(base_fixture):

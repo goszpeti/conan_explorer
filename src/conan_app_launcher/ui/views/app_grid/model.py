@@ -5,7 +5,7 @@ from typing import Callable, List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (
-    INVALID_CONAN_REF, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
+    INVALID_CONAN_REF, INVALID_PATH, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
     USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
@@ -122,8 +122,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         """ Create an empty AppModel on init, so we can load it later"""
         # internal repr for vars which have other types or need to be manipulated
         self.conan_options = {}
-        self.package_folder = Path("NULL")
-        self._executable_path = Path("NULL")
+        self.package_folder = Path(INVALID_PATH)
+        self._executable_path = Path(INVALID_PATH)
         self._conan_ref = INVALID_CONAN_REF
         self._conan_file_reference = ConanFileReference.loads(self._conan_ref)
         self._available_refs: List[ConanFileReference] = []
@@ -156,7 +156,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         # get all info from cache
         self.set_available_packages(app.conan_api.info_cache.get_similar_pkg_refs(
             self._conan_file_reference.name, user="*"))
-        pkg_path = Path("NULL")
+        pkg_path = Path(INVALID_PATH)
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
             pkg_path = app.conan_api.info_cache.get_local_package_path(self._conan_file_reference)
             if self.conan_options:
@@ -340,7 +340,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if platform.system() == "Windows":
             possible_matches = self.package_folder.glob(str(exe_rel_path) + "*")
             match_found = False
-            match = Path("NULL")
+            match = Path(INVALID_PATH)
             try:
                 for match in possible_matches:
                     # don't allow for ambiguity!
@@ -354,7 +354,7 @@ class UiAppLinkModel(UiAppLinkConfig):
                     return match
             except NotImplementedError:
                 Logger().error(f"Absolute path not allowed!")
-            return Path("NULL")
+            return Path(INVALID_PATH)
         else:
             return self.package_folder / exe_rel_path
 
@@ -368,7 +368,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._icon = new_value
 
     def _eval_icon_path(self) -> Path:
-        icon_path = Path("NULL")
+        icon_path = Path(INVALID_PATH)
         # relative to package - migrate from old setting
         # config path will be deprecated
         if self._icon.startswith("//"):
@@ -383,9 +383,9 @@ class UiAppLinkModel(UiAppLinkConfig):
             Logger().debug(f"Can't reslolve path of {str(icon_path)}: {str(e)}")
         if not icon_path.exists():
             if self.get_executable_path().exists():
-                icon = "app.png"
+                icon = "app.svg"
             else:
-                icon = "no-access.png"
+                icon = "no-access.svg"
             icon_path = Path(get_asset_image_path("icons/" + icon))
         return icon_path
 
@@ -400,7 +400,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         # default icon, until package path is updated
         if icon.isNull():
-            icon = get_themed_asset_icon("icons/app.png")
+            icon = get_themed_asset_icon("icons/app.svg")
             if self._icon:  # user input given -> warning
                 Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
         return icon

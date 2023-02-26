@@ -39,7 +39,6 @@ def get_asset_image_path(image_path: str) -> Path:
     if asset_path.exists():  # absolute path - return immediately
         return asset_path
 
-    image_path = image_path.replace(".png", ".svg")  # TODO
     asset_path = app.asset_path / image_path
     if not asset_path.exists():  # try in style
         asset_path = asset_path.parent / get_gui_style() / asset_path.name

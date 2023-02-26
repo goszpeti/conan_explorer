@@ -28,7 +28,7 @@ class Ui_Form(object):
         self.gridLayout.setObjectName(u"gridLayout")
         self.treeWidget = QTreeWidget(Form)
         icon = QIcon()
-        icon.addFile(u"../../assets/icons/about.png", QSize(), QIcon.Normal, QIcon.On)
+        icon.addFile(u"../../assets/icons/about.svg", QSize(), QIcon.Normal, QIcon.On)
         __qtreewidgetitem = QTreeWidgetItem(self.treeWidget)
         __qtreewidgetitem1 = QTreeWidgetItem(__qtreewidgetitem)
         __qtreewidgetitem1.setIcon(0, icon);
@@ -45,7 +45,7 @@ class Ui_Form(object):
         self.pushButton = QPushButton(self.frame)
         self.pushButton.setObjectName(u"pushButton")
         icon1 = QIcon()
-        icon1.addFile(u"../../assets/icons/plus_rounded.png", QSize(), QIcon.Normal, QIcon.On)
+        icon1.addFile(u"../../assets/icons/plus_rounded.svg", QSize(), QIcon.Normal, QIcon.On)
         self.pushButton.setIcon(icon1)
 
         self.verticalLayout.addWidget(self.pushButton)
@@ -53,7 +53,7 @@ class Ui_Form(object):
         self.pushButton_3 = QPushButton(self.frame)
         self.pushButton_3.setObjectName(u"pushButton_3")
         icon2 = QIcon()
-        icon2.addFile(u"../../assets/icons/hide.png", QSize(), QIcon.Normal, QIcon.On)
+        icon2.addFile(u"../../assets/icons/hide.svg", QSize(), QIcon.Normal, QIcon.On)
         self.pushButton_3.setIcon(icon2)
 
         self.verticalLayout.addWidget(self.pushButton_3)
@@ -61,7 +61,7 @@ class Ui_Form(object):
         self.pushButton_2 = QPushButton(self.frame)
         self.pushButton_2.setObjectName(u"pushButton_2")
         icon3 = QIcon()
-        icon3.addFile(u"../../assets/icons/minus_rounded.png", QSize(), QIcon.Normal, QIcon.On)
+        icon3.addFile(u"../../assets/icons/minus_rounded.svg", QSize(), QIcon.Normal, QIcon.On)
         self.pushButton_2.setIcon(icon3)
 
         self.verticalLayout.addWidget(self.pushButton_2)

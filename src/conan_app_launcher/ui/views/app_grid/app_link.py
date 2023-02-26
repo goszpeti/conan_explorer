@@ -55,8 +55,8 @@ class ListAppLink(QFrame):
         self._ui = Ui_Form()
         self._ui.setupUi(self)
 
-        self._ui.edit_button.setIcon(QIcon(get_themed_asset_icon("icons/edit.png")))
-        self._ui.remove_button.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
+        self._ui.edit_button.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
+        self._ui.remove_button.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
         self._ui.app_button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
 
@@ -74,31 +74,31 @@ class ListAppLink(QFrame):
         """ Setup context menu. """
         self.menu = RoundedMenu()
         self.open_fm_action = QAction("Show in File Manager", self)
-        self.open_fm_action.setIcon(QIcon(get_themed_asset_icon("icons/file_explorer.png")))
+        self.open_fm_action.setIcon(QIcon(get_themed_asset_icon("icons/file_explorer.svg")))
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
 
         self.menu.addSeparator()
 
         self.add_action = QAction("Add new App Link", self)
-        self.add_action.setIcon(QIcon(get_themed_asset_icon("icons/add_link.png")))
+        self.add_action.setIcon(QIcon(get_themed_asset_icon("icons/add_link.svg")))
         self.menu.addAction(self.add_action)
         self.add_action.triggered.connect(self.open_app_link_add_dialog)
 
         self.edit_action = QAction("Edit", self)
-        self.edit_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.png")))
+        self.edit_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
         self.menu.addAction(self.edit_action)
         self.edit_action.triggered.connect(self.open_edit_dialog)
 
         self.remove_action = QAction("Remove App Link", self)
-        self.remove_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
+        self.remove_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
         self.menu.addAction(self.remove_action)
         self.remove_action.triggered.connect(self.remove)
 
         self.menu.addSeparator()
 
         self.reorder_action = QAction("Reorder App Links", self)
-        self.reorder_action.setIcon(QIcon(get_themed_asset_icon("icons/rearrange.png")))
+        self.reorder_action.setIcon(QIcon(get_themed_asset_icon("icons/rearrange.svg")))
         self.reorder_action.triggered.connect(self.on_move)
 
         self.menu.addAction(self.reorder_action)
@@ -157,7 +157,7 @@ class ListAppLink(QFrame):
 
     def _apply_new_config(self):
         self._ui.app_name.setText(self.model.name)
-        self._ui.conan_ref_label.setToolTip(self.model.conan_ref)
+        self._ui.conan_ref_label.setText(self.model.conan_ref)
         self._ui.app_button.set_icon(self.model.get_icon())
         self._ui.arguments_value_label.setText(self.model.args)
         self._ui.open_shell_checkbox.setChecked(self.model.is_console_application)

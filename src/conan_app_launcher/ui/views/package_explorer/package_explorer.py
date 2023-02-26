@@ -33,7 +33,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self, self._ui.package_file_view, self._ui.package_path_label,
             self.conan_pkg_selected, self._base_signals.conan_pkg_removed, self._page_widgets)
         self.file_cntx_menu = None
-        self.set_themed_icon(self._ui.refresh_button, "icons/refresh.png")
+        self.set_themed_icon(self._ui.refresh_button, "icons/refresh.svg")
 
         # connect pkg selection controller
         self._ui.package_select_view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
@@ -75,27 +75,27 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.select_cntx_menu = RoundedMenu()
 
         self.copy_ref_action = QAction("Copy reference", self)
-        self.set_themed_icon(self.copy_ref_action, "icons/copy_link.png")
+        self.set_themed_icon(self.copy_ref_action, "icons/copy_link.svg")
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self._pkg_sel_ctrl.on_copy_ref_requested)
 
         self.open_export_action = QAction("Open export Folder", self)
-        self.set_themed_icon(self.open_export_action, "icons/opened_folder.png")
+        self.set_themed_icon(self.open_export_action, "icons/opened_folder.svg")
         self.select_cntx_menu.addAction(self.open_export_action)
         self.open_export_action.triggered.connect(self._pkg_sel_ctrl.on_open_export_folder_requested)
 
         self.show_conanfile_action = QAction("Show conanfile", self)
-        self.set_themed_icon(self.show_conanfile_action, "icons/file_preview.png")
+        self.set_themed_icon(self.show_conanfile_action, "icons/file_preview.svg")
         self.select_cntx_menu.addAction(self.show_conanfile_action)
         self.show_conanfile_action.triggered.connect(self._pkg_sel_ctrl.on_show_conanfile_requested)
 
         self.install_ref_action = QAction("Re(install) package", self)
-        self.set_themed_icon(self.install_ref_action, "icons/download_pkg.png")
+        self.set_themed_icon(self.install_ref_action, "icons/download_pkg.svg")
         self.select_cntx_menu.addAction(self.install_ref_action)
         self.install_ref_action.triggered.connect(self._pkg_sel_ctrl.on_install_ref_requested)
 
         self.remove_ref_action = QAction("Remove package", self)
-        self.set_themed_icon(self.remove_ref_action, "icons/delete.png")
+        self.set_themed_icon(self.remove_ref_action, "icons/delete.svg")
         self.select_cntx_menu.addAction(self.remove_ref_action)
         self.remove_ref_action.triggered.connect(self._pkg_sel_ctrl.on_remove_ref_requested)
 
@@ -108,29 +108,29 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.file_cntx_menu = RoundedMenu()
 
         self.open_fm_action = QAction("Show in File Manager", self)
-        self.set_themed_icon(self.open_fm_action, "icons/file_explorer.png")
+        self.set_themed_icon(self.open_fm_action, "icons/file_explorer.svg")
         self.file_cntx_menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self._pkg_file_exp_ctrl.on_open_file_in_file_manager)
 
         self.copy_as_path_action = QAction("Copy as Path", self)
-        self.set_themed_icon(self.copy_as_path_action, "icons/copy_to_clipboard.png")
+        self.set_themed_icon(self.copy_as_path_action, "icons/copy_to_clipboard.svg")
         self.file_cntx_menu.addAction(self.copy_as_path_action)
         self.copy_as_path_action.triggered.connect(self._pkg_file_exp_ctrl.on_copy_file_as_path)
 
         self._edit_file_action = QAction("Edit file", self)
-        self.set_themed_icon(self._edit_file_action, "icons/edit_file.png")
+        self.set_themed_icon(self._edit_file_action, "icons/edit_file.svg")
         self.file_cntx_menu.addAction(self._edit_file_action)
         self._edit_file_action.triggered.connect(self._pkg_file_exp_ctrl.on_edit_file)
 
         self.open_terminal_action = QAction("Open terminal here", self)
-        self.set_themed_icon(self.open_terminal_action, "icons/cmd.png")
+        self.set_themed_icon(self.open_terminal_action, "icons/cmd.svg")
         self.file_cntx_menu.addAction(self.open_terminal_action)
         self.open_terminal_action.triggered.connect(self._pkg_file_exp_ctrl.on_open_terminal_in_dir)
 
         self.file_cntx_menu.addSeparator()
         # TODO QAction::event: Ambiguous shortcut overload: Ctrl+V
         self.copy_action = QAction("Copy", self)
-        self.set_themed_icon(self.copy_action, "icons/copy.png")
+        self.set_themed_icon(self.copy_action, "icons/copy.svg")
         self.copy_action.setShortcut(QKeySequence("Ctrl+c"))
         self.copy_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self.file_cntx_menu.addAction(self.copy_action)
@@ -139,7 +139,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.copy_action.triggered.connect(self._pkg_file_exp_ctrl.on_file_copy)
 
         self.paste_action = QAction("Paste", self)
-        self.set_themed_icon(self.paste_action, "icons/paste.png")
+        self.set_themed_icon(self.paste_action, "icons/paste.svg")
         self.paste_action.setShortcut(QKeySequence("Ctrl+v"))  # Qt.CTRL + Qt.Key_V))
         self.paste_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self.addAction(self.paste_action)
@@ -147,7 +147,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.paste_action.triggered.connect(self._pkg_file_exp_ctrl.on_file_paste)
 
         self.delete_action = QAction("Delete", self)
-        self.set_themed_icon(self.delete_action, "icons/delete.png")
+        self.set_themed_icon(self.delete_action, "icons/delete.svg")
         self.delete_action.setShortcut(QKeySequence(Qt.Key.Key_Delete))
         self.file_cntx_menu.addAction(self.delete_action)
         self.delete_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
@@ -157,7 +157,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.file_cntx_menu.addSeparator()
 
         self.add_link_action = QAction("Add link to App Grid", self)
-        self.set_themed_icon(self.add_link_action, "icons/add_link.png")
+        self.set_themed_icon(self.add_link_action, "icons/add_link.svg")
         self.file_cntx_menu.addAction(self.add_link_action)
         self.add_link_action.triggered.connect(self._pkg_file_exp_ctrl.on_add_app_link_from_file)
 

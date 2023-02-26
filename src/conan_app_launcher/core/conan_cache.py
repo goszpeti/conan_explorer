@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
-from conan_app_launcher import INVALID_CONAN_REF
+from conan_app_launcher import INVALID_CONAN_REF, INVALID_PATH
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan_common import ConanFileReference
 
@@ -43,11 +43,11 @@ class ConanInfoCache():
         """ Return cached package path of a locally installed package. """
         conan_ref_str = str(conan_ref)
         if not conan_ref_str or conan_ref_str == INVALID_CONAN_REF:
-            return Path("NULL")
+            return Path(INVALID_PATH)
 
         pkg_path_str = self._local_packages.get(conan_ref_str, "")
         if not pkg_path_str:
-            pkg_path = Path("NULL")
+            pkg_path = Path(INVALID_PATH)
         else:
             pkg_path = Path(pkg_path_str)
 

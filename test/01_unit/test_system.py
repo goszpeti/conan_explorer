@@ -12,7 +12,7 @@ from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 
 import conan_app_launcher  # for mocker
 import psutil
-from conan_app_launcher import PKG_NAME
+from conan_app_launcher import INVALID_PATH, PKG_NAME
 from conan_app_launcher.core.system import (calc_paste_same_dir_name,
                                             copy_path_with_overwrite,
                                             delete_path, execute_app, find_program_in_windows,
@@ -31,7 +31,7 @@ def test_choose_run_file(tmp_path, mocker):
 
     # test with nonexistant path - nothing should happen (no exception raising)
 
-    run_file(Path("NULL"), False, "")
+    run_file(Path(INVALID_PATH), False, "")
     conan_app_launcher.core.system.open_file.assert_not_called()
     conan_app_launcher.core.system.execute_app.assert_not_called()
 

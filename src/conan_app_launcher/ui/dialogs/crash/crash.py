@@ -5,6 +5,7 @@ with prefilled text and stacktrace.
 import platform
 import sys
 import traceback
+from types import TracebackType
 
 from conan_app_launcher import REPO_URL, __version__, user_save_path
 from PySide6.QtCore import Qt
@@ -34,7 +35,8 @@ If applicable, add screenshots to help explain your problem.
 Add any other context about the problem here.
 """
 
-def show_bug_reporting_dialog(excvalue, tb):
+
+def show_bug_reporting_dialog(excvalue: BaseException, tb: TracebackType):
     import urllib.parse  # late import hopefully we don't need this
     error_text = f"{excvalue}\n" + "\n".join(traceback.format_tb(tb, limit=None))
     title = urllib.parse.quote("Application Crash on <>")
@@ -54,7 +56,7 @@ def show_bug_reporting_dialog(excvalue, tb):
     dialog_ui.crash_message_label.setText(html_crash_text)
     dialog_ui.error_text_browser.setText(error_text)
     pixmapi = QStyle.StandardPixmap.SP_MessageBoxCritical
-    icon = dialog.style().standardIcon(pixmapi)   
+    icon = dialog.style().standardIcon(pixmapi)
     dialog.setWindowIcon(icon)
     dialog.setMinimumWidth(800)
     dialog.exec()

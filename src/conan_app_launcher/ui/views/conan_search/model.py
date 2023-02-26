@@ -126,7 +126,7 @@ class PkgSearchModel(TreeModel):
             if index.column() != 0:  # only display icon for first column
                 return
             if item.type == REF_TYPE:
-                return QtGui.QIcon(get_themed_asset_icon("icons/package.png"))
+                return QtGui.QIcon(get_themed_asset_icon("icons/package.svg"))
             if item.type == PROFILE_TYPE:
                 profile_name = item.data(2)
                 return get_platform_icon(profile_name)

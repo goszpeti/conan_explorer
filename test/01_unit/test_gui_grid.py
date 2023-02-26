@@ -9,6 +9,8 @@ import sys
 from pathlib import Path
 import psutil
 from subprocess import check_output
+from conan_app_launcher.core.system import is_windows_11
+from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, GUI_STYLE_MATERIAL
 from test.conftest import TEST_REF, check_if_process_running, conan_create_and_upload
 from time import sleep
 
@@ -142,7 +144,7 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
 
     # open button 
     # absolute
-    icon_path = app.asset_path / "icons" / "about.png"
+    icon_path = app.asset_path / "icons" / GUI_STYLE_MATERIAL/  "about.svg"
     mocker.patch.object(QtWidgets.QFileDialog, 'exec',
                         return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
@@ -151,7 +153,7 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     assert diag._ui.icon_line_edit.text() == str(icon_path)
 
     # relative to package
-    icon_pkg_path = temp_package_path / "icon.png"
+    icon_pkg_path = temp_package_path / "icon.svg"
     # copy icon to pkg
     shutil.copyfile(str(icon_path), str(icon_pkg_path))
 
@@ -160,7 +162,7 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(icon_pkg_path)])
     diag._ui.icon_browse_button.clicked.emit()
-    assert diag._ui.icon_line_edit.text() == "icon.png"
+    assert diag._ui.icon_line_edit.text() == "icon.svg"
     os.unlink(str(icon_pkg_path))
     diag._ui.conan_ref_line_edit._completion_thread.join(1)
     root_obj.close()
@@ -170,6 +172,7 @@ def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
     Test, if the entered data is written correctly.
     """
     app.conan_api.init_api()
+    app.active_settings.set(AUTO_INSTALL_QUICKLAUNCH_REFS, True)
 
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
@@ -246,21 +249,22 @@ def test_AppLink_open(qtbot, base_fixture):
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
-    app_ui = ListAppLink(root_obj, None, app_model)
-    app_ui.load()
+    app_link = ListAppLink(root_obj, None, app_model)
+    app_link.load()
     root_obj.setFixedSize(100, 200)
     root_obj.show()
     qtbot.addWidget(root_obj)
 
     qtbot.waitExposed(root_obj)
-    qtbot.mouseClick(app_ui._app_button, Qt.MouseButton.LeftButton)
+    qtbot.mouseClick(app_link._ui.app_button, Qt.MouseButton.LeftButton)
     sleep(5)  # wait for terminal to spawn
     # check pid of created process
     found_process = None
+    process_name = ""
     if platform.system() == "Linux":
         process_name = "x-terminal-emulator"
     elif platform.system() == "Windows":
-        process_name = "cmd"
+            process_name = "cmd"
     for process in psutil.process_iter():
         try:
             if process_name.lower() in process.name().lower():
@@ -274,6 +278,7 @@ def test_AppLink_open(qtbot, base_fixture):
             pass
     if found_process:
         found_process.kill()
+    assert found_process
 
 
 def test_AppLink_icon_update_from_executable(qtbot, base_fixture):
@@ -290,109 +295,9 @@ def test_AppLink_icon_update_from_executable(qtbot, base_fixture):
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
-    app_ui = ListAppLink(root_obj, None, app_model)
-    app_ui.load()
-
-    assert not app_ui.model.get_icon().isNull()
-    assert not app_ui._app_button._greyed_out
-
-
-def test_AppLink_cbox_switch(qtbot, base_fixture):
-    """
-    Test, that changing the version resets the channel and user correctly
-    """
-    app.conan_api.init_api()
-
-    # all versions have different user and channel names, so we can distinguish them
-    conanfile = str(base_fixture.testdata_path / "conan" / "multi" / "conanfile.py")
-    create_packages = True
-    if create_packages:
-        conan_create_and_upload(conanfile, "switch_test/1.0.0@user1/channel1")
-        conan_create_and_upload(conanfile, "switch_test/1.0.0@user1/channel2")
-        conan_create_and_upload(conanfile, "switch_test/1.0.0@user2/channel3")
-        conan_create_and_upload(conanfile, "switch_test/1.0.0@user2/channel4")
-        conan_create_and_upload(conanfile, "switch_test/2.0.0@user3/channel5")
-        conan_create_and_upload(conanfile, "switch_test/2.0.0@user3/channel6")
-        conan_create_and_upload(conanfile, "switch_test/2.0.0@user4/channel7")
-        conan_create_and_upload(conanfile, "switch_test/2.0.0@user4/channel8")
-
-    # loads it into cache
-    app.conan_api.search_recipe_alternatives_in_remotes(CFR.loads("switch_test/1.0.0@user1/channel1"))
-    # need cache
-    app.active_settings.set(DISPLAY_APP_USERS, True)
-    app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
-
-    app_config = UiAppLinkConfig(name="test", conan_ref="switch_test/1.0.0@user1/channel1",
-                                 is_console_application=True, executable="")
-    app_model = UiAppLinkModel().load(app_config, None)
-    root_obj = QtWidgets.QWidget()
-    root_obj.setFixedSize(100, 200)
-    qtbot.addWidget(root_obj)
-    root_obj.setObjectName("parent")
-    app_link = GridAppLink(root_obj, None, app_model)
+    app_link = ListAppLink(root_obj, None, app_model)
     app_link.load()
-    root_obj.show()
 
-    qtbot.waitExposed(root_obj)
+    assert not app_link.model.get_icon().isNull()
+    assert not app_link._ui.app_button._greyed_out
 
-    # wait for version update
-    if app.conan_worker:
-        app.conan_worker.finish_working()
-    sleep(1)
-
-    # check initial state
-    assert app_link._app_version.count() == 2
-    assert app_link._app_version.itemText(0) == "1.0.0"
-    assert app_link._app_version.itemText(1) == "2.0.0"
-    assert app_link._app_user.count() == 2
-    assert app_link._app_user.itemText(0) == "user1"
-    assert app_link._app_user.itemText(1) == "user2"
-    assert app_link._app_channel.count() == 2
-    assert app_link._app_channel.itemText(0) == "channel1"
-    assert app_link._app_channel.itemText(1) == "channel2"
-
-    # now change version to 2.0.0 -> user can change to default, channel should go to NA
-    # this is done, so that the user can select it and not autinstall something random
-    app_link._app_version.setCurrentIndex(1)
-    assert app_link._app_version.count() == 2
-    assert app_link._app_version.itemText(0) == "1.0.0"
-    assert app_link._app_version.itemText(1) == "2.0.0"
-    assert app_link._app_user.count() == 2
-    assert app_link._app_user.itemText(0) == "user3"
-    assert app_link._app_user.itemText(1) == "user4"
-    assert app_link._app_channel.count() == 3
-    assert app_link._app_channel.itemText(0) == "NA"
-    assert app_link._app_channel.currentIndex() == 0
-    assert app_link._app_channel.itemText(1) == "channel5"
-    assert app_link._app_channel.itemText(2) == "channel6"
-
-    # check that reference and executable has updated
-    assert app_model.conan_ref == "switch_test/2.0.0@user3/NA"
-    assert app_model.get_executable_path() == Path("NULL")
-
-    # change user
-    app_link._app_channel.setCurrentIndex(1)
-    # wait for version update
-    if app.conan_worker:
-        app.conan_worker.finish_working()
-    sleep(1)
-    # setting a channel removes NA entry and entry becomes -1
-    assert app_link._app_channel.itemText(0) == "channel5"
-    assert app_link._app_channel.itemText(1) == "channel6"
-    assert app_link._app_channel.currentIndex() == 0
-    # conan worker currently not integrated -> no pkg path update
-    # assert app_model._package_folder.exists()
-
-    # now change back to 1.0.0 -> user can change to default, channel should go to NA
-    app_link._app_version.setCurrentIndex(0)
-    assert app_link._app_version.count() == 2
-    assert app_link._app_version.itemText(0) == "1.0.0"
-    assert app_link._app_version.itemText(1) == "2.0.0"
-    assert app_link._app_user.count() == 2
-    assert app_link._app_user.itemText(0) == "user1"
-    assert app_link._app_user.itemText(1) == "user2"
-    assert app_link._app_channel.count() == 3
-    assert app_link._app_channel.itemText(0) == "NA"
-    assert app_link._app_channel.currentIndex() == 0
-    assert app_link._app_channel.itemText(1) == "channel1"
-    assert app_link._app_channel.itemText(2) == "channel2"

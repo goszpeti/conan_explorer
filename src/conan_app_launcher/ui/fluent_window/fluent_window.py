@@ -149,10 +149,10 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.settings_button.setMinimumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
         self.ui.settings_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
 
-        self.set_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.png")
-        self.set_themed_icon(self.ui.settings_button, "icons/settings.png")
+        self.set_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.svg")
+        self.set_themed_icon(self.ui.settings_button, "icons/settings.svg")
 
-        self.set_themed_icon(self.ui.minimize_button, "icons/minus.png")
+        self.set_themed_icon(self.ui.minimize_button, "icons/minus.svg")
         self.set_themed_icon(self.ui.close_button, "icons/close.svg")
         # balance out size incostinensies #TODO setting
         from ..common.theming import get_gui_style
@@ -451,12 +451,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
         if self.isMaximized():
             if self.ui.restore_max_button.icon().themeName() == "restore" and not force:
                 return
-            icon = get_themed_asset_icon("icons/restore.png")
+            icon = get_themed_asset_icon("icons/restore.svg")
             icon.setThemeName("restore")
             self.ui.restore_max_button.setIcon(icon)
         else:
             if self.ui.restore_max_button.icon().themeName() == "maximize" and not force:
                 return
-            icon = get_themed_asset_icon("icons/maximize.png")
+            icon = get_themed_asset_icon("icons/maximize.svg")
             icon.setThemeName("maximize")
             self.ui.restore_max_button.setIcon(icon)

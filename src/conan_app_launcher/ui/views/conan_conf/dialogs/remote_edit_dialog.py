@@ -26,7 +26,7 @@ class RemoteEditDialog(QDialog):
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
 
-        self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.png")))
+        self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.svg")))
         # self._ui.login_button.clicked.connect(self.on_login_clicked)
         self._ui.button_box.accepted.connect(self.save)
 

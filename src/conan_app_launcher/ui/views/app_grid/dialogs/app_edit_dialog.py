@@ -30,7 +30,7 @@ class AppEditDialog(QDialog):
 
         self.setModal(True)
         self.setWindowTitle("Edit App Link")
-        self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.png")))
+        self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.svg")))
 
         self._ui.executable_browse_button.setEnabled(False)
         self._ui.icon_browse_button.setEnabled(False)
@@ -92,7 +92,7 @@ class AppEditDialog(QDialog):
             temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",
                              directory=str(temp_package_path))
-        # filter="Images (*.ico *.png *.jpg)")
+        # filter="Images (*.ico *.svg *.jpg)")
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         # TODO restrict to the package directory, or emit Error dialog and call anew
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
@@ -118,7 +118,7 @@ class AppEditDialog(QDialog):
             temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",
                              directory=str(temp_package_path),
-                             filter="Images (*.ico *.png *.jpg)")
+                             filter="Images (*.ico *.png *.svg *.jpg)")
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             icon_path = Path(dialog.selectedFiles()[0])

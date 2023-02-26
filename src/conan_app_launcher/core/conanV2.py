@@ -18,7 +18,7 @@ from conans.model.package_ref import RecipeReference as PackageReference
 # except:
 #     Logger().error("Trying to import Conan 2 without probably being installed...")
 
-from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF,
+from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF, INVALID_PATH,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path, user_save_path)
 
 from .conan_cache import ConanInfoCache
@@ -76,12 +76,12 @@ class ConanApi():
     def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """
         if not package_id:  # will give the base path ortherwise
-            return Path("NULL")
+            return Path(INVALID_PATH)
         try:
             layout = self.client_cache.pkg_layout(conan_ref)
             return Path(layout.package(PackageReference(conan_ref, package_id)))
         except Exception:  # gotta catch 'em all!
-            return Path("NULL")
+            return Path(INVALID_PATH)
 
     @staticmethod
     def generate_canonical_ref(conan_ref: ConanFileReference) -> str:
@@ -107,7 +107,7 @@ class ConanApi():
         package = self.find_best_local_package(conan_ref, conan_options)
         if package.get("id", ""):
             return package.get("id", ""), self.get_package_folder(conan_ref, package.get("id", ""))
-        return "", Path("NULL")
+        return "", Path(INVALID_PATH)
 
     def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> ConanPkg:
         """ Find a package in the local cache """

@@ -38,7 +38,7 @@ class ReorderDialog(QDialog):
         self._ui = Ui_rearrange_dialog()
         self._ui.setupUi(self)
 
-        self.setWindowIcon(QIcon(str(asset_path / "icons" / "rearrange.png")))
+        self.setWindowIcon(QIcon(str(asset_path / "icons" / "rearrange.svg")))
         
         self._controller = ReorderController(self._ui.list_view, model)
         self._ui.list_view.setModel(model)

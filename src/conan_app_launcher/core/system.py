@@ -12,7 +12,7 @@ from distutils.file_util import copy_file
 from pathlib import Path
 from typing import List
 
-from conan_app_launcher import PKG_NAME, asset_path
+from conan_app_launcher import INVALID_PATH, PKG_NAME, asset_path
 from conan_app_launcher.app.logger import Logger
 from jinja2 import Template
 from packaging import version
@@ -226,14 +226,14 @@ def calc_paste_same_dir_name(dst: Path, index=1):
     if dst.exists():
         new_path = dst.with_name(f"{dst.stem} ({str(index+1)}){dst.suffix}")
         possible_path = calc_paste_same_dir_name(new_path, index+1)
-        if possible_path == Path("NULL"):
+        if possible_path == Path(INVALID_PATH):
             return new_path
         else:
             return dst
     else:
         if index == 1:  # if file does not exist
             return dst
-        return Path("NULL")
+        return Path(INVALID_PATH)
 
 def get_default_file_editor():
     if platform.system() == "Windows":

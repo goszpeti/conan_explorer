@@ -54,8 +54,8 @@ class ConanSearchView(PluginInterfaceV1):
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
-        self.set_themed_icon(self._ui.search_button, "icons/search.png", size=(20, 20))
-        self.set_themed_icon(self._ui.install_button, "icons/download_pkg.png", size=(20, 20))
+        self.set_themed_icon(self._ui.search_button, "icons/search.svg", size=(20, 20))
+        self.set_themed_icon(self._ui.install_button, "icons/download_pkg.svg", size=(20, 20))
 
         self._ui.remote_list.setMinimumHeight(0)
         self._ui.remote_list.setMaximumHeight(0)
@@ -96,17 +96,17 @@ class ConanSearchView(PluginInterfaceV1):
         self.select_cntx_menu = RoundedMenu()
 
         self.copy_ref_action = QAction("Copy reference", self)
-        self.set_themed_icon(self.copy_ref_action, "icons/copy_link.png")
+        self.set_themed_icon(self.copy_ref_action, "icons/copy_link.svg")
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self._search_controller.on_copy_ref_requested)
 
         self.show_conanfile_action = QAction("Show conanfile", self)
-        self.set_themed_icon(self.show_conanfile_action, "icons/file_preview.png")
+        self.set_themed_icon(self.show_conanfile_action, "icons/file_preview.svg")
         self.select_cntx_menu.addAction(self.show_conanfile_action)
         self.show_conanfile_action.triggered.connect(self._search_controller.on_show_conanfile_requested)
 
         self.install_pkg_action = QAction("Install package", self)
-        self.set_themed_icon(self.install_pkg_action, "icons/download_pkg.png")
+        self.set_themed_icon(self.install_pkg_action, "icons/download_pkg.svg")
         self.select_cntx_menu.addAction(self.install_pkg_action)
         self.install_pkg_action.triggered.connect(self._search_controller.on_install_pkg_requested)
 

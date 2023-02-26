@@ -27,7 +27,7 @@ class SideSubMenu(ThemedWidget):
         self.is_top_level = is_top_level
         self.set_title(title)
         self._content_layout = self.ui.content_frame_layout
-        self.set_themed_icon(self.ui.side_menu_title_button, "icons/back.png")
+        self.set_themed_icon(self.ui.side_menu_title_button, "icons/back.svg")
 
         if is_top_level:
             self.ui.side_menu_title_button.hide()  # off per default
@@ -49,7 +49,7 @@ class SideSubMenu(ThemedWidget):
         """
         if not self.is_top_level:
             return False
-        self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
+        self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.svg")
         self.ui.side_menu_title_button.clicked.connect(self.on_expand_minimize)  # off per default
         return True
 
@@ -57,9 +57,9 @@ class SideSubMenu(ThemedWidget):
         """ The title button can be used to minimize a submenu """
         if self.ui.side_menu_content_frame.height() > 0:
             self.ui.side_menu_content_frame.setMaximumHeight(0)
-            self.set_themed_icon(self.ui.side_menu_title_button, "icons/forward.png")
+            self.set_themed_icon(self.ui.side_menu_title_button, "icons/forward.svg")
         else:
-            self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.png")
+            self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.svg")
             self.ui.side_menu_content_frame.setMaximumHeight(4096)
 
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:

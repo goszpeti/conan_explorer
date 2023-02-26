@@ -70,11 +70,11 @@ class AppGridView(PluginInterfaceV1):
         assert quicklaunch_submenu
         quicklaunch_submenu.reset_widgets()
         quicklaunch_submenu.add_button_menu_entry(
-            "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.png")
+            "Open Layout File", self.open_config_file_dialog, "icons/opened_folder.svg")
         quicklaunch_submenu.add_button_menu_entry(
-            "Add AppLink", self.on_add_link, "icons/add_link.png")
+            "Add AppLink", self.on_add_link, "icons/add_link.svg")
         quicklaunch_submenu.add_button_menu_entry(
-            "Reorder AppLinks", self.on_reorder, "icons/rearrange.png")
+            "Reorder AppLinks", self.on_reorder, "icons/rearrange.svg")
         quicklaunch_submenu.add_menu_line()
 
         quicklaunch_submenu.add_toggle_menu_entry(
@@ -120,17 +120,17 @@ class AppGridView(PluginInterfaceV1):
         self.menu = menu
 
         rename_action = QAction("Rename", self)
-        rename_action.setIcon(QIcon(get_themed_asset_icon("icons/rename.png")))
+        rename_action.setIcon(QIcon(get_themed_asset_icon("icons/rename.svg")))
         menu.addAction(rename_action)
         rename_action.triggered.connect(lambda: self.on_tab_rename(index))
 
         remove_action = QAction("Remove", self)
-        remove_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
+        remove_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
         menu.addAction(remove_action)
         remove_action.triggered.connect(lambda: self.on_tab_remove(index))
 
         new_tab_action = QAction("Add new tab", self)
-        new_tab_action.setIcon(QIcon(get_themed_asset_icon("icons/plus.png")))
+        new_tab_action.setIcon(QIcon(get_themed_asset_icon("icons/plus.svg")))
         menu.addAction(new_tab_action)
         new_tab_action.triggered.connect(self.on_new_tab)
 

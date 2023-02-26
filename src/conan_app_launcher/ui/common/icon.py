@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import xml.dom.minidom as dom
+from conan_app_launcher import INVALID_PATH
 from conan_app_launcher.app.logger import Logger
 from PySide6.QtCore import QFileInfo
 from PySide6.QtGui import QIcon, QImage
@@ -32,7 +33,7 @@ def draw_svg_with_color(svg_path: Path, color="white", scale: float = 1.0) -> Pa
     """
     if not svg_path or not svg_path.exists():
         Logger().error("Cannot draw invalid SVG file: %s", repr(svg_path))
-        return Path("NULL")
+        return Path(INVALID_PATH)
 
     # read svg as xml and get the drawing
     with open(svg_path, "r", encoding="utf-8") as svg:
@@ -76,12 +77,12 @@ def get_platform_icon(profile_name: str) -> QIcon:
     from conan_app_launcher.ui.common.theming import get_themed_asset_icon
     profile_name = profile_name.lower()
     if "win" in profile_name:  # I hope people have no random win"s" in their profilename
-        return QIcon(get_themed_asset_icon("icons/global/windows.png"))
+        return QIcon(get_themed_asset_icon("icons/global/windows.svg"))
     elif "linux" in profile_name:
-        return QIcon(get_themed_asset_icon("icons/global/linux.png"))
+        return QIcon(get_themed_asset_icon("icons/global/linux.svg"))
     elif "android" in profile_name:
-        return QIcon(get_themed_asset_icon("icons/global/android.png"))
+        return QIcon(get_themed_asset_icon("icons/global/android.svg"))
     elif "macos" in profile_name:
-        return QIcon(get_themed_asset_icon("icons/global/mac_os.png"))
+        return QIcon(get_themed_asset_icon("icons/global/mac_os.svg"))
     else:
-        return QIcon(get_themed_asset_icon("icons/default_pkg.png"))
+        return QIcon(get_themed_asset_icon("icons/default_pkg.svg"))

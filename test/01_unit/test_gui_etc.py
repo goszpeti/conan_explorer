@@ -6,7 +6,7 @@ import os
 import platform
 import sys
 import traceback
-from conan_app_launcher.app.crash import show_bug_dialog_exc_hook
+from conan_app_launcher.app.crash import bug_dialog_exc_hook
 from conan_app_launcher.ui.common.theming import get_user_theme_color
 from test.conftest import TEST_REF, app_qt_fixture
 
@@ -48,8 +48,9 @@ def test_edit_line_conan(app_qt_fixture, base_fixture, light_theme_fixture):
     widget.setText("zlib/1.2.8")
     assert ConanRefLineEdit.INVALID_COLOR in widget.styleSheet()
     # test autocompletion (very implicit)
+    assert widget._completion_thread
     widget._completion_thread.join(10)
-    assert TEST_REF in widget._remote_refs
+    assert TEST_REF in widget.completer().model().stringList()
     widget.close()
 
 
@@ -102,12 +103,12 @@ def test_about_dialog(app_qt_fixture, base_fixture):
     Check, that the app name is visible and it is hidden after clicking OK:
     """
     root_obj = QtWidgets.QWidget()
-    widget = AboutPage(root_obj)
+    widget = AboutPage(root_obj, None)
     app_qt_fixture.addWidget(root_obj)
     widget.show()
     app_qt_fixture.waitExposed(widget)
 
-    assert conan_app_launcher.APP_NAME in widget._text.text()
+    assert conan_app_launcher.APP_NAME in widget._ui.about_label.text()
 
 
 def test_bug_dialog(qtbot, base_fixture, mocker):
@@ -120,19 +121,19 @@ def test_bug_dialog(qtbot, base_fixture, mocker):
         exc_info = sys.exc_info()
 
     # mock away dialog OK
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+    mocker.patch.object(QtWidgets.QDialog, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Ok)
 
     with pytest.raises(SystemExit) as excinfo:
         # call hook manually
-        show_bug_dialog_exc_hook(*exc_info)
+        bug_dialog_exc_hook(*exc_info)
     # check that we got the correct exit value, so the dialog didn't crash
     assert excinfo.value.args == (1,)
 
     # now check the dialog itself by calling it directly
     dialog = show_bug_reporting_dialog(exc_info[1], exc_info[2])
-    assert dialog.text()
-    assert "\n".join(traceback.format_tb(exc_info[2], limit=None)) in dialog.detailedText()
+    browser: QtWidgets.QTextBrowser = dialog.findChild(QtWidgets.QTextBrowser)
+    assert "\n".join(traceback.format_tb(exc_info[2], limit=None)) in browser.toPlainText()
 
 def test_get_accent_color(mocker):
     """

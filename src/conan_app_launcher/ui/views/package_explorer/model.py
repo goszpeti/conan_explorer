@@ -100,7 +100,7 @@ class PkgSelectModel(TreeModel):
                 return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
         if role == Qt.ItemDataRole.DecorationRole:
             if item.type == REF_TYPE:
-                return QIcon(get_themed_asset_icon("icons/package.png"))
+                return QIcon(get_themed_asset_icon("icons/package.svg"))
             if item.type == PROFILE_TYPE:
                 profile_name = self.get_quick_profile_name(item)
                 return get_platform_icon(profile_name)

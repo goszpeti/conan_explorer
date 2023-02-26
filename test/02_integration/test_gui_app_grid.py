@@ -144,7 +144,6 @@ def test_tab_move_is_saved(app_qt_fixture, ui_no_refs_config_fixture):
 def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
     """ Test, that Edit AppLink Dialog saves all the configured data s"""
     from pytestqt.plugin import _qapp_instance
-    app.active_settings.set(ENABLE_APP_COMBO_BOXES, False)
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
@@ -177,10 +176,8 @@ def test_edit_AppLink(app_qt_fixture, base_fixture, ui_config_fixture, mocker):
     # check that the gui has updated
     assert len(app_link._parent_tab.app_links) == prev_count
     assert app_link.model.name == "NewApp"
-    assert app_link._app_name.text() == "NewApp"
-    assert app_link._app_version.text() == ConanFileReference.loads(TEST_REF).version
-    assert app_link._app_channel.text() == ConanFileReference.loads(TEST_REF).channel
-
+    assert app_link._ui.app_name.text() == "NewApp"  # TEST_REF
+    assert app_link._ui.conan_ref_label.text() == TEST_REF
     # check, that the config file has updated
     config_tabs = JsonUiConfig(ui_config_fixture).load().app_grid.tabs
     assert config_tabs[0].name == "Basics"  # just safety that it is the same tab
@@ -231,8 +228,6 @@ def test_add_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mo
     """ Tests, that the Edit App Dialog wotks for adding a new Link """
     from pytestqt.plugin import _qapp_instance
 
-    app.active_settings.set(DISPLAY_APP_CHANNELS, False)  # disable, to check if a new app uses it
-    app.active_settings.set(DISPLAY_APP_VERSIONS, True)  # disable, to check if a new app uses it
     # preinstall ref, to see if link updates paths
     app.conan_api.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {})
 
@@ -329,7 +324,6 @@ def test_multiple_apps_ungreying(app_qt_fixture, base_fixture):
     app.active_settings = IniSettings(Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
-    app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
     # load path into local cache
     app.conan_api.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {})
 
@@ -343,8 +337,8 @@ def test_multiple_apps_ungreying(app_qt_fixture, base_fixture):
     for tab in main_gui.app_grid.get_tabs():
         for test_app in tab.app_links:
             if test_app.model.name in ["App1 with spaces", "App1 new"]:
-                assert not test_app._app_button._greyed_out, repr(test_app.model.__dict__)
+                assert not test_app._ui.app_button._greyed_out, repr(test_app.model.__dict__)
             elif test_app.model.name in ["App1 wrong path", "App2"]:
-                assert test_app._app_button._greyed_out
+                assert test_app._ui.app_button._greyed_out
 
     main_gui.close()  # cleanup

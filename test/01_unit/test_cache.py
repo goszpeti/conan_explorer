@@ -2,6 +2,7 @@
 import tempfile
 from distutils.file_util import copy_file
 from pathlib import Path
+from conan_app_launcher import INVALID_PATH
 
 from conan_app_launcher.core import ConanInfoCache
 from conans.model.ref import ConanFileReference as CFR
@@ -41,7 +42,7 @@ def test_read_cache(base_fixture):
         }
     }
     assert str(cache.get_local_package_path(CFR.loads("my_package/2.0.0@_/_"))) == "C:\\.conan\\pkg"
-    assert str(cache.get_local_package_path(CFR.loads("my_package/1.0.0@_/_"))) == "NULL"
+    assert str(cache.get_local_package_path(CFR.loads("my_package/1.0.0@_/_"))) == INVALID_PATH
 
     pkgs = cache.get_similar_remote_pkg_refs("my_package", "_")
     assert len(pkgs) == 2

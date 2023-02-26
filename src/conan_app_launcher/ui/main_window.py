@@ -78,7 +78,7 @@ class MainWindow(FluentWindow):
         widget.setMaximumWidth(self.ui.center_frame.width() - 4)
 
     def _init_left_menu(self):
-        self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.png", is_upper_menu=True, page_widget=self.app_grid,
+        self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.svg", is_upper_menu=True, page_widget=self.app_grid,
                                  create_page_menu=True)
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
@@ -102,31 +102,31 @@ class MainWindow(FluentWindow):
 
     def _init_right_menu(self):
         self.main_general_settings_menu.add_button_menu_entry("Select file editor",
-                                                              self.open_file_editor_selection_dialog, "icons/edit_file.png")
+                                                              self.open_file_editor_selection_dialog, "icons/edit_file.svg")
         view_settings_submenu = SideSubMenu(self.ui.right_menu_bottom_content_sw, "View")
 
-        self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/view.png")
+        self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/view.svg")
 
         view_settings_submenu.add_button_menu_entry(
-            "Font Size +", self.on_font_size_increased, "icons/increase_font.png", QKeySequence("CTRL++"), self)
+            "Font Size +", self.on_font_size_increased, "icons/increase_font.svg", QKeySequence("CTRL++"), self)
         view_settings_submenu.add_button_menu_entry(
-            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.png", QKeySequence("CTRL+-"), self)
+            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.svg", QKeySequence("CTRL+-"), self)
         view_settings_submenu.add_menu_line()
 
         view_settings_submenu.add_toggle_menu_entry(
-            "Dark Mode", self.on_dark_mode_changed, get_gui_dark_mode(), "icons/dark_mode.png")
+            "Dark Mode", self.on_dark_mode_changed, get_gui_dark_mode(), "icons/dark_mode.svg")
         self._init_style_chooser()
         view_settings_submenu.add_named_custom_entry(
-            "Icon Style", self._style_chooser_frame, "icons/global/conan_settings.png", force_v_layout=True)
+            "Icon Style", self._style_chooser_frame, "icons/global/conan_settings.svg", force_v_layout=True)
         view_settings_submenu.add_menu_line()
 
         self.main_general_settings_menu.add_menu_line()
         self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
-                                                              app.conan_api.remove_locks, "icons/remove-lock.png")
+                                                              app.conan_api.remove_locks, "icons/remove-lock.svg")
         self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",
-                                                              self.open_cleanup_cache_dialog, "icons/cleanup.png")
+                                                              self.open_cleanup_cache_dialog, "icons/cleanup.svg")
         self.main_general_settings_menu.add_menu_line()
-        self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.png")
+        self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.svg")
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.svg")
 
     def closeEvent(self, event):  # override QMainWindow

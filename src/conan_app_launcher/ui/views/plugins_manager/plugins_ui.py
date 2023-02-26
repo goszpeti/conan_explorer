@@ -37,7 +37,7 @@ class Ui_Form(object):
         self.add_plugin_button = QPushButton(self.buttons_frame)
         self.add_plugin_button.setObjectName(u"add_plugin_button")
         icon = QIcon()
-        icon.addFile(u"../../assets/icons/plus_rounded.png", QSize(), QIcon.Normal, QIcon.On)
+        icon.addFile(u"../../assets/icons/plus_rounded.svg", QSize(), QIcon.Normal, QIcon.On)
         self.add_plugin_button.setIcon(icon)
 
         self.verticalLayout.addWidget(self.add_plugin_button)
@@ -45,7 +45,7 @@ class Ui_Form(object):
         self.toggle_plugin_button = QPushButton(self.buttons_frame)
         self.toggle_plugin_button.setObjectName(u"toggle_plugin_button")
         icon1 = QIcon()
-        icon1.addFile(u"../../assets/icons/hide.png", QSize(), QIcon.Normal, QIcon.On)
+        icon1.addFile(u"../../assets/icons/hide.svg", QSize(), QIcon.Normal, QIcon.On)
         self.toggle_plugin_button.setIcon(icon1)
 
         self.verticalLayout.addWidget(self.toggle_plugin_button)
@@ -53,7 +53,7 @@ class Ui_Form(object):
         self.remove_plugin_button = QPushButton(self.buttons_frame)
         self.remove_plugin_button.setObjectName(u"remove_plugin_button")
         icon2 = QIcon()
-        icon2.addFile(u"../../assets/icons/minus_rounded.png", QSize(), QIcon.Normal, QIcon.On)
+        icon2.addFile(u"../../assets/icons/minus_rounded.svg", QSize(), QIcon.Normal, QIcon.On)
         self.remove_plugin_button.setIcon(icon2)
 
         self.verticalLayout.addWidget(self.remove_plugin_button)

@@ -11,8 +11,8 @@ class PasswordLineEdit(QLineEdit):
         # hide per default
         self.setEchoMode(self.EchoMode.Password)
 
-        self.show_icon = get_themed_asset_icon("icons/show.png")
-        self.hide_icon = get_themed_asset_icon("icons/hide.png")
+        self.show_icon = get_themed_asset_icon("icons/show.svg")
+        self.hide_icon = get_themed_asset_icon("icons/hide.svg")
 
         self.toggle_show_pw_action = self.addAction(self.show_icon, self.ActionPosition.TrailingPosition)
         self.toggle_show_pw_action.triggered.connect(self.on_toggle_show_password)

@@ -68,10 +68,12 @@ class PathSetup():
         self.testdata_path = self.test_path / "testdata"
 
 
-def check_if_process_running(process_name, kill=False):
+def check_if_process_running(process_name, cmd_contains=[], kill=False):
     for process in psutil.process_iter():
         try:
             if process_name.lower() in process.name().lower():
+                for cmd_contain in cmd_contains:
+                    assert cmd_contain in process.cmdline()[1]
                 if kill:
                     process.kill()
                 return True
@@ -232,7 +234,8 @@ def base_fixture():
 @pytest.fixture
 def light_theme_fixture(base_fixture):
     import conan_app_launcher.app as app
-    app.active_settings.set(GUI_STYLE, GUI_MODE_LIGHT)
+    app.active_settings.set(GUI_MODE, GUI_MODE_LIGHT)
+    app.active_settings.set(GUI_STYLE, GUI_STYLE_MATERIAL)
 
 
 def temp_ui_config(config_file_path: Path):

@@ -1,11 +1,11 @@
 
 import sys
 import traceback
+from types import TracebackType
 
 from conan_app_launcher import __version__, user_save_path
 
-
-def show_bug_dialog_exc_hook(exctype, excvalue, tb):
+def bug_dialog_exc_hook(exctype: type[BaseException], excvalue: BaseException, tb: TracebackType):
     print("Application crashed")
     error_text = f"ERROR: {str(exctype)} {excvalue}"
     with open(user_save_path / "crash.log", "w") as fd:

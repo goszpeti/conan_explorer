@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Optional
 
-from conan_app_launcher import ICON_SIZE
+from conan_app_launcher import ICON_SIZE, INVALID_PATH
 
 from PySide6.QtCore import Signal, QSize, Qt
 from PySide6.QtWidgets import QPushButton, QGraphicsColorizeEffect, QGraphicsPixmapItem
@@ -17,7 +17,7 @@ class ClickableIcon(QPushButton):
     """
 
     # TODO flags
-    def __init__(self, parent, image=Path("NULL"), icon_size=ICON_SIZE):
+    def __init__(self, parent, image=Path(INVALID_PATH), icon_size=ICON_SIZE):
         super().__init__(parent=parent)
 
         self._greyed_out = True  # Must be ungreyed, when available

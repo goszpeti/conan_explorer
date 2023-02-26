@@ -15,11 +15,11 @@ def compile_ui_file_if_newer(ui_file: Path):
     os.system(f"pyside6-uic -o {str(py_ui_file)} {str(ui_file)}")
 
 # compile uic files, if needed
-from conan_app_launcher import DEBUG_LEVEL
+from conan_app_launcher import DEBUG_LEVEL, INVALID_PATH
 if DEBUG_LEVEL > 0:
     current_dir = Path(__file__).parent
     for ui_file in current_dir.glob("**/*.ui"):
-        py_ui_file = Path("NULL")
+        py_ui_file = Path(INVALID_PATH)
         try:
             compile_ui_file_if_newer(ui_file)
         except Exception as e:

@@ -27,7 +27,7 @@ class SamplePluginView(PluginInterfaceV1):
         self._ui.setupUi(self)
 
         # apply an icon which is inverted, when turning on dark mode
-        self.set_themed_icon(self._ui.icon_label, str(current_dir / "about.png"), size=(20, 20))
+        self.set_themed_icon(self._ui.icon_label, str(current_dir / "about.svg"), size=(20, 20))
        
         # register load method for load signal (runs when GUI is starting and displays loading screen) 
         self.load_signal.connect(self.load)
@@ -48,7 +48,7 @@ class SamplePluginView(PluginInterfaceV1):
         menu = self._page_widgets.get_side_menu_by_type(type(self))
         assert menu
         menu.reset_widgets()
-        menu.add_button_menu_entry("My Button", self.on_option_button, "icons/opened_folder.png")
+        menu.add_button_menu_entry("My Button", self.on_option_button, "icons/opened_folder.svg")
         menu.add_menu_line()
         menu.add_toggle_menu_entry("My Toggle", self.on_option_toggled, True)
 

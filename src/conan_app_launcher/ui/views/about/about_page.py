@@ -1,18 +1,11 @@
 from pathlib import Path
 from conan_app_launcher import APP_NAME, AUTHOR, REPO_URL, __version__, asset_path
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import (QFrame, QLabel, QSizePolicy, QSpacerItem,
-                             QVBoxLayout)
 from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 
 from jinja2 import Template
 
 class AboutPage(PluginInterfaceV1):
-    """ Defines About page """
-    html_content = f"""
-
-    """
 
     def __init__(self, parent, base_signals):
         super().__init__(parent, base_signals=base_signals)

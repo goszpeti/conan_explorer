@@ -38,7 +38,7 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.remotes_tree_view, self._base_signals.conan_remotes_updated)
         self._init_remotes_tab()
         self._init_profiles_tab()
-        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.png")
+        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
 
         self.config_file_path = Path(app.conan_api.client_cache.conan_conf_path)
         self.profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
@@ -98,10 +98,10 @@ class ConanConfigView(PluginInterfaceV1):
             self.on_profile_context_menu_requested)
         self._init_profile_context_menu()
         self._ui.profile_save_button.clicked.connect(self.save_profile_file)
-        self.set_themed_icon(self._ui.profile_save_button, "icons/save.png")
-        self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.png")
-        self.set_themed_icon(self._ui.profile_remove_button, "icons/delete.png")
-        self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.png")
+        self.set_themed_icon(self._ui.profile_save_button, "icons/save.svg")
+        self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.svg")
+        self.set_themed_icon(self._ui.profile_remove_button, "icons/delete.svg")
+        self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.svg")
 
     def _load_profiles_tab(self):
         profiles_model = ProfilesModel()
@@ -111,7 +111,7 @@ class ConanConfigView(PluginInterfaceV1):
     def _init_profile_context_menu(self):
         self.profiles_cntx_menu = RoundedMenu()
         self._copy_profile_action = QAction("Copy profile name", self)
-        self._copy_profile_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.png")))
+        self._copy_profile_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.svg")))
         self.profiles_cntx_menu.addAction(self._copy_profile_action)
         self._copy_profile_action.triggered.connect(self.on_copy_profile_requested)
 
@@ -157,19 +157,19 @@ class ConanConfigView(PluginInterfaceV1):
 
     def _init_remotes_tab(self):
         self._ui.remote_refresh_button.clicked.connect(self._remotes_controller.update)
-        self.set_themed_icon(self._ui.remote_refresh_button, "icons/refresh.png")
+        self.set_themed_icon(self._ui.remote_refresh_button, "icons/refresh.svg")
         self._ui.remote_login.clicked.connect(self.on_remotes_login)
-        self.set_themed_icon(self._ui.remote_login, "icons/login.png")
+        self.set_themed_icon(self._ui.remote_login, "icons/login.svg")
         self._ui.remote_toggle_disabled.clicked.connect(self.on_remote_disable)
-        self.set_themed_icon(self._ui.remote_toggle_disabled, "icons/hide.png")
+        self.set_themed_icon(self._ui.remote_toggle_disabled, "icons/hide.svg")
         self._ui.remote_add.clicked.connect(self.on_remote_add)
-        self.set_themed_icon(self._ui.remote_add, "icons/plus_rounded.png")
+        self.set_themed_icon(self._ui.remote_add, "icons/plus_rounded.svg")
         self._ui.remote_remove.clicked.connect(self.on_remote_remove)
-        self.set_themed_icon(self._ui.remote_remove, "icons/delete.png")
+        self.set_themed_icon(self._ui.remote_remove, "icons/delete.svg")
         self._ui.remote_move_up_button.clicked.connect(self._remotes_controller.move_up)
-        self.set_themed_icon(self._ui.remote_move_up_button, "icons/arrow_up.png")
+        self.set_themed_icon(self._ui.remote_move_up_button, "icons/arrow_up.svg")
         self._ui.remote_move_down_button.clicked.connect(self._remotes_controller.move_down)
-        self.set_themed_icon(self._ui.remote_move_down_button, "icons/arrow_down.png")
+        self.set_themed_icon(self._ui.remote_move_down_button, "icons/arrow_down.svg")
 
         self._ui.remotes_tree_view.doubleClicked.connect(self.on_remote_edit)
         self._ui.remotes_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -183,32 +183,32 @@ class ConanConfigView(PluginInterfaceV1):
     def _init_remote_context_menu(self):
         self._remotes_cntx_menu = RoundedMenu()
         self._copy_remote_action = QAction("Copy remote name", self)
-        self._copy_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.png")))
+        self._copy_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.svg")))
         self._remotes_cntx_menu.addAction(self._copy_remote_action)
         self._copy_remote_action.triggered.connect(self.on_copy_remote_name_requested)
 
         self._edit_remote_action = QAction("Edit remote", self)
-        self._edit_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.png")))
+        self._edit_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
         self._remotes_cntx_menu.addAction(self._edit_remote_action)
         self._edit_remote_action.triggered.connect(self.on_remote_edit)
 
         self._add_remote_action = QAction("Add new remote", self)
-        self._add_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/plus_rounded.png")))
+        self._add_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/plus_rounded.svg")))
         self._remotes_cntx_menu.addAction(self._add_remote_action)
         self._add_remote_action.triggered.connect(self.on_remote_add)
 
         self._remove_remote_action = QAction("Remove remote", self)
-        self._remove_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.png")))
+        self._remove_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
         self._remotes_cntx_menu.addAction(self._remove_remote_action)
         self._remove_remote_action.triggered.connect(self.on_remote_remove)
 
         self._disable_profile_action = QAction("Disable/Enable remote", self)
-        self._disable_profile_action.setIcon(QIcon(get_themed_asset_icon("icons/hide.png")))
+        self._disable_profile_action.setIcon(QIcon(get_themed_asset_icon("icons/hide.svg")))
         self._remotes_cntx_menu.addAction(self._disable_profile_action)
         self._disable_profile_action.triggered.connect(self.on_remote_disable)
 
         self._login_remotes_action = QAction("(Multi)Login to remote", self)
-        self._login_remotes_action.setIcon(QIcon(get_themed_asset_icon("icons/login.png")))
+        self._login_remotes_action.setIcon(QIcon(get_themed_asset_icon("icons/login.svg")))
         self._remotes_cntx_menu.addAction(self._login_remotes_action)
         self._login_remotes_action.triggered.connect(self.on_remotes_login)
 

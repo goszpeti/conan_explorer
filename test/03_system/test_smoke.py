@@ -12,9 +12,9 @@ import conan_app_launcher
 from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
                                          settings_factory)
 from PySide6 import QtWidgets
+from pytest_check import check
 
 from test.conftest import check_if_process_running
-import psutil
 
 def test_main_loop_mock(base_fixture, mocker):
     """
@@ -51,22 +51,11 @@ def test_main_loop(base_fixture):
     Popen(["conan_app_launcher"])
 
     time.sleep(4)
-    try:
-        found_process = False
-        for process in psutil.process_iter():
-            if platform.system() == "Windows":
-                script = "Scripts\\conan_app_launcher-script.pyw"
-            else:
-                script = "bin/conan_app_launcher" # TODO
-            try:
-                if process.cmdline() and "python" in process.cmdline()[0].lower() and script in process.cmdline()[1]:
-                    found_process = True
-                    process.kill()
-                    break
-            except Exception:
-                pass
-        time.sleep(2)
-        assert found_process
-    finally:
-        # delete config file
-        os.remove(str(settings_file_path))
+    if platform.system() == "Windows":
+        script = "Scripts\\conan_app_launcher-script.pyw"
+    else:
+        script = "bin/conan_app_launcher"  # TODO
+    with check:
+        assert check_if_process_running("python", [script], kill=True)
+    # delete config file
+    os.remove(str(settings_file_path))
