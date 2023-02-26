@@ -51,18 +51,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="toggle_plugin_button">
-        <property name="text">
-         <string>Enable / Disable</string>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normalon>../../assets/icons/hide.png</normalon>
-         </iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="remove_plugin_button">
         <property name="text">
          <string>Remove Plugin</string>

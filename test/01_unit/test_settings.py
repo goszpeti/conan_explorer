@@ -21,9 +21,8 @@ def test_read_from_file():
     assert sets.get(AUTO_INSTALL_QUICKLAUNCH_REFS) == False
     assert sets.get(GUI_MODE) == GUI_MODE_DARK
     assert sets.get(GUI_STYLE) == GUI_STYLE_MATERIAL
-    assert "local_package_explorer" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
-    assert "conan_search" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
-
+    assert "built-in" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
+    assert "9accea0b-b494-11ed-842e-f7808c507c80" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
 
 def test_save_to_file():
     """
@@ -54,3 +53,16 @@ def test_save_to_file():
     assert parser.get("General", "MyCustomKey2") == "abcd"
     # delete tempfile
     os.remove(temp_ini_path)
+
+
+def test_add__remove_setting():
+    """ Tests, that adding and removing a setting permanently works. """
+    temp_ini_path = tempfile.mktemp()
+    sets = IniSettings(Path(temp_ini_path))
+    sets.add("str_setting", "str_value", "TestNode")
+    sets = IniSettings(Path(temp_ini_path))
+    assert sets.get_string("str_setting") == "str_value"
+    sets.remove("str_setting")
+    sets = IniSettings(Path(temp_ini_path))
+    # node should still be there
+    assert len(sets._values["TestNode"]) == 0

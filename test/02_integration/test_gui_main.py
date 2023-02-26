@@ -86,7 +86,6 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
     from pytestqt.plugin import _qapp_instance
 
     # TEST SETUP
-
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
 

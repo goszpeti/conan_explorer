@@ -1,4 +1,6 @@
 import configparser
+from packaging import specifiers, version
+
 import os
 from dataclasses import dataclass
 from distutils.util import strtobool
@@ -20,14 +22,15 @@ if TYPE_CHECKING:
 
 @dataclass
 class PluginDescription():
-    name: str
+    name: str # Display name, also used as page title
     version: str
     author: str
-    icon: str
-    import_path: str
-    plugin_class: str
+    icon: str # left menu icon
+    import_path: str # this path will be placed on python path or a file directly
+    plugin_class: str # class to be loaded from module
     description: str
-    side_menu: bool
+    side_menu: bool # will create a side menu, which can be accessed by page_widgets
+    conan_versions: str # restrict the plugin to a conan version (will be greyed out)
 
 
 class PluginInterfaceV1(ThemedWidget):
@@ -67,6 +70,12 @@ class PluginFile():
                 return
         app.active_settings.add(str(uuid.uuid1()), plugin_path, PLUGINS_SECTION_NAME)
 
+    @staticmethod
+    def unregister(plugin_path: str):
+        for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
+            plugin_file_path = app.active_settings.get_string(plugin_group_name)
+            if Path(plugin_file_path) == plugin_path:
+                app.active_settings.remove(plugin_group_name)
 
     @staticmethod
     def read_file(plugin_file_path: str) -> List[PluginDescription]:
@@ -104,7 +113,9 @@ class PluginFile():
                 author = plugin_info.get("author", "Unknown")
 
                 side_menu = bool(strtobool(plugin_info.get("side_menu", "False")))
-                desc = PluginDescription(name, version, author, icon, str(import_path), plugin_class, description, side_menu)
+                conan_versions = plugin_info.get("conan_versions", "")
+                desc = PluginDescription(name, version, author, icon, str(import_path),
+                                         plugin_class, description, side_menu, conan_versions)
                 plugins.append(desc)
             except Exception as e:
                 Logger().error(f"Can't read {section} plugin information from {plugin_file_path}: {str(e)}.")
@@ -145,9 +156,12 @@ class PluginHandler(QObject):
                     return file_plugins
         return []
 
-    def remove_plugin(self, plugin_name: str):
-        # TODO read, which file contains this
-        self.unload_plugin.emit(plugin_name)
+    def remove_plugin(self, plugin_path: str):
+        file_plugins = PluginFile.read_file(plugin_path)
+        PluginFile.unregister(plugin_path)
+        for plugin in file_plugins:
+            if self.is_plugin_enabled(plugin):
+                self.unload_plugin.emit(plugin)
 
     def add_plugin(self, plugin_path: str):
         PluginFile.register(plugin_path)
@@ -156,4 +170,14 @@ class PluginHandler(QObject):
     def _load_plugins_from_file(self, plugin_path: str):
         file_plugins = PluginFile.read_file(plugin_path)
         for plugin in file_plugins:
-            self.load_plugin.emit(plugin)
+            if self.is_plugin_enabled(plugin):
+                self.load_plugin.emit(plugin)
+
+    @staticmethod
+    def eval_conan_version_spec(spec: str, conan_version: str=app.conan_api.client_version) -> bool:
+        specs = specifiers.Specifier(spec)
+        return specs.contains(version.parse(conan_version))
+
+    def is_plugin_enabled(self, plugin: PluginDescription):
+        if not self.eval_conan_version_spec(plugin.conan_versions):
+            return False

@@ -22,7 +22,7 @@ PYTHON_REQUIRES = ">=3.7.0"
 # What packages are required for this module to be executed?
 REQUIRES = [
     'PySide6-Essentials>=6.3.0', # LGPLv3
-    "conan>=1.24, <2",  # MIT License - Conan 2 not enabled yet
+    "conan>=1.24, <2.1",  # MIT License - Conan 2 not enabled yet
     "jsonschema>=3.2.0, <4",  # MIT License
     'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)
     'typing-extensions>=3.10.0.2, <4; python_version<"3.8"',  # Python Software Foundation License(PSF)

@@ -1,8 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 from conan_app_launcher import __version__
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QWidget)
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QFileDialog
 from conan_app_launcher.ui.plugin.plugins import PluginHandler, ThemedWidget
 from .controller import PluginController
@@ -18,12 +16,11 @@ class PluginsPage(ThemedWidget):
     def __init__(self, parent: QWidget, plugin_handler: PluginHandler, base_signals: Optional["BaseSignals"] = None,
                  page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent)
-        self._plugin_handler = plugin_handler
         from .plugins_ui import Ui_Form
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.setObjectName("plugin_manager")
-        self._controller = PluginController(self._ui.plugins_tree_view)
+        self._controller = PluginController(self._ui.plugins_tree_view, plugin_handler)
         self._controller.update()
         self.set_themed_icon(self._ui.add_plugin_button, "icons/plus_rounded.svg")
         self.set_themed_icon(self._ui.remove_plugin_button, "icons/delete.svg")
@@ -33,18 +30,12 @@ class PluginsPage(ThemedWidget):
         self._ui.plugins_tree_view.selectionModel().selectionChanged.connect(self.on_plugin_selected)
         self._ui.add_plugin_button.clicked.connect(self.on_add)
         self._ui.remove_plugin_button.clicked.connect(self.on_remove)
-        self._ui.toggle_plugin_button.clicked.connect(self.on_toggle)
 
     def on_plugin_selected(self):
         plugin = self._controller.get_selected_source_item()
         if not plugin:
             return
         self._ui.path_label.setText(plugin.plugin_path)
-
-    def on_toggle(self):
-        # load / reload
-        # TODO MOVE load/disable code from main window to plugin! 
-        pass
 
     def on_add(self):
         """ Open File dialog with filter for ini files, then load the plugin"""
@@ -53,7 +44,7 @@ class PluginsPage(ThemedWidget):
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             new_file = dialog.selectedFiles()[0]
-            self._plugin_handler.add_plugin(new_file)
+            self._controller.add_plugin(new_file)
         self._controller.update()
 
     def on_remove(self):
@@ -61,5 +52,5 @@ class PluginsPage(ThemedWidget):
         selected_item = self._controller.get_selected_source_item()
         if not selected_item:
             return
-        self._plugin_handler.remove_plugin(selected_item.plugin_path)
+        self._controller.remove_plugin(selected_item.plugin_path)
         self._controller.update()

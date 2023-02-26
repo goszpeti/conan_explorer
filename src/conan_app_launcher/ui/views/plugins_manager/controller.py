@@ -3,14 +3,17 @@ from typing import Optional
 from PySide6.QtCore import QObject, QModelIndex
 from PySide6.QtWidgets import (QTreeView)
 
+from conan_app_launcher.ui.plugin.plugins import PluginHandler
+
 from .model import PluginModel, PluginModelItem
 
 class PluginController(QObject):
 
-    def __init__(self, view: QTreeView) -> None:
+    def __init__(self, view: QTreeView, plugin_handler: PluginHandler) -> None:
         super().__init__(view)
         self._view = view
         self._model = PluginModel()
+        self._plugin_handler = plugin_handler
 
     def update(self):
         self._model = PluginModel()
@@ -34,3 +37,9 @@ class PluginController(QObject):
         count = self._view.model().columnCount(QModelIndex())
         for i in reversed(range(count-1)):
             self._view.resizeColumnToContents(i)
+
+    def add_plugin(self, plugin_path: str):
+        self._plugin_handler.add_plugin(plugin_path)
+
+    def remove_plugin(self, plugin_path: str):
+        self._plugin_handler.remove_plugin(plugin_path)

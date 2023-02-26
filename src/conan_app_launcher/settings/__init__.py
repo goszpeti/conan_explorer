@@ -98,11 +98,16 @@ class SettingsInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, setting_name: str, value: Union[str, int, float, bool]):
+    def set(self, name: str, value: Union[str, int, float, bool]):
         """ Set the value of an existing setting """
         raise NotImplementedError
 
     @abstractmethod
-    def add(self, setting_name: str, value: Union[str, int, float, bool], node: Optional[str]=None):
+    def add(self, name: str, value: Union[str, int, float, bool], node: Optional[str] = None):
         """ Add a new setting """
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove(self, name: str):
+        """ Remove a setting """
         raise NotImplementedError

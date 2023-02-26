@@ -1,18 +1,11 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core import ConanApi
-from conan_app_launcher.core.conan_common import ConanPkg
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
-from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_icon
-from conan_app_launcher.core.conan_common import ConanFileReference
-from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtCore import Qt, Slot, SignalInstance
-from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
+from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_themed_asset_icon
+from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QModelIndex
 
-from conan_app_launcher.ui.common.loading import AsyncLoader
 from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginFile
 
 class PluginModelItem(TreeModelItem):
@@ -25,7 +18,7 @@ class PluginModelItem(TreeModelItem):
 class PluginModel(TreeModel):
     def __init__(self, *args, **kwargs):
         super().__init__(checkable=True, *args, **kwargs)
-        self.root_item = TreeModelItem(["Name", "Version", "Author", "Description"])
+        self.root_item = TreeModelItem(["Name", "Version", "Author", "Description", "Conan support"])
 
     def setup_model_data(self):
         self.root_item.child_items = []

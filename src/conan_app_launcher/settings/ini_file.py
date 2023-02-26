@@ -98,28 +98,39 @@ class IniSettings(SettingsInterface):
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
 
-    def set(self, setting_name: str, value: Union[str, int, float, bool]):
+    def set(self, name: str, value: Union[str, int, float, bool]):
         """ Set the value of a specific setting. Does not write to file, if value is already set. """
-        if setting_name in self._values.keys() and isinstance(value, dict):  # dict type setting
-            if self._values[setting_name] == value:
+        if name in self._values.keys() and isinstance(value, dict):  # dict type setting
+            if self._values[name] == value:
                 return
-            self._values[setting_name].update(value)
+            self._values[name].update(value)
         else:
             for section in self._values.keys():
-                if setting_name in self._values[section]:
-                    if self._values[section][setting_name] == value:
+                if name in self._values[section]:
+                    if self._values[section][name] == value:
                         return
-                    self._values[section][setting_name] = value
+                    self._values[section][name] = value
                     break
         if self._auto_save:
             self.save()
 
-    def add(self, setting_name: str, value: Union[str, int, float, bool], section_name: str):
-        self._values[section_name][setting_name] = value
+    def add(self, name: str, value: Union[str, int, float, bool], node: str):
+        if not self._values.get(node):
+            self._values[node] = {}
+        self._values[node][name] = value
+        self.save()
+
+    def remove(self, name: str):
+        for node_name,node in self._values.items():
+            if name in node:
+                node.pop(name)
+                del self._parser[node_name][name]
+                break
         self.save()
 
     def save(self):
         """ Save all user modifiable settings to file. """
+        # save all default values
         for section in self._values.keys():
             for setting in self._values[section]:
                 self._write_setting(setting, section)
@@ -132,14 +143,14 @@ class IniSettings(SettingsInterface):
         update_needed = False
         try:
             self._parser.read(self._ini_file_path, encoding="UTF-8")
-            for section_name in self._values.keys():
-                setting_keys = set(list(self._values[section_name].keys()))
-                if section_name in self._custom_key_enabled_sections:
-                    setting_keys = setting_keys.union(set(self._get_section(section_name).keys()))
-                if not self._values[section_name]:  # empty section - this is a user filled dict
-                    update_needed |= self._read_dict_setting(section_name)
+            for node in self._values.keys():
+                setting_keys = set(list(self._values[node].keys()))
+                if node in self._custom_key_enabled_sections:
+                    setting_keys = setting_keys.union(set(self._get_section(node).keys()))
+                if not self._values[node]:  # empty section - this is a user filled dict
+                    update_needed |= self._read_dict_setting(node)
                 for setting in setting_keys:
-                    update_needed |= self._read_setting(setting, section_name)
+                    update_needed |= self._read_setting(setting, node)
                 
         except Exception as e:
             Logger().error(
@@ -155,65 +166,65 @@ class IniSettings(SettingsInterface):
         with self._ini_file_path.open('w', encoding="utf8") as ini_file:
             self._parser.write(ini_file)
 
-    def _get_section(self, section_name: str) -> configparser.SectionProxy:
+    def _get_section(self, node: str) -> configparser.SectionProxy:
         """ Helper function to get a section from ini, or create it, if it does not exist."""
-        if section_name not in self._parser:
-            self._parser.add_section(section_name)
-        return self._parser[section_name]
+        if node not in self._parser:
+            self._parser.add_section(node)
+        return self._parser[node]
 
-    def _read_dict_setting(self, section_name: str) -> bool:
+    def _read_dict_setting(self, node: str) -> bool:
         """ 
         Helper function to get a dict style setting.
         Dict settings are section itself and are read dynamically.
         """
-        section = self._get_section(section_name)
+        section = self._get_section(node)
         update_needed = False
-        for setting_name in section.keys():
-            update_needed |= self._read_setting(setting_name, section_name)
+        for name in section.keys():
+            update_needed |= self._read_setting(name, node)
         return update_needed
 
-    def _read_setting(self, setting_name: str, section_name: str) -> bool:
+    def _read_setting(self, name: str, node: str) -> bool:
         """ Helper function to get a setting, which uses the init value to determine the type. 
         Returns, if file needs tobe updated
         """
-        section = self._get_section(section_name)
+        section = self._get_section(node)
         try:
-            default_value = self.get(setting_name)
+            default_value = self.get(name)
         except:
             default_value = ""
         if isinstance(default_value, dict):  # no dicts supported directly
             return False
 
-        if setting_name not in section:  # write out
-            section[setting_name] = str(default_value)
+        if name not in section:  # write out
+            section[name] = str(default_value)
             return True
 
         value = None
         if isinstance(default_value, bool):
-            value = section.getboolean(setting_name)
+            value = section.getboolean(name)
         elif isinstance(default_value, str):
-            value = section.get(setting_name)
+            value = section.get(name)
         elif isinstance(default_value, float):
-            value = float(section.get(setting_name))
+            value = float(section.get(name))
         elif isinstance(default_value, int):
-            value = int(section.get(setting_name))
+            value = int(section.get(name))
         if value is None:  # dict type, value will be taken as a string
-            self._logger.error(f"Settings: Setting {setting_name} to write is unknown", )
+            self._logger.error(f"Settings: Setting {name} to write is unknown", )
             return False
         # autosave must be disabled, otherwise we overwrite the other settings in the file
         auto_save = self._auto_save
         self._auto_save = False
-        self._values[section_name][setting_name] = value
+        self._values[node][name] = value
         self._auto_save = auto_save
         return False
 
-    def _write_setting(self, setting_name, section_name):
+    def _write_setting(self, name, node):
         """ Helper function to write a setting. """
-        value = self.get(setting_name)
+        value = self.get(name)
         if isinstance(value, dict):
             return  # dicts are read only currently
 
-        section = self._get_section(section_name)
-        if setting_name not in section:
-            self._logger.error(f"Settings: Setting {setting_name} to write is unknown")
-        section[setting_name] = str(value)
+        section = self._get_section(node)
+        if name not in section:
+            self._logger.error(f"Settings: Setting {name} to write is unknown")
+        section[name] = str(value)
