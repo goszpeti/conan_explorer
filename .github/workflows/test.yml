@@ -95,7 +95,7 @@ jobs:
       - name: Install specific conan version
         run: | # markupsafe is a workaround fix for broken conan dependencies
           pip install markupsafe==2.0.1 
-          pip install conan${{ matrix.conan }}
+          pip install "conan${{ matrix.conan }}""
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
