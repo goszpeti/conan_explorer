@@ -18,9 +18,9 @@ def test_read_from_file():
 
     sets = IniSettings(paths.testdata_path / "settings/read/config.ini")
     assert sets.get(LAST_CONFIG_FILE) == "C:/work/app_config.json"
-    assert sets.get_bool(DISPLAY_APP_CHANNELS) == False
-    assert sets.get_bool(DISPLAY_APP_VERSIONS) == False
-    assert sets.get_bool(DISPLAY_APP_USERS) == False
+    assert sets.get(AUTO_INSTALL_QUICKLAUNCH_REFS) == False
+    assert sets.get(GUI_MODE) == GUI_MODE_DARK
+    assert sets.get(GUI_STYLE) == GUI_STYLE_MATERIAL
     assert "local_package_explorer" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
     assert "conan_search" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
 

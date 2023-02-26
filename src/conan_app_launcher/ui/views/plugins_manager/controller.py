@@ -1,15 +1,9 @@
-import pprint
-from typing import List, Optional
+from typing import Optional
 
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.core import open_file
-from conan_app_launcher.ui.common import AsyncLoader
-from conan_app_launcher.ui.dialogs import ConanInstallDialog
-from conan_app_launcher.core.conan_common import ConanFileReference
-from PySide6.QtCore import Qt, Slot, SignalInstance, QObject
-from PySide6.QtWidgets import (QApplication, QTreeView, QLineEdit, QPushButton, QTextBrowser, QListWidget)
+from PySide6.QtCore import QObject, QModelIndex
+from PySide6.QtWidgets import (QTreeView)
 
-from .model import PROFILE_TYPE, PluginModel, PluginModelItem
+from .model import PluginModel, PluginModelItem
 
 class PluginController(QObject):
 
@@ -25,18 +19,18 @@ class PluginController(QObject):
         self._view.setRootIsDecorated(False)
         self._view.setModel(self._model)
         self._view.expandAll()
-        self._resize_package_columns()
+        self._resize_columns()
 
-    def get_selected_source_item(self, view) -> Optional[PluginModelItem]:
+    def get_selected_source_item(self) -> Optional[PluginModelItem]:
         """ Gets the selected item from a view """
-        indexes = view.selectedIndexes()
+        indexes = self._view.selectedIndexes()
         if not indexes:
             return None
-        view_index = view.selectedIndexes()[0]
-        source_item = view_index.model().mapToSource(view_index).internalPointer()
+        view_index = indexes[0]
+        source_item = view_index.internalPointer()
         return source_item
 
-    def _resize_package_columns(self):
-        self._view.resizeColumnToContents(2)
-        self._view.resizeColumnToContents(1)
-        self._view.resizeColumnToContents(0)
+    def _resize_columns(self):
+        count = self._view.model().columnCount(QModelIndex())
+        for i in reversed(range(count-1)):
+            self._view.resizeColumnToContents(i)

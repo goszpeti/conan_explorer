@@ -9,6 +9,7 @@ from subprocess import PIPE, STDOUT, check_output, run
 import time
 from pathlib import Path
 from shutil import rmtree
+from conan_app_launcher.ui.views.app_grid.tab import TabList
 from test.conftest import conan_path_str
 from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, user_save_path
 from conan_app_launcher.core import ConanApi
@@ -17,8 +18,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.widgets import AnimatedToggle
-from conan_app_launcher.ui.views.about_page import AboutPage
-from conan_app_launcher.ui.views.app_grid.tab import TabList
+from conan_app_launcher.ui.views import AboutPage
 import conan_app_launcher.app as app  # using global module pattern
 
 from conans.model.ref import ConanFileReference
@@ -49,7 +49,7 @@ def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
     qtbot.waitExposed(main_gui, timeout=3000)
 
     # TEST EVALUATION
-    for tab in main_gui.app_grid.findChildren(TabGrid):
+    for tab in main_gui.app_grid.findChildren(TabList):
         assert tab.model.name == "New Tab"
         for test_app in tab.app_links:
             assert test_app.model.name == "New App"
@@ -223,11 +223,6 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     """
     from pytestqt.plugin import _qapp_instance
 
-    # deactivate all settings
-    app.active_settings.set(DISPLAY_APP_CHANNELS, False)
-    app.active_settings.set(DISPLAY_APP_VERSIONS, False)
-    app.active_settings.set(DISPLAY_APP_USERS, False)
-    app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
@@ -237,7 +232,7 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
 
     # TEST ACTION and EVALUATION
     # assert default state
-    for tab in main_gui.app_grid.findChildren(TabGrid):
+    for tab in main_gui.app_grid.findChildren(TabList):
         for test_app in tab.app_links:
             assert test_app._app_version.isHidden()
             assert test_app._app_user.isHidden()

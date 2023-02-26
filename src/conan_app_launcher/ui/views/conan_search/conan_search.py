@@ -4,8 +4,8 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PySide6.QtCore import QPoint, Qt, Slot, QParallelAnimationGroup, QPropertyAnimation, QAbstractAnimation, QEasingCurve
-from PySide6.QtGui import QIcon, QKeySequence, QAction, QShortcut
+from PySide6.QtCore import QPoint, Qt, Slot, QPropertyAnimation, QEasingCurve
+from PySide6.QtGui import QAction, QShortcut
 from PySide6.QtWidgets import QListWidgetItem, QWidget
 
 from .controller import ConanSearchController
@@ -132,7 +132,6 @@ class ConanSearchView(PluginInterfaceV1):
             self.show_in_pkg_exp_action.setEnabled(False)
         self.select_cntx_menu.exec(self._ui.search_results_tree_view.mapToGlobal(position))
 
-    @Slot()
     def on_show_in_pkg_exp(self):
         """ Switch to the main gui and select the item (ref or pkg) in the Local Package Explorer. """
         item = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view)

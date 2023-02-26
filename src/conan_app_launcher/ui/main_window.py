@@ -45,12 +45,12 @@ class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
 
     # signals for inter page communication
-    conan_pkg_installed = Signal(str, str)  # conan_ref, pkg_id
-    conan_pkg_removed = Signal(str, str)  # conan_ref, pkg_ids
-    conan_remotes_updated = Signal()
-    page_size_changed = Signal(QWidget)
+    conan_pkg_installed: SignalInstance = Signal(str, str)  # type: ignore - conan_ref, pkg_id
+    conan_pkg_removed: SignalInstance = Signal(str, str)  # type: ignore - conan_ref, pkg_ids
+    conan_remotes_updated: SignalInstance = Signal()  # type: ignore
+    page_size_changed: SignalInstance = Signal(QWidget) # type: ignore
 
-    log_console_message = Signal(str)  # str arg is the message
+    log_console_message: SignalInstance = Signal(str)  # type: ignore - message
 
     qt_logger_name = "qt_logger"
 
@@ -250,7 +250,7 @@ class MainWindow(FluentWindow):
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(WideMessageBox.StandardButton.Yes | WideMessageBox.StandardButton.Cancel)
+        msg.setStandardButtons(WideMessageBox.StandardButton.Yes | WideMessageBox.StandardButton.Cancel) # type: ignore
         msg.setIcon(WideMessageBox.Icon.Question)
         msg.setWidth(800)
         msg.setMaximumHeight(600)

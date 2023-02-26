@@ -123,7 +123,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.right_menu_bottom_content_sw.addWidget(self.main_general_settings_menu)
         self.ui.right_menu_bottom_content_sw.setCurrentWidget(self.main_general_settings_menu)
 
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowSystemMenuHint |
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowSystemMenuHint | # type: ignore
                             Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowMaximizeButtonHint)
         if is_windows_11() or platform.system() == "Linux":  # To hide black edges around the border rounding
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)

@@ -6,7 +6,7 @@ from conan_app_launcher.core import open_file
 from conan_app_launcher.ui.common import AsyncLoader
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from conan_app_launcher.core.conan_common import ConanFileReference
-from PySide6.QtCore import Qt, Slot, SignalInstance, QObject
+from PySide6.QtCore import Qt, SignalInstance, QObject
 from PySide6.QtWidgets import (QApplication, QTreeView, QLineEdit, QPushButton, QTextBrowser, QListWidget)
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
@@ -29,7 +29,6 @@ class ConanSearchController(QObject):
         self.conan_pkg_installed = conan_pkg_installed
         self.conan_pkg_removed = conan_pkg_removed
 
-    @Slot()
     def on_search(self):
         """ Search for the user entered text by re-initing the model"""
         # IMPORTANT! if put in async loading, the pyqt signal of the model will be created in another Qt thread
@@ -55,7 +54,6 @@ class ConanSearchController(QObject):
         self._view.sortByColumn(1, Qt.SortOrder.AscendingOrder)  # sort by remote at default
         self._view.selectionModel().selectionChanged.connect(self.on_package_selected)
 
-    @Slot()
     def on_package_selected(self):
         """ Display package info only for pkg ref"""
         item = self.get_selected_source_item(self._view)
@@ -67,13 +65,11 @@ class ConanSearchController(QObject):
             {ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
         self._detail_view.setText(pkg_info)
 
-    @Slot()
     def on_copy_ref_requested(self):
         """ Copy the selected reference to the clipboard """
         combined_ref = self.get_selected_combined_ref()
         QApplication.clipboard().setText(combined_ref)
 
-    @Slot()
     def on_show_conanfile_requested(self):
         """ Show the conanfile by downloading and opening with the associated program """
         combined_ref = self.get_selected_combined_ref()
@@ -83,7 +79,6 @@ class ConanSearchController(QObject):
         loader.async_loading(self._view, open_file, (conanfile,), loading_text="Opening Conanfile...")
         loader.wait_for_finished()
 
-    @Slot()
     def on_install_pkg_requested(self):
         """ Spawn the Conan install dialog """
         combined_ref = self.get_selected_combined_ref()
@@ -122,7 +117,7 @@ class ConanSearchController(QObject):
         indexes = view.selectedIndexes()
         if not indexes:
             return None
-        view_index = view.selectedIndexes()[0]
+        view_index = indexes[0]
         source_item = view_index.model().mapToSource(view_index).internalPointer()
         return source_item
 

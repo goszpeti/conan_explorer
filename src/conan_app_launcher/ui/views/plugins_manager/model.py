@@ -15,27 +15,14 @@ from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
 from conan_app_launcher.ui.common.loading import AsyncLoader
 from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginFile
 
-REF_TYPE = 0
-PROFILE_TYPE = 1
-
-
-class PluginFileModelItem(TreeModelItem):
-
-    def __init__(self, file_path: str, parent):
-        super().__init__(["built-in", "", "", ""], parent, lazy_loading=False)
-
-
 class PluginModelItem(TreeModelItem):
 
-    def __init__(self, plugin: PluginDescription, parent):
+    def __init__(self, plugin: PluginDescription, plugin_path: str,  parent):
         super().__init__([plugin.name, plugin.version, plugin.author, plugin.description], parent, lazy_loading=False)
         self._icon = plugin.icon
-
+        self.plugin_path = str(Path(plugin_path).resolve())
 
 class PluginModel(TreeModel):
-    """
-    """
-
     def __init__(self, *args, **kwargs):
         super().__init__(checkable=True, *args, **kwargs)
         self.root_item = TreeModelItem(["Name", "Version", "Author", "Description"])
@@ -44,14 +31,11 @@ class PluginModel(TreeModel):
         self.root_item.child_items = []
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
             plugin_path = app.active_settings.get_string(plugin_group_name)
-            # plugin_file_element = PluginFileModelItem(plugin_path, self.root_item)
-            # .append_child(plugin_file_element)
             plugins = PluginFile.read_file(plugin_path)
             for plugin in plugins:
-                plugin_element = PluginModelItem(plugin, self.root_item)
+                plugin_element = PluginModelItem(plugin, plugin_path, self.root_item)
                 self.root_item.append_child(plugin_element)
 
-        #     self.root_item.append_child(remote_item)
 
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
@@ -67,20 +51,4 @@ class PluginModel(TreeModel):
                 return
             if isinstance(item, PluginModelItem):
                 return get_themed_asset_icon(item._icon)
-
-        # if isinstance(item, RemotesModelItem):
-        #     if role == Qt.ItemDataRole.FontRole and item.remote.disabled:
-        #         font = QFont()
-        #         font.setItalic(True)
-        #         return font
-
         return None
-
-    def save(self):
-        """ Update every remote with new index and thus save to conan remotes file """
-        pass
-        # i = 0
-        # for remote_item in self.root_item.child_items:
-        #     remote = remote_item.remote
-        #     app.conan_api.conan.remote_update(remote.name, remote.url, remote.verify_ssl, i)
-        #     i += 1

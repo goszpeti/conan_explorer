@@ -117,6 +117,9 @@ class ListAppLink(QFrame):
         self.split_into_lines(self._ui.arguments_value_label, self.model.args)
         super().resizeEvent(event)
 
+    def delete(self): # TODO needed?
+        pass
+
     def split_into_lines(self, widget, model_value):
         """ Calculate, how text can be split into multiple lines, based on the current width"""
         max_width = widget.width()

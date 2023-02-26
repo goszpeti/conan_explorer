@@ -39,7 +39,7 @@
                 {
                     "name": "App2",
                     "executable": "bin/app2.exe",
-                    "icon": "./myicon.png",
+                    "icon": "//myicon.png",
                     "is_console_application": false,
                     "args": "",
                     "conan_options": [],

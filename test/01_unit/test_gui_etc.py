@@ -6,6 +6,7 @@ import os
 import platform
 import sys
 import traceback
+from conan_app_launcher.app.crash import show_bug_dialog_exc_hook
 from conan_app_launcher.ui.common.theming import get_user_theme_color
 from test.conftest import TEST_REF, app_qt_fixture
 
@@ -13,9 +14,8 @@ import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
 import pytest
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
-from conan_app_launcher.ui.views.about_page import AboutPage
-from conan_app_launcher.ui.dialogs.bug_dialog import (bug_reporting_dialog,
-                                                      show_bug_dialog_exc_hook)
+from conan_app_launcher.ui.views import AboutPage
+from conan_app_launcher.ui.dialogs import show_bug_reporting_dialog
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 from conans.model.ref import ConanFileReference
@@ -130,7 +130,7 @@ def test_bug_dialog(qtbot, base_fixture, mocker):
     assert excinfo.value.args == (1,)
 
     # now check the dialog itself by calling it directly
-    dialog = bug_reporting_dialog(exc_info[1], exc_info[2])
+    dialog = show_bug_reporting_dialog(exc_info[1], exc_info[2])
     assert dialog.text()
     assert "\n".join(traceback.format_tb(exc_info[2], limit=None)) in dialog.detailedText()
 

@@ -1,5 +1,4 @@
 import configparser
-import importlib
 import os
 from dataclasses import dataclass
 from distutils.util import strtobool
@@ -10,7 +9,7 @@ from typing import TYPE_CHECKING, List, Optional
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
-from PySide6.QtCore import Signal, QObject
+from PySide6.QtCore import Signal, QObject, SignalInstance
 from PySide6.QtWidgets import QWidget, QSizePolicy
 
 from ..fluent_window.fluent_window import ThemedWidget
@@ -38,7 +37,7 @@ class PluginInterfaceV1(ThemedWidget):
     # Return a signal, which will be called, when the Ui should load.
     # Connect this to your actual load method.
     # This is used for asynchronous loading.
-    load_signal = Signal()
+    load_signal: SignalInstance = Signal() # type: ignore 
 
     def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"] = None, page_widgets: Optional["FluentWindow.PageStore"] = None) -> None:
         ThemedWidget.__init__(self, parent)
@@ -70,12 +69,12 @@ class PluginFile():
 
 
     @staticmethod
-    def read_file(path: str) -> List[PluginDescription]:
-        if not os.path.exists(path):
+    def read_file(plugin_file_path: str) -> List[PluginDescription]:
+        if not os.path.exists(plugin_file_path):
             pass # error
         plugins = []
         parser = configparser.ConfigParser()
-        parser.read(path, encoding="UTF-8")
+        parser.read(plugin_file_path, encoding="UTF-8")
         for section in parser.keys():
             if parser.default_section == section:
                 continue
@@ -90,26 +89,25 @@ class PluginFile():
                 if version == "built-in":
                     icon = icon_str
                 else:
-                    icon = str(Path(path).parent / icon_str)
+                    icon = str(Path(plugin_file_path).parent / icon_str)
 
-                import_path = str(Path(path).parent / plugin_info.get("import_path"))
+                import_path = Path(plugin_file_path).parent / plugin_info.get("import_path")
                 assert import_path, "field 'import_path' is required"
                 # import_path =  / import_path_str
-                # assert import_path.exists(), f"import_path {str(import_path)} does not exist"
-                # if import_path.is_dir(): # needs an __init__.py
-                #     import_path = import_path / "__init__.py"
-                #     assert import_path.exists(), f"import_path {str(import_path)} does not exist"
+                assert import_path.exists(), f"import_path {str(import_path)} does not exist"
+                if import_path.is_dir(): # needs an __init__.py
+                    assert (import_path / "__init__.py").exists()
 
                 plugin_class = plugin_info.get("plugin_class")
                 assert plugin_class, "field 'plugin_class' is required"
                 description = plugin_info.get("description", "")
                 author = plugin_info.get("author", "Unknown")
 
-                side_menu = strtobool(plugin_info.get("side_menu", "False"))
-                desc = PluginDescription(name, version, author, icon, import_path, plugin_class, description, side_menu)
+                side_menu = bool(strtobool(plugin_info.get("side_menu", "False")))
+                desc = PluginDescription(name, version, author, icon, str(import_path), plugin_class, description, side_menu)
                 plugins.append(desc)
             except Exception as e:
-                Logger().error(f"Can't read {section} plugin information from {path}: {str(e)}.")
+                Logger().error(f"Can't read {section} plugin information from {plugin_file_path}: {str(e)}.")
 
         return plugins
 
@@ -126,9 +124,9 @@ class PluginFile():
             parser.write(fd)
 
 class PluginHandler(QObject):
-    load_plugin = Signal(PluginDescription)
-    unload_plugin = Signal(str) 
-    
+    load_plugin: SignalInstance = Signal(PluginDescription)  # type: ignore
+    unload_plugin: SignalInstance = Signal(str)  # type: ignore
+
     def __init__(self, parent: Optional[QObject] = ...) -> None:
         super().__init__(parent)
 
