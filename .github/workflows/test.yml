@@ -37,35 +37,35 @@ jobs:
           - name: "ubuntu-py37"
             python: "3.7"
             os: ubuntu-latest
-            conan: "latest"
+            conan: "<2"
           - name: "ubuntu-py38"
             python: "3.8"
             os: ubuntu-latest
-            conan: "latest"
+            conan: "<2"
           - name: "ubuntu-py39"
             python: "3.9"
-            conan: "latest"
+            conan: "<2"
             os: ubuntu-latest
           - name: "ubuntu-py310"
             python: "3.10"
-            conan: "latest"
+            conan: "<2"
             os: ubuntu-latest
           - name: "windows-py311"
             python: "3.11"
             os: windows-latest
-            conan: "latest"
+            conan: "<2"
           - name: "ubuntu-py38-conan1.24.0"
             python: "3.8"
             os: ubuntu-latest
-            conan: "1.24.0"
+            conan: "==1.24.0"
           - name: "ubuntu-py310-conan1.48.2"
             python: "3.11"
             os: ubuntu-latest
-            conan: "1.48.2"
+            conan: "==1.48.2"
           - name: "ubuntu-py311-conan2"
             python: "3.11"
             os: ubuntu-latest
-            conan: "2.0.0"
+            conan: ">=2"
             pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
@@ -93,17 +93,13 @@ jobs:
           python-version: ${{ matrix.python }}
           # cache: 'pip' # caching pip dependencies - needs requirements .txt
       - name: Install specific conan version
-        if: matrix.conan != 'latest'
         run: | # markupsafe is a workaround fix for broken conan dependencies
           pip install markupsafe==2.0.1 
-          pip install conan==${{ matrix.conan }}
+          pip install conan${{ matrix.conan }}
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
           pip install -e .[test]
-      - name: Update remote
-        run: |
-          conan remote clean
       - name: Execute unitests with pytest
         run: |
           pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no

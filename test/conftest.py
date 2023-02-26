@@ -153,6 +153,8 @@ def start_conan_server():
         conan_server_thread.start()
         time.sleep(3)
         print("ADDING CONAN REMOTE")
+        if is_ci_job():
+            os.system("conan remote clean")
         os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
         os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
         os.system(f"conan remote enable {TEST_REMOTE_NAME}")
