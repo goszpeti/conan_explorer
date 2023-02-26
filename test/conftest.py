@@ -20,10 +20,9 @@ import conan_app_launcher.app as app # resolve circular dependencies
 from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path
 from conan_app_launcher.core import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.ui.common import remove_qt_logger
-from conan_app_launcher.settings import *
 from conan_app_launcher.ui.main_window import MainWindow
-
-from conans.model.ref import ConanFileReference
+from conan_app_launcher.settings import *
+from conan_app_launcher.core.conan_common import ConanFileReference
 
 def get_scripts_path():
     scripts_path = Path(distutils.sysconfig.get_config_var("BINDIR"))

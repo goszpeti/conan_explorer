@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Dict, List
 
 from conan_app_launcher.app.logger import Logger
-import conan
 
 try:
     from conans.model.ref import ConanFileReference, PackageReference

@@ -18,8 +18,8 @@ class ConanInfoCache():
     def __init__(self, cache_dir: Path, local_refs: Optional[List[ConanFileReference]]=None):
         if not local_refs:
             local_refs = []
-        import conan
         try:
+            import conan
             if conan.__version__.startswith("2"):
                 self.CACHE_FILE_NAME = "cacheV2.json"
         except: # not all conan v1 versions have a __version__ var
