@@ -1,4 +1,5 @@
 import json
+import pytest
 import tempfile
 from distutils.file_util import copy_file
 from pathlib import Path
@@ -7,6 +8,7 @@ from conan_app_launcher.ui.config.json_file import JsonUiConfig
 from conans.model.ref import ConanFileReference
 
 
+@pytest.mark.conanv2
 def test_new_filename_is_created(base_fixture):
     """
     Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
@@ -112,8 +114,7 @@ def check_config(ref_dict, test_dict):
             else:
                 try:  # test if it is conanref in string form.
                     # We don't care if it is written differently, as long as it is the same object
-                    ConanFileReference.loads(test_dict.get(
-                        key)) == ConanFileReference.loads(ref_dict.get(key))
+                    assert ConanFileReference.loads(test_dict.get(key)) == ConanFileReference.loads(ref_dict.get(key))
                 except Exception:
                     assert test_dict.get(key) == ref_dict.get(key)
         else:

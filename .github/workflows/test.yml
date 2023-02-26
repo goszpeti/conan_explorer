@@ -31,6 +31,7 @@ jobs:
             "windows-py311",
             "ubuntu-py38-conan1.24.0",
             "ubuntu-py310-conan1.48.2",
+            "ubuntu-py311-conan2",
           ]
         include:
           - name: "ubuntu-py37"
@@ -43,30 +44,29 @@ jobs:
             conan: "latest"
           - name: "ubuntu-py39"
             python: "3.9"
-            use_coverage: true
             conan: "latest"
             os: ubuntu-latest
           - name: "ubuntu-py310"
             python: "3.10"
-            use_coverage: true
             conan: "latest"
             os: ubuntu-latest
           - name: "windows-py311"
             python: "3.11"
             os: windows-latest
-            use_coverage: true
             conan: "latest"
           - name: "ubuntu-py38-conan1.24.0"
             python: "3.8"
             os: ubuntu-latest
             conan: "1.24.0"
-            use_coverage: true
           - name: "ubuntu-py310-conan1.48.2"
             python: "3.11"
             os: ubuntu-latest
             conan: "1.48.2"
-            use_coverage: true
-
+          - name: "ubuntu-py311-conan2"
+            python: "3.11"
+            os: ubuntu-latest
+            conan: "2.0.0"
+            pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
       LC_ALL: "en_US.UTF-8"
@@ -117,7 +117,7 @@ jobs:
             SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
           pip install .[test]
-          pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
+          pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append {{pytest_args}}
       - uses: actions/upload-artifact@v2
         with:
           name: Test results
