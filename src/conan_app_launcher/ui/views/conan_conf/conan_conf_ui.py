@@ -15,11 +15,13 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QFrame,
-    QGridLayout, QGroupBox, QHBoxLayout, QHeaderView,
-    QLabel, QListView, QPushButton, QScrollArea,
-    QSizePolicy, QSpacerItem, QTabWidget, QTextBrowser,
-    QTreeView, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QGridLayout,
+    QGroupBox, QHBoxLayout, QHeaderView, QLabel,
+    QListView, QPushButton, QScrollArea, QSizePolicy,
+    QSpacerItem, QTabWidget, QTextBrowser, QTreeView,
+    QVBoxLayout, QWidget)
+
+from conan_app_launcher.ui.widgets import AnimatedToggle
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -49,90 +51,94 @@ class Ui_Form(object):
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.versions_box = QGroupBox(self.info_contents)
         self.versions_box.setObjectName(u"versions_box")
-        self.gridLayout_2 = QGridLayout(self.versions_box)
-        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.gridLayout = QGridLayout(self.versions_box)
+        self.gridLayout.setObjectName(u"gridLayout")
         self.conan_cur_version_label = QLabel(self.versions_box)
         self.conan_cur_version_label.setObjectName(u"conan_cur_version_label")
 
-        self.gridLayout_2.addWidget(self.conan_cur_version_label, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.conan_cur_version_label, 0, 0, 1, 1)
 
         self.conan_cur_version_value_label = QLabel(self.versions_box)
         self.conan_cur_version_value_label.setObjectName(u"conan_cur_version_value_label")
         self.conan_cur_version_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
-        self.gridLayout_2.addWidget(self.conan_cur_version_value_label, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.conan_cur_version_value_label, 0, 1, 1, 1)
 
         self.python_cur_version_label = QLabel(self.versions_box)
         self.python_cur_version_label.setObjectName(u"python_cur_version_label")
 
-        self.gridLayout_2.addWidget(self.python_cur_version_label, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.python_cur_version_label, 1, 0, 1, 1)
+
+        self.python_cur_version_value_label = QLabel(self.versions_box)
+        self.python_cur_version_value_label.setObjectName(u"python_cur_version_value_label")
+
+        self.gridLayout.addWidget(self.python_cur_version_value_label, 1, 1, 1, 1)
+
+        self.conan_sys_version_label = QLabel(self.versions_box)
+        self.conan_sys_version_label.setObjectName(u"conan_sys_version_label")
+
+        self.gridLayout.addWidget(self.conan_sys_version_label, 2, 0, 1, 1)
 
         self.conan_sys_version_value_label = QLabel(self.versions_box)
         self.conan_sys_version_value_label.setObjectName(u"conan_sys_version_value_label")
         self.conan_sys_version_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
-        self.gridLayout_2.addWidget(self.conan_sys_version_value_label, 2, 1, 1, 1)
-
-        self.conan_sys_version_label = QLabel(self.versions_box)
-        self.conan_sys_version_label.setObjectName(u"conan_sys_version_label")
-
-        self.gridLayout_2.addWidget(self.conan_sys_version_label, 2, 0, 1, 1)
-
-        self.python_cur_version_value_label = QLabel(self.versions_box)
-        self.python_cur_version_value_label.setObjectName(u"python_cur_version_value_label")
-
-        self.gridLayout_2.addWidget(self.python_cur_version_value_label, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.conan_sys_version_value_label, 2, 1, 1, 1)
 
         self.python_sys_version_label = QLabel(self.versions_box)
         self.python_sys_version_label.setObjectName(u"python_sys_version_label")
 
-        self.gridLayout_2.addWidget(self.python_sys_version_label, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.python_sys_version_label, 3, 0, 1, 1)
 
         self.python_sys_version_value_label = QLabel(self.versions_box)
         self.python_sys_version_value_label.setObjectName(u"python_sys_version_value_label")
 
-        self.gridLayout_2.addWidget(self.python_sys_version_value_label, 3, 1, 1, 1)
+        self.gridLayout.addWidget(self.python_sys_version_value_label, 3, 1, 1, 1)
 
+        self.gridLayout.setColumnStretch(0, 1)
+        self.gridLayout.setColumnStretch(1, 2)
 
         self.verticalLayout_7.addWidget(self.versions_box)
 
         self.paths_box = QGroupBox(self.info_contents)
         self.paths_box.setObjectName(u"paths_box")
-        self.gridLayout = QGridLayout(self.paths_box)
-        self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout_2 = QGridLayout(self.paths_box)
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.conan_usr_home_label = QLabel(self.paths_box)
         self.conan_usr_home_label.setObjectName(u"conan_usr_home_label")
 
-        self.gridLayout.addWidget(self.conan_usr_home_label, 0, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.conan_usr_home_label, 0, 0, 1, 1)
 
         self.conan_usr_home_value_label = QLabel(self.paths_box)
         self.conan_usr_home_value_label.setObjectName(u"conan_usr_home_value_label")
         self.conan_usr_home_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
-        self.gridLayout.addWidget(self.conan_usr_home_value_label, 0, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.conan_usr_home_value_label, 0, 1, 1, 1)
 
         self.conan_storage_path_label = QLabel(self.paths_box)
         self.conan_storage_path_label.setObjectName(u"conan_storage_path_label")
 
-        self.gridLayout.addWidget(self.conan_storage_path_label, 1, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.conan_storage_path_label, 1, 0, 1, 1)
 
         self.conan_storage_path_value_label = QLabel(self.paths_box)
         self.conan_storage_path_value_label.setObjectName(u"conan_storage_path_value_label")
         self.conan_storage_path_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
-        self.gridLayout.addWidget(self.conan_storage_path_value_label, 1, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.conan_storage_path_value_label, 1, 1, 1, 1)
 
         self.conan_usr_cache_label = QLabel(self.paths_box)
         self.conan_usr_cache_label.setObjectName(u"conan_usr_cache_label")
 
-        self.gridLayout.addWidget(self.conan_usr_cache_label, 2, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.conan_usr_cache_label, 2, 0, 1, 1)
 
         self.conan_usr_cache_value_label = QLabel(self.paths_box)
         self.conan_usr_cache_value_label.setObjectName(u"conan_usr_cache_value_label")
         self.conan_usr_cache_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
 
-        self.gridLayout.addWidget(self.conan_usr_cache_value_label, 2, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.conan_usr_cache_value_label, 2, 1, 1, 1)
 
+        self.gridLayout_2.setColumnStretch(0, 1)
+        self.gridLayout_2.setColumnStretch(1, 2)
 
         self.verticalLayout_7.addWidget(self.paths_box)
 
@@ -142,16 +148,35 @@ class Ui_Form(object):
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.revision_enabled_label = QLabel(self.features_box)
         self.revision_enabled_label.setObjectName(u"revision_enabled_label")
+        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.revision_enabled_label.sizePolicy().hasHeightForWidth())
+        self.revision_enabled_label.setSizePolicy(sizePolicy)
+        self.revision_enabled_label.setMaximumSize(QSize(16777215, 16777215))
+        self.revision_enabled_label.setMidLineWidth(0)
 
         self.gridLayout_3.addWidget(self.revision_enabled_label, 0, 0, 1, 1)
 
-        self.revision_enabled_checkbox = QCheckBox(self.features_box)
+        self.revision_enabled_checkbox = AnimatedToggle(self.features_box)
         self.revision_enabled_checkbox.setObjectName(u"revision_enabled_checkbox")
         self.revision_enabled_checkbox.setEnabled(False)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.revision_enabled_checkbox.sizePolicy().hasHeightForWidth())
+        self.revision_enabled_checkbox.setSizePolicy(sizePolicy1)
         self.revision_enabled_checkbox.setCheckable(True)
 
         self.gridLayout_3.addWidget(self.revision_enabled_checkbox, 0, 1, 1, 1)
 
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_3.addItem(self.horizontalSpacer, 0, 2, 1, 1)
+
+        self.gridLayout_3.setColumnStretch(0, 1)
+        self.gridLayout_3.setColumnStretch(1, 1)
+        self.gridLayout_3.setColumnStretch(2, 2)
 
         self.verticalLayout_7.addWidget(self.features_box)
 
@@ -345,7 +370,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(1)
+        self.config_tab_widget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -357,9 +382,9 @@ class Ui_Form(object):
         self.conan_cur_version_label.setText(QCoreApplication.translate("Form", u"Current Conan Version:", None))
         self.conan_cur_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
         self.python_cur_version_label.setText(QCoreApplication.translate("Form", u"Current Python Version:", None))
-        self.conan_sys_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
-        self.conan_sys_version_label.setText(QCoreApplication.translate("Form", u"System Conan Version:", None))
         self.python_cur_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
+        self.conan_sys_version_label.setText(QCoreApplication.translate("Form", u"System Conan Version:", None))
+        self.conan_sys_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
         self.python_sys_version_label.setText(QCoreApplication.translate("Form", u"System Python Version:", None))
         self.python_sys_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
         self.paths_box.setTitle(QCoreApplication.translate("Form", u"Paths", None))

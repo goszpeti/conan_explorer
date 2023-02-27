@@ -83,7 +83,7 @@ class SideSubMenu(ThemedWidget):
         label = QLabel(text=name, parent=self)
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
         label.setObjectName(gen_obj_name(name) + "_label")
-        label.setMaximumHeight(20)
+        label.setMaximumHeight(30)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         label.setSizePolicy(sizePolicy)
         icon = None
@@ -131,7 +131,7 @@ class SideSubMenu(ThemedWidget):
         toggle.setMaximumSize(self.TOGGLE_WIDTH, self.TOGGLE_HEIGHT)
         toggle.setChecked(initial_state)
         toggle.stateChanged.connect(target)
-        self.add_named_custom_entry(name, toggle, asset_icon)
+        self.add_named_custom_entry(name, toggle, asset_icon, force_v_layout=True)
         return toggle
 
     def add_sub_menu(self, sub_menu: "SideSubMenu", asset_icon: str = ""):
@@ -148,7 +148,6 @@ class SideSubMenu(ThemedWidget):
         button.setMaximumHeight(50)
         if asset_icon:
             self.set_themed_icon(button, asset_icon)
-        # button.setIconSize(QSize(32, 32))
         button.setText(name)
         button.setStyleSheet(f"text-align:left")
         # insert before spacer

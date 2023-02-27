@@ -32,7 +32,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="info_widget">
       <property name="styleSheet">
@@ -77,7 +77,7 @@
              <property name="title">
               <string>Versions</string>
              </property>
-             <layout class="QGridLayout" name="gridLayout_2">
+             <layout class="QGridLayout" name="gridLayout" columnstretch="1,2">
               <item row="0" column="0">
                <widget class="QLabel" name="conan_cur_version_label">
                 <property name="text">
@@ -102,13 +102,10 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
-               <widget class="QLabel" name="conan_sys_version_value_label">
+              <item row="1" column="1">
+               <widget class="QLabel" name="python_cur_version_value_label">
                 <property name="text">
                  <string>Unknown</string>
-                </property>
-                <property name="textInteractionFlags">
-                 <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
                 </property>
                </widget>
               </item>
@@ -119,10 +116,13 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QLabel" name="python_cur_version_value_label">
+              <item row="2" column="1">
+               <widget class="QLabel" name="conan_sys_version_value_label">
                 <property name="text">
                  <string>Unknown</string>
+                </property>
+                <property name="textInteractionFlags">
+                 <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
                 </property>
                </widget>
               </item>
@@ -148,7 +148,7 @@
              <property name="title">
               <string>Paths</string>
              </property>
-             <layout class="QGridLayout" name="gridLayout">
+             <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,2">
               <item row="0" column="0">
                <widget class="QLabel" name="conan_usr_home_label">
                 <property name="text">
@@ -208,18 +208,39 @@
              <property name="title">
               <string>Features</string>
              </property>
-             <layout class="QGridLayout" name="gridLayout_3">
+             <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,1,2">
               <item row="0" column="0">
                <widget class="QLabel" name="revision_enabled_label">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="midLineWidth">
+                 <number>0</number>
+                </property>
                 <property name="text">
                  <string>Revisions enabled:</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QCheckBox" name="revision_enabled_checkbox">
+               <widget class="AnimatedToggle" name="revision_enabled_checkbox">
                 <property name="enabled">
                  <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
                 <property name="text">
                  <string/>
@@ -228,6 +249,19 @@
                  <bool>true</bool>
                 </property>
                </widget>
+              </item>
+              <item row="0" column="2">
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
              </layout>
             </widget>
@@ -546,6 +580,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AnimatedToggle</class>
+   <extends>QCheckBox</extends>
+   <header>conan_app_launcher.ui.widgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

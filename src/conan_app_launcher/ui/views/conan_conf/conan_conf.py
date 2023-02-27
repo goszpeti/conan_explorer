@@ -118,7 +118,10 @@ class ConanConfigView(PluginInterfaceV1):
     def resizeEvent(self, a0):  # override
         """ Resize remote view columns automatically if window size changes """
         super().resizeEvent(a0)
+
         self._remotes_controller.resize_remote_columns()
+        # self._ui.conan_usr_cache_label.adjustSize()
+        #self._ui.revision_enabled_label.setMaximumWidth(self._ui.conan_usr_cache_label.width())
 
     def reload_themed_icons(self):
         super().reload_themed_icons()

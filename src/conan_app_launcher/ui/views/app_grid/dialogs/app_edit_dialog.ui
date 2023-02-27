@@ -207,7 +207,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </widget>
      </item>
      <item row="5" column="1">
-      <widget class="QCheckBox" name="is_console_app_checkbox">
+      <widget class="AnimatedToggle" name="is_console_app_checkbox">
        <property name="text">
         <string/>
        </property>
@@ -273,6 +273,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>AnimatedToggle</class>
+   <extends>QCheckBox</extends>
+   <header>conan_app_launcher.ui.widgets.h</header>
+  </customwidget>
   <customwidget>
    <class>ConanRefLineEdit</class>
    <extends>QLineEdit</extends>

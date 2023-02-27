@@ -15,11 +15,12 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog,
-    QDialogButtonBox, QGridLayout, QLabel, QLayout,
-    QLineEdit, QPushButton, QSizePolicy, QTextEdit,
-    QToolButton, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
+    QGridLayout, QLabel, QLayout, QLineEdit,
+    QPushButton, QSizePolicy, QTextEdit, QToolButton,
+    QVBoxLayout, QWidget)
 
+from conan_app_launcher.ui.widgets import AnimatedToggle
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 
 class Ui_Dialog(object):
@@ -145,7 +146,7 @@ class Ui_Dialog(object):
 
         self.edit_grid.addWidget(self.conan_ref_label, 1, 0, 1, 1)
 
-        self.is_console_app_checkbox = QCheckBox(Dialog)
+        self.is_console_app_checkbox = AnimatedToggle(Dialog)
         self.is_console_app_checkbox.setObjectName(u"is_console_app_checkbox")
 
         self.edit_grid.addWidget(self.is_console_app_checkbox, 5, 1, 1, 1)
