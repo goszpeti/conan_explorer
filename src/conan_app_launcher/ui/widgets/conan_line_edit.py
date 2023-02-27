@@ -5,7 +5,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan_common import ConanFileReference, PackageReference
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QCompleter, QLineEdit
+from PySide6.QtWidgets import QCompleter, QLineEdit, QListView
 
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode
 
@@ -31,6 +31,10 @@ class ConanRefLineEdit(QLineEdit):
         self._first_show = True # don't call completer on first show
         self._completion_thread = None
         self._loading_cbk = None
+        completer_popup = QListView(self)
+        completer_popup.setLayoutMode(QListView.LayoutMode.Batched)
+        completer_popup.setUniformItemSizes(True)
+        completer.setPopup(completer_popup)
         self.setCompleter(completer)
 
         self.completion_finished.connect(self.completer().complete)

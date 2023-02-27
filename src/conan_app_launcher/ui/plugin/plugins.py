@@ -175,9 +175,15 @@ class PluginHandler(QObject):
 
     @staticmethod
     def eval_conan_version_spec(spec: str, conan_version: str=app.conan_api.client_version) -> bool:
+        if not spec:
+            return True
         specs = specifiers.Specifier(spec)
         return specs.contains(version.parse(conan_version))
 
+
     def is_plugin_enabled(self, plugin: PluginDescription):
-        if not self.eval_conan_version_spec(plugin.conan_versions):
-            return False
+        result = self.eval_conan_version_spec(plugin.conan_versions)
+        if not result:
+            Logger().info(
+                f"Can't load plugin {plugin.name}. Conan version restriction {plugin.conan_versions} applies.")
+        return result

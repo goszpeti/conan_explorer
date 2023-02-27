@@ -1,23 +1,28 @@
+from datetime import datetime, timedelta
+from gc import isenabled
 from PySide6.QtCore import (QEasingCurve, QPoint, QPointF, QPropertyAnimation,
-                          QRectF, QSequentialAnimationGroup, QSize, Qt,
+                          QRectF, QSequentialAnimationGroup, QSize, Qt, 
                           Property, Slot) # type: ignore
 from PySide6.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen
-from PySide6.QtWidgets import QCheckBox
+from PySide6.QtWidgets import QCheckBox, QApplication
 
 
 class AnimatedToggle(QCheckBox):
 
-    _transparent_pen = QPen(Qt.GlobalColor.transparent)
-    _light_grey_pen = QPen(Qt.GlobalColor.lightGray)
-
-    def __init__(self, parent=None, bar_color=Qt.GlobalColor.gray, checked_color="#00B0FF", handle_color=Qt.GlobalColor.white,
-                 pulse_unchecked_color="#44999999", pulse_checked_color="#4400B0EE"):
+    ANIM_DURATION_MS = 600
+    MAX_WIDTH = 65
+    MAX_HEIGHT = 55
+    def __init__(self, parent=None, bar_color=Qt.GlobalColor.gray, checked_color="#00B0FF", 
+                handle_color=Qt.GlobalColor.white, pulse_unchecked_color="#44999999", pulse_checked_color="#4400B0EE"):
 
         super().__init__(parent)
+        self._transparent_pen = QPen(Qt.GlobalColor.transparent)
+        self._light_grey_pen = QPen(Qt.GlobalColor.lightGray)
 
         # needed for paintEvent.
-        self._bar_brush = QBrush(bar_color)
+        self._background_color_brush = QBrush(bar_color)
         self._bar_checked_brush = QBrush(QColor(checked_color).lighter())
+        self._disabled_checked_brush = QBrush(QColor(bar_color).darker())
         self._handle_brush = QBrush(handle_color)
         self._handle_checked_brush = QBrush(QColor(checked_color))
 
@@ -25,29 +30,35 @@ class AnimatedToggle(QCheckBox):
 
         self.setContentsMargins(8, 0, 0, 0)
         self._handle_position = 0
+        self.setMaximumWidth(self.MAX_WIDTH+ 20)
+        self.setFixedWidth(self.MAX_WIDTH)
+        self.setFixedHeight(self.MAX_HEIGHT)
 
         self.stateChanged.connect(self.handle_state_change)
 
-        self._pulse_radius = 0
-
         self.handle_anim = QPropertyAnimation(self, b"handle_position", self)  # type: ignore
         self.handle_anim.setEasingCurve(QEasingCurve.Type.InOutCubic)
-        self.handle_anim.setDuration(200)  # ms
-
-        self.pulse_anim = QPropertyAnimation(self, b"pulse_radius", self)  # type: ignore
-        self.pulse_anim.setDuration(300)  # ms
-        self.pulse_anim.setStartValue(10)
-        self.pulse_anim.setEndValue(20)
+        self.handle_anim.setDuration(0)  # ms
+        self.handle_anim.finished.connect(self._set_anim_length)
 
         self.animations_group = QSequentialAnimationGroup()
         self.animations_group.addAnimation(self.handle_anim)
-        self.animations_group.addAnimation(self.pulse_anim)
+        self._first_show = True
 
-        self._pulse_unchecked_animation = QBrush(QColor(pulse_unchecked_color))
-        self._pulse_checked_animation = QBrush(QColor(pulse_checked_color))
+    def _set_anim_length(self):
+        if self._first_show:
+            self._first_show = False
+            self.handle_anim.setDuration(self.ANIM_DURATION_MS)  # ms
+            return
+
+    def wait_for_anim_finish(self):
+        # wait so all animations can finish
+        start = datetime.now()
+        while datetime.now() - start <= timedelta(milliseconds=self.ANIM_DURATION_MS):
+            QApplication.processEvents()
 
     def sizeHint(self):
-        return QSize(70, 50)
+        return QSize(self.MAX_WIDTH, self.MAX_HEIGHT)
 
     def hitButton(self, pos: QPoint):
         return self.contentsRect().contains(pos)
@@ -58,25 +69,12 @@ class AnimatedToggle(QCheckBox):
 
     @handle_position.setter
     def handle_position(self, pos):
-        """change the property
-        we need to trigger QWidget.update() method, either by:
-            1- calling it here [ what we're doing ].
-            2- connecting the QPropertyAnimation.valueChanged() signal to it.
-        """
         self._handle_position = pos
-        self.update()
-
-    @Property(float)
-    def pulse_radius(self): # type: ignore
-        return self._pulse_radius
-
-    @pulse_radius.setter
-    def pulse_radius(self, pos):
-        self._pulse_radius = pos
         self.update()
 
     @Slot(int)
     def handle_state_change(self, value):
+
         self.animations_group.stop()
         if value:
             self.handle_anim.setEndValue(1)
@@ -104,22 +102,20 @@ class AnimatedToggle(QCheckBox):
 
         x_pos = cont_rect.x() + handle_radius + trail_length * self._handle_position
 
-        if self.pulse_anim.state() == QPropertyAnimation.State.Running:
-            painter.setBrush(
-                self._pulse_checked_animation if
-                self.isChecked() else self._pulse_unchecked_animation)
-            painter.drawEllipse(QPointF(x_pos, bar_rect.center().y()),
-                          self._pulse_radius, self._pulse_radius)
-
-        if self.isChecked():
-            painter.setBrush(self._bar_checked_brush)
+        if not self.isEnabled():
+            painter.setBrush(self._disabled_checked_brush)
             painter.drawRoundedRect(bar_rect, rounding, rounding)
-            painter.setBrush(self._handle_checked_brush)
+            painter.setBrush(self._background_color_brush)
         else:
-            painter.setBrush(self._bar_brush)
-            painter.drawRoundedRect(bar_rect, rounding, rounding)
-            painter.setPen(self._light_grey_pen)
-            painter.setBrush(self._handle_brush)
+            if self.isChecked():
+                painter.setBrush(self._bar_checked_brush)
+                painter.drawRoundedRect(bar_rect, rounding, rounding)
+                painter.setBrush(self._handle_checked_brush)
+            else:
+                painter.setBrush(self._background_color_brush)
+                painter.drawRoundedRect(bar_rect, rounding, rounding)
+                painter.setPen(self._light_grey_pen)
+                painter.setBrush(self._handle_brush)
 
         painter.drawEllipse(
             QPointF(x_pos, bar_rect.center().y()),

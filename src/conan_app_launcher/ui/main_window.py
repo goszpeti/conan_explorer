@@ -211,11 +211,8 @@ class MainWindow(FluentWindow):
     
 
     def on_dark_mode_changed(self):
-        # wait 0,5 seconds, so all animations can finish
-        start = datetime.datetime.now()
-        while datetime.datetime.now() - start <= datetime.timedelta(milliseconds=600):
-            QApplication.processEvents()
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
+        sender_toggle.wait_for_anim_finish()
         enable_dark_mode = sender_toggle.isChecked()
         if enable_dark_mode:
             app.active_settings.set(GUI_MODE, GUI_MODE_DARK)

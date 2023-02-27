@@ -15,11 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QFormLayout, QFrame,
-    QHBoxLayout, QLabel, QLayout, QPushButton,
-    QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QFormLayout, QFrame, QHBoxLayout,
+    QLabel, QLayout, QPushButton, QSizePolicy,
+    QVBoxLayout, QWidget)
 
-from conan_app_launcher.ui.widgets import ClickableIcon
+from conan_app_launcher.ui.widgets import (AnimatedToggle, ClickableIcon)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -93,14 +93,11 @@ class Ui_Form(object):
         self.formLayout = QFormLayout(self.frame)
         self.formLayout.setObjectName(u"formLayout")
         self.formLayout.setContentsMargins(-1, -1, 0, -1)
-        self.open_shell_checkbox = QCheckBox(self.frame)
+        self.open_shell_checkbox = AnimatedToggle(self.frame)
         self.open_shell_checkbox.setObjectName(u"open_shell_checkbox")
         self.open_shell_checkbox.setEnabled(False)
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.open_shell_checkbox.sizePolicy().hasHeightForWidth())
-        self.open_shell_checkbox.setSizePolicy(sizePolicy4)
+        sizePolicy1.setHeightForWidth(self.open_shell_checkbox.sizePolicy().hasHeightForWidth())
+        self.open_shell_checkbox.setSizePolicy(sizePolicy1)
         self.open_shell_checkbox.setMaximumSize(QSize(16777215, 35))
         self.open_shell_checkbox.setStyleSheet(u"margin-top:50%; margin-bottom:50%;margin-left: 10%;")
 
@@ -130,11 +127,11 @@ class Ui_Form(object):
 
         self.conan_ref_label = QLabel(self.frame)
         self.conan_ref_label.setObjectName(u"conan_ref_label")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.conan_ref_label.sizePolicy().hasHeightForWidth())
-        self.conan_ref_label.setSizePolicy(sizePolicy5)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.conan_ref_label.sizePolicy().hasHeightForWidth())
+        self.conan_ref_label.setSizePolicy(sizePolicy4)
         self.conan_ref_label.setMinimumSize(QSize(200, 0))
         self.conan_ref_label.setMaximumSize(QSize(16777215, 16777215))
 
@@ -192,8 +189,11 @@ class Ui_Form(object):
         self.verticalLayout.setContentsMargins(-1, 0, -1, 0)
         self.edit_button = QPushButton(self.right_frame)
         self.edit_button.setObjectName(u"edit_button")
-        sizePolicy4.setHeightForWidth(self.edit_button.sizePolicy().hasHeightForWidth())
-        self.edit_button.setSizePolicy(sizePolicy4)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.edit_button.sizePolicy().hasHeightForWidth())
+        self.edit_button.setSizePolicy(sizePolicy5)
         self.edit_button.setMinimumSize(QSize(80, 0))
 
         self.verticalLayout.addWidget(self.edit_button)

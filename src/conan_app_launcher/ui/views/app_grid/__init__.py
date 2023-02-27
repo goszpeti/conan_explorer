@@ -1,4 +1,6 @@
+from datetime import datetime
 from pathlib import Path
+from time import sleep
 from typing import TYPE_CHECKING, List, Type, TypeVar, Union
 
 import conan_app_launcher.app as app
@@ -10,7 +12,7 @@ from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONF
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
-from conan_app_launcher.ui.widgets import RoundedMenu
+from conan_app_launcher.ui.widgets import RoundedMenu, AnimatedToggle
 from conan_app_launcher.core.conan_common import ConanFileReference, PackageReference
 
 from PySide6.QtCore import Qt, SignalInstance, Signal
@@ -188,6 +190,8 @@ class AppGridView(PluginInterfaceV1):
         app.active_settings.set(AUTO_INSTALL_QUICKLAUNCH_REFS, status)
         # model loads incrementally
         self.model.parent.loadf(app.active_settings.get_string(LAST_CONFIG_FILE))
+        sender_toggle.wait_for_anim_finish()
+
         self.re_init(self.model)
 
     def open_config_file_dialog(self):
