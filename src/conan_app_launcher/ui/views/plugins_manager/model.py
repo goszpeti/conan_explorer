@@ -3,16 +3,17 @@ from pathlib import Path
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_themed_asset_icon
-from PySide6.QtCore import Qt
 from PySide6.QtCore import Qt, QModelIndex
+from PySide6.QtGui import QFont
 
-from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginFile
+from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginFile, PluginHandler
 
 class PluginModelItem(TreeModelItem):
 
-    def __init__(self, plugin: PluginDescription, plugin_path: str,  parent):
+    def __init__(self, plugin: PluginDescription, plugin_path: str, enabled: bool, parent: TreeModelItem):
         super().__init__([plugin.name, plugin.version, plugin.author, plugin.description], parent, lazy_loading=False)
         self._icon = plugin.icon
+        self.enabled = enabled
         self.plugin_path = str(Path(plugin_path).resolve())
 
 class PluginModel(TreeModel):
@@ -26,14 +27,14 @@ class PluginModel(TreeModel):
             plugin_path = app.active_settings.get_string(plugin_group_name)
             plugins = PluginFile.read_file(plugin_path)
             for plugin in plugins:
-                plugin_element = PluginModelItem(plugin, plugin_path, self.root_item)
+                plugin_element = PluginModelItem(plugin, plugin_path, PluginHandler.is_plugin_enabled(plugin), self.root_item)
                 self.root_item.append_child(plugin_element)
 
 
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
             return None
-        item = index.internalPointer()
+        item: PluginModelItem = index.internalPointer() # type: ignore
         if role == Qt.ItemDataRole.DisplayRole:
             try:
                 return item.data(index.column())
@@ -44,4 +45,8 @@ class PluginModel(TreeModel):
                 return
             if isinstance(item, PluginModelItem):
                 return get_themed_asset_icon(item._icon)
+        if role == Qt.ItemDataRole.FontRole and not item.enabled:
+            font = QFont()
+            font.setItalic(True)
+            return font
         return None
