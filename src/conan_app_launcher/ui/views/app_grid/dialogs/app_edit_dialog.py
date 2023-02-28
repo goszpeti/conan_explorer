@@ -6,6 +6,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.common import measure_font_width
+from conan_app_launcher.ui.common.theming import get_themed_asset_icon
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from conan_app_launcher.core.conan_common import ConanFileReference
@@ -30,7 +31,7 @@ class AppEditDialog(QDialog):
 
         self.setModal(True)
         self.setWindowTitle("Edit App Link")
-        self.setWindowIcon(QIcon(str(asset_path / "icons" / "edit.svg")))
+        self.setWindowIcon(get_themed_asset_icon("icons/edit.svg", True))
 
         self._ui.executable_browse_button.setEnabled(False)
         self._ui.icon_browse_button.setEnabled(False)

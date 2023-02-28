@@ -11,6 +11,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QListWidgetItem
 
+from conan_app_launcher.ui.common.theming import get_themed_asset_icon
+
 
 current_dir = Path(__file__).parent
 
@@ -41,7 +43,7 @@ class RemoteLoginDialog(QDialog):
             item = QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             item.setCheckState(Qt.CheckState.Checked)
-        self.setWindowIcon(QIcon(str(asset_path / "icons" / "login.svg")))
+        self.setWindowIcon(get_themed_asset_icon("icons/login.svg", True))
         self._ui.button_box.accepted.connect(self.save)
 
 

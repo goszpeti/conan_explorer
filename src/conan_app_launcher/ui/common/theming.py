@@ -48,9 +48,9 @@ def get_asset_image_path(image_path: str) -> Path:
     return asset_path
 
 
-def get_themed_asset_icon(image_path: str) -> QIcon:
+def get_themed_asset_icon(image_path: str, force_light_mode=False) -> QIcon:
     asset_path = get_asset_image_path(image_path)
-    if get_gui_dark_mode():
+    if get_gui_dark_mode() and not force_light_mode:
         if asset_path.suffix == ".svg":
             asset_path = draw_svg_with_color(asset_path)
         else:

@@ -349,7 +349,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="sizeConstraint">
-       <enum>QLayout::SetFixedSize</enum>
+       <enum>QLayout::SetMinAndMaxSize</enum>
       </property>
       <property name="topMargin">
        <number>0</number>
@@ -367,31 +367,43 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>80</width>
+          <width>150</width>
           <height>0</height>
          </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
-         <string>Edit</string>
+         <string>Edit </string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="remove_button">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="minimumSize">
          <size>
-          <width>80</width>
+          <width>150</width>
           <height>0</height>
          </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
-         <string>Remove</string>
+         <string>Remove </string>
         </property>
        </widget>
       </item>

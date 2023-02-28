@@ -48,9 +48,7 @@ def run_application():
 
     from conan_app_launcher.ui.main_window import MainWindow
     main_window = MainWindow(qt_app)
-
-    app_icon = QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
-    main_window.setWindowIcon(app_icon)
+    main_window.setWindowIcon(QtGui.QIcon(str(asset_path / "icons" / "icon.ico")))
 
     conan_api.init_api()
     main_window.show()  # show first, then load appsgrid with progress bar

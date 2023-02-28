@@ -185,7 +185,7 @@ class Ui_Form(object):
         self.right_frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout = QVBoxLayout(self.right_frame)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setSizeConstraint(QLayout.SetFixedSize)
+        self.verticalLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
         self.verticalLayout.setContentsMargins(-1, 0, -1, 0)
         self.edit_button = QPushButton(self.right_frame)
         self.edit_button.setObjectName(u"edit_button")
@@ -194,15 +194,17 @@ class Ui_Form(object):
         sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.edit_button.sizePolicy().hasHeightForWidth())
         self.edit_button.setSizePolicy(sizePolicy5)
-        self.edit_button.setMinimumSize(QSize(80, 0))
+        self.edit_button.setMinimumSize(QSize(150, 0))
+        self.edit_button.setMaximumSize(QSize(150, 16777215))
 
         self.verticalLayout.addWidget(self.edit_button)
 
         self.remove_button = QPushButton(self.right_frame)
         self.remove_button.setObjectName(u"remove_button")
-        sizePolicy1.setHeightForWidth(self.remove_button.sizePolicy().hasHeightForWidth())
-        self.remove_button.setSizePolicy(sizePolicy1)
-        self.remove_button.setMinimumSize(QSize(80, 0))
+        sizePolicy5.setHeightForWidth(self.remove_button.sizePolicy().hasHeightForWidth())
+        self.remove_button.setSizePolicy(sizePolicy5)
+        self.remove_button.setMinimumSize(QSize(150, 0))
+        self.remove_button.setMaximumSize(QSize(150, 16777215))
 
         self.verticalLayout.addWidget(self.remove_button)
 
@@ -227,7 +229,7 @@ class Ui_Form(object):
         self.conan_ref_label.setText(QCoreApplication.translate("Form", u"example/9.9.9@user/channel", None))
         self.arguments_label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-weight:700;\">Arguments:</span></p></body></html>", None))
         self.arguments_value_label.setText(QCoreApplication.translate("Form", u"-f silver_output -d C:Reposfep_interface_silver3exampledemo_simplesilver_example.description -t standard_data -s fepifsilver_default_system", None))
-        self.edit_button.setText(QCoreApplication.translate("Form", u"Edit", None))
-        self.remove_button.setText(QCoreApplication.translate("Form", u"Remove", None))
+        self.edit_button.setText(QCoreApplication.translate("Form", u"Edit ", None))
+        self.remove_button.setText(QCoreApplication.translate("Form", u"Remove ", None))
     # retranslateUi
 

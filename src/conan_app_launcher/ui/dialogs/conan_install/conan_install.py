@@ -21,7 +21,7 @@ class ConanInstallDialog(QDialog):
         self.pkg_installed_signal = pkg_installed_signal
 
         # init search bar
-        icon = QIcon(str(app.asset_path / "icons/download_pkg.svg"))  # no themed
+        icon = get_themed_asset_icon("icons/download_pkg.svg", True)
         self.setWindowIcon(icon)
         self._ui.install_icon.setPixmap(icon.pixmap(20, 20))
         self._ui.conan_ref_line_edit.validator_enabled = False

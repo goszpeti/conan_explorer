@@ -339,10 +339,10 @@ QTreeView::branch:open:has-children {
     image: url(icons:material/expand.svg);
 }
 QTreeView::branch:hover:closed:has-children {
-    image: url(icons:material/forward_w.svg);
+    image: url(icons:material/forward_b.svg);
 }
 QTreeView::branch:hover:open:has-children:hover {
-    image: url(icons:material/expand_w.svg);
+    image: url(icons:material/expand_b.svg);
 }
 
 QTextBrowser {
