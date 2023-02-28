@@ -97,7 +97,11 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.profiles_list_view.customContextMenuRequested.connect(
             self.on_profile_context_menu_requested)
         self._init_profile_context_menu()
-        self._ui.profile_save_button.clicked.connect(self.save_profile_file)
+        self._ui.profile_save_button.clicked.connect(self.on_save_profile_file)
+        self._ui.profile_add_button.clicked.connect(self.on_add_profile)
+        self._ui.profile_remove_button.clicked.connect(self.on_remove_profile)
+        self._ui.profile_refresh_button.clicked.connect(self.on_refresh_profiles)
+
         self.set_themed_icon(self._ui.profile_save_button, "icons/save.svg")
         self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.svg")
         self.set_themed_icon(self._ui.profile_remove_button, "icons/delete.svg")
@@ -131,12 +135,17 @@ class ConanConfigView(PluginInterfaceV1):
 # Profile
 
     def on_copy_profile_requested(self):
-        view_index = self._ui.profiles_list_view.selectedIndexes()[0]
+        view_indexes = self._ui.profiles_list_view.selectedIndexes()
+        if not view_indexes:
+            return
         profile_name = view_index.data()
         QApplication.clipboard().setText(profile_name)
 
     def on_profile_selected(self):
-        view_index = self._ui.profiles_list_view.selectedIndexes()[0]
+        view_indexes = self._ui.profiles_list_view.selectedIndexes()
+        if not view_indexes:
+            return
+        view_index = view_indexes[0]
         profile_name = view_index.data()
         try:
             profile_content = (self.profiles_path / profile_name).read_text()
@@ -147,11 +156,23 @@ class ConanConfigView(PluginInterfaceV1):
     def on_profile_context_menu_requested(self, position):
         self.profiles_cntx_menu.exec(self._ui.profiles_list_view.mapToGlobal(position))
 
-    def save_profile_file(self):
+    def on_save_profile_file(self):
         view_index = self._ui.profiles_list_view.selectedIndexes()[0]
         profile_name = view_index.data(0)
         text = self._ui.profiles_text_browser.toPlainText()
         (self.profiles_path / profile_name).write_text(text)
+
+    def on_add_profile(self):
+        # TODO: add new entry and add new file
+        # TODO: Rename dialog? Or edit model?
+        pass
+
+    def on_remove_profile(self):
+        # TODO: Are you sure dialog
+        pass
+
+    def on_refresh_profiles(self):
+        self._load_profiles_tab()
 
 # Remote
 

@@ -51,5 +51,6 @@ class PluginsPage(ThemedWidget):
         selected_item = self._controller.get_selected_source_item()
         if not selected_item:
             return
+        # TODO: Are you sure dialog
         self._controller.remove_plugin(selected_item.plugin_path)
         self._controller.update()
