@@ -13,7 +13,7 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = "conan-app-launcher"
-VERSION = "2.0.0-alpha3"
+VERSION = "2.0.0-alpha4"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
