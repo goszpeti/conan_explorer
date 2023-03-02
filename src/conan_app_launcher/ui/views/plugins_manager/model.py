@@ -11,7 +11,8 @@ from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginFile, 
 class PluginModelItem(TreeModelItem):
 
     def __init__(self, plugin: PluginDescription, plugin_path: str, enabled: bool, parent: TreeModelItem):
-        super().__init__([plugin.name, plugin.version, plugin.author, plugin.description], parent, lazy_loading=False)
+        super().__init__([plugin.name, plugin.version, plugin.description, plugin.conan_versions,
+                          plugin.author], parent,  lazy_loading=False)
         self._icon = plugin.icon
         self.enabled = enabled
         self.plugin_path = str(Path(plugin_path).resolve())
@@ -19,7 +20,7 @@ class PluginModelItem(TreeModelItem):
 class PluginModel(TreeModel):
     def __init__(self, *args, **kwargs):
         super().__init__(checkable=True, *args, **kwargs)
-        self.root_item = TreeModelItem(["Name", "Version", "Author", "Description", "Conan support"])
+        self.root_item = TreeModelItem(["Name", "Version", "Description", "Conan", "Author"])
 
     def setup_model_data(self):
         self.root_item.child_items = []

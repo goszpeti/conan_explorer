@@ -138,6 +138,7 @@ class ConanConfigView(PluginInterfaceV1):
         view_indexes = self._ui.profiles_list_view.selectedIndexes()
         if not view_indexes:
             return
+        view_index = view_indexes[0]
         profile_name = view_index.data()
         QApplication.clipboard().setText(profile_name)
 

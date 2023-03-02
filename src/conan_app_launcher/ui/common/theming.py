@@ -10,7 +10,7 @@ from conan_app_launcher.app.logger import Logger
 
 from jinja2 import Template
 from PySide6.QtWidgets import QApplication, QWidget
-from PySide6.QtGui import QIcon, QPixmap, QImage
+from PySide6.QtGui import QIcon, QPixmap, QImage, QFont, QFontDatabase
 from PySide6.QtCore import QSize
 
 from conan_app_launcher.ui.common.icon import draw_svg_with_color, get_icon_from_image_file, get_inverted_asset_image
@@ -99,10 +99,12 @@ def configure_theme(qss_template_path: Path, font_size_pt: int, user_color: str,
     """ Configure the given qss file with the set options and return it as a string """
 
     qss_template = None
+    register_font("Noto Sans Mono", "NotoSansMono.ttf")
+    register_font("Noto Sans", "NotoSans-Regular.ttf")
     with open(qss_template_path, "r") as fd:
         qss_template = Template(fd.read())
     qss_content = qss_template.render(MAIN_FONT_SIZE=font_size_pt, USER_COLOR=user_color,
-                                      WINDOW_BORDER_RADIUS=window_border_radius)
+                                      WINDOW_BORDER_RADIUS=window_border_radius, CONSOLE_FONT_FAMILY="Noto Sans Mono",  FONT_FAMILY="Noto Sans")
     return qss_content
 
 
@@ -165,3 +167,22 @@ def get_user_theme_color() -> str:  # RGB
             return "#000000"
         return "#" + rgb_color
     return "#000000"
+
+
+def register_font(font_style_name: str, font_file_name: str) -> QFont:
+    # set up font
+    font_file = app.asset_path / "font" / font_file_name
+    font_id = QFontDatabase.addApplicationFont(str(font_file))
+    qapp = QApplication.instance()
+    if qapp is None:
+        return QFont()
+    font = qapp.font()  # type: ignore
+    if font_id != -1:
+        font_db = QFontDatabase()
+        font_styles = font_db.styles(font_style_name)
+        font_families = QFontDatabase.applicationFontFamilies(font_id)
+        if font_families:
+            font = font_db.font(font_families[0], font_styles[0], 13)
+        else:
+            Logger().warning("Can't register selected font file.")
+    return font

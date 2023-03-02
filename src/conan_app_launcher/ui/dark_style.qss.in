@@ -7,6 +7,7 @@ Usable Macros with Jinja2 syntax:
 
 Palette:
  - Conan Accent Color:  #6699CC
+ - Darker Conan Accent Color: #3375B7
  - light: #808086
  - light-dark: #696969
  - dark: #5c5c5c
@@ -17,7 +18,9 @@ Palette:
 * {
     color: #f8f8ff;
     font-size: {{MAIN_FONT_SIZE}}pt;
+    font-family: {{FONT_FAMILY}};
 }
+
 
 /* Setup for specific widgets */
 
@@ -340,7 +343,7 @@ QListView, QTreeView, QListWidget {
 }
 QListView::item:hover,
 QTreeView::item:hover{
-    background: #6699CC;
+    background: #3375B7;
 }
 QListView::item:selected,
 QTreeView::item:selected {
@@ -452,7 +455,9 @@ QTextEdit{
 }
 QTextBrowser{ 
     background-color: #474747;
+    font-family: {{CONSOLE_FONT_FAMILY}};
 }
+
 QTextBrowser#console{ 
     background-color: #1e1d23;
     border-bottom-right-radius: 7px;

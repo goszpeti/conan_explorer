@@ -31,10 +31,15 @@ class PluginsPage(ThemedWidget):
         self._ui.remove_plugin_button.clicked.connect(self.on_remove)
 
     def on_plugin_selected(self):
+        """ Show path of plugin and disable remove for builtins """
         plugin = self._controller.get_selected_source_item()
         if not plugin:
             return
         self._ui.path_label.setText(plugin.plugin_path)
+        if plugin.data(1) == "built-in":
+            self._ui.remove_plugin_button.setEnabled(False)
+        else:
+            self._ui.remove_plugin_button.setEnabled(True)
 
     def on_add(self):
         """ Open File dialog with filter for ini files, then load the plugin"""
@@ -51,6 +56,9 @@ class PluginsPage(ThemedWidget):
         selected_item = self._controller.get_selected_source_item()
         if not selected_item:
             return
+        if selected_item.data(1) == "built-in":
+            return # TODO Message
         # TODO: Are you sure dialog
         self._controller.remove_plugin(selected_item.plugin_path)
         self._controller.update()
+

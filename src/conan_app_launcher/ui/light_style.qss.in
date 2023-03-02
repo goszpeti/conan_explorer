@@ -6,7 +6,8 @@ Usable Macros with Jinja2 syntax:
  - WINDOW_BORDER_RADIUS
 
 Palette:
- - Conan Accent Color:  #6699CC
+ - Conan Accent:  #6699CC
+ - Lighter Conan Accent: #7fbfff
  - light: F0F0F0
  - dark : #D3D3D3
  - bit darker #BCBCBC
@@ -17,6 +18,7 @@ Palette:
 
 * {
     font-size: {{MAIN_FONT_SIZE}}pt;
+    font-family: {{FONT_FAMILY}};
 }
 
 /* Setup for specific widgets */
@@ -349,6 +351,8 @@ QTextBrowser {
     background-color: white;
     selection-color: white;
     selection-background-color: #6699CC;
+    border-bottom-right-radius: 7px;
+    font-family: {{CONSOLE_FONT_FAMILY}};
 }
 
 
@@ -439,11 +443,6 @@ QHeaderView::section {
     border-bottom-color: transparent;
     border-style: solid;
     border-width: 2px;
-}
-
-QTextBrowser {
-    background-color: white;
-    border-bottom-right-radius: 7px;
 }
 
 QToolTip {

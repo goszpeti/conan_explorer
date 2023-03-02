@@ -83,7 +83,7 @@ class Ui_MainWindow(object):
         self.top_center_frame_layout.setContentsMargins(5, 3, 0, 2)
         self.page_title = QLabel(self.top_center_frame)
         self.page_title.setObjectName(u"page_title")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.page_title.sizePolicy().hasHeightForWidth())
@@ -250,6 +250,9 @@ class Ui_MainWindow(object):
         self.console.setSizePolicy(sizePolicy6)
         self.console.setMinimumSize(QSize(0, 150))
         self.console.setBaseSize(QSize(832, 200))
+        font1 = QFont()
+        font1.setFamilies([u"Consolas"])
+        self.console.setFont(font1)
         self.console.setStyleSheet(u"")
         self.console.setFrameShape(QFrame.NoFrame)
         self.console.setFrameShadow(QFrame.Raised)
@@ -264,8 +267,8 @@ class Ui_MainWindow(object):
 "hr { height: 1px; border-width: 0; }\n"
 "li.unchecked::marker { content: \"\\2610\"; }\n"
 "li.checked::marker { content: \"\\2612\"; }\n"
-"</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'MS Shell Dlg 2'; font-size:7.875pt;\"><br /></p></body></html>")
+"</style></head><body style=\" font-family:'Consolas'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Cascadia Mono';\"><br /></p></body></html>")
         self.console.setOpenExternalLinks(True)
 
         self.page_footer_layout.addWidget(self.console)
@@ -308,7 +311,7 @@ class Ui_MainWindow(object):
         self.right_menu_scroll_area.setWidgetResizable(True)
         self.right_menu_scroll_area_widgets = QWidget()
         self.right_menu_scroll_area_widgets.setObjectName(u"right_menu_scroll_area_widgets")
-        self.right_menu_scroll_area_widgets.setGeometry(QRect(0, 0, 93, 749))
+        self.right_menu_scroll_area_widgets.setGeometry(QRect(0, 0, 93, 744))
         self.right_menu_scroll_area_widgets.setMinimumSize(QSize(0, 0))
         self.right_menu_scroll_area_widgets_layout = QVBoxLayout(self.right_menu_scroll_area_widgets)
         self.right_menu_scroll_area_widgets_layout.setSpacing(2)
@@ -416,10 +419,10 @@ class Ui_MainWindow(object):
         self.title_label = QLabel(self.left_menu_top_subframe)
         self.title_label.setObjectName(u"title_label")
         self.title_label.setMinimumSize(QSize(0, 30))
-        font1 = QFont()
-        font1.setBold(True)
-        font1.setItalic(False)
-        self.title_label.setFont(font1)
+        font2 = QFont()
+        font2.setBold(True)
+        font2.setItalic(False)
+        self.title_label.setFont(font2)
         self.title_label.setStyleSheet(u"font: bold")
         self.title_label.setAlignment(Qt.AlignBottom|Qt.AlignLeading|Qt.AlignLeft)
         self.title_label.setMargin(0)
