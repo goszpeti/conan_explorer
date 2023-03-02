@@ -353,7 +353,7 @@ class UiAppLinkModel(UiAppLinkConfig):
                 else:
                     return match
             except NotImplementedError:
-                Logger().error(f"Absolute path not allowed!")
+                Logger().error("Absolute path not allowed!")
             return Path(INVALID_PATH)
         else:
             return self.package_folder / exe_rel_path

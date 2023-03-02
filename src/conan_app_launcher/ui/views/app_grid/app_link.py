@@ -2,8 +2,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import ICON_SIZE, asset_path
+from conan_app_launcher import ICON_SIZE, INVALID_PATH
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import open_in_file_manager, run_file
 from conan_app_launcher.ui.common import get_themed_asset_icon, measure_font_width
@@ -12,8 +11,7 @@ from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.widgets import RoundedMenu
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import (QDialog, QFrame, QHBoxLayout, QLabel, QLayout,
-                               QMessageBox, QPushButton, QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QDialog, QFrame, QMessageBox, QWidget)
 
 from .dialogs import AppEditDialog
 
@@ -208,7 +206,8 @@ class ListAppLink(QFrame):
 
     def update_icon(self):
         self._ui.app_button.set_icon(self.model.get_icon())
-        self._ui.app_button.ungrey_icon()
+        if self.model.get_executable_path() != Path(INVALID_PATH):
+            self._ui.app_button.ungrey_icon()
 
     def on_click(self):
         """ Callback for opening the executable on click """
