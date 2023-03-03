@@ -295,4 +295,4 @@ def test_view_menu_options(base_fixture, ui_config_fixture, qtbot):
     #         assert test_app._app_channel.isHidden()
 
     # app.conan_worker.finish_working(10)
-    # main_gui.close()
+    main_gui.close()
