@@ -4,7 +4,7 @@ from test.conftest import TEST_REF
 import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
 from conan_app_launcher.ui.main_window import MainWindow
-from conans.model.ref import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanFileReference
 from PySide6 import QtCore
 from conan_app_launcher.ui.views import ConanSearchView
 from conan_app_launcher.ui.views import LocalConanPackageExplorer

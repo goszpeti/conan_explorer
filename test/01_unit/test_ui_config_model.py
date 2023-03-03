@@ -8,7 +8,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import INVALID_PATH, asset_path
 from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
                                                           UiAppLinkModel)
-from conans.model.ref import ConanFileReference as CFR
+from conan_app_launcher.core.conan_common import ConanFileReference as CFR
 
 
 def test_executable_eval(base_fixture):

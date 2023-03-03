@@ -21,7 +21,7 @@ from conan_app_launcher.ui.widgets import AnimatedToggle
 from conan_app_launcher.ui.views import AboutPage
 import conan_app_launcher.app as app  # using global module pattern
 
-from conans.model.ref import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanFileReference
 from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt

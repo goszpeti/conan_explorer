@@ -5,7 +5,7 @@ from pathlib import Path
 from conan_app_launcher import INVALID_PATH
 
 from conan_app_launcher.core import ConanInfoCache
-from conans.model.ref import ConanFileReference as CFR
+from conan_app_launcher.core.conan_common import ConanFileReference as CFR
 
 
 def test_new_cache():

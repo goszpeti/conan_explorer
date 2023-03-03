@@ -23,7 +23,7 @@ from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
 from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
                                                           UiAppLinkConfig,
                                                           UiAppLinkModel)
-from conans.model.ref import ConanFileReference as CFR
+from conan_app_launcher.core.conan_common import ConanFileReference as CFR
 from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt

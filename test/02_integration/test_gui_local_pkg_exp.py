@@ -9,7 +9,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
-from conans.model.ref import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanFileReference
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 
 from PySide6 import QtCore, QtWidgets

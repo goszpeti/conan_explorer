@@ -5,7 +5,7 @@ from distutils.file_util import copy_file
 from pathlib import Path
 
 from conan_app_launcher.ui.config.json_file import JsonUiConfig
-from conans.model.ref import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanFileReference as CFR
 
 
 @pytest.mark.conanv2
