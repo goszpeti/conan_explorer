@@ -12,7 +12,7 @@ from conan_app_launcher.core.conan_worker import (ConanWorker,
                                                   ConanWorkerElement)
 from conan_app_launcher.core.conan_cleanup import  ConanCleanup
 from conans import __version__
-from conan_app_launcher.core.conan_common import ConanFileReference as CFR
+from conan_app_launcher.core.conan_common import ConanFileReference
 
 
 def test_conan_profile_name_alias_builder():

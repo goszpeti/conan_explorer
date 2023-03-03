@@ -18,7 +18,7 @@ from conan_app_launcher.ui.views import AboutPage
 from conan_app_launcher.ui.dialogs import show_bug_reporting_dialog
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
-from conan_app_launcher.core.conan_common import ConanFileReference as CFR
+from conan_app_launcher.core.conan_common import ConanFileReference
 from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
