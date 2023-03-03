@@ -44,6 +44,7 @@ def test_rename_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     main_gui.app_grid.on_tab_rename(0)
     # text must be the same
     assert main_gui.app_grid.tab_widget.tabBar().tabText(0) == new_text
+    main_gui.close()  # cleanup
 
 
 def test_add_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
@@ -76,6 +77,7 @@ def test_add_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count + 1
     assert len(config_tabs) == prev_count + 1
 
+    main_gui.close()  # cleanup
 
 def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that Remove Tab actually removes a tab. Last tab must not be deletable. """

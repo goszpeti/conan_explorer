@@ -247,3 +247,5 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     another_pkg_path = app.conan_api.get_package_folder(cfr, another_id)
     assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + another_id)
     assert Path(lpe._pkg_file_exp_ctrl._model.rootPath()) == another_pkg_path
+
+    main_gui.close()

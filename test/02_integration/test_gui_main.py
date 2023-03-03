@@ -54,6 +54,7 @@ def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
         for test_app in tab.app_links:
             assert test_app.model.name == "New App"
 
+    main_gui.close()
 
 def test_startup_with_existing_config_and_open_menu(qtbot, base_fixture, ui_config_fixture):
     """

@@ -30,11 +30,11 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     main_window = MainWindow(_qapp_instance)
     main_window.conan_remotes_updated.emit()
-    search_dialog = main_window.page_widgets.get_page_by_type(ConanSearchView)
     main_window.load()
     qtbot.addWidget(main_window)
     main_window.show()
     qtbot.waitExposed(main_window)
+    search_dialog = main_window.page_widgets.get_page_by_type(ConanSearchView)
 
     # enter short search term -> search button disabled
     search_dialog._ui.search_line.setText("ex")
