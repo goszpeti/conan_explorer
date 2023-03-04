@@ -257,28 +257,14 @@ def test_AppLink_open(qtbot, base_fixture):
 
     qtbot.waitExposed(root_obj)
     qtbot.mouseClick(app_link._ui.app_button, Qt.MouseButton.LeftButton)
-    sleep(5)  # wait for terminal to spawn
     # check pid of created process
-    found_process = None
     process_name = ""
     if platform.system() == "Linux":
         process_name = "x-terminal-emulator"
     elif platform.system() == "Windows":
-            process_name = "cmd"
-    for process in psutil.process_iter():
-        try:
-            if process_name.lower() in process.name().lower():
-                try:
-                    if "conan_app_launcher" in process.cmdline()[2]:
-                        found_process = process
-                    break
-                except:
-                    pass
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
-    if found_process:
-        found_process.kill()
-    assert found_process
+        process_name = "cmd"
+    
+    assert check_if_process_running(process_name, cmd_contains=["conan_app_launcher"], kill=True, cmd_narg=2)
 
 
 def test_AppLink_icon_update_from_executable(qtbot, base_fixture):

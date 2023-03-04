@@ -218,7 +218,6 @@ def test_open_file():
         time.sleep(1)
     open_file(test_file)
 
-    time.sleep(3)  # wait for program to start
     if platform.system() == "Linux":
         # check pid of created process
         assert check_if_process_running("mousepad", kill=True)

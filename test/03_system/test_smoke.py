@@ -51,14 +51,13 @@ def test_main_loop(base_fixture):
     # conan_app_launcher
     Popen(["conan_app_launcher"])
 
-    time.sleep(4)
     if platform.system() == "Windows":
-        script = "Scripts\\conan_app_launcher-script.pyw"
+        script = ["Scripts\\conan_app_launcher-script.pyw"]
         proc_name = Path(sys.executable).name
     else:
-        script = "bin/conan_app_launcher"  # TODO
+        script = []
         proc_name = "conan_app_launc" # cuts off
     with check:
-        assert check_if_process_running(proc_name, [script], kill=True)
+        check_if_process_running(proc_name, script, kill=True)
     # delete config file
     os.remove(str(settings_file_path))

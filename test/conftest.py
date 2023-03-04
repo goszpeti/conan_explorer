@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import distutils.sysconfig
 import configparser
 import ctypes
@@ -58,21 +59,24 @@ class PathSetup():
         self.testdata_path = self.test_path / "testdata"
 
 
-def check_if_process_running(process_name, cmd_contains=[], kill=False) -> bool:
-    for process in psutil.process_iter():
-        try:
-            if process_name.lower() in process.name().lower():
-                matches = 0
-                for cmd_contain in cmd_contains:
-                    if cmd_contain in process.cmdline()[1]:
-                        matches += 1
-                if matches == len(cmd_contains):
-                    if kill:
-                        process.terminate()
-                        process.kill()
-                    return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
+def check_if_process_running(process_name, cmd_contains=[], kill=False, cmd_narg=1, timeout_s=10) -> bool:
+    start_time = datetime.now()
+    while datetime.now() - start_time < timedelta(seconds=timeout_s):
+        for process in psutil.process_iter():
+            try:
+                if process_name.lower() in process.name().lower():
+                    matches = 0
+                    for cmd_contain in cmd_contains:
+                        if cmd_contain in process.cmdline()[cmd_narg]:
+                            matches += 1
+                    if matches == len(cmd_contains):
+                        if kill:
+                            process.terminate()
+                            process.kill()
+                        return True
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        time.sleep(1)
     return False
 
 
@@ -166,7 +170,7 @@ def start_conan_server():
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():
     started = False
-    if not check_if_process_running("conan_server"):
+    if not check_if_process_running("conan_server", timeout_s=0):
         started = True
         print("STARTING CONAN SERVER")
         start_conan_server()
