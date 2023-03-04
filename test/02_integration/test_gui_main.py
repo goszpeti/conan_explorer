@@ -152,7 +152,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
         conan.conan.remove(ref, force=True)  # clean up for multiple runs
     except Exception:
         pass
-    ret = run(f"{conan_path_str} create {conanfile} {ref}", stdout=PIPE, stderr=STDOUT, shell=True)
+    ret = run(f"conan create {conanfile} {ref}", stdout=PIPE, stderr=STDOUT, shell=True)
     output = ""
     if ret.stderr:
         output += ret.stderr.decode("utf-8")

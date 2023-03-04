@@ -66,16 +66,22 @@ def check_if_process_running(process_name, cmd_contains=[], kill=False, cmd_narg
             try:
                 if process_name.lower() in process.name().lower():
                     matches = 0
+                    cmdline = ""
                     for cmd_contain in cmd_contains:
-                        if cmd_contain in process.cmdline()[cmd_narg]:
+                        cmdline = process.cmdline()
+                        if cmd_contain in cmdline[cmd_narg]:
                             matches += 1
                     if matches == len(cmd_contains):
                         if kill:
                             process.terminate()
                             process.kill()
                         return True
+                    else:
+                        print(f"Not matching arguments: {cmd_contains} in cmdline {cmdline} arg nr. {cmd_narg}")
+
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
+        print(f"Not found process {process_name}, keep looking...")
         time.sleep(1)
     return False
 
