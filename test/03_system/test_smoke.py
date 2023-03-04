@@ -4,6 +4,7 @@ Because the unit tests use qtbot helper, a QApplication object is already presen
 and it cannot be instatiated anew with the main loop of the program.
 """
 import os
+import sys
 import time
 from pathlib import Path
 from subprocess import Popen
@@ -53,9 +54,11 @@ def test_main_loop(base_fixture):
     time.sleep(4)
     if platform.system() == "Windows":
         script = "Scripts\\conan_app_launcher-script.pyw"
+        proc_name = Path(sys.executable).name
     else:
         script = "bin/conan_app_launcher"  # TODO
+        proc_name = "conan_app_launc" # cuts off
     with check:
-        assert check_if_process_running("python", [script], kill=True)
+        assert check_if_process_running(proc_name, [script], kill=True)
     # delete config file
     os.remove(str(settings_file_path))

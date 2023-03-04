@@ -25,11 +25,7 @@ from conan_app_launcher.settings import *
 from conan_app_launcher.core.conan_common import ConanFileReference
 
 def get_scripts_path():
-    scripts_path = Path(distutils.sysconfig.get_config_var("BINDIR"))
-    if platform.system() == "Windows":
-        if not (scripts_path / "conan_app_launcher.exe").exists():
-            scripts_path = Path(distutils.sysconfig.get_config_var("BINDIR")) / "Scripts"
-    return scripts_path
+    return Path(sys.executable).parent
 
 
 exe_ext = ".exe" if platform.system() == "Windows" else ""
@@ -67,15 +63,19 @@ class PathSetup():
         self.testdata_path = self.test_path / "testdata"
 
 
-def check_if_process_running(process_name, cmd_contains=[], kill=False):
+def check_if_process_running(process_name, cmd_contains=[], kill=False) -> bool:
     for process in psutil.process_iter():
+        print(process)
         try:
             if process_name.lower() in process.name().lower():
                 for cmd_contain in cmd_contains:
-                    assert cmd_contain in process.cmdline()[1]
-                if kill:
-                    process.kill()
-                return True
+                    matches = 0
+                    if cmd_contain in process.cmdline()[1]:
+                        matches += 1
+                    if matches == len(cmd_contains):
+                        if kill:
+                            process.kill()
+                        return True
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
     return False

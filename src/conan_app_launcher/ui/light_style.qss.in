@@ -120,6 +120,9 @@ QFrame#center_frame .QPushButton:checked,
 QToolButton:checked {
     background-color: #A8A8A8;
 }
+QDialog{
+    border: 1px solid #D3D3D3;
+}
 
 QDialog .QPushButton,
 QToolButton {
