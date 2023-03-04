@@ -10,14 +10,12 @@ import time
 from pathlib import Path
 from shutil import rmtree
 from conan_app_launcher.ui.views.app_grid.tab import TabList
-from test.conftest import conan_path_str
 from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, user_save_path
 from conan_app_launcher.core import ConanApi
 from conan_app_launcher.core.conan_cleanup import ConanCleanup
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import *
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.widgets import AnimatedToggle
 from conan_app_launcher.ui.views import AboutPage
 import conan_app_launcher.app as app  # using global module pattern
 
@@ -131,7 +129,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
         pass
     # shortpaths is enabled in conanfile
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
-    ret = os.system(f"{conan_path_str} create {conanfile} {ref}")
+    ret = os.system(f"conan create {conanfile} {ref}")
     assert ret == 0
 
     pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
