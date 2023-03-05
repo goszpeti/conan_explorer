@@ -34,6 +34,7 @@ class ConanApi(ConanUnifiedApi):
         self.client_cache = ClientCache(self.conan.cache_folder)
         from .conan_cache import ConanInfoCache
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
+        return self
 
     ### General commands ###
 

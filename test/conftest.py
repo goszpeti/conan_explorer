@@ -109,7 +109,6 @@ def create_test_ref(ref, paths, create_params=[""], update=False):
 
 def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
     if conan_version.startswith("1"):
-
         os.system(f"conan create {conanfile} {ref} {create_params}")
         os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
     elif conan_version.startswith("2"):
@@ -172,19 +171,19 @@ def start_conan_server():
         conan_server_thread = Thread(name="ConanServer", daemon=True, target=run_conan_server)
         conan_server_thread.start()
         time.sleep(3)
-        print("ADDING CONAN REMOTE")
+    print("ADDING CONAN REMOTE")
 
-        if conan_version.startswith("1"):
-            os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
-            os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
-            if is_ci_job():
-                os.system("conan remote clean")
-        elif conan_version.startswith("2"):
-            os.system(f"conan remote add {TEST_REMOTE_NAME} http://localhost:9300/ --insecure")
-            os.system(f"conan remote login {TEST_REMOTE_NAME} demo -p demo")  # todo autogenerate and config
-            if is_ci_job():
-                os.system("conan remote remove conancenter")
-        os.system(f"conan remote enable {TEST_REMOTE_NAME}")
+    if conan_version.startswith("1"):
+        os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
+        os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
+        if is_ci_job():
+            os.system("conan remote clean")
+    elif conan_version.startswith("2"):
+        os.system(f"conan remote add {TEST_REMOTE_NAME} http://localhost:9300/ --insecure")
+        os.system(f"conan remote login {TEST_REMOTE_NAME} demo -p demo")  # todo autogenerate and config
+        if is_ci_job():
+            os.system("conan remote remove conancenter")
+    os.system(f"conan remote enable {TEST_REMOTE_NAME}")
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
         return
@@ -202,6 +201,7 @@ def start_conan_server():
 
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():
+    os.environ["CONAN_NON_INTERACTIVE"] = "True" # don't hang is smth. goes wrong
     started = False
     if not check_if_process_running("conan_server", timeout_s=0):
         started = True

@@ -211,6 +211,7 @@ def test_open_file():
     test_file = Path(tempfile.gettempdir(), "test.inf")
     with open(str(test_file), "w") as f:
         f.write("test")
+    assert (test_file.exists())
 
     if platform.system() == "Linux":
         # set default app for textfile
@@ -222,14 +223,7 @@ def test_open_file():
         # check pid of created process
         assert check_if_process_running("mousepad", kill=True)
     elif platform.system() == "Windows":
-        default_app = "notepad.exe"
-        # this is application specific
-        ret = check_output(f'tasklist /fi "IMAGENAME eq {default_app}"')
-        assert default_app in ret.decode("utf-8").lower()
-        lines = ret.decode("utf-8").splitlines()
-        line = lines[3].replace(" ", "").lower()
-        pid = line.split(default_app)[1].split("console")[0]
-        os.system("taskkill /PID " + pid)
+        assert check_if_process_running("notepad.exe", kill=True)
     os.remove(test_file)
 
 

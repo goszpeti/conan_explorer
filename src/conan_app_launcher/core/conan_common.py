@@ -15,6 +15,10 @@ if conan_version.startswith("1"):
     from conans.model.ref import ConanFileReference, PackageReference
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
     from conans.client.cache.remote_registry import Remote
+    try:
+        from conans.util.windows import CONAN_REAL_PATH, path_shortener
+    except Exception:
+        pass
 elif conan_version.startswith("2"):
     from conans.model.recipe_ref import RecipeReference as ConanFileReference  # type: ignore
     from conans.model.package_ref import RecipeReference as PackageReference  # type: ignore
