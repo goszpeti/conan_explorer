@@ -91,7 +91,7 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture: PathSetup, mocker):
     - resolves the correct relative path for executables and forbids non-package-folder paths
     - resolves the correct relative path for executables and sets non-package-folder paths to the abs. path
     """
-    os.system(f"conan install {TEST_REF}") # need local package
+    assert os.system(f"conan install {TEST_REF}") == 0# need local package
 
     app.conan_api.init_api()
 

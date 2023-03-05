@@ -176,15 +176,16 @@ def start_conan_server():
     print("ADDING CONAN REMOTE")
 
     if conan_version.startswith("1"):
-        os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
-        os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
         if is_ci_job():
             os.system("conan remote clean")
+        os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
+        os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
+
     elif conan_version.startswith("2"):
-        os.system(f"conan remote add {TEST_REMOTE_NAME} http://localhost:9300/ --insecure")
-        os.system(f"conan remote login {TEST_REMOTE_NAME} demo -p demo")  # todo autogenerate and config
         if is_ci_job():
             os.system("conan remote remove conancenter")
+        os.system(f"conan remote add {TEST_REMOTE_NAME} http://localhost:9300/ --insecure")
+        os.system(f"conan remote login {TEST_REMOTE_NAME} demo -p demo")  # todo autogenerate and config
     os.system(f"conan remote enable {TEST_REMOTE_NAME}")
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
