@@ -9,6 +9,8 @@ from subprocess import PIPE, STDOUT, check_output, run
 import time
 from pathlib import Path
 from shutil import rmtree
+
+import pytest
 from conan_app_launcher.ui.views.app_grid.tab import TabList
 from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, user_save_path
 from conan_app_launcher.core import ConanApi
@@ -25,6 +27,7 @@ from PySide6 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
+@pytest.mark.conanv2
 def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
     """ Test, that when no condig file is set,
     a new tab with a new default app is automatically added."""

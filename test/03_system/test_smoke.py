@@ -9,6 +9,8 @@ import time
 from pathlib import Path
 from subprocess import Popen
 import platform
+
+import pytest
 import conan_app_launcher
 from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
                                          settings_factory)
@@ -17,6 +19,8 @@ from pytest_check import check
 
 from test.conftest import check_if_process_running
 
+
+@pytest.mark.conanv2
 def test_main_loop_mock(base_fixture, mocker):
     """
     Smoke test, that the application runs through.
@@ -35,6 +39,7 @@ def test_main_loop_mock(base_fixture, mocker):
     qapp_mock.assert_called_once()
 
 
+@pytest.mark.conanv2
 def test_main_loop(base_fixture):
     """
     Smoke test, that the application can start.
