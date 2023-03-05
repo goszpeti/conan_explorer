@@ -72,7 +72,7 @@ jobs:
           - name: "ubuntu-py311-conan2"
             python: "3.11"
             os: ubuntu-20.04
-            conan: ">=2"
+            conan: "<2.1"
             pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
@@ -81,7 +81,6 @@ jobs:
       CAL_DEBUG_LEVEL: 3 # this does not use Qt Threads, but enables to see stacktraces
       # QT_LOGGING_RULES=: "*.debug=true"
       QT_DEBUG_PLUGINS: 1
-      CONAN_VERSION: ${{ matrix.conan}}
     steps:
       - uses: actions/checkout@v3
       - name: Set up a display for gui in Linux
@@ -108,6 +107,8 @@ jobs:
         # need -e because of coverage paths.
         run: |
           pip install -e .[test]
+        env:
+          CONAN_VERSION: ${{ matrix.conan}}
       - name: Execute unitests with pytest
         run: |
           pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no ${{ matrix.pytest_args }}

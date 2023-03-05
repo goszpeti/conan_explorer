@@ -13,10 +13,13 @@ from os.path import basename, splitext
 from setuptools import find_packages, setup
 conan_version_env = os.getenv("CONAN_VERSION", "").strip()
 conan_major_version = ""
-if conan_version_env.startswith("1"):
-    conan_major_version = "1"
-if conan_version_env.startswith("2"):
-    conan_major_version = "2"
+if conan_version_env: # eval as spec
+    from packaging import specifiers, version
+    specs = specifiers.Specifier(conan_version_env)
+    if specs.contains(version.parse("2.0.0")):
+        conan_major_version = "2"
+    else:
+        conan_major_version = "1"
 
 # Package meta-data.
 NAME = "conan-app-launcher"
@@ -31,7 +34,7 @@ conan_req_spec = "conan>=1.24, <2.1"
 if conan_major_version == "1":
     conan_req_spec = "conan>=1.24"
 if conan_major_version == "2":
-    conan_req_spec = "conan<2.1"
+    conan_req_spec = "conan>=2.0, <2.1"
 REQUIRES = [
     'PySide6-Essentials>=6.3.0', # LGPLv3
     conan_req_spec,  # MIT License

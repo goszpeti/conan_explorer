@@ -39,7 +39,7 @@ class ConanInfoCache():
 
     def get_local_package_path(self, conan_ref: ConanFileReference) -> Path:
         """ Return cached package path of a locally installed package. """
-        conan_ref_str = str(conan_ref)
+        conan_ref_str = ConanUnifiedApi.generate_canonical_ref(conan_ref)
         if not conan_ref_str or conan_ref_str == INVALID_CONAN_REF:
             return Path(INVALID_PATH)
 
