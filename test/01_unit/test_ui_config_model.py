@@ -88,7 +88,7 @@ def test_official_release(base_fixture: PathSetup):
 
     # check, that setting channel works too
     app_link.channel = "stable"
-    assert app_link.channel == "stable"
+    assert str(app_link.conan_ref) == conan_ref_short
     app_link.channel = UiAppLinkModel.OFFICIAL_RELEASE
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
 

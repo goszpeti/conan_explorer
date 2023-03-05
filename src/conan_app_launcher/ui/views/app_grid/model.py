@@ -271,9 +271,9 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @channel.setter
     def channel(self, new_value: str):
-        user = self._conan_file_reference.user
+        user = self.user
         # even when changing to another channel, it will reset, user or whole ref has to be changed
-        if new_value == self.OFFICIAL_RELEASE or not new_value or not user:
+        if new_value == self.OFFICIAL_RELEASE or not new_value or user == self.OFFICIAL_USER:
             new_value = "_"
             user = "_"  # both must be unset if channel is official
         self.conan_ref = str(ConanFileReference(
