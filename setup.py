@@ -8,7 +8,6 @@ import io
 import os
 from glob import glob
 from os.path import basename, splitext
-import pkg_resources
 
 # Force Conan version from envvar CONAN_VERSION
 from setuptools import find_packages, setup
@@ -21,6 +20,7 @@ if conan_version_env: # eval as spec
         conan_major_version = "2"
     else:
         conan_major_version = "1"
+    print(f"Using Conan version {conan_major_version} from spec: {conan_version_env}")
 
 # Package meta-data.
 NAME = "conan-app-launcher"
