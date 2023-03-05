@@ -1,3 +1,6 @@
+import os
+import inspect as python_inspect
+
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 from conan.internal.conan_app import ConanApp
@@ -13,7 +16,7 @@ from conan.api.conan_api import ConanAPI, client_version
 from conans.client.cache.cache import ClientCache
 from conans.errors import ConanException
 from conans.model.recipe_ref import RecipeReference as ConanFileReference
-from conans.model.package_ref import RecipeReference as PackageReference
+from conans.model.package_ref import PkgReference as PackageReference
 from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF, INVALID_PATH,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path, user_save_path)
 
@@ -54,10 +57,18 @@ class ConanApi(ConanUnifiedApi):
         if not package_id:  # will give the base path ortherwise
             return Path(INVALID_PATH)
         try:
-            layout = self.client_cache.pkg_layout(conan_ref)
-            return Path(layout.package(PackageReference(conan_ref, package_id)))
+            latest_rev_ref = self.conan.list.latest_recipe_revision(conan_ref)
+            latest_rev_pkg = self.conan.list.latest_package_revision(PackageReference(latest_rev_ref, package_id))
+            assert latest_rev_pkg
+            layout = self.client_cache.pkg_layout(latest_rev_pkg)
+            return Path(layout.package())
         except Exception:  # gotta catch 'em all!
             return Path(INVALID_PATH)
+
+    def get_export_folder(self, conan_ref: ConanFileReference) -> Path:
+        """ Get the export folder form a reference """
+        return Path(self.conan.cache.export_path(conan_ref))
+
 
     ### Install related methods ###
 
@@ -95,6 +106,13 @@ class ConanApi(ConanUnifiedApi):
             result.append(pkg)
         return result
 
+    def get_local_pkg_from_id(self, pkg_ref: PackageReference) -> ConanPkg:
+        """ Returns an installed pkg from reference and id """
+        package = None
+        for package in self.get_local_pkgs_from_ref(pkg_ref.ref):
+            if package.get("id", "") == pkg_ref.package_id:
+                return package
+        return {"id": ""}
 
     @staticmethod
     def generate_canonical_ref(conan_ref: ConanFileReference) -> str:
@@ -178,9 +196,7 @@ class ConanApi(ConanUnifiedApi):
             pr = ProfileLoader(self.client_cache).load_profile(Path(self.conan.profiles.get_default_host()).name)
             default_settings = dict(pr.settings)
             query = f"(arch=None OR arch={default_settings.get('arch')})" \
-                    f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
-                    f" AND (os=None OR os={default_settings.get('os')})"\
-                    f" AND (os_build=None OR os_build={default_settings.get('os_build')})"
+                    f" AND (os=None OR os={default_settings.get('os')})"
             found_pkgs = self.get_packages_in_remote(conan_ref, remote, query)
         except Exception:  # no problem, next
             return []
@@ -206,8 +222,17 @@ class ConanApi(ConanUnifiedApi):
 
         # this calls external code of the recipe
         try:
-            default_options = self._resolve_default_options(
-                self.conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
+            path = self.conan.local.get_conanfile_path(self.conan.cache.export_path(conan_ref), os.getcwd(), py=True)
+            conanfile = self.conan.graph.load_conanfile_class(path)
+            inspection = python_inspect.getmembers_static(conanfile)
+            found_field = {}
+            for field_name, field in inspection:
+                if field_name == "default_options":
+                    found_field = field
+                    break
+            default_options = self._resolve_default_options(found_field)
+
+
         except Exception:
             default_options = {}
 
@@ -241,10 +266,17 @@ class ConanApi(ConanUnifiedApi):
     def get_packages_in_remote(self, conan_ref: ConanFileReference, remote: Optional[str], query=None) -> List[ConanPkg]:
         found_pkgs: List[ConanPkg] = []
         try:
-            search_results = self.conan.search_packages(conan_ref.full_str(), query=query,
-                                                        remote_name=remote).get("results", None)
+            from conan.api.model import ListPattern
+            pattern = ListPattern(str(conan_ref) + ":*", rrev=None, prev=None)
+            search_results = self.conan.list.select(pattern, remote=remote, package_query=query)
             if search_results:
-                found_pkgs = search_results[0].get("items")[0].get("packages")
+                latest_rev = self.conan.list.latest_recipe_revision(conan_ref)
+                if latest_rev:
+                    found_pkgs_dict = search_results.recipes.get(str(conan_ref), {}).get("revisions", {}).get(latest_rev.revision, {}).get("packages", {})
+                    for id, info in found_pkgs_dict.items():
+                        found_pkgs.append(ConanPkg(id=id, options=info.get("info", {}).get("options", {}),
+                                           settings=info.get("info", {}).get("settings", {}),
+                                           requires=[], outdated=False))
             Logger().debug(str(found_pkgs))
         except ConanException:  # no problem, next
             return []

@@ -21,7 +21,7 @@ if conan_version.startswith("1"):
         pass
 elif conan_version.startswith("2"):
     from conans.model.recipe_ref import RecipeReference as ConanFileReference  # type: ignore
-    from conans.model.package_ref import RecipeReference as PackageReference  # type: ignore
+    from conans.model.package_ref import PkgReference as PackageReference  # type: ignore
     from conans.client.cache.remote_registry import Remote
 else:
     raise RuntimeError("Can't recognize Conan version")
@@ -63,9 +63,9 @@ class ConanUnifiedApi(ABC):
         """ Get the fully resolved package path from the reference and the specific package (id) """
         raise NotImplementedError
 
-    # def get_export_folder(self, conan_ref: ConanFileReference) -> Path:
-    #     """ Get the export folder form a reference """
-    #     raise NotImplementedError
+    def get_export_folder(self, conan_ref: ConanFileReference) -> Path:
+        """ Get the export folder form a reference """
+        raise NotImplementedError
 
     # def get_conanfile_path(self, conan_ref: ConanFileReference) -> Path:
     #     raise NotImplementedError
@@ -107,9 +107,9 @@ class ConanUnifiedApi(ABC):
         """ Returns all installed pkg ids for a reference. """
         raise NotImplementedError
 
-    # def get_local_pkg_from_id(self, pkg_ref: PackageReference) -> "ConanPkg":
-    #     """ Returns an installed pkg from reference and id """
-    #     raise NotImplementedError
+    def get_local_pkg_from_id(self, pkg_ref: PackageReference) -> "ConanPkg":
+        """ Returns an installed pkg from reference and id """
+        raise NotImplementedError
 
     def get_local_pkg_from_path(self, conan_ref: ConanFileReference, path: Path):
         """ For reverse lookup - give info from path """

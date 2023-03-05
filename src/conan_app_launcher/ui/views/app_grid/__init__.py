@@ -256,7 +256,8 @@ class AppGridView(PluginInterfaceV1):
                         if pkg_id:
                             app_link.model.set_package_folder(app.conan_api.get_package_folder(
                                 ConanFileReference.loads(conan_ref), pkg_id))
-                        app_link.model.load_from_cache()
+                        else:
+                            app_link.model.load_from_cache()
                     app_link.apply_conan_info()
 
         except Exception as e:

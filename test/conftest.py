@@ -201,6 +201,16 @@ def start_conan_server():
                         f"-o shared=False -pr {str(profile_path)}"], update=True)
         create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=True)
 
+def conan_install_ref(ref, args=""):
+    paths = PathSetup()
+    profiles_path = paths.testdata_path / "conan" / "profile"
+    extra_cmd = ""
+    if conan_version.startswith("2"):
+        extra_cmd = "--requires"
+        profile = "windowsV2" if platform.system=="Windows" else "linuxV2"
+        args += " -pr " + str(profiles_path / profile)
+    assert os.system(f"conan install {extra_cmd} {ref} {args}") == 0
+
 
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():

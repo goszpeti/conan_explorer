@@ -12,7 +12,7 @@ from typing import Callable
 import pytest
 from pytest_mock import MockerFixture
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, GUI_STYLE_MATERIAL
-from test.conftest import TEST_REF, PathSetup, check_if_process_running
+from test.conftest import TEST_REF, PathSetup, check_if_process_running, conan_install_ref
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui.config import UiAppGridConfig, UiTabConfig
@@ -91,7 +91,7 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture: PathSetup, mocker):
     - resolves the correct relative path for executables and forbids non-package-folder paths
     - resolves the correct relative path for executables and sets non-package-folder paths to the abs. path
     """
-    assert os.system(f"conan install {TEST_REF}") == 0# need local package
+    conan_install_ref(TEST_REF) # need local package
 
     app.conan_api.init_api()
 
