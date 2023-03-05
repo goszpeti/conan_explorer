@@ -217,12 +217,14 @@ def test_open_file():
         # set default app for textfile
         check_output(["xdg-mime", "default", "mousepad.desktop", "text/plain"]).decode("utf-8")
         time.sleep(1)
+
     open_file(test_file)
 
     if platform.system() == "Linux":
         # check pid of created process
         assert check_if_process_running("mousepad", kill=True)
     elif platform.system() == "Windows":
+        time.sleep(1)
         assert check_if_process_running("notepad.exe", kill=True)
     os.remove(test_file)
 
