@@ -9,7 +9,7 @@ from test.conftest import TEST_REF_OFFICIAL, PathSetup
 from conan_app_launcher import INVALID_PATH, asset_path
 from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
                                                           UiAppLinkModel)
-from conan_app_launcher.core.conan_common import ConanFileReference as CFR
+from conan_app_launcher.core.conan_common import ConanFileReference as CFR, ConanUnifiedApi
 
 
 @pytest.mark.conanv2
@@ -88,7 +88,7 @@ def test_official_release(base_fixture: PathSetup):
 
     # check, that setting channel works too
     app_link.channel = "stable"
-    assert str(app_link.conan_ref) == conan_ref_short
+    assert app_link.channel == "stable"
     app_link.channel = UiAppLinkModel.OFFICIAL_RELEASE
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
 
@@ -99,7 +99,7 @@ def test_official_release(base_fixture: PathSetup):
 
     # check, that changing the version does not invalidate the channel or user
     app_link.conan_ref = "example/1.1.0@_/_"
-    assert str(app_link.conan_file_reference) == "example/1.1.0"
+    assert ConanUnifiedApi.generate_canonical_ref(app_link.conan_file_reference) == "example/1.1.0@_/_"
     app_link.version = "1.1.0"
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
-    assert app_link.conan_file_reference.user is None
+    assert app_link.conan_file_reference.user in [None, "_"]

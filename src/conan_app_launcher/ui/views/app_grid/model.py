@@ -237,7 +237,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     @classmethod
     def convert_to_disp_channel(cls, channel: str) -> str:
         """ Substitute _ for official channel string """
-        if not channel:
+        if not channel or channel == "_":
             return cls.OFFICIAL_RELEASE
         return channel
 
@@ -252,7 +252,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if new_value == self.OFFICIAL_USER or not new_value:
             new_value = "_"
             channel = "_"  # both must be unset if channel is official
-        if not channel:
+        if not channel or channel == "_":
             channel = "NA"
         self.conan_ref = str(ConanFileReference(
             self._conan_file_reference.name, self._conan_file_reference.version, new_value, channel))
@@ -260,7 +260,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     @classmethod
     def _convert_to_disp_user(cls, user: str) -> str:
         """ Substitute _ for official user string """
-        if not user:
+        if not user or user == "_":
             return cls.OFFICIAL_USER
         return user
 
@@ -272,7 +272,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     @channel.setter
     def channel(self, new_value: str):
         user = self._conan_file_reference.user
-        # even when changig to another channel, it will reset, user or whole ref has to be changed
+        # even when changing to another channel, it will reset, user or whole ref has to be changed
         if new_value == self.OFFICIAL_RELEASE or not new_value or not user:
             new_value = "_"
             user = "_"  # both must be unset if channel is official
