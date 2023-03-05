@@ -157,8 +157,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         # balance out size incostinensies #TODO setting
         from ..common.theming import get_gui_style
         style = get_gui_style()
-        if style == GUI_STYLE_MATERIAL:
-            self.ui.close_button.setIconSize(QSize(20, 20))
         if style == GUI_STYLE_FLUENT:
             self.ui.close_button.setIconSize(QSize(16, 16))
 
