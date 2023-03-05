@@ -1,13 +1,16 @@
 
 import tempfile
+import pytest
 from distutils.file_util import copy_file
 from pathlib import Path
 from conan_app_launcher import INVALID_PATH
 
 from conan_app_launcher.core import ConanInfoCache
 from conan_app_launcher.core.conan_common import ConanFileReference as CFR
+from test.conftest import PathSetup
 
 
+@pytest.mark.conanv2
 def test_new_cache():
     """
     Test, if a new cache file is generated, if it does not exist.
@@ -17,7 +20,8 @@ def test_new_cache():
     assert (temp_dir / ConanInfoCache.CACHE_FILE_NAME).exists()
 
 
-def test_read_cache(base_fixture):
+@pytest.mark.conanv2
+def test_read_cache(base_fixture: PathSetup):
     """
     Test reading from a cache file. Check internal state and use public API.
     """
@@ -25,8 +29,8 @@ def test_read_cache(base_fixture):
     copy_file(str(base_fixture.testdata_path / "cache" / "cache_read.json"), str(temp_cache_path))
 
     cache = ConanInfoCache(temp_cache_path.parent)
-    assert cache._local_packages == {"my_package/1.0.0": "",
-                                     "my_package/2.0.0": "C:\\.conan\\pkg"}
+    assert cache._local_packages == {"my_package/1.0.0@_/_": "",
+                                     "my_package/2.0.0@_/_": "C:\\.conan\\pkg"}
     assert cache._remote_packages == {
         "my_package": {"_": [
             "1.0.0/_",
@@ -50,7 +54,8 @@ def test_read_cache(base_fixture):
     assert CFR.loads("my_package/2.0.0@_/_") in pkgs
 
 
-def test_read_and_delete_corrupt_cache(base_fixture):
+@pytest.mark.conanv2
+def test_read_and_delete_corrupt_cache(base_fixture: PathSetup):
     """Test, that an invalid jsonfile is deleted and a new one created"""
     temp_cache_path = Path(tempfile.mkdtemp()) / ConanInfoCache.CACHE_FILE_NAME
     copy_file(str(base_fixture.testdata_path / "cache" / "cache_read_corrupt.json"), str(temp_cache_path))
@@ -62,7 +67,8 @@ def test_read_and_delete_corrupt_cache(base_fixture):
     assert info == ""
 
 
-def test_update_cache(base_fixture):
+@pytest.mark.conanv2
+def test_update_cache(base_fixture: PathSetup):
     """
     Test, if updating with new values appends/updates the values correctly in the file
     """

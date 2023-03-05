@@ -25,7 +25,8 @@
             "--cov-append",
             "--cov-branch",
             "--capture=no", // print output
-            "--no-cov" // no coverage while debugging
+            "--no-cov", // no coverage while debugging
+            // "-m conanv2"
         ],
         "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
         "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",

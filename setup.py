@@ -9,7 +9,14 @@ import os
 from glob import glob
 from os.path import basename, splitext
 
+# Force Conan version from envvar CONAN_VERSION
 from setuptools import find_packages, setup
+conan_version_env = os.getenv("CONAN_VERSION", "").strip()
+conan_major_version = ""
+if conan_version_env.startswith("1"):
+    conan_major_version = "1"
+if conan_version_env.startswith("2"):
+    conan_major_version = "2"
 
 # Package meta-data.
 NAME = "conan-app-launcher"
@@ -20,9 +27,14 @@ AUTHOR = "Péter Gosztolya and Contributors"
 PYTHON_REQUIRES = ">=3.7.0"
 
 # What packages are required for this module to be executed?
+conan_req_spec = "conan>=1.24, <2.1"
+if conan_major_version == "1":
+    conan_req_spec = "conan>=1.24"
+if conan_major_version == "2":
+    conan_req_spec = "conan<2.1"
 REQUIRES = [
     'PySide6-Essentials>=6.3.0', # LGPLv3
-    "conan>=1.24, <2.1",  # MIT License
+    conan_req_spec,  # MIT License
     "jsonschema>=3.2.0, <4",  # MIT License
     'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)
     'typing-extensions>=3.10.0.2, <4; python_version<"3.8"',  # Python Software Foundation License(PSF)
@@ -37,8 +49,11 @@ TEST_REQUIRES = [
     "pytest-qt==4.1.0",
     "pytest-check==1.0.10",
     "psutil",
-    "pywin32; sys_platform=='win32'"
+    "pywin32; sys_platform=='win32'",
 ]
+
+if conan_major_version.startswith("2"):
+    TEST_REQUIRES.append("conan-server")
 
 DEV_REQUIRES = [
     "autopep8", # formatter

@@ -2,17 +2,17 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
+from email.generator import Generator
 import os
 import platform
 import shutil
 import sys
 from pathlib import Path
-import psutil
-from subprocess import check_output
-from conan_app_launcher.core.system import is_windows_11
+from typing import Callable
+import pytest
+from pytest_mock import MockerFixture
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, GUI_STYLE_MATERIAL
-from test.conftest import TEST_REF, check_if_process_running, conan_create_and_upload
-from time import sleep
+from test.conftest import TEST_REF, PathSetup, check_if_process_running
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui.config import UiAppGridConfig, UiTabConfig
@@ -29,7 +29,8 @@ from PySide6 import QtCore, QtWidgets
 Qt = QtCore.Qt
 
 
-def test_applink_word_wrap(qtbot, base_fixture):
+@pytest.mark.conanv2
+def test_applink_word_wrap(qtbot, base_fixture: PathSetup):
     """ Check custom word wrap of App Link"""
 
     # max length > actual length -> no change
@@ -44,7 +45,8 @@ def test_applink_word_wrap(qtbot, base_fixture):
                                  10) == "VeryLongAp\npLinkNamet\noTestColum\nnCalculati\non 111111"
 
 
-def test_AppEditDialog_display_values(qtbot, base_fixture):
+@pytest.mark.conanv2
+def test_AppEditDialog_display_values(qtbot, base_fixture: PathSetup):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
@@ -80,7 +82,8 @@ def test_AppEditDialog_display_values(qtbot, base_fixture):
     assert app_info.name == "test"
 
 
-def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
+@pytest.mark.conanv2
+def test_AppEditDialog_browse_buttons(qtbot, base_fixture: PathSetup, mocker):
     """
     Test, if the browse executable and icon button works:
     - buttons are always enabled (behavior change from conditional disable)
@@ -167,7 +170,9 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     diag._ui.conan_ref_line_edit._completion_thread.join(1)
     root_obj.close()
 
-def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
+
+@pytest.mark.conanv2
+def test_AppEditDialog_save_values(qtbot, base_fixture: PathSetup, mocker):
     """
     Test, if the entered data is written correctly.
     """
@@ -235,7 +240,8 @@ def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
     diag._ui.conan_ref_line_edit._completion_thread.join(1)
 
 
-def test_AppLink_open(qtbot, base_fixture):
+@pytest.mark.conanv2
+def test_AppLink_open(qtbot, base_fixture: PathSetup):
     """
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
@@ -267,7 +273,8 @@ def test_AppLink_open(qtbot, base_fixture):
     assert check_if_process_running(process_name, cmd_contains=["conan_app_launcher"], kill=True, cmd_narg=2)
 
 
-def test_AppLink_icon_update_from_executable(qtbot, base_fixture):
+@pytest.mark.conanv2
+def test_AppLink_icon_update_from_executable(qtbot, base_fixture: PathSetup):
     """
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path. Use python executable for testing.

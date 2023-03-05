@@ -85,7 +85,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="app_name">
+       <widget class="QLabel" name="app_name_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -152,7 +152,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QFrame" name="frame">
+       <widget class="QFrame" name="central_left_frame">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -189,7 +189,7 @@
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="open_shell_label">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -202,28 +202,28 @@
           </widget>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="executable_name_label">
            <property name="text">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Executable:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="executable_value_label">
            <property name="text">
             <string>bin/python.exe</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="conan_ref_name_label">
            <property name="text">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Reference:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLabel" name="conan_ref_label">
+          <widget class="QLabel" name="conan_ref_value_label">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -251,7 +251,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="frame_2">
+       <widget class="QFrame" name="central_right_frame">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -272,7 +272,7 @@
           <enum>QFormLayout::ExpandingFieldsGrow</enum>
          </property>
          <item row="0" column="0">
-          <widget class="QLabel" name="arguments_label">
+          <widget class="QLabel" name="arguments_name_label">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
              <horstretch>0</horstretch>

@@ -6,10 +6,11 @@ from pathlib import Path
 
 from conan_app_launcher.ui.config.json_file import JsonUiConfig
 from conan_app_launcher.core.conan_common import ConanFileReference
+from test.conftest import PathSetup
 
 
 @pytest.mark.conanv2
-def test_new_filename_is_created(base_fixture):
+def test_new_filename_is_created(base_fixture: PathSetup):
     """
     Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -20,7 +21,8 @@ def test_new_filename_is_created(base_fixture):
     assert new_file_path.exists()
 
 
-def test_read_correct_file(base_fixture, ui_config_fixture):
+@pytest.mark.conanv2
+def test_read_correct_file(base_fixture: PathSetup, ui_config_fixture: Path):
     """
     Tests reading a correct config json with 2 tabs.
     Expects the same values as in the file.
@@ -51,7 +53,8 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
     assert tab1_entries[0].name == "App2"
 
 
-def test_update(base_fixture):
+@pytest.mark.conanv2
+def test_update(base_fixture: PathSetup):
     """ Test that the oldest schema version updates correctly to the newest one """
     temp_file = Path(tempfile.gettempdir()) / "update.json"
     copy_file(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
@@ -76,7 +79,8 @@ def test_update(base_fixture):
     assert read_obj.get("tabs")[0].get("apps")[0].get("console_application") is None
 
 
-def test_read_invalid_version(base_fixture, capfd):
+@pytest.mark.conanv2
+def test_read_invalid_version(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
     """
     Tests, that reading a config file with the wrong version will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -88,7 +92,8 @@ def test_read_invalid_version(base_fixture, capfd):
     assert "version" in captured.err
 
 
-def test_read_invalid_content(base_fixture, capfd):
+@pytest.mark.conanv2
+def test_read_invalid_content(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
     """
     Tests, that reading a config file with invalid syntax will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -99,6 +104,7 @@ def test_read_invalid_content(base_fixture, capfd):
     assert "Expecting property name" in captured.err
 
 
+@pytest.mark.conanv2
 def check_config(ref_dict, test_dict):
     """ Check dict entries to a ref dict (recursive) """
     for key in test_dict:
@@ -121,7 +127,7 @@ def check_config(ref_dict, test_dict):
             assert not test_dict.get(key)
 
 
-def test_write_config_file(base_fixture, ui_config_fixture, tmp_path):
+def test_write_config_file(base_fixture: PathSetup, ui_config_fixture: Path, tmp_path: Path):
     """
     Tests, that writing a config file from internal state is correct.
     Expects the same content, as the original file.

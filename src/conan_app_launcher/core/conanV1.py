@@ -4,10 +4,12 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
-from conan_app_launcher.core.conan_common import ConanPkg, LoggerWriter, create_key_value_pair_list
+from conan_app_launcher.core.conan_common import ConanPkg, ConanUnifiedApi, LoggerWriter, create_key_value_pair_list
 
 if TYPE_CHECKING:
     from conans.client.cache.remote_registry import Remote
+    from .conan_cache import ConanInfoCache
+
 from conans.client.conan_api import (ClientCache, ConanAPIV1, UserIO,
                                         client_version)
 from conans.client.output import ConanOutput
@@ -24,16 +26,13 @@ from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF, INVALID_PAT
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, user_save_path)
 from conan_app_launcher.app.logger import Logger
 
-from .conan_cache import ConanInfoCache
-
-
-class ConanApi():
+class ConanApi(ConanUnifiedApi):
     """ Wrapper around ConanAPIV1 """
 
     def __init__(self):
         self.conan: ConanAPIV1
         self.client_cache: ClientCache
-        self.info_cache: ConanInfoCache
+        self.info_cache: "ConanInfoCache"
         self.client_version = client_version
         self._short_path_root = Path("Unknown")
 
@@ -57,6 +56,7 @@ class ConanApi():
             self.remove_locks()
         except Exception as error:
             Logger().debug(str(error))
+        from .conan_cache import ConanInfoCache
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
         return self
 
@@ -258,14 +258,14 @@ class ConanApi():
 
     # Remote References and Packages
 
-    def search_query_in_remotes(self, query: str, remote="all") -> List[ConanFileReference]:
+    def search_query_in_remotes(self, query: str, remote_name="all") -> List[ConanFileReference]:
         """ Search in all remotes for a specific query. """
         res_list = []
         search_results = []
         try:
             # no query possible with pattern
             search_results = self.conan.search_recipes(
-                query, remote_name=remote, case_sensitive=False).get("results", None)
+                query, remote_name=remote_name, case_sensitive=False).get("results", None)
         except Exception as e:
             Logger().error(f"Error while searching for recipe: {str(e)}")
             return []
@@ -412,62 +412,3 @@ class ConanApi():
             if same_comp_version_pkgs:
                 found_pkgs = same_comp_version_pkgs
         return found_pkgs
-
-    @staticmethod
-    def _resolve_default_options(default_options_ret: Any) -> Dict[str, Any]:
-        """ Default options can be a a dict or name=value as string, or a tuple of it """
-        default_options: Dict[str, Any] = {}
-        if default_options_ret and isinstance(default_options_ret, str):
-            default_option_str = default_options_ret.split("=")
-            default_options.update({default_option_str[0]: default_option_str[1]})
-        elif default_options_ret and isinstance(default_options_ret, (list, tuple)):
-            for default_option in default_options_ret:
-                default_option_str = default_option.split("=")
-                default_options.update({default_option_str[0]: default_option_str[1]})
-        else:
-            default_options = default_options_ret
-        return default_options
-
-    @staticmethod
-    def generate_canonical_ref(conan_ref: ConanFileReference) -> str:
-        if conan_ref.user is None and conan_ref.channel is None:
-            return str(conan_ref) + "@_/_"
-        return str(conan_ref)
-
-    @staticmethod
-    def build_conan_profile_name_alias(settings: Dict[str, str]) -> str:
-        """ Build a  human readable pseduo profile name, like Windows_x64_vs16_v142_release """
-        if not settings:
-            return "No Settings"
-
-        os = settings.get("os", "")
-        if not os:
-            os = settings.get("os_target", "")
-            if not os:
-                os = settings.get("os_build", "")
-
-        arch = settings.get("arch", "")
-        if not arch:
-            arch = settings.get("arch_target", "")
-            if not arch:
-                arch = settings.get("arch_build", "")
-        if arch == "x86_64":  # shorten x64
-            arch = "x64"
-
-        comp = settings.get("compiler", "")
-        if comp == "Visual Studio":
-            comp = "vs"
-        comp_ver = settings.get("compiler.version", "")
-        comp_text = comp.lower() + comp_ver.lower()
-
-        comp_toolset = settings.get("compiler.toolset", "")
-
-        bt = settings.get("build_type", "")
-
-        alias = os
-        for item in [arch.lower(), comp_text, comp_toolset.lower(), bt.lower()]:
-            if item:
-                alias += "_" + item
-
-        return alias
-

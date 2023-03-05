@@ -1,9 +1,10 @@
 import sys
 from distutils.file_util import copy_file
 from pathlib import Path
+
+import pytest
 from conan_app_launcher.settings import GUI_STYLE_MATERIAL
-from test.conftest import TEST_REF_OFFICIAL
-import conan_app_launcher.app as app  # using global module pattern
+from test.conftest import TEST_REF_OFFICIAL, PathSetup
 
 from conan_app_launcher import INVALID_PATH, asset_path
 from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
@@ -11,7 +12,8 @@ from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
 from conan_app_launcher.core.conan_common import ConanFileReference as CFR
 
 
-def test_executable_eval(base_fixture):
+@pytest.mark.conanv2
+def test_executable_eval(base_fixture: PathSetup):
     """
     Tests, that the executable setter works on all cases.
     Expects correct file, error messoge on wrong file an error message on no file.
@@ -30,7 +32,8 @@ def test_executable_eval(base_fixture):
     assert app_link.get_executable_path() == Path(INVALID_PATH)
 
 
-def test_icon_eval(tmp_path, qtbot, base_fixture):
+@pytest.mark.conanv2
+def test_icon_eval(tmp_path: Path, qtbot, base_fixture: PathSetup):
     """
     Tests, that the icon setter works on all cases.
     Expects package relative file, config-file rel. file, automaticaly extracted file,
@@ -59,7 +62,8 @@ def test_icon_eval(tmp_path, qtbot, base_fixture):
     assert not app_link.get_icon().isNull()
 
 
-def test_icon_eval_wrong_path(tmp_path, qtbot, base_fixture, light_theme_fixture):
+@pytest.mark.conanv2
+def test_icon_eval_wrong_path(tmp_path: Path, qtbot, base_fixture: PathSetup, light_theme_fixture: None):
     """ Test, that a nonexistant path sets to default (check for error removed) """
 
     app_link = UiAppLinkModel("AppName", icon=str(Path.home() / "nonexistant.svg"), executable="abc")
@@ -67,7 +71,8 @@ def test_icon_eval_wrong_path(tmp_path, qtbot, base_fixture, light_theme_fixture
     assert str(app_link._eval_icon_path()) == str(asset_path / "icons" / GUI_STYLE_MATERIAL / "no-access.svg")
 
 
-def test_official_release(base_fixture):
+@pytest.mark.conanv2
+def test_official_release(base_fixture: PathSetup):
     """
     Test, if an official reference in the format name/1.0.0@_/_ works correctly.
     Expects the same option name and value as given to the constructor.

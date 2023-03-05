@@ -4,27 +4,23 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
-from conan_app_launcher import INVALID_CONAN_REF, INVALID_PATH
+from conan_app_launcher import INVALID_CONAN_REF, INVALID_PATH, conan_version
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanFileReference, ConanUnifiedApi
 
 class ConanInfoCache():
     """
     This is a cache to accelerate calls which need remote access.
     It also has an option to store the local package path.
     """
-
     CACHE_FILE_NAME = "cache.json"
+    if conan_version.startswith("2"):
+        CACHE_FILE_NAME = "cacheV2.json"
 
     def __init__(self, cache_dir: Path, local_refs: Optional[List[ConanFileReference]]=None):
         if not local_refs:
             local_refs = []
-        try:
-            import conan
-            if conan.__version__.startswith("2"):
-                self.CACHE_FILE_NAME = "cacheV2.json"
-        except: # not all conan v1 versions have a __version__ var
-            pass
+
         self._cache_file = cache_dir / self.CACHE_FILE_NAME
         self._local_packages: Dict[str, str] = {}
         self._remote_packages: Dict[str, Dict[str, List[str]]] = {}
@@ -146,7 +142,8 @@ class ConanInfoCache():
         with self._access_lock:
             if self._local_packages.get(str(conan_ref)) == str(folder):
                 return
-            self._local_packages.update({str(conan_ref): str(folder.as_posix())})
+            self._local_packages.update(
+                {ConanUnifiedApi.generate_canonical_ref(conan_ref): str(folder.as_posix())})
             self._save()
 
     def invalidate_remote_package(self, conan_ref: ConanFileReference):

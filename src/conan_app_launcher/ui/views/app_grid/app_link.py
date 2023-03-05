@@ -154,9 +154,10 @@ class ListAppLink(QFrame):
         open_in_file_manager(self.model.get_executable_path().parent)
 
     def _apply_new_config(self):
-        self._ui.app_name.setText(self.model.name)
-        self._ui.conan_ref_label.setText(self.model.conan_ref)
+        self._ui.app_name_label.setText(self.model.name)
+        self._ui.conan_ref_value_label.setText(self.model.conan_ref)
         self._ui.app_button.set_icon(self.model.get_icon())
+        self._ui.executable_value_label.setText(self.model.executable)
         self._ui.arguments_value_label.setText(self.model.args)
         self._ui.open_shell_checkbox.setChecked(self.model.is_console_application)
 

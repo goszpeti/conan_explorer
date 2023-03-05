@@ -2,44 +2,65 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
 from conan.internal.conan_app import ConanApp
 
-from conan_app_launcher.core.conan_common import ConanPkg
+from conan_app_launcher.core.conan_common import ConanPkg, ConanUnifiedApi
 from conan_app_launcher.app.logger import Logger
 
 if TYPE_CHECKING:
     from conans.client.cache.remote_registry import Remote
-# try:
+    from .conan_cache import ConanInfoCache
+
 from conan.api.conan_api import ConanAPI, client_version
 from conans.client.cache.cache import ClientCache
-from conans.client.userio import UserInput
-from conan.api.output import ConanOutput
 from conans.errors import ConanException
 from conans.model.recipe_ref import RecipeReference as ConanFileReference
 from conans.model.package_ref import RecipeReference as PackageReference
-# except:
-#     Logger().error("Trying to import Conan 2 without probably being installed...")
-
 from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF, INVALID_PATH,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path, user_save_path)
 
-from .conan_cache import ConanInfoCache
 
-class ConanApi():
+
+class ConanApi(ConanUnifiedApi):
     """ Wrapper around ConanAPIV2 """
 
     def __init__(self):
         self.conan: ConanAPI
         self.client_cache: ClientCache
-        self.info_cache: ConanInfoCache
+        self.info_cache: "ConanInfoCache"
         self.client_version = client_version
         self._short_path_root = Path("Unknown")
 
     def init_api(self):
         self.conan = ConanAPI()
         self.client_cache = ClientCache(self.conan.cache_folder)
+        from .conan_cache import ConanInfoCache
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
+
+    ### General commands ###
 
     def remove_locks(self):
         pass # command does not exist
+
+    def get_remotes(self, include_disabled=False) -> List["Remote"]:
+        remotes = []
+        try:
+            remotes = self.conan.remotes.list(None, only_enabled=not include_disabled)
+        except Exception as e:
+            Logger().error(f"Error while reading remotes: {str(e)}")
+        return remotes
+
+    def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
+        """ Get the fully resolved package path from the reference and the specific package (id) """
+        if not package_id:  # will give the base path ortherwise
+            return Path(INVALID_PATH)
+        try:
+            layout = self.client_cache.pkg_layout(conan_ref)
+            return Path(layout.package(PackageReference(conan_ref, package_id)))
+        except Exception:  # gotta catch 'em all!
+            return Path(INVALID_PATH)
+
+    ### Install related methods ###
+
+    ### Local References and Packages ###
 
     def get_all_local_refs(self) -> List[ConanFileReference]:
         """ Returns all locally installed conan references """
@@ -73,15 +94,6 @@ class ConanApi():
             result.append(pkg)
         return result
 
-    def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
-        """ Get the fully resolved package path from the reference and the specific package (id) """
-        if not package_id:  # will give the base path ortherwise
-            return Path(INVALID_PATH)
-        try:
-            layout = self.client_cache.pkg_layout(conan_ref)
-            return Path(layout.package(PackageReference(conan_ref, package_id)))
-        except Exception:  # gotta catch 'em all!
-            return Path(INVALID_PATH)
 
     @staticmethod
     def generate_canonical_ref(conan_ref: ConanFileReference) -> str:
@@ -123,8 +135,28 @@ class ConanApi():
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
             return packages[0]
-        Logger().debug(f"No matching packages found for <b>{str(conan_ref)}</b>")
+        Logger().debug(f"No matching local packages found for <b>{str(conan_ref)}</b>")
         return {"id": ""}
+
+    ### Remote References and Packages ###
+
+    def search_query_in_remotes(self, query: str, remote_name="all") -> List["ConanFileReference"]:
+        """ Search in all remotes for a specific query. """
+        search_results = []
+        if remote_name == "all":
+            remote_name = None
+        try:
+            # no query possible with pattern
+            for remote in self.get_remotes():
+                search_results: List["ConanFileReference"] = self.conan.search.recipes(query, remote=remote)
+                # .get("results", None)
+        except Exception as e:
+            Logger().error(f"Error while searching for recipe: {str(e)}")
+            return []
+
+        search_results = list(set(search_results))  # make unique
+        search_results.sort()
+        return search_results
 
     def find_best_matching_packages(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {},
                                     remote: Optional[str] = None) -> List[ConanPkg]:
@@ -217,17 +249,3 @@ class ConanApi():
             return []
         return found_pkgs
 
-    @staticmethod
-    def _resolve_default_options(default_options_ret: Any) -> Dict[str, Any]:
-        """ Default options can be a a dict or name=value as string, or a tuple of it """
-        default_options: Dict[str, Any] = {}
-        if default_options_ret and isinstance(default_options_ret, str):
-            default_option_str = default_options_ret.split("=")
-            default_options.update({default_option_str[0]: default_option_str[1]})
-        elif default_options_ret and isinstance(default_options_ret, (list, tuple)):
-            for default_option in default_options_ret:
-                default_option_str = default_option.split("=")
-                default_options.update({default_option_str[0]: default_option_str[1]})
-        else:
-            default_options = default_options_ret
-        return default_options

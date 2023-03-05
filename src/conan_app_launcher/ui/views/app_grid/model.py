@@ -418,7 +418,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         self.package_folder = package_folder
         if not package_folder.exists():
             Logger().warning(
-                f"Can't find any package for <b>{str(self.conan_ref)}<b> and options {repr(self.conan_options)}")
+                f"Can't find any local package for <b>{str(self.conan_ref)}<b> and options {repr(self.conan_options)}")
 
         # call registered update callback
         if self._update_cbk_func:

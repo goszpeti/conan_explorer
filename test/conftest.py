@@ -24,7 +24,7 @@ from conan_app_launcher.ui.common import remove_qt_logger
 from conan_app_launcher.ui.main_window import MainWindow
 from conan_app_launcher.settings import *
 from conan_app_launcher.core.conan_common import ConanFileReference
-
+from conan_app_launcher import conan_version
 
 exe_ext = ".exe" if platform.system() == "Windows" else ""
 conan_server_thread = None
@@ -61,7 +61,7 @@ class PathSetup():
 
 def check_if_process_running(process_name, cmd_contains=[], kill=False, cmd_narg=1, timeout_s=10) -> bool:
     start_time = datetime.now()
-    while datetime.now() - start_time < timedelta(seconds=timeout_s):
+    while datetime.now() - start_time < timedelta(seconds=timeout_s) or timeout_s == 0:
         for process in psutil.process_iter():
             try:
                 if process_name.lower() in process.name().lower():
@@ -82,28 +82,41 @@ def check_if_process_running(process_name, cmd_contains=[], kill=False, cmd_narg
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         print(f"Not found process {process_name}, keep looking...")
+        if timeout_s == 0:
+            return False
         time.sleep(1)
     return False
 
 
 def create_test_ref(ref, paths, create_params=[""], update=False):
-    native_ref = ConanFileReference.loads(ref).full_str()
+    native_ref = str(ConanFileReference.loads(ref))
     conan = ConanApi()
     conan.init_api()
+    
     pkgs = conan.search_query_in_remotes(native_ref)
 
     if not update:
         for pkg in pkgs:
-            if pkg.full_str() == native_ref:
+            if str(pkg) == native_ref:
                 return
     conanfile = str(paths.testdata_path / "conan" / "conanfile.py")
+    if conan_version.startswith("2"):
+        conanfile = str(paths.testdata_path / "conan" / "conanfileV2.py")
+
     for param in create_params:
         conan_create_and_upload(conanfile, ref, param)
 
 
 def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
-    os.system(f"conan create {conanfile} {ref} {create_params}")
-    os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
+    if conan_version.startswith("1"):
+
+        os.system(f"conan create {conanfile} {ref} {create_params}")
+        os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
+    elif conan_version.startswith("2"):
+        cfr = ConanFileReference.loads(ref)
+        os.system(f"conan create {conanfile} --name={cfr.name} --version={cfr.version} --user={cfr.user} --channel={cfr.channel} {create_params}")
+        os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force")
+
 
 
 def run_conan_server():
@@ -134,10 +147,13 @@ def start_conan_server():
     # Setup default profile
     paths = PathSetup()
     profiles_path = paths.testdata_path / "conan" / "profile"
-    conan = ConanApi()
-    conan.init_api()
-    os.makedirs(conan.client_cache.profiles_path, exist_ok=True)
-    shutil.copy(str(profiles_path / platform.system().lower()),  conan.client_cache.default_profile_path)
+    if conan_version.startswith("1"):
+        conan = ConanApi()
+        conan.init_api()
+        os.makedirs(conan.client_cache.profiles_path, exist_ok=True)
+        shutil.copy(str(profiles_path / platform.system().lower()),  conan.client_cache.default_profile_path)
+    elif conan_version.startswith("2"):
+        os.system("conan profile detect")
 
     # Add to firewall
     if platform.system() == "Windows":
@@ -158,15 +174,24 @@ def start_conan_server():
         time.sleep(3)
         print("ADDING CONAN REMOTE")
         if is_ci_job():
-            os.system("conan remote clean")
-        os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
-        os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
+            os.system("conan remote remove conancenter")
+        if conan_version.startswith("1"):
+            os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
+            os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
+
+        elif conan_version.startswith("2"):
+            os.system(f"conan remote add {TEST_REMOTE_NAME} http://localhost:9300/ --insecure")
+            os.system(f"conan remote login {TEST_REMOTE_NAME} demo -p demo")  # todo autogenerate and config
         os.system(f"conan remote enable {TEST_REMOTE_NAME}")
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
         return
     print("CREATING TESTDATA FOR LOCAL CONAN SERVER")
-    for profile in ["windows", "linux"]:
+    profiles = ["windows", "linux"]
+    if conan_version.startswith("2"):
+        profiles = ["windowsV2", "linuxV2"]
+
+    for profile in profiles:
         profile_path = profiles_path / profile
         create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
                         f"-o shared=False -pr {str(profile_path)}"], update=True)
@@ -183,7 +208,7 @@ def ConanServer():
     yield
     if started:
         print("\nKILLING CONAN SERVER\n ")
-        check_if_process_running("conan_server", kill=True)
+        check_if_process_running("conan_server", timeout_s=0, kill=True)
 
 
 @pytest.fixture

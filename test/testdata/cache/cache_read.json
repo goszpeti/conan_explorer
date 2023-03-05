@@ -1,8 +1,8 @@
 {
     "read_only": true,
     "local_packages": {
-        "my_package/1.0.0": "",
-        "my_package/2.0.0": "C:\\.conan\\pkg"
+        "my_package/1.0.0@_/_": "",
+        "my_package/2.0.0@_/_": "C:\\.conan\\pkg"
     },
     "remote_packages": {
         "my_package": {

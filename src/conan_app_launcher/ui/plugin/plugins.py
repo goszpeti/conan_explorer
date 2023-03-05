@@ -7,6 +7,7 @@ from distutils.util import strtobool
 from pathlib import Path
 import uuid
 from typing import TYPE_CHECKING, List, Optional
+from conan_app_launcher import conan_version
 
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
@@ -20,17 +21,18 @@ if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
     from conan_app_launcher.ui.main_window import BaseSignals
 
+
 @dataclass
 class PluginDescription():
-    name: str # Display name, also used as page title
+    name: str  # Display name, also used as page title
     version: str
     author: str
-    icon: str # left menu icon
-    import_path: str # this path will be placed on python path or a file directly
-    plugin_class: str # class to be loaded from module
+    icon: str  # left menu icon
+    import_path: str  # this path will be placed on python path or a file directly
+    plugin_class: str  # class to be loaded from module
     description: str
-    side_menu: bool # will create a side menu, which can be accessed by page_widgets
-    conan_versions: str # restrict the plugin to a conan version (will be greyed out)
+    side_menu: bool  # will create a side menu, which can be accessed by page_widgets
+    conan_versions: str  # restrict the plugin to a conan version (will be greyed out)
 
 
 class PluginInterfaceV1(ThemedWidget):
@@ -40,13 +42,13 @@ class PluginInterfaceV1(ThemedWidget):
     # Return a signal, which will be called, when the Ui should load.
     # Connect this to your actual load method.
     # This is used for asynchronous loading.
-    load_signal: SignalInstance = Signal() # type: ignore 
+    load_signal: SignalInstance = Signal()  # type: ignore
 
     def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"] = None, page_widgets: Optional["FluentWindow.PageStore"] = None) -> None:
         ThemedWidget.__init__(self, parent)
         self._base_signals = base_signals
         self._page_widgets = page_widgets
-        #self._base_signals.page_size_changed.emit(self)
+        # self._base_signals.page_size_changed.emit(self)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setVerticalStretch(0)
         self.setSizePolicy(sizePolicy)
@@ -57,6 +59,7 @@ class PluginInterfaceV1(ThemedWidget):
             return
         self._base_signals.page_size_changed.emit(self)
         super().resizeEvent(a0)
+
 
 class PluginFile():
 
@@ -80,7 +83,7 @@ class PluginFile():
     @staticmethod
     def read_file(plugin_file_path: str) -> List[PluginDescription]:
         if not os.path.exists(plugin_file_path):
-            pass # error
+            pass  # error
         plugins = []
         parser = configparser.ConfigParser()
         parser.read(plugin_file_path, encoding="UTF-8")
@@ -104,7 +107,7 @@ class PluginFile():
                 assert import_path, "field 'import_path' is required"
                 # import_path =  / import_path_str
                 assert import_path.exists(), f"import_path {str(import_path)} does not exist"
-                if import_path.is_dir(): # needs an __init__.py
+                if import_path.is_dir():  # needs an __init__.py
                     assert (import_path / "__init__.py").exists()
 
                 plugin_class = plugin_info.get("plugin_class")
@@ -134,13 +137,13 @@ class PluginFile():
         with open(path, 'w', encoding="utf8") as fd:
             parser.write(fd)
 
+
 class PluginHandler(QObject):
     load_plugin: SignalInstance = Signal(PluginDescription)  # type: ignore
     unload_plugin: SignalInstance = Signal(str)  # type: ignore
 
     def __init__(self, parent: Optional[QObject] = ...) -> None:
         super().__init__(parent)
-
 
     def load_all_plugins(self):
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
@@ -174,7 +177,7 @@ class PluginHandler(QObject):
                 self.load_plugin.emit(plugin)
 
     @staticmethod
-    def eval_conan_version_spec(spec: str, conan_version: str=app.conan_api.client_version) -> bool:
+    def eval_conan_version_spec(spec: str, conan_version: str = conan_version) -> bool:
         if not spec:
             return True
         specs = specifiers.Specifier(spec)

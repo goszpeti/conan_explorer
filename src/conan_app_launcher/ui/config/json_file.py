@@ -41,7 +41,7 @@ class JsonUiConfig(UiConfigInterface):
         self._json_file_path = Path(json_file_path)
 
         # create file, if not available for first start
-        if not self._json_file_path.is_file():
+        if not self._json_file_path.exists():
             Logger().info('UiConfig: Creating json file')
             self._json_file_path.touch()
         else:

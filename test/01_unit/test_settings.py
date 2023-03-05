@@ -4,11 +4,14 @@ import shutil
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from conan_app_launcher.settings import *
 from conan_app_launcher.settings.ini_file import IniSettings, PLUGINS_SECTION_NAME
 from test.conftest import PathSetup
 
 
+@pytest.mark.conanv2
 def test_read_from_file():
     """
     Tests, that the settings file is read by using a string setting.
@@ -24,6 +27,8 @@ def test_read_from_file():
     assert "built-in" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
     assert "9accea0b-b494-11ed-842e-f7808c507c80" in sets.get_settings_from_node(PLUGINS_SECTION_NAME)
 
+
+@pytest.mark.conanv2
 def test_save_to_file():
     """
     Tests, that writing a value works and untouched entries remain.
@@ -55,6 +60,7 @@ def test_save_to_file():
     os.remove(temp_ini_path)
 
 
+@pytest.mark.conanv2
 def test_add__remove_setting():
     """ Tests, that adding and removing a setting permanently works. """
     temp_ini_path = tempfile.mktemp()

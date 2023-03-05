@@ -53,6 +53,10 @@ AUTOCLOSE_SIDE_MENU = False
 # From ennvar DEBUG - 0: No debug, 1 = debug logging on, 2 = disable true async loading
 DEBUG_LEVEL = int(os.getenv("CAL_DEBUG_LEVEL", "0"))
 
+# Conan version
+conan_pkg_info = distribution("conan")
+conan_version = conan_pkg_info.version
+
 # Paths to find folders - points to the folder of this file
 # must be initialized later, otherwise setup.py can't parse this file
 
