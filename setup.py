@@ -8,15 +8,16 @@ import io
 import os
 from glob import glob
 from os.path import basename, splitext
+import pkg_resources
 
 # Force Conan version from envvar CONAN_VERSION
 from setuptools import find_packages, setup
+from pkg_resources import Requirement
 conan_version_env = os.getenv("CONAN_VERSION", "").strip()
 conan_major_version = ""
 if conan_version_env: # eval as spec
-    from packaging import specifiers, version
-    specs = specifiers.Specifier(conan_version_env)
-    if specs.contains(version.parse("2.0.0")):
+    specs = Requirement.parse("conan" + conan_version_env)
+    if "2.0.0" in specs:
         conan_major_version = "2"
     else:
         conan_major_version = "1"
