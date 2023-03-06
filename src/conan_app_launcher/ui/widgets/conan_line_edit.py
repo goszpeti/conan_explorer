@@ -13,7 +13,7 @@ from conan_app_launcher.ui.common.theming import get_gui_dark_mode
 class ConanRefLineEdit(QLineEdit):
     """ Adds completions for Conan references and a validator. """
     completion_finished = Signal()
-    MINIMUM_CHARS_FOR_QUERY = 4
+    MINIMUM_CHARS_FOR_QUERY = 6
     INVALID_COLOR = "LightCoral"
     VALID_COLOR_LIGHT = "#37efba"  # light green
     VALID_COLOR_DARK = "#007b50"  # dark green
@@ -88,15 +88,16 @@ class ConanRefLineEdit(QLineEdit):
         if len(conan_ref) < self.MINIMUM_CHARS_FOR_QUERY:  # skip searching for such broad terms
             return
         # start a query for all similar packages with conan search by starting a new thread for it
-        if not any([entry.startswith(conan_ref) for entry in app.conan_api.info_cache.get_all_remote_refs()]) or not self.is_valid:
-            if self._completion_thread and self._completion_thread.is_alive():  # one query at a time
-                return
-            self._completion_thread = Thread(target=self.load_completion, args=[conan_ref, ])
-            self._completion_thread.start()
-            if self._loading_cbk:
-                self._loading_cbk()
+        if self._completion_thread and self._completion_thread.is_alive():  # one query at a time
+            return
+        self._completion_thread = Thread(target=self.load_completion, args=[conan_ref, ])
+        self._completion_thread.start()
+        if self._loading_cbk:
+            self._loading_cbk()
 
     def load_completion(self, text: str):
+        if any([entry.startswith(text) for entry in app.conan_api.info_cache.get_all_remote_refs()]) or self.is_valid:
+            return
         recipes = app.conan_api.search_query_in_remotes(f"{text}*")  # can take very long time
         if app.conan_api:  # program can shut down and conan_api destroyed
             try:

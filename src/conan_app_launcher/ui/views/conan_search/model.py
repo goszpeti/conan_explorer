@@ -95,7 +95,7 @@ class PkgSearchModel(TreeModel):
         recipes_with_remotes: Dict[ConanFileReference, str] = {}
         for remote in remotes:
             recipe_list = (app.conan_api.search_query_in_remotes(
-                f"{search_query}*", remote=remote))
+                f"{search_query}*", remote_name=remote))
             for recipe in recipe_list:
                 current_value = recipes_with_remotes.get(recipe, "")
                 if current_value:
