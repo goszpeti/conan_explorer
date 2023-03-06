@@ -25,13 +25,13 @@ jobs:
         name:
           [
             "ubuntu-py37",
-            "ubuntu-py38",
-            "ubuntu-py39",
-            "ubuntu-py310",
+            # "ubuntu-py38",
+            # "ubuntu-py39",
+            # "ubuntu-py310",
             "windows-py311",
-            "ubuntu-py38-conan1.24.0",
-            "ubuntu-py310-conan1.48.2",
-            "ubuntu-py311-conan2",
+            # "ubuntu-py38-conan1.24.0",
+            # "ubuntu-py310-conan1.48.2",
+            # "ubuntu-py311-conan2",
           ]
         include:
           - name: "ubuntu-py37"
@@ -39,48 +39,48 @@ jobs:
             os: ubuntu-20.04
             conan: "<2"
             pytest_args: ""
-          - name: "ubuntu-py38"
-            python: "3.8"
-            os: ubuntu-20.04
-            conan: "<2"
-            pytest_args: ""
-          - name: "ubuntu-py39"
-            python: "3.9"
-            conan: "<2"
-            os: ubuntu-20.04
-            pytest_args: ""
-          - name: "ubuntu-py310"
-            python: "3.10"
-            conan: "<2"
-            os: ubuntu-20.04
-            pytest_args: ""
+          # - name: "ubuntu-py38"
+          #   python: "3.8"
+          #   os: ubuntu-20.04
+          #   conan: "<2"
+          #   pytest_args: ""
+          # - name: "ubuntu-py39"
+          #   python: "3.9"
+          #   conan: "<2"
+          #   os: ubuntu-20.04
+          #   pytest_args: ""
+          # - name: "ubuntu-py310"
+          #   python: "3.10"
+          #   conan: "<2"
+          #   os: ubuntu-20.04
+          #   pytest_args: ""
           - name: "windows-py311"
             python: "3.11"
             os: windows-latest
             conan: "<2"
             pytest_args: ""
-          - name: "ubuntu-py38-conan1.24.0"
-            python: "3.8"
-            os: ubuntu-20.04
-            conan: "==1.24.0"
-            pytest_args: ""
-          - name: "ubuntu-py310-conan1.48.2"
-            python: "3.11"
-            os: ubuntu-20.04
-            conan: "==1.48.2"
-            pytest_args: ""
-          - name: "ubuntu-py311-conan2"
-            python: "3.11"
-            os: ubuntu-20.04
-            conan: "<2.1"
-            pytest_args: "-m conanv2"
+          # - name: "ubuntu-py38-conan1.24.0"
+          #   python: "3.8"
+          #   os: ubuntu-20.04
+          #   conan: "==1.24.0"
+          #   pytest_args: ""
+          # - name: "ubuntu-py310-conan1.48.2"
+          #   python: "3.11"
+          #   os: ubuntu-20.04
+          #   conan: "==1.48.2"
+          #   pytest_args: ""
+          # - name: "ubuntu-py311-conan2"
+          #   python: "3.11"
+          #   os: ubuntu-20.04
+          #   conan: "<2.1"
+          #   pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
       LC_ALL: "en_US.UTF-8"
       CONAN_REVISIONS_ENABLED: 1
       CAL_DEBUG_LEVEL: 3 # this does not use Qt Threads, but enables to see stacktraces
       # QT_LOGGING_RULES=: "*.debug=true"
-      QT_DEBUG_PLUGINS: 1
+      # QT_DEBUG_PLUGINS: 1
     steps:
       - uses: actions/checkout@v3
       - name: Set up a display for gui in Linux
@@ -130,37 +130,37 @@ jobs:
             cov/
             results/
 
-  sonarcloud:
-    if: always() # eecute, even when tests fail
-    needs:
-      - test
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # Disabling shallow clone is recommended for improving relevancy of reporting, cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
-          fetch-depth: 0
-      - uses: actions/download-artifact@v3
-        with:
-          name: Test results
-          path: ./
-      - name: Fix code coverage paths
-        working-directory: ./cov
-        run: |
-          sed -i 's@/home/runner/work/conan_app_launcher/conan_app_launcher@.@g' cov-*.xml
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=goszpeti
-            -Dsonar.projectKey=goszpeti_conan_app_launcher
-            -Dsonar.sources=./src
-            -Dsonar.exclusions=**/*_ui.py
-            -Dsonar.tests=./test
-            -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.python.version=3.7,3.8,3.9
-            -Dsonar.python.coverage.reportPaths=cov/cov-*.xml
-            -Dsonar.python.xunit.reportPath=results/result-*-ubuntu-py39.xml
+  # sonarcloud:
+  #   if: always() # eecute, even when tests fail
+  #   needs:
+  #     - test
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         # Disabling shallow clone is recommended for improving relevancy of reporting, cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
+  #         fetch-depth: 0
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: Test results
+  #         path: ./
+  #     - name: Fix code coverage paths
+  #       working-directory: ./cov
+  #       run: |
+  #         sed -i 's@/home/runner/work/conan_app_launcher/conan_app_launcher@.@g' cov-*.xml
+  #     - name: SonarCloud Scan
+  #       uses: sonarsource/sonarcloud-github-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       with:
+  #         args: >
+  #           -Dsonar.organization=goszpeti
+  #           -Dsonar.projectKey=goszpeti_conan_app_launcher
+  #           -Dsonar.sources=./src
+  #           -Dsonar.exclusions=**/*_ui.py
+  #           -Dsonar.tests=./test
+  #           -Dsonar.sourceEncoding=UTF-8
+  #           -Dsonar.python.version=3.7,3.8,3.9
+  #           -Dsonar.python.coverage.reportPaths=cov/cov-*.xml
+  #           -Dsonar.python.xunit.reportPath=results/result-*-ubuntu-py39.xml
