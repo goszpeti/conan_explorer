@@ -19,4 +19,7 @@ class Example(ConanFile):
 
     def package(self):
         # repackage some executable
-        copy(self, Path(sys.executable).name, src=os.path.dirname(sys.executable), dst="bin")
+        python_path = Path(sys.executable)
+        renamed_executable = Path(gettempdir()) / ("python" + python_path.suffix)
+        copy_file(str(python_path), str(renamed_executable))
+        self.copy(renamed_executable.name, src=str(renamed_executable.parent), dst="bin")

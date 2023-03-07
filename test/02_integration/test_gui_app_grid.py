@@ -313,6 +313,7 @@ def test_move_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, m
     # click up again - nothing should happen
     move_dialog._ui.move_up_button.clicked.emit()
     assert apps_model[0].name == app_link.model.name
+    move_dialog.close()
     main_gui.close()
 
 
@@ -322,12 +323,14 @@ def test_multiple_apps_ungreying(app_qt_fixture, base_fixture):
     Set greyed attribute of the underlying app button expected.
     """
     from pytestqt.plugin import _qapp_instance
+    os.system(f"conan install {TEST_REF} -u")
 
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")
 
     app.active_settings = IniSettings(Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
+    app.active_settings.set(AUTO_INSTALL_QUICKLAUNCH_REFS, True)
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
     # load path into local cache
     app.conan_api.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {})

@@ -356,7 +356,11 @@ class UiAppLinkModel(UiAppLinkConfig):
                 Logger().error("Absolute path not allowed!")
             return Path(INVALID_PATH)
         else:
-            return self.package_folder / exe_rel_path
+            possible_match = self.package_folder / exe_rel_path
+            if not possible_match.exists():
+                Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
+                return Path(INVALID_PATH)
+            return possible_match
 
     @property
     def icon(self) -> str:
