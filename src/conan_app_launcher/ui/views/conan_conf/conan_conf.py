@@ -5,14 +5,14 @@ from typing import Optional
 
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.system import escape_venv
+from conan_app_launcher.core.system import delete_path, escape_venv
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conans.client.cache.remote_registry import Remote
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QApplication
+from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QApplication, QInputDialog
 
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
 from .model import ProfilesModel
@@ -164,13 +164,25 @@ class ConanConfigView(PluginInterfaceV1):
         (self.profiles_path / profile_name).write_text(text)
 
     def on_add_profile(self):
-        # TODO: add new entry and add new file
-        # TODO: Rename dialog? Or edit model?
-        pass
+        new_profile_dialog = QInputDialog(self)
+        profile_name, accepted = new_profile_dialog.getText(self, "New profile", 'Enter name:', text="")
+        if profile_name:
+            (self.profiles_path / profile_name).touch()
+            # TODO: reload model
 
     def on_remove_profile(self):
-        # TODO: Are you sure dialog
-        pass
+        view_index = self._ui.profiles_list_view.selectedIndexes()[0]
+        profile_name = view_index.data(0)
+        message_box = QMessageBox(parent=self)
+        message_box.setWindowTitle("Remove profile")
+        message_box.setText(f"Are you sure, you want to delete the profile {profile_name}?")
+        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setIcon(QMessageBox.Icon.Question)
+        reply = message_box.exec()
+        if reply == QMessageBox.StandardButton.Yes:
+            delete_path(self.profiles_path / profile_name)
+            # TODO: reload model
+
 
     def on_refresh_profiles(self):
         self._load_profiles_tab()
@@ -269,8 +281,8 @@ class ConanConfigView(PluginInterfaceV1):
         remote_item = self._remotes_controller.get_selected_remote()
         if not remote_item:
             return
-        message_box = QMessageBox(parent=self)  # self.parentWidget())
-        message_box.setWindowTitle("Delete Remove")
+        message_box = QMessageBox(parent=self)
+        message_box.setWindowTitle("Remove remote")
         message_box.setText(f"Are you sure, you want to delete the remote {remote_item.remote.name}?")
         message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         message_box.setIcon(QMessageBox.Icon.Question)

@@ -81,7 +81,6 @@ def test_add_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     main_gui.close()  # cleanup
 
 
-@pytest.mark.skip
 def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that Remove Tab actually removes a tab. Last tab must not be deletable. """
     from pytestqt.plugin import _qapp_instance
@@ -98,6 +97,14 @@ def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     prev_count = main_gui.app_grid.tab_widget.tabBar().count()
     assert prev_count > 1, "Test won't work with one tab"
 
+    # press no
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.No)
+    main_gui.app_grid.on_tab_remove(0)
+    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
+    assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count
+    assert len(config_tabs) == prev_count
+
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     mocker.patch.object(QtWidgets.QMenu, 'exec',
@@ -113,13 +120,6 @@ def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert len(config_tabs) == prev_count - 1
 
-    # press no
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                        return_value=QtWidgets.QMessageBox.StandardButton.No)
-    main_gui.app_grid.on_tab_remove(0)
-    config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
-    assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count - 1
-    assert len(config_tabs) == prev_count - 1
     main_gui.close()
 
 

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 from conan_app_launcher import __version__
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QFileDialog
+from PySide6.QtWidgets import QWidget, QFileDialog, QMessageBox
 from conan_app_launcher.ui.plugin.plugins import PluginHandler, ThemedWidget
 from .controller import PluginController
 
@@ -57,8 +57,15 @@ class PluginsPage(ThemedWidget):
         if not selected_item:
             return
         if selected_item.data(1) == "built-in":
-            return # TODO Message
-        # TODO: Are you sure dialog
-        self._controller.remove_plugin(selected_item.plugin_path)
-        self._controller.update()
+            return
+        message_box = QMessageBox(parent=self)
+        message_box.setWindowTitle("Remove plugin?")
+        message_box.setText(f"Are you sure, you want to remove the plugin {selected_item.data(0)}?")
+        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setIcon(QMessageBox.Icon.Question)
+        reply = message_box.exec()
+        if reply == QMessageBox.StandardButton.Yes:
+         
+            self._controller.remove_plugin(selected_item.plugin_path)
+            self._controller.update()
 
