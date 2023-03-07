@@ -188,7 +188,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             self._conan_file_reference = ConanFileReference.loads(new_value)
         except Exception:  # invalid ref
-            Logger().debug(f"Invalid ref: {new_value}")
+            # Logger().debug(f"Invalid ref: {new_value}")
             return
         # add conan ref to worker
         if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
@@ -327,7 +327,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def get_executable_path(self) -> Path:
         if not self._executable or not self.package_folder.exists():
-            Logger().debug(f"No file/executable specified for {str(self.name)}")
+            # Logger().debug(f"No file/executable specified for {str(self.name)}")
             return Path("<Unknown>")
         path = Path(self._executable)
         full_path = self.resolve_executable_path(path)

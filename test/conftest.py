@@ -226,6 +226,12 @@ def ConanServer():
         check_if_process_running("conan_server", timeout_s=0, kill=True)
 
 
+@pytest.fixture(autouse=True)
+def test_output():
+    print("********************** Starting TEST ********************************")
+    yield
+    print("********************** Finished TEST ********************************")
+
 @pytest.fixture
 def app_qt_fixture(qtbot):
     yield qtbot

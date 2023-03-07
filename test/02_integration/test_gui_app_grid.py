@@ -113,6 +113,9 @@ def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     mocker.patch.object(QtWidgets.QMenu, 'exec',
                         return_value=None)
+    main_gui.activateWindow()
+    main_gui.raise_()
+    main_gui.setFocus()
     tab_rect = main_gui.app_grid.tab_widget.tabBar().tabRect(id_to_delete)
     menu = main_gui.app_grid.on_tab_context_menu_requested(tab_rect.center())
     actions = menu.actions()
