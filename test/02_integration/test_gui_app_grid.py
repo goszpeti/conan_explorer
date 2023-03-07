@@ -87,6 +87,7 @@ def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
+    print("Load gui")
     main_gui.load(ui_no_refs_config_fixture)
 
     app_qt_fixture.addWidget(main_gui)
@@ -98,6 +99,7 @@ def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     assert prev_count > 1, "Test won't work with one tab"
 
     # press no
+    print("Test pressing no")
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.No)
     main_gui.app_grid.on_tab_remove(0)
@@ -105,6 +107,8 @@ def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count
     assert len(config_tabs) == prev_count
 
+
+    print("Test pressing yes")
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     mocker.patch.object(QtWidgets.QMenu, 'exec',
@@ -112,6 +116,7 @@ def test_remove_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     tab_rect = main_gui.app_grid.tab_widget.tabBar().tabRect(id_to_delete)
     menu = main_gui.app_grid.on_tab_context_menu_requested(tab_rect.center())
     actions = menu.actions()
+    print("Execute remove")
     delete_action = actions[1]
     delete_action.trigger()
 
