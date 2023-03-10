@@ -122,6 +122,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
     # restart reload (check for thread safety)
+    Logger().debug("Reload")
     lpe._ui.refresh_button.clicked.emit()
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
 

@@ -402,7 +402,8 @@ class PackageFileExplorerController(QObject):
         return self._view.isExpanded(file_view_index)
 
     def resize_file_columns(self):
-        self._view.resizeColumnToContents(3)
-        self._view.resizeColumnToContents(2)
-        self._view.resizeColumnToContents(1)
-        self._view.resizeColumnToContents(0)
+        if self._view:
+            self._view.resizeColumnToContents(3)
+            self._view.resizeColumnToContents(2)
+            self._view.resizeColumnToContents(1)
+            self._view.resizeColumnToContents(0)
