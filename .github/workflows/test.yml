@@ -98,7 +98,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
-          # cache: 'pip' # caching pip dependencies - needs requirements .txt
+          cache: 'pip' # caching pip dependencies
+          cache-dependency-path: setup.py
       - name: Install specific conan version
         run: | # markupsafe is a workaround fix for broken conan dependencies
           pip install markupsafe==2.0.1 --use-pep517
