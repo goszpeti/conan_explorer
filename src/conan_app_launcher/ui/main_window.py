@@ -60,6 +60,7 @@ class MainWindow(FluentWindow):
         self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed, self.conan_remotes_updated, self.page_size_changed)
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
         self._plugin_handler = PluginHandler(self)
+        self.setWindowTitle(APP_NAME)
         # connect logger to console widget to log possible errors at init
         init_qt_logger(Logger(), self.qt_logger_name, self.log_console_message)
         self.log_console_message.connect(self.write_log)

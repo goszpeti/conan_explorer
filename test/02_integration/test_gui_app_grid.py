@@ -21,7 +21,6 @@ from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
-@pytest.mark.skip
 def test_rename_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that rename dialog change the name """
     from pytestqt.plugin import _qapp_instance

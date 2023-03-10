@@ -2,7 +2,7 @@ import os
 import platform
 import sys
 
-from conan_app_launcher import SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
+from conan_app_launcher import APP_NAME, SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
 from conan_app_launcher.core import ConanApi, ConanWorker
 from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsInterface, settings_factory
 from .logger import Logger
@@ -42,6 +42,8 @@ def run_application():
     except:
         Logger().debug("Can't set DPI Rounding")
     qt_app = QtWidgets.QApplication([])
+    qt_app.setApplicationName(APP_NAME)
+    qt_app.setApplicationDisplayName(APP_NAME)
     from .crash import bug_dialog_exc_hook
     sys.excepthook = bug_dialog_exc_hook  # dialog needs qt_app
     activate_theme(qt_app)
