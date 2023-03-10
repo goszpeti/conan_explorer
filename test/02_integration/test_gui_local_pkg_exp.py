@@ -4,6 +4,7 @@ from pathlib import Path
 import platform
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL
 import pytest_check as check
+from time import sleep
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
@@ -120,6 +121,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
 
     main_gui.page_widgets.get_button_by_type(type(lpe)).click()   # changes to local explorer page   
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
+    sleep(1)
 
     # restart reload (check for thread safety)
     Logger().debug("Reload")
@@ -139,11 +141,13 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
             assert pkg_sel_model.get_quick_profile_name(pkg.child(0)) in [
                 "Windows_x64_vs16_release", "Linux_x64_gcc9_release"]
     assert found_tst_pkg
+    sleep(1)
 
     # select package (ref, not profile)
     assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF)
     Logger().debug("Selected ref")
     assert not lpe._pkg_file_exp_ctrl._model  # view not changed
+    sleep(1)
 
     # ensure, that we select the pkg with the correct options
     Logger().debug("Select pkg")
@@ -151,6 +155,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
 
     assert lpe._pkg_file_exp_ctrl._model  # view selected -> fs_model is set
     assert Path(lpe._pkg_file_exp_ctrl._model.rootPath()) == pkg_path
+    sleep(1)
 
     ### Test pkg reference context menu functions ###
     # test copy ref
@@ -158,6 +163,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     lpe._pkg_sel_ctrl.on_copy_ref_requested()
     assert QtWidgets.QApplication.clipboard().text() == str(cfr)
     conanfile = app.conan_api.get_conanfile_path(cfr)
+    sleep(1)
 
     # test open export folder
     Logger().debug("open export folder")
@@ -166,12 +172,14 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     mocker.patch.object(lc, 'open_in_file_manager')
     lpe._pkg_sel_ctrl.on_open_export_folder_requested()
     lc.open_in_file_manager.assert_called_once_with(conanfile)
+    sleep(1)
 
     # test show conanfile
     Logger().debug("open show conanfile")
     mocker.patch.object(lc, 'open_file')
     lpe._pkg_sel_ctrl.on_show_conanfile_requested()
     lc.open_file.assert_called_once_with(conanfile)
+    sleep(1)
 
     #### Test file context menu functions ###
     # select a file
@@ -185,6 +193,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     # check copy as path - don't check the clipboard, it has issues in windows with qtbot
     cp_text = lpe._pkg_file_exp_ctrl.on_copy_file_as_path()
     assert Path(cp_text) == file
+    sleep(1)
 
     # check open terminal
     Logger().debug("open terminal")
