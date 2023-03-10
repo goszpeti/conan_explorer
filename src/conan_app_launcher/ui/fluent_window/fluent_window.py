@@ -154,7 +154,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         self.set_themed_icon(self.ui.minimize_button, "icons/minus.svg")
         self.set_themed_icon(self.ui.close_button, "icons/close.svg")
-        # balance out size incostinensies #TODO setting
         from ..common.theming import get_gui_style
         style = get_gui_style()
         if style == GUI_STYLE_FLUENT:

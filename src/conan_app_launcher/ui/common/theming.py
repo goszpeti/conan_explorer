@@ -48,9 +48,9 @@ def get_asset_image_path(image_path: str) -> Path:
     return asset_path
 
 
-def get_themed_asset_icon(image_path: str, force_light_mode=False) -> QIcon:
+def get_themed_asset_icon(image_path: str, force_light_mode=False, force_dark_mode=False) -> QIcon:
     asset_path = get_asset_image_path(image_path)
-    if get_gui_dark_mode() and not force_light_mode:
+    if force_dark_mode or (get_gui_dark_mode() and not force_light_mode):
         if asset_path.suffix == ".svg":
             asset_path = draw_svg_with_color(asset_path)
         else:
@@ -69,13 +69,13 @@ class ThemedWidget(QWidget):
                              ThemedWidget.IconInfo] = {}  # widget: {name, size} for re-theming
 
     def set_themed_icon(self, widget: Union[CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol],
-                        asset_path: str, size: Optional[Tuple[int, int]] = None):
+                        asset_path: str, size: Optional[Tuple[int, int]] = None, force_dark_mode=False):
         """ 
         Applies an icon to a widget and inverts it, when theming is toggled to dark mode.
         For that reload_themed_icons must be called.
         Size only applies for pixmaps.
         """
-        icon = get_themed_asset_icon(asset_path)
+        icon = get_themed_asset_icon(asset_path, force_dark_mode=force_dark_mode)
         if isinstance(widget, CanSetIconWidgetProtocol):
             widget.setIcon(icon)
         elif isinstance(widget, CanSetPixmapWidgetProtocol):

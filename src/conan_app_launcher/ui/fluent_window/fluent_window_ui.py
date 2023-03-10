@@ -156,6 +156,10 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_10.addWidget(self.window_btns_frame)
 
+        self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_10.addItem(self.verticalSpacer_3)
+
 
         self.top_center_frame_layout.addWidget(self.top_center_right_frame)
 
