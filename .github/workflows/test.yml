@@ -124,7 +124,7 @@ jobs:
         run: |
           pip install .[test]
           pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append ${{ matrix.pytest_args }}
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: Test results
           path: |
