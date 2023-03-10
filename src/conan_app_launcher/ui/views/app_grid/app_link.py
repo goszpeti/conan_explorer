@@ -112,6 +112,7 @@ class ListAppLink(QFrame):
             self._parent_tab.redraw(force=True)
 
     def resizeEvent(self, event):
+        # TODO: Hide arguments, if too big
         self.split_into_lines(self._ui.arguments_value_label, self.model.args)
         super().resizeEvent(event)
 

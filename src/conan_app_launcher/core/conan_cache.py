@@ -209,8 +209,8 @@ class ConanInfoCache():
             json_data["read_only"] = self._read_only
             json_data["remote_packages"] = self._remote_packages
             json_data["local_packages"] = self._local_packages
-        try:
-            with open(self._cache_file, "w") as json_file:
-                json.dump(json_data, json_file)
-        except:
-            Logger().debug("ConanCache: Can't save speedup-cache file.")
+            try:
+                with open(self._cache_file, "w") as json_file:
+                    json.dump(json_data, json_file)
+            except Exception:
+                Logger().debug("ConanCache: Can't save speedup-cache file.")
