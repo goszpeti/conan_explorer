@@ -404,8 +404,6 @@ class Ui_MainWindow(object):
 
         self.left_menu_frame = QFrame(self.main_frame)
         self.left_menu_frame.setObjectName(u"left_menu_frame")
-        self.left_menu_frame.setMinimumSize(QSize(75, 0))
-        self.left_menu_frame.setMaximumSize(QSize(75, 16777215))
         self.left_menu_frame.setStyleSheet(u"")
         self.left_menu_frame.setFrameShape(QFrame.NoFrame)
         self.left_menu_frame.setFrameShadow(QFrame.Raised)
@@ -427,6 +425,7 @@ class Ui_MainWindow(object):
         font3 = QFont()
         font3.setBold(True)
         font3.setItalic(False)
+        font3.setStyleStrategy(QFont.PreferAntialias)
         self.title_label.setFont(font3)
         self.title_label.setStyleSheet(u"font: bold")
         self.title_label.setAlignment(Qt.AlignBottom|Qt.AlignLeading|Qt.AlignLeft)
@@ -496,6 +495,10 @@ class Ui_MainWindow(object):
 
         self.main_frame_layout.addWidget(self.left_menu_frame, 0, 0, 2, 1)
 
+        self.main_frame_layout.setRowStretch(0, 1)
+        self.main_frame_layout.setRowStretch(1, 10)
+        self.main_frame_layout.setColumnStretch(0, 1)
+        self.main_frame_layout.setColumnStretch(1, 20)
 
         self.central_widget_layout.addWidget(self.main_frame)
 

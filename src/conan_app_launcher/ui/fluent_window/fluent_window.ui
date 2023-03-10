@@ -108,7 +108,7 @@
       <property name="lineWidth">
        <number>0</number>
       </property>
-      <layout class="QGridLayout" name="main_frame_layout">
+      <layout class="QGridLayout" name="main_frame_layout" rowstretch="1,10" columnstretch="1,20">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -900,18 +900,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </item>
        <item row="0" column="0" rowspan="2">
         <widget class="QFrame" name="left_menu_frame">
-         <property name="minimumSize">
-          <size>
-           <width>75</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>75</width>
-           <height>16777215</height>
-          </size>
-         </property>
          <property name="styleSheet">
           <string notr="true"/>
          </property>
@@ -973,6 +961,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                 <font>
                  <italic>false</italic>
                  <bold>true</bold>
+                 <stylestrategy>PreferAntialias</stylestrategy>
                 </font>
                </property>
                <property name="styleSheet">

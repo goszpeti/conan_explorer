@@ -47,7 +47,6 @@ def test_rename_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     main_gui.close()  # cleanup
 
 
-@pytest.mark.skip
 def test_add_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     """ Test, that Add Tab function adds a new tab """
     from pytestqt.plugin import _qapp_instance
@@ -73,7 +72,7 @@ def test_add_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
     # press cancel - count must still be original + 1
     mocker.patch.object(QtWidgets.QInputDialog, 'getText',
                         return_value=["OtherText", False])
-    main_gui.app_grid.on_tab_rename(0)
+    main_gui.app_grid.on_new_tab()
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count + 1
     assert len(config_tabs) == prev_count + 1
