@@ -17,7 +17,7 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 8
+    timeout-minutes: 12
 
     strategy:
       fail-fast: false
@@ -102,7 +102,7 @@ jobs:
       - name: Install specific conan version
         run: | # markupsafe is a workaround fix for broken conan dependencies
           pip install markupsafe==2.0.1 
-          pip install "conan${{ matrix.conan }}"
+          pip install "conan${{ matrix.conan }}" --use-pep517
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
