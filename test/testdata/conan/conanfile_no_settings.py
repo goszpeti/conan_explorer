@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 class Example(ConanFile):
-    name = "example"
+    name = "nocompsettings"
     #default_user = "user"
     #default_channel = "very_long_channel_name_you_should_not_do_this"
     options = {"shared": [True, False], "fPIC": [True, False]}
