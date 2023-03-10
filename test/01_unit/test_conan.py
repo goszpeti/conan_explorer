@@ -160,7 +160,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     The actual installaton must not return an error.
     """
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile_no_settings.py")
-    ref = "example/1.0.0@local/no_sets"
+    ref = "nocompsettings/1.0.0@local/no_sets"
     conan_create_and_upload(conanfile, ref)
     os.system(f"conan remove {ref} -f")
 

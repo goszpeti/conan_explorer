@@ -101,7 +101,7 @@ jobs:
           # cache: 'pip' # caching pip dependencies - needs requirements .txt
       - name: Install specific conan version
         run: | # markupsafe is a workaround fix for broken conan dependencies
-          pip install markupsafe==2.0.1 
+          pip install markupsafe==2.0.1 --use-pep517
           pip install "conan${{ matrix.conan }}" --use-pep517
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
