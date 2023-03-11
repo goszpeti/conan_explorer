@@ -27,7 +27,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1126, 795)
+        Form.resize(447, 532)
         Form.setStyleSheet(u"")
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -59,7 +59,7 @@ class Ui_Form(object):
         self.search_button.setMinimumSize(QSize(150, 0))
         self.search_button.setMaximumSize(QSize(150, 16777215))
         icon = QIcon()
-        icon.addFile(u"../../../assets/icons/search_packages.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u"../../../assets/icons/search_packages.png", QSize(), QIcon.Normal, QIcon.Off)
         self.search_button.setIcon(icon)
 
         self.search_text_button_layout.addWidget(self.search_button)
@@ -71,7 +71,7 @@ class Ui_Form(object):
         self.install_button.setMinimumSize(QSize(150, 0))
         self.install_button.setMaximumSize(QSize(150, 16777215))
         icon1 = QIcon()
-        icon1.addFile(u"../../../assets/icons/download_pkg.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u"../../../assets/icons/download_pkg.png", QSize(), QIcon.Normal, QIcon.Off)
         self.install_button.setIcon(icon1)
 
         self.search_text_button_layout.addWidget(self.install_button)
@@ -161,7 +161,7 @@ class Ui_Form(object):
 
         self.search_results_tree_view = QTreeView(self.layoutWidget_2)
         self.search_results_tree_view.setObjectName(u"search_results_tree_view")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.MinimumExpanding)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         sizePolicy5.setHorizontalStretch(0)
         sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.search_results_tree_view.sizePolicy().hasHeightForWidth())
@@ -173,6 +173,7 @@ class Ui_Form(object):
 
         self.results_layout.addWidget(self.search_results_tree_view)
 
+        self.results_layout.setStretch(0, 4)
         self.results_layout.setStretch(1, 1)
         self.views_splitter.addWidget(self.layoutWidget_2)
         self.layoutWidget_3 = QWidget(self.views_splitter)
@@ -198,7 +199,7 @@ class Ui_Form(object):
         sizePolicy6.setVerticalStretch(0)
         sizePolicy6.setHeightForWidth(self.package_info_text.sizePolicy().hasHeightForWidth())
         self.package_info_text.setSizePolicy(sizePolicy6)
-        self.package_info_text.setMinimumSize(QSize(0, 120))
+        self.package_info_text.setMinimumSize(QSize(0, 20))
         self.package_info_text.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
 
         self.pkg_info_layout.addWidget(self.package_info_text)

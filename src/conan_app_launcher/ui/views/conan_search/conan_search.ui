@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1126</width>
-    <height>795</height>
+    <width>447</width>
+    <height>532</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -243,7 +243,7 @@
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="layoutWidget_2">
-      <layout class="QVBoxLayout" name="results_layout" stretch="0,1">
+      <layout class="QVBoxLayout" name="results_layout" stretch="4,1">
        <property name="sizeConstraint">
         <enum>QLayout::SetMinAndMaxSize</enum>
        </property>
@@ -268,7 +268,7 @@
        <item>
         <widget class="QTreeView" name="search_results_tree_view">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -338,7 +338,7 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>120</height>
+           <height>20</height>
           </size>
          </property>
          <property name="sizeAdjustPolicy">
