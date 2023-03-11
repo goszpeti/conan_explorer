@@ -46,6 +46,11 @@ class TabList(QWidget):
         # spacer for compressing app links, when hiding cboxes
         self.tab_layout.addItem(self._v_spacer)
 
+    # def resizeEvent(self, event):
+    #     for app_link in self.app_links:
+    #         app_link.resizeEvent(event)
+    #     super().resizeEvent(event)
+
     def open_app_link_add_dialog(self, new_model: Optional[UiAppLinkModel] =None):
         if not new_model:
             new_model = UiAppLinkModel()

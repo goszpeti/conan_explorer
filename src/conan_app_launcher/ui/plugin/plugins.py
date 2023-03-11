@@ -56,6 +56,7 @@ class PluginInterfaceV1(ThemedWidget):
     def resizeEvent(self, a0) -> None:
         # handles maximum size on resize
         if not self._base_signals:
+            super().resizeEvent(a0)
             return
         self._base_signals.page_size_changed.emit(self)
         super().resizeEvent(a0)

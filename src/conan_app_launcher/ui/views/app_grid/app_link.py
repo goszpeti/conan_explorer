@@ -1,6 +1,7 @@
 
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
+import conan_app_launcher.app as app
 
 from conan_app_launcher import ICON_SIZE, INVALID_PATH
 from conan_app_launcher.app.logger import Logger
@@ -112,17 +113,46 @@ class ListAppLink(QFrame):
             self._parent_tab.redraw(force=True)
 
     def resizeEvent(self, event):
+        max_cl_width = app.content_frame.width() - self._ui.left_frame.width() - \
+            self._ui.right_frame.width()
+        if max_cl_width < 400:
+            self._ui.central_left_frame.setMaximumWidth(0)
+            self._ui.central_right_frame.setMaximumWidth(0)
+            self._ui.arguments_name_label.setMaximumWidth(0)
+            self._ui.arguments_value_label.setMaximumWidth(0)
+            self._ui.arguments_value_label.setText("")
+            return
+        else:
+            self._ui.central_left_frame.setMaximumWidth(10000)
+
+        self._ui.central_left_frame.adjustSize()
+        max_sum_width = app.content_frame.width() - self._ui.left_frame.width() - \
+            self._ui.central_left_frame.width() - self._ui.right_frame.width()
+
         # TODO: Hide arguments, if too big
-        self.split_into_lines(self._ui.arguments_value_label, self.model.args)
+        if max_sum_width < 250:
+            self._ui.central_right_frame.setMaximumWidth(0)
+            self._ui.arguments_name_label.setMaximumWidth(0)
+            self._ui.arguments_value_label.setMaximumWidth(0)
+            self._ui.arguments_value_label.setText("")
+
+        else:
+            self._ui.central_right_frame.setMaximumWidth(max_sum_width)
+            self._ui.arguments_name_label.setMaximumWidth(1000)
+            self._ui.arguments_name_label.adjustSize()
+            self._ui.arguments_value_label.setMaximumWidth(
+                max_sum_width - self._ui.arguments_name_label.width() - 50)
+            self.split_into_lines(self._ui.arguments_value_label, self.model.args,
+                                  max_sum_width - self._ui.arguments_name_label.width())
+        
         super().resizeEvent(event)
 
     def delete(self): # TODO needed?
         pass
 
-    def split_into_lines(self, widget, model_value):
+    def split_into_lines(self, widget, model_value, max_width):
         """ Calculate, how text can be split into multiple lines, based on the current width"""
-        max_width = widget.width()
-        px = measure_font_width(widget.text())
+        px = measure_font_width(model_value)
         if px == 0:
             return
         new_length = int(len(model_value) * (max_width-10) / px)
@@ -134,6 +164,8 @@ class ListAppLink(QFrame):
 
     @staticmethod
     def word_wrap(text: str, max_length: int) -> str:
+        if max_length==0:
+            return text
         split_name = text.split(" ")
         name = ""  # split long titles
         for word in split_name:

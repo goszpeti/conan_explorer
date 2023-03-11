@@ -25,7 +25,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1239, 140)
+        Form.resize(882, 140)
         sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -33,6 +33,7 @@ class Ui_Form(object):
         Form.setSizePolicy(sizePolicy)
         Form.setMinimumSize(QSize(0, 140))
         self.horizontalLayout_3 = QHBoxLayout(Form)
+        self.horizontalLayout_3.setSpacing(0)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.horizontalLayout_3.setContentsMargins(0, 2, 0, 2)
         self.left_frame = QFrame(Form)
@@ -75,12 +76,12 @@ class Ui_Form(object):
 
         self.central_frame = QFrame(Form)
         self.central_frame.setObjectName(u"central_frame")
-        sizePolicy3 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.central_frame.sizePolicy().hasHeightForWidth())
         self.central_frame.setSizePolicy(sizePolicy3)
-        self.central_frame.setMinimumSize(QSize(500, 0))
+        self.central_frame.setMinimumSize(QSize(0, 0))
         self.central_frame.setFrameShape(QFrame.StyledPanel)
         self.central_frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_2 = QHBoxLayout(self.central_frame)
@@ -88,6 +89,8 @@ class Ui_Form(object):
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.central_left_frame = QFrame(self.central_frame)
         self.central_left_frame.setObjectName(u"central_left_frame")
+        sizePolicy2.setHeightForWidth(self.central_left_frame.sizePolicy().hasHeightForWidth())
+        self.central_left_frame.setSizePolicy(sizePolicy2)
         self.central_left_frame.setFrameShape(QFrame.StyledPanel)
         self.central_left_frame.setFrameShadow(QFrame.Raised)
         self.formLayout = QFormLayout(self.central_left_frame)
@@ -127,12 +130,8 @@ class Ui_Form(object):
 
         self.conan_ref_value_label = QLabel(self.central_left_frame)
         self.conan_ref_value_label.setObjectName(u"conan_ref_value_label")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.conan_ref_value_label.sizePolicy().hasHeightForWidth())
-        self.conan_ref_value_label.setSizePolicy(sizePolicy4)
-        self.conan_ref_value_label.setMinimumSize(QSize(200, 0))
+        sizePolicy3.setHeightForWidth(self.conan_ref_value_label.sizePolicy().hasHeightForWidth())
+        self.conan_ref_value_label.setSizePolicy(sizePolicy3)
         self.conan_ref_value_label.setMaximumSize(QSize(16777215, 16777215))
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.conan_ref_value_label)
@@ -142,29 +141,32 @@ class Ui_Form(object):
 
         self.central_right_frame = QFrame(self.central_frame)
         self.central_right_frame.setObjectName(u"central_right_frame")
-        sizePolicy3.setHeightForWidth(self.central_right_frame.sizePolicy().hasHeightForWidth())
-        self.central_right_frame.setSizePolicy(sizePolicy3)
+        self.central_right_frame.setEnabled(True)
+        sizePolicy2.setHeightForWidth(self.central_right_frame.sizePolicy().hasHeightForWidth())
+        self.central_right_frame.setSizePolicy(sizePolicy2)
+        self.central_right_frame.setMaximumSize(QSize(16777215, 16777215))
         self.central_right_frame.setFrameShape(QFrame.StyledPanel)
         self.central_right_frame.setFrameShadow(QFrame.Raised)
         self.formLayout_2 = QFormLayout(self.central_right_frame)
         self.formLayout_2.setObjectName(u"formLayout_2")
         self.formLayout_2.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.formLayout_2.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+        self.formLayout_2.setFieldGrowthPolicy(QFormLayout.FieldsStayAtSizeHint)
         self.arguments_name_label = QLabel(self.central_right_frame)
         self.arguments_name_label.setObjectName(u"arguments_name_label")
         sizePolicy2.setHeightForWidth(self.arguments_name_label.sizePolicy().hasHeightForWidth())
         self.arguments_name_label.setSizePolicy(sizePolicy2)
-        self.arguments_name_label.setMinimumSize(QSize(80, 0))
+        self.arguments_name_label.setMinimumSize(QSize(0, 0))
+        self.arguments_name_label.setMaximumSize(QSize(2000, 16777215))
         self.arguments_name_label.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
 
         self.formLayout_2.setWidget(0, QFormLayout.LabelRole, self.arguments_name_label)
 
         self.arguments_value_label = QLabel(self.central_right_frame)
         self.arguments_value_label.setObjectName(u"arguments_value_label")
-        sizePolicy3.setHeightForWidth(self.arguments_value_label.sizePolicy().hasHeightForWidth())
-        self.arguments_value_label.setSizePolicy(sizePolicy3)
-        self.arguments_value_label.setMinimumSize(QSize(160, 0))
-        self.arguments_value_label.setMaximumSize(QSize(16777215, 16777215))
+        sizePolicy2.setHeightForWidth(self.arguments_value_label.sizePolicy().hasHeightForWidth())
+        self.arguments_value_label.setSizePolicy(sizePolicy2)
+        self.arguments_value_label.setMinimumSize(QSize(0, 0))
+        self.arguments_value_label.setMaximumSize(QSize(100, 16777215))
         self.arguments_value_label.setScaledContents(False)
         self.arguments_value_label.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
         self.arguments_value_label.setWordWrap(True)
@@ -174,7 +176,8 @@ class Ui_Form(object):
 
         self.horizontalLayout_2.addWidget(self.central_right_frame)
 
-        self.horizontalLayout_2.setStretch(1, 1)
+        self.horizontalLayout_2.setStretch(0, 1)
+        self.horizontalLayout_2.setStretch(1, 2)
 
         self.horizontalLayout_3.addWidget(self.central_frame)
 
@@ -186,14 +189,14 @@ class Ui_Form(object):
         self.verticalLayout = QVBoxLayout(self.right_frame)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.verticalLayout.setContentsMargins(-1, 0, -1, 0)
+        self.verticalLayout.setContentsMargins(6, 0, -1, 0)
         self.edit_button = QPushButton(self.right_frame)
         self.edit_button.setObjectName(u"edit_button")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.edit_button.sizePolicy().hasHeightForWidth())
-        self.edit_button.setSizePolicy(sizePolicy5)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.edit_button.sizePolicy().hasHeightForWidth())
+        self.edit_button.setSizePolicy(sizePolicy4)
         self.edit_button.setMinimumSize(QSize(150, 0))
         self.edit_button.setMaximumSize(QSize(150, 16777215))
 
@@ -201,8 +204,8 @@ class Ui_Form(object):
 
         self.remove_button = QPushButton(self.right_frame)
         self.remove_button.setObjectName(u"remove_button")
-        sizePolicy5.setHeightForWidth(self.remove_button.sizePolicy().hasHeightForWidth())
-        self.remove_button.setSizePolicy(sizePolicy5)
+        sizePolicy4.setHeightForWidth(self.remove_button.sizePolicy().hasHeightForWidth())
+        self.remove_button.setSizePolicy(sizePolicy4)
         self.remove_button.setMinimumSize(QSize(150, 0))
         self.remove_button.setMaximumSize(QSize(150, 16777215))
 
@@ -211,6 +214,7 @@ class Ui_Form(object):
 
         self.horizontalLayout_3.addWidget(self.right_frame)
 
+        self.horizontalLayout_3.setStretch(1, 1)
 
         self.retranslateUi(Form)
 

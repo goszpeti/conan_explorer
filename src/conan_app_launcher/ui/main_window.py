@@ -57,6 +57,7 @@ class MainWindow(FluentWindow):
     def __init__(self, qt_app: QApplication):
         super().__init__(title_text=APP_NAME)
         self._qt_app = qt_app
+        self.loaded = False
         self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed, self.conan_remotes_updated, self.page_size_changed)
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
         self._plugin_handler = PluginHandler(self)
@@ -73,10 +74,13 @@ class MainWindow(FluentWindow):
         self._init_right_menu()
 
         self._plugin_handler.load_plugin.connect(self._load_plugin)
+        # size needs to be set as early as possible to correctly position loading windows
         self.restore_window_state()
 
+
     def resize_page(self, widget: QWidget):
-        widget.setMaximumWidth(self.ui.center_frame.width() - 4)
+        pass
+        # widget.setMaximumWidth(self.ui.center_frame.width() - 4)
 
     def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.svg", is_upper_menu=True, page_widget=self.app_grid,
@@ -143,6 +147,9 @@ class MainWindow(FluentWindow):
 
     def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent
         super().resizeEvent(a0)
+        if self.loaded:
+            self.ui.page_stacked_widget.currentWidget().setMaximumWidth(self.ui.center_frame.width() - 4)
+            self.ui.page_stacked_widget.currentWidget().adjustSize()
 
     def load(self, config_source: Optional[PathLike] = None):
         """ Load all application gui elements specified in the GUI config (file) """
@@ -155,6 +162,7 @@ class MainWindow(FluentWindow):
         loader = AsyncLoader(self)
         loader.async_loading(self, self._load_job, (config_source_str,), cancel_button=False)
         loader.wait_for_finished()
+        self.loaded = True
 
     def _load_plugins(self):
         self._plugin_handler.load_all_plugins()
@@ -284,6 +292,7 @@ class MainWindow(FluentWindow):
                 self.setGeometry(geometry)
             except Exception as e:
                 Logger().warning(f"Can't restore window size: {str(e)}")
+
         # restore console size
         try:
             sizes_str = app.active_settings.get_string(CONSOLE_SPLIT_SIZES)
