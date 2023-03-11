@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>859</width>
-    <height>824</height>
+    <width>855</width>
+    <height>807</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -274,22 +274,11 @@
                      <property name="minimumSize">
                       <size>
                        <width>55</width>
-                       <height>50</height>
+                       <height>48</height>
                       </size>
                      </property>
                      <property name="text">
                       <string/>
-                     </property>
-                     <property name="icon">
-                      <iconset>
-                       <normalon>../../assets/icons/material/close.svg</normalon>
-                      </iconset>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>20</width>
-                       <height>20</height>
-                      </size>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -301,22 +290,11 @@
                      <property name="minimumSize">
                       <size>
                        <width>55</width>
-                       <height>50</height>
+                       <height>48</height>
                       </size>
                      </property>
                      <property name="text">
                       <string/>
-                     </property>
-                     <property name="icon">
-                      <iconset>
-                       <normalon>../../assets/icons/material/restore.svg</normalon>
-                      </iconset>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>20</width>
-                       <height>20</height>
-                      </size>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -328,22 +306,11 @@
                      <property name="minimumSize">
                       <size>
                        <width>55</width>
-                       <height>50</height>
+                       <height>48</height>
                       </size>
                      </property>
                      <property name="text">
                       <string/>
-                     </property>
-                     <property name="icon">
-                      <iconset>
-                       <normalon>../../assets/icons/material/minus.svg</normalon>
-                      </iconset>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>20</width>
-                       <height>20</height>
-                      </size>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -736,7 +703,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>745</height>
+                  <height>728</height>
                  </rect>
                 </property>
                 <property name="minimumSize">

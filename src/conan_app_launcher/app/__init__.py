@@ -35,11 +35,10 @@ def run_application():
         sys.exit(1)
 
     # apply Qt attributes (only possible before QApplication is created)
-    QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
     try:
         QtWidgets.QApplication.setHighDpiScaleFactorRoundingPolicy(
-            QtCore.Qt.HighDpiScaleFactorRoundingPolicy.RoundPreferFloor)
-    except:
+            QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    except Exception:
         Logger().debug("Can't set DPI Rounding")
     qt_app = QtWidgets.QApplication([])
     qt_app.setApplicationName(APP_NAME)
