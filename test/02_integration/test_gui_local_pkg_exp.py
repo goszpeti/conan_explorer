@@ -241,6 +241,8 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     sel_idx = lpe._pkg_file_exp_ctrl._model.index(
         str(root_path / config_path.name), 0)  # (0, 0, QtCore.QModelIndex())
     lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    sleep(1)
+
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     lpe._pkg_file_exp_ctrl.on_file_delete()  # check new file?
