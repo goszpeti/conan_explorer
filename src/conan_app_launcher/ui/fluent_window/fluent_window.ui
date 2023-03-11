@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>855</width>
-    <height>807</height>
+    <width>859</width>
+    <height>824</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -238,7 +238,7 @@
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
-                    <height>60</height>
+                    <height>50</height>
                    </size>
                   </property>
                   <property name="maximumSize">
@@ -274,7 +274,7 @@
                      <property name="minimumSize">
                       <size>
                        <width>55</width>
-                       <height>48</height>
+                       <height>40</height>
                       </size>
                      </property>
                      <property name="text">
@@ -290,7 +290,7 @@
                      <property name="minimumSize">
                       <size>
                        <width>55</width>
-                       <height>48</height>
+                       <height>40</height>
                       </size>
                      </property>
                      <property name="text">
@@ -306,7 +306,7 @@
                      <property name="minimumSize">
                       <size>
                        <width>55</width>
-                       <height>48</height>
+                       <height>40</height>
                       </size>
                      </property>
                      <property name="text">
@@ -703,7 +703,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>728</height>
+                  <height>745</height>
                  </rect>
                 </property>
                 <property name="minimumSize">
