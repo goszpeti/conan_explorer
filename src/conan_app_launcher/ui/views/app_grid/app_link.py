@@ -113,9 +113,12 @@ class ListAppLink(QFrame):
             self._parent_tab.redraw(force=True)
 
     def resizeEvent(self, event):
-        max_cl_width = app.content_frame.width() - self._ui.left_frame.width() - \
+        if not self._parent_tab:
+            return
+        content_frame: QWidget = self._parent_tab.parent().parent().parent().parent().parent()
+        max_cl_width = content_frame.width() - self._ui.left_frame.width() - \
             self._ui.right_frame.width()
-        if max_cl_width < 400:
+        if max_cl_width < 400: # TODO find better solution
             self._ui.central_left_frame.setMaximumWidth(0)
             self._ui.central_right_frame.setMaximumWidth(0)
             self._ui.arguments_name_label.setMaximumWidth(0)
@@ -126,10 +129,10 @@ class ListAppLink(QFrame):
             self._ui.central_left_frame.setMaximumWidth(10000)
 
         self._ui.central_left_frame.adjustSize()
-        max_sum_width = app.content_frame.width() - self._ui.left_frame.width() - \
+        max_sum_width = content_frame.width() - self._ui.left_frame.width() - \
             self._ui.central_left_frame.width() - self._ui.right_frame.width()
 
-        # TODO: Hide arguments, if too big
+        # Hide arguments, if too big
         if max_sum_width < 250:
             self._ui.central_right_frame.setMaximumWidth(0)
             self._ui.arguments_name_label.setMaximumWidth(0)

@@ -23,7 +23,6 @@ active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE,
                                                       user_save_path / (SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE))
 conan_api = ConanApi()
 conan_worker = ConanWorker(conan_api, active_settings)
-content_frame = None
 
 def run_application():
     """ Start the Qt application and load the main window """
@@ -57,9 +56,6 @@ def run_application():
 
     conan_api.init_api()
     main_window.show()  # show first, then load appsgrid with progress bar
-    global content_frame
-    content_frame = main_window.ui.content_frame
-
     main_window.load()
     main_window.installEventFilter(main_window)
 
