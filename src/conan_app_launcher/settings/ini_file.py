@@ -190,7 +190,7 @@ class IniSettings(SettingsInterface):
         section = self._get_section(node)
         try:
             default_value = self.get(name)
-        except:
+        except Exception:
             default_value = ""
         if isinstance(default_value, dict):  # no dicts supported directly
             return False
@@ -211,6 +211,8 @@ class IniSettings(SettingsInterface):
         if value is None:  # dict type, value will be taken as a string
             self._logger.error(f"Settings: Setting {name} to write is unknown", )
             return False
+        if value == "" and default_value:
+            value = default_value
         # autosave must be disabled, otherwise we overwrite the other settings in the file
         auto_save = self._auto_save
         self._auto_save = False
