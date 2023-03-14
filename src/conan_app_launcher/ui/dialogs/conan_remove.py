@@ -2,6 +2,8 @@ from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
+from ..common import AsyncLoader
+
 from PySide6.QtCore import SignalInstance
 from PySide6.QtWidgets import QMessageBox, QWidget
 
@@ -26,9 +28,13 @@ class ConanRemoveDialog(QMessageBox):
 
     def on_remove(self):
         """ Remove conan ref/pkg and emit a signal, if registered """
+        loader = AsyncLoader(self)
+        loader.async_loading(self, self.remove, cancel_button=False)
+        loader.wait_for_finished()
+
+    def remove(self):
         try:
             Logger().info(f"Deleting {self._conan_ref} {self._pkg_id}")
-
             pkg_ids = [self._pkg_id] if self._pkg_id else None
             app.conan_api.conan.remove(self._conan_ref, packages=pkg_ids, force=True)
         except Exception as e:
