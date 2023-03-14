@@ -310,7 +310,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         width = self.ui.left_menu_frame.width()
 
         # switch extended and minimized state
-        if width == LEFT_MENU_MIN_WIDTH:
+        if width < LEFT_MENU_MAX_WIDTH:
             width_to_set = LEFT_MENU_MAX_WIDTH
             maximize = True
         else:
@@ -348,7 +348,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
     def toggle_right_menu(self):
         width = self.ui.right_menu_frame.width()
-        if width == RIGHT_MENU_MIN_WIDTH:
+        if width < RIGHT_MENU_MAX_WIDTH:
             width_to_set = RIGHT_MENU_MAX_WIDTH
         else:
             width_to_set = RIGHT_MENU_MIN_WIDTH
