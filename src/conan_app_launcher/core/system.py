@@ -262,11 +262,10 @@ def find_program_in_windows(app_name: str, partial_match=False, key_to_find="Ins
                 if partial_match:
                     if app_name in current_app_name:
                         location = winreg.QueryValueEx(sub_key, key_to_find)[0]
-                        sub_key.Close()
                         return location
-                if app_name == app_name:
-                    sub_key.Close()
-                    return winreg.QueryValueEx(sub_key, 'InstallLocation')[0]
+                if app_name == current_app_name:
+                    location = winreg.QueryValueEx(sub_key, key_to_find)[0]
+                    return location
             except OSError as e:
                 pass
             finally:
