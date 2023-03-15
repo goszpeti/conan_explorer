@@ -4,16 +4,19 @@ from PySide6.QtCore import (QEasingCurve, QPoint, QPointF, QPropertyAnimation,
                           QRectF, QSequentialAnimationGroup, QSize, Qt, 
                           Property, Slot) # type: ignore
 from PySide6.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen
-from PySide6.QtWidgets import QCheckBox, QApplication
+from PySide6.QtWidgets import QCheckBox, QApplication, QGraphicsDropShadowEffect
 
 
 class AnimatedToggle(QCheckBox):
 
-    ANIM_DURATION_MS = 600
-    MAX_WIDTH = 60
-    MAX_HEIGHT = 50
+    ANIM_DURATION_MS = 400
+    FIXED_WIDTH = 60
+    FIXED_HEIGHT = 50
+    THUMB_REL_SIZE = 0.15
+    TRACK_REL_SIZE = 0.4
+
     def __init__(self, parent=None, bar_color=Qt.GlobalColor.gray, checked_color="#00B0FF", 
-                handle_color=Qt.GlobalColor.white, pulse_unchecked_color="#44999999", pulse_checked_color="#4400B0EE"):
+                thumb_color=Qt.GlobalColor.white, pulse_unchecked_color="#44999999", pulse_checked_color="#4400B0EE"):
 
         super().__init__(parent)
         self._transparent_pen = QPen(Qt.GlobalColor.transparent)
@@ -23,33 +26,25 @@ class AnimatedToggle(QCheckBox):
         self._background_color_brush = QBrush(bar_color)
         self._bar_checked_brush = QBrush(QColor(checked_color).lighter())
         self._disabled_checked_brush = QBrush(QColor(bar_color).darker())
-        self._handle_brush = QBrush(handle_color)
-        self._handle_checked_brush = QBrush(QColor(checked_color))
+        self._thumb_brush = QBrush(thumb_color)
+        self._thumb_checked_brush = QBrush(QColor(checked_color))
 
         # Setup the rest of the widget.
 
         self.setContentsMargins(8, 0, 0, 0)
-        self._handle_position = 0
-        self.setMaximumWidth(self.MAX_WIDTH+ 20)
-        self.setFixedWidth(self.MAX_WIDTH)
-        self.setFixedHeight(self.MAX_HEIGHT)
+        self._thumb_position = 0
+        self.setFixedWidth(self.FIXED_WIDTH)
+        self.setFixedHeight(self.FIXED_HEIGHT)
 
-        self.stateChanged.connect(self.handle_state_change)
+        self.stateChanged.connect(self.thumb_state_change)
 
-        self.handle_anim = QPropertyAnimation(self, b"handle_position", self)  # type: ignore
-        self.handle_anim.setEasingCurve(QEasingCurve.Type.InOutCubic)
-        self.handle_anim.setDuration(0)  # ms
-        self.handle_anim.finished.connect(self._set_anim_length)
+        self.thumb_anim = QPropertyAnimation(self, b"thumb_position", self)  # type: ignore
+        self.thumb_anim.setEasingCurve(QEasingCurve.Type.InOutCubic)
+        self.thumb_anim.setDuration(0)  # ms
 
         self.animations_group = QSequentialAnimationGroup()
-        self.animations_group.addAnimation(self.handle_anim)
+        self.animations_group.addAnimation(self.thumb_anim)
         self._first_show = True
-
-    def _set_anim_length(self):
-        if self._first_show:
-            self._first_show = False
-            self.handle_anim.setDuration(self.ANIM_DURATION_MS)  # ms
-            return
 
     def wait_for_anim_finish(self):
         # wait so all animations can finish
@@ -57,68 +52,72 @@ class AnimatedToggle(QCheckBox):
         while datetime.now() - start <= timedelta(milliseconds=self.ANIM_DURATION_MS):
             QApplication.processEvents()
 
-    def sizeHint(self):
-        return QSize(self.MAX_WIDTH, self.MAX_HEIGHT)
-
     def hitButton(self, pos: QPoint):
         return self.contentsRect().contains(pos)
 
     @Property(float)
-    def handle_position(self):  # type: ignore
-        return self._handle_position
+    def thumb_position(self):  # type: ignore
+        return self._thumb_position
 
-    @handle_position.setter
-    def handle_position(self, pos):
-        self._handle_position = pos
+    @thumb_position.setter
+    def thumb_position(self, pos):
+        self._thumb_position = pos
         self.update()
 
     @Slot(int)
-    def handle_state_change(self, value):
-
+    def thumb_state_change(self, value):
         self.animations_group.stop()
         if value:
-            self.handle_anim.setEndValue(1)
+            self.thumb_anim.setEndValue(1)
         else:
-            self.handle_anim.setEndValue(0)
+            self.thumb_anim.setEndValue(0)
         self.animations_group.start()
 
     def paintEvent(self, e: QPaintEvent):
 
         cont_rect = self.contentsRect()
-        handle_radius = round(0.2* cont_rect.height())
+        thumb_radius = round(self.THUMB_REL_SIZE * cont_rect.height())
 
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        # Print 
         painter.setPen(self._transparent_pen)
-        bar_rect = QRectF(0, 0,
-            cont_rect.width() - handle_radius, 0.40 * cont_rect.height()
+        track_rect = QRectF(0, 0,
+                          cont_rect.width() - thumb_radius,
+                          self.TRACK_REL_SIZE * cont_rect.height()
         )
-        bar_rect.moveCenter(QPointF(cont_rect.center()))
-        rounding = bar_rect.height() / 2
+        track_rect.moveCenter(QPointF(cont_rect.center()))
+        rounding = track_rect.height() / 2
 
-        # the handle will move along this line
-        trail_length = cont_rect.width() - 2 * handle_radius
-
-        x_pos = cont_rect.x() + handle_radius + trail_length * self._handle_position
-
+        # the thumb will move along this line
+        thumb_offset: float = (self.TRACK_REL_SIZE - (self.THUMB_REL_SIZE * 2)) * cont_rect.width()
+        trail_length = cont_rect.width() + thumb_offset - 2 * thumb_radius
+        x_pos = cont_rect.x() + thumb_offset +  thumb_radius + (trail_length - 3.5 * thumb_offset) * self._thumb_position
+        # switch brush to reflect disabled, enabled ON, and enabled OFF states
         if not self.isEnabled():
             painter.setBrush(self._disabled_checked_brush)
-            painter.drawRoundedRect(bar_rect, rounding, rounding)
+            painter.drawRoundedRect(track_rect, rounding, rounding)
             painter.setBrush(self._background_color_brush)
         else:
             if self.isChecked():
                 painter.setBrush(self._bar_checked_brush)
-                painter.drawRoundedRect(bar_rect, rounding, rounding)
-                painter.setBrush(self._handle_checked_brush)
+                painter.drawRoundedRect(track_rect, rounding, rounding)
+                painter.setBrush(self._thumb_checked_brush)
             else:
                 painter.setBrush(self._background_color_brush)
-                painter.drawRoundedRect(bar_rect, rounding, rounding)
+                painter.drawRoundedRect(track_rect, rounding, rounding)
                 painter.setPen(self._light_grey_pen)
-                painter.setBrush(self._handle_brush)
+                painter.setBrush(self._thumb_brush)
 
+        # fraw thumb
         painter.drawEllipse(
-            QPointF(x_pos, bar_rect.center().y()),
-            handle_radius, handle_radius)
+            QPointF(x_pos, track_rect.center().y()),
+            thumb_radius, thumb_radius)
 
         painter.end()
+
+        # set anim length after first show (otherwise on opening the application all toggles will slide)
+        if self._first_show:
+            self._first_show = False
+            self.thumb_anim.setDuration(self.ANIM_DURATION_MS)  # ms
