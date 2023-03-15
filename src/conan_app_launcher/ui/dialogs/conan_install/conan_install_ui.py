@@ -15,11 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QComboBox,
-    QDialog, QDialogButtonBox, QFormLayout, QFrame,
-    QHBoxLayout, QHeaderView, QLabel, QLayout,
-    QLineEdit, QSizePolicy, QTreeWidget, QTreeWidgetItem,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QCheckBox,
+    QComboBox, QDialog, QDialogButtonBox, QFormLayout,
+    QFrame, QHBoxLayout, QHeaderView, QLabel,
+    QLayout, QLineEdit, QSizePolicy, QTreeWidget,
+    QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 
@@ -88,6 +88,9 @@ class Ui_Dialog(object):
 
         self.options_widget = QTreeWidget(self.frame_2)
         self.options_widget.setObjectName(u"options_widget")
+        self.options_widget.setEditTriggers(QAbstractItemView.DoubleClicked|QAbstractItemView.EditKeyPressed)
+        self.options_widget.setSortingEnabled(True)
+        self.options_widget.setWordWrap(True)
 
         self.formLayout.setWidget(2, QFormLayout.FieldRole, self.options_widget)
 
@@ -159,10 +162,10 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Conan Install", None))
         self.conan_ref_line_edit.setText("")
         self.label.setText(QCoreApplication.translate("Dialog", u"Profile", None))
-        self.conan_opts_label.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p>Conan Options</p><p>using format: </p><p>name1=val1</p><p>name2=val2</p></body></html>", None))
+        self.conan_opts_label.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p>Conan Options</p></body></html>", None))
         ___qtreewidgetitem = self.options_widget.headerItem()
-        ___qtreewidgetitem.setText(1, QCoreApplication.translate("Dialog", u"value", None));
-        ___qtreewidgetitem.setText(0, QCoreApplication.translate("Dialog", u"name", None));
+        ___qtreewidgetitem.setText(1, QCoreApplication.translate("Dialog", u"Value", None));
+        ___qtreewidgetitem.setText(0, QCoreApplication.translate("Dialog", u"Name", None));
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Additional args", None))
         self.auto_install_check_box.setText(QCoreApplication.translate("Dialog", u"Automatically determine best matching package", None))
         self.update_check_box.setText(QCoreApplication.translate("Dialog", u"Update (-u)", None))

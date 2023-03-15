@@ -105,20 +105,29 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Conan Options&lt;/p&gt;&lt;p&gt;using format: &lt;/p&gt;&lt;p&gt;name1=val1&lt;/p&gt;&lt;p&gt;name2=val2&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Conan Options&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
        <widget class="QTreeWidget" name="options_widget">
+        <property name="editTriggers">
+         <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
         <column>
          <property name="text">
-          <string>name</string>
+          <string>Name</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>value</string>
+          <string>Value</string>
          </property>
         </column>
        </widget>

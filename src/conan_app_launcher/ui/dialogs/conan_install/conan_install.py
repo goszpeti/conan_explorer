@@ -5,7 +5,7 @@ from conan_app_launcher.app.logger import Logger  # using global module pattern
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from PySide6.QtCore import QSize, Qt, SignalInstance
-from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem
+from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem, QComboBox
 
 from conan_app_launcher.core.conan_common import ConanFileReference
 
@@ -39,12 +39,29 @@ class ConanInstallDialog(QDialog):
         self._ui.conan_ref_line_edit.setText(conan_full_ref)
         self._ui.profile_cbox.addItems(self._profiles)
         for name, value in options:
-            item = QTreeWidgetItem()
+            item = QTreeWidgetItem(self._ui.options_widget)
             item.setData(0, 0, name)
             item.setData(1, 0, value)
-
+            item.setFlags(Qt.ItemFlag.ItemIsEditable | Qt.ItemFlag.ItemIsEnabled)
             self._ui.options_widget.addTopLevelItem(item)
+            # TODO: selection
+            try:
+                values = self._ref_info[0].root.dependencies[0].dst.conanfile.options._data[name]._possible_values
+                if values:
+                    cb = QComboBox()
+                    cb.addItems(values)
+                    cb.setCurrentText(value)
+            except:
+                pass
+            self._ui.options_widget.setItemWidget(item, 1, cb)
+        self._ui.options_widget.resizeColumnToContents(1)
+        self._ui.options_widget.resizeColumnToContents(0)
+        # self._ui.options_widget.itemDoubleClicked.connect(
+        #     self.onTreeWidgetItemDoubleClicked)  # openPersistentEditor(item, 1)
         self.adjust_to_size()
+
+    # def onTreeWidgetItemDoubleClicked(self, item, column):
+    #     self._ui.options_widget.editItem(item, column)
 
     def adjust_to_size(self):
         """ Expands the dialog to the length of the install ref text.
