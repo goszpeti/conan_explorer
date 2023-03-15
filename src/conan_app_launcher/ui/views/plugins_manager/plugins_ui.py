@@ -15,7 +15,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QHeaderView,
+from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QHeaderView,
     QLabel, QPushButton, QSizePolicy, QSpacerItem,
     QTreeView, QVBoxLayout, QWidget)
 
@@ -23,24 +23,23 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(645, 454)
-        self.gridLayout = QGridLayout(Form)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.gridLayout.setContentsMargins(0, -1, 2, 0)
+        Form.resize(489, 333)
+        self.verticalLayout = QVBoxLayout(Form)
+        self.verticalLayout.setObjectName(u"verticalLayout")
         self.buttons_frame = QFrame(Form)
         self.buttons_frame.setObjectName(u"buttons_frame")
         self.buttons_frame.setFrameShape(QFrame.StyledPanel)
         self.buttons_frame.setFrameShadow(QFrame.Raised)
-        self.verticalLayout = QVBoxLayout(self.buttons_frame)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(0, -1, 0, -1)
+        self.horizontalLayout = QHBoxLayout(self.buttons_frame)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(0, -1, 0, -1)
         self.add_plugin_button = QPushButton(self.buttons_frame)
         self.add_plugin_button.setObjectName(u"add_plugin_button")
         icon = QIcon()
         icon.addFile(u"../../assets/icons/plus_rounded.png", QSize(), QIcon.Normal, QIcon.On)
         self.add_plugin_button.setIcon(icon)
 
-        self.verticalLayout.addWidget(self.add_plugin_button)
+        self.horizontalLayout.addWidget(self.add_plugin_button)
 
         self.remove_plugin_button = QPushButton(self.buttons_frame)
         self.remove_plugin_button.setObjectName(u"remove_plugin_button")
@@ -48,24 +47,25 @@ class Ui_Form(object):
         icon1.addFile(u"../../assets/icons/minus_rounded.png", QSize(), QIcon.Normal, QIcon.On)
         self.remove_plugin_button.setIcon(icon1)
 
-        self.verticalLayout.addWidget(self.remove_plugin_button)
+        self.horizontalLayout.addWidget(self.remove_plugin_button)
 
-        self.vertical_spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.verticalLayout.addItem(self.vertical_spacer)
+        self.horizontalLayout.addItem(self.horizontalSpacer)
 
 
-        self.gridLayout.addWidget(self.buttons_frame, 1, 1, 2, 1)
-
-        self.plugins_tree_view = QTreeView(Form)
-        self.plugins_tree_view.setObjectName(u"plugins_tree_view")
-
-        self.gridLayout.addWidget(self.plugins_tree_view, 1, 0, 1, 1)
+        self.verticalLayout.addWidget(self.buttons_frame)
 
         self.path_label = QLabel(Form)
         self.path_label.setObjectName(u"path_label")
 
-        self.gridLayout.addWidget(self.path_label, 0, 0, 1, 1)
+        self.verticalLayout.addWidget(self.path_label)
+
+        self.plugins_tree_view = QTreeView(Form)
+        self.plugins_tree_view.setObjectName(u"plugins_tree_view")
+        self.plugins_tree_view.setFrameShape(QFrame.NoFrame)
+
+        self.verticalLayout.addWidget(self.plugins_tree_view)
 
 
         self.retranslateUi(Form)
