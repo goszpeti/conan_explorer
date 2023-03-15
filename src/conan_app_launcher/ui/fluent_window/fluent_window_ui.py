@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(859, 824)
+        MainWindow.resize(851, 795)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -95,6 +95,9 @@ class Ui_MainWindow(object):
         font1.setPointSize(24)
         font1.setStyleStrategy(QFont.PreferAntialias)
         self.page_title.setFont(font1)
+        self.page_title.setScaledContents(True)
+        self.page_title.setAlignment(Qt.AlignBottom|Qt.AlignLeading|Qt.AlignLeft)
+        self.page_title.setMargin(0)
 
         self.top_center_frame_layout.addWidget(self.page_title)
 
@@ -308,7 +311,7 @@ class Ui_MainWindow(object):
         self.right_menu_scroll_area.setWidgetResizable(True)
         self.right_menu_scroll_area_widgets = QWidget()
         self.right_menu_scroll_area_widgets.setObjectName(u"right_menu_scroll_area_widgets")
-        self.right_menu_scroll_area_widgets.setGeometry(QRect(0, 0, 93, 745))
+        self.right_menu_scroll_area_widgets.setGeometry(QRect(0, 0, 93, 716))
         self.right_menu_scroll_area_widgets.setMinimumSize(QSize(0, 0))
         self.right_menu_scroll_area_widgets_layout = QVBoxLayout(self.right_menu_scroll_area_widgets)
         self.right_menu_scroll_area_widgets_layout.setSpacing(2)

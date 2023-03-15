@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>859</width>
-    <height>824</height>
+    <width>851</width>
+    <height>795</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -200,6 +200,15 @@
                </property>
                <property name="text">
                 <string>Page Title</string>
+               </property>
+               <property name="scaledContents">
+                <bool>true</bool>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+               </property>
+               <property name="margin">
+                <number>0</number>
                </property>
               </widget>
              </item>
@@ -703,7 +712,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>745</height>
+                  <height>716</height>
                  </rect>
                 </property>
                 <property name="minimumSize">

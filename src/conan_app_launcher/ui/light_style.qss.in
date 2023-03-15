@@ -37,7 +37,7 @@ QLabel#page_title {
     border-style: solid;
     border-bottom-color: #6699CC;
     border-bottom-width: 2px;
-    margin: 1px;
+    padding-bottom: -5px;
     font-size: {{MAIN_FONT_SIZE + 12 }}pt;
 }
 
