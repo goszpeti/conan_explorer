@@ -2,8 +2,7 @@ import os
 import inspect as python_inspect
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
-from conan.internal.conan_app import ConanApp
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from conan_app_launcher.core.conan_common import ConanPkg, ConanUnifiedApi
 from conan_app_launcher.app.logger import Logger
@@ -17,10 +16,8 @@ from conans.client.cache.cache import ClientCache
 from conans.errors import ConanException
 from conans.model.recipe_ref import RecipeReference as ConanFileReference
 from conans.model.package_ref import PkgReference as PackageReference
-from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF, INVALID_PATH,
-                                SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, base_path, user_save_path)
-
-
+from conan_app_launcher import (INVALID_CONAN_REF, INVALID_PATH,
+                                user_save_path)
 
 class ConanApi(ConanUnifiedApi):
     """ Wrapper around ConanAPIV2 """
@@ -51,6 +48,9 @@ class ConanApi(ConanUnifiedApi):
         except Exception as e:
             Logger().error(f"Error while reading remotes: {str(e)}")
         return remotes
+    
+    def get_profiles(self)-> List[str]:
+        return self.conan.profiles.list()
 
     def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """

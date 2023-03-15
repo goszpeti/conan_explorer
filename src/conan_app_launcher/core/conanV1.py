@@ -77,6 +77,9 @@ class ConanApi(ConanUnifiedApi):
             Logger().error(f"Error while reading remotes file: {str(e)}")
         return remotes
     
+    def get_profiles(self) -> List[str]:
+        return self.conan.profile_list()
+    
     def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]: # user_name, autheticated
         user_info = self.conan.users_list(remote_name).get("remotes", {})
         if len(user_info) < 1:

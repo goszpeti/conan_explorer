@@ -50,6 +50,10 @@ class ConanUnifiedApi(ABC):
     def get_remotes(self, include_disabled=False) -> List[Remote]:
         """ Return a list of all remotes. """
         raise NotImplementedError
+    
+    def get_profiles(self) -> List[str]:
+        """ Return a list of all profiles """
+        raise NotImplementedError
 
     # def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, authenticated
     #     """ Get username and authenticated info for a remote. """
