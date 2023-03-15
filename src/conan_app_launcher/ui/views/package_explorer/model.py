@@ -97,7 +97,7 @@ class PkgSelectModel(TreeModel):
             if item.type == PROFILE_TYPE:
                 data = item.data(0)
                 # remove dict style print characters
-                return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
+                return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord("'"): None})
         if role == Qt.ItemDataRole.DecorationRole:
             if item.type == REF_TYPE:
                 return QIcon(get_themed_asset_icon("icons/package.svg"))

@@ -62,7 +62,7 @@ class ConanSearchController(QObject):
         if item.type != PROFILE_TYPE:
             return
         pkg_info = pprint.pformat(item.pkg_data).translate(
-            {ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
+            {ord("{"): None, ord("}"): None, ord("'"): None})
         self._detail_view.setText(pkg_info)
 
     def on_copy_ref_requested(self):
