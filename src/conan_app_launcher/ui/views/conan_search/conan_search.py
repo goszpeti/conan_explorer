@@ -40,6 +40,8 @@ class ConanSearchView(PluginInterfaceV1):
 
         self._ui.search_button.clicked.connect(self._search_controller.on_search)
         self._ui.search_button.setEnabled(False)
+        self._ui.install_button.clicked.connect(self._search_controller.on_install_button)
+        self._ui.search_button.setEnabled(True)
         self._ui.search_line.validator_enabled = False
         self._ui.search_line.textChanged.connect(self._enable_search_button)
         for key in ("Enter", "Return",):
@@ -61,6 +63,7 @@ class ConanSearchView(PluginInterfaceV1):
         self._ui.remote_list.setMaximumHeight(0)
         self.remote_toggle_animation = QPropertyAnimation(self._ui.remote_list, b"maximumHeight")
 
+        # animation for expanding/collapsing remote list
         def start_animation(checked):
             arrow_type = Qt.ArrowType.DownArrow if checked else Qt.ArrowType.RightArrow
             max_height = self._ui.remote_list.sizeHint().height()

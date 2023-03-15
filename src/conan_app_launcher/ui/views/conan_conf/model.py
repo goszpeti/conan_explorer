@@ -83,7 +83,7 @@ class RemotesTableModel(TreeModel):
 class ProfilesModel(QAbstractListModel):
     def __init__(self):
         super().__init__()
-        self._profiles = app.conan_api.conan.profile_list()
+        self._profiles = app.conan_api.get_profiles()
 
     def data(self, index, role):
         if role == Qt.ItemDataRole.DisplayRole:

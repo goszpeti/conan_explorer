@@ -28,10 +28,10 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
     def load(self):
         self._pkg_sel_ctrl = PackageSelectionController(
             self, self._ui.package_select_view, self._ui.package_filter_edit,
-            self.conan_pkg_selected, self._base_signals.conan_pkg_removed, self._page_widgets)
+            self.conan_pkg_selected, self._base_signals, self._page_widgets)
         self._pkg_file_exp_ctrl = PackageFileExplorerController(
             self, self._ui.package_file_view, self._ui.package_path_label,
-            self.conan_pkg_selected, self._base_signals.conan_pkg_removed, self._page_widgets)
+            self.conan_pkg_selected, self._base_signals, self._page_widgets)
         self.file_cntx_menu = None
         self.set_themed_icon(self._ui.refresh_button, "icons/refresh.svg")
 

@@ -15,6 +15,7 @@ from conan_app_launcher.ui.common import AsyncLoader, FileSystemModel
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog
+from conan_app_launcher.ui.dialogs.conan_install.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.views import AppGridView
 from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
                           Qt, QUrl, SignalInstance)
@@ -26,15 +27,15 @@ from .model import (PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem,
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
-
+    from conan_app_launcher.ui.main_window import BaseSignals
 
 
 class PackageSelectionController(QObject):
 
     def __init__(self, parent: QWidget, view: QTreeView, package_filter_edit: QLineEdit, conan_pkg_selected: SignalInstance,
-                 conan_pkg_removed: SignalInstance, page_widgets: "FluentWindow.PageStore"):
+                 base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
-        self._conan_pkg_removed = conan_pkg_removed
+        self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
         self._model = None
         self._loader = AsyncLoader(self)
@@ -42,7 +43,7 @@ class PackageSelectionController(QObject):
         self._view = view
         self._package_filter_edit = package_filter_edit
 
-        conan_pkg_removed.connect(self.on_conan_pkg_removed)
+        base_signals.conan_pkg_removed.connect(self.on_conan_pkg_removed)
 
     def on_open_export_folder_requested(self):
         conan_ref = self.get_selected_conan_ref()
@@ -92,7 +93,10 @@ class PackageSelectionController(QObject):
         QApplication.clipboard().setText(conan_ref)
 
     def on_install_ref_requested(self):
-        pass # TODO
+        # TODO: select pkg id
+        conan_ref = self.get_selected_conan_ref()
+        dialog = ConanInstallDialog(self._view, conan_ref, self._base_signals.conan_pkg_installed)
+        dialog.show()
 
     def on_remove_ref_requested(self):
         source_item = self.get_selected_pkg_source_item()
@@ -218,13 +222,14 @@ class PackageSelectionController(QObject):
 
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QLabel, conan_pkg_selected: SignalInstance, conan_pkg_removed: SignalInstance, page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QLabel, conan_pkg_selected: SignalInstance, 
+                 base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._model = None
         self._page_widgets = page_widgets
         self._view = view
         self._pkg_path_label = pkg_path_label
-        self._conan_pkg_removed = conan_pkg_removed
+        self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
         self._conan_pkg_selected.connect(self.on_pkg_selection_change)
 

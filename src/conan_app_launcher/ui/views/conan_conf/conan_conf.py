@@ -31,6 +31,7 @@ class ConanConfigView(PluginInterfaceV1):
         self.load_signal.connect(self.load)
         self.config_file_path = Path("Unknown")
         self.profiles_path = Path("Unknown")
+        self._edited_profile = None
 
     def load(self):
 
@@ -148,6 +149,7 @@ class ConanConfigView(PluginInterfaceV1):
             return
         view_index = view_indexes[0]
         profile_name = view_index.data()
+        self._edited_profile = profile_name
         try:
             profile_content = (self.profiles_path / profile_name).read_text()
         except Exception:
@@ -158,8 +160,9 @@ class ConanConfigView(PluginInterfaceV1):
         self.profiles_cntx_menu.exec(self._ui.profiles_list_view.mapToGlobal(position))
 
     def on_save_profile_file(self):
-        view_index = self._ui.profiles_list_view.selectedIndexes()[0]
-        profile_name = view_index.data(0)
+        if not self._edited_profile:
+            return
+        profile_name = self._edited_profile
         text = self._ui.profiles_text_browser.toPlainText()
         (self.profiles_path / profile_name).write_text(text)
 
@@ -168,7 +171,7 @@ class ConanConfigView(PluginInterfaceV1):
         profile_name, accepted = new_profile_dialog.getText(self, "New profile", 'Enter name:', text="")
         if profile_name:
             (self.profiles_path / profile_name).touch()
-            # TODO: reload model
+            self.on_refresh_profiles()
 
     def on_remove_profile(self):
         view_index = self._ui.profiles_list_view.selectedIndexes()[0]
@@ -181,7 +184,7 @@ class ConanConfigView(PluginInterfaceV1):
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
             delete_path(self.profiles_path / profile_name)
-            # TODO: reload model
+            self.on_refresh_profiles()
 
 
     def on_refresh_profiles(self):

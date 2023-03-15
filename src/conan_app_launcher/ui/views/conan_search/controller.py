@@ -82,7 +82,13 @@ class ConanSearchController(QObject):
     def on_install_pkg_requested(self):
         """ Spawn the Conan install dialog """
         combined_ref = self.get_selected_combined_ref()
-        dialog = ConanInstallDialog(self._view, combined_ref, self.conan_pkg_installed)
+        self.install(combined_ref)
+
+    def on_install_button(self):
+        self.install(self._search_line.text())
+
+    def install(self, ref):
+        dialog = ConanInstallDialog(self._view, ref, self.conan_pkg_installed)
         dialog.show()
 
     def get_selected_remotes(self) -> List[str]:
