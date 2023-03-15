@@ -74,6 +74,9 @@ def check_if_process_running(process_name, cmd_contains=[], kill=False, cmd_narg
                     if matches == len(cmd_contains):
                         if kill:
                             try:
+                                # or parent.children() for recursive=False
+                                for child in process.children(recursive=True):
+                                    child.terminate()
                                 process.terminate()
                             except:
                                 process.kill()
@@ -224,6 +227,7 @@ def ConanServer():
     if started:
         print("\nKILLING CONAN SERVER\n ")
         check_if_process_running("conan_server", timeout_s=0, kill=True)
+        conan_server_thread.join()
 
 
 @pytest.fixture(autouse=True)
