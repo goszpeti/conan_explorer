@@ -7,18 +7,16 @@ from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike
+from conan_app_launcher import APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, conan_version
                                 
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan_cleanup import ConanCleanup
-from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES,
-                                         FILE_EDITOR_EXECUTABLE, FONT_SIZE,
-                                         GUI_MODE, GUI_MODE_DARK,
-                                         GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL, LAST_CONFIG_FILE,
-                                         PLUGINS_SECTION_NAME, WINDOW_SIZE)
+from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
+                                         GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT, 
+                                         GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, WINDOW_SIZE)
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
-from conan_app_launcher.ui.plugin.plugins import PluginFile, PluginHandler
+from conan_app_launcher.ui.plugin.plugins import PluginHandler
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
 from PySide6.QtCore import QRect, SignalInstance, Signal
 from PySide6.QtGui import QKeySequence
@@ -126,11 +124,13 @@ class MainWindow(FluentWindow):
         view_settings_submenu.add_menu_line()
 
         self.main_general_settings_menu.add_menu_line()
-        self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
-                                                              app.conan_api.remove_locks, "icons/remove-lock.svg")
-        self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",
-                                                              self.open_cleanup_cache_dialog, "icons/cleanup.svg")
-        self.main_general_settings_menu.add_menu_line()
+        
+        if conan_version.startswith("1"):
+            self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
+                                                                app.conan_api.remove_locks, "icons/remove-lock.svg")
+            self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",
+                                                                self.open_cleanup_cache_dialog, "icons/cleanup.svg")
+            self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.svg")
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.svg")
 
