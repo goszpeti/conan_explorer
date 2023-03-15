@@ -10,8 +10,8 @@ from PySide6.QtWidgets import QCheckBox, QApplication
 class AnimatedToggle(QCheckBox):
 
     ANIM_DURATION_MS = 600
-    MAX_WIDTH = 65
-    MAX_HEIGHT = 55
+    MAX_WIDTH = 60
+    MAX_HEIGHT = 50
     def __init__(self, parent=None, bar_color=Qt.GlobalColor.gray, checked_color="#00B0FF", 
                 handle_color=Qt.GlobalColor.white, pulse_unchecked_color="#44999999", pulse_checked_color="#4400B0EE"):
 

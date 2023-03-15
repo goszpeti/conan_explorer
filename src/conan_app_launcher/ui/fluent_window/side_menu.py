@@ -12,8 +12,6 @@ from conan_app_launcher.ui.widgets.toggle import AnimatedToggle
 from . import RIGHT_MENU_MAX_WIDTH, gen_obj_name
 
 class SideSubMenu(ThemedWidget):
-    TOGGLE_WIDTH = 70
-    TOGGLE_HEIGHT = 50
 
     def __init__(self, parent_stacked_widget: QStackedWidget, title: str = "", is_top_level=False):
         super().__init__(parent_stacked_widget)
@@ -127,8 +125,6 @@ class SideSubMenu(ThemedWidget):
 
     def add_toggle_menu_entry(self, name: str, target: Callable, initial_state: bool, asset_icon: str = ""):
         toggle = AnimatedToggle(self)
-        toggle.setMinimumSize(self.TOGGLE_WIDTH, self.TOGGLE_HEIGHT)
-        toggle.setMaximumSize(self.TOGGLE_WIDTH, self.TOGGLE_HEIGHT)
         toggle.setChecked(initial_state)
         toggle.stateChanged.connect(target)
         self.add_named_custom_entry(name, toggle, asset_icon, force_v_layout=True)
