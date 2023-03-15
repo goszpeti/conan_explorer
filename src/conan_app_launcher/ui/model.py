@@ -23,7 +23,6 @@ class UiApplicationModel(UiConfig):
         UiConfig.__init__(self, *args, **kwargs)
         self.app_grid: UiAppGridModel
         self._ui_config_data: Optional[UiConfigInterface] = None
-
         self.conan_pkg_installed = conan_pkg_installed
         self.conan_pkg_removed = conan_pkg_removed
 

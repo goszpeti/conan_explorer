@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.common import measure_font_width
 from conan_app_launcher.ui.common.theming import get_themed_asset_icon
@@ -12,7 +11,6 @@ from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from conan_app_launcher.core.conan_common import ConanFileReference
 
 from PySide6.QtCore import SignalInstance
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
 
 

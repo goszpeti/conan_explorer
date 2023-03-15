@@ -5,10 +5,9 @@ from conan_app_launcher.app.logger import Logger  # using global module pattern
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from PySide6.QtCore import QSize, Qt, SignalInstance
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem
 
-from conan_app_launcher.core.conan_common import ConanFileReference, PackageReference
+from conan_app_launcher.core.conan_common import ConanFileReference
 
 
 class ConanInstallDialog(QDialog):
@@ -27,7 +26,7 @@ class ConanInstallDialog(QDialog):
         self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_auto_install_on_pkg_ref)
         self._ui.button_box.accepted.connect(self.on_install)
         self._ui.auto_install_check_box.setChecked(True)  # default state
-        self._profiles = app.conan_api.conan.profile_list()
+        self._profiles = app.conan_api.get_profiles()
         options = []
         try:
             conan_ref = conan_full_ref.split(":")[0]
