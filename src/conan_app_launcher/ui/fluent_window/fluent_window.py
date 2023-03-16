@@ -141,13 +141,14 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.drag_position: Optional[QPoint] = None
 
         self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
+        self.ui.left_menu_frame.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
         menu_margins = self.ui.left_menu_bottom_subframe.layout().contentsMargins()
         button_offset = menu_margins.right() + menu_margins.left()
         # fix buttons sizes, so they don't expand on togglling the menu
         self.ui.toggle_left_menu_button.setMinimumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
         self.ui.toggle_left_menu_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
-        self.ui.settings_button.setMinimumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
-        self.ui.settings_button.setMaximumWidth(LEFT_MENU_MIN_WIDTH - button_offset)
+
+        self.ui.settings_button.setFixedWidth(LEFT_MENU_MIN_WIDTH - button_offset)
 
         self.set_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.svg")
         self.set_themed_icon(self.ui.settings_button, "icons/settings.svg")
