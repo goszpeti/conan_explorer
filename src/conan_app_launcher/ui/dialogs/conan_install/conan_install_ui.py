@@ -27,13 +27,13 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(585, 343)
+        Dialog.resize(406, 343)
         sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
         Dialog.setSizePolicy(sizePolicy)
-        Dialog.setMinimumSize(QSize(200, 100))
+        Dialog.setMinimumSize(QSize(400, 100))
         Dialog.setSizeIncrement(QSize(0, 0))
         Dialog.setModal(False)
         self.verticalLayout_2 = QVBoxLayout(Dialog)
@@ -123,19 +123,26 @@ class Ui_Dialog(object):
         self.frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout = QVBoxLayout(self.frame)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.auto_install_check_box = QCheckBox(self.frame)
-        self.auto_install_check_box.setObjectName(u"auto_install_check_box")
-        sizePolicy.setHeightForWidth(self.auto_install_check_box.sizePolicy().hasHeightForWidth())
-        self.auto_install_check_box.setSizePolicy(sizePolicy)
-
-        self.verticalLayout.addWidget(self.auto_install_check_box)
-
         self.update_check_box = QCheckBox(self.frame)
         self.update_check_box.setObjectName(u"update_check_box")
         sizePolicy.setHeightForWidth(self.update_check_box.sizePolicy().hasHeightForWidth())
         self.update_check_box.setSizePolicy(sizePolicy)
 
         self.verticalLayout.addWidget(self.update_check_box)
+
+        self.line = QFrame(self.frame)
+        self.line.setObjectName(u"line")
+        self.line.setFrameShape(QFrame.HLine)
+        self.line.setFrameShadow(QFrame.Sunken)
+
+        self.verticalLayout.addWidget(self.line)
+
+        self.auto_install_check_box = QCheckBox(self.frame)
+        self.auto_install_check_box.setObjectName(u"auto_install_check_box")
+        sizePolicy.setHeightForWidth(self.auto_install_check_box.sizePolicy().hasHeightForWidth())
+        self.auto_install_check_box.setSizePolicy(sizePolicy)
+
+        self.verticalLayout.addWidget(self.auto_install_check_box)
 
         self.button_box = QDialogButtonBox(self.frame)
         self.button_box.setObjectName(u"button_box")
@@ -167,7 +174,7 @@ class Ui_Dialog(object):
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("Dialog", u"Value", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("Dialog", u"Name", None));
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Additional args", None))
-        self.auto_install_check_box.setText(QCoreApplication.translate("Dialog", u"Automatically determine best matching package", None))
         self.update_check_box.setText(QCoreApplication.translate("Dialog", u"Update (-u)", None))
+        self.auto_install_check_box.setText(QCoreApplication.translate("Dialog", u"Automatically determine best matching package", None))
     # retranslateUi
 

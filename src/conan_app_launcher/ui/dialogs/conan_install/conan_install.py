@@ -25,7 +25,6 @@ class ConanInstallDialog(QDialog):
         self._ui.conan_ref_line_edit.validator_enabled = False
         self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_auto_install_on_pkg_ref)
         self._ui.button_box.accepted.connect(self.on_install)
-        self._ui.auto_install_check_box.setChecked(True)  # default state
         self._profiles = app.conan_api.get_profiles()
         options = []
         try:
@@ -42,26 +41,29 @@ class ConanInstallDialog(QDialog):
             item = QTreeWidgetItem(self._ui.options_widget)
             item.setData(0, 0, name)
             item.setData(1, 0, value)
-            item.setFlags(Qt.ItemFlag.ItemIsEditable | Qt.ItemFlag.ItemIsEnabled)
+            item.setFlags(Qt.ItemFlag.ItemIsEnabled)  # Qt.ItemFlag.ItemIsEditable |
             self._ui.options_widget.addTopLevelItem(item)
             # TODO: selection
             try:
                 values = self._ref_info[0].root.dependencies[0].dst.conanfile.options._data[name]._possible_values
-                if values:
+                if isinstance(values, list):
                     cb = QComboBox()
                     cb.addItems(values)
                     cb.setCurrentText(value)
+                    self._ui.options_widget.setItemWidget(item, 1, cb)
             except:
                 pass
-            self._ui.options_widget.setItemWidget(item, 1, cb)
         self._ui.options_widget.resizeColumnToContents(1)
         self._ui.options_widget.resizeColumnToContents(0)
-        # self._ui.options_widget.itemDoubleClicked.connect(
-        #     self.onTreeWidgetItemDoubleClicked)  # openPersistentEditor(item, 1)
+        self._ui.options_widget.itemDoubleClicked.connect(
+             self.onTreeWidgetItemDoubleClicked)  # 
+
         self.adjust_to_size()
 
-    # def onTreeWidgetItemDoubleClicked(self, item, column):
-    #     self._ui.options_widget.editItem(item, column)
+        # self._ui.auto_install_check_box - disable profile and options on activating this
+
+    def onTreeWidgetItemDoubleClicked(self, item):
+        self._ui.options_widget.openPersistentEditor(item, 1)
 
     def adjust_to_size(self):
         """ Expands the dialog to the length of the install ref text.
@@ -71,6 +73,8 @@ class ConanInstallDialog(QDialog):
         self.adjustSize()
         h_offset = (self.size() - self._ui.conan_ref_line_edit.size()).width()  # type: ignore
         width = self._ui.conan_ref_line_edit.fontMetrics().boundingRect(self._ui.conan_ref_line_edit.text()).width()
+        if width < 250:
+            width = 250
         self.resize(QSize(width + h_offset + 15, self.height()))  # 15 margin
 
     def toggle_auto_install_on_pkg_ref(self, text: str):
@@ -87,8 +91,12 @@ class ConanInstallDialog(QDialog):
         if self._ui.auto_install_check_box.checkState() == Qt.CheckState.Checked:
             auto_install_checked = True
         ref_text = self._ui.conan_ref_line_edit.text()
-        conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": {},
-                                                    "options": {}, "update": update_check_state,
+        # settings from profile
+        settings = app.conan_api.get_profile_settings(self._ui.profile_cbox.currentText())
+        # TODO options from selection
+        options = self.get_user_options()
+        conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": settings,
+                                                    "options": options, "update": update_check_state,
                                                     "auto_install": auto_install_checked}
 
         app.conan_worker.put_ref_in_install_queue(conan_worker_element, self.emit_conan_pkg_signal_callback)
@@ -97,3 +105,11 @@ class ConanInstallDialog(QDialog):
         if not self.pkg_installed_signal:
             return
         self.pkg_installed_signal.emit(conan_ref, pkg_id)
+
+
+    def get_user_options(self):
+        options = {}
+        for i in range(0, self._ui.options_widget.topLevelItemCount()):
+            item = self._ui.options_widget.topLevelItem(i)
+            options[item.data(0, 0)] = item.data(1, 0)
+        return options
