@@ -67,6 +67,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
 
     conan_install_dialog = ConanInstallDialog(root_obj, TEST_REF + ":" + id)
+    conan_install_dialog._ui.auto_install_check_box.setCheckState(Qt.CheckState.Checked)
     app_qt_fixture.addWidget(root_obj)
     conan_install_dialog.show()
     app_qt_fixture.waitExposed(conan_install_dialog)

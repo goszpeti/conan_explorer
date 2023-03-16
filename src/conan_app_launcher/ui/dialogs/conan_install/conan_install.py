@@ -84,17 +84,21 @@ class ConanInstallDialog(QDialog):
             self._ui.auto_install_check_box.setEnabled(True)
 
     def on_install(self):
+        ref_text = self._ui.conan_ref_line_edit.text()
         update_check_state = False
         if self._ui.update_check_box.checkState() == Qt.CheckState.Checked:
             update_check_state = True
+    
         auto_install_checked = False
+        settings = {}
+        options = {}
         if self._ui.auto_install_check_box.checkState() == Qt.CheckState.Checked:
             auto_install_checked = True
-        ref_text = self._ui.conan_ref_line_edit.text()
-        # settings from profile
-        settings = app.conan_api.get_profile_settings(self._ui.profile_cbox.currentText())
-        # TODO options from selection
-        options = self.get_user_options()
+        else:
+            # settings from profile
+            settings = app.conan_api.get_profile_settings(self._ui.profile_cbox.currentText())
+            # TODO options from selection
+            options = self.get_user_options()
         conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": settings,
                                                     "options": options, "update": update_check_state,
                                                     "auto_install": auto_install_checked}
