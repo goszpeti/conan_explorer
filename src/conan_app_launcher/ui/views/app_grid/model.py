@@ -12,11 +12,11 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
 from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_icon, get_asset_image_path
 from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 
 # from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
+from PySide6.QtCore import QAbstractListModel, QModelIndex, QPersistentModelIndex, Qt, QObject
 
 
 class UiAppGridModel(UiAppGridConfig, QObject):
@@ -91,7 +91,7 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
     def rowCount(self, parent=None) -> int:
         return len(self.apps)
 
-    def columnCount(self, parent: QModelIndex = ...) -> int:
+    def columnCount(self, parent: QModelIndex | QPersistentModelIndex) -> int:
         return 1
 
     def insertRow(self, row: int, parent=QModelIndex()) -> bool:
@@ -125,8 +125,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         self.package_folder = Path(INVALID_PATH)
         self._executable_path = Path(INVALID_PATH)
         self._conan_ref = INVALID_CONAN_REF
-        self._conan_file_reference = ConanFileReference.loads(self._conan_ref)
-        self._available_refs: List[ConanFileReference] = []
+        self._conan_file_reference = ConanRef.loads(self._conan_ref)
+        self._available_refs: List[ConanRef] = []
         self._executable = ""
         self._icon: str = ""
         self.lock_changes = True  # values do not emit events. used when multiple changes are needed
@@ -175,7 +175,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._update_cbk_func = update_func
 
     @property
-    def conan_file_reference(self) -> ConanFileReference:
+    def conan_file_reference(self) -> ConanRef:
         return self._conan_file_reference
 
     @property
@@ -186,7 +186,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     @conan_ref.setter
     def conan_ref(self, new_value: str):
         try:
-            self._conan_file_reference = ConanFileReference.loads(new_value)
+            self._conan_file_reference = ConanRef.loads(new_value)
         except Exception:  # invalid ref
             # Logger().debug(f"Invalid ref: {new_value}")
             return
@@ -232,7 +232,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not self._conan_file_reference.user or not self._conan_file_reference.channel:
             user = "_"
             channel = "_"  # both must be unset if channel is official
-        self.conan_ref = str(ConanFileReference(self._conan_file_reference.name, new_value, user, channel))
+        self.conan_ref = str(ConanRef(self._conan_file_reference.name, new_value, user, channel))
 
     @classmethod
     def convert_to_disp_channel(cls, channel: str) -> str:
@@ -254,7 +254,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             channel = "_"  # both must be unset if channel is official
         if not channel or channel == "_":
             channel = "NA"
-        self.conan_ref = str(ConanFileReference(
+        self.conan_ref = str(ConanRef(
             self._conan_file_reference.name, self._conan_file_reference.version, new_value, channel))
 
     @classmethod
@@ -276,7 +276,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if new_value == self.OFFICIAL_RELEASE or not new_value or user == self.OFFICIAL_USER:
             new_value = "_"
             user = "_"  # both must be unset if channel is official
-        self.conan_ref = str(ConanFileReference(
+        self.conan_ref = str(ConanRef(
             self._conan_file_reference.name, self._conan_file_reference.version, user, new_value))
 
     @property
@@ -428,7 +428,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if self._update_cbk_func:
             self._update_cbk_func()
 
-    def set_available_packages(self, available_refs: List[ConanFileReference]):
+    def set_available_packages(self, available_refs: List[ConanRef]):
         """
         Set all other available packages.
         Usually to be called from conan worker.

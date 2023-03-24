@@ -8,7 +8,7 @@ from conan_app_launcher.ui.common import measure_font_width
 from conan_app_launcher.ui.common.theming import get_themed_asset_icon
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 
 from PySide6.QtCore import SignalInstance
 from PySide6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
@@ -86,7 +86,7 @@ class AppEditDialog(QDialog):
 
     def on_executable_browse_clicked(self):
         _, temp_package_path = app.conan_api.get_best_matching_package_path(
-            ConanFileReference.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
+            ConanRef.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
         if not temp_package_path.exists():  # default path
             temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",
@@ -112,7 +112,7 @@ class AppEditDialog(QDialog):
 
     def on_icon_browse_clicked(self):
         _, temp_package_path = app.conan_api.get_best_matching_package_path(
-            ConanFileReference.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
+            ConanRef.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
         if not temp_package_path.exists():  # default path
             temp_package_path = Path.home()
         dialog = QFileDialog(parent=self, caption="Select file for icon display",

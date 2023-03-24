@@ -1,7 +1,5 @@
-from datetime import datetime
 from pathlib import Path
-from time import sleep
-from typing import TYPE_CHECKING, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, List, Type, TypeVar
 
 import conan_app_launcher.app as app
 from conan_app_launcher import user_save_path
@@ -13,12 +11,11 @@ from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu, AnimatedToggle
-from conan_app_launcher.core.conan_common import ConanFileReference, PackageReference
+from conan_app_launcher.core.conan_common import ConanRef, PkgRef
 
-from PySide6.QtCore import Qt, SignalInstance, Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget, QFileDialog, QSizePolicy,
-                               QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget, QFileDialog, QVBoxLayout)
 
 from .model import UiAppLinkModel, UiTabModel
 from .tab import TabList, TabList  # TabGrid
@@ -29,7 +26,7 @@ if TYPE_CHECKING:
 
 
 class AppGridView(PluginInterfaceV1):
-    load_signal = Signal()
+    load_signal = Signal() # type: ignore
 
     def __init__(self, parent, model: "UiAppGridModel", base_signals: "BaseSignals", page_widgets: FluentWindow.PageStore):
         super().__init__(parent, base_signals, page_widgets)
@@ -68,6 +65,7 @@ class AppGridView(PluginInterfaceV1):
 
     def _init_right_menu(self):
         # Right Settings menu
+        assert self._page_widgets
         quicklaunch_submenu = self._page_widgets.get_side_menu_by_type(type(self))
         assert quicklaunch_submenu
         quicklaunch_submenu.reset_widgets()
@@ -112,7 +110,8 @@ class AppGridView(PluginInterfaceV1):
         """ Refresh backend info when tabs are reordered"""
         reordered_tabs = []
         for i in range(self.tab_widget.count()):
-            reordered_tabs.append(self.tab_widget.widget(i).model)
+            tab: TabList = self.tab_widget.widget(i) # type: ignore
+            reordered_tabs.append(tab.model)
         self.model.tabs = reordered_tabs
         self.model.save()
 
@@ -157,7 +156,7 @@ class AppGridView(PluginInterfaceV1):
             self.tab_widget.addTab(tab, text)
 
     def on_tab_rename(self, index):
-        tab: TabList = self.tab_widget.widget(index)
+        tab: TabList = self.tab_widget.widget(index) # type: ignore
 
         rename_tab_dialog = QInputDialog(self)
         text, accepted = rename_tab_dialog.getText(self, 'Rename tab', 'Enter new name:', text=tab.model.name)
@@ -248,14 +247,14 @@ class AppGridView(PluginInterfaceV1):
 
                     if app_link.model.conan_ref == conan_ref:
                         # reverse lookup - don't update an icon with other options
-                        pkg_info = app.conan_api.get_local_pkg_from_id(PackageReference.loads(conan_ref + ":" + pkg_id))
+                        pkg_info = app.conan_api.get_local_pkg_from_id(PkgRef.loads(conan_ref + ":" + pkg_id))
                         if app_link.model.conan_options:  # only compare options, if user explicitly set them
                             # user options should be a subset of full pkg options
                             if not app_link.model.conan_options.items() <= pkg_info.get("options", {}).items():
                                 continue
                         if pkg_id:
                             app_link.model.set_package_folder(app.conan_api.get_package_folder(
-                                ConanFileReference.loads(conan_ref), pkg_id))
+                                ConanRef.loads(conan_ref), pkg_id))
                         else:
                             app_link.model.load_from_cache()
                     app_link.apply_conan_info()

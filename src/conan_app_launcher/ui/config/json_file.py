@@ -1,7 +1,7 @@
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
 import jsonschema
 from packaging.version import Version
@@ -51,7 +51,7 @@ class JsonUiConfig(UiConfigInterface):
     def get_file_ext(cls):
         return ".json"
 
-    T = TypeVar('T', bound=Union[UiTabConfig, UiAppLinkConfig])
+    T = TypeVar('T', bound=UiTabConfig | UiAppLinkConfig)
     @staticmethod
     def _convert_to_config_type(dict: Dict[str, Any], config_type: Type[T]) -> T:
         """ Convert the dict to the class representations. 

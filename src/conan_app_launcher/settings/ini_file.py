@@ -2,7 +2,7 @@ import configparser
 import os
 from pathlib import Path
 import platform
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple
 
 from conan_app_launcher import PathLike, base_path
 from conan_app_launcher.app.logger import Logger
@@ -75,7 +75,7 @@ class IniSettings(SettingsInterface):
     def get_settings_from_node(self, node: str) -> Tuple[str]:
         return tuple(self._values.get(node, {}).keys())
 
-    def get(self, name: str) -> Union[str, int, float, bool]:
+    def get(self, name: str) -> str | int | float | bool:
         """ Get a specific setting """
         value = None
         for section in self._values.values():
@@ -98,7 +98,7 @@ class IniSettings(SettingsInterface):
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
 
-    def set(self, name: str, value: Union[str, int, float, bool]):
+    def set(self, name: str, value: str | int | float | bool):
         """ Set the value of a specific setting. Does not write to file, if value is already set. """
         if name in self._values.keys() and isinstance(value, dict):  # dict type setting
             if self._values[name] == value:
@@ -114,7 +114,7 @@ class IniSettings(SettingsInterface):
         if self._auto_save:
             self.save()
 
-    def add(self, name: str, value: Union[str, int, float, bool], node: str):
+    def add(self, name: str, value: str | int | float | bool, node: str):
         if not self._values.get(node):
             self._values[node] = {}
         self._values[node][name] = value

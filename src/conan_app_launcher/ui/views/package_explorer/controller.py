@@ -6,7 +6,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core import (open_cmd_in_path, open_file,
                                      open_in_file_manager, run_file)
-from conan_app_launcher.core.conan_common import ConanPkg, ConanFileReference
+from conan_app_launcher.core.conan_common import ConanPkg, ConanRef
 from conan_app_launcher.core.system import (calc_paste_same_dir_name,
                                             copy_path_with_overwrite,
                                             delete_path, execute_cmd)
@@ -47,12 +47,12 @@ class PackageSelectionController(QObject):
 
     def on_open_export_folder_requested(self):
         conan_ref = self.get_selected_conan_ref()
-        conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
+        conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_ref))
         open_in_file_manager(conanfile)
 
     def on_show_conanfile_requested(self):
         conan_ref = self.get_selected_conan_ref()
-        conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
+        conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_ref))
         loader = AsyncLoader(self)
         loader.async_loading(self._view, open_file, (conanfile,), loading_text="Opening Conanfile...")
         loader.wait_for_finished()
@@ -241,7 +241,7 @@ class PackageFileExplorerController(QObject):
         self._current_ref = conan_ref
         self._current_pkg = pkg_info
         pkg_path = app.conan_api.get_package_folder(
-            ConanFileReference.loads(conan_ref), pkg_info.get("id", ""))
+            ConanRef.loads(conan_ref), pkg_info.get("id", ""))
         if not pkg_path.exists():
             Logger().warning(
                 f"Can't find package path for {conan_ref} and {str(pkg_info)} for File View")
@@ -372,7 +372,7 @@ class PackageFileExplorerController(QObject):
         if not file_path.is_file():
             Logger().error("Please select a file, not a directory!")
             return
-        conan_ref = ConanFileReference.loads(self._current_ref)
+        conan_ref = ConanRef.loads(self._current_ref)
         # determine relpath from package
         pkg_info = self._current_pkg
         if not pkg_info:

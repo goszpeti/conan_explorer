@@ -4,7 +4,7 @@ this is a bit overblown for this usecase, but it is worth an experiment """
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List
 
 from conan_app_launcher import INVALID_CONAN_REF, PathLike
 
@@ -29,7 +29,7 @@ class UiAppLinkConfig():
 class UiTabConfig():
     name: str = "New Tab"
     # The Union is a workaround. How to say, that this is the base class?
-    apps: List[Union[UiAppLinkConfig, "UiAppLinkModel"]] = field(default_factory=list)
+    apps: List["UiAppLinkConfig | UiAppLinkModel"] = field(default_factory=list)
 
     def __post_init__(self):
         if not self.apps:
@@ -39,7 +39,7 @@ class UiTabConfig():
 @dataclass
 class UiAppGridConfig():
     # The Union is a workaround. How to say, that this is the base class?
-    tabs: List[Union[UiTabConfig, "UiTabModel"]] = field(default_factory=list)
+    tabs: List["UiTabConfig | UiTabModel"] = field(default_factory=list)
 
     def __post_init__(self):
         if not self.tabs:

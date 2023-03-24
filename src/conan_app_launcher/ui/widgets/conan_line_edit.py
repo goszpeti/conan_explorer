@@ -3,7 +3,7 @@ from typing import Callable, List
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.conan_common import ConanFileReference, PackageReference
+from conan_app_launcher.core.conan_common import ConanRef, PkgRef
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit, QListView
 
@@ -60,7 +60,7 @@ class ConanRefLineEdit(QLineEdit):
         self.search_query(text)
 
     def validate(self, conan_ref: str):
-        """ Validate ConanFileReference or PackageReference. Empty text is invalid. """
+        """ Validate ConanRef or PackageReference. Empty text is invalid. """
         if not self.validator_enabled:
             return
         if not conan_ref:
@@ -68,9 +68,9 @@ class ConanRefLineEdit(QLineEdit):
         else:
             try:
                 if ":" in conan_ref:
-                    PackageReference.loads(conan_ref)
+                    PkgRef.loads(conan_ref)
                 else:
-                    ConanFileReference.loads(conan_ref)
+                    ConanRef.loads(conan_ref)
                 self.is_valid = True
             except Exception:
                 self.is_valid = False

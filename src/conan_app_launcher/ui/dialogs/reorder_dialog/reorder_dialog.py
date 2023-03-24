@@ -1,12 +1,10 @@
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
-from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
 from PySide6.QtCore import QItemSelectionModel, QModelIndex, QPersistentModelIndex
 from PySide6.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
-from PySide6.QtGui import QIcon
 
 from conan_app_launcher.ui.common.theming import get_themed_asset_icon
 
@@ -59,7 +57,7 @@ class ReorderDialog(QDialog):
 
 class ReorderController():
     
-    def __init__(self, view: Union[QListView, QTreeView], model: ReorderingModel) -> None:
+    def __init__(self, view: QListView| QTreeView, model: ReorderingModel) -> None:
         self._view = view
         self._model = model
 

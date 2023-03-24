@@ -5,7 +5,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.core import open_file
 from conan_app_launcher.ui.common import AsyncLoader
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 from PySide6.QtCore import Qt, SignalInstance, QObject
 from PySide6.QtWidgets import (QApplication, QTreeView, QLineEdit, QPushButton, QTextBrowser, QListWidget)
 
@@ -74,7 +74,7 @@ class ConanSearchController(QObject):
         """ Show the conanfile by downloading and opening with the associated program """
         combined_ref = self.get_selected_combined_ref()
         conan_ref = combined_ref.split(":")[0]
-        conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
+        conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_ref))
         loader = AsyncLoader(self)
         loader.async_loading(self._view, open_file, (conanfile,), loading_text="Opening Conanfile...")
         loader.wait_for_finished()

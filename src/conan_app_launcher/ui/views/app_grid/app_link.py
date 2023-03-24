@@ -115,7 +115,7 @@ class ListAppLink(QFrame):
     def resizeEvent(self, event):
         if not self._parent_tab:
             return
-        content_frame: QWidget = self._parent_tab.parent().parent().parent().parent().parent()
+        content_frame: QWidget = self._parent_tab.parent().parent().parent().parent().parent() # type: ignore
         max_cl_width = content_frame.width() - self._ui.left_frame.width() - \
             self._ui.right_frame.width()
         if max_cl_width < 400: # TODO find better solution

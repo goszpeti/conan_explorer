@@ -2,7 +2,7 @@
 """ Use constants in class, so they don't need to be separately accessed """
 
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 from conan_app_launcher import PathLike
 
@@ -73,7 +73,7 @@ class SettingsInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get(self, name: str) -> Union[str, int, float, bool]:
+    def get(self, name: str) -> str | int | float | bool:
         """ Default getter, not good for typing """
         raise NotImplementedError
 
@@ -98,12 +98,12 @@ class SettingsInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, name: str, value: Union[str, int, float, bool]):
+    def set(self, name: str, value: str | int | float | bool):
         """ Set the value of an existing setting """
         raise NotImplementedError
 
     @abstractmethod
-    def add(self, name: str, value: Union[str, int, float, bool], node: Optional[str] = None):
+    def add(self, name: str, value: str | int | float | bool, node: Optional[str] = None):
         """ Add a new setting """
         raise NotImplementedError
 
