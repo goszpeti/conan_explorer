@@ -1,7 +1,10 @@
 """ Common ui classes, and functions """
 
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.settings import FONT_SIZE
+from pathlib import Path
+import conan_app_launcher.app as app
+from conan_app_launcher.core.conan_common import ConanRef
+from conan_app_launcher.core.system import execute_cmd, open_file  # using global module pattern
+from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE, FONT_SIZE
 from PySide6.QtGui import QFontMetrics, QFont
 
 from .icon import extract_icon, get_icon_from_image_file, get_inverted_asset_image, get_platform_icon
@@ -18,3 +21,12 @@ def measure_font_width(text: str) -> int:
     font.setPointSize(fs)
     fm = QFontMetrics(font)
     return fm.horizontalAdvance(text)
+
+
+def show_conanfile(conan_ref: str):
+    conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_ref))
+    editor = app.active_settings.get_string(FILE_EDITOR_EXECUTABLE)
+    if not editor or not Path(editor).exists():
+        open_file(conanfile)
+        return  
+    execute_cmd([editor, str(conanfile)], False)

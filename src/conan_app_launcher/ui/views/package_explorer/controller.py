@@ -11,7 +11,7 @@ from conan_app_launcher.core.system import (calc_paste_same_dir_name,
                                             copy_path_with_overwrite,
                                             delete_path, execute_cmd)
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
-from conan_app_launcher.ui.common import AsyncLoader, FileSystemModel
+from conan_app_launcher.ui.common import AsyncLoader, FileSystemModel, show_conanfile
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog
@@ -52,9 +52,8 @@ class PackageSelectionController(QObject):
 
     def on_show_conanfile_requested(self):
         conan_ref = self.get_selected_conan_ref()
-        conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_ref))
         loader = AsyncLoader(self)
-        loader.async_loading(self._view, open_file, (conanfile,), loading_text="Opening Conanfile...")
+        loader.async_loading(self._view, show_conanfile, (conan_ref,), loading_text="Opening Conanfile...")
         loader.wait_for_finished()
 
     def on_pkg_refresh_clicked(self):
