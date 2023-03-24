@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any, Dict, List
 from abc import ABC, abstractmethod
 from conan_app_launcher import conan_version
 if TYPE_CHECKING:
-    from typing import TypedDict, Protocol
+    from typing import TypedDict, Protocol, TypeAlias
     from conan_app_launcher.core.conan_cache import ConanInfoCache
 else:
     try:
