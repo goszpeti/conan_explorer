@@ -91,7 +91,7 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
     def rowCount(self, parent=None) -> int:
         return len(self.apps)
 
-    def columnCount(self, parent: QModelIndex | QPersistentModelIndex) -> int:
+    def columnCount(self, parent: "QModelIndex | QPersistentModelIndex") -> int:
         return 1
 
     def insertRow(self, row: int, parent=QModelIndex()) -> bool:

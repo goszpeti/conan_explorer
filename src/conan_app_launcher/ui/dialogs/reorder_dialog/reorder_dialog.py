@@ -19,10 +19,10 @@ else:
 
 current_dir = Path(__file__).parent
 class ReorderingModel(Protocol):
-    def index(self, row: int, column: int, parent: QModelIndex | QPersistentModelIndex) -> QModelIndex:
+    def index(self, row: int, column: int, parent: "QModelIndex | QPersistentModelIndex") -> QModelIndex:
         ...
 
-    def columnCount(self, parent: QModelIndex | QPersistentModelIndex) -> int: ...
+    def columnCount(self, parent: "QModelIndex | QPersistentModelIndex") -> int: ...
 
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
         ...
@@ -57,7 +57,7 @@ class ReorderDialog(QDialog):
 
 class ReorderController():
     
-    def __init__(self, view: QListView| QTreeView, model: ReorderingModel) -> None:
+    def __init__(self, view: "QListView| QTreeView", model: ReorderingModel) -> None:
         self._view = view
         self._model = model
 

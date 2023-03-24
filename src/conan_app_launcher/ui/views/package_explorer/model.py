@@ -65,7 +65,7 @@ class PackageFilter(QSortFilterProxyModel):
 class PackageTreeItem(TreeModelItem):
     """ Represents a tree item of a Conan pkg. To be used for the parent (ref) and the child (Profile)"""
 
-    def __init__(self, data: List[str | ConanPkg], parent=None, item_type=REF_TYPE):
+    def __init__(self, data: List["str | ConanPkg"], parent=None, item_type=REF_TYPE):
         super().__init__(data, parent)
         self.type = item_type
 
