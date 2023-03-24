@@ -67,7 +67,7 @@ class PackageSelectionController(QObject):
             return None
         view_index = self._view.selectedIndexes()[0]
         model: PackageFilter = view_index.model()  # type: ignore
-        source_item: PackageTreeItem = model.mapToSource(view_index).internalPointer()
+        source_item: PackageTreeItem = model.mapToSource(view_index).internalPointer() # type: ignore
         return source_item
 
     def get_selected_conan_ref(self) -> str:
@@ -193,7 +193,7 @@ class PackageSelectionController(QObject):
         self._view.expand(view_model.mapFromSource(proxy_index))
 
         if pkg_id:
-            item: PackageTreeItem = proxy_index.internalPointer()
+            item: PackageTreeItem = proxy_index.internalPointer() # type: ignore
             i = 0
             for i in range(len(item.child_items)):
                 if item.child_items[i].item_data[0].get("id", "") == pkg_id:

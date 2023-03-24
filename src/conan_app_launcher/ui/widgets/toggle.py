@@ -55,7 +55,7 @@ class AnimatedToggle(QCheckBox):
     def hitButton(self, pos: QPoint):
         return self.contentsRect().contains(pos)
 
-    @Property(float)
+    @Property(float) # type: ignore
     def thumb_position(self):  # type: ignore
         return self._thumb_position
 

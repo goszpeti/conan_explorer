@@ -1,7 +1,7 @@
 import platform
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
@@ -17,6 +17,10 @@ from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QAppl
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
 from .model import ProfilesModel
 from .controller import ConanRemoteController
+
+if TYPE_CHECKING:
+    from conan_app_launcher.ui.main_window import BaseSignals
+    from conan_app_launcher.ui.fluent_window.fluent_window import FluentWindow
 
 
 class ConanConfigView(PluginInterfaceV1):
@@ -34,7 +38,7 @@ class ConanConfigView(PluginInterfaceV1):
         self._edited_profile = None
 
     def load(self):
-
+        assert self._base_signals
         self._remotes_controller = ConanRemoteController(
             self._ui.remotes_tree_view, self._base_signals.conan_remotes_updated)
         self._init_remotes_tab()

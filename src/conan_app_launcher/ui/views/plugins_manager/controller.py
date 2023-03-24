@@ -30,7 +30,7 @@ class PluginController(QObject):
         if not indexes:
             return None
         view_index = indexes[0]
-        source_item = view_index.internalPointer()
+        source_item: PluginModelItem = view_index.internalPointer() # type: ignore
         return source_item
 
     def _resize_columns(self):
