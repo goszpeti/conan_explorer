@@ -246,7 +246,7 @@ def get_default_file_editor():
 
 
 def find_program_in_windows(app_name: str, partial_match=False, key_to_find="InstallLocation") -> str:
-    if not platform.system() == "Windows":
+    if platform.system() != "Windows":
         return ""
 
     import winreg
@@ -266,7 +266,7 @@ def find_program_in_windows(app_name: str, partial_match=False, key_to_find="Ins
                 if app_name == current_app_name:
                     location = winreg.QueryValueEx(sub_key, key_to_find)[0]
                     return location
-            except OSError as e:
+            except OSError:
                 pass
             finally:
                 sub_key.Close()

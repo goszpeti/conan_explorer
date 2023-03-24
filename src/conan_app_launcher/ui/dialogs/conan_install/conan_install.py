@@ -32,8 +32,9 @@ class ConanInstallDialog(QDialog):
             conan_ref = conan_full_ref.split(":")[0]
             self._ref_info = app.conan_api.conan.info(
                 app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
-            options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()
-        except Exception as e:
+            # TODO: CONAN V2
+            options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items() # type: ignore
+        except Exception:
             Logger().warning("Can't determine options of " + conan_ref)
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
         self._ui.conan_ref_line_edit.setText(conan_full_ref)

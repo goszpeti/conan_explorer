@@ -52,8 +52,8 @@ class ConanApi(ConanUnifiedApi):
         # don't hang on startup
         try:  # use try-except because of Conan 1.24 envvar errors in tests
             self.remove_locks()
-        except Exception as error:
-            Logger().debug(str(error))
+        except Exception as e:
+            Logger().debug(str(e))
         from .conan_cache import ConanInfoCache
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
         return self
@@ -170,8 +170,8 @@ class ConanApi(ConanUnifiedApi):
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, package.get("id", "")))
             return True
-        except ConanException as error:
-            Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(error)}")
+        except ConanException as e:
+            Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(e)}")
             return False
 
     def get_path_or_auto_install(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:

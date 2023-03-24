@@ -27,12 +27,6 @@ current_dir = Path(__file__).parent
 
 class ListAppLink(QFrame):
     """ Represents a clickable button + info for an executable in a conan package.
-    |- Button with Icon (clickable to start executable)
-    |- Package version(s)
-    |- Package user(s)
-    |- Package channel(s)
-    |- Vertical Spacer (to enforce vertical size)
-    Hovering shows the Conan reference.
     Rightclick context menu has the following elements:
     - Show in File Manager
     - Add new App Link
@@ -41,7 +35,6 @@ class ListAppLink(QFrame):
     - Reorder App Links
     """
     icon_size: int
-    MAX_WIDTH = 150
 
     def __init__(self, parent: Optional[QWidget], parent_tab: "TabList", model: UiAppLinkModel, icon_size=ICON_SIZE):
         super().__init__(parent)
@@ -64,10 +57,6 @@ class ListAppLink(QFrame):
         self._ui.edit_button.clicked.connect(self.open_edit_dialog)
         self._ui.remove_button.clicked.connect(self.remove)
         self._init_context_menu()
-
-    @classmethod
-    def max_width(cls) -> int:
-        return cls.MAX_WIDTH
 
     def _init_context_menu(self):
         """ Setup context menu. """

@@ -211,9 +211,9 @@ class UiAppLinkModel(UiAppLinkConfig):
                 conan_worker_element, self.emit_conan_pkg_signal_callback)
             app.conan_worker.put_ref_in_version_queue(
                 conan_worker_element,  self.emit_conan_pkg_signal_callback)
-        except Exception as error:
+        except Exception as e:
             # errors happen fairly often, keep going
-            Logger().warning(f"Conan reference invalid {str(error)}")
+            Logger().warning(f"Conan reference invalid {str(e)}")
 
     def emit_conan_pkg_signal_callback(self, conan_ref, pkg_id):
         if not self.parent.parent.parent.conan_pkg_installed:

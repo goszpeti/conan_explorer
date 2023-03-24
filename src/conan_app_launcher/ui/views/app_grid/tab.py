@@ -85,11 +85,6 @@ class TabList(QWidget):
             self.app_links = []
 
     def redraw(self, force=False):
-        """ Works only as long as the order does not change. Used for resizing the window. """
-        # only if column size changes
-        max_columns = self.get_max_columns()
-        if max_columns in [self._columns_count, 1] and not force:  # already correct -> 1 means this is still not real width
-            return
         if self._initialized:  # don't call on init
             self.remove_all_app_links(force)
             self.load_apps_from_model(force)
@@ -133,14 +128,14 @@ class TabList(QWidget):
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.layout().addWidget(self.tab_scroll_area)
 
-    def get_max_columns(self, offset=0):
-        if self._initialized:
-            width = self._parent_tab.width()
-            max_columns = int((width + offset) / (ListAppLink.max_width()))
-            if max_columns == 0:
-                max_columns = 1
-            return max_columns
-        return 1  # always enable one row
+    # def get_max_columns(self, offset=0):
+    #     if self._initialized:
+    #         width = self._parent_tab.width()
+    #         max_columns = int((width + offset) / (ListAppLink.max_width()))
+    #         if max_columns == 0:
+    #             max_columns = 1
+    #         return max_columns
+    #     return 1  # always enable one row
 
     def add_app_link_to_tab(self, app_link: ListAppLink):
         """ To be called from a child AppLink """

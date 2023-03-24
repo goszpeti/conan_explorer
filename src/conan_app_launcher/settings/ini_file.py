@@ -157,7 +157,7 @@ class IniSettings(SettingsInterface):
                 f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
             try:
                 os.remove(str(self._ini_file_path))  # let an exeception to the user, file can't be deleted
-            except:
+            except Exception:
                 Logger().error(f"Settings: Can't delete ini file: {str(e)}.")
 
         # write file - to record defaults, if missing

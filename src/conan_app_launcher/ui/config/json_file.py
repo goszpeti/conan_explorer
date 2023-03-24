@@ -88,8 +88,8 @@ class JsonUiConfig(UiConfigInterface):
                 try:
                     json_app_config = json.load(fp)
                     jsonschema.validate(instance=json_app_config, schema=json_schema)
-                except Exception as error:
-                    Logger().error(f"UiConfig: Failed validating:\n{str(error)}")
+                except Exception as e:
+                    Logger().error(f"UiConfig: Failed validating:\n{str(e)}")
                     return UiConfig()
 
         # implement subsequent migration functions

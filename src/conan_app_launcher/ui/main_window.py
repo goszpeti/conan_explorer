@@ -186,8 +186,8 @@ class MainWindow(FluentWindow):
         for page in self.page_widgets.get_all_pages():
             try:
                 page.load_signal.emit()
-            except:
-                print("error")
+            except Exception as e:
+                Logger().error(f"Can't load page {type(page)}: {str(e)}")
         # loads the remotes in the search dialog
         self.conan_remotes_updated.emit()
 
