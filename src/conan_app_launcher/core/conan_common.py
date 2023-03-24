@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, TypeAlias
+from typing import TYPE_CHECKING, Any, Dict, List
 from abc import ABC, abstractmethod
 from conan_app_launcher import conan_version
 if TYPE_CHECKING:
@@ -7,9 +7,9 @@ if TYPE_CHECKING:
     from conan_app_launcher.core.conan_cache import ConanInfoCache
 else:
     try:
-        from typing import TypedDict, Protocol
+        from typing import TypedDict, Protocol, TypeAlias
     except ImportError:
-        from typing_extensions import TypedDict, Protocol
+        from typing_extensions import TypedDict, Protocol, TypeAlias
 
 if conan_version.startswith("1"):
     from conans.model.ref import ConanFileReference, PackageReference
