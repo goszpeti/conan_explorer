@@ -26,6 +26,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.load_signal.connect(self.load)
 
     def load(self):
+        assert self._base_signals
+        assert self._page_widgets
         self._pkg_sel_ctrl = PackageSelectionController(
             self, self._ui.package_select_view, self._ui.package_filter_edit,
             self.conan_pkg_selected, self._base_signals, self._page_widgets)

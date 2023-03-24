@@ -43,7 +43,7 @@ class RemotesTableModel(TreeModel):
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
             return None
-        item = index.internalPointer()
+        item: RemotesModelItem = index.internalPointer() # type: ignore
         if role == Qt.ItemDataRole.DisplayRole:
             try:
                 return item.data(index.column())

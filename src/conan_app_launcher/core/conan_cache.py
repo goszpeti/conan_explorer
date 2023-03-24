@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from conan_app_launcher import INVALID_CONAN_REF, INVALID_PATH, conan_version
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.conan_common import ConanFileReference, ConanUnifiedApi
+from conan_app_launcher.core.conan_common import ConanRef, ConanUnifiedApi
 
 class ConanInfoCache():
     """
@@ -17,7 +17,7 @@ class ConanInfoCache():
     if conan_version.startswith("2"):
         CACHE_FILE_NAME = "cacheV2.json"
 
-    def __init__(self, cache_dir: Path, local_refs: Optional[List[ConanFileReference]]=None):
+    def __init__(self, cache_dir: Path, local_refs: Optional[List[ConanRef]]=None):
         if not local_refs:
             local_refs = []
 
@@ -37,7 +37,7 @@ class ConanInfoCache():
         self._load()
         
 
-    def get_local_package_path(self, conan_ref: ConanFileReference) -> Path:
+    def get_local_package_path(self, conan_ref: ConanRef) -> Path:
         """ Return cached package path of a locally installed package. """
         conan_ref_str = ConanUnifiedApi.generate_canonical_ref(conan_ref)
         if not conan_ref_str or conan_ref_str == INVALID_CONAN_REF:
@@ -60,28 +60,28 @@ class ConanInfoCache():
         """ Return cached info on all available conan refs from the same ref name and user. """
         return self.get_similar_remote_pkg_refs(name, user) + self.get_similar_local_pkg_refs(name, user)
 
-    def get_similar_remote_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
+    def get_similar_remote_pkg_refs(self, name: str, user: str) -> List[ConanRef]:
         """ Return cached info on remotely available conan refs from the same ref name and user. """
         if not user:  # official pkgs have no user, substituted by _
             user = "_"
-        refs: List[ConanFileReference] = []
+        refs: List[ConanRef] = []
         with self._access_lock:
             if user == "*":  # find all refs with same name
                 name_pkgs = self._remote_packages.get(name, {})
                 for user in name_pkgs:
                     for version_channel in self._remote_packages.get(name, {}).get(user, []):
                         version, channel = version_channel.split("/")
-                        refs.append(ConanFileReference(name, version, user, channel))
+                        refs.append(ConanRef(name, version, user, channel))
             else:
                 user_pkgs = self._remote_packages.get(name, {}).get(user, [])
                 for version_channel in user_pkgs:
                     version, channel = version_channel.split("/")
-                    refs.append(ConanFileReference(name, version, user, channel))
+                    refs.append(ConanRef(name, version, user, channel))
         return refs
 
-    def get_similar_local_pkg_refs(self, name: str, user: str) -> List[ConanFileReference]:
+    def get_similar_local_pkg_refs(self, name: str, user: str) -> List[ConanRef]:
         """ Return cached info on locally available conan refs from the same ref name and user. """
-        refs: List[ConanFileReference] = []
+        refs: List[ConanRef] = []
         with self._access_lock:
             for ref in self._all_local_refs:
                 if ref.name == name:
@@ -98,7 +98,7 @@ class ConanInfoCache():
                 for user in self._remote_packages[name]:
                     for version_channel in self._remote_packages.get(name, {}).get(user, []):
                         version, channel = version_channel.split("/")
-                        refs.append(str(ConanFileReference(name, version, user, channel)))
+                        refs.append(str(ConanRef(name, version, user, channel)))
         return refs
 
     def get_all_local_refs(self) -> List[str]:
@@ -137,7 +137,7 @@ class ConanInfoCache():
                     local_refs.add(str(ref))
             return (local_refs, remote_refs)
 
-    def update_local_package_path(self, conan_ref: ConanFileReference, folder: Path):
+    def update_local_package_path(self, conan_ref: ConanRef, folder: Path):
         """ Update the cache with the path of a local package path. """
         with self._access_lock:
             if self._local_packages.get(str(conan_ref)) == str(folder):
@@ -146,7 +146,7 @@ class ConanInfoCache():
                 {ConanUnifiedApi.generate_canonical_ref(conan_ref): str(folder.as_posix())})
             self._save()
 
-    def invalidate_remote_package(self, conan_ref: ConanFileReference):
+    def invalidate_remote_package(self, conan_ref: ConanRef):
         """ Remove a package, wich was removed on the remote """
         version_channels = self._remote_packages.get(conan_ref.name, {}).get(conan_ref.user, [])
         invalid_version_channel = f"{conan_ref.version}/{conan_ref.channel}"
@@ -155,7 +155,7 @@ class ConanInfoCache():
             version_channels.remove(f"{conan_ref.version}/{conan_ref.channel}")
             self._save()
 
-    def update_remote_package_list(self, remote_packages: List[ConanFileReference], invalidate=False):
+    def update_remote_package_list(self, remote_packages: List[ConanRef], invalidate=False):
         """
         Update the cache with the info of several remote packages. 
         Invalidate option clears the cache.

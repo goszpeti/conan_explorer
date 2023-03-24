@@ -92,7 +92,7 @@ class PkgSelectModel(TreeModel):
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
             return None
-        item: PackageTreeItem = index.internalPointer()
+        item: PackageTreeItem = index.internalPointer() # type: ignore
         if role == Qt.ItemDataRole.ToolTipRole:
             if item.type == PROFILE_TYPE:
                 data = item.data(0)

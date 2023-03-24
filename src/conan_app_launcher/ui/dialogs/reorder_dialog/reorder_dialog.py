@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
-from PySide6.QtCore import QItemSelectionModel, QModelIndex
+from PySide6.QtCore import QItemSelectionModel, QModelIndex, QPersistentModelIndex
 from PySide6.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
 from PySide6.QtGui import QIcon
 
@@ -21,10 +21,10 @@ else:
 
 current_dir = Path(__file__).parent
 class ReorderingModel(Protocol):
-    def index(self, row, column, parent):
+    def index(self, row: int, column: int, parent: QModelIndex | QPersistentModelIndex) -> QModelIndex:
         ...
 
-    def columnCount(self, parent: QModelIndex = ...) -> int: ...
+    def columnCount(self, parent: QModelIndex | QPersistentModelIndex) -> int: ...
 
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
         ...

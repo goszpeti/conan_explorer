@@ -82,7 +82,7 @@ class SideSubMenu(ThemedWidget):
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
         label.setObjectName(gen_obj_name(name) + "_label")
         label.setMaximumHeight(30)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         label.setSizePolicy(sizePolicy)
         icon = None
         if asset_icon:
@@ -102,7 +102,8 @@ class SideSubMenu(ThemedWidget):
                 horizontal_layout = QHBoxLayout(frame)
                 horizontal_layout.addWidget(icon)
                 horizontal_layout.addWidget(label)
-                horizontal_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+                horizontal_layout.addSpacerItem(QSpacerItem(
+                    40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
                 layout.addLayout(horizontal_layout)
                 layout.setStretch(1, 1)
             else:

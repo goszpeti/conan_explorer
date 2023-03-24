@@ -182,7 +182,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
     def nativeEvent(self, eventType, message):  # override
         """ Platform native events """
-        retval, result = super(QMainWindow, self).nativeEvent(eventType, message)
+        retval = QMainWindow.nativeEvent(self, eventType, message)
         if str(eventType) == "b'windows_generic_MSG'":
             # message.setsize(8)
             msg = MSG.from_address(message.__int__())
@@ -203,8 +203,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         for submenu in self.ui.right_menu_top_content_sw.findChildren(SideSubMenu):
             submenu.reload_themed_icons()  # type: ignore
 
-    def move_window(self, a0: QMouseEvent):
-        event = a0
+    def move_window(self, event: QMouseEvent):
         # do nothing if the resize function is active
         if self.cursor().shape() != Qt.CursorShape.ArrowCursor:
             self.eventFilter(self, event)  # call this to be able to resize
@@ -439,7 +438,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         elif self._resize_direction == ResizeDirection.top_left:
             window.startSystemResize(Qt.Edge.TopEdge | Qt.Edge.LeftEdge)
 
-    def maximize_restore(self, a0=None):  # dummy arg to be used as an event slot
+    def maximize_restore(self, event=None):  # dummy arg to be used as an event slot
         if self.isMaximized():
             self.showNormal()
         else:

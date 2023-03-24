@@ -49,7 +49,7 @@ class PluginInterfaceV1(ThemedWidget):
         self._base_signals = base_signals
         self._page_widgets = page_widgets
         # self._base_signals.page_size_changed.emit(self)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setVerticalStretch(0)
         self.setSizePolicy(sizePolicy)
 

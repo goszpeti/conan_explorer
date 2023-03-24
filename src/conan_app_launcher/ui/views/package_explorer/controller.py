@@ -107,7 +107,7 @@ class PackageSelectionController(QObject):
         pkg_id = ""
         if pkg_info:
             pkg_id = pkg_info.get("id", "")
-        dialog = ConanRemoveDialog(self._view, conan_ref, pkg_id, self._conan_pkg_removed)
+        dialog = ConanRemoveDialog(self._view, conan_ref, pkg_id, self._base_signals.conan_pkg_removed)
         dialog.show()
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):

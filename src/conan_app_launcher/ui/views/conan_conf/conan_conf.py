@@ -9,7 +9,7 @@ from conan_app_launcher.core.system import delete_path, escape_venv
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
-from conans.client.cache.remote_registry import Remote
+from conan_app_launcher.core.conan_common import Remote
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QApplication, QInputDialog
@@ -21,7 +21,7 @@ from .controller import ConanRemoteController
 
 class ConanConfigView(PluginInterfaceV1):
 
-    load_signal = Signal()
+    load_signal = Signal() # type: ignore
 
     def __init__(self, parent: QWidget, base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent, base_signals)

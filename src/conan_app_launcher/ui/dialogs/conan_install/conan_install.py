@@ -7,7 +7,7 @@ from conan_app_launcher.ui.common import get_themed_asset_icon
 from PySide6.QtCore import QSize, Qt, SignalInstance
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem, QComboBox
 
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 
 
 class ConanInstallDialog(QDialog):
@@ -27,10 +27,11 @@ class ConanInstallDialog(QDialog):
         self._ui.button_box.accepted.connect(self.on_install)
         self._profiles = app.conan_api.get_profiles()
         options = []
+        conan_ref = ""
         try:
             conan_ref = conan_full_ref.split(":")[0]
             self._ref_info = app.conan_api.conan.info(
-                app.conan_api.generate_canonical_ref(ConanFileReference.loads(conan_ref)))
+                app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
             options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()
         except Exception as e:
             Logger().warning("Can't determine options of " + conan_ref)

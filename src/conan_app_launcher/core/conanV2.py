@@ -14,10 +14,9 @@ if TYPE_CHECKING:
 from conan.api.conan_api import ConanAPI, client_version
 from conans.client.cache.cache import ClientCache
 from conans.errors import ConanException
-from conans.model.recipe_ref import RecipeReference as ConanFileReference
-from conans.model.package_ref import PkgReference as PackageReference
 from conan_app_launcher import (INVALID_CONAN_REF, INVALID_PATH,
                                 user_save_path)
+from conan_app_launcher.core.conan_common import ConanPkg, ConanRef, PkgRef,  ConanUnifiedApi, LoggerWriter, create_key_value_pair_list
 
 class ConanApi(ConanUnifiedApi):
     """ Wrapper around ConanAPIV2 """
@@ -52,20 +51,20 @@ class ConanApi(ConanUnifiedApi):
     def get_profiles(self)-> List[str]:
         return self.conan.profiles.list()
 
-    def get_package_folder(self, conan_ref: ConanFileReference, package_id: str) -> Path:
+    def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """
         if not package_id:  # will give the base path ortherwise
             return Path(INVALID_PATH)
         try:
             latest_rev_ref = self.conan.list.latest_recipe_revision(conan_ref)
-            latest_rev_pkg = self.conan.list.latest_package_revision(PackageReference(latest_rev_ref, package_id))
+            latest_rev_pkg = self.conan.list.latest_package_revision(PkgRef(latest_rev_ref, package_id))
             assert latest_rev_pkg
             layout = self.client_cache.pkg_layout(latest_rev_pkg)
             return Path(layout.package())
         except Exception:  # gotta catch 'em all!
             return Path(INVALID_PATH)
 
-    def get_export_folder(self, conan_ref: ConanFileReference) -> Path:
+    def get_export_folder(self, conan_ref: ConanRef) -> Path:
         """ Get the export folder form a reference """
         return Path(self.conan.cache.export_path(conan_ref))
 
@@ -74,11 +73,11 @@ class ConanApi(ConanUnifiedApi):
 
     ### Local References and Packages ###
 
-    def get_all_local_refs(self) -> List[ConanFileReference]:
+    def get_all_local_refs(self) -> List[ConanRef]:
         """ Returns all locally installed conan references """
         return self.client_cache.all_refs()
 
-    def get_local_pkg_from_path(self, conan_ref: ConanFileReference, path: Path):
+    def get_local_pkg_from_path(self, conan_ref: ConanRef, path: Path):
         """ For reverse lookup - give info from path """
         found_package = None
         for package in self.get_local_pkgs_from_ref(conan_ref):
@@ -87,7 +86,7 @@ class ConanApi(ConanUnifiedApi):
                 break
         return found_package
 
-    def get_local_pkgs_from_ref(self, conan_ref: ConanFileReference) -> List[ConanPkg]:
+    def get_local_pkgs_from_ref(self, conan_ref: ConanRef) -> List[ConanPkg]:
         """ Returns all installed pkg ids for a reference. """
         result: List[ConanPkg] = []
         if conan_ref.user == "_":
@@ -106,7 +105,7 @@ class ConanApi(ConanUnifiedApi):
             result.append(pkg)
         return result
 
-    def get_local_pkg_from_id(self, pkg_ref: PackageReference) -> ConanPkg:
+    def get_local_pkg_from_id(self, pkg_ref: PkgRef) -> ConanPkg:
         """ Returns an installed pkg from reference and id """
         package = None
         for package in self.get_local_pkgs_from_ref(pkg_ref.ref):
@@ -115,12 +114,12 @@ class ConanApi(ConanUnifiedApi):
         return {"id": ""}
 
     @staticmethod
-    def generate_canonical_ref(conan_ref: ConanFileReference) -> str:
+    def generate_canonical_ref(conan_ref: ConanRef) -> str:
         if conan_ref.user is None and conan_ref.channel is None:
             return str(conan_ref) + "@_/_"
         return str(conan_ref)
 
-    def get_path_or_auto_install(self, conan_ref: ConanFileReference, conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
+    def get_path_or_auto_install(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
         """ Return the pkg_id and package folder of a conan reference 
         and auto-install it with the best matching package, if it is not available """
         if not update:
@@ -134,13 +133,13 @@ class ConanApi(ConanUnifiedApi):
         # return pkg_id, path
         return "", Path()
 
-    def get_best_matching_package_path(self, conan_ref: ConanFileReference, conan_options: Dict[str, str] = {}) -> Tuple[str, Path]:
+    def get_best_matching_package_path(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}) -> Tuple[str, Path]:
         package = self.find_best_local_package(conan_ref, conan_options)
         if package.get("id", ""):
             return package.get("id", ""), self.get_package_folder(conan_ref, package.get("id", ""))
         return "", Path(INVALID_PATH)
 
-    def find_best_local_package(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {}) -> ConanPkg:
+    def find_best_local_package(self, conan_ref: ConanRef, input_options: Dict[str, str] = {}) -> ConanPkg:
         """ Find a package in the local cache """
         packages = self.find_best_matching_packages(conan_ref, input_options)
         # What to if multiple ones exits? - for now simply take the first entry
@@ -159,7 +158,7 @@ class ConanApi(ConanUnifiedApi):
 
     ### Remote References and Packages ###
 
-    def search_query_in_remotes(self, query: str, remote_name="all") -> List["ConanFileReference"]:
+    def search_query_in_remotes(self, query: str, remote_name="all") -> List["ConanRef"]:
         """ Search in all remotes for a specific query. """
         search_results = []
         if remote_name == "all":
@@ -167,7 +166,7 @@ class ConanApi(ConanUnifiedApi):
         try:
             # no query possible with pattern
             for remote in self.get_remotes():
-                search_results: List["ConanFileReference"] = self.conan.search.recipes(query, remote=remote)
+                search_results: List["ConanRef"] = self.conan.search.recipes(query, remote=remote)
                 # .get("results", None)
         except Exception as e:
             Logger().error(f"Error while searching for recipe: {str(e)}")
@@ -177,7 +176,7 @@ class ConanApi(ConanUnifiedApi):
         search_results.sort()
         return search_results
 
-    def find_best_matching_packages(self, conan_ref: ConanFileReference, input_options: Dict[str, str] = {},
+    def find_best_matching_packages(self, conan_ref: ConanRef, input_options: Dict[str, str] = {},
                                     remote: Optional[str] = None) -> List[ConanPkg]:
         """
         This method tries to find the best matching packages either locally or in a remote,
@@ -263,7 +262,7 @@ class ConanApi(ConanUnifiedApi):
                 found_pkgs = same_comp_version_pkgs
         return found_pkgs
 
-    def get_packages_in_remote(self, conan_ref: ConanFileReference, remote: Optional[str], query=None) -> List[ConanPkg]:
+    def get_packages_in_remote(self, conan_ref: ConanRef, remote: Optional[str], query=None) -> List[ConanPkg]:
         found_pkgs: List[ConanPkg] = []
         try:
             from conan.api.model import ListPattern
