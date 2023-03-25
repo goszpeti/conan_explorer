@@ -21,7 +21,6 @@ Palette:
     font-family: {{FONT_FAMILY}};
 }
 
-
 /* Setup for specific widgets */
 
 QWidget#central_widget{
@@ -117,6 +116,7 @@ QToolButton:disabled {
     color: #5c5c5c;
 }
 
+/* Dialog styling */
 QDialog .QPushButton,
 QToolButton {
     border-radius: 5px;
@@ -143,6 +143,8 @@ QToolButton:checked {
     background-color: #5c5c5c;
 }
 
+/* Quicklaunch styling */ 
+
 AppGridView {
     background-color: #5c5c5c;
 }
@@ -161,6 +163,9 @@ ListAppLink {
     border-radius: 7px;
 }
 
+QLabel#app_name {
+    font: bold;
+}
 ClickableIcon {
     border-radius: 5px;
     background-color: transparent;
@@ -179,6 +184,7 @@ ClickableIcon:pressed {
     background-color: #5c5c5c;
 }
 
+/* About page */
 QLabel#about_label {
     background-color: #5c5c5c;
     border-radius: 5px;
@@ -229,7 +235,6 @@ QFrame#right_menu_frame {
     border: 1px solid #696969;
 }
 
-
 QLabel#right_menu_top_title_label {
     font-size: {{MAIN_FONT_SIZE + 2}}pt;
     padding: 3px;
@@ -247,16 +252,18 @@ QFrame#right_menu_frame QPushButton{
     padding: 3px;
     min-width: 30px;
 }
+
 QFrame#right_menu_frame QPushButton:hover{
     background-color: #696969;
-    /* #B7B7B7; */
 }
+
 QFrame#right_menu_frame QPushButton:pressed{
     padding-top: 5px;
     background-color: #5c5c5c;
 }
+
 QFrame#right_menu_frame QPushButton:checked{
-    background-color: #696969;
+    background-color: #808086;
 }
 
 QLabel#side_menu_title_label {
@@ -264,6 +271,9 @@ QLabel#side_menu_title_label {
     font-size: {{MAIN_FONT_SIZE + 1}}pt;
 }
 
+QPushButton#side_menu_title_button {
+    background-color: #717178;
+}
 
 /* Generic widgets */
 
