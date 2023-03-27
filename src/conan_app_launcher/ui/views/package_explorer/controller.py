@@ -94,7 +94,7 @@ class PackageSelectionController(QObject):
     def on_install_ref_requested(self):
         # TODO: select pkg id
         conan_ref = self.get_selected_conan_ref()
-        dialog = ConanInstallDialog(self._view, conan_ref, self._base_signals.conan_pkg_installed)
+        dialog = ConanInstallDialog(self._view, conan_ref, self._base_signals.conan_pkg_installed, lock_ref=True)
         dialog.show()
 
     def on_remove_ref_requested(self):

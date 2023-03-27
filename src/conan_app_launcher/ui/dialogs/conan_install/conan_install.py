@@ -11,7 +11,7 @@ from conan_app_launcher.core.conan_common import ConanRef
 
 
 class ConanInstallDialog(QDialog):
-    def __init__(self, parent: Optional[QWidget], conan_full_ref: str, pkg_installed_signal: Optional[SignalInstance] = None):
+    def __init__(self, parent: Optional[QWidget], conan_full_ref: str, pkg_installed_signal: Optional[SignalInstance] = None, lock_ref=False):
         """ conan_ref can be in full ref format with <ref>:<id> """
         super().__init__(parent)
         from .conan_install_ui import Ui_Dialog
@@ -24,6 +24,8 @@ class ConanInstallDialog(QDialog):
         self.setWindowIcon(icon)
         self._ui.conan_ref_line_edit.validator_enabled = False
         self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_auto_install_on_pkg_ref)
+        if lock_ref:
+            self._ui.conan_ref_line_edit.setEnabled(False)
         self._ui.button_box.accepted.connect(self.on_install)
         self._profiles = app.conan_api.get_profiles()
         options = []
@@ -57,15 +59,24 @@ class ConanInstallDialog(QDialog):
                 pass
         self._ui.options_widget.resizeColumnToContents(1)
         self._ui.options_widget.resizeColumnToContents(0)
-        self._ui.options_widget.itemDoubleClicked.connect(
-             self.onTreeWidgetItemDoubleClicked)  # 
-
+        self._ui.options_widget.itemDoubleClicked.connect(self.onTreeWidgetItemDoubleClicked)  
+        # disable profile and options on activating this
+        self._ui.auto_install_check_box.clicked.connect(self.on_auto_install_check)
         self.adjust_to_size()
 
-        # self._ui.auto_install_check_box - disable profile and options on activating this
 
     def onTreeWidgetItemDoubleClicked(self, item):
         self._ui.options_widget.openPersistentEditor(item, 1)
+
+    def on_auto_install_check(self):
+        enabled = True
+        if self._ui.auto_install_check_box.isChecked():
+            enabled = False
+        self._ui.profile_cbox.setEnabled(enabled)
+        self._ui.options_widget.setEnabled(enabled)
+        self._ui.additional_args_line_edit.setEnabled(enabled)
+        self._ui.update_check_box.setEnabled(enabled)
+
 
     def adjust_to_size(self):
         """ Expands the dialog to the length of the install ref text.
@@ -99,7 +110,7 @@ class ConanInstallDialog(QDialog):
         else:
             # settings from profile
             settings = app.conan_api.get_profile_settings(self._ui.profile_cbox.currentText())
-            # TODO options from selection
+            # options from selection
             options = self.get_user_options()
         conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": settings,
                                                     "options": options, "update": update_check_state,
@@ -115,7 +126,12 @@ class ConanInstallDialog(QDialog):
 
     def get_user_options(self):
         options = {}
+        self._ui.options_widget.updateEditorData()
         for i in range(0, self._ui.options_widget.topLevelItemCount()):
             item = self._ui.options_widget.topLevelItem(i)
-            options[item.data(0, 0)] = item.data(1, 0)
+            widget = self._ui.options_widget.itemWidget(item, 1)
+            value = item.data(1, 0)
+            if isinstance(widget, QComboBox):
+                value = widget.currentText()
+            options[item.data(0, 0)] = value
         return options

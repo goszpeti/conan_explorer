@@ -143,9 +143,11 @@ class ConanApi(ConanUnifiedApi):
         Returns the actual pkg_id and the package path.
         """
         pkg_id = ""
+        options_list = create_key_value_pair_list(conan_options)
+        settings_list = create_key_value_pair_list(conan_settings)
         try:
             infos = self.conan.install_reference(
-                conan_ref, settings=conan_settings, options=conan_options, update=update)
+                conan_ref, settings=settings_list, options=options_list, update=update)
             if not infos.get("error", True):
                 pkg_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
             return (pkg_id, self.get_package_folder(conan_ref, pkg_id))

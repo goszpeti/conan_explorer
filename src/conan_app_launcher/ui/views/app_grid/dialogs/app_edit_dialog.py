@@ -81,7 +81,7 @@ class AppEditDialog(QDialog):
         self._ui.icon_browse_button.setEnabled(True)
 
     def on_install_clicked(self):
-        dialog = ConanInstallDialog(self, self._ui.conan_ref_line_edit.text(), self._pkg_installed_signal)
+        dialog = ConanInstallDialog(self, self._ui.conan_ref_line_edit.text(), self._pkg_installed_signal, lock_ref=True)
         dialog.show()
 
     def on_executable_browse_clicked(self):

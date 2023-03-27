@@ -36,7 +36,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <widget class="QFrame" name="frame_2">
+    <widget class="QFrame" name="main_frame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -44,13 +44,6 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetMinAndMaxSize</enum>
-        </property>
-       </layout>
-      </item>
       <item row="0" column="1">
        <widget class="ConanRefLineEdit" name="conan_ref_line_edit">
         <property name="sizePolicy">
@@ -83,15 +76,11 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Profile</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QLabel" name="profile_label">
+        <property name="text">
+         <string>Profile</string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="1">
        <widget class="QComboBox" name="profile_cbox"/>
@@ -133,27 +122,20 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+       <widget class="QLabel" name="add_args_label">
+        <property name="text">
+         <string>Additional args</string>
+        </property>
+       </widget>
       </item>
-      <item row="4" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Additional args</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="lineEdit"/>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="additional_args_line_edit"/>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="frame">
+    <widget class="QFrame" name="bottom_frame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
