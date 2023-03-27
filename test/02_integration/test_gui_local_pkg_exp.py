@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 import platform
+from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL
 import pytest_check as check
 from time import sleep
@@ -93,6 +94,9 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
         6. Delete file
     4. Select another package view
     """
+    # disable editor to force open file
+    app.active_settings.set(FILE_EDITOR_EXECUTABLE, "UNKNOWN")
+
     from conan_app_launcher.app.logger import Logger
     from pytestqt.plugin import _qapp_instance
 
@@ -176,9 +180,9 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
 
     # test show conanfile
     Logger().debug("open show conanfile")
-    mocker.patch.object(lc, 'open_file')
+    mock_open_file = mocker.patch("conan_app_launcher.ui.common.open_file")
     lpe._pkg_sel_ctrl.on_show_conanfile_requested()
-    lc.open_file.assert_called_once_with(conanfile)
+    mock_open_file.assert_called_once_with(conanfile)
     sleep(1)
 
     #### Test file context menu functions ###

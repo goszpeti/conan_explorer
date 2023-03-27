@@ -1,4 +1,6 @@
 
+import os
+from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from test.conftest import TEST_REF
 
 import conan_app_launcher  # for mocker
@@ -24,6 +26,8 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     - Show conanfile call
     - Show in Local Package Explorer
     """
+    # disable editor to force open file
+    app.active_settings.set(FILE_EDITOR_EXECUTABLE, "UNKNOWN")
     from pytestqt.plugin import _qapp_instance
     cfr = ConanFileReference.loads(TEST_REF)
     # first with ref + id in constructor
@@ -103,8 +107,7 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
                                            TEST_REF + ":" + id, search_dialog._search_controller.conan_pkg_installed)
 
     # check show conanfile
-    mock_open_file = mocker.patch(
-        "conan_search.controller.open_file")
+    mock_open_file = mocker.patch("conan_app_launcher.ui.common.open_file")
     search_dialog._search_controller.on_show_conanfile_requested()
     conanfile = app.conan_api.get_export_folder(cfr) / "conanfile.py"
     mock_open_file.assert_called_with(conanfile)

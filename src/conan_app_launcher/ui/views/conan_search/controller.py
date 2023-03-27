@@ -2,7 +2,6 @@ import pprint
 from typing import TYPE_CHECKING, List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.core import open_file
 from conan_app_launcher.ui.common import AsyncLoader, show_conanfile
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from conan_app_launcher.core.conan_common import ConanRef
