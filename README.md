@@ -103,7 +103,7 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 
 ## Toolchain
 
-This project uses Python with Qt as a frontend using the PyQt integration.
+This project uses Python with Qt as a frontend using the PySide6 integration.
 An IDE configuration is available for VsCode.
 
 See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for Static Code Analysis.
@@ -111,7 +111,7 @@ See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for St
 ## Licenses of used libraries and code
 
 > **Warning** **Change of License to LGPL**
-> From version 2.0.0 the project will use the LGPL 3.0 license to cleanly comply with PySide6.
+> From version 2.0.0 the project will use the [LGPL 3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license to cleanly comply with PySide6.
 
 #### Resources
 * Conan Package Manager Icon by Conan.io developers under [MIT License](http://opensource.org/licenses/mit-license.php), via Wikimedia Commons
@@ -125,7 +125,7 @@ See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for St
 * Modified [Open Box icon](https://www.svgrepo.com/svg/383786/open-box-parcel) by wishforge.gamesunder [CC Attribution License](https://creativecommons.org/licenses/by/4.0/legalcode)</li>
 
 ##### PyPi runtime dependencies
-* PyQt6 by Riverbank Computing Limited, [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+* PySide6 by Qt, [LGPL V3](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 * Conan by JFrog LTD under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 * jsonschema by Julian Berman under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 * Using a modified version of Toggle Widget from QtWidgets (https://github.com/pythonguis/python-qtwidgets) under [MIT License](<http://opensource.org/licenses/mit-license.php>)
