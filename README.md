@@ -98,7 +98,7 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 * Pyside6 >= 6.4.0
 * conan >= 1.24.0
 
-> **Warning** **Deprecation of Python 3.6**  
+> **Warning** - **Deprecation of Python 3.6**  
 > From version 2.0.0 Python 3.6 will not be supported anymore, because end-of-life support has been reached.
 
 ## Toolchain
@@ -110,7 +110,7 @@ See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for St
 
 ## Licenses of used libraries and code
 
-> **Warning** **Change of License to LGPL**
+> **Warning** - **Change of License to LGPL**
 > From version 2.0.0 the project will use the [LGPL 3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license to cleanly comply with PySide6.
 
 #### Resources
