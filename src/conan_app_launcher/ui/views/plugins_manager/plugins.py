@@ -2,7 +2,8 @@ from typing import TYPE_CHECKING, Optional
 from conan_app_launcher import __version__
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QFileDialog, QMessageBox
-from conan_app_launcher.ui.plugin.plugins import PluginHandler, ThemedWidget
+from conan_app_launcher.ui.plugin.plugins import PluginHandler, ThemedWidget, PluginInterfaceV1
+
 from .controller import PluginController
 
 
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import BaseSignals
 
 
-class PluginsPage(ThemedWidget):
+class PluginsPage(PluginInterfaceV1):
 
     def __init__(self, parent: QWidget, plugin_handler: PluginHandler, base_signals: Optional["BaseSignals"] = None,
                  page_widgets: Optional["FluentWindow.PageStore"] = None):
