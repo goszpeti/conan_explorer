@@ -55,7 +55,7 @@ class ConanWorker():
         for worker_element in conan_elements:
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:
                 self._conan_install_queue.put((worker_element, info_callback))
-            self._conan_versions_queue.put((worker_element, info_callback))
+            # self._conan_versions_queue.put((worker_element, info_callback))
 
         # start getting versions info in a separate thread in a bundled way to get better performance
         self._start_install_worker()

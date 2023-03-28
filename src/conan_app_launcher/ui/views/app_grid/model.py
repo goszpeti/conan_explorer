@@ -168,7 +168,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
             _, pkg_path = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
 
-        self.set_package_folder(pkg_path)
+        self.set_package_folder(pkg_path, quiet=True)
 
     def register_update_callback(self, update_func: Callable):
         """ This callback can be used to update the gui after new conan info was received """
@@ -409,7 +409,7 @@ class UiAppLinkModel(UiAppLinkConfig):
                 Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
         return icon
 
-    def set_package_folder(self, package_folder: Path):
+    def set_package_folder(self, package_folder: Path, quiet=False):
         """
         Sets package path and all dependent paths.
         Use, when conan operation is done and paths can be validated.
@@ -420,9 +420,11 @@ class UiAppLinkModel(UiAppLinkConfig):
             if self.package_folder != package_folder:
                 app.conan_api.info_cache.update_local_package_path(self._conan_file_reference, package_folder)
         self.package_folder = package_folder
-        if not package_folder.exists():
-            Logger().warning(
-                f"Can't find any local package for <b>{str(self.conan_ref)}<b> and options {repr(self.conan_options)}")
+
+        if not quiet:
+            if not package_folder.exists():
+                Logger().info(
+                f"Can't find a package for <b>{str(self.conan_ref)}</b> and options {repr(self.conan_options)} <b>locally</b>")
 
         # call registered update callback
         if self._update_cbk_func:

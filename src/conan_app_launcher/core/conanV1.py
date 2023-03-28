@@ -344,7 +344,8 @@ class ConanApi(ConanUnifiedApi):
             packages = self.find_best_matching_packages(conan_ref, conan_options, remote.name)
             if packages:
                 return packages
-        Logger().info(f"Can't find a package '<b>{str(conan_ref)}</b>' with options {conan_options} in the remotes")
+        Logger().info(
+            f"Can't find a package '<b>{str(conan_ref)}</b>' with options {conan_options} in the <b>remotes</b>")
         return []
 
     def find_best_matching_packages(self, conan_ref: ConanRef, input_options: Dict[str, str] = {},
