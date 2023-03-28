@@ -8,7 +8,7 @@ from conan_app_launcher import PathLike, base_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import get_default_file_editor
 
-from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
+from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
                GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL,
                GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, VIEW_SECTION_NAME, WINDOW_SIZE,
                SettingsInterface)
@@ -19,6 +19,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
         LAST_CONFIG_FILE: "",
         FILE_EDITOR_EXECUTABLE: get_default_file_editor(),
         AUTO_INSTALL_QUICKLAUNCH_REFS: False,
+        DEFAULT_INSTALL_PROFILE: ""
     },
     VIEW_SECTION_NAME: {
         FONT_SIZE: 12,

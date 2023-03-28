@@ -17,9 +17,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QCheckBox,
     QComboBox, QDialog, QDialogButtonBox, QFormLayout,
-    QFrame, QHeaderView, QLabel, QLineEdit,
-    QSizePolicy, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
-    QWidget)
+    QFrame, QGridLayout, QHeaderView, QLabel,
+    QLineEdit, QPushButton, QSizePolicy, QTreeWidget,
+    QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 
@@ -36,8 +36,8 @@ class Ui_Dialog(object):
         Dialog.setMinimumSize(QSize(400, 100))
         Dialog.setSizeIncrement(QSize(0, 0))
         Dialog.setModal(False)
-        self.verticalLayout_2 = QVBoxLayout(Dialog)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.gridLayout = QGridLayout(Dialog)
+        self.gridLayout.setObjectName(u"gridLayout")
         self.main_frame = QFrame(Dialog)
         self.main_frame.setObjectName(u"main_frame")
         self.main_frame.setFrameShape(QFrame.StyledPanel)
@@ -73,7 +73,7 @@ class Ui_Dialog(object):
         sizePolicy1.setHeightForWidth(self.conan_opts_label.sizePolicy().hasHeightForWidth())
         self.conan_opts_label.setSizePolicy(sizePolicy1)
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.conan_opts_label)
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.conan_opts_label)
 
         self.options_widget = QTreeWidget(self.main_frame)
         self.options_widget.setObjectName(u"options_widget")
@@ -81,20 +81,25 @@ class Ui_Dialog(object):
         self.options_widget.setSortingEnabled(True)
         self.options_widget.setWordWrap(True)
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.options_widget)
+        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.options_widget)
 
         self.add_args_label = QLabel(self.main_frame)
         self.add_args_label.setObjectName(u"add_args_label")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.add_args_label)
+        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.add_args_label)
 
         self.additional_args_line_edit = QLineEdit(self.main_frame)
         self.additional_args_line_edit.setObjectName(u"additional_args_line_edit")
 
-        self.formLayout.setWidget(3, QFormLayout.FieldRole, self.additional_args_line_edit)
+        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.additional_args_line_edit)
+
+        self.set_default_install_profile_button = QPushButton(self.main_frame)
+        self.set_default_install_profile_button.setObjectName(u"set_default_install_profile_button")
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.set_default_install_profile_button)
 
 
-        self.verticalLayout_2.addWidget(self.main_frame)
+        self.gridLayout.addWidget(self.main_frame, 0, 0, 1, 1)
 
         self.bottom_frame = QFrame(Dialog)
         self.bottom_frame.setObjectName(u"bottom_frame")
@@ -134,7 +139,7 @@ class Ui_Dialog(object):
         self.verticalLayout.addWidget(self.button_box)
 
 
-        self.verticalLayout_2.addWidget(self.bottom_frame)
+        self.gridLayout.addWidget(self.bottom_frame, 1, 0, 1, 1)
 
 
         self.retranslateUi(Dialog)
@@ -153,6 +158,7 @@ class Ui_Dialog(object):
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("Dialog", u"Value", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("Dialog", u"Name", None));
         self.add_args_label.setText(QCoreApplication.translate("Dialog", u"Additional args", None))
+        self.set_default_install_profile_button.setText(QCoreApplication.translate("Dialog", u"Set this as default install profile", None))
         self.update_check_box.setText(QCoreApplication.translate("Dialog", u"Update (-u)", None))
         self.auto_install_check_box.setText(QCoreApplication.translate("Dialog", u"Automatically determine best matching package", None))
     # retranslateUi

@@ -3,6 +3,7 @@ from typing import Optional
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger  # using global module pattern
 from conan_app_launcher.core.conan_worker import ConanWorkerElement
+from conan_app_launcher.settings import DEFAULT_INSTALL_PROFILE
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from PySide6.QtCore import QSize, Qt, SignalInstance
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem, QComboBox
@@ -11,6 +12,8 @@ from conan_app_launcher.core.conan_common import ConanRef
 
 
 class ConanInstallDialog(QDialog):
+    MARK_AS_DEFAULT_INSTALL_PROFILE = " *"
+
     def __init__(self, parent: Optional[QWidget], conan_full_ref: str, pkg_installed_signal: Optional[SignalInstance] = None, lock_ref=False):
         """ conan_ref can be in full ref format with <ref>:<id> """
         super().__init__(parent)
@@ -19,15 +22,45 @@ class ConanInstallDialog(QDialog):
         self._ui.setupUi(self)
         self.pkg_installed_signal = pkg_installed_signal
 
-        # init search bar
+        # style
         icon = get_themed_asset_icon("icons/download_pkg.svg", True)
         self.setWindowIcon(icon)
+
+        # init search bar
         self._ui.conan_ref_line_edit.validator_enabled = False
         self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_auto_install_on_pkg_ref)
         if lock_ref:
             self._ui.conan_ref_line_edit.setEnabled(False)
+
+        # profiles
+        self.load_profiles()
+        self.load_options(conan_full_ref)
+      
+        # disable profile and options on activating this
+        self._ui.auto_install_check_box.clicked.connect(self.on_auto_install_check)
+        
+        self._ui.set_default_install_profile_button.clicked.connect(self.on_set_default_install_profile)
+
+        # button box
         self._ui.button_box.accepted.connect(self.on_install)
-        self._profiles = app.conan_api.get_profiles()
+        self.adjust_to_size()
+
+    def load_profiles(self):
+        self._ui.profile_cbox.clear()
+        profiles = app.conan_api.get_profiles()
+        default_profile = app.active_settings.get_string(DEFAULT_INSTALL_PROFILE)
+        default_index = profiles.index(default_profile)
+        if not default_index:
+            app.active_settings.set(DEFAULT_INSTALL_PROFILE, "default")
+        try:
+            profiles.pop(default_index)
+            profiles.insert(0, default_profile + self.MARK_AS_DEFAULT_INSTALL_PROFILE)
+        except Exception:
+            Logger().debug("Can't mark default install profile")
+        self._ui.profile_cbox.addItems(profiles)
+
+    def load_options(self, conan_full_ref: str):
+        # options table
         options = []
         conan_ref = ""
         try:
@@ -35,12 +68,11 @@ class ConanInstallDialog(QDialog):
             self._ref_info = app.conan_api.conan.info(
                 app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
             # TODO: CONAN V2
-            options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items() # type: ignore
+            options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()  # type: ignore
         except Exception:
             Logger().warning("Can't determine options of " + conan_ref)
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
         self._ui.conan_ref_line_edit.setText(conan_full_ref)
-        self._ui.profile_cbox.addItems(self._profiles)
         for name, value in options:
             item = QTreeWidgetItem(self._ui.options_widget)
             item.setData(0, 0, name)
@@ -59,11 +91,7 @@ class ConanInstallDialog(QDialog):
                 pass
         self._ui.options_widget.resizeColumnToContents(1)
         self._ui.options_widget.resizeColumnToContents(0)
-        self._ui.options_widget.itemDoubleClicked.connect(self.onTreeWidgetItemDoubleClicked)  
-        # disable profile and options on activating this
-        self._ui.auto_install_check_box.clicked.connect(self.on_auto_install_check)
-        self.adjust_to_size()
-
+        self._ui.options_widget.itemDoubleClicked.connect(self.onTreeWidgetItemDoubleClicked)
 
     def onTreeWidgetItemDoubleClicked(self, item):
         self._ui.options_widget.openPersistentEditor(item, 1)
@@ -109,7 +137,7 @@ class ConanInstallDialog(QDialog):
             auto_install_checked = True
         else:
             # settings from profile
-            settings = app.conan_api.get_profile_settings(self._ui.profile_cbox.currentText())
+            settings = app.conan_api.get_profile_settings(self.get_selected_profile())
             # options from selection
             options = self.get_user_options()
         conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": settings,
@@ -123,6 +151,16 @@ class ConanInstallDialog(QDialog):
             return
         self.pkg_installed_signal.emit(conan_ref, pkg_id)
 
+    def on_set_default_install_profile(self):
+        selected_profile = self.get_selected_profile()
+        app.active_settings.set(DEFAULT_INSTALL_PROFILE, selected_profile)
+        # re-select after clear
+        self.load_profiles()
+        self._ui.profile_cbox.setCurrentText(selected_profile + self.MARK_AS_DEFAULT_INSTALL_PROFILE)
+
+    def get_selected_profile(self) -> str:
+        selected_profile = self._ui.profile_cbox.currentText()
+        return selected_profile.rstrip(self.MARK_AS_DEFAULT_INSTALL_PROFILE)
 
     def get_user_options(self):
         options = {}

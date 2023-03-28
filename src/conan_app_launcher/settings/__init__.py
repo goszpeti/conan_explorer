@@ -15,6 +15,7 @@ PLUGINS_SECTION_NAME = "Plugins"
 LAST_CONFIG_FILE = "last_config_file"
 FILE_EDITOR_EXECUTABLE = "file_editor"
 AUTO_INSTALL_QUICKLAUNCH_REFS = "auto_install_quicklaunch"
+DEFAULT_INSTALL_PROFILE = "default_install_profile"
 
 FONT_SIZE = "font_size"
 GUI_STYLE = "style"

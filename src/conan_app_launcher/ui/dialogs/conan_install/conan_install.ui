@@ -34,8 +34,8 @@
   <property name="modal">
    <bool>false</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
-   <item>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
     <widget class="QFrame" name="main_frame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -85,7 +85,7 @@
       <item row="1" column="1">
        <widget class="QComboBox" name="profile_cbox"/>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="conan_opts_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
@@ -98,7 +98,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QTreeWidget" name="options_widget">
         <property name="editTriggers">
          <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
@@ -121,20 +121,27 @@
         </column>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="add_args_label">
         <property name="text">
          <string>Additional args</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QLineEdit" name="additional_args_line_edit"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="set_default_install_profile_button">
+        <property name="text">
+         <string>Set this as default install profile</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
    </item>
-   <item>
+   <item row="1" column="0">
     <widget class="QFrame" name="bottom_frame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>

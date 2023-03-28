@@ -232,9 +232,9 @@ def ConanServer():
 
 @pytest.fixture(autouse=True)
 def test_output():
-    print("********************** Starting TEST ********************************")
+    print("\n********************** Starting TEST ********************************")
     yield
-    print("********************** Finished TEST ********************************")
+    print("\n********************** Finished TEST ********************************")
 
 @pytest.fixture
 def app_qt_fixture(qtbot):

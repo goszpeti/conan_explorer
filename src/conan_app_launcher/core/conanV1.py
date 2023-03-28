@@ -84,6 +84,12 @@ class ConanApi(ConanUnifiedApi):
             return {}
         return dict(profile.settings)
     
+    def get_profiles_with_settings(self) -> Dict[str, Dict[str, str]]:
+        profiles_dict = {}
+        for profile in self.get_profiles():
+            profiles_dict[profile] = self.get_profile_settings(profile)
+        return profiles_dict
+
     def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]: # user_name, autheticated
         user_info = self.conan.users_list(remote_name).get("remotes", {})
         if len(user_info) < 1:
