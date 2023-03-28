@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Tuple
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
@@ -69,7 +69,7 @@ class PackageSelectionController(QObject):
         source_item: PackageTreeItem = model.mapToSource(view_index).internalPointer() # type: ignore
         return source_item
     
-    def get_selected_ref_with_pkg_id(self) -> tuple[str, str]:
+    def get_selected_ref_with_pkg_id(self) -> Tuple[str, str]:
         conan_ref = self.get_selected_conan_ref()
         pkg_info = self.get_selected_conan_pkg_info()
         pkg_id = ""
