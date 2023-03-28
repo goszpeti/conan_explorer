@@ -35,7 +35,7 @@ except PackageNotFoundError: # pragma: no cover
 ICON_SIZE = 64 # Icon size (width and height) in pixels on an Applink
 MAX_FONT_SIZE = 16
 MIN_FONT_SIZE = 8
-INVALID_PATH = "<Unknown>"
+INVALID_PATH = "Unknown"
 INVALID_CONAN_REF = "Invalid/0.0.1@NA/NA" # used to indicate a conan reference is invalid
 SETTINGS_FILE_NAME = "settings" # for storing application settings
 LEGACY_SETTINGS_FILE_NAME = ".cal_config"  # for backwards compatibility till 1.4.1
