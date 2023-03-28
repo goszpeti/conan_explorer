@@ -28,22 +28,36 @@ class ConanInstallDialog(QDialog):
 
         # init search bar
         self._ui.conan_ref_line_edit.validator_enabled = False
-        self._ui.conan_ref_line_edit.textChanged.connect(self.toggle_auto_install_on_pkg_ref)
+        self._ui.conan_ref_line_edit.setText(conan_full_ref)
         if lock_ref:
             self._ui.conan_ref_line_edit.setEnabled(False)
 
+        # button box
+        self._ui.button_box.accepted.connect(self.on_install)
+        self.adjust_to_size()
+
+        # hide items, when it has a ref:
+        if ":" in conan_full_ref:
+            self.hide_config_elements()
+            self.setFixedHeight(150)
+            return
         # profiles
         self.load_profiles()
         self.load_options(conan_full_ref)
       
         # disable profile and options on activating this
         self._ui.auto_install_check_box.clicked.connect(self.on_auto_install_check)
-        
         self._ui.set_default_install_profile_button.clicked.connect(self.on_set_default_install_profile)
 
-        # button box
-        self._ui.button_box.accepted.connect(self.on_install)
-        self.adjust_to_size()
+    def hide_config_elements(self):
+        self._ui.profile_cbox.hide()
+        self._ui.profile_label.hide()
+        self._ui.set_default_install_profile_button.hide()
+        self._ui.conan_opts_label.hide()
+        self._ui.options_widget.hide()
+        self._ui.conan_opts_label.hide()
+        self._ui.line.hide()
+        self._ui.auto_install_check_box.hide()
 
     def load_profiles(self):
         self._ui.profile_cbox.clear()
@@ -72,7 +86,6 @@ class ConanInstallDialog(QDialog):
         except Exception:
             Logger().warning("Can't determine options of " + conan_ref)
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
-        self._ui.conan_ref_line_edit.setText(conan_full_ref)
         for name, value in options:
             item = QTreeWidgetItem(self._ui.options_widget)
             item.setData(0, 0, name)
@@ -102,9 +115,7 @@ class ConanInstallDialog(QDialog):
             enabled = False
         self._ui.profile_cbox.setEnabled(enabled)
         self._ui.options_widget.setEnabled(enabled)
-        self._ui.additional_args_line_edit.setEnabled(enabled)
         self._ui.update_check_box.setEnabled(enabled)
-
 
     def adjust_to_size(self):
         """ Expands the dialog to the length of the install ref text.
@@ -117,12 +128,6 @@ class ConanInstallDialog(QDialog):
         if width < 250:
             width = 250
         self.resize(QSize(width + h_offset + 15, self.height()))  # 15 margin
-
-    def toggle_auto_install_on_pkg_ref(self, text: str):
-        if ":" in text:  # if a package id is given, auto install does not make sense
-            self._ui.auto_install_check_box.setEnabled(False)
-        else:
-            self._ui.auto_install_check_box.setEnabled(True)
 
     def on_install(self):
         ref_text = self._ui.conan_ref_line_edit.text()

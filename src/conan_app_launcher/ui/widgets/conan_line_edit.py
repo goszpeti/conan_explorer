@@ -40,6 +40,14 @@ class ConanRefLineEdit(QLineEdit):
         self.completion_finished.connect(self.completer().complete)
         self.textChanged.connect(self.on_text_changed)
 
+    def setEnabled(self, enabled: bool): # override:
+        # apply grey color to text, when disabled manually
+        if enabled:
+            self.setStyleSheet(f"") # remove grey color
+        else:
+            self.setStyleSheet(f"color: grey;")
+        super().setEnabled(enabled)
+
     def showEvent(self, event):
         combined_refs = set()
         combined_refs.update(app.conan_api.info_cache.get_all_local_refs())

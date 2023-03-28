@@ -69,13 +69,14 @@ class ThemedWidget(QWidget):
                              ThemedWidget.IconInfo] = {}  # widget: {name, size} for re-theming
 
     def set_themed_icon(self, widget: Union[CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol],
-                        asset_path: str, size: Optional[Tuple[int, int]] = None, force_dark_mode=False):
+                        asset_path: str, size: Optional[Tuple[int, int]] = None,
+                        force_dark_mode=False, force_light_mode=False):
         """ 
         Applies an icon to a widget and inverts it, when theming is toggled to dark mode.
         For that reload_themed_icons must be called.
         Size only applies for pixmaps.
         """
-        icon = get_themed_asset_icon(asset_path, force_dark_mode=force_dark_mode)
+        icon = get_themed_asset_icon(asset_path, force_light_mode, force_dark_mode)
         if isinstance(widget, CanSetIconWidgetProtocol):
             widget.setIcon(icon)
         elif isinstance(widget, CanSetPixmapWidgetProtocol):

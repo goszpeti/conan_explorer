@@ -41,7 +41,6 @@ class ConanSearchView(PluginInterfaceV1):
         self._ui.search_button.clicked.connect(self._search_controller.on_search)
         self._ui.search_button.setEnabled(False)
         self._ui.install_button.clicked.connect(self._search_controller.on_install_button)
-        self._ui.search_button.setEnabled(True)
         self._ui.search_line.validator_enabled = False
         self._ui.search_line.textChanged.connect(self._enable_search_button)
         for key in ("Enter", "Return",):
@@ -56,7 +55,8 @@ class ConanSearchView(PluginInterfaceV1):
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
-        self.set_themed_icon(self._ui.search_button, "icons/search.svg", size=(20, 20))
+        # force_light_mode for disabled icon in dark mode
+        self.set_themed_icon(self._ui.search_button, "icons/search.svg", size=(20, 20), force_light_mode=True)
         self.set_themed_icon(self._ui.install_button, "icons/download_pkg.svg", size=(20, 20))
 
         self._ui.remote_list.setMinimumHeight(0)
@@ -91,8 +91,10 @@ class ConanSearchView(PluginInterfaceV1):
         """ Enable search button from minimum 3 characters onwards"""
         if len(self._ui.search_line.text()) > 2:
             self._ui.search_button.setEnabled(True)
+            self.set_themed_icon(self._ui.search_button, "icons/search.svg", size=(20, 20))
         else:
             self._ui.search_button.setEnabled(False)
+            self.set_themed_icon(self._ui.search_button, "icons/search.svg", size=(20, 20), force_light_mode=True)
 
     def _init_pkg_context_menu(self):
         """ Initalize context menu with all actions """

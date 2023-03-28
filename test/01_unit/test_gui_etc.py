@@ -65,7 +65,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
 
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
-
+    
     conan_install_dialog = ConanInstallDialog(root_obj, TEST_REF + ":" + id)
     conan_install_dialog._ui.auto_install_check_box.setCheckState(Qt.CheckState.Checked)
     app_qt_fixture.addWidget(root_obj)
@@ -96,6 +96,8 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
                                                 "options": {}, "update": True, "auto_install": False}
     conan_install_dialog.close()
+
+    
 
 
 def test_about_dialog(app_qt_fixture, base_fixture):

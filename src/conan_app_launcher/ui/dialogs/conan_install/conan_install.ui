@@ -85,6 +85,13 @@
       <item row="1" column="1">
        <widget class="QComboBox" name="profile_cbox"/>
       </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="set_default_install_profile_button">
+        <property name="text">
+         <string>Set this as default install profile</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="0">
        <widget class="QLabel" name="conan_opts_label">
         <property name="sizePolicy">
@@ -94,7 +101,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Conan Options&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Options&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -121,20 +128,10 @@
         </column>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="add_args_label">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>Additional args</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="additional_args_line_edit"/>
-      </item>
-      <item row="2" column="1">
-       <widget class="QPushButton" name="set_default_install_profile_button">
-        <property name="text">
-         <string>Set this as default install profile</string>
+         <string>Reference</string>
         </property>
        </widget>
       </item>

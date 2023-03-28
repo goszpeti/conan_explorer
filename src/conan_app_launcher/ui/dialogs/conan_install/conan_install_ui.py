@@ -18,8 +18,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QCheckBox,
     QComboBox, QDialog, QDialogButtonBox, QFormLayout,
     QFrame, QGridLayout, QHeaderView, QLabel,
-    QLineEdit, QPushButton, QSizePolicy, QTreeWidget,
-    QTreeWidgetItem, QVBoxLayout, QWidget)
+    QPushButton, QSizePolicy, QTreeWidget, QTreeWidgetItem,
+    QVBoxLayout, QWidget)
 
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 
@@ -65,6 +65,11 @@ class Ui_Dialog(object):
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.profile_cbox)
 
+        self.set_default_install_profile_button = QPushButton(self.main_frame)
+        self.set_default_install_profile_button.setObjectName(u"set_default_install_profile_button")
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.set_default_install_profile_button)
+
         self.conan_opts_label = QLabel(self.main_frame)
         self.conan_opts_label.setObjectName(u"conan_opts_label")
         sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
@@ -83,20 +88,10 @@ class Ui_Dialog(object):
 
         self.formLayout.setWidget(3, QFormLayout.FieldRole, self.options_widget)
 
-        self.add_args_label = QLabel(self.main_frame)
-        self.add_args_label.setObjectName(u"add_args_label")
+        self.label = QLabel(self.main_frame)
+        self.label.setObjectName(u"label")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.add_args_label)
-
-        self.additional_args_line_edit = QLineEdit(self.main_frame)
-        self.additional_args_line_edit.setObjectName(u"additional_args_line_edit")
-
-        self.formLayout.setWidget(4, QFormLayout.FieldRole, self.additional_args_line_edit)
-
-        self.set_default_install_profile_button = QPushButton(self.main_frame)
-        self.set_default_install_profile_button.setObjectName(u"set_default_install_profile_button")
-
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.set_default_install_profile_button)
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
 
 
         self.gridLayout.addWidget(self.main_frame, 0, 0, 1, 1)
@@ -153,12 +148,12 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Conan Install", None))
         self.conan_ref_line_edit.setText("")
         self.profile_label.setText(QCoreApplication.translate("Dialog", u"Profile", None))
-        self.conan_opts_label.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p>Conan Options</p></body></html>", None))
+        self.set_default_install_profile_button.setText(QCoreApplication.translate("Dialog", u"Set this as default install profile", None))
+        self.conan_opts_label.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p>Options</p></body></html>", None))
         ___qtreewidgetitem = self.options_widget.headerItem()
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("Dialog", u"Value", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("Dialog", u"Name", None));
-        self.add_args_label.setText(QCoreApplication.translate("Dialog", u"Additional args", None))
-        self.set_default_install_profile_button.setText(QCoreApplication.translate("Dialog", u"Set this as default install profile", None))
+        self.label.setText(QCoreApplication.translate("Dialog", u"Reference", None))
         self.update_check_box.setText(QCoreApplication.translate("Dialog", u"Update (-u)", None))
         self.auto_install_check_box.setText(QCoreApplication.translate("Dialog", u"Automatically determine best matching package", None))
     # retranslateUi

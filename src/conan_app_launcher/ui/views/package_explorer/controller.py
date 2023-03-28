@@ -68,6 +68,14 @@ class PackageSelectionController(QObject):
         model: PackageFilter = view_index.model()  # type: ignore
         source_item: PackageTreeItem = model.mapToSource(view_index).internalPointer() # type: ignore
         return source_item
+    
+    def get_selected_ref_with_pkg_id(self) -> tuple[str, str]:
+        conan_ref = self.get_selected_conan_ref()
+        pkg_info = self.get_selected_conan_pkg_info()
+        pkg_id = ""
+        if pkg_info:
+            pkg_id = pkg_info.get("id", "")
+        return conan_ref, pkg_id
 
     def get_selected_conan_ref(self) -> str:
         # no need to map from postition, since rightclick selects a single item
@@ -92,20 +100,18 @@ class PackageSelectionController(QObject):
         QApplication.clipboard().setText(conan_ref)
 
     def on_install_ref_requested(self):
-        # TODO: select pkg id
-        conan_ref = self.get_selected_conan_ref()
+        conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
+        if not conan_ref:
+            return
+        if pkg_id:
+            conan_ref += ":" + pkg_id
         dialog = ConanInstallDialog(self._view, conan_ref, self._base_signals.conan_pkg_installed, lock_ref=True)
         dialog.show()
 
     def on_remove_ref_requested(self):
-        source_item = self.get_selected_pkg_source_item()
-        if not source_item:
+        conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
+        if not conan_ref:
             return
-        conan_ref = self.get_selected_conan_ref()
-        pkg_info = self.get_selected_conan_pkg_info()
-        pkg_id = ""
-        if pkg_info:
-            pkg_id = pkg_info.get("id", "")
         dialog = ConanRemoveDialog(self._view, conan_ref, pkg_id, self._base_signals.conan_pkg_removed)
         dialog.show()
 

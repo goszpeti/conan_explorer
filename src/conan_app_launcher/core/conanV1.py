@@ -151,11 +151,15 @@ class ConanApi(ConanUnifiedApi):
         pkg_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
+        Logger().info(
+            f"Installing '<b>{str(conan_ref)}</b>' with settings: {str(settings_list)}, " \
+            f"options: {str(options_list)} and update={update}\n")
         try:
             infos = self.conan.install_reference(
                 conan_ref, settings=settings_list, options=options_list, update=update)
             if not infos.get("error", True):
                 pkg_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
+            Logger().info(f"Installation of '<b>{str(conan_ref)}</b>' finished")
             return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
         except ConanException as error:
             Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
@@ -170,10 +174,12 @@ class ConanApi(ConanUnifiedApi):
         options_list = create_key_value_pair_list(package.get("options", {}))
         settings_list = create_key_value_pair_list(package.get("settings", {}))
         Logger().info(
-            f"Installing '<b>{str(conan_ref)}</b>':{package_id} with settings: {str(settings_list)}, options: {str(options_list)}")
+            f"Installing '<b>{str(conan_ref)}</b>':{package_id} with settings: {str(settings_list)}, " \
+            f"options: {str(options_list)} and update={update}\n")
         try:
             self.conan.install_reference(conan_ref, update=update,
                                          settings=settings_list, options=options_list)
+            Logger().info(f"Installation of '<b>{str(conan_ref)}</b>' finished")
             # Update cache with this package
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, package.get("id", "")))
