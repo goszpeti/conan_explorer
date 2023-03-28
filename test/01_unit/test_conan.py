@@ -11,7 +11,7 @@ from conan_app_launcher.core.conan_common import create_key_value_pair_list
 from conan_app_launcher.core.conan_worker import (ConanWorker,
                                                   ConanWorkerElement)
 from conan_app_launcher.core.conan_cleanup import  ConanCleanup
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 
 
 def test_conan_profile_name_alias_builder():
@@ -73,7 +73,7 @@ def test_conan_find_remote_pkg(base_fixture):
     conan = ConanApi().init_api()
     default_settings = dict(conan.client_cache.default_profile.settings)
 
-    pkgs = conan.get_matching_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"shared": "True"})
+    pkgs = conan.get_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"shared": "True"})
     assert len(pkgs) > 0
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
@@ -90,7 +90,7 @@ def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi().init_api()
-    pkg = conan.get_matching_package_in_remotes(ConanFileReference.loads(TEST_REF),  {"BogusOption": "True"})
+    pkg = conan.get_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"BogusOption": "True"})
     assert not pkg
 
 
@@ -101,7 +101,7 @@ def test_conan_find_local_pkg(base_fixture):
     """
     os.system(f"conan install {TEST_REF} -u")
     conan = ConanApi().init_api()
-    pkgs = conan.find_best_matching_packages(ConanFileReference.loads(TEST_REF))
+    pkgs = conan.find_best_matching_packages(ConanRef.loads(TEST_REF))
     assert len(pkgs) == 1
 
 
@@ -114,10 +114,10 @@ def test_get_path_or_install(base_fixture):
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi().init_api()
     # Gets package path / installs the package
-    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF))
+    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
     # check again for already installed package
-    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF))
+    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
 
 
@@ -129,7 +129,7 @@ def test_get_path_or_install_manual_options(capsys):
     # This package has an option "shared" and is fairly small.
     os.system(f"conan remove {TEST_REF} -f")
     conan = ConanApi().init_api()
-    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(TEST_REF), {"shared": "True"})
+    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF), {"shared": "True"})
     if platform.system() == "Windows":
         assert (package_folder / "bin" / "python.exe").is_file()
     elif platform.system() == "Linux":
@@ -146,7 +146,7 @@ def test_install_with_any_settings(mocker, capfd):
     # Create the "any" package
     conan = ConanApi().init_api()
     assert conan.install_package(
-        ConanFileReference.loads(TEST_REF),
+        ConanRef.loads(TEST_REF),
         {'id': '325c44fdb228c32b3de52146f3e3ff8d94dddb60', 'options': {}, 'settings': {
             'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
     captured = capfd.readouterr()
@@ -166,7 +166,7 @@ def test_compiler_no_settings(base_fixture, capfd):
 
     conan = ConanApi().init_api()
 
-    id, package_folder = conan.get_path_or_auto_install(ConanFileReference.loads(ref))
+    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(ref))
     assert (package_folder / "bin").is_dir()
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
@@ -214,8 +214,8 @@ def test_create_key_value_list(base_fixture):
 def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi().init_api()
-    res = conan.search_recipe_alternatives_in_remotes(ConanFileReference.loads(TEST_REF))
-    ref = ConanFileReference.loads(TEST_REF)  # need to convert @_/_
+    res = conan.search_recipe_alternatives_in_remotes(ConanRef.loads(TEST_REF))
+    ref = ConanRef.loads(TEST_REF)  # need to convert @_/_
     assert str(ref) in str(res)
 
 

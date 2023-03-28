@@ -5,7 +5,7 @@ from distutils.file_util import copy_file
 from pathlib import Path
 
 from conan_app_launcher.ui.config.json_file import JsonUiConfig
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 from test.conftest import PathSetup
 
 
@@ -120,7 +120,7 @@ def check_config(ref_dict, test_dict):
             else:
                 try:  # test if it is conanref in string form.
                     # We don't care if it is written differently, as long as it is the same object
-                    assert ConanFileReference.loads(test_dict.get(key)) == ConanFileReference.loads(ref_dict.get(key))
+                    assert ConanRef.loads(test_dict.get(key)) == ConanRef.loads(ref_dict.get(key))
                 except Exception:
                     assert test_dict.get(key) == ref_dict.get(key)
         else:

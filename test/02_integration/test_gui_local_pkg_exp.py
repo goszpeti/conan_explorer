@@ -11,7 +11,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 
 from PySide6 import QtCore, QtWidgets
@@ -28,7 +28,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     without id and cancel does nothing"""
     from pytestqt.plugin import _qapp_instance
 
-    cfr = ConanFileReference.loads(TEST_REF_OFFICIAL)
+    cfr = ConanRef.loads(TEST_REF_OFFICIAL)
     os.system(f"conan install {TEST_REF_OFFICIAL}")
 
     # precheck, that the package is found
@@ -100,7 +100,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     from conan_app_launcher.app.logger import Logger
     from pytestqt.plugin import _qapp_instance
 
-    cfr = ConanFileReference.loads(TEST_REF)
+    cfr = ConanRef.loads(TEST_REF)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     assert id
     assert pkg_path.exists()

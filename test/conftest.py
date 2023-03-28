@@ -23,7 +23,7 @@ from conan_app_launcher.core import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.ui.common import remove_qt_logger
 from conan_app_launcher.ui.main_window import MainWindow
 from conan_app_launcher.settings import *
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 from conan_app_launcher import conan_version
 
 exe_ext = ".exe" if platform.system() == "Windows" else ""
@@ -94,7 +94,7 @@ def check_if_process_running(process_name, cmd_contains=[], kill=False, cmd_narg
 
 
 def create_test_ref(ref, paths, create_params=[""], update=False):
-    native_ref = str(ConanFileReference.loads(ref))
+    native_ref = str(ConanRef.loads(ref))
     conan = ConanApi()
     conan.init_api()
     
@@ -117,7 +117,7 @@ def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
         os.system(f"conan create {conanfile} {ref} {create_params}")
         os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
     elif conan_version.startswith("2"):
-        cfr = ConanFileReference.loads(ref)
+        cfr = ConanRef.loads(ref)
         os.system(f"conan create {conanfile} --name={cfr.name} --version={cfr.version} --user={cfr.user} --channel={cfr.channel} {create_params}")
         os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force")
 

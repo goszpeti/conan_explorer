@@ -6,7 +6,7 @@ from test.conftest import TEST_REF
 import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
 from conan_app_launcher.ui.main_window import MainWindow
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 from PySide6 import QtCore
 from conan_app_launcher.ui.views import ConanSearchView
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
@@ -29,7 +29,7 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     # disable editor to force open file
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, "UNKNOWN")
     from pytestqt.plugin import _qapp_instance
-    cfr = ConanFileReference.loads(TEST_REF)
+    cfr = ConanRef.loads(TEST_REF)
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     main_window = MainWindow(_qapp_instance)

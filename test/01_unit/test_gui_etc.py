@@ -18,7 +18,7 @@ from conan_app_launcher.ui.views import AboutPage
 from conan_app_launcher.ui.dialogs import show_bug_reporting_dialog
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -61,7 +61,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     app.conan_api.init_api()
 
     root_obj = QtWidgets.QWidget()
-    cfr = ConanFileReference.loads(TEST_REF)
+    cfr = ConanRef.loads(TEST_REF)
 
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)

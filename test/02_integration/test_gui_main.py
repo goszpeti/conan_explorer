@@ -21,7 +21,7 @@ from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.views import AboutPage
 import conan_app_launcher.app as app  # using global module pattern
 
-from conan_app_launcher.core.conan_common import ConanFileReference
+from conan_app_launcher.core.conan_common import ConanRef
 from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -135,12 +135,12 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     ret = os.system(f"conan create {conanfile} {ref}")
     assert ret == 0
 
-    pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
+    pkg = conan.find_best_local_package(ConanRef.loads(ref))
     remotes = conan.get_remotes()
     Logger().debug("Remotes:" + repr(remotes))
     time.sleep(1)
     assert pkg["id"], f"Package: {pkg}"
-    pkg_dir_to_delete = conan.get_package_folder(ConanFileReference.loads(ref), pkg["id"])
+    pkg_dir_to_delete = conan.get_package_folder(ConanRef.loads(ref), pkg["id"])
 
     real_path_file = pkg_dir_to_delete / ".." / CONAN_REAL_PATH
     with open(str(real_path_file), "r+") as fp:
@@ -162,10 +162,10 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     if ret.stdout:
        output += ret.stdout.decode("utf-8")
     assert ret.returncode == 0, output
-    exp_folder = conan.get_export_folder(ConanFileReference.loads(ref))
-    pkg = conan.find_best_local_package(ConanFileReference.loads(ref))
+    exp_folder = conan.get_export_folder(ConanRef.loads(ref))
+    pkg = conan.find_best_local_package(ConanRef.loads(ref))
     pkg_cache_folder = os.path.abspath(os.path.join(exp_folder, "..", "package", pkg["id"]))
-    pkg_dir = conan.get_package_folder(ConanFileReference.loads(ref), pkg["id"])
+    pkg_dir = conan.get_package_folder(ConanRef.loads(ref), pkg["id"])
     rmtree(pkg_dir)
 
     paths_to_delete = ConanCleanup(conan).get_cleanup_cache_paths()
