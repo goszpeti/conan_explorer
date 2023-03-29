@@ -45,7 +45,7 @@ class RemoteLoginDialog(QDialog):
             item.setCheckState(Qt.CheckState.Checked)
         self.setWindowIcon(get_themed_asset_icon("icons/login.svg", True))
         self._ui.button_box.accepted.connect(self.save)
-
+        self.adjustSize()
 
     def save(self):
         """ Is triggered on OK and tries to login while showing a loading dialog """

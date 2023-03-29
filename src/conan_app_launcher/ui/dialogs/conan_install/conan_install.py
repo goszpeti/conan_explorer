@@ -39,7 +39,7 @@ class ConanInstallDialog(QDialog):
         # hide items, when it has a ref:
         if ":" in conan_full_ref:
             self.hide_config_elements()
-            self.setFixedHeight(150)
+            self.setFixedHeight(175)
             return
         # profiles
         self.load_profiles()
@@ -63,12 +63,16 @@ class ConanInstallDialog(QDialog):
         self._ui.profile_cbox.clear()
         profiles = app.conan_api.get_profiles()
         default_profile = app.active_settings.get_string(DEFAULT_INSTALL_PROFILE)
-        default_index = profiles.index(default_profile)
+        try:
+            default_index = profiles.index(default_profile)
+        except Exception:
+            default_index = None
         if not default_index:
             app.active_settings.set(DEFAULT_INSTALL_PROFILE, "default")
         try:
-            profiles.pop(default_index)
-            profiles.insert(0, default_profile + self.MARK_AS_DEFAULT_INSTALL_PROFILE)
+            if default_index is not None:
+                profiles.pop(default_index)
+                profiles.insert(0, default_profile + self.MARK_AS_DEFAULT_INSTALL_PROFILE)
         except Exception:
             Logger().debug("Can't mark default install profile")
         self._ui.profile_cbox.addItems(profiles)

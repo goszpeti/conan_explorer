@@ -46,6 +46,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.refresh_button.clicked.connect(self._pkg_sel_ctrl.on_pkg_refresh_clicked)
         self._ui.package_filter_edit.textChanged.connect(self._pkg_sel_ctrl.set_filter_wildcard)
         self.conan_pkg_selected.connect(self.on_pkg_selection_change)
+        self.updateGeometry()
+        self.resize_filter()
 
     def on_pkg_selection_change(self, conan_ref, pkg):
         # init/update the context menu
@@ -58,13 +60,17 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         return super().showEvent(a0)
 
     def resizeEvent(self, a0: QResizeEvent) -> None:
+        self.resize_filter()
+        self._pkg_file_exp_ctrl.resize_file_columns()
+        super().resizeEvent(a0)
+
+    def resize_filter(self):
         # resize filter splitter to roughly match file view splitter
         sizes = self._ui.splitter.sizes()
         offset = self._ui.package_filter_label.width() + self._ui.refresh_button.width()
-        self._ui.splitter_filter.setSizes([sizes[0] - offset, self._ui.splitter_filter.width()
-                                           - sizes[0] + offset])
-        self._pkg_file_exp_ctrl.resize_file_columns()
-        super().resizeEvent(a0)
+        self._ui.splitter_filter.setSizes(
+            [sizes[0]  - offset -5, sizes[1] + 5])
+
 
     def reload_themed_icons(self):
         super().reload_themed_icons()

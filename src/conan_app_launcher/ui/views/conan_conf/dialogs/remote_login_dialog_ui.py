@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'remote_login_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QDialog,
-    QDialogButtonBox, QGridLayout, QLabel, QLayout,
-    QLineEdit, QListView, QListWidget, QListWidgetItem,
-    QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QAbstractScrollArea, QApplication,
+    QDialog, QDialogButtonBox, QGridLayout, QLabel,
+    QLayout, QLineEdit, QListView, QListWidget,
+    QListWidgetItem, QSizePolicy, QVBoxLayout, QWidget)
 
 from conan_app_launcher.ui.widgets.password_line_edit import PasswordLineEdit
 
@@ -27,7 +27,7 @@ class Ui_Dialog(object):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         Dialog.resize(429, 273)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
@@ -78,13 +78,29 @@ class Ui_Dialog(object):
         self.edit_grid.addWidget(self.password_line_edit, 2, 1, 1, 1)
 
         self.remote_list = QListWidget(Dialog)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
+        QListWidgetItem(self.remote_list)
         self.remote_list.setObjectName(u"remote_list")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.MinimumExpanding)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.remote_list.sizePolicy().hasHeightForWidth())
         self.remote_list.setSizePolicy(sizePolicy3)
         self.remote_list.setMinimumSize(QSize(0, 40))
+        self.remote_list.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContentsOnFirstShow)
         self.remote_list.setSelectionMode(QAbstractItemView.NoSelection)
         self.remote_list.setMovement(QListView.Static)
         self.remote_list.setFlow(QListView.TopToBottom)
@@ -129,6 +145,41 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Login to Remote", None))
         self.password_label.setText(QCoreApplication.translate("Dialog", u"Password", None))
         self.name_label.setText(QCoreApplication.translate("Dialog", u"Name", None))
+
+        __sortingEnabled = self.remote_list.isSortingEnabled()
+        self.remote_list.setSortingEnabled(False)
+        ___qlistwidgetitem = self.remote_list.item(0)
+        ___qlistwidgetitem.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem1 = self.remote_list.item(1)
+        ___qlistwidgetitem1.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem2 = self.remote_list.item(2)
+        ___qlistwidgetitem2.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem3 = self.remote_list.item(3)
+        ___qlistwidgetitem3.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem4 = self.remote_list.item(4)
+        ___qlistwidgetitem4.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem5 = self.remote_list.item(5)
+        ___qlistwidgetitem5.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem6 = self.remote_list.item(6)
+        ___qlistwidgetitem6.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem7 = self.remote_list.item(7)
+        ___qlistwidgetitem7.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem8 = self.remote_list.item(8)
+        ___qlistwidgetitem8.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem9 = self.remote_list.item(9)
+        ___qlistwidgetitem9.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem10 = self.remote_list.item(10)
+        ___qlistwidgetitem10.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem11 = self.remote_list.item(11)
+        ___qlistwidgetitem11.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem12 = self.remote_list.item(12)
+        ___qlistwidgetitem12.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem13 = self.remote_list.item(13)
+        ___qlistwidgetitem13.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        ___qlistwidgetitem14 = self.remote_list.item(14)
+        ___qlistwidgetitem14.setText(QCoreApplication.translate("Dialog", u"New Item", None));
+        self.remote_list.setSortingEnabled(__sortingEnabled)
+
         self.note_label.setText("")
     # retranslateUi
 
