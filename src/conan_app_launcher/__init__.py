@@ -42,6 +42,7 @@ LEGACY_SETTINGS_FILE_NAME = ".cal_config"  # for backwards compatibility till 1.
 DEFAULT_UI_CFG_FILE_NAME = "ui_cfg" # no extension from 1.4.1
 LEGACY_UI_CFG_FILE_NAME = "cal_ui.json"  # for backwards compatibility till 1.4.1
 CONAN_LOG_PREFIX = "CONAN: " # logger uses this to indicate a log comes from Conan
+BUILT_IN_PLUGIN = "built-in"
 
 # Feature flags
 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True # get versions directly from the custom cache

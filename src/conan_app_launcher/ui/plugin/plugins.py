@@ -1,4 +1,7 @@
 import configparser
+import importlib
+import sys
+import types
 from packaging import specifiers, version
 
 import os
@@ -7,9 +10,10 @@ from distutils.util import strtobool
 from pathlib import Path
 import uuid
 from typing import TYPE_CHECKING, List, Optional
-from conan_app_launcher import conan_version
+from conan_app_launcher import BUILT_IN_PLUGIN, conan_version
 
 import conan_app_launcher.app as app
+from conan_app_launcher import base_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from PySide6.QtCore import Signal, QObject, SignalInstance
@@ -44,11 +48,14 @@ class PluginInterfaceV1(ThemedWidget):
     # This is used for asynchronous loading.
     load_signal: SignalInstance = Signal()  # type: ignore
 
-    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"] = None, page_widgets: Optional["FluentWindow.PageStore"] = None) -> None:
+    def __init__(self, parent: QWidget, plugin_description: PluginDescription,
+                 base_signals: Optional["BaseSignals"] = None,
+                 page_widgets: Optional["FluentWindow.PageStore"] = None) -> None:
         ThemedWidget.__init__(self, parent)
         self._base_signals = base_signals
         self._page_widgets = page_widgets
-        # self._base_signals.page_size_changed.emit(self)
+        # save PluginDescription to query data from outside
+        self.plugin_description = plugin_description
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setVerticalStretch(0)
         self.setSizePolicy(sizePolicy)
@@ -99,7 +106,7 @@ class PluginFile():
 
                 icon_str = plugin_info.get("icon")
                 assert icon_str, "field 'icon' is required"
-                if version == "built-in":
+                if version == BUILT_IN_PLUGIN:
                     icon = icon_str
                 else:
                     icon = str(Path(plugin_file_path).parent / icon_str)
@@ -140,16 +147,32 @@ class PluginFile():
 
 
 class PluginHandler(QObject):
+    # Both signals need to be connected in the main gui
     load_plugin: SignalInstance = Signal(PluginDescription)  # type: ignore
     unload_plugin: SignalInstance = Signal(str)  # type: ignore
 
-    def __init__(self, parent: Optional[QObject] = ...) -> None:
+    def __init__(self, parent: Optional[QObject], base_signals, page_widgets) -> None:
         super().__init__(parent)
+        self._base_signals = base_signals
+        self._page_widgets = page_widgets
 
     def load_all_plugins(self):
+        # load built-in from dynamic path
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
             plugin_path = app.active_settings.get_string(plugin_group_name)
+            if plugin_group_name == BUILT_IN_PLUGIN:
+                # fix potentially outdated setting
+                correct_plugin_path = str(base_path / "ui" / "plugins.ini")
+                if plugin_path != correct_plugin_path:
+                    app.active_settings.add(BUILT_IN_PLUGIN, correct_plugin_path, PLUGINS_SECTION_NAME)
+                    plugin_path = correct_plugin_path
             self._load_plugins_from_file(plugin_path)
+
+    def get_plugin_descr_from_name(self, plugin_name: str) -> Optional[PluginDescription]:
+        plugins = self.get_same_file_plugins_from_name(plugin_name)
+        for plugin in plugins:
+            if plugin.name == plugin_name:
+                return plugin
 
     def get_same_file_plugins_from_name(self, plugin_name: str) -> List[PluginDescription]:
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
@@ -160,25 +183,54 @@ class PluginHandler(QObject):
                     return file_plugins
         return []
 
-    def remove_plugin(self, plugin_path: str):
-        file_plugins = PluginFile.read_file(plugin_path)
-        PluginFile.unregister(plugin_path)
-        for plugin in file_plugins:
-            if self.is_plugin_enabled(plugin):
-                self.unload_plugin.emit(plugin)
-
     def add_plugin(self, plugin_path: str):
         PluginFile.register(plugin_path)
         self._load_plugins_from_file(plugin_path)
 
+    def remove_plugin(self, plugin_path: str):
+        file_plugins = PluginFile.read_file(plugin_path)
+        PluginFile.unregister(plugin_path)
+        for plugin in file_plugins:
+            self._unload_plugin(plugin)
+
+    def reload_plugin(self, plugin_name: str):
+        plugin = self.get_plugin_descr_from_name(plugin_name)
+        assert plugin
+        self._unload_plugin(plugin)
+        self._load_plugin(plugin, reload=True)
+
     def _load_plugins_from_file(self, plugin_path: str):
         file_plugins = PluginFile.read_file(plugin_path)
         for plugin in file_plugins:
-            if self.is_plugin_enabled(plugin):
-                self.load_plugin.emit(plugin)
-            else:
-                Logger().info(
-                    f"Can't load plugin {plugin.name}. Conan version restriction {plugin.conan_versions} applies.")
+            self._load_plugin(plugin)
+
+    def _load_plugin(self, plugin: PluginDescription, reload=False):
+        if self.is_plugin_enabled(plugin):
+            try:
+                import_path = Path(plugin.import_path)
+                sys.path.append(str(import_path.parent))
+                module_ = importlib.import_module(import_path.stem)
+                if reload:
+                    modules_to_del = [x for x in sys.modules if import_path.stem in x]
+                    # importlib reload does not work with relative imports
+                    for module_to_del in modules_to_del:
+                        del sys.modules[module_to_del]
+                    module_ = importlib.import_module(import_path.stem)
+
+                class_ = getattr(module_, plugin.plugin_class)
+                plugin_object: PluginInterfaceV1 = class_(self.parent(), plugin, self._base_signals, self._page_widgets)
+                self.load_plugin.emit(plugin_object)
+                plugin_object.load_signal.emit()
+            except Exception as e:
+                Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
+        else:
+            Logger().info(
+                f"Can't load plugin {plugin.name}. Conan version restriction {plugin.conan_versions} applies.")
+
+    def _unload_plugin(self, plugin: PluginDescription):
+        if not self.is_plugin_enabled(plugin):
+            return
+        self.unload_plugin.emit(plugin.name)
 
     @staticmethod
     def eval_conan_version_spec(spec: str, conan_version: str = conan_version) -> bool:

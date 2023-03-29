@@ -43,3 +43,6 @@ class PluginController(QObject):
 
     def remove_plugin(self, plugin_path: str):
         self._plugin_handler.remove_plugin(plugin_path)
+
+    def reload_plugin(self, plugin_name: str):
+        self._plugin_handler.reload_plugin(plugin_name)

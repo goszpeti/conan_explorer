@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
+from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
 from PySide6.QtCore import QPoint, Qt, Slot, QPropertyAnimation, QEasingCurve
@@ -18,10 +18,11 @@ if TYPE_CHECKING:
 
 class ConanSearchView(PluginInterfaceV1):
 
-    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"],
+    def __init__(self, parent: QWidget, plugin_description: PluginDescription, 
+                 base_signals: Optional["BaseSignals"],
                  page_widgets: Optional["FluentWindow.PageStore"] = None):
         # Add minimize and maximize buttons
-        super().__init__(parent, base_signals, page_widgets)
+        super().__init__(parent, plugin_description, base_signals, page_widgets)
         from .conan_search_ui import Ui_Form
         self._ui = Ui_Form()
         self._ui.setupUi(self)
@@ -48,10 +49,9 @@ class ConanSearchView(PluginInterfaceV1):
             shorcut.activated.connect(self._ui.search_button.animateClick)
 
         # init remotes list
+        self._init_remotes()
         if self._base_signals:
             self._base_signals.conan_remotes_updated.connect(self._init_remotes)
-        else:
-            self._init_remotes()
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()

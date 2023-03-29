@@ -103,7 +103,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self._page_widgets[gen_obj_name(name)] = (button, page, right_sub_menu, name)
 
         def remove_page_by_name(self, name: str):
-            button, widget, menu, _ = self._page_widgets[gen_obj_name(name)]
+            button, widget, menu, _ = self._page_widgets.pop(gen_obj_name(name))
             button.hide()
             widget.hide()
             button.deleteLater()

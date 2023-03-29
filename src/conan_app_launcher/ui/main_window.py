@@ -1,18 +1,15 @@
 import datetime
-import importlib
-import sys
 from dataclasses import dataclass
-from pathlib import Path
 from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, conan_version
-                                
+
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.conan_cleanup import ConanCleanup
 from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
-                                         GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT, 
+                                         GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
                                          GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, WINDOW_SIZE)
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
@@ -20,7 +17,7 @@ from conan_app_launcher.ui.plugin.plugins import PluginHandler
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
 from PySide6.QtCore import QRect, SignalInstance, Signal
 from PySide6.QtGui import QKeySequence
-from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QFrame, QVBoxLayout, QRadioButton, QSizePolicy, QSpacerItem
+from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QFrame, QVBoxLayout, QRadioButton
 
 from .common import (AsyncLoader, activate_theme, init_qt_logger,
                      remove_qt_logger)
@@ -39,6 +36,7 @@ class BaseSignals():
     conan_remotes_updated: SignalInstance
     page_size_changed: SignalInstance
 
+
 class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
 
@@ -46,7 +44,7 @@ class MainWindow(FluentWindow):
     conan_pkg_installed: SignalInstance = Signal(str, str)  # type: ignore - conan_ref, pkg_id
     conan_pkg_removed: SignalInstance = Signal(str, str)  # type: ignore - conan_ref, pkg_ids
     conan_remotes_updated: SignalInstance = Signal()  # type: ignore
-    page_size_changed: SignalInstance = Signal(QWidget) # type: ignore
+    page_size_changed: SignalInstance = Signal(QWidget)  # type: ignore
 
     log_console_message: SignalInstance = Signal(str)  # type: ignore - message
 
@@ -56,9 +54,10 @@ class MainWindow(FluentWindow):
         super().__init__(title_text=APP_NAME)
         self._qt_app = qt_app
         self.loaded = False
-        self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed, self.conan_remotes_updated, self.page_size_changed)
+        self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed,
+                                        self.conan_remotes_updated, self.page_size_changed)
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
-        self._plugin_handler = PluginHandler(self)
+        self._plugin_handler = PluginHandler(self, self.base_signals, self.page_widgets)
         self.setWindowTitle(APP_NAME)
         # connect logger to console widget to log possible errors at init
         init_qt_logger(Logger(), self.qt_logger_name, self.log_console_message)
@@ -72,9 +71,10 @@ class MainWindow(FluentWindow):
         self._init_right_menu()
 
         self._plugin_handler.load_plugin.connect(self._load_plugin)
+        self._plugin_handler.unload_plugin.connect(self._unload_plugin)
+
         # size needs to be set as early as possible to correctly position loading windows
         self.restore_window_state()
-
 
     def resize_page(self, widget: QWidget):
         pass
@@ -102,7 +102,6 @@ class MainWindow(FluentWindow):
         self._style_chooser_radio_material.clicked.connect(self.on_style_changed)
         self._style_chooser_radio_fluent.clicked.connect(self.on_style_changed)
 
-
     def _init_right_menu(self):
         self.main_general_settings_menu.add_button_menu_entry("Select file editor",
                                                               self.open_file_editor_selection_dialog, "icons/edit_file.svg")
@@ -124,12 +123,12 @@ class MainWindow(FluentWindow):
         view_settings_submenu.add_menu_line()
 
         self.main_general_settings_menu.add_menu_line()
-        
+
         if conan_version.startswith("1"):
             self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
-                                                                app.conan_api.remove_locks, "icons/remove-lock.svg")
+                                                                  app.conan_api.remove_locks, "icons/remove-lock.svg")
             self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",
-                                                                self.open_cleanup_cache_dialog, "icons/cleanup.svg")
+                                                                  self.open_cleanup_cache_dialog, "icons/cleanup.svg")
             self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.svg")
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.svg")
@@ -156,40 +155,35 @@ class MainWindow(FluentWindow):
         config_source_str = str(config_source)
         if not config_source:
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
-        self._load_plugins()
+        self._load_plugins()  # creates the objects - must be in this thread
 
         # model loads incrementally
         loader = AsyncLoader(self)
-        loader.async_loading(self, self._load_job, (config_source_str,), cancel_button=False)
+        loader.async_loading(self, self._load_job_quicklaunch, (config_source_str,), cancel_button=False)
         loader.wait_for_finished()
         self.loaded = True
 
     def _load_plugins(self):
         self._plugin_handler.load_all_plugins()
 
-    def _load_plugin(self, plugin):
+    def _load_plugin(self, plugin_object: PluginInterfaceV1):
         try:
-            import_path = Path(plugin.import_path)
-            sys.path.append(str(import_path.parent))
-            module_ = importlib.import_module(import_path.stem)
-            class_ = getattr(module_, plugin.plugin_class)
-            plugin_object: PluginInterfaceV1 = class_(self, self.base_signals, self.page_widgets)
-            self.add_left_menu_entry(plugin.name, plugin.icon, True, plugin_object, plugin.side_menu)
+            self.add_left_menu_entry(plugin_object.plugin_description.name,
+                                     plugin_object.plugin_description.icon, True, plugin_object,
+                                     plugin_object.plugin_description.side_menu)
         except Exception as e:
-            Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
+            Logger().error(f"Can't load plugin {plugin_object.plugin_description.name}: {str(e)}")
 
-    def _load_job(self, config_source_str):
+    def _unload_plugin(self, plugin_name: str):
+        # TODO: switch away, if this the current view
+        self.page_widgets.remove_page_by_name(plugin_name)
+
+    def _load_job_quicklaunch(self, config_source_str):
         # load ui file definitions
         self.model.loadf(config_source_str)
         # now actually load the views - this need signals, to execute in the gui thread
         self.app_grid.model = self.model.app_grid
-        for page in self.page_widgets.get_all_pages():
-            try:
-                page.load_signal.emit()
-            except Exception as e:
-                Logger().error(f"Can't load page {type(page)}: {str(e)}")
-        # loads the remotes in the search dialog
-        self.conan_remotes_updated.emit()
+        self.app_grid.load_signal.emit()
 
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
@@ -217,7 +211,6 @@ class MainWindow(FluentWindow):
         elif self._style_chooser_radio_fluent.isChecked():
             app.active_settings.set(GUI_STYLE, GUI_STYLE_FLUENT)
         self.reload_theme()
-    
 
     def on_dark_mode_changed(self):
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
@@ -256,7 +249,7 @@ class MainWindow(FluentWindow):
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(WideMessageBox.StandardButton.Yes | WideMessageBox.StandardButton.Cancel) # type: ignore
+        msg.setStandardButtons(WideMessageBox.StandardButton.Yes | WideMessageBox.StandardButton.Cancel)  # type: ignore
         msg.setIcon(WideMessageBox.Icon.Question)
         msg.setWidth(800)
         msg.setMaximumHeight(600)

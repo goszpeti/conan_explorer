@@ -29,7 +29,7 @@ class AppGridView(PluginInterfaceV1):
     load_signal = Signal() # type: ignore
 
     def __init__(self, parent, model: "UiAppGridModel", base_signals: "BaseSignals", page_widgets: FluentWindow.PageStore):
-        super().__init__(parent, base_signals, page_widgets)
+        super().__init__(parent, None, base_signals, page_widgets) # TODO
         self.setLayout(QVBoxLayout(self))
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.tab_widget = QTabWidget(self)

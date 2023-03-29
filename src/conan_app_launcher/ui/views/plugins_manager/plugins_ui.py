@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'plugins.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -49,9 +49,14 @@ class Ui_Form(object):
 
         self.horizontalLayout.addWidget(self.remove_plugin_button)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.reload_plugin_button = QPushButton(self.buttons_frame)
+        self.reload_plugin_button.setObjectName(u"reload_plugin_button")
 
-        self.horizontalLayout.addItem(self.horizontalSpacer)
+        self.horizontalLayout.addWidget(self.reload_plugin_button)
+
+        self.buttons_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout.addItem(self.buttons_spacer)
 
 
         self.verticalLayout.addWidget(self.buttons_frame)
@@ -77,6 +82,7 @@ class Ui_Form(object):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.add_plugin_button.setText(QCoreApplication.translate("Form", u"Add new Plugin", None))
         self.remove_plugin_button.setText(QCoreApplication.translate("Form", u"Remove Plugin", None))
+        self.reload_plugin_button.setText(QCoreApplication.translate("Form", u"Reload Plugin", None))
         self.path_label.setText("")
     # retranslateUi
 

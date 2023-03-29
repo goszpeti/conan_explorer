@@ -4,7 +4,7 @@ from pathlib import Path
 import platform
 from typing import Any, Dict, Optional, Tuple
 
-from conan_app_launcher import PathLike, base_path
+from conan_app_launcher import BUILT_IN_PLUGIN, PathLike, base_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.core.system import get_default_file_editor
 
@@ -29,7 +29,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
         CONSOLE_SPLIT_SIZES: "413,126"
     },
     PLUGINS_SECTION_NAME: {
-        "built-in": str(base_path / "ui" / "plugins.ini")
+        BUILT_IN_PLUGIN: str(base_path / "ui" / "plugins.ini")
     }
 
 }

@@ -54,7 +54,14 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
+       <widget class="QPushButton" name="reload_plugin_button">
+        <property name="text">
+         <string>Reload Plugin</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="buttons_spacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
