@@ -53,7 +53,9 @@ class ConanRefLineEdit(QLineEdit):
         combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
         combined_refs.update(app.conan_api.info_cache.get_all_remote_refs())
         self.completer().model().setStringList(sorted(combined_refs))  # type: ignore
-
+        if self._first_show:
+            self.completer().popup().hide()
+            self._first_show = True
         super().showEvent(event)
 
     def cleanup(self):
