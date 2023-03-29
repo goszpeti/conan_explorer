@@ -19,7 +19,7 @@ from conan_app_launcher.ui.dialogs import show_bug_reporting_dialog
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 from conan_app_launcher.core.conan_common import ConanRef
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets, QtGui
 
 Qt = QtCore.Qt
 
@@ -33,10 +33,15 @@ def test_edit_line_conan(app_qt_fixture, base_fixture, light_theme_fixture):
     widget = ConanRefLineEdit(root_obj)
     app_qt_fixture.addWidget(root_obj)
     widget.show()
+    widget.showEvent(QtGui.QShowEvent())
     app_qt_fixture.waitExposed(widget)
     # test recipe ref without revision
     widget.setText(TEST_REF)
     assert ConanRefLineEdit.VALID_COLOR_LIGHT in widget.styleSheet()
+    # test autocompletion (very implicit)
+    assert widget._completion_thread
+    widget._completion_thread.join(10)
+    assert TEST_REF in widget.completer().model().stringList()
     # test package ref with revision
     widget.setText(TEST_REF + ":127af201a4cdf8111e2e08540525c245c9b3b99e")
     assert ConanRefLineEdit.VALID_COLOR_LIGHT in widget.styleSheet()
@@ -47,10 +52,6 @@ def test_edit_line_conan(app_qt_fixture, base_fixture, light_theme_fixture):
     widget.validator_enabled = False
     widget.setText("zlib/1.2.8")
     assert ConanRefLineEdit.INVALID_COLOR in widget.styleSheet()
-    # test autocompletion (very implicit)
-    assert widget._completion_thread
-    widget._completion_thread.join(10)
-    assert TEST_REF in widget.completer().model().stringList()
     widget.close()
 
 
