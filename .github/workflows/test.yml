@@ -131,37 +131,37 @@ jobs:
             cov/
             results/
 
-  # sonarcloud:
-  #   if: always() # eecute, even when tests fail
-  #   needs:
-  #     - test
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         # Disabling shallow clone is recommended for improving relevancy of reporting, cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
-  #         fetch-depth: 0
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: Test results
-  #         path: ./
-  #     - name: Fix code coverage paths
-  #       working-directory: ./cov
-  #       run: |
-  #         sed -i 's@/home/runner/work/conan_app_launcher/conan_app_launcher@.@g' cov-*.xml
-  #     - name: SonarCloud Scan
-  #       uses: sonarsource/sonarcloud-github-action@master
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #       with:
-  #         args: >
-  #           -Dsonar.organization=goszpeti
-  #           -Dsonar.projectKey=goszpeti_conan_app_launcher
-  #           -Dsonar.sources=./src
-  #           -Dsonar.exclusions=**/*_ui.py
-  #           -Dsonar.tests=./test
-  #           -Dsonar.sourceEncoding=UTF-8
-  #           -Dsonar.python.version=3.7,3.8,3.9
-  #           -Dsonar.python.coverage.reportPaths=cov/cov-*.xml
-  #           -Dsonar.python.xunit.reportPath=results/result-*-ubuntu-py39.xml
+  sonarcloud:
+    if: always() # eecute, even when tests fail
+    needs:
+      - test
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting, cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
+          fetch-depth: 0
+      - uses: actions/download-artifact@v3
+        with:
+          name: Test results
+          path: ./
+      - name: Fix code coverage paths
+        working-directory: ./cov
+        run: |
+          sed -i 's@/home/runner/work/conan_app_launcher/conan_app_launcher@.@g' cov-*.xml
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=goszpeti
+            -Dsonar.projectKey=goszpeti_conan_app_launcher
+            -Dsonar.sources=./src
+            -Dsonar.exclusions=**/*_ui.py
+            -Dsonar.tests=./test
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.python.version=3.7,3.8,3.9
+            -Dsonar.python.coverage.reportPaths=cov/cov-*.xml
+            -Dsonar.python.xunit.reportPath=results/result-*-ubuntu-py39.xml
