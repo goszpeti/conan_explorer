@@ -32,7 +32,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="info_widget">
       <property name="styleSheet">
@@ -493,6 +493,9 @@
          </item>
          <item row="1" column="0">
           <widget class="QTextBrowser" name="profiles_text_browser">
+           <property name="undoRedoEnabled">
+            <bool>true</bool>
+           </property>
            <property name="readOnly">
             <bool>false</bool>
            </property>
@@ -511,6 +514,9 @@
         <widget class="QTextBrowser" name="config_file_text_browser">
          <property name="tabChangesFocus">
           <bool>false</bool>
+         </property>
+         <property name="undoRedoEnabled">
+          <bool>true</bool>
          </property>
          <property name="readOnly">
           <bool>false</bool>

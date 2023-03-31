@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_conf.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -314,6 +314,7 @@ class Ui_Form(object):
 
         self.profiles_text_browser = QTextBrowser(self.profiles)
         self.profiles_text_browser.setObjectName(u"profiles_text_browser")
+        self.profiles_text_browser.setUndoRedoEnabled(True)
         self.profiles_text_browser.setReadOnly(False)
 
         self.profiles_layout.addWidget(self.profiles_text_browser, 1, 0, 1, 1)
@@ -329,6 +330,7 @@ class Ui_Form(object):
         self.config_file_text_browser = QTextBrowser(self.config)
         self.config_file_text_browser.setObjectName(u"config_file_text_browser")
         self.config_file_text_browser.setTabChangesFocus(False)
+        self.config_file_text_browser.setUndoRedoEnabled(True)
         self.config_file_text_browser.setReadOnly(False)
 
         self.verticalLayout_3.addWidget(self.config_file_text_browser)
@@ -370,7 +372,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(0)
+        self.config_tab_widget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(Form)
