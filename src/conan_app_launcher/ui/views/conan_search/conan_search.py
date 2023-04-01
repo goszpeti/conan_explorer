@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 import conan_app_launcher.app as app
-from conan_app_launcher.ui.common.syntax import ConfigHighlighter  # using global module pattern
+from conan_app_launcher.ui.common.syntax_highlighting import ConfigHighlighter  # using global module pattern
 from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu

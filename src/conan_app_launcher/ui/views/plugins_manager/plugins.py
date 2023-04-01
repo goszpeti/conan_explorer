@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, Optional
 from conan_app_launcher import AUTHOR, BUILT_IN_PLUGIN, DEBUG_LEVEL, __version__
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QFileDialog, QMessageBox
 from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginHandler, ThemedWidget, PluginInterfaceV1
 from conan_app_launcher.ui.views.plugins_manager.model import PluginModelItem

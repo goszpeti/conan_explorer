@@ -263,7 +263,7 @@ class PackageFileExplorerController(QObject):
         # disable edit on double click, since we want to open
         self._view.setEditTriggers(QAbstractItemView.EditTrigger.EditKeyPressed)
         self._pkg_path_label.setText(str(pkg_path))
-
+        self._pkg_path_label.setAlignment(Qt.AlignmentFlag.AlignRight) # must be called after every text set
         self._view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.resize_file_columns()
 

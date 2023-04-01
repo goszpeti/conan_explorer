@@ -47,6 +47,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.refresh_button.clicked.connect(self._pkg_sel_ctrl.on_pkg_refresh_clicked)
         self._ui.package_filter_edit.textChanged.connect(self._pkg_sel_ctrl.set_filter_wildcard)
         self.conan_pkg_selected.connect(self.on_pkg_selection_change)
+        self._ui.package_path_label.setText("<Package path>")
+        self._ui.package_path_label.setAlignment(Qt.AlignmentFlag.AlignRight) # must be called after every text set
         self.updateGeometry()
         self.resize_filter()
 
@@ -61,7 +63,6 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         return super().showEvent(a0)
 
     def resizeEvent(self, a0: QResizeEvent) -> None:
-        #self.resize_filter()
         self._pkg_file_exp_ctrl.resize_file_columns()
         super().resizeEvent(a0)
 

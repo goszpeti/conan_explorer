@@ -1,7 +1,15 @@
-from typing import Literal, Union
+from typing import TYPE_CHECKING, Union
 import conan_app_launcher.app as app
-from PySide6.QtCore import Qt, QRegularExpression, QRegularExpressionMatch, QByteArray
+from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QColor
+
+if TYPE_CHECKING:
+    from typing import Literal
+else:
+    try:
+        from typing import Literal
+    except ImportError:
+        from typing_extensions import Literal
 
 from conan_app_launcher.settings import GUI_MODE, GUI_MODE_DARK
 class ConfigHighlighter(QSyntaxHighlighter):

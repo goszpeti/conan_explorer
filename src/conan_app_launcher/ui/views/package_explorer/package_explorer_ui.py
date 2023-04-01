@@ -17,9 +17,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplication, QFrame,
     QHBoxLayout, QHeaderView, QLabel, QLayout,
-    QLineEdit, QPushButton, QSizePolicy, QSpacerItem,
-    QSplitter, QTextBrowser, QTextEdit, QTreeView,
-    QVBoxLayout, QWidget)
+    QLineEdit, QPushButton, QSizePolicy, QSplitter,
+    QTextBrowser, QTextEdit, QTreeView, QVBoxLayout,
+    QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -66,6 +66,7 @@ class Ui_Form(object):
         sizePolicy2.setHeightForWidth(self.splitter_filter.sizePolicy().hasHeightForWidth())
         self.splitter_filter.setSizePolicy(sizePolicy2)
         self.splitter_filter.setOrientation(Qt.Horizontal)
+        self.splitter_filter.setHandleWidth(5)
         self.splitter_filter.setChildrenCollapsible(False)
         self.package_filter_edit = QLineEdit(self.splitter_filter)
         self.package_filter_edit.setObjectName(u"package_filter_edit")
@@ -75,40 +76,53 @@ class Ui_Form(object):
         sizePolicy3.setVerticalStretch(1)
         sizePolicy3.setHeightForWidth(self.package_filter_edit.sizePolicy().hasHeightForWidth())
         self.package_filter_edit.setSizePolicy(sizePolicy3)
-        self.package_filter_edit.setMinimumSize(QSize(175, 32))
-        self.package_filter_edit.setMaximumSize(QSize(400, 32))
+        self.package_filter_edit.setMinimumSize(QSize(150, 32))
+        self.package_filter_edit.setMaximumSize(QSize(350, 32))
         font = QFont()
         font.setPointSize(10)
         self.package_filter_edit.setFont(font)
         self.package_filter_edit.setInputMethodHints(Qt.ImhNone)
         self.package_filter_edit.setClearButtonEnabled(True)
         self.splitter_filter.addWidget(self.package_filter_edit)
+        self.package_path_label = QTextBrowser(self.splitter_filter)
+        self.package_path_label.setObjectName(u"package_path_label")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.package_path_label.sizePolicy().hasHeightForWidth())
+        self.package_path_label.setSizePolicy(sizePolicy4)
+        self.package_path_label.setMaximumSize(QSize(16777215, 32))
+        self.package_path_label.setStyleSheet(u"text-align: right;")
+        self.package_path_label.setFrameShape(QFrame.NoFrame)
+        self.package_path_label.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.package_path_label.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.package_path_label.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.package_path_label.setAutoFormatting(QTextEdit.AutoNone)
+        self.package_path_label.setLineWrapMode(QTextEdit.NoWrap)
+        self.package_path_label.setOverwriteMode(False)
+        self.splitter_filter.addWidget(self.package_path_label)
 
         self.local_packages_bar_layout.addWidget(self.splitter_filter)
-
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.local_packages_bar_layout.addItem(self.horizontalSpacer)
 
 
         self.verticalLayout.addLayout(self.local_packages_bar_layout)
 
         self.splitter = QSplitter(Form)
         self.splitter.setObjectName(u"splitter")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
-        self.splitter.setSizePolicy(sizePolicy4)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.splitter.sizePolicy().hasHeightForWidth())
+        self.splitter.setSizePolicy(sizePolicy5)
         self.splitter.setOrientation(Qt.Horizontal)
         self.splitter.setChildrenCollapsible(False)
         self.package_select_view = QTreeView(self.splitter)
         self.package_select_view.setObjectName(u"package_select_view")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        sizePolicy5.setHorizontalStretch(1)
-        sizePolicy5.setVerticalStretch(1)
-        sizePolicy5.setHeightForWidth(self.package_select_view.sizePolicy().hasHeightForWidth())
-        self.package_select_view.setSizePolicy(sizePolicy5)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy6.setHorizontalStretch(1)
+        sizePolicy6.setVerticalStretch(1)
+        sizePolicy6.setHeightForWidth(self.package_select_view.sizePolicy().hasHeightForWidth())
+        self.package_select_view.setSizePolicy(sizePolicy6)
         self.package_select_view.setMinimumSize(QSize(100, 0))
         self.package_select_view.setFrameShape(QFrame.NoFrame)
         self.package_select_view.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
@@ -121,11 +135,11 @@ class Ui_Form(object):
         self.package_select_view.header().setVisible(True)
         self.package_file_view = QTreeView(self.splitter)
         self.package_file_view.setObjectName(u"package_file_view")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-        sizePolicy6.setHorizontalStretch(2)
-        sizePolicy6.setVerticalStretch(1)
-        sizePolicy6.setHeightForWidth(self.package_file_view.sizePolicy().hasHeightForWidth())
-        self.package_file_view.setSizePolicy(sizePolicy6)
+        sizePolicy7 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy7.setHorizontalStretch(2)
+        sizePolicy7.setVerticalStretch(1)
+        sizePolicy7.setHeightForWidth(self.package_file_view.sizePolicy().hasHeightForWidth())
+        self.package_file_view.setSizePolicy(sizePolicy7)
         self.package_file_view.setMinimumSize(QSize(100, 0))
         self.package_file_view.setFrameShape(QFrame.NoFrame)
         self.package_file_view.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
@@ -139,33 +153,6 @@ class Ui_Form(object):
         self.splitter.addWidget(self.package_file_view)
 
         self.verticalLayout.addWidget(self.splitter)
-
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setSpacing(4)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(4, -1, -1, -1)
-        self.package_path_label_2 = QLabel(Form)
-        self.package_path_label_2.setObjectName(u"package_path_label_2")
-
-        self.horizontalLayout.addWidget(self.package_path_label_2)
-
-        self.package_path_label = QTextBrowser(Form)
-        self.package_path_label.setObjectName(u"package_path_label")
-        sizePolicy7 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        sizePolicy7.setHorizontalStretch(0)
-        sizePolicy7.setVerticalStretch(0)
-        sizePolicy7.setHeightForWidth(self.package_path_label.sizePolicy().hasHeightForWidth())
-        self.package_path_label.setSizePolicy(sizePolicy7)
-        self.package_path_label.setMaximumSize(QSize(16777215, 32))
-        self.package_path_label.setFrameShape(QFrame.NoFrame)
-        self.package_path_label.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.package_path_label.setLineWrapMode(QTextEdit.NoWrap)
-        self.package_path_label.setOverwriteMode(False)
-
-        self.horizontalLayout.addWidget(self.package_path_label)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout)
 
 
         self.retranslateUi(Form)
@@ -181,7 +168,6 @@ class Ui_Form(object):
         self.refresh_button.setText("")
         self.package_filter_label.setText(QCoreApplication.translate("Form", u"Filter:", None))
         self.package_filter_edit.setPlaceholderText(QCoreApplication.translate("Form", u"*", None))
-        self.package_path_label_2.setText(QCoreApplication.translate("Form", u"Package path:", None))
         self.package_path_label.setHtml(QCoreApplication.translate("Form", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
