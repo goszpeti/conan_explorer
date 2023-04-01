@@ -4,16 +4,16 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
-from conan_app_launcher.core.conan_common import ConanPkg, ConanRef,PkgRef,  ConanUnifiedApi, LoggerWriter, create_key_value_pair_list
+from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef, PkgRef,  ConanUnifiedApi, LoggerWriter, create_key_value_pair_list
 
 if TYPE_CHECKING:
     from conans.client.cache.remote_registry import Remote
     from .conan_cache import ConanInfoCache
+    from conans.client.conan_api import (ClientCache, ConanAPIV1, UserIO,
+                                         client_version)
 
-from conans.client.conan_api import (ClientCache, ConanAPIV1, UserIO,
-                                        client_version)
-from conans.client.output import ConanOutput
-from conans.errors import ConanException
+    from conans.client.output import ConanOutput
+    from conans.errors import ConanException
 
 try:
     from conans.util.windows import path_shortener
@@ -24,19 +24,21 @@ from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF, INVALID_PAT
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, user_save_path)
 from conan_app_launcher.app.logger import Logger
 
+
 class ConanApi(ConanUnifiedApi):
     """ Wrapper around ConanAPIV1 """
 
     def __init__(self):
-        self.conan: ConanAPIV1
-        self.client_cache: ClientCache
+        self.conan: "ConanAPIV1"
+        self.client_cache: "ClientCache"
         self.info_cache: "ConanInfoCache"
-        self.client_version = client_version
         self._short_path_root = Path("Unknown")
 
     def init_api(self):
         """ Instantiate the internal Conan api. In some cases it needs to be instatiated anew. """
-        self.conan= ConanAPIV1(output=ConanOutput(LoggerWriter(
+        from conans.client.conan_api import (ClientCache, ConanAPIV1, UserIO)
+        from conans.client.output import ConanOutput
+        self.conan = ConanAPIV1(output=ConanOutput(LoggerWriter(
             Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
         self.conan.user_io = UserIO(out=ConanOutput(LoggerWriter(
             Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
@@ -74,23 +76,23 @@ class ConanApi(ConanUnifiedApi):
         except Exception as e:
             Logger().error(f"Error while reading remotes file: {str(e)}")
         return remotes
-    
+
     def get_profiles(self) -> List[str]:
         return self.conan.profile_list()
-    
-    def get_profile_settings(self, profile_name: str) -> Dict[str, str]: 
+
+    def get_profile_settings(self, profile_name: str) -> Dict[str, str]:
         profile = self.conan.read_profile(profile_name)
         if not profile:
             return {}
         return dict(profile.settings)
-    
+
     def get_profiles_with_settings(self) -> Dict[str, Dict[str, str]]:
         profiles_dict = {}
         for profile in self.get_profiles():
             profiles_dict[profile] = self.get_profile_settings(profile)
         return profiles_dict
 
-    def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]: # user_name, autheticated
+    def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, autheticated
         user_info = self.conan.users_list(remote_name).get("remotes", {})
         if len(user_info) < 1:
             return ("", False)
@@ -113,7 +115,7 @@ class ConanApi(ConanUnifiedApi):
 
     def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """
-        if not package_id: # will give the base path ortherwise
+        if not package_id:  # will give the base path ortherwise
             return Path(INVALID_PATH)
         try:
             layout = self.client_cache.package_layout(conan_ref)
@@ -148,11 +150,12 @@ class ConanApi(ConanUnifiedApi):
         Uses plain conan install (No auto determination of best matching package)
         Returns the actual pkg_id and the package path.
         """
+        from conans.errors import ConanException
         pkg_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
         Logger().info(
-            f"Installing '<b>{str(conan_ref)}</b>' with settings: {str(settings_list)}, " \
+            f"Installing '<b>{str(conan_ref)}</b>' with settings: {str(settings_list)}, "
             f"options: {str(options_list)} and update={update}\n")
         try:
             infos = self.conan.install_reference(
@@ -170,11 +173,12 @@ class ConanApi(ConanUnifiedApi):
         Try to install a conan package (id) with the provided extra information.
         Returns True, if installation was succesfull.
         """
+        from conans.errors import ConanException
         package_id = package.get("id", "")
         options_list = create_key_value_pair_list(package.get("options", {}))
         settings_list = create_key_value_pair_list(package.get("settings", {}))
         Logger().info(
-            f"Installing '<b>{str(conan_ref)}</b>':{package_id} with settings: {str(settings_list)}, " \
+            f"Installing '<b>{str(conan_ref)}</b>':{package_id} with settings: {str(settings_list)}, "
             f"options: {str(options_list)} and update={update}\n")
         try:
             self.conan.install_reference(conan_ref, update=update,
@@ -195,7 +199,8 @@ class ConanApi(ConanUnifiedApi):
             pkg_id, path = self.get_best_matching_package_path(conan_ref, conan_options)
             if pkg_id:
                 return pkg_id, path
-            Logger().info(f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed. Searching for packages to install...")
+            Logger().info(
+                f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed. Searching for packages to install...")
 
         pkg_id, path = self.install_best_matching_package(conan_ref, conan_options, update=update)
         return pkg_id, path
@@ -373,7 +378,8 @@ class ConanApi(ConanUnifiedApi):
         found_pkgs: List[ConanPkg] = []
         default_settings: Dict[str, str] = {}
         try:
-            default_settings = dict(self.client_cache.default_profile.settings)  # type: ignore - dynamic prop is ok in try-catch
+            # type: ignore - dynamic prop is ok in try-catch
+            default_settings = dict(self.client_cache.default_profile.settings)
             query = f"(arch=None OR arch={default_settings.get('arch')})" \
                     f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"\

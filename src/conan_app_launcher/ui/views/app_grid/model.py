@@ -7,12 +7,12 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (
     INVALID_CONAN_REF, INVALID_PATH, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
     USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
-from conan_app_launcher.core.conan_worker import ConanWorkerElement
+from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
 from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_icon, get_asset_image_path
 from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
-from conan_app_launcher.core.conan_common import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanRef
 
 # from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
 from PySide6.QtGui import QIcon

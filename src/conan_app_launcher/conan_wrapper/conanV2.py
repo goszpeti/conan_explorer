@@ -4,7 +4,7 @@ import inspect as python_inspect
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-from conan_app_launcher.core.conan_common import ConanPkg, ConanUnifiedApi
+from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanUnifiedApi
 from conan_app_launcher.app.logger import Logger
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ from conans.client.cache.cache import ClientCache
 from conans.errors import ConanException
 from conan_app_launcher import (INVALID_CONAN_REF, INVALID_PATH,
                                 user_save_path)
-from conan_app_launcher.core.conan_common import ConanPkg, ConanRef, PkgRef,  ConanUnifiedApi, LoggerWriter, create_key_value_pair_list
+from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef, PkgRef,  ConanUnifiedApi, LoggerWriter, create_key_value_pair_list
 
 class ConanApi(ConanUnifiedApi):
     """ Wrapper around ConanAPIV2 """
@@ -25,7 +25,6 @@ class ConanApi(ConanUnifiedApi):
         self.conan: ConanAPI
         self.client_cache: ClientCache
         self.info_cache: "ConanInfoCache"
-        self.client_version = client_version
         self._short_path_root = Path("Unknown")
 
     def init_api(self):

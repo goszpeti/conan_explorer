@@ -4,12 +4,10 @@ from typing import TYPE_CHECKING, Optional, Tuple
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core import (open_cmd_in_path, open_file,
-                                     open_in_file_manager, run_file)
-from conan_app_launcher.core.conan_common import ConanPkg, ConanRef
-from conan_app_launcher.core.system import (calc_paste_same_dir_name,
-                                            copy_path_with_overwrite,
-                                            delete_path, execute_cmd)
+from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef
+from conan_app_launcher.app.system import (calc_paste_same_dir_name,
+                                           copy_path_with_overwrite,
+                                           delete_path, execute_cmd, open_cmd_in_path, open_in_file_manager, run_file)
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common import AsyncLoader, FileSystemModel, show_conanfile
 from conan_app_launcher.ui.common.model import re_register_signal
@@ -18,9 +16,9 @@ from conan_app_launcher.ui.dialogs import ConanRemoveDialog
 from conan_app_launcher.ui.dialogs.conan_install.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.views import AppGridView
 from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
-                          Qt, QUrl, SignalInstance)
+                            Qt, QUrl, SignalInstance)
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QLabel,
-                             QLineEdit, QMessageBox, QTreeView, QWidget)
+                               QLineEdit, QMessageBox, QTreeView, QWidget)
 
 from .model import (PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem,
                     PkgSelectModel)
@@ -66,9 +64,9 @@ class PackageSelectionController(QObject):
             return None
         view_index = self._view.selectedIndexes()[0]
         model: PackageFilter = view_index.model()  # type: ignore
-        source_item: PackageTreeItem = model.mapToSource(view_index).internalPointer() # type: ignore
+        source_item: PackageTreeItem = model.mapToSource(view_index).internalPointer()  # type: ignore
         return source_item
-    
+
     def get_selected_ref_with_pkg_id(self) -> Tuple[str, str]:
         conan_ref = self.get_selected_conan_ref()
         pkg_info = self.get_selected_conan_pkg_info()
@@ -198,7 +196,7 @@ class PackageSelectionController(QObject):
         self._view.expand(view_model.mapFromSource(proxy_index))
 
         if pkg_id:
-            item: PackageTreeItem = proxy_index.internalPointer() # type: ignore
+            item: PackageTreeItem = proxy_index.internalPointer()  # type: ignore
             i = 0
             for i in range(len(item.child_items)):
                 if item.child_items[i].item_data[0].get("id", "") == pkg_id:
@@ -225,9 +223,10 @@ class PackageSelectionController(QObject):
         conan_ref = self.get_selected_conan_ref()
         self._conan_pkg_selected.emit(conan_ref, self.get_selected_conan_pkg_info())
 
+
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QLabel, conan_pkg_selected: SignalInstance, 
+    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QLabel, conan_pkg_selected: SignalInstance,
                  base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._model = None
@@ -407,14 +406,14 @@ class PackageFileExplorerController(QObject):
         file_view_index = self._get_pkg_file_source_item()
         # if nothing selected return root
         if not file_view_index:
-                return self._model.rootPath()
+            return self._model.rootPath()
         return self._model.fileInfo(file_view_index).absoluteFilePath()
 
     def _is_selected_item_expanded(self):
         file_view_index = self._get_pkg_file_source_item()
         # if nothing selected return root
         if not file_view_index:
-                return False
+            return False
         return self._view.isExpanded(file_view_index)
 
     def resize_file_columns(self):

@@ -3,13 +3,14 @@ import subprocess
 from pathlib import Path
 from typing import Optional, TYPE_CHECKING
 
+from conan_app_launcher import conan_version
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.system import delete_path, escape_venv
+from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
-from conan_app_launcher.core.conan_common import Remote
+from conan_app_launcher.conan_wrapper.types import Remote
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QApplication, QInputDialog
@@ -25,10 +26,10 @@ if TYPE_CHECKING:
 
 class ConanConfigView(PluginInterfaceV1):
 
-    load_signal = Signal() # type: ignore
+    load_signal = Signal()  # type: ignore
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
-                  base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"] = None):
+                 base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent, plugin_description, base_signals)
         from .conan_conf_ui import Ui_Form
         self._ui = Ui_Form()
@@ -58,7 +59,8 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.config_tab_widget.tabBar().setCurrentIndex(0)
 
     def _load_info_tab(self):
-        self._ui.conan_cur_version_value_label.setText(app.conan_api.client_version)
+        self._ui.conan_cur_version_value_label.setText(conan_version)
+        from conan_app_launcher.app.system import escape_venv
 
         # setup system version outside of own venv
         with escape_venv():
@@ -131,7 +133,7 @@ class ConanConfigView(PluginInterfaceV1):
 
         self._remotes_controller.resize_remote_columns()
         # self._ui.conan_usr_cache_label.adjustSize()
-        #self._ui.revision_enabled_label.setMaximumWidth(self._ui.conan_usr_cache_label.width())
+        # self._ui.revision_enabled_label.setMaximumWidth(self._ui.conan_usr_cache_label.width())
 
     def reload_themed_icons(self):
         super().reload_themed_icons()
@@ -190,7 +192,6 @@ class ConanConfigView(PluginInterfaceV1):
         if reply == QMessageBox.StandardButton.Yes:
             delete_path(self.profiles_path / profile_name)
             self.on_refresh_profiles()
-
 
     def on_refresh_profiles(self):
         self._load_profiles_tab()

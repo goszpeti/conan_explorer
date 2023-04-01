@@ -8,7 +8,7 @@ from conan_app_launcher.ui.common import measure_font_width
 from conan_app_launcher.ui.common.theming import get_themed_asset_icon
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
-from conan_app_launcher.core.conan_common import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanRef
 
 from PySide6.QtCore import SignalInstance
 from PySide6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox

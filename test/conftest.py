@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import distutils.sysconfig
 import configparser
 import ctypes
 import os
@@ -17,13 +16,13 @@ from unittest import mock
 
 import psutil
 import pytest
-import conan_app_launcher.app as app # resolve circular dependencies
+import conan_app_launcher.app as app  # resolve circular dependencies
 from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path
-from conan_app_launcher.core import ConanApi, ConanInfoCache, ConanWorker
+from conan_app_launcher.conan_wrapper import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.ui.common import remove_qt_logger
 from conan_app_launcher.ui.main_window import MainWindow
 from conan_app_launcher.settings import *
-from conan_app_launcher.core.conan_common import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanRef
 from conan_app_launcher import conan_version
 
 exe_ext = ".exe" if platform.system() == "Windows" else ""
@@ -34,6 +33,7 @@ TEST_REF_OFFICIAL = "example/1.0.0@_/_"
 SKIP_CREATE_CONAN_TEST_DATA = strtobool(os.getenv("SKIP_CREATE_CONAN_TEST_DATA", "False"))
 TEST_REMOTE_NAME = "local"
 TEST_REMOTE_URL = "http://127.0.0.1:9300/"
+
 
 def is_ci_job():
     """ Test runs in CI environment """
@@ -97,7 +97,7 @@ def create_test_ref(ref, paths, create_params=[""], update=False):
     native_ref = str(ConanRef.loads(ref))
     conan = ConanApi()
     conan.init_api()
-    
+
     pkgs = conan.search_query_in_remotes(native_ref)
 
     if not update:
@@ -118,9 +118,9 @@ def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
         os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
     elif conan_version.startswith("2"):
         cfr = ConanRef.loads(ref)
-        os.system(f"conan create {conanfile} --name={cfr.name} --version={cfr.version} --user={cfr.user} --channel={cfr.channel} {create_params}")
+        os.system(
+            f"conan create {conanfile} --name={cfr.name} --version={cfr.version} --user={cfr.user} --channel={cfr.channel} {create_params}")
         os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force")
-
 
 
 def run_conan_server():
@@ -204,20 +204,21 @@ def start_conan_server():
                         f"-o shared=False -pr {str(profile_path)}"], update=True)
         create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=True)
 
+
 def conan_install_ref(ref, args=""):
     paths = PathSetup()
     profiles_path = paths.testdata_path / "conan" / "profile"
     extra_cmd = ""
     if conan_version.startswith("2"):
         extra_cmd = "--requires"
-        profile = "windowsV2" if platform.system=="Windows" else "linuxV2"
+        profile = "windowsV2" if platform.system == "Windows" else "linuxV2"
         args += " -pr " + str(profiles_path / profile)
     assert os.system(f"conan install {extra_cmd} {ref} {args}") == 0
 
 
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():
-    os.environ["CONAN_NON_INTERACTIVE"] = "True" # don't hang is smth. goes wrong
+    os.environ["CONAN_NON_INTERACTIVE"] = "True"  # don't hang is smth. goes wrong
     started = False
     if not check_if_process_running("conan_server", timeout_s=0):
         started = True
@@ -235,6 +236,7 @@ def test_output():
     print("\n********************** Starting TEST ********************************")
     yield
     print("\n********************** Finished TEST ********************************")
+
 
 @pytest.fixture
 def app_qt_fixture(qtbot):
@@ -259,7 +261,8 @@ def base_fixture():
     os.environ["DISABLE_ASYNC_LOADER"] = "True"  # for code coverage to work
     import conan_app_launcher.app as app
 
-    app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path / (SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE))
+    app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path /
+                                           (SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE))
     app.conan_api = ConanApi()
     app.conan_api.init_api()
     app.conan_worker = ConanWorker(app.conan_api, app.active_settings)

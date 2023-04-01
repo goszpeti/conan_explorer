@@ -2,10 +2,10 @@ from typing import Dict, List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core import ConanApi
-from conan_app_launcher.core.conan_common import ConanPkg
+from conan_app_launcher.conan_wrapper import ConanApi
+from conan_app_launcher.conan_wrapper.types import ConanPkg
 from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_icon
-from conan_app_launcher.core.conan_common import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Slot, SignalInstance
 

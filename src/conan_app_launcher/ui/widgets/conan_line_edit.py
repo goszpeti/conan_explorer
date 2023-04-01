@@ -3,7 +3,7 @@ from typing import Callable, List
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.conan_common import ConanRef, PkgRef
+from conan_app_launcher.conan_wrapper.types import ConanRef, PkgRef
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit, QListView
 

@@ -2,7 +2,7 @@
 import os
 from time import sleep
 import conan_app_launcher
-from conan_app_launcher.core import ConanApi
+from conan_app_launcher.conan_wrapper import ConanApi
 from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL
 
 import conan_app_launcher.app as app  # using global module pattern

@@ -7,7 +7,6 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, conan_version
 
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.conan_cleanup import ConanCleanup
 from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
                                          GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
                                          GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, WINDOW_SIZE)
@@ -126,7 +125,7 @@ class MainWindow(FluentWindow):
 
         if conan_version.startswith("1"):
             self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
-                                                                  app.conan_api.remove_locks, "icons/remove-lock.svg")
+                                                                  self.on_conan_remove_locks, "icons/remove-lock.svg")
             self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",
                                                                   self.open_cleanup_cache_dialog, "icons/cleanup.svg")
             self.main_general_settings_menu.add_menu_line()
@@ -156,11 +155,7 @@ class MainWindow(FluentWindow):
         if not config_source:
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
         self._load_plugins()  # creates the objects - must be in this thread
-
-        # model loads incrementally
-        loader = AsyncLoader(self)
-        loader.async_loading(self, self._load_job_quicklaunch, (config_source_str,), cancel_button=False)
-        loader.wait_for_finished()
+        self._load_job_quicklaunch(config_source_str)
         self.loaded = True
 
     def _load_plugins(self):
@@ -184,6 +179,9 @@ class MainWindow(FluentWindow):
         # now actually load the views - this need signals, to execute in the gui thread
         self.app_grid.model = self.model.app_grid
         self.app_grid.load_signal.emit()
+
+    def on_conan_remove_locks(self):
+        app.conan_api.remove_locks()
 
     def on_font_size_increased(self):
         """ Increase font size by 2. Ignore if font gets too large. """
@@ -232,6 +230,7 @@ class MainWindow(FluentWindow):
 
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
+        from conan_app_launcher.conan_wrapper.conan_cleanup import ConanCleanup
         cleaner = ConanCleanup(app.conan_api)
         loader = AsyncLoader(self)
         loader.async_loading(self, cleaner.get_cleanup_cache_paths, )

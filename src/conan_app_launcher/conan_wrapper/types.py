@@ -2,9 +2,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List
 from abc import ABC, abstractmethod
 from conan_app_launcher import conan_version
+
 if TYPE_CHECKING:
-    from typing import TypedDict, Protocol, TypeAlias
-    from conan_app_launcher.core.conan_cache import ConanInfoCache
+    from typing import TypedDict,  TypeAlias
+    from conan_app_launcher.conan_wrapper.conan_cache import ConanInfoCache
+    from conans.client.conan_api import ClientCache
 else:
     try:
         from typing import TypedDict, Protocol, TypeAlias
@@ -36,10 +38,10 @@ class ConanUnifiedApi(ABC):
     API abstraction to provide compatiblity betwwen ConanV1 and V2 APIs. 
     Functions, which are not yet implemented in ConanV2 are commented out, so static type checkers can work.
     """
-    
+
     def __init__(self) -> None:
         # no direct Conan API access!
-        self.client_cache: "ClientCache" # TODO: Abstract this
+        self.client_cache: "ClientCache"  # TODO: Abstract this
         self.info_cache: "ConanInfoCache"
         super().__init__()
 
@@ -56,7 +58,7 @@ class ConanUnifiedApi(ABC):
     def get_remotes(self, include_disabled=False) -> List[Remote]:
         """ Return a list of all remotes. """
         raise NotImplementedError
-    
+
     def get_profiles(self) -> List[str]:
         """ Return a list of all profiles """
         raise NotImplementedError
@@ -217,8 +219,6 @@ class ConanUnifiedApi(ABC):
                 alias += "_" + item
 
         return alias
-
-
 
 
 class ConanPkg(TypedDict, total=False):

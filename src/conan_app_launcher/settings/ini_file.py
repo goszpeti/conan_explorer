@@ -6,33 +6,35 @@ from typing import Any, Dict, Optional, Tuple
 
 from conan_app_launcher import BUILT_IN_PLUGIN, PathLike, base_path
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.system import get_default_file_editor
+from conan_app_launcher.app.system import get_default_file_editor
 
 from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
                GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL,
                GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, VIEW_SECTION_NAME, WINDOW_SIZE,
                SettingsInterface)
 
+
 def application_settings_spec() -> Dict[str, Dict[str, Any]]:
     return {
-    GENERAL_SECTION_NAME: {
-        LAST_CONFIG_FILE: "",
-        FILE_EDITOR_EXECUTABLE: get_default_file_editor(),
-        AUTO_INSTALL_QUICKLAUNCH_REFS: False,
-        DEFAULT_INSTALL_PROFILE: ""
-    },
-    VIEW_SECTION_NAME: {
-        FONT_SIZE: 12,
-        GUI_STYLE: GUI_STYLE_FLUENT if platform.system() == "Windows" else GUI_STYLE_MATERIAL,
-        GUI_MODE: GUI_MODE_LIGHT,
-        WINDOW_SIZE: "0,0,800,600",
-        CONSOLE_SPLIT_SIZES: "413,126"
-    },
-    PLUGINS_SECTION_NAME: {
-        BUILT_IN_PLUGIN: str(base_path / "ui" / "plugins.ini")
+        GENERAL_SECTION_NAME: {
+            LAST_CONFIG_FILE: "",
+            FILE_EDITOR_EXECUTABLE: get_default_file_editor(),
+            AUTO_INSTALL_QUICKLAUNCH_REFS: False,
+            DEFAULT_INSTALL_PROFILE: ""
+        },
+        VIEW_SECTION_NAME: {
+            FONT_SIZE: 12,
+            GUI_STYLE: GUI_STYLE_FLUENT if platform.system() == "Windows" else GUI_STYLE_MATERIAL,
+            GUI_MODE: GUI_MODE_LIGHT,
+            WINDOW_SIZE: "0,0,800,600",
+            CONSOLE_SPLIT_SIZES: "413,126"
+        },
+        PLUGINS_SECTION_NAME: {
+            BUILT_IN_PLUGIN: str(base_path / "ui" / "plugins.ini")
+        }
+
     }
 
-}
 
 class IniSettings(SettingsInterface):
     """
@@ -42,9 +44,9 @@ class IniSettings(SettingsInterface):
     Settings should be accessed via their constant name.
     """
 
-    def __init__(self, ini_file_path: Optional[PathLike], auto_save=True, 
+    def __init__(self, ini_file_path: Optional[PathLike], auto_save=True,
                  default_values=application_settings_spec(),
-                 custom_key_enabled_sections = [PLUGINS_SECTION_NAME]):
+                 custom_key_enabled_sections=[PLUGINS_SECTION_NAME]):
         """
         Read config.ini file to load settings.
         Create, if not existing, but the directory must already exist!
@@ -122,7 +124,7 @@ class IniSettings(SettingsInterface):
         self.save()
 
     def remove(self, name: str):
-        for node_name,node in self._values.items():
+        for node_name, node in self._values.items():
             if name in node:
                 node.pop(name)
                 del self._parser[node_name][name]
@@ -152,7 +154,7 @@ class IniSettings(SettingsInterface):
                     update_needed |= self._read_dict_setting(node)
                 for setting in setting_keys:
                     update_needed |= self._read_setting(setting, node)
-                
+
         except Exception as e:
             Logger().error(
                 f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
