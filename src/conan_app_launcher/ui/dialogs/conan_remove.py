@@ -1,8 +1,8 @@
 from typing import Optional
 
-import conan_app_launcher.app as app  # using global module pattern
+import conan_app_launcher.app as app
+from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from ..common import AsyncLoader
 
 from PySide6.QtCore import SignalInstance
 from PySide6.QtWidgets import QMessageBox, QWidget

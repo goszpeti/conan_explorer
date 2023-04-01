@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 
-import conan_app_launcher.app as app  # using global module pattern
+import conan_app_launcher.app as app
+from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.conan_wrapper import ConanApi
 from conan_app_launcher.conan_wrapper.types import ConanPkg
@@ -8,8 +9,6 @@ from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_platform_
 from conan_app_launcher.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, Slot, SignalInstance
-
-from conan_app_launcher.ui.common.loading import AsyncLoader
 
 REF_TYPE = 0
 PROFILE_TYPE = 1
@@ -108,6 +107,7 @@ class PkgSearchModel(TreeModel):
                 ["No package found!", "", ""], self.root_item, None, PROFILE_TYPE, empty=True))
             return
 
+        # add info if it is installed
         installed_refs = app.conan_api.get_all_local_refs()
         for recipe in recipes_with_remotes:
             recipe_remotes = recipes_with_remotes.get(recipe, "")

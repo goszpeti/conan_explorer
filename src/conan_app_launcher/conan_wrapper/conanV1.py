@@ -303,6 +303,7 @@ class ConanApi(ConanUnifiedApi):
                 res_list.append(ConanRef.loads(item.get("recipe", {}).get("id", "")))
         res_list = list(set(res_list))  # make unique
         res_list.sort()
+        self.info_cache.update_remote_package_list(res_list)
         return res_list
 
     def search_recipe_alternatives_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:

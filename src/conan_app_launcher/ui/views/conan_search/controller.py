@@ -1,12 +1,13 @@
 import pprint
 from typing import TYPE_CHECKING, List, Optional
 
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.ui.common import AsyncLoader, show_conanfile
+from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
+from conan_app_launcher.ui.common import show_conanfile
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
-from conan_app_launcher.conan_wrapper.types import ConanRef
 from PySide6.QtCore import Qt, SignalInstance, QObject
-from PySide6.QtWidgets import (QApplication, QTreeView, QLineEdit, QPushButton, QTextBrowser, QListWidget)
+from PySide6.QtWidgets import (QApplication, QTreeView, QPushButton, QTextBrowser, QListWidget)
+
+from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 if TYPE_CHECKING:
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 
 class ConanSearchController(QObject):
 
-    def __init__(self, view: QTreeView, search_line: QLineEdit, search_button: QPushButton, remote_list: QListWidget, 
+    def __init__(self, view: QTreeView, search_line: ConanRefLineEdit, search_button: QPushButton, remote_list: QListWidget, 
                  detail_view: QTextBrowser, conan_pkg_installed: Optional[SignalInstance], 
                  conan_pkg_removed: Optional[SignalInstance]) -> None:
         super().__init__(view)
@@ -52,6 +53,7 @@ class ConanSearchController(QObject):
         self._resize_package_columns()
         self._view.sortByColumn(1, Qt.SortOrder.AscendingOrder)  # sort by remote at default
         self._view.selectionModel().selectionChanged.connect(self.on_package_selected)
+        self._search_line.load_completion_refs()
 
     def on_package_selected(self):
         """ Display package info only for pkg ref"""

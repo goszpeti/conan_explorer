@@ -1,6 +1,7 @@
 from typing import Optional
 
 import conan_app_launcher.app as app
+from conan_app_launcher.app.loading import AsyncLoader
 from conan_app_launcher.app.logger import Logger  # using global module pattern
 from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import DEFAULT_INSTALL_PROFILE
@@ -83,8 +84,9 @@ class ConanInstallDialog(QDialog):
         conan_ref = ""
         try:
             conan_ref = conan_full_ref.split(":")[0]
-            self._ref_info = app.conan_api.conan.info(
-                app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
+            loader = AsyncLoader(self)
+            loader.async_loading(self, self.on_options_query, (conan_ref, ), loading_text="Loading options...")
+            loader.wait_for_finished()
             # TODO: CONAN V2
             options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()  # type: ignore
         except Exception:
@@ -112,6 +114,13 @@ class ConanInstallDialog(QDialog):
 
     def onTreeWidgetItemDoubleClicked(self, item):
         self._ui.options_widget.openPersistentEditor(item, 1)
+
+    def on_options_query(self, conan_ref: str):
+        try:
+            self._ref_info = app.conan_api.conan.info(
+                    app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
+        except Exception:
+            return
 
     def on_auto_install_check(self):
         enabled = True

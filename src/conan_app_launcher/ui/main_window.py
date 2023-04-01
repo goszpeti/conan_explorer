@@ -5,6 +5,7 @@ from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, conan_version
+from conan_app_launcher.app.loading import AsyncLoader
 
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
@@ -18,7 +19,7 @@ from PySide6.QtCore import QRect, SignalInstance, Signal
 from PySide6.QtGui import QKeySequence
 from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QFrame, QVBoxLayout, QRadioButton
 
-from .common import (AsyncLoader, activate_theme, init_qt_logger,
+from .common import (activate_theme, init_qt_logger,
                      remove_qt_logger)
 from .fluent_window import FluentWindow, SideSubMenu
 from .plugin import PluginInterfaceV1

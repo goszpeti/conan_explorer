@@ -2,11 +2,10 @@
 from pathlib import Path
 from typing import List, Optional
 
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import asset_path
+import conan_app_launcher.app as app
+from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conans.client.cache.remote_registry import Remote
-from conan_app_launcher.ui.common import AsyncLoader
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget, QListWidgetItem

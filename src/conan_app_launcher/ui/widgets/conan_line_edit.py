@@ -49,14 +49,17 @@ class ConanRefLineEdit(QLineEdit):
         super().setEnabled(enabled)
 
     def showEvent(self, event):
-        combined_refs = set()
-        combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
-        combined_refs.update(app.conan_api.info_cache.get_all_remote_refs())
-        self.completer().model().setStringList(sorted(combined_refs))  # type: ignore
+        self.load_completion_refs()
         if self._first_show:
             self.completer().popup().hide()
             self._first_show = True
         super().showEvent(event)
+
+    def load_completion_refs(self):
+        combined_refs = set()
+        combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
+        combined_refs.update(app.conan_api.info_cache.get_all_remote_refs())
+        self.completer().model().setStringList(sorted(combined_refs))  # type: ignore
 
     def cleanup(self):
         if self._completion_thread:
