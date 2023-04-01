@@ -1,3 +1,4 @@
+import os
 import platform
 import shutil
 import tempfile
@@ -107,11 +108,11 @@ class ConanApi(ConanUnifiedApi):
         # only need to get once
         if self._short_path_root.exists() or platform.system() != "Windows":
             return self._short_path_root
-        temp_dir = str(path_shortener(tempfile.mkdtemp(), True))
-        gen_short_path = Path(temp_dir)
-        short_path_root = gen_short_path.parents[1]
-        shutil.rmtree(gen_short_path.parent, ignore_errors=True)
-        return short_path_root
+        short_home = os.getenv("CONAN_USER_HOME_SHORT")
+        if not short_home:
+            drive = os.path.splitdrive(self.client_cache.cache_folder)[0]
+            short_home = os.path.join(drive, os.sep, ".conan")
+        return Path(short_home)
 
     def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> Path:
         """ Get the fully resolved package path from the reference and the specific package (id) """

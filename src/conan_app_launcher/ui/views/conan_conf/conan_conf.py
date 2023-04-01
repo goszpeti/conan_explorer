@@ -1,6 +1,8 @@
+from os import devnull
 import platform
 import subprocess
 from pathlib import Path
+import sys
 from typing import Optional, TYPE_CHECKING
 
 from conan_app_launcher import conan_version
@@ -11,7 +13,7 @@ from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.conan_wrapper.types import Remote
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QProcess
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QApplication, QInputDialog
 
@@ -60,29 +62,9 @@ class ConanConfigView(PluginInterfaceV1):
 
     def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(conan_version)
-        from conan_app_launcher.app.system import escape_venv
-
-        # setup system version outside of own venv
-        with escape_venv():
-            try:  # move to conan?
-                out = subprocess.check_output("conan --version", shell=True).decode("utf-8")
-                conan_sys_version = out.lower().split("version ")[1].rstrip()
-            except Exception:
-                Logger().debug("Conan version unknown...")
-                conan_sys_version = "Unknown"
-            try:  # move to conan?
-                python_exe_name = "python"
-                if platform.system() == "Linux":
-                    python_exe_name = "python3"
-                out = subprocess.check_output(f"{python_exe_name} --version", shell=True).decode("utf-8")
-                python_sys_version = out.lower().split("python ")[1].rstrip()
-            except Exception:
-                python_sys_version = "Unknown"
-
+        self._ui.python_exe_value_label.setText(sys.executable)
         self._ui.python_cur_version_value_label.setText(platform.python_version())
         self._ui.revision_enabled_checkbox.setChecked(app.conan_api.client_cache.config.revisions_enabled)
-        self._ui.conan_sys_version_value_label.setText(conan_sys_version)
-        self._ui.python_sys_version_value_label.setText(python_sys_version)
         self._ui.conan_usr_home_value_label.setText(app.conan_api.client_cache.cache_folder)
         self._ui.conan_usr_cache_value_label.setText(str(app.conan_api.get_short_path_root()))
         self._ui.conan_storage_path_value_label.setText(str(app.conan_api.client_cache.store))

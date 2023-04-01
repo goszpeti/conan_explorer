@@ -53,10 +53,26 @@ class Ui_Form(object):
         self.versions_box.setObjectName(u"versions_box")
         self.gridLayout = QGridLayout(self.versions_box)
         self.gridLayout.setObjectName(u"gridLayout")
+        self.python_exe_label = QLabel(self.versions_box)
+        self.python_exe_label.setObjectName(u"python_exe_label")
+
+        self.gridLayout.addWidget(self.python_exe_label, 2, 0, 1, 1)
+
+        self.python_exe_value_label = QLabel(self.versions_box)
+        self.python_exe_value_label.setObjectName(u"python_exe_value_label")
+        self.python_exe_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
+
+        self.gridLayout.addWidget(self.python_exe_value_label, 2, 1, 1, 1)
+
         self.conan_cur_version_label = QLabel(self.versions_box)
         self.conan_cur_version_label.setObjectName(u"conan_cur_version_label")
 
         self.gridLayout.addWidget(self.conan_cur_version_label, 0, 0, 1, 1)
+
+        self.python_cur_version_value_label = QLabel(self.versions_box)
+        self.python_cur_version_value_label.setObjectName(u"python_cur_version_value_label")
+
+        self.gridLayout.addWidget(self.python_cur_version_value_label, 1, 1, 1, 1)
 
         self.conan_cur_version_value_label = QLabel(self.versions_box)
         self.conan_cur_version_value_label.setObjectName(u"conan_cur_version_value_label")
@@ -68,32 +84,6 @@ class Ui_Form(object):
         self.python_cur_version_label.setObjectName(u"python_cur_version_label")
 
         self.gridLayout.addWidget(self.python_cur_version_label, 1, 0, 1, 1)
-
-        self.python_cur_version_value_label = QLabel(self.versions_box)
-        self.python_cur_version_value_label.setObjectName(u"python_cur_version_value_label")
-
-        self.gridLayout.addWidget(self.python_cur_version_value_label, 1, 1, 1, 1)
-
-        self.conan_sys_version_label = QLabel(self.versions_box)
-        self.conan_sys_version_label.setObjectName(u"conan_sys_version_label")
-
-        self.gridLayout.addWidget(self.conan_sys_version_label, 2, 0, 1, 1)
-
-        self.conan_sys_version_value_label = QLabel(self.versions_box)
-        self.conan_sys_version_value_label.setObjectName(u"conan_sys_version_value_label")
-        self.conan_sys_version_value_label.setTextInteractionFlags(Qt.LinksAccessibleByMouse|Qt.TextSelectableByKeyboard|Qt.TextSelectableByMouse)
-
-        self.gridLayout.addWidget(self.conan_sys_version_value_label, 2, 1, 1, 1)
-
-        self.python_sys_version_label = QLabel(self.versions_box)
-        self.python_sys_version_label.setObjectName(u"python_sys_version_label")
-
-        self.gridLayout.addWidget(self.python_sys_version_label, 3, 0, 1, 1)
-
-        self.python_sys_version_value_label = QLabel(self.versions_box)
-        self.python_sys_version_value_label.setObjectName(u"python_sys_version_value_label")
-
-        self.gridLayout.addWidget(self.python_sys_version_value_label, 3, 1, 1, 1)
 
         self.gridLayout.setColumnStretch(0, 1)
         self.gridLayout.setColumnStretch(1, 2)
@@ -379,14 +369,12 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.versions_box.setTitle(QCoreApplication.translate("Form", u"Versions", None))
+        self.python_exe_label.setText(QCoreApplication.translate("Form", u"Current Python Executable:", None))
+        self.python_exe_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
         self.conan_cur_version_label.setText(QCoreApplication.translate("Form", u"Current Conan Version:", None))
+        self.python_cur_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
         self.conan_cur_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
         self.python_cur_version_label.setText(QCoreApplication.translate("Form", u"Current Python Version:", None))
-        self.python_cur_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
-        self.conan_sys_version_label.setText(QCoreApplication.translate("Form", u"System Conan Version:", None))
-        self.conan_sys_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
-        self.python_sys_version_label.setText(QCoreApplication.translate("Form", u"System Python Version:", None))
-        self.python_sys_version_value_label.setText(QCoreApplication.translate("Form", u"Unknown", None))
         self.paths_box.setTitle(QCoreApplication.translate("Form", u"Paths", None))
         self.conan_usr_home_label.setText(QCoreApplication.translate("Form", u"Conan User Home:", None))
         self.conan_usr_home_value_label.setText("")
