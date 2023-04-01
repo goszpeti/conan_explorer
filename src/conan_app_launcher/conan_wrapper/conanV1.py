@@ -1,7 +1,5 @@
 import os
 import platform
-import shutil
-import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
@@ -110,8 +108,9 @@ class ConanApi(ConanUnifiedApi):
             return self._short_path_root
         short_home = os.getenv("CONAN_USER_HOME_SHORT")
         if not short_home:
-            drive = os.path.splitdrive(self.client_cache.cache_folder)[0]
+            drive = os.path.splitdrive(self.client_cache.cache_folder)[0].upper()
             short_home = os.path.join(drive, os.sep, ".conan")
+        os.makedirs(short_home, exist_ok=True)
         return Path(short_home)
 
     def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> Path:
