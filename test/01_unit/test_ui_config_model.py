@@ -9,7 +9,7 @@ from test.conftest import TEST_REF_OFFICIAL, PathSetup
 from conan_app_launcher import INVALID_PATH, asset_path
 from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
                                                           UiAppLinkModel)
-from conan_app_launcher.core.conan_common import ConanRef as CFR, ConanUnifiedApi
+from conan_app_launcher.conan_wrapper.types import ConanRef as CFR, ConanUnifiedApi
 
 
 @pytest.mark.conanv2

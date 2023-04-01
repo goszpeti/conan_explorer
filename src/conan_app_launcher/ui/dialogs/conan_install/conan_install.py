@@ -2,13 +2,13 @@ from typing import Optional
 
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger  # using global module pattern
-from conan_app_launcher.core.conan_worker import ConanWorkerElement
+from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import DEFAULT_INSTALL_PROFILE
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from PySide6.QtCore import QSize, Qt, SignalInstance
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem, QComboBox
 
-from conan_app_launcher.core.conan_common import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanRef
 
 
 class ConanInstallDialog(QDialog):

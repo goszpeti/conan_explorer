@@ -21,9 +21,9 @@ from conan_app_launcher.ui.views.app_grid.app_link import ListAppLink, ListAppLi
 from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
     AppEditDialog
 from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
-                                                          UiAppLinkConfig,
-                                                          UiAppLinkModel)
-from conan_app_launcher.core.conan_common import ConanRef as CFR
+                                                        UiAppLinkConfig,
+                                                        UiAppLinkModel)
+from conan_app_launcher.conan_wrapper.types import ConanRef as CFR
 from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -91,7 +91,7 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture: PathSetup, mocker):
     - resolves the correct relative path for executables and forbids non-package-folder paths
     - resolves the correct relative path for executables and sets non-package-folder paths to the abs. path
     """
-    conan_install_ref(TEST_REF) # need local package
+    conan_install_ref(TEST_REF)  # need local package
 
     app.conan_api.init_api()
 
@@ -138,16 +138,16 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture: PathSetup, mocker):
                         return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(selection)])
-    
+
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.DialogCode.Accepted)
     diag._ui.executable_browse_button.clicked.emit()
     # entry not changed
     assert diag._ui.execpath_line_edit.text() == exe_rel_path.replace("\\", "/")
 
-    # open button 
+    # open button
     # absolute
-    icon_path = app.asset_path / "icons" / GUI_STYLE_MATERIAL/  "about.svg"
+    icon_path = app.asset_path / "icons" / GUI_STYLE_MATERIAL / "about.svg"
     mocker.patch.object(QtWidgets.QFileDialog, 'exec',
                         return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
@@ -211,9 +211,9 @@ def test_AppEditDialog_save_values(qtbot, base_fixture: PathSetup, mocker):
     # the caller must call save_data manually
 
     mock_version_func = mocker.patch(
-        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_version_queue')
+        'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_version_queue')
     mock_install_func = mocker.patch(
-        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_install_queue')
+        'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
     diag.save_data()
 
     # assert that all infos where saved
@@ -269,7 +269,7 @@ def test_AppLink_open(qtbot, base_fixture: PathSetup):
         process_name = "x-terminal-emulator"
     elif platform.system() == "Windows":
         process_name = "cmd"
-    
+
     assert check_if_process_running(process_name, cmd_contains=["conan_app_launcher"], kill=True, cmd_narg=2)
 
 
@@ -293,4 +293,3 @@ def test_AppLink_icon_update_from_executable(qtbot, base_fixture: PathSetup):
 
     assert not app_link.model.get_icon().isNull()
     assert not app_link._ui.app_button._greyed_out
-

@@ -11,7 +11,7 @@ from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu, AnimatedToggle
-from conan_app_launcher.core.conan_common import ConanRef, PkgRef
+from conan_app_launcher.conan_wrapper.types import ConanRef, PkgRef
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction

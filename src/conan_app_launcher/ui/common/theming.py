@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union
 
 import conan_app_launcher.app as app
 from conan_app_launcher import base_path
-from conan_app_launcher.core.system import is_windows_11
+from conan_app_launcher.app.system import is_windows_11
 from conan_app_launcher.settings import FONT_SIZE, GUI_MODE, GUI_MODE_LIGHT, GUI_MODE_DARK, GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL
 from conan_app_launcher.app.logger import Logger
 

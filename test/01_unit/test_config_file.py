@@ -5,7 +5,7 @@ from distutils.file_util import copy_file
 from pathlib import Path
 
 from conan_app_launcher.ui.config.json_file import JsonUiConfig
-from conan_app_launcher.core.conan_common import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanRef
 from test.conftest import PathSetup
 
 

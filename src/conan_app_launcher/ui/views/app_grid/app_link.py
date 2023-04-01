@@ -5,7 +5,7 @@ import conan_app_launcher.app as app
 
 from conan_app_launcher import ICON_SIZE, INVALID_PATH
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core import open_in_file_manager, run_file
+from conan_app_launcher.app.system import open_in_file_manager, run_file
 from conan_app_launcher.ui.common import get_themed_asset_icon, measure_font_width
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
@@ -104,10 +104,10 @@ class ListAppLink(QFrame):
     def resizeEvent(self, event):
         if not self._parent_tab:
             return
-        content_frame: QWidget = self._parent_tab.parent().parent().parent().parent().parent() # type: ignore
+        content_frame: QWidget = self._parent_tab.parent().parent().parent().parent().parent()  # type: ignore
         max_cl_width = content_frame.width() - self._ui.left_frame.width() - \
             self._ui.right_frame.width()
-        if max_cl_width < 400: # TODO find better solution
+        if max_cl_width < 400:  # TODO find better solution
             self._ui.central_left_frame.setMaximumWidth(0)
             self._ui.central_right_frame.setMaximumWidth(0)
             self._ui.arguments_name_label.setMaximumWidth(0)
@@ -136,10 +136,10 @@ class ListAppLink(QFrame):
                 max_sum_width - self._ui.arguments_name_label.width() - 50)
             self.split_into_lines(self._ui.arguments_value_label, self.model.args,
                                   max_sum_width - self._ui.arguments_name_label.width())
-        
+
         super().resizeEvent(event)
 
-    def delete(self): # TODO needed?
+    def delete(self):  # TODO needed?
         pass
 
     def split_into_lines(self, widget, model_value, max_width):
@@ -156,7 +156,7 @@ class ListAppLink(QFrame):
 
     @staticmethod
     def word_wrap(text: str, max_length: int) -> str:
-        if max_length==0:
+        if max_length == 0:
             return text
         split_name = text.split(" ")
         name = ""  # split long titles

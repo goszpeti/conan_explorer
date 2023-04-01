@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Type, TypeVar
 
 # uses Logger, settings and theming related functions
 from conan_app_launcher import AUTOCLOSE_SIDE_MENU
-from conan_app_launcher.core.system import is_windows_11
+from conan_app_launcher.app.system import is_windows_11
 
 from PySide6.QtCore import (QEasingCurve, QEvent, QObject, QPoint,
                             QPropertyAnimation, QRect, QSize, Qt)

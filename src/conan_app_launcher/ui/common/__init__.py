@@ -2,8 +2,8 @@
 
 from pathlib import Path
 import conan_app_launcher.app as app
-from conan_app_launcher.core.conan_common import ConanRef
-from conan_app_launcher.core.system import execute_cmd, open_file  # using global module pattern
+from conan_app_launcher.conan_wrapper.types import ConanRef
+from conan_app_launcher.app.system import execute_cmd, open_file  # using global module pattern
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE, FONT_SIZE
 from PySide6.QtGui import QFontMetrics, QFont
 

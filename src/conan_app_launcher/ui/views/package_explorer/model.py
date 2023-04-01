@@ -2,8 +2,8 @@ import pprint
 from typing import List
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.core import ConanApi
-from conan_app_launcher.core.conan_common import ConanPkg
+from conan_app_launcher.conan_wrapper import ConanApi
+from conan_app_launcher.conan_wrapper.types import ConanPkg
 from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_icon, TreeModel, TreeModelItem
 from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
 from PySide6.QtGui import QIcon

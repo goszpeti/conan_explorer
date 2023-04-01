@@ -1,17 +1,20 @@
+from os import devnull
 import platform
 import subprocess
 from pathlib import Path
+import sys
 from typing import Optional, TYPE_CHECKING
 
+from conan_app_launcher import conan_version
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core.system import delete_path, escape_venv
+from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.ui.common.syntax import ConfigHighlighter
 from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
-from conan_app_launcher.core.conan_common import Remote
-from PySide6.QtCore import Qt, Signal
+from conan_app_launcher.conan_wrapper.types import Remote
+from PySide6.QtCore import Qt, Signal, QProcess
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QApplication, QInputDialog
 
@@ -26,10 +29,10 @@ if TYPE_CHECKING:
 
 class ConanConfigView(PluginInterfaceV1):
 
-    load_signal = Signal() # type: ignore
+    load_signal = Signal()  # type: ignore
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
-                  base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"] = None):
+                 base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent, plugin_description, base_signals)
         from .conan_conf_ui import Ui_Form
         self._ui = Ui_Form()
@@ -62,29 +65,10 @@ class ConanConfigView(PluginInterfaceV1):
         self._settings_highlighter = ConfigHighlighter(self._ui.settings_file_text_browser.document(), "yaml")
 
     def _load_info_tab(self):
-        self._ui.conan_cur_version_value_label.setText(app.conan_api.client_version)
-
-        # setup system version outside of own venv
-        with escape_venv():
-            try:  # move to conan?
-                out = subprocess.check_output("conan --version", shell=True).decode("utf-8")
-                conan_sys_version = out.lower().split("version ")[1].rstrip()
-            except Exception:
-                Logger().debug("Conan version unknown...")
-                conan_sys_version = "Unknown"
-            try:  # move to conan?
-                python_exe_name = "python"
-                if platform.system() == "Linux":
-                    python_exe_name = "python3"
-                out = subprocess.check_output(f"{python_exe_name} --version", shell=True).decode("utf-8")
-                python_sys_version = out.lower().split("python ")[1].rstrip()
-            except Exception:
-                python_sys_version = "Unknown"
-
+        self._ui.conan_cur_version_value_label.setText(conan_version)
+        self._ui.python_exe_value_label.setText(sys.executable)
         self._ui.python_cur_version_value_label.setText(platform.python_version())
         self._ui.revision_enabled_checkbox.setChecked(app.conan_api.client_cache.config.revisions_enabled)
-        self._ui.conan_sys_version_value_label.setText(conan_sys_version)
-        self._ui.python_sys_version_value_label.setText(python_sys_version)
         self._ui.conan_usr_home_value_label.setText(app.conan_api.client_cache.cache_folder)
         self._ui.conan_usr_cache_value_label.setText(str(app.conan_api.get_short_path_root()))
         self._ui.conan_storage_path_value_label.setText(str(app.conan_api.client_cache.store))
@@ -135,7 +119,7 @@ class ConanConfigView(PluginInterfaceV1):
 
         self._remotes_controller.resize_remote_columns()
         # self._ui.conan_usr_cache_label.adjustSize()
-        #self._ui.revision_enabled_label.setMaximumWidth(self._ui.conan_usr_cache_label.width())
+        # self._ui.revision_enabled_label.setMaximumWidth(self._ui.conan_usr_cache_label.width())
 
     def reload_themed_icons(self):
         super().reload_themed_icons()
@@ -197,7 +181,6 @@ class ConanConfigView(PluginInterfaceV1):
         if reply == QMessageBox.StandardButton.Yes:
             delete_path(self.profiles_path / profile_name)
             self.on_refresh_profiles()
-
 
     def on_refresh_profiles(self):
         self._load_profiles_tab()

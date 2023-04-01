@@ -6,12 +6,12 @@ from pathlib import Path
 from test.conftest import TEST_REF, conan_create_and_upload
 from typing import List
 
-from conan_app_launcher.core import ConanApi
-from conan_app_launcher.core.conan_common import create_key_value_pair_list
-from conan_app_launcher.core.conan_worker import (ConanWorker,
-                                                  ConanWorkerElement)
-from conan_app_launcher.core.conan_cleanup import  ConanCleanup
-from conan_app_launcher.core.conan_common import ConanRef
+from conan_app_launcher.conan_wrapper import ConanApi
+from conan_app_launcher.conan_wrapper.types import create_key_value_pair_list
+from conan_app_launcher.conan_wrapper.conan_worker import (ConanWorker,
+                                                           ConanWorkerElement)
+from conan_app_launcher.conan_wrapper.conan_cleanup import ConanCleanup
+from conan_app_launcher.conan_wrapper.types import ConanRef
 
 
 def test_conan_profile_name_alias_builder():
@@ -230,7 +230,7 @@ def test_conan_worker(base_fixture, mocker):
                                              "settings": {}, "update": False,  "auto_install": True}
                                             ]
 
-    mock_func = mocker.patch('conan_app_launcher.core.ConanApi.get_path_or_auto_install')
+    mock_func = mocker.patch('conan_app_launcher.conan_wrapper.ConanApi.get_path_or_auto_install')
     import conan_app_launcher.app as app
 
     conan_worker = ConanWorker(ConanApi().init_api(), app.active_settings)

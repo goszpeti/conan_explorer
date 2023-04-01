@@ -6,7 +6,6 @@ from packaging import specifiers, version
 
 import os
 from dataclasses import dataclass
-from distutils.util import strtobool
 from pathlib import Path
 import uuid
 from typing import TYPE_CHECKING, List, Optional
@@ -122,7 +121,7 @@ class PluginFile():
                 assert plugin_class, "field 'plugin_class' is required"
                 description = plugin_info.get("description", "")
                 author = plugin_info.get("author", "Unknown")
-
+                from distutils.util import strtobool
                 side_menu = bool(strtobool(plugin_info.get("side_menu", "False")))
                 conan_versions = plugin_info.get("conan_versions", "")
                 desc = PluginDescription(name, version, author, icon, str(import_path),

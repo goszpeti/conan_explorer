@@ -13,12 +13,12 @@ from test.conftest import TEST_REF, app_qt_fixture
 import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
 import pytest
-from conan_app_launcher.core.conan_worker import ConanWorkerElement
+from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.views import AboutPage
 from conan_app_launcher.ui.dialogs import show_bug_reporting_dialog
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
-from conan_app_launcher.core.conan_common import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtWidgets, QtGui
 
 Qt = QtCore.Qt
@@ -66,7 +66,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
 
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
-    
+
     conan_install_dialog = ConanInstallDialog(root_obj, TEST_REF + ":" + id)
     conan_install_dialog._ui.auto_install_check_box.setCheckState(Qt.CheckState.Checked)
     app_qt_fixture.addWidget(root_obj)
@@ -76,7 +76,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     # with update flag
     conan_install_dialog._ui.update_check_box.setCheckState(Qt.CheckState.Checked)
     mock_install_func = mocker.patch(
-        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_install_queue')
+        'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, "settings": {},
                                                 "options": {}, "update": True, "auto_install": True}
@@ -97,8 +97,6 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
                                                 "options": {}, "update": True, "auto_install": False}
     conan_install_dialog.close()
-
-    
 
 
 def test_about_dialog(app_qt_fixture, base_fixture):
@@ -139,6 +137,7 @@ def test_bug_dialog(qtbot, base_fixture, mocker):
     browser: QtWidgets.QTextBrowser = dialog.findChild(QtWidgets.QTextBrowser)
     assert "\n".join(traceback.format_tb(exc_info[2], limit=None)) in browser.toPlainText()
 
+
 def test_get_accent_color(mocker):
     """
     Test, that get_user_theme_color returns black on default and the color on Windows
@@ -161,4 +160,3 @@ def test_get_accent_color(mocker):
     elif platform.system() == "Linux":
         color = get_user_theme_color()
         assert color == "#000000"
-
