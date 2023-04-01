@@ -196,7 +196,7 @@ class Ui_MainWindow(object):
         self.content_frame_layout.setSpacing(0)
         self.content_frame_layout.setObjectName(u"content_frame_layout")
         self.content_frame_layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.content_frame_layout.setContentsMargins(2, 0, 2, 5)
+        self.content_frame_layout.setContentsMargins(2, 0, 2, 1)
         self.page_stacked_widget = QStackedWidget(self.content_frame)
         self.page_stacked_widget.setObjectName(u"page_stacked_widget")
         sizePolicy4.setHeightForWidth(self.page_stacked_widget.sizePolicy().hasHeightForWidth())

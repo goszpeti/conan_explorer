@@ -61,7 +61,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         return super().showEvent(a0)
 
     def resizeEvent(self, a0: QResizeEvent) -> None:
-        self.resize_filter()
+        #self.resize_filter()
         self._pkg_file_exp_ctrl.resize_file_columns()
         super().resizeEvent(a0)
 

@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
-import conan_app_launcher.app as app  # using global module pattern
+import conan_app_launcher.app as app
+from conan_app_launcher.ui.common.syntax import ConfigHighlighter  # using global module pattern
 from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
@@ -58,7 +59,7 @@ class ConanSearchView(PluginInterfaceV1):
         # force_light_mode for disabled icon in dark mode
         self.set_themed_icon(self._ui.search_button, "icons/search.svg", size=(20, 20), force_light_mode=True)
         self.set_themed_icon(self._ui.install_button, "icons/download_pkg.svg", size=(20, 20))
-
+        self._conan_config_highlighter = ConfigHighlighter(self._ui.package_info_text.document(), "yaml")
         self._ui.remote_list.setMinimumHeight(0)
         self._ui.remote_list.setMaximumHeight(0)
         self.remote_toggle_animation = QPropertyAnimation(self._ui.remote_list, b"maximumHeight")

@@ -449,7 +449,7 @@
                   <number>2</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>5</number>
+                  <number>1</number>
                  </property>
                  <item>
                   <widget class="QStackedWidget" name="page_stacked_widget">
