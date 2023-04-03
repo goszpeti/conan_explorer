@@ -4,8 +4,6 @@ import os
 import platform
 import shutil
 import subprocess
-import sys
-from contextlib import contextmanager
 
 from pathlib import Path
 from typing import List
@@ -14,30 +12,6 @@ from conan_app_launcher import INVALID_PATH, PKG_NAME, asset_path
 from conan_app_launcher.app.logger import Logger
 
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
-
-
-@contextmanager
-def escape_venv():
-    # don't do this while testing! if it errors or the gui is closed, while this is running,
-    #  the whole testrun will be compromised!
-    if os.getenv("PYTEST_CURRENT_TEST"):
-        yield
-    if os.getenv("PYTEST_CURRENT_TEST"):
-        return
-    path_var = os.environ.get("PATH", "")
-    bin_path = Path(sys.executable).parent
-    import re
-    path_regex = re.compile(re.escape(str(bin_path)), re.IGNORECASE)
-    new_path_var = path_regex.sub('', path_var)
-    apply_vars = {"PATH": new_path_var}
-    old_env = dict(os.environ)
-    os.environ.update(apply_vars)
-    try:
-        yield
-    finally:
-        os.environ.clear()
-        os.environ.update(old_env)
-
 
 def is_windows_11():
     """ Main version number is still 10 - thanks MS! """

@@ -4,7 +4,6 @@
 # Note: To use the "upload" functionality of this file, you must:
 #   $ pipenv install twine --dev
 
-import io
 import os
 from glob import glob
 from os.path import basename, splitext
@@ -70,7 +69,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 # Import the README and use it as the long-description.
 # Replace image links at release to point to this tag instead of master, so they do not change with new releases
 try:
-    with io.open(os.path.join(here, "README.md"), encoding="utf-8") as f:
+    with open(os.path.join(here, "README.md"), encoding="utf-8") as f:
         long_description = "\n" + f.read()
     # replace links
     temp = []

@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 import configparser
 import ctypes
@@ -329,3 +330,25 @@ def mock_clipboard(mocker):
     clipboard.supportsSelection.return_value = True
     QApplication.clipboard.return_value = clipboard
     return clipboard
+
+@contextmanager
+def escape_venv():
+    # don't do this while testing! if it errors or the gui is closed, while this is running,
+    #  the whole testrun will be compromised!
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        yield
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        return
+    path_var = os.environ.get("PATH", "")
+    bin_path = Path(sys.executable).parent
+    import re
+    path_regex = re.compile(re.escape(str(bin_path)), re.IGNORECASE)
+    new_path_var = path_regex.sub('', path_var)
+    apply_vars = {"PATH": new_path_var}
+    old_env = dict(os.environ)
+    os.environ.update(apply_vars)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_env)
