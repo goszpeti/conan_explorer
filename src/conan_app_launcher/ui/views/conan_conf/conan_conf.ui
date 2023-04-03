@@ -32,7 +32,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="info_widget">
       <property name="styleSheet">
@@ -451,6 +451,13 @@
              <widget class="QPushButton" name="profile_remove_button">
               <property name="text">
                <string>Remove</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="profile_rename_button">
+              <property name="text">
+               <string>Rename</string>
               </property>
              </widget>
             </item>

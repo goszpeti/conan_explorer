@@ -290,6 +290,11 @@ class Ui_Form(object):
 
         self.verticalLayout_9.addWidget(self.profile_remove_button)
 
+        self.profile_rename_button = QPushButton(self.profiles_buttons_frame)
+        self.profile_rename_button.setObjectName(u"profile_rename_button")
+
+        self.verticalLayout_9.addWidget(self.profile_rename_button)
+
         self.profile_save_button = QPushButton(self.profiles_buttons_frame)
         self.profile_save_button.setObjectName(u"profile_save_button")
 
@@ -362,7 +367,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(3)
+        self.config_tab_widget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -399,6 +404,7 @@ class Ui_Form(object):
         self.profile_refresh_button.setText(QCoreApplication.translate("Form", u"Refresh list", None))
         self.profile_add_button.setText(QCoreApplication.translate("Form", u"Add", None))
         self.profile_remove_button.setText(QCoreApplication.translate("Form", u"Remove", None))
+        self.profile_rename_button.setText(QCoreApplication.translate("Form", u"Rename", None))
         self.profile_save_button.setText(QCoreApplication.translate("Form", u"Save", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.profiles), QCoreApplication.translate("Form", u"Profiles", None))
         self.config_file_save_button.setText(QCoreApplication.translate("Form", u"Save", None))

@@ -94,13 +94,15 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.profile_save_button.clicked.connect(self.on_save_profile_file)
         self._ui.profile_add_button.clicked.connect(self.on_add_profile)
         self._ui.profile_remove_button.clicked.connect(self.on_remove_profile)
+        self._ui.profile_rename_button.clicked.connect(self.on_rename_profile)
         self._ui.profile_refresh_button.clicked.connect(self.on_refresh_profiles)
 
         self.set_themed_icon(self._ui.profile_save_button, "icons/save.svg")
         self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.svg")
         self.set_themed_icon(self._ui.profile_remove_button, "icons/delete.svg")
         self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.svg")
-
+        self.set_themed_icon(self._ui.profile_rename_button, "icons/rename.svg")
+        
     def _load_profiles_tab(self):
         profiles_model = ProfilesModel()
         self._ui.profiles_list_view.setModel(profiles_model)
@@ -165,13 +167,26 @@ class ConanConfigView(PluginInterfaceV1):
     def on_add_profile(self):
         new_profile_dialog = QInputDialog(self)
         profile_name, accepted = new_profile_dialog.getText(self, "New profile", 'Enter name:', text="")
-        if profile_name:
+        if accepted and profile_name:
             (self.profiles_path / profile_name).touch()
             self.on_refresh_profiles()
 
+    def on_rename_profile(self):
+        view_indexes = self._ui.profiles_list_view.selectedIndexes()
+        if not view_indexes:
+            return
+        profile_name: str = view_indexes[0].data(0)
+        rename_profile_dialog = QInputDialog(self)
+        new_profile_name, accepted = rename_profile_dialog.getText(self, "Rename profile", 'Enter new name:', text=profile_name)
+        if accepted and profile_name:
+            (self.profiles_path / profile_name).rename(self.profiles_path / new_profile_name)
+            self.on_refresh_profiles()
+
     def on_remove_profile(self):
-        view_index = self._ui.profiles_list_view.selectedIndexes()[0]
-        profile_name = view_index.data(0)
+        view_indexes = self._ui.profiles_list_view.selectedIndexes()
+        if not view_indexes:
+            return
+        profile_name: str = view_indexes[0].data(0)
         message_box = QMessageBox(parent=self)
         message_box.setWindowTitle("Remove profile")
         message_box.setText(f"Are you sure, you want to delete the profile {profile_name}?")
