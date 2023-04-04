@@ -15,12 +15,13 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QCheckBox,
-    QComboBox, QDialog, QDialogButtonBox, QFormLayout,
-    QFrame, QGridLayout, QHeaderView, QLabel,
+from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QComboBox,
+    QDialog, QDialogButtonBox, QFormLayout, QFrame,
+    QGridLayout, QHBoxLayout, QHeaderView, QLabel,
     QPushButton, QSizePolicy, QTreeWidget, QTreeWidgetItem,
     QVBoxLayout, QWidget)
 
+from conan_app_launcher.ui.widgets import AnimatedToggle
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 
 class Ui_Dialog(object):
@@ -37,7 +38,9 @@ class Ui_Dialog(object):
         Dialog.setSizeIncrement(QSize(0, 0))
         Dialog.setModal(False)
         self.gridLayout = QGridLayout(Dialog)
+        self.gridLayout.setSpacing(2)
         self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setContentsMargins(2, 2, 2, 2)
         self.main_frame = QFrame(Dialog)
         self.main_frame.setObjectName(u"main_frame")
         self.main_frame.setFrameShape(QFrame.StyledPanel)
@@ -102,12 +105,27 @@ class Ui_Dialog(object):
         self.bottom_frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout = QVBoxLayout(self.bottom_frame)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.update_check_box = QCheckBox(self.bottom_frame)
+        self.verticalLayout.setContentsMargins(2, 2, 2, 2)
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.update_check_box = AnimatedToggle(self.bottom_frame)
         self.update_check_box.setObjectName(u"update_check_box")
-        sizePolicy.setHeightForWidth(self.update_check_box.sizePolicy().hasHeightForWidth())
-        self.update_check_box.setSizePolicy(sizePolicy)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.update_check_box.sizePolicy().hasHeightForWidth())
+        self.update_check_box.setSizePolicy(sizePolicy2)
 
-        self.verticalLayout.addWidget(self.update_check_box)
+        self.horizontalLayout.addWidget(self.update_check_box)
+
+        self.update_label = QLabel(self.bottom_frame)
+        self.update_label.setObjectName(u"update_label")
+        self.update_label.setLayoutDirection(Qt.RightToLeft)
+
+        self.horizontalLayout.addWidget(self.update_label)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.line = QFrame(self.bottom_frame)
         self.line.setObjectName(u"line")
@@ -116,12 +134,22 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addWidget(self.line)
 
-        self.auto_install_check_box = QCheckBox(self.bottom_frame)
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.auto_install_check_box = AnimatedToggle(self.bottom_frame)
         self.auto_install_check_box.setObjectName(u"auto_install_check_box")
-        sizePolicy.setHeightForWidth(self.auto_install_check_box.sizePolicy().hasHeightForWidth())
-        self.auto_install_check_box.setSizePolicy(sizePolicy)
+        sizePolicy2.setHeightForWidth(self.auto_install_check_box.sizePolicy().hasHeightForWidth())
+        self.auto_install_check_box.setSizePolicy(sizePolicy2)
 
-        self.verticalLayout.addWidget(self.auto_install_check_box)
+        self.horizontalLayout_2.addWidget(self.auto_install_check_box)
+
+        self.auto_install_label = QLabel(self.bottom_frame)
+        self.auto_install_label.setObjectName(u"auto_install_label")
+
+        self.horizontalLayout_2.addWidget(self.auto_install_label)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
 
         self.button_box = QDialogButtonBox(self.bottom_frame)
         self.button_box.setObjectName(u"button_box")
@@ -154,7 +182,9 @@ class Ui_Dialog(object):
         ___qtreewidgetitem.setText(1, QCoreApplication.translate("Dialog", u"Value", None));
         ___qtreewidgetitem.setText(0, QCoreApplication.translate("Dialog", u"Name", None));
         self.label.setText(QCoreApplication.translate("Dialog", u"Reference", None))
-        self.update_check_box.setText(QCoreApplication.translate("Dialog", u"Update (-u)", None))
-        self.auto_install_check_box.setText(QCoreApplication.translate("Dialog", u"Automatically determine best matching package", None))
+        self.update_check_box.setText("")
+        self.update_label.setText(QCoreApplication.translate("Dialog", u"Update (-u)", None))
+        self.auto_install_check_box.setText("")
+        self.auto_install_label.setText(QCoreApplication.translate("Dialog", u"Automatically determine best matching package", None))
     # retranslateUi
 

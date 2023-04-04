@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'remote_edit_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.4.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,9 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QDialog,
-    QDialogButtonBox, QGridLayout, QLabel, QLayout,
-    QLineEdit, QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
+    QGridLayout, QLabel, QLayout, QLineEdit,
+    QSizePolicy, QVBoxLayout, QWidget)
+
+from conan_app_launcher.ui.widgets import AnimatedToggle
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -35,7 +37,7 @@ class Ui_Dialog(object):
         self.edit_grid = QGridLayout()
         self.edit_grid.setObjectName(u"edit_grid")
         self.edit_grid.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.verify_ssl_checkbox = QCheckBox(Dialog)
+        self.verify_ssl_checkbox = AnimatedToggle(Dialog)
         self.verify_ssl_checkbox.setObjectName(u"verify_ssl_checkbox")
 
         self.edit_grid.addWidget(self.verify_ssl_checkbox, 2, 1, 1, 1)

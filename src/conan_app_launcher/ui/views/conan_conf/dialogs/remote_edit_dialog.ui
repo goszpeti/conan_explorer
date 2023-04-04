@@ -29,7 +29,7 @@
       <enum>QLayout::SetMinAndMaxSize</enum>
      </property>
      <item row="2" column="1">
-      <widget class="QCheckBox" name="verify_ssl_checkbox">
+      <widget class="AnimatedToggle" name="verify_ssl_checkbox">
        <property name="text">
         <string/>
        </property>
@@ -116,6 +116,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AnimatedToggle</class>
+   <extends>QCheckBox</extends>
+   <header>conan_app_launcher.ui.widgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
