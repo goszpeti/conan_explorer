@@ -104,6 +104,9 @@ jobs:
         run: | # markupsafe is a workaround fix for broken conan dependencies
           pip install markupsafe==2.0.1 --use-pep517
           pip install "conan${{ matrix.conan }}" --use-pep517
+      - name: Install specific PySide6 version
+        run: |  # 6.5.0 does currently not work on Linux 
+          pip install PySide6-Essentials==6.4.5
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
