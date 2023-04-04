@@ -106,7 +106,7 @@ jobs:
           pip install "conan${{ matrix.conan }}" --use-pep517
       - name: Install specific PySide6 version
         run: |  # 6.5.0 does currently not work on Linux 
-          pip install PySide6-Essentials==6.4.5
+          pip install PySide6-Essentials==6.4.3
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
