@@ -7,6 +7,7 @@ import platform
 import sys
 import traceback
 from conan_app_launcher.app.crash import bug_dialog_exc_hook
+from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common.theming import get_user_theme_color
 from test.conftest import TEST_REF, app_qt_fixture
 
@@ -15,13 +16,54 @@ import conan_app_launcher.app as app
 import pytest
 from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_app_launcher.ui.views import AboutPage
-from conan_app_launcher.ui.dialogs import show_bug_reporting_dialog
+from conan_app_launcher.ui.dialogs import show_bug_reporting_dialog, FileEditorSelDialog
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 from conan_app_launcher.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtWidgets, QtGui
 
 Qt = QtCore.Qt
+
+def test_select_file_editor(app_qt_fixture, base_fixture, mocker):
+    """ Test, that the select file editor displays the setting and saves it, if it is valid. """
+    # set valid executable first
+    app.active_settings.set(FILE_EDITOR_EXECUTABLE, sys.executable)
+    
+    root_obj = QtWidgets.QWidget()
+    dialog = FileEditorSelDialog(root_obj)
+    app_qt_fixture.addWidget(root_obj)
+    app_qt_fixture.waitExposed(dialog)
+
+    assert dialog._ui.file_edit.text() == sys.executable
+
+    # set invalid path
+    dialog._ui.file_edit.setText("unknown")
+
+    # press ok
+    dialog._ui.button_box.accepted.emit()
+
+    # setting should not changed
+    assert app.active_settings.get_string(FILE_EDITOR_EXECUTABLE) == sys.executable
+
+    # set valid path
+    app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
+    dialog = FileEditorSelDialog(root_obj)
+    dialog._ui.file_edit.setText(sys.executable)
+    # press ok
+    dialog._ui.button_box.accepted.emit()
+    # setting should be changed
+    assert app.active_settings.get_string(FILE_EDITOR_EXECUTABLE) == sys.executable
+
+    # try browse button
+
+    dialog = FileEditorSelDialog(root_obj)
+    dialog._ui.file_edit.setText("")
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
+                        return_value=[str(sys.executable)])
+    dialog._ui.browse_button.clicked.emit()
+    assert dialog._ui.file_edit.text() == sys.executable
 
 
 def test_edit_line_conan(app_qt_fixture, base_fixture, light_theme_fixture):

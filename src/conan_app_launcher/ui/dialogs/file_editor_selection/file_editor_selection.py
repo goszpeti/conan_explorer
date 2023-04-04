@@ -2,6 +2,7 @@
 from pathlib import Path
 from PySide6.QtWidgets import QDialog, QFileDialog
 import conan_app_launcher.app as app
+from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 
 class FileEditorSelDialog(QDialog):
@@ -32,9 +33,13 @@ class FileEditorSelDialog(QDialog):
             selected_path = Path(dialog.selectedFiles()[0])
             try:
                 self._ui.file_edit.setText(str(selected_path))
-            except Exception:
+            except Exception as e:
                 # errors, if it does not resolve
-                pass # TODO
+                Logger().debug("Can}'t set selected path: {e}.")
+
     def on_save(self):
-        app.active_settings.set(FILE_EDITOR_EXECUTABLE, self._ui.file_edit.text())
+        if Path(self._ui.file_edit.text()).is_file():
+            app.active_settings.set(FILE_EDITOR_EXECUTABLE, self._ui.file_edit.text())
+        else:
+            Logger().warning(f"Path {self._ui.file_edit.text()} is not a file, setting will be discarded.")
         self.close()
