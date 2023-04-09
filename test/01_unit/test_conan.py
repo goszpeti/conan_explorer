@@ -121,7 +121,7 @@ def test_get_path_or_install(base_fixture):
     assert (package_folder / dir_to_check).is_dir()
 
 
-def test_get_path_or_install_manual_options(capsys):
+def test_get_path_or_install_manual_options():
     """
     Test, if a package with options can install.
     The actual installaton must not return an error and non given options be merged with default options.
