@@ -1,11 +1,8 @@
-from tempfile import gettempdir, tempdir
-from typing import Optional
+from tempfile import gettempdir
 from conans import ConanFile
-import platform
 import sys
-import os
 from pathlib import Path
-from distutils.file_util import copy_file
+from shutil import copyfile
 
 class Example(ConanFile):
     name = "example"
@@ -21,5 +18,5 @@ class Example(ConanFile):
         # repackage some executable
         python_path = Path(sys.executable)
         renamed_executable = Path(gettempdir()) / ("python" + python_path.suffix)
-        copy_file(str(python_path), str(renamed_executable))
+        copyfile(str(python_path), str(renamed_executable))
         self.copy(renamed_executable.name, src=str(renamed_executable.parent), dst="bin")

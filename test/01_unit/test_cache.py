@@ -1,7 +1,7 @@
 
 import tempfile
 import pytest
-from distutils.file_util import copy_file
+from shutil import copyfile
 from pathlib import Path
 from conan_app_launcher import INVALID_PATH
 
@@ -26,7 +26,7 @@ def test_read_cache(base_fixture: PathSetup):
     Test reading from a cache file. Check internal state and use public API.
     """
     temp_cache_path = Path(tempfile.mkdtemp()) / ConanInfoCache.CACHE_FILE_NAME
-    copy_file(str(base_fixture.testdata_path / "cache" / "cache_read.json"), str(temp_cache_path))
+    copyfile(str(base_fixture.testdata_path / "cache" / "cache_read.json"), str(temp_cache_path))
 
     cache = ConanInfoCache(temp_cache_path.parent)
     assert cache._local_packages == {"my_package/1.0.0@_/_": "",
@@ -58,7 +58,7 @@ def test_read_cache(base_fixture: PathSetup):
 def test_read_and_delete_corrupt_cache(base_fixture: PathSetup):
     """Test, that an invalid jsonfile is deleted and a new one created"""
     temp_cache_path = Path(tempfile.mkdtemp()) / ConanInfoCache.CACHE_FILE_NAME
-    copy_file(str(base_fixture.testdata_path / "cache" / "cache_read_corrupt.json"), str(temp_cache_path))
+    copyfile(str(base_fixture.testdata_path / "cache" / "cache_read_corrupt.json"), str(temp_cache_path))
 
     cache = ConanInfoCache(temp_cache_path.parent)
     info = ""
@@ -73,7 +73,7 @@ def test_update_cache(base_fixture: PathSetup):
     Test, if updating with new values appends/updates the values correctly in the file
     """
     temp_cache_path = Path(tempfile.mkdtemp()) / ConanInfoCache.CACHE_FILE_NAME
-    copy_file(str(base_fixture.testdata_path / "cache" / "cache_write.json"), str(temp_cache_path))
+    copyfile(str(base_fixture.testdata_path / "cache" / "cache_write.json"), str(temp_cache_path))
 
     cache = ConanInfoCache(temp_cache_path.parent)
     pkg = CFR.loads("new_pkg/1.0.0@me/stable")

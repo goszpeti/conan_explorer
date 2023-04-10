@@ -6,12 +6,20 @@ import shutil
 import subprocess
 
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from conan_app_launcher import INVALID_PATH, PKG_NAME, asset_path
 from conan_app_launcher.app.logger import Logger
 
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
+
+def str2bool(value: str) -> bool:
+    value = value.lower()
+    if value in {'yes', 'true', 'y', '1'}:
+        return True
+    if value in  {'no', 'false','n', '0'}:
+        return False
+    return False
 
 def is_windows_11():
     """ Main version number is still 10 - thanks MS! """
@@ -171,12 +179,12 @@ def delete_path(dst: Path):
     Delete file or (non-empty) folder recursively.
     Exceptions will be caught and message logged to stdout.
     """
-    from distutils.dir_util import remove_tree
+    from shutil import rmtree
     try:
         if dst.is_file():
             os.remove(dst)
         elif dst.is_dir():
-            remove_tree(str(dst), verbose=1)
+            rmtree(str(dst), ignore_errors=True)
     except Exception as e:
         Logger().warning(f"Can't delete {str(dst)}: {str(e)}")
 
@@ -187,14 +195,13 @@ def copy_path_with_overwrite(src: Path, dst: Path):
     Directories will be copied from under source, so you may need to add the orig. folder name, if you want that!
     Exceptions will be caught and message logged to stdout.
     """
-    # TODO find replacements for deprecated distutils functions
-    from distutils.dir_util import copy_tree
-    from distutils.file_util import copy_file
+    from shutil import copytree, copy2
     try:
+        dst.parent.mkdir(parents=True, exist_ok=True)
         if src.is_file():
-            copy_file(str(src), str(dst))
+            copy2(str(src), str(dst))
         else:
-            copy_tree(str(src), str(dst))
+            copytree(str(src), str(dst), dirs_exist_ok=True)
     except Exception as e:
         Logger().warning(f"Can't copy {str(src)} to {str(dst)}: {str(e)}")
 

@@ -1,4 +1,5 @@
 import configparser
+from copy import deepcopy
 import os
 from pathlib import Path
 import platform
@@ -45,7 +46,7 @@ class IniSettings(SettingsInterface):
     """
 
     def __init__(self, ini_file_path: Optional[PathLike], auto_save=True,
-                 default_values=application_settings_spec(),
+                 default_values: Dict[str, Dict[str, Any]] = application_settings_spec(),
                  custom_key_enabled_sections=[PLUGINS_SECTION_NAME]):
         """
         Read config.ini file to load settings.
@@ -68,7 +69,7 @@ class IniSettings(SettingsInterface):
             self._logger.info(f'Settings: Using {self._ini_file_path}')
 
         ### default setting values ###
-        self._values: Dict[str, Dict[str, Any]] = default_values
+        self._values: Dict[str, Dict[str, Any]] = deepcopy(default_values)
 
         self._read_ini()
 
@@ -138,19 +139,19 @@ class IniSettings(SettingsInterface):
             for setting in self._values[section]:
                 self._write_setting(setting, section)
 
-        with self._ini_file_path.open('w', encoding="utf8") as ini_file:
+        with self._ini_file_path.open('w', encoding="utf-8") as ini_file:
             self._parser.write(ini_file)
 
     def _read_ini(self):
         """ Read settings ini with configparser. """
         update_needed = False
         try:
-            self._parser.read(self._ini_file_path, encoding="UTF-8")
-            for node in self._values.keys():
-                setting_keys = set(list(self._values[node].keys()))
+            self._parser.read(self._ini_file_path, encoding="utf--8")
+            for node in self._parser.sections():
+                setting_keys = set(list(self._values.get(node, {}).keys()))
                 if node in self._custom_key_enabled_sections:
                     setting_keys = setting_keys.union(set(self._get_section(node).keys()))
-                if not self._values[node]:  # empty section - this is a user filled dict
+                if not self._values.get(node):  # empty section - this is a user filled dict
                     update_needed |= self._read_dict_setting(node)
                 for setting in setting_keys:
                     update_needed |= self._read_setting(setting, node)
@@ -173,6 +174,8 @@ class IniSettings(SettingsInterface):
         """ Helper function to get a section from ini, or create it, if it does not exist."""
         if node not in self._parser:
             self._parser.add_section(node)
+        if node not in self._values:
+            self._values[node] = {}
         return self._parser[node]
 
     def _read_dict_setting(self, node: str) -> bool:
@@ -230,6 +233,4 @@ class IniSettings(SettingsInterface):
             return  # dicts are read only currently
 
         section = self._get_section(node)
-        if name not in section:
-            self._logger.error(f"Settings: Setting {name} to write is unknown")
         section[name] = str(value)

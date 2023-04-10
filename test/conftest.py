@@ -8,7 +8,6 @@ import shutil
 import sys
 import tempfile
 import time
-from distutils.util import strtobool
 from pathlib import Path
 from shutil import copy
 from subprocess import CalledProcessError, check_output
@@ -19,6 +18,7 @@ import psutil
 import pytest
 import conan_app_launcher.app as app  # resolve circular dependencies
 from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path
+from conan_app_launcher.app.system import str2bool
 from conan_app_launcher.conan_wrapper import ConanApi, ConanInfoCache, ConanWorker
 from conan_app_launcher.ui.common import remove_qt_logger
 from conan_app_launcher.ui.main_window import MainWindow
@@ -31,7 +31,7 @@ conan_server_thread = None
 # setup conan test server
 TEST_REF = "example/9.9.9@local/testing"
 TEST_REF_OFFICIAL = "example/1.0.0@_/_"
-SKIP_CREATE_CONAN_TEST_DATA = strtobool(os.getenv("SKIP_CREATE_CONAN_TEST_DATA", "False"))
+SKIP_CREATE_CONAN_TEST_DATA = str2bool(os.getenv("SKIP_CREATE_CONAN_TEST_DATA", "False"))
 TEST_REMOTE_NAME = "local"
 TEST_REMOTE_URL = "http://127.0.0.1:9300/"
 
@@ -262,8 +262,9 @@ def base_fixture():
     os.environ["DISABLE_ASYNC_LOADER"] = "True"  # for code coverage to work
     import conan_app_launcher.app as app
 
-    app.active_settings = settings_factory(SETTINGS_INI_TYPE, user_save_path /
-                                           (SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE))
+    settings_ini_path = user_save_path / (SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE)
+    os.remove(str(settings_ini_path))
+    app.active_settings = settings_factory(SETTINGS_INI_TYPE, settings_ini_path)
     app.conan_api = ConanApi()
     app.conan_api.init_api()
     app.conan_worker = ConanWorker(app.conan_api, app.active_settings)

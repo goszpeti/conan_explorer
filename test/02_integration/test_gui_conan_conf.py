@@ -3,7 +3,7 @@ import os
 from time import sleep
 import conan_app_launcher
 from conan_app_launcher.conan_wrapper import ConanApi
-from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL
+from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, PathSetup
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
@@ -12,7 +12,7 @@ from conan_app_launcher.ui.views.conan_conf import ConanConfigView
 
 Qt = QtCore.Qt
 
-def test_conan_config_view_remotes(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
+def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_config_fixture, mocker):
     """
     Test Local Pacakge Explorer functions.
     Add 2 remotes in addition to the local one.
@@ -226,3 +226,6 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     # assert password is empty (does not really test, if it worked correctly)
     assert conan_conf_view.remote_login_dialog._ui.password_line_edit.text() == ""
     main_gui.close()
+
+def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, ui_no_refs_config_fixture, mocker):
+    pass

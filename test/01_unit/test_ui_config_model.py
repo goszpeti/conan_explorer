@@ -1,5 +1,5 @@
 import sys
-from distutils.file_util import copy_file
+from shutil import copy2, copyfile
 from pathlib import Path
 
 import pytest
@@ -42,8 +42,8 @@ def test_icon_eval(tmp_path: Path, qtbot, base_fixture: PathSetup):
     
 
     # copy icons to tmp_path to fake package path
-    copy_file(str(asset_path / "icons" / "icon.ico"), tmp_path)
-    copy_file(str(asset_path / "icons" / GUI_STYLE_MATERIAL / "app.svg"), tmp_path)
+    copy2(str(asset_path / "icons" / "icon.ico"), str(tmp_path))
+    copy2(str(asset_path / "icons" / GUI_STYLE_MATERIAL / "app.svg"), str(tmp_path))
 
     # relative to package with // notation - migrate from old setting
     app_config = UiAppLinkConfig("AppName", icon="//icon.ico")

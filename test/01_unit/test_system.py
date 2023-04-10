@@ -5,7 +5,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from distutils.dir_util import remove_tree
+from shutil import rmtree
 from pathlib import Path
 from subprocess import check_output
 from test.conftest import check_if_process_running, get_window_pid, is_ci_job
@@ -269,7 +269,7 @@ def test_copy_paste():
     copy_path_with_overwrite(test_dir, new_path)
     assert new_path.exists()
     assert test_file_content == (new_path / test_file.name).read_text()
-    remove_tree(str(new_path), verbose=1)
+    rmtree(str(new_path), ignore_errors=True)
 
     # 3. Copy file in other dir(non-overwrite)
     new_dir_path = Path(tempfile.mkdtemp())

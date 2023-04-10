@@ -115,6 +115,10 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     conan_install_dialog.show()
     app_qt_fixture.waitExposed(conan_install_dialog)
 
+    # check, that there is no option and profile selection and ref line edit is locked
+    # TODO
+    # assert False
+
     # with update flag
     conan_install_dialog._ui.update_check_box.setCheckState(Qt.CheckState.Checked)
     mock_install_func = mocker.patch(
@@ -125,9 +129,8 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
 
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 
-    # check only ref
-    conan_install_dialog._ui.update_check_box.setCheckState(Qt.CheckState.Unchecked)
-    conan_install_dialog._ui.conan_ref_line_edit.setText(TEST_REF)
+    # check only ref - new instance neededm(other dialog variant)
+    conan_install_dialog = ConanInstallDialog(root_obj, TEST_REF)
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
                                                 "options": {}, "update": False, "auto_install": True}
@@ -138,8 +141,16 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
                                                 "options": {}, "update": True, "auto_install": False}
-    conan_install_dialog.close()
 
+    # test option selection
+
+    # check profile selection
+
+    ## check that profile set default works
+
+    ## remove default selected profile and re-init
+
+    conan_install_dialog.close()
 
 def test_about_dialog(app_qt_fixture, base_fixture):
     """

@@ -1,9 +1,12 @@
 from pathlib import Path
 import tempfile
 import pytest
-from conan_app_launcher import INVALID_PATH
+import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher import BUILT_IN_PLUGIN, INVALID_PATH, AUTHOR
+from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from conan_app_launcher.ui.plugin import PluginHandler, PluginFile, PluginDescription
 from test.conftest import PathSetup
+from PySide6 import QtCore, QtWidgets
 
 @pytest.mark.conanv2
 def test_plugin_file_read(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
@@ -81,10 +84,35 @@ def test_plugin_file_read(base_fixture: PathSetup, capfd: pytest.CaptureFixture[
     assert plugins[0].plugin_class == "TestPlugin"
 
 def test_plugin_file_write():
-    pass
+    """ Write out full plugin file with 2 plugins and compare line for line"""
+    plugin_descrs = []
+    plugin_descrs.append(PluginDescription("WriteTest", "0.0.1", AUTHOR, "icon.ico", "import_path", "PluginClass", "description", False, "<2.0.0"))
+    plugin_descrs.append(PluginDescription("WriteTest2", "0.0.1", AUTHOR, "icon.ico", "import_path", "PluginClass", "description", False, "<2.0.0"))
 
-def test_plugin_file_register():
-    pass
+    out_file_path = Path(tempfile.mktemp())
+    PluginFile.write(out_file_path, plugin_descrs)
+    content = out_file_path.read_text("utf-8")
+    assert content == '[PluginDescription0]\nname = WriteTest\nversion = 0.0.1\nauthor = Péter Gosztolya and Contributors\nicon =' \
+    ' icon.ico\nimport_path = import_path\nplugin_class = PluginClass\ndescription = description\nside_menu = False\nconan_versions'\
+    ' = <2.0.0\n\n[PluginDescription1]\nname = WriteTest2\nversion = 0.0.1\nauthor = Péter Gosztolya and Contributors\nicon = icon.ico\n'\
+    'import_path = import_path\nplugin_class = PluginClass\ndescription = description\nside_menu = False\nconan_versions = <2.0.0\n\n'
+
+def test_plugin_file_register(base_fixture):
+    """ Check, that registering a description file generates a uuid - path entry in settings, and the same plugin cannit be registered twice """
+    plugin_groups = app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME)
+    assert plugin_groups == (BUILT_IN_PLUGIN,)
+    plugin_file_path = base_fixture.testdata_path / "plugin" / "plugins_minimal_valid.ini"
+
+    PluginFile.register(plugin_file_path)
+
+    plugin_groups  = app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME)
+    assert len(plugin_groups) == 2
+    for plugin_group in plugin_groups:
+        if plugin_group == BUILT_IN_PLUGIN:
+            continue
+        settings_plugin_file_path = app.active_settings.get_string(plugin_group)
+        assert Path(settings_plugin_file_path) == plugin_file_path
+
 
 def test_plugin_file_unregister():
     pass
@@ -99,9 +127,16 @@ def test_plugin_handler_conan_version():
     plugin = PluginDescription("", "1.58.0", "", "", "", "", "", False, "<2")
     assert PluginHandler.is_plugin_enabled(plugin)
 
-def test_plugin_handler(base_fixture: PathSetup):
-    ph = PluginHandler()
+def test_plugin_handler(app_qt_fixture, base_fixture: PathSetup):
+    # test add, remove, get_plugin_descr_from_name and get_same_file_plugins_from_name 
+    root_obj = QtWidgets.QWidget()
+
+    ph = PluginHandler(root_obj, None, None)
+    app_qt_fixture.addWidget(root_obj)
+    ph.show()
+    app_qt_fixture.waitExposed(ph)
 
 @pytest.mark.conanv1
 def test_example_plugin():
+    # TODO 
     pass

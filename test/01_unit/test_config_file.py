@@ -1,7 +1,7 @@
 import json
 import pytest
 import tempfile
-from distutils.file_util import copy_file
+from shutil import copyfile
 from pathlib import Path
 
 from conan_app_launcher.ui.config.json_file import JsonUiConfig
@@ -57,7 +57,7 @@ def test_read_correct_file(base_fixture: PathSetup, ui_config_fixture: Path):
 def test_update(base_fixture: PathSetup):
     """ Test that the oldest schema version updates correctly to the newest one """
     temp_file = Path(tempfile.gettempdir()) / "update.json"
-    copy_file(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
+    copyfile(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
 
     tabs = JsonUiConfig(temp_file).load().app_grid.tabs
     assert tabs[0].name == "Basics"
