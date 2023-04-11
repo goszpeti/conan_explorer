@@ -56,7 +56,6 @@ class ConanInstallDialog(QDialog):
         self._ui.set_default_install_profile_button.hide()
         self._ui.conan_opts_label.hide()
         self._ui.options_widget.hide()
-        self._ui.conan_opts_label.hide()
         self._ui.line.hide()
         self._ui.auto_install_check_box.hide()
 
@@ -87,7 +86,7 @@ class ConanInstallDialog(QDialog):
             loader = AsyncLoader(self)
             loader.async_loading(self, self.on_options_query, (conan_ref, ), loading_text="Loading options...")
             loader.wait_for_finished()
-            # TODO: CONAN V2
+            # TODO: CONAN V2 and make dedicated function from info and default options
             options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()  # type: ignore
         except Exception:
             Logger().warning("Can't determine options of " + conan_ref)
@@ -117,8 +116,7 @@ class ConanInstallDialog(QDialog):
 
     def on_options_query(self, conan_ref: str):
         try:
-            self._ref_info = app.conan_api.conan.info(
-                    app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
+            self._ref_info = app.conan_api.conan.info(app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
         except Exception:
             return
 
