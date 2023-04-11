@@ -11,6 +11,7 @@ from pathlib import Path
 from shutil import rmtree
 
 import pytest
+from conan_app_launcher.ui.plugin.plugins import PluginFile
 from conan_app_launcher.ui.views.app_grid.tab import TabList
 from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, user_save_path
 from conan_app_launcher.conan_wrapper import ConanApi
@@ -23,6 +24,8 @@ import conan_app_launcher.app as app  # using global module pattern
 
 from conan_app_launcher.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtWidgets
+
+from test.conftest import PathSetup
 
 Qt = QtCore.Qt
 
@@ -221,3 +224,30 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
     time.sleep(5)
     assert main_gui.app_grid.tab_widget.tabBar().count() == tabs_num
     main_gui.close()
+
+
+@pytest.mark.conanv1
+def test_example_plugin(app_qt_fixture, base_fixture: PathSetup):
+    example_plugin_path = base_fixture.core_path / "doc/example_plugin"
+    os.system(f"pip install -e {example_plugin_path}")
+    plugin_file_path = example_plugin_path / "cal_example_plugin" / "plugin.ini"
+    assert plugin_file_path.exists()
+    app.active_settings._read_ini() # reload settings
+
+    # start window
+    from pytestqt.plugin import _qapp_instance
+    main_gui = main_window.MainWindow(_qapp_instance)
+    app_qt_fixture.addWidget(main_gui)
+    main_gui.load()
+
+    main_gui.show()
+    app_qt_fixture.waitExposed(main_gui, timeout=3000)
+
+    # assert, that plugin is loaded
+    plugin = main_gui.page_widgets.get_page_by_name("My Example Plugin")
+    # path is dynamically loaded
+    from cal_example_plugin.my_cal_plugin import SamplePluginView
+    assert isinstance(plugin, SamplePluginView)
+
+    main_gui.close()
+    PluginFile.unregister(plugin_file_path)

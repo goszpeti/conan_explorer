@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import tempfile
 import pytest
@@ -97,7 +98,7 @@ def test_plugin_file_write():
     ' = <2.0.0\n\n[PluginDescription1]\nname = WriteTest2\nversion = 0.0.1\nauthor = Péter Gosztolya and Contributors\nicon = icon.ico\n'\
     'import_path = import_path\nplugin_class = PluginClass\ndescription = description\nside_menu = False\nconan_versions = <2.0.0\n\n'
 
-def test_plugin_file_register(base_fixture):
+def test_plugin_file_register_unregister(base_fixture):
     """ Check, that registering a description file generates a uuid - path entry in settings, and the same plugin cannit be registered twice """
     plugin_groups = app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME)
     assert plugin_groups == (BUILT_IN_PLUGIN,)
@@ -107,15 +108,17 @@ def test_plugin_file_register(base_fixture):
 
     plugin_groups  = app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME)
     assert len(plugin_groups) == 2
+    settings_plugin_file_path = ""
     for plugin_group in plugin_groups:
         if plugin_group == BUILT_IN_PLUGIN:
             continue
         settings_plugin_file_path = app.active_settings.get_string(plugin_group)
-        assert Path(settings_plugin_file_path) == plugin_file_path
+    assert Path(settings_plugin_file_path) == plugin_file_path
 
-
-def test_plugin_file_unregister():
-    pass
+    # Check, that unregistering the description file removes it from settings
+    PluginFile.unregister(plugin_file_path)
+    plugin_groups  = app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME)
+    assert len(plugin_groups) == 1
 
 @pytest.mark.conanv2
 def test_plugin_handler_conan_version():
@@ -128,7 +131,7 @@ def test_plugin_handler_conan_version():
     assert PluginHandler.is_plugin_enabled(plugin)
 
 def test_plugin_handler(app_qt_fixture, base_fixture: PathSetup):
-    # test add, remove, get_plugin_descr_from_name and get_same_file_plugins_from_name 
+    # TODO test add, remove, get_plugin_descr_from_name and get_same_file_plugins_from_name 
     root_obj = QtWidgets.QWidget()
 
     ph = PluginHandler(root_obj, None, None)
@@ -136,7 +139,3 @@ def test_plugin_handler(app_qt_fixture, base_fixture: PathSetup):
     ph.show()
     app_qt_fixture.waitExposed(ph)
 
-@pytest.mark.conanv1
-def test_example_plugin():
-    # TODO 
-    pass

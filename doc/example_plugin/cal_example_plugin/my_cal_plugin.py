@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional
 import sys
 
-from conan_app_launcher.ui import BaseSignals, PluginInterfaceV1, FluentWindow, compile_ui_file_if_newer
+from conan_app_launcher.ui import BaseSignals, PluginInterfaceV1, FluentWindow, PluginDescription, compile_ui_file_if_newer
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
 
 current_dir = Path(__file__).parent
@@ -15,9 +15,10 @@ compile_ui_file_if_newer(current_dir / "example.ui")
 
 class SamplePluginView(PluginInterfaceV1):
 
-    def __init__(self, parent: QWidget, base_signals: Optional["BaseSignals"] = None,
+    def __init__(self, parent: QWidget, plugin_description: PluginDescription,
+                 base_signals: Optional["BaseSignals"] = None,
                  page_widgets: Optional["FluentWindow.PageStore"] = None):
-        super().__init__(parent, base_signals, page_widgets)
+        super().__init__(parent, plugin_description, base_signals, page_widgets)
         self._base_signals # access to global Qt signals
         self._page_widgets # access to other views (Caution!)
 

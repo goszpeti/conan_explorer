@@ -82,7 +82,7 @@ class PluginFile():
     @staticmethod
     def unregister(plugin_file_path: Union[Path, str]):
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
-            settings_plugin_file_path = app.active_settings.get_string(plugin_group_name)
+            settings_plugin_file_path: str = app.active_settings.get_string(plugin_group_name)
             if Path(settings_plugin_file_path) == plugin_file_path:
                 app.active_settings.remove(plugin_group_name)
 

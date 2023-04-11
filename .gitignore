@@ -6,7 +6,7 @@
 **/*_white.svg
 **/__pycache__/**
 *.egg-info
-build/**
+**/build/**
 dist/**
 *result*.xml
 cov.xml
