@@ -29,13 +29,16 @@ Qt = QtCore.Qt
 
 @pytest.mark.conanv2
 def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
-    """ Test, that when no condig file is set,
+    """ Test, that when no config file is set,
     a new tab with a new default app is automatically added."""
     from pytestqt.plugin import _qapp_instance
 
     # TEST SETUP
     # no settings entry
     app.active_settings.set(LAST_CONFIG_FILE, "")
+    # set dark mode to to at least call the functions once
+    app.active_settings.set(GUI_MODE, GUI_MODE_DARK)
+
     # delete default file, in case it exists and has content
     default_config_file_path = user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")
     if default_config_file_path.exists():

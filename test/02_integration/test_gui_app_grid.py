@@ -328,7 +328,7 @@ def test_multiple_apps_ungreying(app_qt_fixture, base_fixture):
 
     app.active_settings = IniSettings(Path(temp_ini_path))
     config_file_path = base_fixture.testdata_path / "config_file/multiple_apps_same_package.json"
-    app.active_settings.set(AUTO_INSTALL_QUICKLAUNCH_REFS, True)
+    app.active_settings.set(AUTO_INSTALL_QUICKLAUNCH_REFS, False)
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
     # load path into local cache
     app.conan_api.get_path_or_auto_install(ConanRef.loads(TEST_REF), {})
