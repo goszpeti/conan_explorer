@@ -9,7 +9,7 @@ from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE  # using global module pattern
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
-from conan_app_launcher.ui.plugin.plugins import PluginInterfaceV1
+from conan_app_launcher.ui.plugin import PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu, AnimatedToggle
 from conan_app_launcher.conan_wrapper.types import ConanRef, PkgRef
 

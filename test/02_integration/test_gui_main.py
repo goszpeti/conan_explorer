@@ -11,7 +11,7 @@ from pathlib import Path
 from shutil import rmtree
 
 import pytest
-from conan_app_launcher.ui.plugin.plugins import PluginFile
+from conan_app_launcher.ui.plugin.handler import PluginFile
 from conan_app_launcher.ui.views.app_grid.tab import TabList
 from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, user_save_path
 from conan_app_launcher.conan_wrapper import ConanApi

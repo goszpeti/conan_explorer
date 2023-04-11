@@ -6,7 +6,7 @@ from conan_app_launcher.ui.common import TreeModel, TreeModelItem, get_themed_as
 from PySide6.QtCore import Qt, QModelIndex
 from PySide6.QtGui import QFont
 
-from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginFile, PluginHandler
+from conan_app_launcher.ui.plugin import PluginDescription, PluginFile, PluginHandler
 
 class PluginModelItem(TreeModelItem):
 
@@ -26,7 +26,7 @@ class PluginModel(TreeModel):
         self.root_item.child_items = []
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
             plugin_path = app.active_settings.get_string(plugin_group_name)
-            plugins = PluginFile.read_file(plugin_path)
+            plugins = PluginFile.read(plugin_path)
             for plugin in plugins:
                 plugin_element = PluginModelItem(plugin, plugin_path, PluginHandler.is_plugin_enabled(plugin), self.root_item)
                 self.root_item.append_child(plugin_element)

@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 import tempfile
 import pytest
@@ -7,13 +6,13 @@ from conan_app_launcher import BUILT_IN_PLUGIN, INVALID_PATH, AUTHOR
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from conan_app_launcher.ui.plugin import PluginHandler, PluginFile, PluginDescription
 from test.conftest import PathSetup
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtWidgets
 
 @pytest.mark.conanv2
 def test_plugin_file_read(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
     """ test plugin file read method of all failures"""
     # nonexistant file
-    plugins = PluginFile.read_file(Path(INVALID_PATH))
+    plugins = PluginFile.read(Path(INVALID_PATH))
     assert plugins == []
     out = capfd.readouterr()
     assert "does not exist" in out.err
@@ -21,33 +20,33 @@ def test_plugin_file_read(base_fixture: PathSetup, capfd: pytest.CaptureFixture[
     # no content - no error
     empty_file = Path(tempfile.mktemp())
     empty_file.touch()
-    plugins = PluginFile.read_file(empty_file)
+    plugins = PluginFile.read(empty_file)
     assert plugins == []
 
     # empty section
     plugin_file = base_fixture.testdata_path / "plugin" / "plugins_empty_section.ini"
-    plugins = PluginFile.read_file(plugin_file)
+    plugins = PluginFile.read(plugin_file)
     assert plugins == []
     out = capfd.readouterr()
     assert "Can't read PluginData0" in out.err
 
     # no name
     plugin_file = base_fixture.testdata_path / "plugin" / "plugins_no_name.ini"
-    plugins = PluginFile.read_file(plugin_file)
+    plugins = PluginFile.read(plugin_file)
     assert plugins == []
     out = capfd.readouterr()
     assert "'name' is required" in out.err
 
     # no icon
     plugin_file = base_fixture.testdata_path / "plugin" / "plugins_no_icon.ini"
-    plugins = PluginFile.read_file(plugin_file)
+    plugins = PluginFile.read(plugin_file)
     assert plugins == []
     out = capfd.readouterr()
     assert "'icon' is required" in out.err
 
     # icon invalid path
     plugin_file = base_fixture.testdata_path / "plugin" / "plugins_iconpath_invalid.ini"
-    plugins = PluginFile.read_file(plugin_file)
+    plugins = PluginFile.read(plugin_file)
     assert plugins == []
     out = capfd.readouterr()
     assert "icon" in out.err
@@ -55,14 +54,14 @@ def test_plugin_file_read(base_fixture: PathSetup, capfd: pytest.CaptureFixture[
 
     # no import path
     plugin_file = base_fixture.testdata_path / "plugin" / "plugins_no_importpath.ini"
-    plugins = PluginFile.read_file(plugin_file)
+    plugins = PluginFile.read(plugin_file)
     assert plugins == []
     out = capfd.readouterr()
     assert "'import_path' is required" in out.err
 
     # import path invalid
     plugin_file = base_fixture.testdata_path / "plugin" / "plugins_importpath_invalid.ini"
-    plugins = PluginFile.read_file(plugin_file)
+    plugins = PluginFile.read(plugin_file)
     assert plugins == []
     out = capfd.readouterr()
     assert "import_path" in out.err
@@ -70,14 +69,14 @@ def test_plugin_file_read(base_fixture: PathSetup, capfd: pytest.CaptureFixture[
 
     # no class 
     plugin_file = base_fixture.testdata_path / "plugin" / "plugins_no_class.ini"
-    plugins = PluginFile.read_file(plugin_file)
+    plugins = PluginFile.read(plugin_file)
     assert plugins == []
     out = capfd.readouterr()
     assert "'plugin_class' is required" in out.err
 
     # minimal valid file
     plugin_file = base_fixture.testdata_path / "plugin" / "plugins_minimal_valid.ini"
-    plugins = PluginFile.read_file(plugin_file)
+    plugins = PluginFile.read(plugin_file)
     assert len(plugins) == 1
     assert plugins[0].name == "Test Plugin"
     assert Path(plugins[0].icon).is_file()
@@ -120,6 +119,7 @@ def test_plugin_file_register_unregister(base_fixture):
     plugin_groups  = app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME)
     assert len(plugin_groups) == 1
 
+@pytest.mark.conanv1
 @pytest.mark.conanv2
 def test_plugin_handler_conan_version():
     """ Tests the refspec eval and is_plugin_enabled function of PluginHandler """
@@ -128,14 +128,36 @@ def test_plugin_handler_conan_version():
     assert PluginHandler.eval_conan_version_spec("<2", "1.58.0")
 
     plugin = PluginDescription("", "1.58.0", "", "", "", "", "", False, "<2")
-    assert PluginHandler.is_plugin_enabled(plugin)
+    from conan_app_launcher import conan_version
 
-def test_plugin_handler(app_qt_fixture, base_fixture: PathSetup):
-    # TODO test add, remove, get_plugin_descr_from_name and get_same_file_plugins_from_name 
+    if conan_version.startswith("1"):
+        assert PluginHandler.is_plugin_enabled(plugin)
+    if conan_version.startswith("2"):
+        assert not PluginHandler.is_plugin_enabled(plugin)
+
+def test_plugin_handler(app_qt_fixture, base_fixture: PathSetup, mocker):
+    """ Check loading and unloading mechanism """
     root_obj = QtWidgets.QWidget()
-
-    ph = PluginHandler(root_obj, None, None)
     app_qt_fixture.addWidget(root_obj)
-    ph.show()
-    app_qt_fixture.waitExposed(ph)
+    ph = PluginHandler(root_obj, None, None)
+    plugin_file_path = base_fixture.testdata_path / "plugin" / "plugins_minimal_valid.ini"
+
+    # add
+    register_func_mock = mocker.patch.object(PluginFile, "register")
+    ph.add_plugin(plugin_path=str(plugin_file_path))
+    
+    register_func_mock.assert_called_with(str(plugin_file_path))
+
+    plugin_descrs = PluginFile.read(plugin_file_path)
+    plugin_object = ph.get_plugin_by_description(plugin_descrs[0])
+    assert plugin_object is not None
+    plugin_object.show()
+    app_qt_fixture.waitExposed(plugin_object)
+
+    # remove
+    unregister_func_mock = mocker.patch.object(PluginFile, "unregister")
+    ph.remove_plugin(plugin_path=str(plugin_file_path))
+
+    unregister_func_mock.assert_called_with(str(plugin_file_path))
+    assert ph.get_plugin_by_description(plugin_descrs[0]) is None
 

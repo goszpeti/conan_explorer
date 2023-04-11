@@ -11,7 +11,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.ui.common.syntax_highlighting import ConfigHighlighter
-from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginInterfaceV1
+from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.conan_wrapper.types import Remote
 from PySide6.QtCore import Qt, Signal, QProcess

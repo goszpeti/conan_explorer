@@ -3,7 +3,7 @@ from typing import Optional
 from PySide6.QtCore import QObject, QModelIndex
 from PySide6.QtWidgets import (QTreeView)
 
-from conan_app_launcher.ui.plugin.plugins import PluginHandler
+from conan_app_launcher.ui.plugin import PluginHandler
 
 from .model import PluginModel, PluginModelItem
 

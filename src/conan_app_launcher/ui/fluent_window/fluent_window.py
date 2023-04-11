@@ -26,7 +26,7 @@ from ..common import get_themed_asset_icon
 from .side_menu import SideSubMenu
 
 if TYPE_CHECKING:
-    from ..plugin.plugins import PluginInterfaceV1
+    from ..plugin.handler import PluginInterfaceV1
 
 class WidgetNotFoundException(Exception):
     """ Raised, when a widget searched for, ist in the parent container. """
@@ -107,7 +107,15 @@ class FluentWindow(QMainWindow, ThemedWidget):
             button.hide()
             widget.hide()
             button.deleteLater()
+            if menu:
+                menu.deleteLater()
             widget.deleteLater()
+        
+        def remove_page_extras_by_name(self, name: str):
+            """ Remove page but not the widget itself, in case it is managed by another mechanism like plugins """
+            button, widget, menu, _ = self._page_widgets.pop(gen_obj_name(name))
+            button.hide()
+            button.deleteLater()
             if menu:
                 menu.deleteLater()
 
@@ -270,7 +278,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             self.ui.left_menu_bottom_subframe.layout().addWidget(button)
         self.ui.page_stacked_widget.addWidget(page_widget)
-        page_widget.setParent(self.ui.page_stacked_widget)
 
     # can only be called for top level menu
     def add_right_bottom_menu_main_page_entry(self, name: str, page_widget: QWidget, asset_icon: str = ""):
@@ -279,7 +286,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.page_widgets.add_new_page(name, button, page_widget, None)
         self.ui.page_stacked_widget.addWidget(page_widget)
         button.clicked.connect(self.toggle_right_menu)
-        page_widget.setParent(self.ui.page_stacked_widget)
 
     def switch_page(self):
         sender_button = self.sender()

@@ -1,1 +1,3 @@
-from .plugins import PluginInterfaceV1, PluginDescription, PluginFile, PluginHandler
+from .types import  PluginInterfaceV1, PluginDescription
+from .file import PluginFile
+from .handler import PluginHandler

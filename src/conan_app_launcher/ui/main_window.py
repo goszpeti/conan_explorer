@@ -13,7 +13,7 @@ from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUT
                                          GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, WINDOW_SIZE)
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
-from conan_app_launcher.ui.plugin.plugins import PluginHandler
+from conan_app_launcher.ui.plugin import PluginHandler
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
 from PySide6.QtCore import QRect, SignalInstance, Signal
 from PySide6.QtGui import QKeySequence
@@ -171,8 +171,7 @@ class MainWindow(FluentWindow):
             Logger().error(f"Can't load plugin {plugin_object.plugin_description.name}: {str(e)}")
 
     def _unload_plugin(self, plugin_name: str):
-        # TODO: switch away, if this the current view
-        self.page_widgets.remove_page_by_name(plugin_name)
+        self.page_widgets.remove_page_extras_by_name(plugin_name)
 
     def _load_job_quicklaunch(self, config_source_str):
         # load ui file definitions

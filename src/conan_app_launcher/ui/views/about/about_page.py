@@ -1,7 +1,7 @@
 from pathlib import Path
 from conan_app_launcher import APP_NAME, AUTHOR, BUILT_IN_PLUGIN, REPO_URL, __version__, asset_path
 from PySide6.QtGui import QIcon
-from conan_app_launcher.ui.plugin.plugins import PluginDescription, PluginInterfaceV1
+from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 
 from jinja2 import Template
 

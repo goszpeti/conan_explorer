@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
 
 current_dir = Path(__file__).parent
 
-# For standalone execution with no package installed (cna be removed depending on workflow)
+# For standalone execution with no package installed (can be removed depending on workflow)
 sys.path.append(str(current_dir.parent))
 
 # Generates examplu_ui.py, so UI variables resolve in IDE
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     # Standalone execution
     app = QApplication([])
     window = QMainWindow()
-    pl = SamplePluginView(window)
+    pl = SamplePluginView(window, {})
     window.setGeometry(pl.geometry())
     pl.load_signal.emit()
     window.show()
