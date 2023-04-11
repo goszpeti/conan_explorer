@@ -201,7 +201,11 @@ def copy_path_with_overwrite(src: Path, dst: Path):
         if src.is_file():
             copy2(str(src), str(dst))
         else:
-            copytree(str(src), str(dst), dirs_exist_ok=True)
+            if platform.python_version_tuple()[1] == "7": # 3.7 has no dirs_exist_ok
+                from distutils.dir_util import copy_tree
+                copy_tree(str(src), str(dst))
+            else:
+                copytree(str(src), str(dst), dirs_exist_ok=True)
     except Exception as e:
         Logger().warning(f"Can't copy {str(src)} to {str(dst)}: {str(e)}")
 
