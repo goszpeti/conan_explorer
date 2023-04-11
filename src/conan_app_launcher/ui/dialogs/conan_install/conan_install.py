@@ -156,7 +156,9 @@ class ConanInstallDialog(QDialog):
             settings = app.conan_api.get_profile_settings(self.get_selected_profile())
             # options from selection
             options = self.get_user_options()
-        conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text, "settings": settings,
+        conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text,                                                     #"settings": settings,
+                                                    "settings": {},
+                                                    "profile": self.get_selected_profile(),
                                                     "options": options, "update": update_check_state,
                                                     "auto_install": auto_install_checked}
 

@@ -3,11 +3,12 @@ Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
 import os
+from pathlib import Path
 import platform
 import sys
 import traceback
 from conan_app_launcher.app.crash import bug_dialog_exc_hook
-from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
+from conan_app_launcher.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common.theming import get_user_theme_color
 from test.conftest import TEST_REF, app_qt_fixture
 
@@ -102,6 +103,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     Tests, that the Conan Install dialog can install references, packages and the update and auto_install flag works.
     """
     app.conan_api.init_api()
+    app.active_settings.set(DEFAULT_INSTALL_PROFILE, "default")
 
     root_obj = QtWidgets.QWidget()
     cfr = ConanRef.loads(TEST_REF)
@@ -126,25 +128,28 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     mock_install_func = mocker.patch(
         'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
     conan_install_dialog._ui.button_box.accepted.emit()
-    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, "settings": {},
+    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, "settings": {}, "profile": "",
                                                 "options": {}, "update": True, "auto_install": True}
 
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 
     # check only ref - new instance needed (other dialog variant)
     conan_install_dialog = ConanInstallDialog(root_obj, TEST_REF)
+    conan_install_dialog.show()
+    app_qt_fixture.waitExposed(conan_install_dialog)
+
     profile = conan_install_dialog.get_selected_profile()
-    settings = app.conan_api.get_profile_settings(profile)
+    assert profile == "default"
     default_options =  {'variant': 'var1', 'shared': "True", 'fPIC': 'True'}
     conan_install_dialog._ui.button_box.accepted.emit()
-    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": settings,
+    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {}, "profile": profile,
                                                 "options": default_options, "update": False, "auto_install": False}
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 
     # check ref with autoupdate
     conan_install_dialog._ui.auto_install_check_box.setCheckState(Qt.CheckState.Checked)
     conan_install_dialog._ui.button_box.accepted.emit()
-    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {},
+    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {}, "profile": profile,
                                                 "options": {}, "update": False, "auto_install": True}
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 
@@ -153,17 +158,39 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     variant_option.setData(1,0, "MyVariant")
     conan_install_dialog._ui.auto_install_check_box.setCheckState(Qt.CheckState.Unchecked)
     conan_install_dialog._ui.button_box.accepted.emit()
-    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": settings,
+    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {}, "profile": profile,
                                                 "options":  {'variant': 'MyVariant', 'shared': "True", 'fPIC': 'True'},
                                                   "update": False, "auto_install": False}
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 
-    # check profile selection
-    conan_install_dialog._ui.profile_cbox
+    # Check profile selection
 
     ## check that profile set default works
+    profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
+    new_profile_path = profiles_path / "new_profile"
+    new_profile_path.touch()
+    conan_install_dialog.load_profiles()
+
+    # default must be fisrt item and has a * after the name
+    first_profile = conan_install_dialog._ui.profile_cbox.itemText(0)
+    assert first_profile == "default *"
+    new_profile_idx = -1
+    for i in range(len(app.conan_api.get_profiles())):
+        if conan_install_dialog._ui.profile_cbox.itemText(i) == "new_profile":
+            new_profile_idx = i
+            break
+    assert new_profile_idx > 0 # not the default profile
+    # select this 
+    conan_install_dialog._ui.profile_cbox.setCurrentIndex(new_profile_idx)
+    conan_install_dialog.on_set_default_install_profile()
+
+    assert app.active_settings.get_string(DEFAULT_INSTALL_PROFILE) == "new_profile"
 
     ## remove default selected profile and re-init
+    os.remove(new_profile_path)
+    conan_install_dialog = ConanInstallDialog(root_obj, TEST_REF)
+    # noc crash and the first item is default, but with no * (currently no def. inst. prof. set)
+    assert conan_install_dialog._ui.profile_cbox.itemText(0) == "default"
 
     conan_install_dialog.close()
 

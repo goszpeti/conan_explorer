@@ -225,9 +225,9 @@ def test_conan_worker(base_fixture, mocker):
     It is expected,that the queue size decreases over time.
     """
     conan_refs: List[ConanWorkerElement] = [{"ref_pkg_id": "m4/1.4.19@_/_", "options": {},
-                                            "settings": {}, "update": False,  "auto_install": True},
+                                            "settings": {}, "update": False,  "auto_install": True, "profile": ""},
                                             {"ref_pkg_id": "zlib/1.2.11@conan/stable", "options": {"shared": "True"},
-                                             "settings": {}, "update": False,  "auto_install": True}
+                                             "settings": {}, "update": False,  "auto_install": True, "profile": ""}
                                             ]
 
     mock_func = mocker.patch('conan_app_launcher.conan_wrapper.ConanApi.get_path_or_auto_install')

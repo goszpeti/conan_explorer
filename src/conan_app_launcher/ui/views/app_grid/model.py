@@ -47,7 +47,7 @@ class UiAppGridModel(UiAppGridConfig, QObject):
             for app in tab.apps:
                 conan_worker_element: ConanWorkerElement = {"ref_pkg_id": app.conan_ref, "settings": {},
                                                             "options": app.conan_options, "update": False,
-                                                            "auto_install": True}
+                                                            "profile": "", "auto_install": True}
                 if conan_worker_element not in conan_refs:
                     conan_refs.append(conan_worker_element)
         return conan_refs
@@ -205,7 +205,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not app.active_settings.get_bool(AUTO_INSTALL_QUICKLAUNCH_REFS):
             return
         try:
-            conan_worker_element: ConanWorkerElement = {"ref_pkg_id": str(self._conan_ref), "settings": {},
+            conan_worker_element: ConanWorkerElement = {"ref_pkg_id": str(self._conan_ref), "settings": {}, "profile": "",
                                                         "options": self.conan_options, "update": True, "auto_install": True}
             app.conan_worker.put_ref_in_install_queue(
                 conan_worker_element, self.emit_conan_pkg_signal_callback)

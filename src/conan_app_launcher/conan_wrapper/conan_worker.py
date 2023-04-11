@@ -23,6 +23,7 @@ class ConanWorkerElement(TypedDict):
     ref_pkg_id: str  # format in <ref>:<id>. Id is optional. If id is used options, settings and auto_isntall is ignored
     options: Dict[str, str]  # conan options with key-value pairs
     settings: Dict[str, str]  # conan settings with key-value pairs
+    profile: str # alternative to settings
     update: bool  # use -u flag for install
     auto_install: bool  # automatically determine best matching package.
 
@@ -92,6 +93,7 @@ class ConanWorker():
             ref_pkg_id = worker_element.get("ref_pkg_id", "")
             conan_options = worker_element.get("options", {})
             conan_settings = worker_element.get("settings", {})
+            conan_profile =  worker_element.get("profile", "")
             pkg_id = ""
             update = worker_element.get("update", False)
             auto_install = worker_element.get("auto_install", True)
@@ -109,7 +111,7 @@ class ConanWorker():
                     if auto_install:
                         pkg_id, _ = self._conan_api.get_path_or_auto_install(conan_ref, conan_options, update)
                     else:
-                        pkg_id, _ = self._conan_api.install_reference(conan_ref, conan_settings, conan_options, update=update)
+                        pkg_id, _ = self._conan_api.install_reference(conan_ref, conan_profile, conan_settings, conan_options, update)
             except Exception as e:
                 try:
                     self._conan_install_queue.task_done()

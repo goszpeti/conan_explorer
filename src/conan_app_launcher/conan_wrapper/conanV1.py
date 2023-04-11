@@ -143,23 +143,24 @@ class ConanApi(ConanUnifiedApi):
 
     ### Install related methods ###
 
-    def install_reference(self, conan_ref: ConanRef, conan_settings:  Dict[str, str] = {},
+    def install_reference(self, conan_ref: ConanRef, profile= "", conan_settings:  Dict[str, str] = {},
                           conan_options: Dict[str, str] = {}, update=True) -> Tuple[str, Path]:
         """
         Try to install a conan reference (without id) with the provided extra information.
-        Uses plain conan install (No auto determination of best matching package)
+        Uses plain conan install (No auto determination of best matching package).
         Returns the actual pkg_id and the package path.
         """
         from conans.errors import ConanException
         pkg_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
-        Logger().info(
-            f"Installing '<b>{str(conan_ref)}</b>' with settings: {str(settings_list)}, "
-            f"options: {str(options_list)} and update={update}\n")
+        install_message=  f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
+        f"settings: {str(settings_list)}, " \
+        f"options: {str(options_list)} and update={update}\n"
+        Logger().info(install_message)
         try:
             infos = self.conan.install_reference(
-                conan_ref, settings=settings_list, options=options_list, update=update)
+                conan_ref, settings=settings_list, options=options_list, update=update, profile_names=[profile])
             if not infos.get("error", True):
                 pkg_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
             Logger().info(f"Installation of '<b>{str(conan_ref)}</b>' finished")
