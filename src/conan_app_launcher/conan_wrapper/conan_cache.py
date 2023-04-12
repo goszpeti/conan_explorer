@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from conan_app_launcher import INVALID_CONAN_REF, INVALID_PATH, conan_version
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.conan_wrapper.types import ConanRef, ConanUnifiedApi
 
 class ConanInfoCache():
@@ -192,7 +193,7 @@ class ConanInfoCache():
                     json_data = json.loads(content)
         except Exception:  # possibly corrupt, delete cache file
             Logger().debug("ConanCache: Can't read speedup-cache file, deleting it.")
-            os.remove(self._cache_file)
+            delete_path(self._cache_file)
             # create file anew
             self._cache_file.touch()
             return

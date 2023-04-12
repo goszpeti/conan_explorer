@@ -34,13 +34,11 @@ def test_rename_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
 
     new_text = "My Text"
 
-    mocker.patch.object(QtWidgets.QInputDialog, 'getText',
-                        return_value=[new_text, True])
+    mocker.patch.object(QtWidgets.QInputDialog, 'getText', return_value=[new_text, True])
     main_gui.app_grid.on_tab_rename(0)
     assert main_gui.app_grid.tab_widget.tabBar().tabText(0) == new_text
 
-    mocker.patch.object(QtWidgets.QInputDialog, 'getText',
-                        return_value=["OtherText", False])
+    mocker.patch.object(QtWidgets.QInputDialog, 'getText', return_value=["OtherText", False])
     main_gui.app_grid.on_tab_rename(0)
     # text must be the same
     assert main_gui.app_grid.tab_widget.tabBar().tabText(0) == new_text
@@ -60,8 +58,7 @@ def test_add_tab_dialog(app_qt_fixture, ui_no_refs_config_fixture, mocker):
 
     new_text = "My New Tab"
     prev_count = main_gui.app_grid.tab_widget.tabBar().count()
-    mocker.patch.object(QtWidgets.QInputDialog, 'getText',
-                        return_value=[new_text, True])
+    mocker.patch.object(QtWidgets.QInputDialog, 'getText', return_value=[new_text, True])
     main_gui.app_grid.on_new_tab()
     assert main_gui.app_grid.tab_widget.tabBar().count() == prev_count + 1
     assert main_gui.app_grid.tab_widget.tabBar().tabText(prev_count) == new_text

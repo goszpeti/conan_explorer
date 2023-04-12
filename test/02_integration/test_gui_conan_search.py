@@ -75,6 +75,7 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
 
     while not ref_item.child_items:
         _qapp_instance.processEvents()
+
     # check in child items that installed pkg id is highlighted
     pkg_found = False
     for child_item in ref_item.child_items:

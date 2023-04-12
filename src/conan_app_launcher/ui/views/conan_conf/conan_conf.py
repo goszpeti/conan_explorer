@@ -14,7 +14,7 @@ from conan_app_launcher.ui.common.syntax_highlighting import ConfigHighlighter
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.conan_wrapper.types import Remote
-from PySide6.QtCore import Qt, Signal, QProcess
+from PySide6.QtCore import Qt, Signal, QItemSelectionModel
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QApplication, QInputDialog
 
@@ -179,7 +179,10 @@ class ConanConfigView(PluginInterfaceV1):
         rename_profile_dialog = QInputDialog(self)
         new_profile_name, accepted = rename_profile_dialog.getText(self, "Rename profile", 'Enter new name:', text=profile_name)
         if accepted and profile_name:
-            (self.profiles_path / profile_name).rename(self.profiles_path / new_profile_name)
+            try:
+                (self.profiles_path / profile_name).rename(self.profiles_path / new_profile_name)
+            except Exception as e:
+                Logger().error(f"Can't rename {profile_name}: {e}")
             self.on_refresh_profiles()
 
     def on_remove_profile(self):
@@ -198,7 +201,10 @@ class ConanConfigView(PluginInterfaceV1):
             self.on_refresh_profiles()
 
     def on_refresh_profiles(self):
-        self._load_profiles_tab()
+        profile_model: ProfilesModel = self._ui.profiles_list_view.model() # type: ignore
+        # clear selection, otherwise an old selection could remain active in the profile content browser
+        self._ui.profiles_list_view.selectionModel().clear()
+        profile_model.update_profiles()
 
 # Remote
 

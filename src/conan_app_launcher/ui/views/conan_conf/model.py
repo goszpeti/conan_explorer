@@ -1,4 +1,5 @@
 
+from typing import Optional
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.common import (TreeModel, TreeModelItem,
@@ -96,3 +97,14 @@ class ProfilesModel(QAbstractListModel):
 
     def rowCount(self, index):
         return len(self._profiles)
+    
+    def update_profiles(self):
+        self._profiles = app.conan_api.get_profiles()
+
+    def get_index_from_profile(self, profile_name: str) -> Optional[QModelIndex]:
+        index = None
+        for i, profile in enumerate(self._profiles):
+            if profile == profile_name:
+                index = self.createIndex(i, 0)
+                break
+        return index

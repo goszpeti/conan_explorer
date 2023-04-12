@@ -12,7 +12,10 @@ from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from conan_app_launcher.ui.plugin.types import PluginDescription
 
 class PluginFile():
-    """ Plugin file related methods implemented as ini file """
+    """ 
+    Plugin file related methods.
+    Format implemented as ini file.
+    """
 
     @staticmethod
     def register(plugin_file_path: Union[Path, str]):

@@ -1,7 +1,11 @@
 
 import os
+from pathlib import Path
 from time import sleep
+
+import pytest
 import conan_app_launcher
+from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.conan_wrapper import ConanApi
 from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, PathSetup
 
@@ -174,7 +178,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         main_gui.close()
 
 def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
-    # Test login with the local remote
+    """ Test login with the local remote """
     from pytestqt.plugin import _qapp_instance
     os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
 
@@ -227,5 +231,94 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     assert conan_conf_view.remote_login_dialog._ui.password_line_edit.text() == ""
     main_gui.close()
 
-def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, ui_no_refs_config_fixture, mocker):
-    pass
+@pytest.fixture
+def profile_fixture():
+    """ Delete all created profiles in case of errors for test_conan_config_view_profiles"""
+    profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
+    delete_path(profiles_path / "new_profile_add")
+    delete_path(profiles_path / "new_profile_rename")
+    delete_path(profiles_path / "new_profile_test")
+    yield
+    delete_path(profiles_path / "new_profile_add")
+    delete_path(profiles_path / "new_profile_rename")
+    delete_path(profiles_path / "new_profile_test")
+    
+
+
+def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixture, ui_no_refs_config_fixture, mocker):
+    """ Test all profile related functions """
+    from pytestqt.plugin import _qapp_instance
+    main_gui = main_window.MainWindow(_qapp_instance)
+    main_gui.show()
+    main_gui.load(ui_no_refs_config_fixture)
+
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    app.conan_worker.finish_working()
+    conan_conf_view = main_gui.page_widgets.get_page_by_type(ConanConfigView)
+    main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
+
+    # check, that all conan profiles are displayed
+    model = conan_conf_view._ui.profiles_list_view.model()
+    profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
+    default_profile_path = profiles_path / "default"
+
+    profile_model_count = model.rowCount(0)
+
+    assert profile_model_count == len(app.conan_api.get_profiles())
+    index = model.get_index_from_profile("default")
+
+    # check, that selecting a profile displays it in the bottom pane
+    sel_model = conan_conf_view._ui.profiles_list_view.selectionModel()
+    sel_model.select(index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+   
+    assert conan_conf_view._ui.profiles_text_browser.toPlainText() == default_profile_path.read_text()
+    
+    # add a new profile
+    mocker.patch.object(QtWidgets.QInputDialog, 'getText', return_value=["new_profile_add", True])
+    conan_conf_view._ui.profile_add_button.click()
+    #model = conan_conf_view._ui.profiles_list_view.model()
+    assert profile_model_count +1 == model.rowCount(0)
+
+    # select and rename the profile
+    index = model.get_index_from_profile("new_profile_add")
+    sel_model.select(index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+
+    mocker.patch.object(QtWidgets.QInputDialog, 'getText', return_value=["new_profile_rename", True])
+    conan_conf_view._ui.profile_rename_button.click()
+    assert "new_profile_rename" in model._profiles
+
+    # enter some content
+    index = model.get_index_from_profile("new_profile_rename")
+    sel_model.select(index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    new_profile_content = "[settings]\nos=Linux\n"
+    conan_conf_view._ui.profiles_text_browser.setText(new_profile_content)
+
+    # save and reload
+    conan_conf_view._ui.profile_save_button.click()
+    sleep(1) # wait for file being created
+    new_profile_path = profiles_path / "new_profile_rename"
+
+    # check, that content is changed
+    assert new_profile_path.read_text() == new_profile_content
+
+    # remove profile
+    index = model.get_index_from_profile("new_profile_rename")
+    sel_model.select(index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
+    conan_conf_view._ui.profile_remove_button.click()
+    sleep(1) # wait for file being deleted
+    assert not new_profile_path.exists()
+
+    # check, that reload button works
+    ## create new profile file
+    new_profile_path = profiles_path / "new_profile_test"
+    new_profile_path.touch()
+
+    ## click reload
+    conan_conf_view._ui.profile_refresh_button.click()
+
+    ## check model
+    assert "new_profile_test" in model._profiles
