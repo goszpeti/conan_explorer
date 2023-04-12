@@ -121,6 +121,10 @@ class ConanSearchView(PluginInterfaceV1):
         self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
         self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 
+    def reload_themed_icons(self):
+        self._conan_config_highlighter = ConfigHighlighter(self._ui.package_info_text.document(), "yaml")
+        super().reload_themed_icons()
+
     @Slot(QPoint)
     def on_pkg_context_menu_requested(self, position: QPoint):
         """ 
