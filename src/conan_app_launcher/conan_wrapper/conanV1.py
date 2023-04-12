@@ -172,12 +172,17 @@ class ConanApi(ConanUnifiedApi):
     def install_package(self, conan_ref: ConanRef, package: ConanPkg, update=True) -> bool:
         """
         Try to install a conan package (id) with the provided extra information.
+        This is only an approximation to try and install it, because there is no built in way to do so.
+        Currently only Conan download accepts ids, but it can't donwload transitive deps and does not execute deploy.
+        The ConanPkg has all the information, (transitive pkg ids), but there is no way to give them to conan install directly.
+        TODO: automatically determine, what transitive settings need to be applied, to receive the same pkg.
         Returns True, if installation was succesfull.
         """
         from conans.errors import ConanException
         package_id = package.get("id", "")
         options_list = create_key_value_pair_list(package.get("options", {}))
         settings_list = create_key_value_pair_list(package.get("settings", {}))
+
         Logger().info(
             f"Installing '<b>{str(conan_ref)}</b>':{package_id} with settings: {str(settings_list)}, "
             f"options: {str(options_list)} and update={update}\n")

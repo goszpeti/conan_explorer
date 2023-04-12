@@ -9,7 +9,6 @@ from conan_app_launcher.conan_wrapper.types import ConanRef
 from test.conftest import PathSetup
 
 
-@pytest.mark.conanv2
 def test_new_filename_is_created(base_fixture: PathSetup):
     """
     Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
@@ -21,7 +20,6 @@ def test_new_filename_is_created(base_fixture: PathSetup):
     assert new_file_path.exists()
 
 
-@pytest.mark.conanv2
 def test_read_correct_file(base_fixture: PathSetup, ui_config_fixture: Path):
     """
     Tests reading a correct config json with 2 tabs.
@@ -53,7 +51,6 @@ def test_read_correct_file(base_fixture: PathSetup, ui_config_fixture: Path):
     assert tab1_entries[0].name == "App2"
 
 
-@pytest.mark.conanv2
 def test_update(base_fixture: PathSetup):
     """ Test that the oldest schema version updates correctly to the newest one """
     temp_file = Path(tempfile.gettempdir()) / "update.json"
@@ -79,7 +76,6 @@ def test_update(base_fixture: PathSetup):
     assert read_obj.get("tabs")[0].get("apps")[0].get("console_application") is None
 
 
-@pytest.mark.conanv2
 def test_read_invalid_version(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
     """
     Tests, that reading a config file with the wrong version will print an error.
@@ -92,7 +88,6 @@ def test_read_invalid_version(base_fixture: PathSetup, capfd: pytest.CaptureFixt
     assert "version" in captured.err
 
 
-@pytest.mark.conanv2
 def test_read_invalid_content(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
     """
     Tests, that reading a config file with invalid syntax will print an error.
@@ -104,7 +99,6 @@ def test_read_invalid_content(base_fixture: PathSetup, capfd: pytest.CaptureFixt
     assert "Expecting property name" in captured.err
 
 
-@pytest.mark.conanv2
 def check_config(ref_dict, test_dict):
     """ Check dict entries to a ref dict (recursive) """
     for key in test_dict:

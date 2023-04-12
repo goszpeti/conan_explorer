@@ -66,7 +66,7 @@ def test_select_file_editor(app_qt_fixture, base_fixture, mocker):
     dialog._ui.browse_button.clicked.emit()
     assert dialog._ui.file_edit.text() == sys.executable
 
-
+@pytest.mark.conanv2
 def test_edit_line_conan(app_qt_fixture, base_fixture, light_theme_fixture):
     """ Test, that the line edit validates on edit
     and displays the local packages instantly and the remote ones after a delay
@@ -97,7 +97,7 @@ def test_edit_line_conan(app_qt_fixture, base_fixture, light_theme_fixture):
     assert ConanRefLineEdit.INVALID_COLOR in widget.styleSheet()
     widget.close()
 
-
+@pytest.mark.conanv2
 def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     """ 
     Tests, that the Conan Install dialog can install references, packages and the update and auto_install flag works.

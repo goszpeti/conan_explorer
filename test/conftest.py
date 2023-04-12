@@ -140,12 +140,6 @@ def start_conan_server():
     if "write_permissions" not in cp:
         cp.add_section("write_permissions")
     cp["write_permissions"]["*/*@*/*"] = "*"
-    # if "read_permissions" not in cp:
-    #     cp.add_section("read_permissions")
-    # cp["read_permissions"]["*/*@*/*"] = "*"
-    # if "users" not in cp:
-    #     cp.add_section("read_permissions")
-    # cp["read_permissions"]["*/*@*/*"] = "*"
     with config_path.open('w', encoding="utf8") as fd:
         cp.write(fd)
 
@@ -204,6 +198,9 @@ def start_conan_server():
         create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
                         f"-o shared=False -pr {str(profile_path)}"], update=True)
         create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=True)
+        paths = PathSetup()
+        conanfile = str(paths.testdata_path / "conan" / "conanfile_no_settings.py")
+        conan_create_and_upload(conanfile,  "nocompsettings/1.0.0@local/no_sets")
 
 
 def conan_install_ref(ref, args=""):
@@ -216,6 +213,11 @@ def conan_install_ref(ref, args=""):
         args += " -pr " + str(profiles_path / profile)
     assert os.system(f"conan install {extra_cmd} {ref} {args}") == 0
 
+def conan_remove_ref(ref):
+    if conan_version.startswith("2"):
+        os.system(f"conan remove {ref} -c")
+    else:
+        os.system(f"conan remove {ref} -f")
 
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():

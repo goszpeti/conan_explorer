@@ -3,7 +3,9 @@ import platform
 import tempfile
 import time
 from pathlib import Path
-from test.conftest import TEST_REF, conan_create_and_upload
+
+import pytest
+from test.conftest import TEST_REF, conan_create_and_upload, conan_install_ref, conan_remove_ref
 from typing import List
 
 from conan_app_launcher.conan_wrapper import ConanApi
@@ -37,7 +39,7 @@ def test_conan_profile_name_alias_builder():
     profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
-
+# @pytest.mark.conanv2
 def test_conan_short_path_root():
     """ Test, that short path root can be read. """
     new_short_home = Path(tempfile.gettempdir()) / "._myconan_short"
@@ -62,7 +64,7 @@ def test_empty_cleanup_cache(base_fixture):
     os.environ.pop("CONAN_USER_HOME")
     os.environ.pop("CONAN_USER_HOME_SHORT")
 
-
+# @pytest.mark.conanv2
 def test_conan_find_remote_pkg(base_fixture):
     """
     Test, if search_package_in_remotes finds a package for the current system and the specified options.
@@ -82,7 +84,7 @@ def test_conan_find_remote_pkg(base_fixture):
         if setting in pkg["settings"].keys():
             assert default_settings[setting] in pkg["settings"][setting]
 
-
+# @pytest.mark.conanv2
 def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     Test, if a wrong Option return causes an error.
@@ -93,34 +95,37 @@ def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     pkg = conan.get_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"BogusOption": "True"})
     assert not pkg
 
-
+@pytest.mark.conanv2
 def test_conan_find_local_pkg(base_fixture):
     """
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    os.system(f"conan install {TEST_REF} -u")
+    conan_install_ref(TEST_REF, "-u")
     conan = ConanApi().init_api()
     pkgs = conan.find_best_matching_packages(ConanRef.loads(TEST_REF))
-    assert len(pkgs) == 1
+    assert len(pkgs) == 1 # default options are filtered
 
-
+@pytest.mark.conanv2
 def test_get_path_or_install(base_fixture):
     """
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
+    # use nocompsettings to check with transitive packages
     dir_to_check = "bin"
-    os.system(f"conan remove {TEST_REF} -f")
+    ref = "nocompsettings/1.0.0@local/no_sets"
+    conan_remove_ref(ref)
+
     conan = ConanApi().init_api()
     # Gets package path / installs the package
-    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF))
+    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(ref))
     assert (package_folder / dir_to_check).is_dir()
     # check again for already installed package
-    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF))
+    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(ref))
     assert (package_folder / dir_to_check).is_dir()
 
-
+@pytest.mark.conanv2
 def test_get_path_or_install_manual_options():
     """
     Test, if a package with options can install.
@@ -135,7 +140,7 @@ def test_get_path_or_install_manual_options():
     elif platform.system() == "Linux":
         assert (package_folder / "bin" / "python").is_file()
 
-
+@pytest.mark.conanv2
 def test_install_with_any_settings(mocker, capfd):
     """
     Test, if a package with <setting>=Any flags can install
@@ -153,15 +158,13 @@ def test_install_with_any_settings(mocker, capfd):
     assert "ERROR" not in captured.err
     assert "Cannot install package" not in captured.err
 
-
+# @pytest.mark.conanv2 TODO create package for it
 def test_compiler_no_settings(base_fixture, capfd):
     """
     Test, if a package with no settings at all can install
     The actual installaton must not return an error.
     """
-    conanfile = str(base_fixture.testdata_path / "conan" / "conanfile_no_settings.py")
     ref = "nocompsettings/1.0.0@local/no_sets"
-    conan_create_and_upload(conanfile, ref)
     os.system(f"conan remove {ref} -f")
 
     conan = ConanApi().init_api()
@@ -173,7 +176,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     assert "Can't find a matching package" not in captured.err
     os.system(f"conan remove {ref} -f")
 
-
+@pytest.mark.conanv2
 def test_resolve_default_options(base_fixture):
     """
     Test, if different kind of types of default options can be converted to a dict
@@ -210,7 +213,7 @@ def test_create_key_value_list(base_fixture):
     res = create_key_value_pair_list(inp)
     assert res == ["Key1=Value1"]
 
-
+#@pytest.mark.conanv2
 def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi().init_api()
@@ -218,7 +221,7 @@ def test_search_for_all_packages(base_fixture):
     ref = ConanRef.loads(TEST_REF)  # need to convert @_/_
     assert str(ref) in str(res)
 
-
+@pytest.mark.conanv2
 def test_conan_worker(base_fixture, mocker):
     """
     Test, if conan worker works on the queue.

@@ -13,6 +13,7 @@ class Example(ConanFile):
     default_options = {"shared": True, "fPIC": True}
     no_copy_source = True
     short_paths = True
+    requires = "example/9.9.9@local/testing"
 
     def package(self):
         # repackage some executable

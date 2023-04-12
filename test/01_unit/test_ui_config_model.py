@@ -12,7 +12,6 @@ from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
 from conan_app_launcher.conan_wrapper.types import ConanRef as CFR, ConanUnifiedApi
 
 
-@pytest.mark.conanv2
 def test_executable_eval(base_fixture: PathSetup):
     """
     Tests, that the executable setter works on all cases.
@@ -32,7 +31,6 @@ def test_executable_eval(base_fixture: PathSetup):
     assert app_link.get_executable_path() == Path(INVALID_PATH)
 
 
-@pytest.mark.conanv2
 def test_icon_eval(tmp_path: Path, qtbot, base_fixture: PathSetup):
     """
     Tests, that the icon setter works on all cases.
@@ -62,7 +60,6 @@ def test_icon_eval(tmp_path: Path, qtbot, base_fixture: PathSetup):
     assert not app_link.get_icon().isNull()
 
 
-@pytest.mark.conanv2
 def test_icon_eval_wrong_path(tmp_path: Path, qtbot, base_fixture: PathSetup, light_theme_fixture: None):
     """ Test, that a nonexistant path sets to default (check for error removed) """
 
@@ -71,7 +68,6 @@ def test_icon_eval_wrong_path(tmp_path: Path, qtbot, base_fixture: PathSetup, li
     assert str(app_link._eval_icon_path()) == str(asset_path / "icons" / GUI_STYLE_MATERIAL / "no-access.svg")
 
 
-@pytest.mark.conanv2
 def test_official_release(base_fixture: PathSetup):
     """
     Test, if an official reference in the format name/1.0.0@_/_ works correctly.

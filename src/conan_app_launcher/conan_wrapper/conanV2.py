@@ -67,8 +67,92 @@ class ConanApi(ConanUnifiedApi):
         """ Get the export folder form a reference """
         return Path(self.conan.cache.export_path(conan_ref))
 
-
     ### Install related methods ###
+
+    def install_reference(self, conan_ref: ConanRef, profile= "", conan_settings:  Dict[str, str] = {},
+                          conan_options: Dict[str, str] = {}, update=True) -> Tuple[str, Path]:
+        """
+        Try to install a conan reference (without id) with the provided extra information.
+        Uses plain conan install (No auto determination of best matching package).
+        Returns the actual pkg_id and the package path.
+        """
+        from conans.errors import ConanException
+        pkg_id = ""
+        options_list = create_key_value_pair_list(conan_options)
+        settings_list = create_key_value_pair_list(conan_settings)
+        install_message=  f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
+        f"settings: {str(settings_list)}, " \
+        f"options: {str(options_list)} and update={update}\n"
+        Logger().info(install_message)
+        from conan.cli.cli import Cli
+        cli = Cli(self.conan)
+        try:
+            args = ["install", "--requires", "{str(conan_ref)}"]
+            if profile:
+                args += ["-pr", profile]
+            cli.run(args)
+            # infos = self.conan.install(
+            #     conan_ref, settings=settings_list, options=options_list, update=update, profile_names=[profile])
+            # if not infos.get("error", True):
+            #     pkg_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
+            Logger().info(f"Installation of '<b>{str(conan_ref)}</b>' finished")
+            return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
+        except ConanException as error:
+            Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
+            return (pkg_id, Path(INVALID_PATH))
+
+    def install_package(self, conan_ref: ConanRef, package: ConanPkg, update=True) -> bool:
+        """
+        Try to install a conan package (id) with the provided extra information.
+        Returns True, if installation was succesfull.
+        """
+        from conans.errors import ConanException
+        package_id = package.get("id", "")
+        options_list = create_key_value_pair_list(package.get("options", {}))
+        settings_list = create_key_value_pair_list(package.get("settings", {}))
+        Logger().info(
+            f"Installing '<b>{str(conan_ref)}</b>':{package_id} with settings: {str(settings_list)}, "
+            f"options: {str(options_list)} and update={update}\n")
+        try:
+            self.install_reference(conan_ref, update=update,
+                                         settings=settings_list, options=options_list)
+            Logger().info(f"Installation of '<b>{str(conan_ref)}</b>' finished")
+            # Update cache with this package
+            self.info_cache.update_local_package_path(
+                conan_ref, self.get_package_folder(conan_ref, package.get("id", "")))
+            return True
+        except ConanException as e:
+            Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(e)}")
+            return False
+
+
+    def get_path_or_auto_install(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
+        """ Return the pkg_id and package folder of a conan reference 
+        and auto-install it with the best matching package, if it is not available """
+        if not update:
+            pkg_id, path = self.get_best_matching_package_path(conan_ref, conan_options)
+            if pkg_id:
+                return pkg_id, path
+            Logger().info(
+                f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed. Searching for packages to install...")
+
+        pkg_id, path = self.install_best_matching_package(conan_ref, conan_options, update=update)
+        return pkg_id, path
+
+    def install_best_matching_package(self, conan_ref: ConanRef,
+                                      conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
+        packages: List[ConanPkg] = self.get_matching_package_in_remotes(conan_ref, conan_options)
+        if not packages:
+            self.info_cache.invalidate_remote_package(conan_ref)
+            return ("", Path(INVALID_PATH))
+
+        if self.install_package(conan_ref, packages[0], update):
+            package = self.find_best_local_package(conan_ref, conan_options)
+            pkg_id = package.get("id", "")
+            if not pkg_id:
+                return (pkg_id, Path(INVALID_PATH))
+            return (pkg_id, self.get_package_folder(conan_ref, pkg_id))
+        return ("", Path(INVALID_PATH))
 
     ### Local References and Packages ###
 
@@ -118,20 +202,6 @@ class ConanApi(ConanUnifiedApi):
             return str(conan_ref) + "@_/_"
         return str(conan_ref)
 
-    def get_path_or_auto_install(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
-        """ Return the pkg_id and package folder of a conan reference 
-        and auto-install it with the best matching package, if it is not available """
-        if not update:
-            pkg_id, path = self.get_best_matching_package_path(conan_ref, conan_options)
-            if pkg_id:
-                return pkg_id, path
-            Logger().info(
-                f"'<b>{conan_ref}</b>' with options {repr(conan_options)} is not installed. Searching for packages to install...")
-
-        # pkg_id, path = self.install_best_matching_package(conan_ref, conan_options, update=update)
-        # return pkg_id, path
-        return "", Path()
-
     def get_best_matching_package_path(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}) -> Tuple[str, Path]:
         package = self.find_best_local_package(conan_ref, conan_options)
         if package.get("id", ""):
@@ -174,6 +244,16 @@ class ConanApi(ConanUnifiedApi):
         search_results = list(set(search_results))  # make unique
         search_results.sort()
         return search_results
+    
+    def get_matching_package_in_remotes(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}) -> List[ConanPkg]:
+        """ Find a package with options in the remotes """
+        for remote in self.get_remotes():
+            packages = self.find_best_matching_packages(conan_ref, conan_options, remote.name)
+            if packages:
+                return packages
+        Logger().info(
+            f"Can't find a package '<b>{str(conan_ref)}</b>' with options {conan_options} in the <b>remotes</b>")
+        return []
 
     def find_best_matching_packages(self, conan_ref: ConanRef, input_options: Dict[str, str] = {},
                                     remote: Optional[str] = None) -> List[ConanPkg]:
@@ -208,8 +288,7 @@ class ConanApi(ConanUnifiedApi):
 
         # filter the found packages by the user options
         if input_options:
-            found_pkgs = list(filter(lambda pkg: input_options.items() <=
-                                     pkg.get("options", {}).items(), found_pkgs))
+            found_pkgs = list(filter(lambda pkg: input_options.items() <= pkg.get("options", {}).items(), found_pkgs))
             if not found_pkgs:
                 return found_pkgs
         # get a set of existing options and reduce default options with them
@@ -220,17 +299,16 @@ class ConanApi(ConanUnifiedApi):
 
         # this calls external code of the recipe
         try:
+            # TODO: Workaround, until there is a dedicated api function for this.
             path = self.conan.local.get_conanfile_path(self.conan.cache.export_path(conan_ref), os.getcwd(), py=True)
             conanfile = self.conan.graph.load_conanfile_class(path)
-            inspection = python_inspect.getmembers_static(conanfile)
+            inspection = python_inspect.getmembers(conanfile)
             found_field = {}
             for field_name, field in inspection:
                 if field_name == "default_options":
                     found_field = field
                     break
             default_options = self._resolve_default_options(found_field)
-
-
         except Exception:
             default_options = {}
 
@@ -266,15 +344,18 @@ class ConanApi(ConanUnifiedApi):
         try:
             from conan.api.model import ListPattern
             pattern = ListPattern(str(conan_ref) + ":*", rrev=None, prev=None)
-            search_results = self.conan.list.select(pattern, remote=remote, package_query=query)
-            if search_results:
-                latest_rev = self.conan.list.latest_recipe_revision(conan_ref)
-                if latest_rev:
-                    found_pkgs_dict = search_results.recipes.get(str(conan_ref), {}).get("revisions", {}).get(latest_rev.revision, {}).get("packages", {})
-                    for id, info in found_pkgs_dict.items():
-                        found_pkgs.append(ConanPkg(id=id, options=info.get("info", {}).get("options", {}),
-                                           settings=info.get("info", {}).get("settings", {}),
-                                           requires=[], outdated=False))
+            search_results = None
+            for remote_obj in self.get_remotes():
+                if remote_obj.name == remote:
+                    search_results = self.conan.list.select(pattern, remote=remote_obj, package_query=query)
+                    if search_results:
+                        latest_rev = self.conan.list.latest_recipe_revision(conan_ref, remote_obj)
+                        if latest_rev:
+                            found_pkgs_dict = search_results.recipes.get(str(conan_ref), {}).get("revisions", {}).get(latest_rev.revision, {}).get("packages", {})
+                            for id, info in found_pkgs_dict.items():
+                                found_pkgs.append(ConanPkg(id=id, options=info.get("info", {}).get("options", {}),
+                                                settings=info.get("info", {}).get("settings", {}),
+                                                requires=[], outdated=False))
             Logger().debug(str(found_pkgs))
         except ConanException:  # no problem, next
             return []

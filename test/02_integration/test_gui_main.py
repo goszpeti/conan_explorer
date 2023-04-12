@@ -63,6 +63,7 @@ def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
 
     main_gui.close()
 
+@pytest.mark.conanv2
 def test_startup_with_existing_config_and_open_menu(qtbot, base_fixture, ui_config_fixture):
     """
     Test, that loading a config file and opening the about menu, and clicking on OK

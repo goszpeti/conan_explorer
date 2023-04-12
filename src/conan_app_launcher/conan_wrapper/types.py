@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 from abc import ABC, abstractmethod
 from conan_app_launcher import conan_version
 
@@ -100,6 +100,11 @@ class ConanUnifiedApi(ABC):
     #     Returns True, if installation was succesfull.
     #     """
     #     raise NotImplementedError
+
+    def get_path_or_auto_install(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
+        """ Return the pkg_id and package folder of a conan reference 
+        and auto-install it with the best matching package, if it is not available """
+        raise NotImplementedError
 
     # def install_best_matching_package(self, conan_ref: ConanRef,
     #                                   conan_options: Dict[str, str] = {}, update=False) -> Tuple[str, Path]:
