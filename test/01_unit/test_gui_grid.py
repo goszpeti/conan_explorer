@@ -122,7 +122,7 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture: PathSetup, mocker):
         exe_rel_path = "bin\\python.exe"
     else:
         exe_rel_path = "bin/python"
-    _, temp_package_path = app.conan_api.get_best_matching_package_path(
+    _, temp_package_path = app.conan_api.get_best_matching_local_package_path(
         CFR.loads(diag._ui.conan_ref_line_edit.text()), diag.resolve_conan_options())
     selection = temp_package_path / exe_rel_path
     mocker.patch.object(QtWidgets.QFileDialog, 'exec',

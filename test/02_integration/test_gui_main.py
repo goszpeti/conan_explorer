@@ -139,7 +139,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     ret = os.system(f"conan create {conanfile} {ref}")
     assert ret == 0
 
-    pkg = conan.find_best_local_package(ConanRef.loads(ref))
+    pkg = conan.find_best_matching_local_package(ConanRef.loads(ref))
     remotes = conan.get_remotes()
     Logger().debug("Remotes:" + repr(remotes))
     time.sleep(1)
@@ -164,7 +164,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
        output += ret.stdout.decode("utf-8")
     assert ret.returncode == 0, output
     exp_folder = conan.get_export_folder(ConanRef.loads(ref))
-    pkg = conan.find_best_local_package(ConanRef.loads(ref))
+    pkg = conan.find_best_matching_local_package(ConanRef.loads(ref))
     pkg_cache_folder = os.path.abspath(os.path.join(exp_folder, "..", "package", pkg["id"]))
     pkg_dir = conan.get_package_folder(ConanRef.loads(ref), pkg["id"])
     rmtree(pkg_dir)

@@ -75,7 +75,7 @@ def test_conan_find_remote_pkg(base_fixture):
     conan = ConanApi().init_api()
     default_settings = dict(conan.client_cache.default_profile.settings)
 
-    pkgs = conan.get_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"shared": "True"})
+    pkgs = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"shared": "True"})
     assert len(pkgs) > 0
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
@@ -92,7 +92,7 @@ def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     conan_remove_ref(TEST_REF)
     conan = ConanApi().init_api()
-    pkg = conan.get_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"BogusOption": "True"})
+    pkg = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"BogusOption": "True"})
     assert not pkg
 
 @pytest.mark.conanv2
@@ -164,7 +164,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     """
     ref = "nocompsettings/1.0.0@local/no_sets"
     conan_remove_ref(ref)
-
+    capfd.readouterr() # remove can result in error message - clear
     conan = ConanApi().init_api()
 
     id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(ref))

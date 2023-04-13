@@ -38,7 +38,7 @@ class SearchedPackageTreeItem(TreeModelItem):
             # cross reference with installed packages
             infos = app.conan_api.get_local_pkgs_from_ref(ConanRef.loads(recipe_ref))
             installed_ids = [info.get("id") for info in infos]
-            packages = app.conan_api.get_packages_in_remote(ConanRef.loads(recipe_ref), remote)
+            packages = app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(recipe_ref), remote)
             for pkg in packages:
                 pkg_id = pkg.get("id", "")
                 if pkg_id in pkgs_to_be_added.keys():  # package already found in another remote
@@ -93,7 +93,7 @@ class PkgSearchModel(TreeModel):
         # needs to be ConanRef, so we can check with get_all_local_refs directly
         recipes_with_remotes: Dict[ConanRef, str] = {}
         for remote in remotes:
-            recipe_list = (app.conan_api.search_query_in_remotes(
+            recipe_list = (app.conan_api.search_recipes_in_remotes(
                 f"{search_query}*", remote_name=remote))
             for recipe in recipe_list:
                 current_value = recipes_with_remotes.get(recipe, "")

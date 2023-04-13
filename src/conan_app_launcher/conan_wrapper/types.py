@@ -27,7 +27,7 @@ else:
 
 
 ConanRef: TypeAlias = ConanFileReference
-PkgRef: TypeAlias = PackageReference
+ConanPkgRef: TypeAlias = PackageReference
 
 
 class ConanPkg(TypedDict, total=False):

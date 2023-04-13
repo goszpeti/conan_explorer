@@ -51,7 +51,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     dialog.show()
     dialog.button(dialog.StandardButton.Cancel).clicked.emit()
 
-    found_pkg = app.conan_api.find_best_local_package(cfr)
+    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
     assert found_pkg.get("id", "")
 
     # check without pkg id
@@ -59,7 +59,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
     # check, that the package is deleted
-    found_pkg = app.conan_api.find_best_local_package(cfr)
+    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
     assert not found_pkg.get("id", "")
 
     # check with pkg id
@@ -70,7 +70,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
 
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
-    found_pkg = app.conan_api.find_best_local_package(cfr)
+    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
     assert not found_pkg.get("id", "")
     main_gui.close()
 

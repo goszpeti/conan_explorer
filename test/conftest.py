@@ -99,7 +99,7 @@ def create_test_ref(ref, paths, create_params=[""], update=False):
     conan = ConanApi()
     conan.init_api()
 
-    pkgs = conan.search_query_in_remotes(native_ref)
+    pkgs = conan.search_recipes_in_remotes(native_ref)
 
     if not update:
         for pkg in pkgs:

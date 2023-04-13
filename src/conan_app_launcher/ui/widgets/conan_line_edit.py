@@ -3,7 +3,7 @@ from typing import Callable, List
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.conan_wrapper.types import ConanRef, PkgRef
+from conan_app_launcher.conan_wrapper.types import ConanRef, ConanPkgRef
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit, QListView
 
@@ -81,7 +81,7 @@ class ConanRefLineEdit(QLineEdit):
         else:
             try:
                 if ":" in conan_ref:
-                    PkgRef.loads(conan_ref)
+                    ConanPkgRef.loads(conan_ref)
                 else:
                     ConanRef.loads(conan_ref)
                 self.is_valid = True
@@ -111,7 +111,7 @@ class ConanRefLineEdit(QLineEdit):
     def load_completion(self, text: str):
         if any([entry.startswith(text) for entry in app.conan_api.info_cache.get_all_remote_refs()]) or self.is_valid:
             return
-        recipes = app.conan_api.search_query_in_remotes(f"{text}*")  # can take very long time
+        recipes = app.conan_api.search_recipes_in_remotes(f"{text}*")  # can take very long time
         if app.conan_api:  # program can shut down and conan_api destroyed
             try:
                 app.conan_api.info_cache.update_remote_package_list(recipes)  # add to cache

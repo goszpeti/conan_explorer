@@ -11,7 +11,7 @@ from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.plugin import PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu, AnimatedToggle
-from conan_app_launcher.conan_wrapper.types import ConanRef, PkgRef
+from conan_app_launcher.conan_wrapper.types import ConanRef, ConanPkgRef
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
@@ -247,7 +247,7 @@ class AppGridView(PluginInterfaceV1):
 
                     if app_link.model.conan_ref == conan_ref:
                         # reverse lookup - don't update an icon with other options
-                        pkg_info = app.conan_api.get_local_pkg_from_id(PkgRef.loads(conan_ref + ":" + pkg_id))
+                        pkg_info = app.conan_api.get_local_pkg_from_id(ConanPkgRef.loads(conan_ref + ":" + pkg_id))
                         if app_link.model.conan_options:  # only compare options, if user explicitly set them
                             # user options should be a subset of full pkg options
                             if not app_link.model.conan_options.items() <= pkg_info.get("options", {}).items():

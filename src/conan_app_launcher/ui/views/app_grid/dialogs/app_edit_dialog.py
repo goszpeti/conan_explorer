@@ -85,7 +85,7 @@ class AppEditDialog(QDialog):
         dialog.show()
 
     def on_executable_browse_clicked(self):
-        _, temp_package_path = app.conan_api.get_best_matching_package_path(
+        _, temp_package_path = app.conan_api.get_best_matching_local_package_path(
             ConanRef.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
         if not temp_package_path.exists():  # default path
             temp_package_path = Path.home()
@@ -111,7 +111,7 @@ class AppEditDialog(QDialog):
             return True
 
     def on_icon_browse_clicked(self):
-        _, temp_package_path = app.conan_api.get_best_matching_package_path(
+        _, temp_package_path = app.conan_api.get_best_matching_local_package_path(
             ConanRef.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
         if not temp_package_path.exists():  # default path
             temp_package_path = Path.home()

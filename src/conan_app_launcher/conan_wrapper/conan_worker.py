@@ -17,7 +17,7 @@ else:
 
 from conan_app_launcher import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
 from conan_app_launcher.app.logger import Logger
-from .types import ConanRef, PkgRef
+from .types import ConanRef, ConanPkgRef
 
 class ConanWorkerElement(TypedDict):
     ref_pkg_id: str  # format in <ref>:<id>. Id is optional. If id is used options, settings and auto_isntall is ignored
@@ -100,7 +100,7 @@ class ConanWorker():
             # package path will be updated in conan cache
             try:
                 if ":" in ref_pkg_id:  # pkg ref
-                    pkg_ref = PkgRef.loads(ref_pkg_id)
+                    pkg_ref = ConanPkgRef.loads(ref_pkg_id)
                     conan_ref = pkg_ref.ref
                     pkg_id = pkg_ref.id
                     package = self._conan_api.get_remote_pkg_from_id(pkg_ref)
