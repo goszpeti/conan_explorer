@@ -9,8 +9,7 @@ from .unified_api import ConanUnifiedApi
 if TYPE_CHECKING:
     from conans.client.cache.remote_registry import Remote
     from .conan_cache import ConanInfoCache
-    from conans.client.conan_api import ClientCache, ConanAPIV1, UserIO
-    from conans.client.output import ConanOutput
+    from conans.client.conan_api import ClientCache, ConanAPIV1
 
 from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF, INVALID_PATH,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, user_save_path)
@@ -28,7 +27,7 @@ class ConanApi(ConanUnifiedApi):
 
     def init_api(self):
         """ Instantiate the internal Conan api. In some cases it needs to be instatiated anew. """
-        from conans.client.conan_api import (ClientCache, ConanAPIV1, UserIO)
+        from conans.client.conan_api import (ConanAPIV1, UserIO)
         from conans.client.output import ConanOutput
         self._conan = ConanAPIV1(output=ConanOutput(LoggerWriter(
             Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
@@ -133,8 +132,8 @@ class ConanApi(ConanUnifiedApi):
 
     ### Install related methods ###
 
-    def install_reference(self, conan_ref: ConanRef, profile= "", conan_settings:  Dict[str, str] = {},
-                          conan_options: Dict[str, str] = {}, update=True) -> Tuple[str, Path]:
+    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: Dict[str, str]={},
+                          conan_options: Dict[str, str]={}, update=True) -> Tuple[str, Path]:
         package_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
@@ -142,9 +141,12 @@ class ConanApi(ConanUnifiedApi):
         f"settings: {str(settings_list)}, " \
         f"options: {str(options_list)} and update={update}\n"
         Logger().info(install_message)
+        profile_names = []
+        if profile:
+            profile_names = [profile_names]
         try:
             infos = self._conan.install_reference(
-                conan_ref, settings=settings_list, options=options_list, update=update, profile_names=[profile])
+                conan_ref, settings=settings_list, options=options_list, update=update, profile_names=profile_names)
             if not infos.get("error", True):
                 package_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
             Logger().info(f"Installation of '<b>{str(conan_ref)}</b>' finished")
@@ -314,7 +316,7 @@ class ConanApi(ConanUnifiedApi):
         default_settings: Dict[str, str] = {}
         try:
             # type: ignore - dynamic prop is ok in try-catch
-            default_settings = dict(self.client_cache.default_profile.settings)
+            default_settings = dict(self.client_cache.default_profile.settings) # type: ignore
             query = f"(arch=None OR arch={default_settings.get('arch')})" \
                     f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"\
