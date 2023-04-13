@@ -36,7 +36,8 @@ class ConanRemoveDialog(QMessageBox):
         try:
             Logger().info(f"Deleting {self._conan_ref} {self._pkg_id}")
             pkg_ids = [self._pkg_id] if self._pkg_id else None
-            app.conan_api.conan.remove(self._conan_ref, packages=pkg_ids, force=True)
+            # TODO dedicated function
+            app.conan_api._conan.remove(self._conan_ref, packages=pkg_ids, force=True)
         except Exception as e:
             Logger().error(f"Error while removing package {self._conan_ref}: {str(e)}")
         if not self._conan_pkg_removed_sig:

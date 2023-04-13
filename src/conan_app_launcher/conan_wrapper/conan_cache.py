@@ -7,7 +7,8 @@ from typing import Dict, List, Optional, Set, Tuple
 from conan_app_launcher import INVALID_CONAN_REF, INVALID_PATH, conan_version
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import delete_path
-from conan_app_launcher.conan_wrapper.types import ConanRef, ConanUnifiedApi
+from .types import ConanRef
+from . import ConanApi
 
 class ConanInfoCache():
     """
@@ -40,7 +41,7 @@ class ConanInfoCache():
 
     def get_local_package_path(self, conan_ref: ConanRef) -> Path:
         """ Return cached package path of a locally installed package. """
-        conan_ref_str = ConanUnifiedApi.generate_canonical_ref(conan_ref)
+        conan_ref_str = ConanApi.generate_canonical_ref(conan_ref)
         if not conan_ref_str or conan_ref_str == INVALID_CONAN_REF:
             return Path(INVALID_PATH)
 
@@ -144,7 +145,7 @@ class ConanInfoCache():
             if self._local_packages.get(str(conan_ref)) == str(folder):
                 return
             self._local_packages.update(
-                {ConanUnifiedApi.generate_canonical_ref(conan_ref): str(folder.as_posix())})
+                {ConanApi.generate_canonical_ref(conan_ref): str(folder.as_posix())})
             self._save()
 
     def invalidate_remote_package(self, conan_ref: ConanRef):

@@ -59,7 +59,7 @@ class RemoteLoginDialog(QDialog):
             # will be canceled after the first error, so no lockout will occur, because of multiple incorrect logins
             # error is printed on the console
             try:
-                app.conan_api.conan.authenticate(self._ui.name_line_edit.text(),
+                app.conan_api._conan.authenticate(self._ui.name_line_edit.text(),
                                                 self._ui.password_line_edit.text(), remote.name)
             except Exception as e:
                 Logger().error(f"Can't sign in to {remote.name}: {str(e)}")

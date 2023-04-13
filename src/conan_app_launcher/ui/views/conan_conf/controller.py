@@ -71,7 +71,8 @@ class ConanRemoteController():
         remote_item = self.get_selected_remote()
         if not remote_item:
             return
-        app.conan_api.conan.remote_set_disabled_state(remote_item.remote.name, not remote_item.remote.disabled)
+        # TODO dedicated function
+        app.conan_api._conan.remote_set_disabled_state(remote_item.remote.name, not remote_item.remote.disabled)
         self.update()
 
     def get_selected_remote(self) -> Union[RemotesModelItem, None]:

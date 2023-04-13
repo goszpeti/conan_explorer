@@ -116,7 +116,8 @@ class ConanInstallDialog(QDialog):
 
     def on_options_query(self, conan_ref: str):
         try:
-            self._ref_info = app.conan_api.conan.info(app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
+            # TODO dedicated function
+            self._ref_info = app.conan_api._conan.info(app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
         except Exception:
             return
 

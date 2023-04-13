@@ -2,7 +2,8 @@ from . import ConanApi
 from pathlib import Path
 import platform
 from typing import Set
-import conans
+
+from conan_app_launcher import conan_version
 from conan_app_launcher.app.logger import Logger
 
 class ConanCleanup():
@@ -15,7 +16,7 @@ class ConanCleanup():
     def get_cleanup_cache_paths(self) -> Set[str]:
         """ Get a list of orphaned short path and cache folders """
         # Blessed are the users Microsoft products!
-        if platform.system() != "Windows" or conans.__version__.startswith("2"):
+        if platform.system() != "Windows" or conan_version.startswith("2"):
             return set()
         self.find_orphaned_references()
         self.find_orphaned_packages()

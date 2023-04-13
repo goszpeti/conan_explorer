@@ -71,7 +71,7 @@ def test_conan_find_remote_pkg(base_fixture):
     The function must find exactly one pacakge, which uses the spec. options and corresponds to the
     default settings.
     """
-    os.system(f"conan remove {TEST_REF} -f")
+    conan_remove_ref(TEST_REF)
     conan = ConanApi().init_api()
     default_settings = dict(conan.client_cache.default_profile.settings)
 
@@ -90,7 +90,7 @@ def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     Test, if a wrong Option return causes an error.
     Empty list must be returned and the error be logged.
     """
-    os.system(f"conan remove {TEST_REF} -f")
+    conan_remove_ref(TEST_REF)
     conan = ConanApi().init_api()
     pkg = conan.get_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"BogusOption": "True"})
     assert not pkg
@@ -112,17 +112,15 @@ def test_get_path_or_install(base_fixture):
     Test, if get_package installs the package and returns the path and check it again.
     The bin dir in the package must exist (indicating it was correctly downloaded)
     """
-    # use nocompsettings to check with transitive packages
     dir_to_check = "bin"
-    ref = "nocompsettings/1.0.0@local/no_sets"
-    conan_remove_ref(ref)
+    conan_remove_ref(TEST_REF)
 
     conan = ConanApi().init_api()
     # Gets package path / installs the package
-    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(ref))
+    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
     # check again for already installed package
-    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(ref))
+    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
 
 @pytest.mark.conanv2
@@ -132,7 +130,7 @@ def test_get_path_or_install_manual_options():
     The actual installaton must not return an error and non given options be merged with default options.
     """
     # This package has an option "shared" and is fairly small.
-    os.system(f"conan remove {TEST_REF} -f")
+    conan_remove_ref(TEST_REF)
     conan = ConanApi().init_api()
     id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF), {"shared": "True"})
     if platform.system() == "Windows":
@@ -147,7 +145,7 @@ def test_install_with_any_settings(mocker, capfd):
     The actual installaton must not return an error.
     """
     # mock the remote response
-    os.system(f"conan remove {TEST_REF} -f")
+    conan_remove_ref(TEST_REF)
     # Create the "any" package
     conan = ConanApi().init_api()
     assert conan.install_package(
@@ -165,7 +163,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     The actual installaton must not return an error.
     """
     ref = "nocompsettings/1.0.0@local/no_sets"
-    os.system(f"conan remove {ref} -f")
+    conan_remove_ref(ref)
 
     conan = ConanApi().init_api()
 
@@ -174,7 +172,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
     assert "Can't find a matching package" not in captured.err
-    os.system(f"conan remove {ref} -f")
+    conan_remove_ref(ref)
 
 @pytest.mark.conanv2
 def test_resolve_default_options(base_fixture):

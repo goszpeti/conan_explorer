@@ -307,7 +307,8 @@ class ConanConfigView(PluginInterfaceV1):
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
-            app.conan_api.conan.remote_remove(remote_item.remote.name)
+            # TODO dedicated function
+            app.conan_api._conan.remote_remove(remote_item.remote.name)
             self._remotes_controller.update()
 
     def on_remote_disable(self, model_index):

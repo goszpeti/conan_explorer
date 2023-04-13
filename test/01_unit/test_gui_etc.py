@@ -10,7 +10,7 @@ import traceback
 from conan_app_launcher.app.crash import bug_dialog_exc_hook
 from conan_app_launcher.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common.theming import get_user_theme_color
-from test.conftest import TEST_REF, app_qt_fixture
+from test.conftest import TEST_REF, app_qt_fixture, conan_remove_ref
 
 import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
@@ -71,7 +71,7 @@ def test_edit_line_conan(app_qt_fixture, base_fixture, light_theme_fixture):
     """ Test, that the line edit validates on edit
     and displays the local packages instantly and the remote ones after a delay
     """
-    os.system(f"conan remove {TEST_REF} -f")
+    conan_remove_ref(TEST_REF)
     root_obj = QtWidgets.QWidget()
     widget = ConanRefLineEdit(root_obj)
     app_qt_fixture.addWidget(root_obj)

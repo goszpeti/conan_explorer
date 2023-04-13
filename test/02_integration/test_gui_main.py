@@ -25,7 +25,7 @@ import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtWidgets
 
-from test.conftest import PathSetup
+from test.conftest import PathSetup, conan_remove_ref
 
 Qt = QtCore.Qt
 
@@ -133,10 +133,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     # Set up broken packages to have something to cleanup
     # in short path - edit .real_path
     ref = "example/1.0.0@user/testing"
-    try:
-        conan.conan.remove(ref, force=True)  # clean up for multiple runs
-    except Exception:
-        pass
+    conan_remove_ref(ref)  # clean up for multiple runs
     # shortpaths is enabled in conanfile
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
     ret = os.system(f"conan create {conanfile} {ref}")
@@ -158,10 +155,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
 
     # in cache - delete Short path, so that cache folder is orphaned
     ref = "example/1.0.0@user/orphan"
-    try:
-        conan.conan.remove(ref, force=True)  # clean up for multiple runs
-    except Exception:
-        pass
+    conan_remove_ref(ref)
     ret = run(f"conan create {conanfile} {ref}", stdout=PIPE, stderr=STDOUT, shell=True)
     output = ""
     if ret.stderr:

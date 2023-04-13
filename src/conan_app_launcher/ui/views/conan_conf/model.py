@@ -67,7 +67,8 @@ class RemotesTableModel(TreeModel):
         i = 0
         for remote_item in self.root_item.child_items:
             remote: Remote = remote_item.remote
-            app.conan_api.conan.remote_update(remote.name, remote.url, remote.verify_ssl, i)
+            # TODO dedicated function
+            app.conan_api._conan.remote_update(remote.name, remote.url, remote.verify_ssl, i)
             i += 1
 
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
