@@ -9,7 +9,8 @@ from test.conftest import TEST_REF_OFFICIAL, PathSetup
 from conan_app_launcher import INVALID_PATH, asset_path
 from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
                                                           UiAppLinkModel)
-from conan_app_launcher.conan_wrapper.types import ConanRef as CFR, ConanUnifiedApi
+from conan_app_launcher.conan_wrapper.types import ConanRef
+from conan_app_launcher.conan_wrapper.unified_api import ConanUnifiedApi
 
 
 def test_executable_eval(base_fixture: PathSetup):
@@ -75,7 +76,7 @@ def test_official_release(base_fixture: PathSetup):
     """
     
 
-    conan_ref_short = str(CFR.loads(TEST_REF_OFFICIAL))
+    conan_ref_short = str(ConanRef.loads(TEST_REF_OFFICIAL))
     app_config = UiAppLinkConfig("AppName", conan_ref=TEST_REF_OFFICIAL)
     app_link = UiAppLinkModel().load(app_config, None)
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
