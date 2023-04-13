@@ -50,8 +50,8 @@ class ConanConfigView(PluginInterfaceV1):
         self._init_profiles_tab()
         self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
 
-        self.config_file_path = Path(app.conan_api.client_cache.conan_conf_path)
-        self.profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
+        self.config_file_path = Path(app.conan_api._client_cache.conan_conf_path)
+        self.profiles_path = Path(str(app.conan_api._client_cache.default_profile_path)).parent
         self._load_info_tab()
         self._load_remotes_tab()
         self._load_profiles_tab()
@@ -68,14 +68,14 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.conan_cur_version_value_label.setText(conan_version)
         self._ui.python_exe_value_label.setText(sys.executable)
         self._ui.python_cur_version_value_label.setText(platform.python_version())
-        self._ui.revision_enabled_checkbox.setChecked(app.conan_api.client_cache.config.revisions_enabled)
-        self._ui.conan_usr_home_value_label.setText(app.conan_api.client_cache.cache_folder)
+        self._ui.revision_enabled_checkbox.setChecked(app.conan_api._client_cache.config.revisions_enabled)
+        self._ui.conan_usr_home_value_label.setText(app.conan_api._client_cache.cache_folder)
         self._ui.conan_usr_cache_value_label.setText(str(app.conan_api.get_short_path_root()))
-        self._ui.conan_storage_path_value_label.setText(str(app.conan_api.client_cache.store))
+        self._ui.conan_storage_path_value_label.setText(str(app.conan_api._client_cache.store))
 
     def _load_settings_yml_tab(self):
         try:
-            self._ui.settings_file_text_browser.setText(Path(app.conan_api.client_cache.settings_path).read_text())
+            self._ui.settings_file_text_browser.setText(Path(app.conan_api._client_cache.settings_path).read_text())
         except Exception:
             Logger().error("Cannot read settings.yaml file!")
 

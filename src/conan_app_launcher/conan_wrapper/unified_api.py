@@ -14,7 +14,6 @@ class ConanUnifiedApi(ABC):
 
     def __init__(self) -> None:
         # no direct Conan API access!
-        self.client_cache: "ClientCache"  # TODO: Abstract this
         self.info_cache: "ConanInfoCache"
         super().__init__()
 
@@ -35,6 +34,17 @@ class ConanUnifiedApi(ABC):
     def get_profiles(self) -> List[str]:
         """ Return a list of all profiles """
         raise NotImplementedError
+    
+    def get_profile_settings(self, profile_name: str) -> Dict[str, str]:
+        """ Return a dict of settings for a profile """
+        raise NotImplementedError
+    
+    def get_profiles_with_settings(self) -> Dict[str, Dict[str, str]]:
+        """ Return a list of all profiles and the corresponding settings """
+        profiles_dict = {}
+        for profile in self.get_profiles():
+            profiles_dict[profile] = self.get_profile_settings(profile)
+        return profiles_dict
 
     # def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, authenticated
     #     """ Get username and authenticated info for a remote. """
@@ -120,16 +130,31 @@ class ConanUnifiedApi(ABC):
 
     def find_best_matching_local_package(self, conan_ref: ConanRef, input_options: Dict[str, str] = {}) -> ConanPkg:
         """ Find a package in the local cache """
-        raise NotImplementedError
+        packages = self.find_best_matching_packages(conan_ref, input_options, remote=None)
+        # What to if multiple ones exits? - for now simply take the first entry
+        if packages:
+            if len(packages) > 1:
+                settings = packages[0].get("settings", {})
+                id = packages[0].get("id", "")
+                Logger().warning(f"Multiple matching packages found for '<b>{str(conan_ref)}</b>'!\n"
+                                 f"Choosing this: {id} ({self.build_conan_profile_name_alias(settings)})")
+            # Update cache with this package
+            self.info_cache.update_local_package_path(
+                conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
+            return packages[0]
+        Logger().debug(f"No matching local packages found for <b>{str(conan_ref)}</b>")
+        return {"id": ""}
 
     def get_best_matching_local_package_path(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}) -> Tuple[str, Path]:
-        """ Return the pkg_id and package folder of a conan reference 
-        and auto-install it with the best matching package, if it is not available """
-        raise NotImplementedError
-
+        """ Return the pkg_id and package folder of a conan reference, if it is installed. """
+        package = self.find_best_matching_local_package(conan_ref, conan_options)
+        if package.get("id", ""):
+            return package.get("id", ""), self.get_package_folder(conan_ref, package.get("id", ""))
+        return "", Path(INVALID_PATH)
+    
     def get_all_local_refs(self) -> List[ConanRef]:
         """ Returns all locally installed conan references """
-        return self.client_cache.all_refs()
+        raise NotImplementedError
 
     def get_local_pkgs_from_ref(self, conan_ref: ConanRef) -> List["ConanPkg"]:
         """ Returns all installed pkg ids for a reference. """
@@ -137,11 +162,21 @@ class ConanUnifiedApi(ABC):
 
     def get_local_pkg_from_id(self, pkg_ref: ConanPkgRef) -> "ConanPkg":
         """ Returns an installed pkg from reference and id """
-        raise NotImplementedError
+        package = None
+        for package in self.get_local_pkgs_from_ref(pkg_ref.ref):
+            if package.get("id", "") == pkg_ref.id:
+                return package
+        return {"id": ""}
 
     def get_local_pkg_from_path(self, conan_ref: ConanRef, path: Path):
-        """ For reverse lookup - give info from path """
-        raise NotImplementedError
+        """ For reverse lookup - give info from path """   
+        found_package = None
+        for package in self.get_local_pkgs_from_ref(conan_ref):
+            if self.get_package_folder(conan_ref, package.get("id", "")) == path:
+                found_package = package
+                break
+        return found_package
+
 
 ### Remote References and Packages ###
 
@@ -159,11 +194,23 @@ class ConanUnifiedApi(ABC):
 
     def get_remote_pkg_from_id(self, pkg_ref: ConanPkgRef) -> "ConanPkg":
         """ Returns a remote pkg from reference and id """
-        raise NotImplementedError
+        package = None
+        for remote in self.get_remotes():
+            packages = self.get_remote_pkgs_from_ref(pkg_ref.ref, remote.name)
+            for package in packages:
+                if package.get("id", "") == pkg_ref.id:
+                    return package
+        return {"id": ""}
 
-    def find_best_matching_package_in_remotes(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}) -> List[ConanPkg]:
+    def find_best_matching_package_in_remotes(self, conan_ref: ConanRef, conan_options: Dict[str, str] = {}) -> List[ConanPkg]:   
         """ Find a package with options in the remotes """
-        raise NotImplementedError
+        for remote in self.get_remotes():
+            packages = self.find_best_matching_packages(conan_ref, conan_options, remote.name)
+            if packages:
+                return packages
+        Logger().info(
+            f"Can't find a package '<b>{str(conan_ref)}</b>' with options {conan_options} in the <b>remotes</b>")
+        return []
 
     def find_best_matching_packages(self, conan_ref: ConanRef, input_options: Dict[str, str] = {},
                                     remote: Optional[str] = None) -> List[ConanPkg]:

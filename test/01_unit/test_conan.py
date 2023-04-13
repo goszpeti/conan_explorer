@@ -73,7 +73,7 @@ def test_conan_find_remote_pkg(base_fixture):
     """
     conan_remove_ref(TEST_REF)
     conan = ConanApi().init_api()
-    default_settings = dict(conan.client_cache.default_profile.settings)
+    default_settings = dict(conan._client_cache.default_profile.settings)
 
     pkgs = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"shared": "True"})
     assert len(pkgs) > 0

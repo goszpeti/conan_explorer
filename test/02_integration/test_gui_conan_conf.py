@@ -234,7 +234,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
 @pytest.fixture
 def profile_fixture():
     """ Delete all created profiles in case of errors for test_conan_config_view_profiles"""
-    profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
+    profiles_path = Path(str(app.conan_api._client_cache.default_profile_path)).parent
     delete_path(profiles_path / "new_profile_add")
     delete_path(profiles_path / "new_profile_rename")
     delete_path(profiles_path / "new_profile_test")
@@ -261,7 +261,7 @@ def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixt
 
     # check, that all conan profiles are displayed
     model = conan_conf_view._ui.profiles_list_view.model()
-    profiles_path = Path(str(app.conan_api.client_cache.default_profile_path)).parent
+    profiles_path = Path(str(app.conan_api._client_cache.default_profile_path)).parent
     default_profile_path = profiles_path / "default"
 
     profile_model_count = model.rowCount(0)

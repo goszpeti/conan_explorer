@@ -149,8 +149,8 @@ def start_conan_server():
     if conan_version.startswith("1"):
         conan = ConanApi()
         conan.init_api()
-        os.makedirs(conan.client_cache.profiles_path, exist_ok=True)
-        shutil.copy(str(profiles_path / platform.system().lower()),  conan.client_cache.default_profile_path)
+        os.makedirs(conan._client_cache.profiles_path, exist_ok=True)
+        shutil.copy(str(profiles_path / platform.system().lower()),  conan._client_cache.default_profile_path)
     elif conan_version.startswith("2"):
         os.system("conan profile detect")
 

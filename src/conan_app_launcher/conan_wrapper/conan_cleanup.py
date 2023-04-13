@@ -25,8 +25,8 @@ class ConanCleanup():
     def find_orphaned_references(self):
         from .types import PackageEditableLayout
         del_list = []
-        for ref in self._conan_api.client_cache.all_refs():
-            ref_cache = self._conan_api.client_cache.package_layout(ref)
+        for ref in self._conan_api._client_cache.all_refs():
+            ref_cache = self._conan_api._client_cache.package_layout(ref)
             try:
                 package_ids = ref_cache.package_ids()
             except Exception:
