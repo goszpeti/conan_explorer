@@ -118,7 +118,6 @@ def test_plugin_file_register_unregister(base_fixture):
     plugin_groups  = app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME)
     assert len(plugin_groups) == 1
 
-@pytest.mark.conanv1
 @pytest.mark.conanv2
 def test_plugin_handler_conan_version():
     """ Tests the refspec eval and is_plugin_enabled function of PluginHandler """
@@ -133,6 +132,7 @@ def test_plugin_handler_conan_version():
         assert PluginHandler.is_plugin_enabled(plugin)
     if conan_version.startswith("2"):
         assert not PluginHandler.is_plugin_enabled(plugin)
+
 
 def test_plugin_handler(app_qt_fixture, base_fixture: PathSetup, mocker):
     """ Check loading and unloading mechanism """

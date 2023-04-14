@@ -157,7 +157,6 @@ class ConanUnifiedApi(ABC):
 
 ### Local References and Packages ###
 
-
     def find_best_matching_local_package(self, conan_ref: ConanRef, conan_options: ConanOptions = {}) -> ConanPkg:
         """ Find a package in the local cache """
         packages = self.find_best_matching_packages(conan_ref, conan_options, remote_name=None)

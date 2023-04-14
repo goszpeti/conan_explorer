@@ -165,6 +165,8 @@ class UiAppLinkModel(UiAppLinkConfig):
                 if pkg_info:
                     if not self.conan_options.items() <= pkg_info.get("options", {}).items():
                         return
+        else:
+            _, pkg_path = app.conan_api.get_best_matching_local_package_path(self._conan_file_reference, self.conan_options)
         if not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
             _, pkg_path = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
 
