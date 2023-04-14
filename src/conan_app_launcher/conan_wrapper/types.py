@@ -44,10 +44,10 @@ ConanPackagePath: TypeAlias = Path
 class ConanPkg(TypedDict, total=False):
     """ Dummy class to type conan returned package dicts """
 
-    id: str
-    options: Dict[str, Any]
-    settings: Dict[str, str]
-    requires: List
+    id: ConanPackageId
+    options: ConanOptions
+    settings: ConanSettings
+    requires: List[Any]
     outdated: bool
 
 class LoggerWriter:
