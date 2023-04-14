@@ -31,49 +31,36 @@ jobs:
             "windows-py311",
             "ubuntu-py38-conan1.24.0",
             "ubuntu-py310-conan1.48.2",
-            # "ubuntu-py311-conan2",
           ]
         include:
           - name: "ubuntu-py37"
             python: "3.7"
             os: ubuntu-20.04
             conan: "<2"
-            pytest_args: ""
           - name: "ubuntu-py38"
             python: "3.8"
             os: ubuntu-20.04
             conan: "<2"
-            pytest_args: ""
           - name: "ubuntu-py39"
             python: "3.9"
             conan: "<2"
             os: ubuntu-20.04
-            pytest_args: ""
           - name: "ubuntu-py310"
             python: "3.10"
             conan: "<2"
             os: ubuntu-20.04
-            pytest_args: ""
           - name: "windows-py311"
             python: "3.11"
             os: windows-latest
             conan: "<2"
-            pytest_args: ""
           - name: "ubuntu-py38-conan1.24.0"
             python: "3.8"
             os: ubuntu-20.04
             conan: "==1.24.0"
-            pytest_args: ""
           - name: "ubuntu-py310-conan1.48.2"
             python: "3.11"
             os: ubuntu-20.04
             conan: "==1.48.2"
-            pytest_args: ""
-          # - name: "ubuntu-py311-conan2"
-          #   python: "3.11"
-          #   os: ubuntu-20.04
-          #   conan: "<2.1"
-          #   pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
       LC_ALL: "en_US.UTF-8"
@@ -113,21 +100,37 @@ jobs:
           pip install -e .[test]
         env:
           CONAN_VERSION: ${{ matrix.conan}}
-      - name: Execute unitests with pytest
-        run: |
-          pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no ${{ matrix.pytest_args }}
-      - name: Execute integration with pytest
+      # - name: Execute unitests with pytest
+      #   run: |
+      #     pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
+      # - name: Execute integration with pytest
+      #   env:
+      #       SKIP_CREATE_CONAN_TEST_DATA: True
+      #   run: |
+      #     pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
+      # - name: Execute system with pytest # Reinstall into site-packages to find install and pkg problems
+      #   env:
+      #       SKIP_CREATE_CONAN_TEST_DATA: True
+      #   run: |
+      #     pip install .[test]
+      #     pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
+      - name: ConanV2 setup and unit tests
+        if: matrix.conan == '<2' # only for non fixed version conan ci jobs
         env:
-            SKIP_CREATE_CONAN_TEST_DATA: True
+            CONAN_VERSION: 2
         run: |
-          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no ${{ matrix.pytest_args }}
-      - name: Execute system with pytest # Reinstall into site-packages to find install and pkg problems
+          pip uninstall conan -y
+          pip install -e .[test]
+          pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}_conanV2.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no -m conanv2
+      - name: ConanV2 intergration tests
+        if: matrix.conan == '<2' # only for non fixed version conan ci jobs
         env:
+            CONAN_VERSION: 2
             SKIP_CREATE_CONAN_TEST_DATA: True
-        run: |
-          pip install .[test]
-          pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append ${{ matrix.pytest_args }}
-      - uses: actions/upload-artifact@v3
+        run: |          
+          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no -m conanv2
+      - name: Upload Test results
+        uses: actions/upload-artifact@v3
         with:
           name: Test results
           path: |
@@ -165,6 +168,6 @@ jobs:
             -Dsonar.exclusions=**/*_ui.py
             -Dsonar.tests=./test
             -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.python.version=3.7,3.8,3.9
+            -Dsonar.python.version=3.7,3.8,3.9,3.10,3.11
             -Dsonar.python.coverage.reportPaths=cov/cov-*.xml
             -Dsonar.python.xunit.reportPath=results/result-*-ubuntu-py39.xml
