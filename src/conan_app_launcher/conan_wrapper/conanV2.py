@@ -134,7 +134,7 @@ class ConanApi(ConanUnifiedApi):
     def get_options_with_default_values(self, conan_ref: ConanRef) -> Tuple[ConanAvailableOptions, ConanOptions]:
         # this calls external code of the recipe
         default_options = {}
-        options = {}
+        available_options = {}
         try:
             path = self.get_conanfile_path(conan_ref)
             conanfile = self._conan.graph.load_conanfile_class(path)
@@ -143,11 +143,11 @@ class ConanApi(ConanUnifiedApi):
                 if field_name == "default_options":
                     default_options = field
                 elif field_name == "options":
-                    options = field
+                    available_options = field
             default_options = self._resolve_default_options(default_options)
         except Exception:
             Logger().debug(f"Error while getting default options for {str(conan_ref)}")
-        return options, default_options
+        return available_options, default_options
 
     ### Local References and Packages ###
 

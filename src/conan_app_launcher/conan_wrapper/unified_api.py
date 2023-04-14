@@ -107,7 +107,6 @@ class ConanUnifiedApi(ABC):
         try:
             installed_id, package_path = self.install_reference(
                 conan_ref, update=update, conan_settings=settings, conan_options=options)
-            Logger().info(f"Installation of '<b>{str(conan_ref)}</b>' finished")
             if installed_id != package_id:
                 Logger().warning("Installed {installed_id} instead of selected {package_id}."
                                  "This can happen, if there transitive settings changed in comparison to the build time.")

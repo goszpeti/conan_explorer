@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit, QListView
 
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode
-
+from conan_app_launcher import conan_version
 
 class ConanRefLineEdit(QLineEdit):
     """ Adds completions for Conan references and a validator. """
@@ -84,7 +84,8 @@ class ConanRefLineEdit(QLineEdit):
                     ref= ConanPkgRef.loads(conan_ref)
                 else:
                     ref = ConanRef.loads(conan_ref)
-                    ref.validate_ref()
+                    if conan_version.startswith("2"):
+                        ref.validate_ref() # TODO create compat. classes for refs
                 self.is_valid = True
             except Exception:
                 self.is_valid = False

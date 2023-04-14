@@ -10,8 +10,9 @@ else:
         from typing import Literal, TypedDict, Protocol, TypeAlias
     except ImportError:
         from typing_extensions import Literal, TypedDict, Protocol, TypeAlias
+
 if conan_version.startswith("1"):
-    from conans.model.ref import ConanFileReference, PackageReference
+    from conans.model.ref import ConanFileReference, PackageReference # type: ignore
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
     try:
         from conans.util.windows import CONAN_REAL_PATH
@@ -19,7 +20,12 @@ if conan_version.startswith("1"):
         pass
 elif conan_version.startswith("2"):
     from conans.model.recipe_ref import RecipeReference as ConanFileReference  # type: ignore
-    from conans.model.package_ref import PkgReference as PackageReference  # type: ignore
+    from conans.model.package_ref import PkgReference  # type: ignore
+    class PackageReference(PkgReference): # type: ignore
+        """ Compatibility class for changed package_id attribute """
+        @property
+        def id(self):
+            return self.package_id
 else:
     raise RuntimeError("Can't recognize Conan version")
 
@@ -27,20 +33,13 @@ from conans.client.cache.remote_registry import Remote
 from conans.errors import ConanException
 
 ConanRef: TypeAlias = ConanFileReference
+ConanPkgRef: TypeAlias = PackageReference
 ConanOptions: TypeAlias = Dict[str, Any]
 ConanAvailableOptions: TypeAlias = Dict[str, Union[List[Any], Literal["ANY"]]]
 ConanSettings: TypeAlias = Dict[str, str]
 ConanPackageId: TypeAlias = str
 ConanPackagePath: TypeAlias = Path
 
-class ConanPkgRef(PackageReference): # type: ignore
-    """ Compatibility class for changed package_id attribute """
-    @property
-    def id(self):
-        if conan_version.startswith("1"):
-            return self.id
-        elif conan_version.startswith("2"):
-            return self.package_id
     
 class ConanPkg(TypedDict, total=False):
     """ Dummy class to type conan returned package dicts """

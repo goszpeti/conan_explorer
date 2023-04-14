@@ -3,7 +3,7 @@ import platform
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-from .types import ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, LoggerWriter, create_key_value_pair_list
+from .types import ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, LoggerWriter, create_key_value_pair_list
 from .unified_api import ConanUnifiedApi
 
 if TYPE_CHECKING:
@@ -76,9 +76,9 @@ class ConanApi(ConanUnifiedApi):
         if not profile:
             return {}
         return dict(profile.settings)
-    
+
     def get_default_settings(self) -> ConanSettings:
-        return dict(self._client_cache.default_profile.settings) # type: ignore
+        return dict(self._client_cache.default_profile.settings)  # type: ignore
 
     def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, autheticated
         user_info = self._conan.users_list(remote_name).get("remotes", {})
@@ -129,14 +129,14 @@ class ConanApi(ConanUnifiedApi):
 
     ### Install related methods ###
 
-    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings={},
-                          conan_options: ConanOptions={}, update=True) -> Tuple[str, Path]:
+    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings = {},
+                          conan_options: ConanOptions = {}, update=True) -> Tuple[str, Path]:
         package_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
-        install_message =  f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
-        f"settings: {str(settings_list)}, " \
-        f"options: {str(options_list)} and update={update}\n"
+        install_message = f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
+            f"settings: {str(settings_list)}, " \
+            f"options: {str(options_list)} and update={update}\n"
         Logger().info(install_message)
         profile_names = None
         if profile:
@@ -154,6 +154,21 @@ class ConanApi(ConanUnifiedApi):
         except ConanException as error:
             Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return package_id, Path(INVALID_PATH)
+
+    def get_options_with_default_values(self, conan_ref: ConanRef) -> Tuple[ConanAvailableOptions, ConanOptions]:
+        # this calls external code of the recipe
+        default_options = {}
+        available_options = {}
+        try:
+            ref_info = self._conan.info(self.generate_canonical_ref(conan_ref))
+            default_options_list = ref_info[0].root.dependencies[0].dst.conanfile.options.items()  # type: ignore
+            for option, value in default_options_list:
+                default_options.update({option: value})
+                available_options.update({option: 
+                                          ref_info[0].root.dependencies[0].dst.conanfile.options._data[option]._possible_values})  # type: ignore
+        except Exception as e:
+            Logger().debug(f"Error while getting default options for {str(conan_ref)}: {str(e)}")
+        return available_options, default_options
 
     # Local References and Packages
 
@@ -204,13 +219,13 @@ class ConanApi(ConanUnifiedApi):
         try:
             # no query possible with pattern
             search_results: List = self._conan.search_recipes(f"{conan_ref.name}/*@*/*",
-                                                             remote_name="all").get("results", None)
+                                                              remote_name="all").get("results", None)
         except Exception as e:
             Logger().warning(str(e))
         try:
             if SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
                 local_results: List = self._conan.search_recipes(f"{conan_ref.name}/*@*/*",
-                                                                remote_name=None).get("results", None)
+                                                                 remote_name=None).get("results", None)
         except Exception as e:
             Logger().warning(str(e))
             return []
@@ -229,7 +244,7 @@ class ConanApi(ConanUnifiedApi):
         found_pkgs: List[ConanPkg] = []
         try:
             search_results = self._conan.search_packages(conan_ref.full_str(), query=query,
-                                                        remote_name=remote).get("results", None)
+                                                         remote_name=remote).get("results", None)
             if search_results:
                 found_pkgs = search_results[0].get("items")[0].get("packages")
             Logger().debug(str(found_pkgs))
