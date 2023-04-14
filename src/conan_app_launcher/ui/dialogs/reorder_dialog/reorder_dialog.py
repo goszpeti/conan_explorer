@@ -41,7 +41,7 @@ class ReorderDialog(QDialog):
         self.setWindowIcon(get_themed_asset_icon("icons/rearrange.svg", True))
         
         self._controller = ReorderController(self._ui.list_view, model)
-        self._ui.list_view.setModel(model)
+        self._ui.list_view.setModel(model) # type: ignore
 
         self._ui.list_view.setUpdatesEnabled(True)
         self._ui.list_view.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)

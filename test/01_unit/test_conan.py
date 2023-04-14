@@ -64,7 +64,7 @@ def test_empty_cleanup_cache(base_fixture):
     os.environ.pop("CONAN_USER_HOME")
     os.environ.pop("CONAN_USER_HOME_SHORT")
 
-# @pytest.mark.conanv2
+@pytest.mark.conanv2
 def test_conan_find_remote_pkg(base_fixture):
     """
     Test, if search_package_in_remotes finds a package for the current system and the specified options.
@@ -215,7 +215,7 @@ def test_create_key_value_list(base_fixture):
 def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi().init_api()
-    res = conan.search_recipe_alternatives_in_remotes(ConanRef.loads(TEST_REF))
+    res = conan.search_recipe_all_versions_in_remotes(ConanRef.loads(TEST_REF))
     ref = ConanRef.loads(TEST_REF)  # need to convert @_/_
     assert str(ref) in str(res)
 

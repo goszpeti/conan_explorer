@@ -17,12 +17,12 @@ else:
 
 from conan_app_launcher import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
 from conan_app_launcher.app.logger import Logger
-from .types import ConanRef, ConanPkgRef
+from .types import ConanOptions, ConanRef, ConanPkgRef, ConanSettings
 
 class ConanWorkerElement(TypedDict):
     ref_pkg_id: str  # format in <ref>:<id>. Id is optional. If id is used options, settings and auto_isntall is ignored
-    options: Dict[str, str]  # conan options with key-value pairs
-    settings: Dict[str, str]  # conan settings with key-value pairs
+    options: ConanOptions  # conan options with key-value pairs
+    settings: ConanSettings  # conan settings with key-value pairs
     profile: str # alternative to settings
     update: bool  # use -u flag for install
     auto_install: bool  # automatically determine best matching package.
@@ -102,9 +102,8 @@ class ConanWorker():
                 if ":" in ref_pkg_id:  # pkg ref
                     pkg_ref = ConanPkgRef.loads(ref_pkg_id)
                     conan_ref = pkg_ref.ref
-                    pkg_id = pkg_ref.id
                     package = self._conan_api.get_remote_pkg_from_id(pkg_ref)
-                    self._conan_api.install_package(pkg_ref.ref, package, update)
+                    pkg_id, _ = self._conan_api.install_package(pkg_ref.ref, package, update)
                 else:
                     conan_ref = ConanRef.loads(ref_pkg_id)
 
@@ -138,7 +137,7 @@ class ConanWorker():
             _, info_callback = self._conan_versions_queue.get()
             # available versions will be in cache and retrievable for every item from there
             try:
-                available_refs = self._conan_api.search_recipe_alternatives_in_remotes(
+                available_refs = self._conan_api.search_recipe_all_versions_in_remotes(
                     ConanRef.loads(conan_ref))
             except Exception as e:
                 Logger().debug(f"ERROR in searching for {conan_ref}: {str(e)}")

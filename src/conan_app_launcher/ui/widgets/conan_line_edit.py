@@ -81,9 +81,10 @@ class ConanRefLineEdit(QLineEdit):
         else:
             try:
                 if ":" in conan_ref:
-                    ConanPkgRef.loads(conan_ref)
+                    ref= ConanPkgRef.loads(conan_ref)
                 else:
-                    ConanRef.loads(conan_ref)
+                    ref = ConanRef.loads(conan_ref)
+                    ref.validate_ref()
                 self.is_valid = True
             except Exception:
                 self.is_valid = False

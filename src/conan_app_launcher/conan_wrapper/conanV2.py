@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 from conan_app_launcher import (INVALID_CONAN_REF, INVALID_PATH,user_save_path)
 from conan_app_launcher.app.logger import Logger
-from .types import ConanPkg, ConanRef, ConanPkgRef, ConanException, create_key_value_pair_list
+from .types import ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, create_key_value_pair_list
 from .unified_api import ConanUnifiedApi
 
 if TYPE_CHECKING:
@@ -62,12 +62,28 @@ class ConanApi(ConanUnifiedApi):
 
     def get_export_folder(self, conan_ref: ConanRef) -> Path:
         return Path(self._conan.cache.export_path(conan_ref))
+    
+    def get_conanfile_path(self, conan_ref: ConanRef) -> Path:
+        try:
+            if conan_ref not in self.get_all_local_refs():
+                for remote in self.get_remotes():
+                    result = self.search_recipes_in_remotes(str(conan_ref), remote_name=remote.name)
+                    if result:
+                        latest_rev: ConanRef = self._conan.list.latest_recipe_revision(conan_ref, remote)
+                        self._conan.download.recipe(latest_rev, remote)
+                        break
+            path = self._conan.local.get_conanfile_path(self._conan.cache.export_path(conan_ref), os.getcwd(), py=True)
+            if not path:
+                return Path(INVALID_PATH)
+            return Path(path)
+        except Exception as e:
+            Logger().error(f"Can't get conanfile: {str(e)}")
+        return Path(INVALID_PATH)
 
     ### Install related methods ###
 
-    def install_reference(self, conan_ref: ConanRef, profile= "", conan_settings:  Dict[str, str] = {},
-                          conan_options: Dict[str, str] = {}, update=True) -> Tuple[str, Path]:
-        from conans.errors import ConanException
+    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings={},
+                          conan_options: ConanOptions={}, update=True) -> Tuple[str, Path]:
         pkg_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
@@ -83,8 +99,7 @@ class ConanApi(ConanUnifiedApi):
             profiles = [profile] if profile else []
             profile_host = self._conan.profiles.get_profile(profiles, settings=settings_list, options=options_list)
             requires = [conan_ref]
-            deps_graph = self._conan.graph.load_graph_requires(requires, None,
-                                                                profile_host, profile_host, None,
+            deps_graph = self._conan.graph.load_graph_requires(requires, None, profile_host, profile_host, None,
                                                                 remotes, update)
             print_graph_basic(deps_graph)
             deps_graph.report_graph_error()
@@ -110,6 +125,24 @@ class ConanApi(ConanUnifiedApi):
         except ConanException as error:
             Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return (pkg_id, Path(INVALID_PATH))
+        
+    def get_options_with_default_values(self, conan_ref: ConanRef) -> Tuple[ConanAvailableOptions, ConanOptions]:
+        # this calls external code of the recipe
+        default_options = {}
+        options = {}
+        try:
+            path = self.get_conanfile_path(conan_ref)
+            conanfile = self._conan.graph.load_conanfile_class(path)
+            inspection = python_inspect.getmembers(conanfile)
+            for field_name, field in inspection:
+                if field_name == "default_options":
+                    default_options = field
+                elif field_name == "options":
+                    options = field
+            default_options = self._resolve_default_options(default_options)
+        except Exception:
+            Logger().debug(f"Error while getting default options for {str(conan_ref)}")
+        return options, default_options
 
     ### Local References and Packages ###
 
@@ -161,8 +194,8 @@ class ConanApi(ConanUnifiedApi):
         search_results.sort()
         return search_results
 
-    def find_best_matching_packages(self, conan_ref: ConanRef, input_options: Dict[str, str] = {},
-                                    remote: Optional[str] = None) -> List[ConanPkg]:
+    def find_best_matching_packages(self, conan_ref: ConanRef, input_options: ConanOptions={},
+                                    remote_name: Optional[str]=None) -> List[ConanPkg]:
         # skip search on default invalid recipe
         if str(conan_ref) == INVALID_CONAN_REF:
             return []
@@ -177,7 +210,7 @@ class ConanApi(ConanUnifiedApi):
             default_settings = dict(pr.settings)
             query = f"(arch=None OR arch={default_settings.get('arch')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"
-            found_pkgs = self.get_remote_pkgs_from_ref(conan_ref, remote, query)
+            found_pkgs = self.get_remote_pkgs_from_ref(conan_ref, remote_name, query)
         except Exception:  # no problem, next
             return []
 
@@ -200,19 +233,7 @@ class ConanApi(ConanUnifiedApi):
             min_opts_list = min_opts_set.pop()
 
         # this calls external code of the recipe
-        try:
-            # TODO: Workaround, until there is a dedicated api function for this.
-            path = self._conan.local.get_conanfile_path(self._conan.cache.export_path(conan_ref), os.getcwd(), py=True)
-            conanfile = self._conan.graph.load_conanfile_class(path)
-            inspection = python_inspect.getmembers(conanfile)
-            found_field = {}
-            for field_name, field in inspection:
-                if field_name == "default_options":
-                    found_field = field
-                    break
-            default_options = self._resolve_default_options(found_field)
-        except Exception:
-            default_options = {}
+        _, default_options = self.get_options_with_default_values(conan_ref)
 
         if default_options:
             default_options = dict(filter(lambda opt: opt[0] in min_opts_list, default_options.items()))

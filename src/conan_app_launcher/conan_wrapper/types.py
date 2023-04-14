@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Dict, List
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Union
 from conan_app_launcher import conan_version
 
 if TYPE_CHECKING:
@@ -9,9 +10,6 @@ else:
         from typing import TypedDict, Protocol, TypeAlias
     except ImportError:
         from typing_extensions import TypedDict, Protocol, TypeAlias
-
-from conans.client.cache.remote_registry import Remote
-from conans.errors import ConanException
 if conan_version.startswith("1"):
     from conans.model.ref import ConanFileReference, PackageReference
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
@@ -25,16 +23,30 @@ elif conan_version.startswith("2"):
 else:
     raise RuntimeError("Can't recognize Conan version")
 
+from conans.client.cache.remote_registry import Remote
+from conans.errors import ConanException
 
 ConanRef: TypeAlias = ConanFileReference
-ConanPkgRef: TypeAlias = PackageReference
+ConanOptions: TypeAlias = Dict[str, Any]
+ConanAvailableOptions: TypeAlias = Dict[str, Union[List[Any], Literal["ANY"]]]
+ConanSettings: TypeAlias = Dict[str, str]
+ConanPackageId: TypeAlias = str
+ConanPackagePath: TypeAlias = Path
 
-
+class ConanPkgRef(PackageReference): # type: ignore
+    """ Compatibility class for changed package_id attribute """
+    @property
+    def id(self):
+        if conan_version.startswith("1"):
+            return self.id
+        elif conan_version.startswith("2"):
+            return self.package_id
+    
 class ConanPkg(TypedDict, total=False):
     """ Dummy class to type conan returned package dicts """
 
     id: str
-    options: Dict[str, str]
+    options: Dict[str, Any]
     settings: Dict[str, str]
     requires: List
     outdated: bool
@@ -58,7 +70,7 @@ class LoggerWriter:
         pass
 
 
-def create_key_value_pair_list(input_dict: Dict[str, str]) -> List[str]:
+def create_key_value_pair_list(input_dict: Dict[str, Any]) -> List[str]:
     """
     Helper to create name=value string list from dict
     Filters "ANY" options.

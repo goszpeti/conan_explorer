@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, List, Type, TypeVar
 
 import conan_app_launcher.app as app
-from conan_app_launcher import user_save_path
+from conan_app_launcher import AUTHOR, BUILT_IN_PLUGIN, user_save_path
 from conan_app_launcher.app.logger import Logger
 # using global module pattern
 from conan_app_launcher.ui.common import get_themed_asset_icon
@@ -10,6 +10,7 @@ from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONF
 from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.plugin import PluginInterfaceV1
+from conan_app_launcher.ui.plugin.types import PluginDescription
 from conan_app_launcher.ui.widgets import RoundedMenu, AnimatedToggle
 from conan_app_launcher.conan_wrapper.types import ConanRef, ConanPkgRef
 
@@ -29,7 +30,8 @@ class AppGridView(PluginInterfaceV1):
     load_signal = Signal() # type: ignore
 
     def __init__(self, parent, model: "UiAppGridModel", base_signals: "BaseSignals", page_widgets: FluentWindow.PageStore):
-        super().__init__(parent, None, base_signals, page_widgets) # TODO
+        plugin_descr = PluginDescription("Conan Quicklaunch", BUILT_IN_PLUGIN, AUTHOR, "", "", "", " ", False, "")
+        super().__init__(parent, plugin_descr, base_signals, page_widgets) # TODO
         self.setLayout(QVBoxLayout(self))
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.tab_widget = QTabWidget(self)

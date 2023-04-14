@@ -3,7 +3,7 @@ import platform
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-from .types import ConanPkg, ConanRef, ConanPkgRef, ConanException, LoggerWriter, create_key_value_pair_list
+from .types import ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, LoggerWriter, create_key_value_pair_list
 from .unified_api import ConanUnifiedApi
 
 if TYPE_CHECKING:
@@ -71,7 +71,7 @@ class ConanApi(ConanUnifiedApi):
     def get_profiles(self) -> List[str]:
         return self._conan.profile_list()
 
-    def get_profile_settings(self, profile_name: str) -> Dict[str, str]:
+    def get_profile_settings(self, profile_name: str) -> ConanSettings:
         profile = self._conan.read_profile(profile_name)
         if not profile:
             return {}
@@ -126,8 +126,8 @@ class ConanApi(ConanUnifiedApi):
 
     ### Install related methods ###
 
-    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: Dict[str, str]={},
-                          conan_options: Dict[str, str]={}, update=True) -> Tuple[str, Path]:
+    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings={},
+                          conan_options: ConanOptions={}, update=True) -> Tuple[str, Path]:
         package_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
@@ -195,7 +195,7 @@ class ConanApi(ConanUnifiedApi):
         self.info_cache.update_remote_package_list(res_list)
         return res_list
 
-    def search_recipe_alternatives_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
+    def search_recipe_all_versions_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
         search_results = []
         local_results = []
         try:
@@ -234,14 +234,14 @@ class ConanApi(ConanUnifiedApi):
             return []
         return found_pkgs
 
-    def find_best_matching_packages(self, conan_ref: ConanRef, input_options: Dict[str, str] = {},
-                                    remote: Optional[str] = None) -> List[ConanPkg]:
+    def find_best_matching_packages(self, conan_ref: ConanRef, conan_options: ConanOptions={},
+                                    remote_name: Optional[str]=None) -> List[ConanPkg]:
         # skip search on default invalid recipe
         if str(conan_ref) == INVALID_CONAN_REF:
             return []
 
         found_pkgs: List[ConanPkg] = []
-        default_settings: Dict[str, str] = {}
+        default_settings: ConanSettings = {}
         try:
             # type: ignore - dynamic prop is ok in try-catch
             default_settings = dict(self._client_cache.default_profile.settings) # type: ignore
@@ -249,7 +249,7 @@ class ConanApi(ConanUnifiedApi):
                     f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"\
                     f" AND (os_build=None OR os_build={default_settings.get('os_build')})"
-            found_pkgs = self.get_remote_pkgs_from_ref(conan_ref, remote, query)
+            found_pkgs = self.get_remote_pkgs_from_ref(conan_ref, remote_name, query)
         except Exception:  # no problem, next
             return []
 
@@ -261,8 +261,8 @@ class ConanApi(ConanUnifiedApi):
             found_pkgs = no_debug_pkgs
 
         # filter the found packages by the user options
-        if input_options:
-            found_pkgs = list(filter(lambda pkg: input_options.items() <=
+        if conan_options:
+            found_pkgs = list(filter(lambda pkg: conan_options.items() <=
                                      pkg.get("options", {}).items(), found_pkgs))
             if not found_pkgs:
                 return found_pkgs
@@ -275,14 +275,14 @@ class ConanApi(ConanUnifiedApi):
         # this calls external code of the recipe
         try:
             default_options = self._resolve_default_options(
-                self._conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
+            self._conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
         except Exception:
             default_options = {}
 
         if default_options:
             default_options = dict(filter(lambda opt: opt[0] in min_opts_list, default_options.items()))
             # patch user input into default options to combine the two
-            default_options.update(input_options)
+            default_options.update(conan_options)
             # convert vals to string
             default_str_options: Dict[str, str] = dict([key, str(value)]
                                                        for key, value in default_options.items())
