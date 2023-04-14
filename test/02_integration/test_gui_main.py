@@ -72,7 +72,6 @@ def test_startup_with_existing_config_and_open_menu(qtbot, base_fixture, ui_conf
     main_gui = main_window.MainWindow(_qapp_instance)
     qtbot.addWidget(main_gui)
     main_gui.load()
-
     main_gui.show()
     qtbot.waitExposed(main_gui, timeout=3000)
 

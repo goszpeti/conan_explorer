@@ -9,6 +9,7 @@ from conan_app_launcher.app.logger import Logger
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Qt, Signal, SignalInstance
 
+from conan_app_launcher.app.system import str2bool
 
 class Worker(QtCore.QObject):
     """ Generic worker for Qt, which can call any function with args """
@@ -71,7 +72,7 @@ class AsyncLoader(QtCore.QObject):
                 self.progress_dialog.move(rectangle.topLeft())
         self.progress_dialog.show()
 
-        if bool(os.getenv("DISABLE_ASYNC_LOADER")):
+        if str2bool(os.getenv("DISABLE_ASYNC_LOADER", "")):
             work_task(*worker_args)
             self.thread_finished()
             self.progress_dialog.hide()

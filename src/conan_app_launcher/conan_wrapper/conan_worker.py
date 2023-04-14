@@ -38,9 +38,6 @@ class ConanWorker():
         self._conan_api = conan_api
         self._conan_install_queue: Queue[Tuple[ConanWorkerElement,
                                                Optional[ConanWorkerResultCallback]]] = Queue(maxsize=0)
-        self._conan_versions_queue: Queue[Tuple[ConanWorkerElement,
-                                                Optional[ConanWorkerResultCallback]]] = Queue(maxsize=0)
-        self._version_worker: Optional[Thread] = None
         self._install_worker: Optional[Thread] = None
         self._shutdown_requested = False  # internal flag to cancel worker on shutdown
         self._settings = settings
@@ -57,13 +54,9 @@ class ConanWorker():
         for worker_element in conan_elements:
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:
                 self._conan_install_queue.put((worker_element, info_callback))
-            # self._conan_versions_queue.put((worker_element, info_callback))
 
         # start getting versions info in a separate thread in a bundled way to get better performance
         self._start_install_worker()
-
-    def put_ref_in_version_queue(self, conan_element: ConanWorkerElement, info_callback: Optional[ConanWorkerResultCallback]):
-        self._conan_versions_queue.put((conan_element, info_callback))
 
     def put_ref_in_install_queue(self, conan_element: ConanWorkerElement, info_callback: Optional[ConanWorkerResultCallback]):
         """ Add a new entry to work on """
@@ -76,13 +69,6 @@ class ConanWorker():
             self._install_worker = Thread(target=self._work_on_conan_install_queue,
                                           name="ConanInstallWorker", daemon=True)
             self._install_worker.start()
-
-    def _start_version_worker(self):
-        """ Start worker, if it is not already started (can be called multiple times)"""
-        if not self._version_worker or not self._version_worker.is_alive():
-            self._version_worker = Thread(target=self._work_on_conan_versions_queue,
-                                          name="ConanVersionWorker", daemon=True)
-            self._version_worker.start()
 
     def _work_on_conan_install_queue(self):
         """ Call conan install from queue """
@@ -130,39 +116,12 @@ class ConanWorker():
                     except Exception as e:
                         Logger().error(str(e))
 
-    def _work_on_conan_versions_queue(self):
-        """ Get all version and channel combination of a package from all remotes. """
-        info_callback = None
-        conan_ref = ""
-        while not self._shutdown_requested and not self._conan_versions_queue.empty():
-            _, info_callback = self._conan_versions_queue.get()
-            # available versions will be in cache and retrievable for every item from there
-            try:
-                available_refs = self._conan_api.search_recipe_all_versions_in_remotes(
-                    ConanRef.loads(conan_ref))
-            except Exception as e:
-                Logger().debug(f"ERROR in searching for {conan_ref}: {str(e)}")
-                continue
-            Logger().debug(f"Finished available package query for {str(conan_ref)}")
-            if not available_refs:
-                continue
-        if info_callback and not self._shutdown_requested:
-            try:
-                info_callback(conan_ref, "")
-            except Exception as e:
-                Logger().error(str(e))
-
     def finish_working(self, timeout_s: Optional[float]=None):
         """ Cancel, if worker is still not finished """
         self._shutdown_requested = True
         try:
             if self._install_worker and self._install_worker.is_alive():
                 self._install_worker.join(timeout_s)
-        except Exception:
-            return  # Conan threads can crash on join
-        try:
-            if self._version_worker and self._version_worker.is_alive():
-                self._version_worker.join(timeout_s)
         except Exception:
             return  # Conan threads can crash on join
         self._conan_install_queue = Queue(maxsize=0)

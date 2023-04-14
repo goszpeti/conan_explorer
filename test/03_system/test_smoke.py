@@ -26,6 +26,7 @@ def test_main_loop_mock(base_fixture, mocker):
     Smoke test, that the application runs through.
     No error expected.
     """
+    os.environ["DISABLE_ASYNC_LOADER"] = "False"  # for code coverage of async loader
 
     main_ui_mock = mocker.patch("conan_app_launcher.ui.main_window.MainWindow")
     qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec")
