@@ -209,7 +209,7 @@ def conan_install_ref(ref, args=""):
     extra_cmd = ""
     if conan_version.startswith("2"):
         extra_cmd = "--requires"
-        profile = "windowsV2" if platform.system == "Windows" else "linuxV2"
+        profile = "windowsV2" if platform.system() == "Windows" else "linuxV2"
         args += " -pr " + str(profiles_path / profile)
     assert os.system(f"conan install {extra_cmd} {ref} {args}") == 0
 

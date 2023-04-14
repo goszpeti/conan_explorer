@@ -36,7 +36,6 @@ def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
     a new tab with a new default app is automatically added."""
     from pytestqt.plugin import _qapp_instance
 
-    # TEST SETUP
     # no settings entry
     app.active_settings.set(LAST_CONFIG_FILE, "")
     # set dark mode to to at least call the functions once
@@ -47,7 +46,6 @@ def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
     if default_config_file_path.exists():
         os.remove(default_config_file_path)
 
-    # TEST ACTION
     # init config file and parse
     main_gui = main_window.MainWindow(_qapp_instance)
     qtbot.addWidget(main_gui)
@@ -55,13 +53,13 @@ def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
     main_gui.show()
     qtbot.waitExposed(main_gui, timeout=3000)
 
-    # TEST EVALUATION
     for tab in main_gui.app_grid.findChildren(TabList):
         assert tab.model.name == "New Tab"
         for test_app in tab.app_links:
             assert test_app.model.name == "New App"
 
     main_gui.close()
+
 
 @pytest.mark.conanv2
 def test_startup_with_existing_config_and_open_menu(qtbot, base_fixture, ui_config_fixture):
@@ -71,7 +69,6 @@ def test_startup_with_existing_config_and_open_menu(qtbot, base_fixture, ui_conf
     """
     from pytestqt.plugin import _qapp_instance
 
-    # TEST SETUP
     main_gui = main_window.MainWindow(_qapp_instance)
     qtbot.addWidget(main_gui)
     main_gui.load()
@@ -79,13 +76,12 @@ def test_startup_with_existing_config_and_open_menu(qtbot, base_fixture, ui_conf
     main_gui.show()
     qtbot.waitExposed(main_gui, timeout=3000)
 
-    # TEST ACTION
     main_gui.page_widgets.get_button_by_type(AboutPage).click()
     time.sleep(3)
 
-    # TEST EVALUATION
     assert main_gui.about_page.isVisible()
     main_gui.close()
+
 
 def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocker):
     """
@@ -94,7 +90,6 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
     """
     from pytestqt.plugin import _qapp_instance
 
-    # TEST SETUP
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
 
@@ -102,7 +97,6 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
     qtbot.waitExposed(main_gui, timeout=3000)
     main_gui.load()
 
-    # TEST ACTION
     selection = str(Path.home() / "new_config.json")
     mocker.patch.object(QtWidgets.QFileDialog, 'exec',
                         return_value=QtWidgets.QDialog.DialogCode.Accepted)
@@ -112,7 +106,6 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
     assert side_menu
     side_menu.get_menu_entry_by_name("Open Layout File").click()
 
-    # TEST EVALUATION
     time.sleep(3)
     assert app.active_settings.get(LAST_CONFIG_FILE) == selection
     app.conan_worker.finish_working(3)
@@ -124,7 +117,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     Test, that clicking on on open config file and selecting a file writes it back to settings.
     Same file as selected expected in settings.
     """
-    # TEST SETUP
+
     if not platform.system() == "Windows":  # Feature only "available" on Windows
         return
     from conans.util.windows import CONAN_REAL_PATH
@@ -161,7 +154,7 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     if ret.stderr:
         output += ret.stderr.decode("utf-8")
     if ret.stdout:
-       output += ret.stdout.decode("utf-8")
+        output += ret.stdout.decode("utf-8")
     assert ret.returncode == 0, output
     exp_folder = conan.get_export_folder(ConanRef.loads(ref))
     pkg = conan.find_best_matching_local_package(ConanRef.loads(ref))
@@ -173,7 +166,6 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     assert pkg_cache_folder in paths_to_delete
     assert str(pkg_dir_to_delete.parent) in paths_to_delete
 
-    # TEST ACTION
     from pytestqt.plugin import _qapp_instance
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
@@ -186,7 +178,6 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     button.click()
     time.sleep(3)
 
-    # TEST EVALUATION
     assert not os.path.exists(pkg_cache_folder)
     assert not pkg_dir_to_delete.parent.exists()
     main_gui.close()
@@ -199,7 +190,6 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
     """
     from pytestqt.plugin import _qapp_instance
 
-    # TEST SETUP
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     main_gui.load()
@@ -215,7 +205,6 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
 
     main_gui.app_grid.re_init(main_gui.model.app_grid)  # re-init with same file
 
-    # TEST EVALUATION
     time.sleep(5)
     assert main_gui.app_grid.tab_widget.tabBar().count() == tabs_num
     main_gui.close()
@@ -227,7 +216,7 @@ def test_example_plugin(app_qt_fixture, base_fixture: PathSetup):
     os.system(f"pip install -e {example_plugin_path}")
     plugin_file_path = example_plugin_path / "cal_example_plugin" / "plugin.ini"
     assert plugin_file_path.exists()
-    app.active_settings._read_ini() # reload settings
+    app.active_settings._read_ini()  # reload settings
 
     # start window
     from pytestqt.plugin import _qapp_instance
