@@ -40,8 +40,35 @@
             ".venv"
         ],
         "python.analysis.autoImportCompletions": true,
-        "python.analysis.inlayHints.functionReturnTypes": true,
+        "python.analysis.inlayHints.functionReturnTypes": false,
         "python.analysis.inlayHints.pytestParameters": true,
-        "python.analysis.inlayHints.variableTypes": true,
+        "python.analysis.inlayHints.variableTypes": false,
+        "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+        "colorInfo.languages": [
+            {
+                "selector": "css",
+                "colors": "css"
+            },
+            {
+                "selector": "sass",
+                "colors": "css"
+            },
+            {
+                "selector": "scss",
+                "colors": "css"
+            },
+            {
+                "selector": "less",
+                "colors": "css"
+            },
+            {
+                "selector": "html",
+                "colors": "css"
+            },
+            {
+                "selector": "python",
+                "colors": "css"
+            },
+        ],
     }
 }

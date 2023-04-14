@@ -117,7 +117,6 @@ See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for St
 * Conan Package Manager Icon by Conan.io developers under [MIT License](http://opensource.org/licenses/mit-license.php), via Wikimedia Commons
 * [Noto Sans and Noto Sans Mono fonts](https://fonts.google.com/) by Google under [SIL Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL)
 * [Material icons](https://fonts.google.com/) by Google  under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-* [Fluent icons](https://www.svgrepo.com/collection/fluent-ui-icons-outlined/) by Microsoft  under [MIT License](http://opensource.org/licenses/mit-license.php)
 * [Linux icon](https://www.svgrepo.com/svg/340563/linux-alt) by Carbon Design  under [Apache License](https://opensource.org/licenses/Apache-1.1)
 * [Apple icon](https://www.svgrepo.com/svg/488495/apple) by Klever Space  under [MIT License](http://opensource.org/licenses/mit-license.php)
 * [Windows icon](https://www.svgrepo.com/svg/488736/windows) by Klever Space under [MIT License](http://opensource.org/licenses/mit-license.php)

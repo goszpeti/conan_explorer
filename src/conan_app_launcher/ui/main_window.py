@@ -4,7 +4,7 @@ from shutil import rmtree
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import APP_NAME, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, conan_version
+from conan_app_launcher import APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, conan_version
 from conan_app_launcher.app.loading import AsyncLoader
 
 from conan_app_launcher.app.logger import Logger
@@ -117,10 +117,11 @@ class MainWindow(FluentWindow):
 
         view_settings_submenu.add_toggle_menu_entry(
             "Dark Mode", self.on_dark_mode_changed, get_gui_dark_mode(), "icons/dark_mode.svg")
-        self._init_style_chooser()
-        view_settings_submenu.add_named_custom_entry(
-            "Icon Style", self._style_chooser_frame, "icons/global/conan_settings.svg", force_v_layout=True)
-        view_settings_submenu.add_menu_line()
+        if ENABLE_GUI_STYLES:
+            self._init_style_chooser()
+            view_settings_submenu.add_named_custom_entry("Icon Style", self._style_chooser_frame, 
+                                                         "icons/global/conan_settings.svg", force_v_layout=True)
+            view_settings_submenu.add_menu_line()
 
         self.main_general_settings_menu.add_menu_line()
 

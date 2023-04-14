@@ -25,7 +25,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
         },
         VIEW_SECTION_NAME: {
             FONT_SIZE: 12,
-            GUI_STYLE: GUI_STYLE_FLUENT if platform.system() == "Windows" else GUI_STYLE_MATERIAL,
+            GUI_STYLE: GUI_STYLE_MATERIAL,
             GUI_MODE: GUI_MODE_LIGHT,
             WINDOW_SIZE: "0,0,800,600",
             CONSOLE_SPLIT_SIZES: "413,126"
