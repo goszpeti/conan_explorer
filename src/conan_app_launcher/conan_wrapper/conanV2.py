@@ -169,6 +169,8 @@ class ConanApi(ConanUnifiedApi):
         if conan_ref.channel == "_":
             conan_ref.channel = None
         conan_ref_latest: "RecipeReference" = self._conan.list.latest_recipe_revision(conan_ref) # type: ignore
+        if not conan_ref_latest:
+            return result
         refs = self._conan.list.packages_configurations(conan_ref_latest)
         for ref, pkg_info in refs.items():
             pkg = ConanPkg()
