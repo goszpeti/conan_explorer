@@ -1,3 +1,4 @@
+from email.policy import default
 from typing import Optional
 
 import conan_app_launcher.app as app
@@ -79,7 +80,7 @@ class ConanInstallDialog(QDialog):
 
     def load_options(self, conan_full_ref: str):
         # options table
-        options = []
+        default_options = {}
         conan_ref = ""
         try:
             conan_ref = conan_full_ref.split(":")[0]
@@ -87,26 +88,26 @@ class ConanInstallDialog(QDialog):
             loader.async_loading(self, self.on_options_query, (conan_ref, ), loading_text="Loading options...")
             loader.wait_for_finished()
             # TODO: CONAN V2 and make dedicated function from info and default options
-            options = self._ref_info[0].root.dependencies[0].dst.conanfile.options.items()  # type: ignore
+            default_options = self._default_options
         except Exception:
             Logger().warning("Can't determine options of " + conan_ref)
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
-        for name, value in options:
+        for name, value in default_options.items():
             item = QTreeWidgetItem(self._ui.options_widget)
             item.setData(0, 0, name)
-            item.setData(1, 0, value)
+            item.setData(1, 0, str(value))
             item.setFlags(Qt.ItemFlag.ItemIsEnabled)  # Qt.ItemFlag.ItemIsEditable |
             self._ui.options_widget.addTopLevelItem(item)
-            # TODO: selection
             try:
-                values = self._ref_info[0].root.dependencies[0].dst.conanfile.options._data[name]._possible_values
-                if isinstance(values, list):
+                values = self._available_options[name]
+                if isinstance(values, list) and values != ["ANY"]:
                     cb = QComboBox()
-                    cb.addItems(values)
-                    cb.setCurrentText(value)
+                    values_str = [str(x) for x in values]
+                    cb.addItems(values_str)
+                    cb.setCurrentText(str(value))
                     self._ui.options_widget.setItemWidget(item, 1, cb)
-            except:
-                pass
+            except Exception as e:
+                Logger().debug(f"Error while gettings options: {str(e)}")
         self._ui.options_widget.resizeColumnToContents(1)
         self._ui.options_widget.resizeColumnToContents(0)
         self._ui.options_widget.itemDoubleClicked.connect(self.onTreeWidgetItemDoubleClicked)
@@ -116,8 +117,7 @@ class ConanInstallDialog(QDialog):
 
     def on_options_query(self, conan_ref: str):
         try:
-            # TODO dedicated function
-            self._ref_info = app.conan_api._conan.info(app.conan_api.generate_canonical_ref(ConanRef.loads(conan_ref)))
+            self._available_options, self._default_options = app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))           
         except Exception:
             return
 

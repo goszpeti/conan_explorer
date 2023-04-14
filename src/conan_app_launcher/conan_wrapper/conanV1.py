@@ -76,6 +76,9 @@ class ConanApi(ConanUnifiedApi):
         if not profile:
             return {}
         return dict(profile.settings)
+    
+    def get_default_settings(self) -> ConanSettings:
+        return dict(self._client_cache.default_profile.settings) # type: ignore
 
     def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, autheticated
         user_info = self._conan.users_list(remote_name).get("remotes", {})
@@ -232,76 +235,4 @@ class ConanApi(ConanUnifiedApi):
             Logger().debug(str(found_pkgs))
         except ConanException:  # no problem, next
             return []
-        return found_pkgs
-
-    def find_best_matching_packages(self, conan_ref: ConanRef, conan_options: ConanOptions={},
-                                    remote_name: Optional[str]=None) -> List[ConanPkg]:
-        # skip search on default invalid recipe
-        if str(conan_ref) == INVALID_CONAN_REF:
-            return []
-
-        found_pkgs: List[ConanPkg] = []
-        default_settings: ConanSettings = {}
-        try:
-            # type: ignore - dynamic prop is ok in try-catch
-            default_settings = dict(self._client_cache.default_profile.settings) # type: ignore
-            query = f"(arch=None OR arch={default_settings.get('arch')})" \
-                    f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
-                    f" AND (os=None OR os={default_settings.get('os')})"\
-                    f" AND (os_build=None OR os_build={default_settings.get('os_build')})"
-            found_pkgs = self.get_remote_pkgs_from_ref(conan_ref, remote_name, query)
-        except Exception:  # no problem, next
-            return []
-
-        # remove debug releases
-        no_debug_pkgs = list(filter(lambda pkg: pkg.get("settings", {}).get(
-            "build_type", "").lower() != "debug", found_pkgs))
-        # check, if a package remained and only then take the result
-        if no_debug_pkgs:
-            found_pkgs = no_debug_pkgs
-
-        # filter the found packages by the user options
-        if conan_options:
-            found_pkgs = list(filter(lambda pkg: conan_options.items() <=
-                                     pkg.get("options", {}).items(), found_pkgs))
-            if not found_pkgs:
-                return found_pkgs
-        # get a set of existing options and reduce default options with them
-        min_opts_set = set(map(lambda pkg: frozenset(tuple(pkg.get("options", {}).keys())), found_pkgs))
-        min_opts_list = frozenset()
-        if min_opts_set:
-            min_opts_list = min_opts_set.pop()
-
-        # this calls external code of the recipe
-        try:
-            default_options = self._resolve_default_options(
-            self._conan.inspect(str(conan_ref), attributes=["default_options"]).get("default_options", {}))
-        except Exception:
-            default_options = {}
-
-        if default_options:
-            default_options = dict(filter(lambda opt: opt[0] in min_opts_list, default_options.items()))
-            # patch user input into default options to combine the two
-            default_options.update(conan_options)
-            # convert vals to string
-            default_str_options: Dict[str, str] = dict([key, str(value)]
-                                                       for key, value in default_options.items())
-            if len(found_pkgs) > 1:
-                comb_opts_pkgs = list(filter(lambda pkg: default_str_options.items() <=
-                                             pkg.get("options", {}).items(), found_pkgs))
-                if comb_opts_pkgs:
-                    found_pkgs = comb_opts_pkgs
-
-        # now we have all matching packages, but with potentially different compilers
-        # reduce with default settings
-        if len(found_pkgs) > 1:
-            same_comp_pkgs = list(filter(lambda pkg: default_settings.get("compiler", "") ==
-                                         pkg.get("settings", {}).get("compiler", ""), found_pkgs))
-            if same_comp_pkgs:
-                found_pkgs = same_comp_pkgs
-
-            same_comp_version_pkgs = list(filter(lambda pkg: default_settings.get("compiler.version", "") ==
-                                                 pkg.get("settings", {}).get("compiler.version", ""), found_pkgs))
-            if same_comp_version_pkgs:
-                found_pkgs = same_comp_version_pkgs
         return found_pkgs

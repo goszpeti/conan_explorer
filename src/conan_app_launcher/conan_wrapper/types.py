@@ -1,15 +1,15 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 from conan_app_launcher import conan_version
 
 if TYPE_CHECKING:
-    from typing import TypedDict,  TypeAlias
+    from typing import TypedDict, TypeAlias, Literal
     from conan_app_launcher.conan_wrapper.conan_cache import ConanInfoCache
 else:
     try:
-        from typing import TypedDict, Protocol, TypeAlias
+        from typing import Literal, TypedDict, Protocol, TypeAlias
     except ImportError:
-        from typing_extensions import TypedDict, Protocol, TypeAlias
+        from typing_extensions import Literal, TypedDict, Protocol, TypeAlias
 if conan_version.startswith("1"):
     from conans.model.ref import ConanFileReference, PackageReference
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
