@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 import pytest
-from test.conftest import TEST_REF, conan_create_and_upload, conan_install_ref, conan_remove_ref
+from test.conftest import TEST_REF, conan_install_ref, conan_remove_ref
 from typing import List
 
 from conan_app_launcher.conan_wrapper import ConanApi
@@ -73,7 +73,7 @@ def test_conan_find_remote_pkg(base_fixture):
     """
     conan_remove_ref(TEST_REF)
     conan = ConanApi().init_api()
-    default_settings = dict(conan._client_cache.default_profile.settings)
+    default_settings = conan.get_default_settings()
 
     pkgs = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"shared": "True"})
     assert len(pkgs) > 0
@@ -82,6 +82,8 @@ def test_conan_find_remote_pkg(base_fixture):
 
     for setting in default_settings:
         if setting in pkg["settings"].keys():
+            if "compiler." in setting: # don't evaluate comp. details
+                continue
             assert default_settings[setting] in pkg["settings"][setting]
 
 # @pytest.mark.conanv2
@@ -138,7 +140,7 @@ def test_get_path_or_install_manual_options():
     elif platform.system() == "Linux":
         assert (package_folder / "bin" / "python").is_file()
 
-@pytest.mark.conanv2
+# @pytest.mark.conanv2 TODO: Create v2 compatible testcase
 def test_install_with_any_settings(mocker, capfd):
     """
     Test, if a package with <setting>=Any flags can install

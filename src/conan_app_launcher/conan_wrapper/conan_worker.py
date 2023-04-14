@@ -33,6 +33,7 @@ class ConanWorkerResultCallback(Protocol):
 
 class ConanWorker():
     """ Sequential worker with a queue to execute conan install/version alternatives commands """
+
     def __init__(self, conan_api: "ConanApi", settings: SettingsInterface):
         self._conan_api = conan_api
         self._conan_install_queue: Queue[Tuple[ConanWorkerElement,

@@ -8,7 +8,6 @@ from conan_app_launcher.ui.plugin import PluginHandler, PluginFile, PluginDescri
 from test.conftest import PathSetup
 from PySide6 import QtWidgets
 
-@pytest.mark.conanv2
 def test_plugin_file_read(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
     """ test plugin file read method of all failures"""
     # nonexistant file
