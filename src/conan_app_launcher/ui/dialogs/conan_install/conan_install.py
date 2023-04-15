@@ -58,6 +58,7 @@ class ConanInstallDialog(QDialog):
         self._ui.conan_opts_label.hide()
         self._ui.options_widget.hide()
         self._ui.line.hide()
+        self._ui.auto_install_label.hide()
         self._ui.auto_install_check_box.hide()
 
     def load_profiles(self):

@@ -73,7 +73,6 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.splitter_filter.setSizes(
             [sizes[0]  - offset -5, sizes[1] + 5])
 
-
     def reload_themed_icons(self):
         super().reload_themed_icons()
         self._init_selection_context_menu()

@@ -12,8 +12,7 @@ from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common import FileSystemModel, show_conanfile
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
-from conan_app_launcher.ui.dialogs import ConanRemoveDialog
-from conan_app_launcher.ui.dialogs.conan_install.conan_install import ConanInstallDialog
+from conan_app_launcher.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from conan_app_launcher.ui.views import AppGridView
 from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
                             Qt, QUrl, SignalInstance)

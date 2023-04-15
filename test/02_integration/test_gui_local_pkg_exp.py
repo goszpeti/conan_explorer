@@ -2,11 +2,13 @@
 import os
 from pathlib import Path
 import platform
+from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from test.conftest import TEST_REF, TEST_REF_OFFICIAL
 import pytest_check as check
 from time import sleep
 
+import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
@@ -104,6 +106,7 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     assert id
     assert pkg_path.exists()
+
     # Switch to another package view
     # need new id
     profiles_path = base_fixture.testdata_path / "conan" / "profile"
@@ -123,7 +126,8 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     app.conan_worker.finish_working()
     lpe = main_gui.page_widgets.get_page_by_type(LocalConanPackageExplorer)
 
-    main_gui.page_widgets.get_button_by_type(type(lpe)).click()   # changes to local explorer page   
+    # change to local explorer page   
+    main_gui.page_widgets.get_button_by_type(type(lpe)).click() 
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
     sleep(1)
 
@@ -185,6 +189,13 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     mock_open_file.assert_called_once_with(conanfile)
     sleep(1)
 
+    # test install ref 
+    mock_install_dialog = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.ConanInstallDialog")
+    lpe._pkg_sel_ctrl.on_install_ref_requested()
+    
+    mock_install_dialog.assert_called_with(lpe._pkg_sel_ctrl._view,  TEST_REF + ":" + id, 
+                                           lpe._pkg_sel_ctrl._base_signals.conan_pkg_installed, lock_ref=True)
+
     #### Test file context menu functions ###
     # select a file
     Logger().debug("select a file")
@@ -225,7 +236,25 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     assert last_app_link.executable == "conaninfo.txt"
     assert str(last_app_link.conan_file_reference) == str(cfr)
 
-    # Check copy
+    # check edit file
+    mock_execute_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.execute_cmd")
+    app.active_settings.set(FILE_EDITOR_EXECUTABLE, str(file))
+
+    lpe._pkg_file_exp_ctrl.on_edit_file()
+    
+    mock_execute_cmd.assert_called_with([str(file), str(file)], False)
+
+    # setting unset
+    mock_execute_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.execute_cmd")
+    app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
+    lpe._pkg_file_exp_ctrl.on_edit_file()
+    mock_execute_cmd.assert_not_called()
+
+    app.active_settings.set(FILE_EDITOR_EXECUTABLE, str(Path(conan_app_launcher.INVALID_PATH)))
+    lpe._pkg_file_exp_ctrl.on_edit_file()
+    mock_execute_cmd.assert_not_called()
+
+    # check copy
     mime_file = lpe._pkg_file_exp_ctrl.on_file_copy()
     mime_file_text = mime_file.toString()
     assert "file://" in mime_file_text and cp_text in mime_file_text
@@ -239,6 +268,33 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     _qapp_instance.clipboard().setMimeData(data)
     lpe._pkg_file_exp_ctrl.on_file_paste()  # check new file
     check.is_true((root_path / config_path.name).exists())
+
+    # check overwrite dialog
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
+    # paste just in case the previous one failed (clipboard is unreliable)
+    lpe._pkg_file_exp_ctrl.paste_path(config_path, root_path / config_path.name)
+
+    mock_copy_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.copy_path_with_overwrite")
+
+    lpe._pkg_file_exp_ctrl.paste_path(config_path, root_path / config_path.name)
+
+    mock_copy_cmd.assert_called_with(config_path, root_path / config_path.name)
+    
+    # select no in dialog
+    mock_copy_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.copy_path_with_overwrite")
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.Cancel)
+    
+    lpe._pkg_file_exp_ctrl.paste_path(config_path, root_path / config_path.name)
+
+    mock_copy_cmd.assert_not_called()
+
+    # check auto renaming 
+    mock_copy_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.copy_path_with_overwrite")
+    lpe._pkg_file_exp_ctrl.paste_path(root_path / config_path.name, root_path / config_path.name)
+    renamed_file = root_path / "app_config_empty_refs (2).json"
+    mock_copy_cmd.assert_called_with(root_path / config_path.name, renamed_file)
 
     # check delete
     Logger().debug("delete")

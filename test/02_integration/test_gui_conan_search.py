@@ -101,8 +101,7 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     mock_clipboard.setText.assert_called_with(TEST_REF + ":" + id)
 
     # check install
-    mock_install_dialog = mocker.patch(
-        "conan_search.controller.ConanInstallDialog")
+    mock_install_dialog = mocker.patch("conan_search.controller.ConanInstallDialog")
     search_dialog._search_controller.on_install_pkg_requested()
     mock_install_dialog.assert_called_with(search_dialog._search_controller._view, 
                                            TEST_REF + ":" + id, search_dialog._search_controller.conan_pkg_installed)
