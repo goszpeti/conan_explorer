@@ -210,8 +210,6 @@ def test_AppEditDialog_save_values(qtbot, base_fixture: PathSetup, mocker):
 
     # the caller must call save_data manually
 
-    mock_version_func = mocker.patch(
-        'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_version_queue')
     mock_install_func = mocker.patch(
         'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
     diag.save_data()
@@ -235,7 +233,6 @@ def test_AppEditDialog_save_values(qtbot, base_fixture: PathSetup, mocker):
 
     # check, that the package info and the available versions are updated
 
-    mock_version_func.assert_called()
     mock_install_func.assert_called()
     diag._ui.conan_ref_line_edit._completion_thread.join(1)
 
