@@ -306,6 +306,6 @@ class MainWindow(FluentWindow):
         # save console size
         sizes = self.ui.content_footer_splitter.sizes()
         if len(sizes) < 2:
-            Logger().warning(f"Can't save splitter size")
+            Logger().warning("Can't save splitter size")
         sizes_str = f"{int(sizes[0])},{int(sizes[1])}"
         app.active_settings.set(CONSOLE_SPLIT_SIZES, sizes_str)

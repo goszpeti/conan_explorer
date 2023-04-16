@@ -135,6 +135,7 @@ class SideSubMenu(ThemedWidget):
         button = self.add_button_menu_entry(sub_menu.title, sub_menu.ui.side_menu_title_button.show, asset_icon)
         button.clicked.connect(lambda: self.parent_stacked_widget.setCurrentWidget(sub_menu))
         sub_menu.ui.side_menu_title_button.clicked.connect(lambda: self.parent_stacked_widget.setCurrentWidget(self))
+        sub_menu.setObjectName(gen_obj_name(sub_menu.title) + "_widget")
         return button
 
     def add_button_menu_entry(self, name: str, target: Callable, asset_icon: str = "",
