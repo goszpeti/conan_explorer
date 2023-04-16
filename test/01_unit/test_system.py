@@ -5,19 +5,19 @@ import subprocess
 import sys
 import tempfile
 import time
-from distutils.dir_util import remove_tree
+from shutil import rmtree
 from pathlib import Path
 from subprocess import check_output
 from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 
 import conan_app_launcher  # for mocker
 import psutil
-from conan_app_launcher import PKG_NAME
-from conan_app_launcher.core.system import (calc_paste_same_dir_name,
-                                            copy_path_with_overwrite,
-                                            delete_path, execute_app,
-                                            open_file, open_in_file_manager,
-                                            run_file)
+from conan_app_launcher import INVALID_PATH, PKG_NAME
+from conan_app_launcher.app.system import (calc_paste_same_dir_name,
+                                           copy_path_with_overwrite,
+                                           delete_path, execute_app, find_program_in_windows,
+                                           open_file, open_in_file_manager,
+                                           run_file)
 
 
 def test_choose_run_file(tmp_path, mocker):
@@ -26,14 +26,14 @@ def test_choose_run_file(tmp_path, mocker):
     Existing path with a filesize > 0 expected
     """
     # Mock away the calls
-    mocker.patch('conan_app_launcher.core.system.open_file')
-    mocker.patch('conan_app_launcher.core.system.execute_app')
+    mocker.patch('conan_app_launcher.app.system.open_file')
+    mocker.patch('conan_app_launcher.app.system.execute_app')
 
     # test with nonexistant path - nothing should happen (no exception raising)
 
-    run_file(Path("NULL"), False, "")
-    conan_app_launcher.core.system.open_file.assert_not_called()
-    conan_app_launcher.core.system.execute_app.assert_not_called()
+    run_file(Path(INVALID_PATH), False, "")
+    conan_app_launcher.app.system.open_file.assert_not_called()
+    conan_app_launcher.app.system.execute_app.assert_not_called()
 
     # test with existing path
     test_file = Path(tmp_path) / "test.txt"
@@ -42,7 +42,7 @@ def test_choose_run_file(tmp_path, mocker):
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.core.system.open_file.assert_called_once_with(test_file)
+    conan_app_launcher.app.system.open_file.assert_called_once_with(test_file)
 
 
 def test_open_in_file_manager(mocker):
@@ -53,7 +53,8 @@ def test_open_in_file_manager(mocker):
         if is_ci_job():
             mocker.patch('subprocess.Popen')
             ret = open_in_file_manager(current_file_path)
-            subprocess.Popen.assert_called_once_with("explorer /select," + str(current_file_path), creationflags=subprocess.CREATE_NO_WINDOW)
+            subprocess.Popen.assert_called_once_with(
+                "explorer /select," + str(current_file_path), creationflags=subprocess.CREATE_NO_WINDOW)
             ret.kill()
         else:
             open_in_file_manager(current_file_path)
@@ -82,7 +83,7 @@ def test_choose_run_script(tmp_path, mocker):
     """
 
     # Mock away the calls
-    mocker.patch('conan_app_launcher.core.system.execute_app')
+    mocker.patch('conan_app_launcher.app.system.execute_app')
 
     if platform.system() == "Windows":
         test_file = Path(tmp_path) / "test.bat"
@@ -98,7 +99,7 @@ def test_choose_run_script(tmp_path, mocker):
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.core.system.execute_app.assert_called_once_with(test_file, False, "")
+    conan_app_launcher.app.system.execute_app.assert_called_once_with(test_file, False, "")
 
 
 def test_choose_run_exe(tmp_path, mocker):
@@ -106,7 +107,7 @@ def test_choose_run_exe(tmp_path, mocker):
     Test, that run_file will call execute_app with the correct argumnenst.
     Mock away the actual calls.
     """
-    mocker.patch('conan_app_launcher.core.system.execute_app')
+    mocker.patch('conan_app_launcher.app.system.execute_app')
     test_file = Path()
     if platform.system() == "Linux":
         test_file = Path(tmp_path) / "test"
@@ -122,7 +123,7 @@ def test_choose_run_exe(tmp_path, mocker):
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.core.system.execute_app.assert_called_once_with(test_file, False, "")
+    conan_app_launcher.app.system.execute_app.assert_called_once_with(test_file, False, "")
 
 
 def test_start_cli_option_app():
@@ -211,26 +212,21 @@ def test_open_file():
     test_file = Path(tempfile.gettempdir(), "test.inf")
     with open(str(test_file), "w") as f:
         f.write("test")
+    assert (test_file.exists())
 
     if platform.system() == "Linux":
         # set default app for textfile
         check_output(["xdg-mime", "default", "mousepad.desktop", "text/plain"]).decode("utf-8")
         time.sleep(1)
+
     open_file(test_file)
 
-    time.sleep(3)  # wait for program to start
     if platform.system() == "Linux":
         # check pid of created process
         assert check_if_process_running("mousepad", kill=True)
     elif platform.system() == "Windows":
-        default_app = "notepad.exe"
-        # this is application specific
-        ret = check_output(f'tasklist /fi "IMAGENAME eq {default_app}"')
-        assert default_app in ret.decode("utf-8").lower()
-        lines = ret.decode("utf-8").splitlines()
-        line = lines[3].replace(" ", "").lower()
-        pid = line.split(default_app)[1].split("console")[0]
-        os.system("taskkill /PID " + pid)
+        time.sleep(1)
+        assert check_if_process_running("notepad.exe", kill=True)
     os.remove(test_file)
 
 
@@ -273,7 +269,7 @@ def test_copy_paste():
     copy_path_with_overwrite(test_dir, new_path)
     assert new_path.exists()
     assert test_file_content == (new_path / test_file.name).read_text()
-    remove_tree(str(new_path), verbose=1)
+    rmtree(str(new_path), ignore_errors=True)
 
     # 3. Copy file in other dir(non-overwrite)
     new_dir_path = Path(tempfile.mkdtemp())
@@ -303,7 +299,8 @@ def test_copy_paste():
         f.write(test_file_overwrite_content)
     copy_path_with_overwrite(test_dir, new_dir_path)
     assert test_file_overwrite_content == (new_dir_path / test_file.name).read_text()
-    
+
+
 def test_delete():
     """ 
     1. Delete file
@@ -325,3 +322,12 @@ def test_delete():
         f.write("test")
     delete_path(test_dir)
     assert not test_dir.exists()
+
+
+def test_find_program_in_registry():
+
+    found_path = find_program_in_windows("Git", True)
+    if platform.system() == "Linux":
+        assert not found_path
+    else:
+        assert os.path.exists(found_path)

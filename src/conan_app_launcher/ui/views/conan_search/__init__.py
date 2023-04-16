@@ -1,1 +1,1 @@
-from .conan_search import ConanSearchDialog
+from .conan_search import ConanSearchView

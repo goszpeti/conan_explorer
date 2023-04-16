@@ -17,7 +17,7 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 14
 
     strategy:
       fail-fast: false
@@ -27,93 +27,108 @@ jobs:
             "ubuntu-py37",
             "ubuntu-py38",
             "ubuntu-py39",
-            "windows-py310",
+            "ubuntu-py310",
+            "windows-py311",
             "ubuntu-py38-conan1.24.0",
-            "ubuntu-py310-conan1.28.0",
+            "ubuntu-conan2",
+            "windows-conan2",
           ]
         include:
           - name: "ubuntu-py37"
             python: "3.7"
-            os: ubuntu-latest
-            conan: "latest"
+            os: ubuntu-20.04
+            conan: "<2"
+            pytest_args: ""
           - name: "ubuntu-py38"
             python: "3.8"
-            os: ubuntu-latest
-            conan: "latest"
+            os: ubuntu-20.04
+            conan: "<2"
+            pytest_args: ""
           - name: "ubuntu-py39"
             python: "3.9"
-            use_coverage: true
-            conan: "latest"
-            os: ubuntu-latest
-          - name: "windows-py310"
+            conan: "<2"
+            os: ubuntu-20.04
+            pytest_args: ""
+          - name: "ubuntu-py310"
             python: "3.10"
+            conan: "<2"
+            os: ubuntu-20.04
+            pytest_args: ""
+          - name: "windows-py311"
+            python: "3.11"
             os: windows-latest
-            use_coverage: true
-            conan: "latest"
+            conan: "<2"
+            pytest_args: ""
           - name: "ubuntu-py38-conan1.24.0"
             python: "3.8"
-            os: ubuntu-latest
-            conan: "1.24.0"
-            use_coverage: true
-          - name: "ubuntu-py310-conan1.28.0"
-            python: "3.10"
-            os: ubuntu-latest
-            conan: "1.28.2"
-            use_coverage: true
-
+            os: ubuntu-20.04
+            conan: "==1.24.0"
+            pytest_args: ""
+          - name: "ubuntu-conan2"
+            python: "3.11"
+            os: ubuntu-20.04
+            conan: "<3"
+            pytest_args: "-m conanv2"
+          - name:  "windows-conan2"
+            python: "3.11"
+            os: windows-latest
+            conan: "<3"
+            pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
       LC_ALL: "en_US.UTF-8"
       CONAN_REVISIONS_ENABLED: 1
-      CAL_DEBUG_LEVEL: 3
+      CAL_DEBUG_LEVEL: 2 # this does not use Qt Threads, but enables to see stacktraces
       # QT_LOGGING_RULES=: "*.debug=true"
-      QT_DEBUG_PLUGINS: 1
+      # QT_DEBUG_PLUGINS: 1
     steps:
       - uses: actions/checkout@v3
       - name: Set up a display for gui in Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt update
-          sudo apt install python3-pyqt5
-          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 libxcb-shape0
+          sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 libxcb-shape0
           /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
-      - name: Install xterm for testing in Linux
-        if: matrix.os == 'ubuntu-latest'
+      - name: Install system depencies for testing in Linux
+        if: matrix.os == 'ubuntu-20.04'
         run: |  # terminal, file manager, xwininfo, text-editor
-          sudo apt install lxterminal nautilus x11-utils mousepad
+          sudo apt install lxterminal nautilus x11-utils mousepad xdg-utils
           sudo apt install dbus-x11 at-spi2-core
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
-          # cache: 'pip' # caching pip dependencies - needs requirements .txt
-      - name: Install specific conan version
-        if: matrix.conan != 'latest'
+          cache: 'pip' # caching pip dependencies
+          cache-dependency-path: setup.py
+      - name: Install specific Conan version
         run: | # markupsafe is a workaround fix for broken conan dependencies
-          pip install markupsafe==2.0.1 
-          pip install conan==${{ matrix.conan }}
+          pip install markupsafe==2.0.1 --use-pep517
+          pip install "conan${{ matrix.conan }}" --use-pep517
+      - name: Install specific PySide6 version
+        run: |  # 6.5.0 does currently not work on Linux 
+          pip install PySide6-Essentials==6.4.3
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
           pip install -e .[test]
-      - name: Update remote
-        run: |
-          conan remote clean
+        env:
+          CONAN_VERSION: ${{ matrix.conan}}
       - name: Execute unitests with pytest
         run: |
-          pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
+          pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no ${{matrix.pytest_args}}
       - name: Execute integration with pytest
         env:
             SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
-          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no
+          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no ${{matrix.pytest_args}}
       - name: Execute system with pytest # Reinstall into site-packages to find install and pkg problems
         env:
             SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
           pip install .[test]
-          pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append
-      - uses: actions/upload-artifact@v2
+          pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append ${{matrix.pytest_args}}
+      - name: Upload Test results
+        uses: actions/upload-artifact@v3
         with:
           name: Test results
           path: |
@@ -124,13 +139,13 @@ jobs:
     if: always() # eecute, even when tests fail
     needs:
       - test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting, cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
           fetch-depth: 0
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: Test results
           path: ./
@@ -151,6 +166,6 @@ jobs:
             -Dsonar.exclusions=**/*_ui.py
             -Dsonar.tests=./test
             -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.python.version=3.7,3.8,3.9
+            -Dsonar.python.version=3.7,3.8,3.9,3.10,3.11
             -Dsonar.python.coverage.reportPaths=cov/cov-*.xml
             -Dsonar.python.xunit.reportPath=results/result-*-ubuntu-py39.xml

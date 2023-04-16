@@ -1,22 +1,14 @@
 from pathlib import Path
 
-from conan_app_launcher import ICON_SIZE
+import xml.dom.minidom as dom
+from conan_app_launcher import INVALID_PATH
 from conan_app_launcher.app.logger import Logger
-from PyQt5.QtCore import QFileInfo, Qt
-from PyQt5.QtGui import QIcon, QPixmap, QImage
-from PyQt5.QtWidgets import QFileIconProvider
-
-import conan_app_launcher.app as app
-from conan_app_launcher.settings import GUI_STYLE, GUI_STYLE_DARK  # using global module pattern
+from PySide6.QtCore import QFileInfo
+from PySide6.QtGui import QIcon, QImage
+from PySide6.QtWidgets import QFileIconProvider
 
 
-def get_themed_asset_image(image_rel_path: str) -> str:
-    if app.active_settings.get_string(GUI_STYLE).lower() == GUI_STYLE_DARK:
-        return get_inverted_asset_image(app.asset_path / image_rel_path)
-    return str(app.asset_path / image_rel_path)
-
-
-def get_inverted_asset_image(image_path: Path):
+def get_inverted_asset_image(image_path: Path) -> Path:
     """ Inverts a given image and saves it beside the original one with _inv in the name.
     To be used for icons to switch between light and dark mode themes. """
     inverted_img_path = image_path.parent / ((image_path.with_suffix('').name + "_inv") + image_path.suffix)
@@ -25,17 +17,42 @@ def get_inverted_asset_image(image_path: Path):
         img = QImage(str(image_path))
         img.invertPixels()
         img.save(str(inverted_img_path))
-    return str(inverted_img_path)
+    return inverted_img_path
 
 
 def get_icon_from_image_file(image_path: Path) -> QIcon:
-    if image_path.suffix == ".ico":
-        return QIcon(str(image_path))
-    else:
-        pixmap = QPixmap(str(image_path)).toImage()
-        icon = QPixmap.fromImage(pixmap).scaled(
-            ICON_SIZE, ICON_SIZE, transformMode=Qt.SmoothTransformation)
-        return QIcon(icon)
+    return QIcon(str(image_path))
+
+
+def draw_svg_with_color(svg_path: Path, color="white", scale: float = 1.0) -> Path:
+    """
+    Sets an svg in the desired color for a QtWidget.
+    :param color: the disired color as a string in html compatible name
+    :param shadow: draws a drop shadow
+    :param scale: multiplicator for scaling the image
+    """
+    if not svg_path or not svg_path.exists():
+        Logger().error("Cannot draw invalid SVG file: %s", repr(svg_path))
+        return Path(INVALID_PATH)
+
+    # read svg as xml and get the drawing
+    with open(svg_path, "r", encoding="utf-8") as svg:
+        svg_content = "".join(svg.readlines())
+        svg_content = svg_content.replace("\t", "")
+    svg_dom = dom.parseString("".join(svg_content))
+    svg_paths = svg_dom.getElementsByTagName("path")
+    # set color in the dom element
+    for path in svg_paths:
+        path.setAttribute("fill", color)
+    # also replace possible css
+    xml_text: str = svg_dom.toxml()
+    xml_text = xml_text.replace("#000000", "white")
+    # create temporary svg and read into pyqt svg graphics object
+    new_svg_path = svg_path.parent /  Path(svg_path.stem + "_" + color + svg_path.suffix)
+    with open(new_svg_path, "w+", encoding="utf-8") as new_svg:
+        new_svg.write(xml_text)
+    return new_svg_path
+
 
 
 def extract_icon(file_path: Path) -> QIcon:
@@ -56,16 +73,16 @@ def extract_icon(file_path: Path) -> QIcon:
 
 def get_platform_icon(profile_name: str) -> QIcon:
     """ Return an Icon based on the profile name.
-    TODO: This would be better done with a settings object.
     """
+    from conan_app_launcher.ui.common.theming import get_themed_asset_icon
     profile_name = profile_name.lower()
-    if "win" in profile_name: # I hope people have no random win"s" in their profilename
-        return QIcon(get_themed_asset_image("icons/windows.png"))
+    if "win" in profile_name:  # I hope people have no random win"s" in their profilename
+        return QIcon(get_themed_asset_icon("icons/global/windows.svg"))
     elif "linux" in profile_name:
-        return QIcon(get_themed_asset_image("icons/linux.png"))
+        return QIcon(get_themed_asset_icon("icons/global/linux.svg"))
     elif "android" in profile_name:
-        return QIcon(get_themed_asset_image("icons/android.png"))
+        return QIcon(get_themed_asset_icon("icons/global/android.svg"))
     elif "macos" in profile_name:
-        return QIcon(get_themed_asset_image("icons/mac_os.png"))
+        return QIcon(get_themed_asset_icon("icons/global/mac_os.svg"))
     else:
-        return QIcon(get_themed_asset_image("icons/default_pkg.png"))
+        return QIcon(get_themed_asset_icon("icons/default_pkg.svg"))

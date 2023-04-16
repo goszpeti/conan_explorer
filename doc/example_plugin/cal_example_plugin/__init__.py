@@ -1,0 +1,1 @@
+from cal_example_plugin.my_cal_plugin import SamplePluginView

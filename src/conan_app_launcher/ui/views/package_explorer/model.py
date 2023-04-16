@@ -1,12 +1,12 @@
 import pprint
-from typing import List, Union
+from typing import List
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.core import ConanApi
-from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_image, TreeModel, TreeModelItem
-from PyQt5.QtCore import QSortFilterProxyModel, Qt, QModelIndex
-from PyQt5.QtGui import QIcon
+from conan_app_launcher.conan_wrapper import ConanApi
+from conan_app_launcher.conan_wrapper.types import ConanPkg
+from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_icon, TreeModel, TreeModelItem
+from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
+from PySide6.QtGui import QIcon
 
 REF_TYPE = 0
 PROFILE_TYPE = 1
@@ -65,7 +65,7 @@ class PackageFilter(QSortFilterProxyModel):
 class PackageTreeItem(TreeModelItem):
     """ Represents a tree item of a Conan pkg. To be used for the parent (ref) and the child (Profile)"""
 
-    def __init__(self, data: List[Union[str, ConanPkg]], parent=None, item_type=REF_TYPE):
+    def __init__(self, data: List["str | ConanPkg"], parent=None, item_type=REF_TYPE):
         super().__init__(data, parent)
         self.type = item_type
 
@@ -78,7 +78,7 @@ class PkgSelectModel(TreeModel):
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
-        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
     def setup_model_data(self):
         for conan_ref in app.conan_api.get_all_local_refs():
@@ -92,19 +92,19 @@ class PkgSelectModel(TreeModel):
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
             return None
-        item: PackageTreeItem = index.internalPointer()
-        if role == Qt.ToolTipRole:
+        item: PackageTreeItem = index.internalPointer() # type: ignore
+        if role == Qt.ItemDataRole.ToolTipRole:
             if item.type == PROFILE_TYPE:
                 data = item.data(0)
                 # remove dict style print characters
-                return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord(","): None, ord("'"): None})
-        if role == Qt.DecorationRole:
+                return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord("'"): None})
+        if role == Qt.ItemDataRole.DecorationRole:
             if item.type == REF_TYPE:
-                return QIcon(get_themed_asset_image("icons/package.png"))
+                return QIcon(get_themed_asset_icon("icons/package.svg"))
             if item.type == PROFILE_TYPE:
                 profile_name = self.get_quick_profile_name(item)
                 return get_platform_icon(profile_name)
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             if item.type == REF_TYPE:
                 return item.data(index.column())
             if item.type == PROFILE_TYPE:

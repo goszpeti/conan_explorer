@@ -67,9 +67,12 @@ Conan Config
 
 Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04.
 
-1. Qt for Python must be installed with the native package manager, like:
-
-    sudo apt install python3-pyqt5
+1. Pip must be updated to at least pip 20.3, so using a venv like this is recommended:
+    sudo apt install python3-venv
+    python3 -m venv .venv 
+    source .venv/bin/activate
+    python3 -m pip install --upgrade pip
+    pip install conan_app_launcher
 
 2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type "x-terminal-emulator" to get a list of available terminals.
 
@@ -92,29 +95,37 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 
 ### Main dependencies
 
-* PyQt5 >= 5.13.0 
+* Pyside6 >= 6.4.0
 * conan >= 1.24.0
 
-> **Warning** **Deprecation of Python 3.6**  
-> From version 2.0.0 Python 3.6 will not be supported anymore, because it's end-of-life has been reached.
+> **Warning** - **Deprecation of Python 3.6**  
+> From version 2.0.0 Python 3.6 will not be supported anymore, because end-of-life support has been reached.
 
 ## Toolchain
 
-This project uses Python with Qt as a frontend using the PyQt integration.
+This project uses Python with Qt as a frontend using the PySide6 integration.
 An IDE configuration is available for VsCode.
 
 See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for Static Code Analysis.
 
 ## Licenses of used libraries and code
 
+> **Warning** - **Change of License to LGPL**
+> From version 2.0.0 the project will use the [LGPL 3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license to cleanly comply with PySide6.
+
 #### Resources
-* Using icons by https://icons8.com under [Universal Multimedia Licensing
-Agreement for Icons8](https://icons8.com/vue-static/landings/pricing/icons8-license.pdf)
-* Using Conan Package Manager Icon by Conan.io developers under [MIT License](<http://opensource.org/licenses/mit-license.php>), via Wikimedia Commons
+* Conan Package Manager Icon by Conan.io developers under [MIT License](http://opensource.org/licenses/mit-license.php), via Wikimedia Commons
+* [Noto Sans and Noto Sans Mono fonts](https://fonts.google.com/) by Google under [SIL Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL)
+* [Material icons](https://fonts.google.com/) by Google  under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+* [Linux icon](https://www.svgrepo.com/svg/340563/linux-alt) by Carbon Design  under [Apache License](https://opensource.org/licenses/Apache-1.1)
+* [Apple icon](https://www.svgrepo.com/svg/488495/apple) by Klever Space  under [MIT License](http://opensource.org/licenses/mit-license.php)
+* [Windows icon](https://www.svgrepo.com/svg/488736/windows) by Klever Space under [MIT License](http://opensource.org/licenses/mit-license.php)
+* Modified [Package icon](https://www.svgrepo.com/svg/487645/package) by Neuicons [MIT License](http://opensource.org/licenses/mit-license.php)
+* Modified [Open Box icon](https://www.svgrepo.com/svg/383786/open-box-parcel) by wishforge.gamesunder [CC Attribution License](https://creativecommons.org/licenses/by/4.0/legalcode)</li>
 
 ##### PyPi runtime dependencies
-* PyQt5 by Riverbank Computing Limited, [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
-* Conan by JFrog LTD under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+* PySide6 by Qt, [LGPL V3](https://www.gnu.org/licenses/lgpl-3.0.en.html)
+* Conan by JFrog LTD under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 * jsonschema by Julian Berman under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 * Using a modified version of Toggle Widget from QtWidgets (https://github.com/pythonguis/python-qtwidgets) under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 

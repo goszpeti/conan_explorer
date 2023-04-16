@@ -7,17 +7,18 @@ Usable Macros with Jinja2 syntax:
 
 Palette:
  - Conan Accent Color:  #6699CC
+ - Darker Conan Accent Color: #3375B7
  - light: #808086
- - light-dark: 696969
+ - light-dark: #696969
  - dark: #5c5c5c
  - darker: #474747
- - almost here: #
  - darkest: #202020
 */
 
 * {
     color: #f8f8ff;
     font-size: {{MAIN_FONT_SIZE}}pt;
+    font-family: {{FONT_FAMILY}};
 }
 
 /* Setup for specific widgets */
@@ -36,7 +37,7 @@ QLabel#page_title {
     border-style: solid;
     border-bottom-color: #6699CC;
     border-bottom-width: 2px;
-    margin: 1px;
+    padding-bottom: -5px;
     font-size: {{MAIN_FONT_SIZE + 11 }}pt;
 }
 
@@ -80,6 +81,9 @@ QFrame#content_frame .QFrame {
     background-color: transparent;
     border-radius: 7px;
 }
+QFrame#content_frame .QFrame[frameShape="4"] {
+    background: white;
+}
 
 QFrame#content_frame .QPushButton,
 QToolButton {
@@ -107,6 +111,40 @@ QToolButton:checked {
     background-color: #5c5c5c;
 }
 
+QFrame#content_frame .QPushButton:disabled,
+QToolButton:disabled {
+    color: #5c5c5c;
+}
+
+/* Dialog styling */
+QDialog .QPushButton,
+QToolButton {
+    border-radius: 5px;
+    margin: 2px;
+    text-align: middle;
+    background-color: #474747;
+    padding: 3px;
+    min-width: 30px;
+}
+
+QDialog .QPushButton:hover,
+QToolButton:hover {
+    background-color: #5c5c5c;
+}
+
+QDialog .QPushButton:pressed,
+QToolButton:pressed {
+    padding-top: 5px;
+    background-color: #696969;
+}
+
+QDialog .QPushButton:checked,
+QToolButton:checked {
+    background-color: #5c5c5c;
+}
+
+/* Quicklaunch styling */ 
+
 AppGridView {
     background-color: #5c5c5c;
 }
@@ -119,12 +157,15 @@ TabScrollAreaWidgets {
     background-color: #808086;
 }
 
-AppLinkBase {
+ListAppLink {
     /* background-color: #353839; */
     background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #5a88b6, stop:1 #6699CC);
     border-radius: 7px;
 }
 
+QLabel#app_name {
+    font: bold;
+}
 ClickableIcon {
     border-radius: 5px;
     background-color: transparent;
@@ -143,6 +184,7 @@ ClickableIcon:pressed {
     background-color: #5c5c5c;
 }
 
+/* About page */
 QLabel#about_label {
     background-color: #5c5c5c;
     border-radius: 5px;
@@ -189,6 +231,9 @@ QLabel#title_label {
 QFrame#right_menu_frame * {
     background-color: #808086;
 }
+QFrame#right_menu_frame {
+    border: 1px solid #696969;
+}
 
 QLabel#right_menu_top_title_label {
     font-size: {{MAIN_FONT_SIZE + 2}}pt;
@@ -207,16 +252,18 @@ QFrame#right_menu_frame QPushButton{
     padding: 3px;
     min-width: 30px;
 }
+
 QFrame#right_menu_frame QPushButton:hover{
     background-color: #696969;
-    /* #B7B7B7; */
 }
+
 QFrame#right_menu_frame QPushButton:pressed{
     padding-top: 5px;
     background-color: #5c5c5c;
 }
+
 QFrame#right_menu_frame QPushButton:checked{
-    background-color: #696969;
+    background-color: #808086;
 }
 
 QLabel#side_menu_title_label {
@@ -224,8 +271,9 @@ QLabel#side_menu_title_label {
     font-size: {{MAIN_FONT_SIZE + 1}}pt;
 }
 
-
-
+QPushButton#side_menu_title_button {
+    background-color: #717178;
+}
 
 /* Generic widgets */
 
@@ -253,14 +301,13 @@ QTabWidget::tab-bar:bottom {
     bottom: 1px;
 }
 
-QScrollArea{
+QScrollArea, QLabel#logo_label{
     background-color: #808086;
 }
 
-QWidget#info_contents {
+QWidget#info_contents, QWidget#about_contents {
     background-color: #808086;
 }
-
 
 QMessageBox QPushButton{
     background-color: #474747;
@@ -303,35 +350,36 @@ QListView, QTreeView, QListWidget {
     color: #f8f8ff;
     background-color: #474747;
     alternate-background-color: #474747;
-    selection-background-color: #6699CC; /* Used on Mac */
-    selection-color: white; /* Used on Mac */
-    show-decoration-selected: 0;
 }
-QListView::item:hover, QTreeView::item:hover{
-    background-color: #6699CC;
+QListView::item:hover,
+QTreeView::item:hover{
+    background: #3375B7;
 }
+QListView::item:selected,
 QTreeView::item:selected {
-    color: #f8f8ff;
-    background-color: #A8A8A8;
 }
+QListView::item:selected:active,
 QTreeView::item:selected:active{
-    color: black;
     background-color: #6699CC;
 }
+QListView::item:selected:!active,
 QTreeView::item:selected:!active {
-    background: #6699CC;
+    background-color: #6699CC;
+}
+QTreeView::branch {
+    background: #474747;
 }
 QTreeView::branch:closed:has-children {
-    image: url(icons:forward_w.png);
+    image: url(icons:material/forward_w.svg);
 }
 QTreeView::branch:open:has-children {
-    image: url(icons:expand_w.png);
+    image: url(icons:material/expand_w.svg);
 }
 QTreeView::branch:hover:closed:has-children {
-    image: url(icons:forward_b.png);
+    image: url(icons:material/forward_b.svg);
 }
 QTreeView::branch:hover:open:has-children:hover {
-    image: url(icons:expand_b.png);
+    image: url(icons:material/expand_b.svg);
 }
 QScrollBar:vertical {
     border: 0px solid transparent;
@@ -417,7 +465,10 @@ QTextEdit{
 }
 QTextBrowser{ 
     background-color: #474747;
+    font-family: {{CONSOLE_FONT_FAMILY}};
+    font-size: {{MAIN_FONT_SIZE - 2}}pt;
 }
+
 QTextBrowser#console{ 
     background-color: #1e1d23;
     border-bottom-right-radius: 7px;

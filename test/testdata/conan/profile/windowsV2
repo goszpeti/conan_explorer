@@ -1,0 +1,10 @@
+[settings]
+os=Windows
+arch=x86_64
+compiler=msvc
+compiler.version=192
+compiler.cppstd=17
+compiler.runtime_type =Release
+compiler.runtime=dynamic
+build_type=Release
+[options]

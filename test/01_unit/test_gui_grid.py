@@ -2,49 +2,51 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
+from email.generator import Generator
 import os
 import platform
 import shutil
 import sys
 from pathlib import Path
-import psutil
-from subprocess import check_output
-from test.conftest import TEST_REF, check_if_process_running, conan_create_and_upload
-from time import sleep
+from typing import Callable
+import pytest
+from pytest_mock import MockerFixture
+from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, GUI_STYLE_MATERIAL
+from test.conftest import TEST_REF, PathSetup, check_if_process_running, conan_install_ref
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.settings import (APPLIST_ENABLED, DISPLAY_APP_USERS,
-                                         ENABLE_APP_COMBO_BOXES)
 from conan_app_launcher.ui.config import UiAppGridConfig, UiTabConfig
 from conan_app_launcher.ui.model import UiApplicationModel
-from conan_app_launcher.ui.views.app_grid.app_link import AppLinkBase, ListAppLink, GridAppLink
+from conan_app_launcher.ui.views.app_grid.app_link import ListAppLink, ListAppLink
 from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
     AppEditDialog
 from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
-                                                          UiAppLinkConfig,
-                                                          UiAppLinkModel)
-from conans.model.ref import ConanFileReference as CFR
-from PyQt5 import QtCore, QtWidgets
+                                                        UiAppLinkConfig,
+                                                        UiAppLinkModel)
+from conan_app_launcher.conan_wrapper.types import ConanRef as CFR
+from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
 
 
-def test_applink_word_wrap(qtbot, base_fixture):
+@pytest.mark.conanv2
+def test_applink_word_wrap(qtbot, base_fixture: PathSetup):
     """ Check custom word wrap of App Link"""
 
     # max length > actual length -> no change
-    assert AppLinkBase.word_wrap("New Link", 10) == "New Link"
+    assert ListAppLink.word_wrap("New Link", 10) == "New Link"
 
     # max length < actual length with one word
-    assert AppLinkBase.word_wrap("VeryLongAppLinkNametoTestColumnCalculation",
+    assert ListAppLink.word_wrap("VeryLongAppLinkNametoTestColumnCalculation",
                                  10) == "VeryLongAp\npLinkNamet\noTestColum\nnCalculati\non"
 
     # max length < actual length with two words
-    assert AppLinkBase.word_wrap("VeryLongAppLinkNametoTestColumnCalculation 111111",
+    assert ListAppLink.word_wrap("VeryLongAppLinkNametoTestColumnCalculation 111111",
                                  10) == "VeryLongAp\npLinkNamet\noTestColum\nnCalculati\non 111111"
 
 
-def test_AppEditDialog_display_values(qtbot, base_fixture):
+@pytest.mark.conanv2
+def test_AppEditDialog_display_values(qtbot, base_fixture: PathSetup):
     """
     Test, if the already existent app data is displayed correctly in the dialog.
     """
@@ -64,7 +66,7 @@ def test_AppEditDialog_display_values(qtbot, base_fixture):
     # assert values
     assert diag._ui.name_line_edit.text() == app_info.name
     assert diag._ui.conan_ref_line_edit.text() == str(app_info.conan_ref)
-    assert diag._ui.exec_path_line_edit.text() == app_info.executable
+    assert diag._ui.execpath_line_edit.text() == app_info.executable
     assert diag._ui.is_console_app_checkbox.isChecked() == app_info.is_console_application
     assert diag._ui.icon_line_edit.text() == app_info.icon
     assert diag._ui.args_line_edit.text() == app_info.args
@@ -75,12 +77,13 @@ def test_AppEditDialog_display_values(qtbot, base_fixture):
     diag._ui.name_line_edit.setText("NewName")
 
     # press cancel - no values should be saved
-    qtbot.mouseClick(diag._ui.button_box.buttons()[1], Qt.LeftButton)
+    qtbot.mouseClick(diag._ui.button_box.buttons()[1], Qt.MouseButton.LeftButton)
 
     assert app_info.name == "test"
 
 
-def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
+@pytest.mark.conanv2
+def test_AppEditDialog_browse_buttons(qtbot, base_fixture: PathSetup, mocker):
     """
     Test, if the browse executable and icon button works:
     - buttons are always enabled (behavior change from conditional disable)
@@ -88,6 +91,8 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
     - resolves the correct relative path for executables and forbids non-package-folder paths
     - resolves the correct relative path for executables and sets non-package-folder paths to the abs. path
     """
+    conan_install_ref(TEST_REF)  # need local package
+
     app.conan_api.init_api()
 
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
@@ -117,59 +122,62 @@ def test_AppEditDialog_browse_buttons(qtbot, base_fixture, mocker):
         exe_rel_path = "bin\\python.exe"
     else:
         exe_rel_path = "bin/python"
-    _, temp_package_path = app.conan_api.get_best_matching_package_path(
+    _, temp_package_path = app.conan_api.get_best_matching_local_package_path(
         CFR.loads(diag._ui.conan_ref_line_edit.text()), diag.resolve_conan_options())
     selection = temp_package_path / exe_rel_path
-    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(selection)])
     diag._ui.executable_browse_button.clicked.emit()
-    assert diag._ui.exec_path_line_edit.text() == exe_rel_path.replace("\\", "/")
+    assert diag._ui.execpath_line_edit.text() == exe_rel_path.replace("\\", "/")
 
     # negative test
     selection = base_fixture.testdata_path / "nofile.json"
-    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(selection)])
-    
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec_',
-                        return_value=QtWidgets.QMessageBox.Accepted)
+
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.DialogCode.Accepted)
     diag._ui.executable_browse_button.clicked.emit()
     # entry not changed
-    assert diag._ui.exec_path_line_edit.text() == exe_rel_path.replace("\\", "/")
+    assert diag._ui.execpath_line_edit.text() == exe_rel_path.replace("\\", "/")
 
-    # open button 
+    # open button
     # absolute
-    icon_path = app.asset_path / "icons" / "about.png"
-    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    icon_path = app.asset_path / "icons" / GUI_STYLE_MATERIAL / "about.svg"
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(icon_path)])
     diag._ui.icon_browse_button.clicked.emit()
     assert diag._ui.icon_line_edit.text() == str(icon_path)
 
     # relative to package
-    icon_pkg_path = temp_package_path / "icon.png"
+    icon_pkg_path = temp_package_path / "icon.svg"
     # copy icon to pkg
     shutil.copyfile(str(icon_path), str(icon_pkg_path))
 
-    mocker.patch.object(QtWidgets.QFileDialog, 'exec_',
-                        return_value=QtWidgets.QDialog.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
                         return_value=[str(icon_pkg_path)])
     diag._ui.icon_browse_button.clicked.emit()
-    assert diag._ui.icon_line_edit.text() == "icon.png"
+    assert diag._ui.icon_line_edit.text() == "icon.svg"
     os.unlink(str(icon_pkg_path))
     diag._ui.conan_ref_line_edit._completion_thread.join(1)
     root_obj.close()
 
-def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
+
+@pytest.mark.conanv2
+def test_AppEditDialog_save_values(qtbot, base_fixture: PathSetup, mocker):
     """
     Test, if the entered data is written correctly.
     """
     app.conan_api.init_api()
+    app.active_settings.set(AUTO_INSTALL_QUICKLAUNCH_REFS, True)
 
     app_info = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                executable="bin/myexec", is_console_application=True,
@@ -193,7 +201,7 @@ def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
     # edit dialog
     diag._ui.name_line_edit.setText("NewName")
     diag._ui.conan_ref_line_edit.setText(TEST_REF)
-    diag._ui.exec_path_line_edit.setText("include/zlib.h")
+    diag._ui.execpath_line_edit.setText("include/zlib.h")
     diag._ui.is_console_app_checkbox.setChecked(True)
     diag._ui.icon_line_edit.setText("//Myico.ico")
     diag._ui.args_line_edit.setText("--help -kw=value")
@@ -202,16 +210,14 @@ def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
 
     # the caller must call save_data manually
 
-    mock_version_func = mocker.patch(
-        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_version_queue')
     mock_install_func = mocker.patch(
-        'conan_app_launcher.core.conan_worker.ConanWorker.put_ref_in_install_queue')
+        'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
     diag.save_data()
 
     # assert that all infos where saved
     assert diag._ui.name_line_edit.text() == model.name
     assert diag._ui.conan_ref_line_edit.text() == TEST_REF  # internal representation will strip @_/_
-    assert diag._ui.exec_path_line_edit.text() == model.executable
+    assert diag._ui.execpath_line_edit.text() == model.executable
     assert diag._ui.is_console_app_checkbox.isChecked() == model.is_console_application
     assert diag._ui.icon_line_edit.text() == model.icon
     assert diag._ui.args_line_edit.text() == model.args
@@ -227,12 +233,12 @@ def test_AppEditDialog_save_values(qtbot, base_fixture, mocker):
 
     # check, that the package info and the available versions are updated
 
-    mock_version_func.assert_called()
     mock_install_func.assert_called()
     diag._ui.conan_ref_line_edit._completion_thread.join(1)
 
 
-def test_AppLink_open(qtbot, base_fixture):
+@pytest.mark.conanv2
+def test_AppLink_open(qtbot, base_fixture: PathSetup):
     """
     Test, if clicking on an app_button in the gui opens the app. Also check the icon.
     The set process is expected to be running.
@@ -242,41 +248,30 @@ def test_AppLink_open(qtbot, base_fixture):
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable=Path(sys.executable).name)
     app_model = UiAppLinkModel().load(app_config, None)
-    app_model.set_package_info(Path(sys.executable).parent)
+    app_model.set_package_folder(Path(sys.executable).parent)
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
-    app_ui = ListAppLink(root_obj, None, app_model)
-    app_ui.load()
+    app_link = ListAppLink(root_obj, None, app_model)
+    app_link.load()
     root_obj.setFixedSize(100, 200)
     root_obj.show()
     qtbot.addWidget(root_obj)
 
     qtbot.waitExposed(root_obj)
-    qtbot.mouseClick(app_ui._app_button, Qt.LeftButton)
-    sleep(5)  # wait for terminal to spawn
+    qtbot.mouseClick(app_link._ui.app_button, Qt.MouseButton.LeftButton)
     # check pid of created process
-    found_process = None
+    process_name = ""
     if platform.system() == "Linux":
         process_name = "x-terminal-emulator"
     elif platform.system() == "Windows":
         process_name = "cmd"
-    for process in psutil.process_iter():
-        try:
-            if process_name.lower() in process.name().lower():
-                try:
-                    if "conan_app_launcher" in process.cmdline()[2]:
-                        found_process = process
-                    break
-                except:
-                    pass
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
-    if found_process:
-        found_process.kill()
+
+    assert check_if_process_running(process_name, cmd_contains=["conan_app_launcher"], kill=True, cmd_narg=2)
 
 
-def test_AppLink_icon_update_from_executable(qtbot, base_fixture):
+@pytest.mark.conanv2
+def test_AppLink_icon_update_from_executable(qtbot, base_fixture: PathSetup):
     """
     Test, that an extracted icon from an exe is displayed after loaded and then retrived from cache.
     Check, that the icon has the temp path. Use python executable for testing.
@@ -286,114 +281,12 @@ def test_AppLink_icon_update_from_executable(qtbot, base_fixture):
     app_config = UiAppLinkConfig(name="test", conan_ref="abcd/1.0.0@usr/stable",
                                  is_console_application=True, executable="python")
     app_model = UiAppLinkModel().load(app_config, None)
-    app_model.set_package_info(Path(sys.executable).parent)
+    app_model.set_package_folder(Path(sys.executable).parent)
 
     root_obj = QtWidgets.QWidget()
     root_obj.setObjectName("parent")
-    app_ui = ListAppLink(root_obj, None, app_model)
-    app_ui.load()
-
-    assert not app_ui.model.get_icon().isNull()
-    assert not app_ui._app_button._greyed_out
-
-
-def test_AppLink_cbox_switch(qtbot, base_fixture):
-    """
-    Test, that changing the version resets the channel and user correctly
-    """
-    app.conan_api.init_api()
-
-    # all versions have different user and channel names, so we can distinguish them
-    conanfile = str(base_fixture.testdata_path / "conan" / "multi" / "conanfile.py")
-    create_packages = True
-    if create_packages:
-        conan_create_and_upload(conanfile, "switch_test/1.0.0@user1/channel1")
-        conan_create_and_upload(conanfile, "switch_test/1.0.0@user1/channel2")
-        conan_create_and_upload(conanfile, "switch_test/1.0.0@user2/channel3")
-        conan_create_and_upload(conanfile, "switch_test/1.0.0@user2/channel4")
-        conan_create_and_upload(conanfile, "switch_test/2.0.0@user3/channel5")
-        conan_create_and_upload(conanfile, "switch_test/2.0.0@user3/channel6")
-        conan_create_and_upload(conanfile, "switch_test/2.0.0@user4/channel7")
-        conan_create_and_upload(conanfile, "switch_test/2.0.0@user4/channel8")
-
-    # loads it into cache
-    app.conan_api.search_recipe_alternatives_in_remotes(CFR.loads("switch_test/1.0.0@user1/channel1"))
-    # need cache
-    app.active_settings.set(DISPLAY_APP_USERS, True)
-    app.active_settings.set(ENABLE_APP_COMBO_BOXES, True)
-    app.active_settings.set(APPLIST_ENABLED, False)
-
-    app_config = UiAppLinkConfig(name="test", conan_ref="switch_test/1.0.0@user1/channel1",
-                                 is_console_application=True, executable="")
-    app_model = UiAppLinkModel().load(app_config, None)
-    root_obj = QtWidgets.QWidget()
-    root_obj.setFixedSize(100, 200)
-    qtbot.addWidget(root_obj)
-    root_obj.setObjectName("parent")
-    app_link = GridAppLink(root_obj, None, app_model)
+    app_link = ListAppLink(root_obj, None, app_model)
     app_link.load()
-    root_obj.show()
 
-    qtbot.waitExposed(root_obj)
-
-    # wait for version update
-    if app.conan_worker:
-        app.conan_worker.finish_working()
-    sleep(1)
-
-    # check initial state
-    assert app_link._app_version.count() == 2
-    assert app_link._app_version.itemText(0) == "1.0.0"
-    assert app_link._app_version.itemText(1) == "2.0.0"
-    assert app_link._app_user.count() == 2
-    assert app_link._app_user.itemText(0) == "user1"
-    assert app_link._app_user.itemText(1) == "user2"
-    assert app_link._app_channel.count() == 2
-    assert app_link._app_channel.itemText(0) == "channel1"
-    assert app_link._app_channel.itemText(1) == "channel2"
-
-    # now change version to 2.0.0 -> user can change to default, channel should go to NA
-    # this is done, so that the user can select it and not autinstall something random
-    app_link._app_version.setCurrentIndex(1)
-    assert app_link._app_version.count() == 2
-    assert app_link._app_version.itemText(0) == "1.0.0"
-    assert app_link._app_version.itemText(1) == "2.0.0"
-    assert app_link._app_user.count() == 2
-    assert app_link._app_user.itemText(0) == "user3"
-    assert app_link._app_user.itemText(1) == "user4"
-    assert app_link._app_channel.count() == 3
-    assert app_link._app_channel.itemText(0) == "NA"
-    assert app_link._app_channel.currentIndex() == 0
-    assert app_link._app_channel.itemText(1) == "channel5"
-    assert app_link._app_channel.itemText(2) == "channel6"
-
-    # check that reference and executable has updated
-    assert app_model.conan_ref == "switch_test/2.0.0@user3/NA"
-    assert app_model.get_executable_path() == Path("NULL")
-
-    # change user
-    app_link._app_channel.setCurrentIndex(1)
-    # wait for version update
-    if app.conan_worker:
-        app.conan_worker.finish_working()
-    sleep(1)
-    # setting a channel removes NA entry and entry becomes -1
-    assert app_link._app_channel.itemText(0) == "channel5"
-    assert app_link._app_channel.itemText(1) == "channel6"
-    assert app_link._app_channel.currentIndex() == 0
-    # conan worker currently not integrated -> no pkg path update
-    # assert app_model._package_folder.exists()
-
-    # now change back to 1.0.0 -> user can change to default, channel should go to NA
-    app_link._app_version.setCurrentIndex(0)
-    assert app_link._app_version.count() == 2
-    assert app_link._app_version.itemText(0) == "1.0.0"
-    assert app_link._app_version.itemText(1) == "2.0.0"
-    assert app_link._app_user.count() == 2
-    assert app_link._app_user.itemText(0) == "user1"
-    assert app_link._app_user.itemText(1) == "user2"
-    assert app_link._app_channel.count() == 3
-    assert app_link._app_channel.itemText(0) == "NA"
-    assert app_link._app_channel.currentIndex() == 0
-    assert app_link._app_channel.itemText(1) == "channel1"
-    assert app_link._app_channel.itemText(2) == "channel2"
+    assert not app_link.model.get_icon().isNull()
+    assert not app_link._ui.app_button._greyed_out

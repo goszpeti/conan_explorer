@@ -4,26 +4,32 @@ Because the unit tests use qtbot helper, a QApplication object is already presen
 and it cannot be instatiated anew with the main loop of the program.
 """
 import os
+import sys
 import time
 from pathlib import Path
 from subprocess import Popen
 import platform
+
+import pytest
 import conan_app_launcher
 from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
                                          settings_factory)
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
+from pytest_check import check
 
 from test.conftest import check_if_process_running
-import psutil
 
+
+@pytest.mark.conanv2
 def test_main_loop_mock(base_fixture, mocker):
     """
     Smoke test, that the application runs through.
     No error expected.
     """
+    os.environ["DISABLE_ASYNC_LOADER"] = "False"  # for code coverage of async loader
 
     main_ui_mock = mocker.patch("conan_app_launcher.ui.main_window.MainWindow")
-    qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec_")
+    qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec")
     # delayed import necessary, so the mocker can patch the object before
     from conan_app_launcher import __main__
 
@@ -34,6 +40,7 @@ def test_main_loop_mock(base_fixture, mocker):
     qapp_mock.assert_called_once()
 
 
+@pytest.mark.conanv2
 def test_main_loop(base_fixture):
     """
     Smoke test, that the application can start.
@@ -50,23 +57,13 @@ def test_main_loop(base_fixture):
     # conan_app_launcher
     Popen(["conan_app_launcher"])
 
-    time.sleep(4)
-    try:
-        found_process = False
-        for process in psutil.process_iter():
-            if platform.system() == "Windows":
-                script = "Scripts\\conan_app_launcher-script.pyw"
-            else:
-                script = "bin/conan_app_launcher" # TODO
-            try:
-                if process.cmdline() and "python" in process.cmdline()[0].lower() and script in process.cmdline()[1]:
-                    found_process = True
-                    process.kill()
-                    break
-            except Exception:
-                pass
-        time.sleep(2)
-        assert found_process
-    finally:
-        # delete config file
-        os.remove(str(settings_file_path))
+    if platform.system() == "Windows":
+        script = ["Scripts\\conan_app_launcher-script.pyw"]
+        proc_name = Path(sys.executable).name
+    else:
+        script = []
+        proc_name = "conan_app_launc" # cuts off
+    with check:
+        check_if_process_running(proc_name, script, kill=True)
+    # delete config file
+    os.remove(str(settings_file_path))

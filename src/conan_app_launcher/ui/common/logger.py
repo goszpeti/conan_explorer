@@ -3,7 +3,7 @@ from threading import Lock
 
 from conan_app_launcher import CONAN_LOG_PREFIX
 from conan_app_launcher.app.logger import Logger
-from PyQt5.QtCore import pyqtBoundSignal
+from PySide6.QtCore import SignalInstance
 
 
 class QtLogHandler(logging.Handler):
@@ -14,7 +14,7 @@ class QtLogHandler(logging.Handler):
     _lock = Lock()
     _formatter = logging.Formatter(r"%(levelname)s: %(message)s")
 
-    def __init__(self, update_signal: pyqtBoundSignal):
+    def __init__(self, update_signal: SignalInstance):
         super().__init__(logging.DEBUG)
         self._update_signal = update_signal
 
@@ -35,7 +35,7 @@ class QtLogHandler(logging.Handler):
                     print("QT Logger errored")  # don't log here with logger...
 
 
-def init_qt_logger(logger: Logger, name: str, update_signal: pyqtBoundSignal):
+def init_qt_logger(logger: Logger, name: str, update_signal: SignalInstance):
     """
     Redirects the logger to QT widget.
     Needs to be called when GUI objects are available.

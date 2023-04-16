@@ -4,11 +4,6 @@
             "path": ".."
         }
     ],
-    "extensions": {
-        "recommendations": [
-            "zhoufeng.pyqt-integration"
-        ]
-    },
     "settings": {
         "files.associations": {
             "*.qss.in": "qss"
@@ -30,7 +25,8 @@
             "--cov-append",
             "--cov-branch",
             "--capture=no", // print output
-            "--no-cov" // no coverage while debugging
+            "--no-cov", // no coverage while debugging
+            // "-m conanv2"
         ],
         "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
         "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
@@ -38,6 +34,41 @@
         "python.terminal.activateEnvironment": true,
         "editor.rulers": [
             120
+        ],
+        "python.analysis.exclude": [
+            "**/*_ui.py",
+            ".venv"
+        ],
+        "python.analysis.autoImportCompletions": true,
+        "python.analysis.inlayHints.functionReturnTypes": false,
+        "python.analysis.inlayHints.pytestParameters": true,
+        "python.analysis.inlayHints.variableTypes": false,
+        "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+        "colorInfo.languages": [
+            {
+                "selector": "css",
+                "colors": "css"
+            },
+            {
+                "selector": "sass",
+                "colors": "css"
+            },
+            {
+                "selector": "scss",
+                "colors": "css"
+            },
+            {
+                "selector": "less",
+                "colors": "css"
+            },
+            {
+                "selector": "html",
+                "colors": "css"
+            },
+            {
+                "selector": "python",
+                "colors": "css"
+            },
         ],
     }
 }

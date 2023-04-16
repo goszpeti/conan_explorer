@@ -14,7 +14,7 @@
                     "is_console_application": true
                 },
                 {
-                    "name": "App1",
+                    "name": "App1 new",
                     "conan_ref": "example/9.9.9@local/testing",
                     "executable": "bin/python",
                     "conan_options": []
@@ -39,7 +39,7 @@
             "name": "Extra",
             "apps": [
                 {
-                    "name": "App2",
+                    "name": "App2 extra",
                     "conan_ref": "example/1.0.0@_/_",
                     "executable": "bin/app2.exe",
                     "icon": "//myicon.png",

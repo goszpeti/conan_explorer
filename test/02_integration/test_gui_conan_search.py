@@ -1,16 +1,20 @@
 
+import os
+from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from test.conftest import TEST_REF
 
 import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app
 from conan_app_launcher.ui.main_window import MainWindow
-from conans.model.ref import ConanFileReference
-from PyQt5 import QtCore
+from conan_app_launcher.conan_wrapper.types import ConanRef
+from PySide6 import QtCore
+from conan_app_launcher.ui.views import ConanSearchView
+from conan_app_launcher.ui.views import LocalConanPackageExplorer
 
 Qt = QtCore.Qt
 
 
-def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
+def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     """ Tests, that the Conan search dialog:
     - search button does not work under 3 characters
     - can find the test packages from the name
@@ -22,16 +26,19 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
     - Show conanfile call
     - Show in Local Package Explorer
     """
+    # disable editor to force open file
+    app.active_settings.set(FILE_EDITOR_EXECUTABLE, "UNKNOWN")
     from pytestqt.plugin import _qapp_instance
-    cfr = ConanFileReference.loads(TEST_REF)
+    cfr = ConanRef.loads(TEST_REF)
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
     main_window = MainWindow(_qapp_instance)
     main_window.conan_remotes_updated.emit()
-    search_dialog = main_window.search_dialog
+    main_window.load()
     qtbot.addWidget(main_window)
     main_window.show()
     qtbot.waitExposed(main_window)
+    search_dialog = main_window.page_widgets.get_page_by_type(ConanSearchView)
 
     # enter short search term -> search button disabled
     search_dialog._ui.search_line.setText("ex")
@@ -53,7 +60,7 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
     #     _qapp_instance.processEvents()
 
     assert model.root_item.item_data[0] == "Packages"
-    assert model.root_item.child_count() == 3
+    assert model.root_item.child_count() == 2
 
     # expand package -> assert number of packages and itemdata
     # check installed ref ist highlighted
@@ -68,6 +75,7 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
 
     while not ref_item.child_items:
         _qapp_instance.processEvents()
+
     # check in child items that installed pkg id is highlighted
     pkg_found = False
     for child_item in ref_item.child_items:
@@ -82,33 +90,33 @@ def test_conan_search_dialog(qtbot, base_fixture, mock_clipboard, mocker):
     # check copy recipe ref
     # select ref
     sel_model = search_dialog._ui.search_results_tree_view.selectionModel()
-    sel_model.select(ref_view_index, QtCore.QItemSelectionModel.ClearAndSelect)
+    sel_model.select(ref_view_index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
     search_dialog._search_controller.on_copy_ref_requested()
     mock_clipboard.setText.assert_called_with(TEST_REF)
 
     # check copy id ref
     # select id
-    sel_model.select(pkg_view_index, QtCore.QItemSelectionModel.ClearAndSelect)
+    sel_model.select(pkg_view_index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
     search_dialog._search_controller.on_copy_ref_requested()
     mock_clipboard.setText.assert_called_with(TEST_REF + ":" + id)
 
     # check install
-    mock_install_dialog = mocker.patch(
-        "conan_app_launcher.ui.views.conan_search.controller.ConanInstallDialog")
+    mock_install_dialog = mocker.patch("conan_search.controller.ConanInstallDialog")
     search_dialog._search_controller.on_install_pkg_requested()
     mock_install_dialog.assert_called_with(search_dialog._search_controller._view, 
                                            TEST_REF + ":" + id, search_dialog._search_controller.conan_pkg_installed)
 
     # check show conanfile
-    mock_open_file = mocker.patch(
-        "conan_app_launcher.ui.views.conan_search.controller.open_file")
+    mock_open_file = mocker.patch("conan_app_launcher.ui.common.open_file")
     search_dialog._search_controller.on_show_conanfile_requested()
     conanfile = app.conan_api.get_export_folder(cfr) / "conanfile.py"
     mock_open_file.assert_called_with(conanfile)
 
     # check check open in local pkg explorer
     search_dialog.on_show_in_pkg_exp()
-    assert id == main_window.local_package_explorer._pkg_sel_ctrl.get_selected_conan_pkg_info().get("id", "")
+    lpe = main_window.page_widgets.get_page_by_type(LocalConanPackageExplorer)
+
+    assert id == lpe._pkg_sel_ctrl.get_selected_conan_pkg_info().get("id", "")
 
     search_dialog.hide()
     main_window.close()

@@ -1,28 +1,28 @@
 
-import abc
 from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional
 
-from conan_app_launcher import asset_path
 from conan_app_launcher.app.logger import Logger
-from PyQt5.QtCore import Qt, QItemSelectionModel, QAbstractListModel, QModelIndex
-from PyQt5.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
-from PyQt5.QtGui import QIcon
+from PySide6.QtCore import QItemSelectionModel, QModelIndex, QPersistentModelIndex
+from PySide6.QtWidgets import QWidget, QAbstractItemView, QDialog, QListView, QTreeView
 
-from .reorder_dialog_ui import Ui_rearrange_dialog
+from conan_app_launcher.ui.common.theming import get_themed_asset_icon
 
-try:
-    from typing_extensions import Protocol
-except ImportError:
+
+if TYPE_CHECKING:
     from typing import Protocol
+else:
+    try:
+        from typing import Protocol
+    except ImportError:
+        from typing_extensions import Protocol
 
 current_dir = Path(__file__).parent
 class ReorderingModel(Protocol):
-
-    def index(self, row, column, parent):
+    def index(self, row: int, column: int, parent: "QModelIndex | QPersistentModelIndex") -> QModelIndex:
         ...
 
-    def columnCount(self, parent: QModelIndex = ...) -> int: ...
+    def columnCount(self, parent: "QModelIndex | QPersistentModelIndex") -> int: ...
 
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
         ...
@@ -32,19 +32,20 @@ class ReorderingModel(Protocol):
 
 class ReorderDialog(QDialog):
 
-    def __init__(self, model: ReorderingModel, parent: Optional[QWidget], flags=Qt.WindowFlags()):
-        super().__init__(parent=parent, flags=flags)
+    def __init__(self, model: ReorderingModel, parent: Optional[QWidget]):
+        super().__init__(parent=parent)
+        from .reorder_dialog_ui import Ui_rearrange_dialog
         self._ui = Ui_rearrange_dialog()
         self._ui.setupUi(self)
 
-        self.setWindowIcon(QIcon(str(asset_path / "icons" / "rearrange.png")))
+        self.setWindowIcon(get_themed_asset_icon("icons/rearrange.svg", True))
         
         self._controller = ReorderController(self._ui.list_view, model)
-        self._ui.list_view.setModel(model)
+        self._ui.list_view.setModel(model) # type: ignore
 
         self._ui.list_view.setUpdatesEnabled(True)
-        self._ui.list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self._ui.list_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self._ui.list_view.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self._ui.list_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         self._ui.move_up_button.clicked.connect(self._controller.move_up)
         self._ui.move_down_button.clicked.connect(self._controller.move_down)
@@ -56,7 +57,7 @@ class ReorderDialog(QDialog):
 
 class ReorderController():
     
-    def __init__(self, view: Union[QListView, QTreeView], model: ReorderingModel) -> None:
+    def __init__(self, view: "QListView| QTreeView", model: ReorderingModel) -> None:
         self._view = view
         self._model = model
 
@@ -84,7 +85,7 @@ class ReorderController():
                 # for all columns
                 for column in range(self._model.columnCount(QModelIndex())):
                     index = self._model.index(row-1, column, QModelIndex())
-                    self._view.selectionModel().select(index, QItemSelectionModel.Select)
+                    self._view.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
         except Exception as e:
             print(e)
 
@@ -113,7 +114,7 @@ class ReorderController():
                 # for all columns
                 for column in range(self._model.columnCount(QModelIndex())):
                     index = self._model.index(row+1, column, QModelIndex())
-                    self._view.selectionModel().select(index, QItemSelectionModel.Select)
+                    self._view.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
         except Exception as e:
             print(e)
 

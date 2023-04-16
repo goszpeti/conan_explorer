@@ -4,15 +4,15 @@ import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.dialogs import ReorderController
 from conans.client.cache.remote_registry import Remote
-from PyQt5.QtCore import QModelIndex, QItemSelectionModel, pyqtBoundSignal
-from PyQt5.QtWidgets import QApplication, QTreeView
+from PySide6.QtCore import QModelIndex, QItemSelectionModel, SignalInstance
+from PySide6.QtWidgets import QApplication, QTreeView
 
 from conan_app_launcher.ui.views.conan_conf.model import RemotesModelItem, RemotesTableModel
 
 
 class ConanRemoteController():
 
-    def __init__(self, view: QTreeView, conan_remotes_updated: Optional[pyqtBoundSignal]) -> None:
+    def __init__(self, view: QTreeView, conan_remotes_updated: Optional[SignalInstance]) -> None:
         self._view = view
         self._model = RemotesTableModel()
         self.conan_remotes_updated = conan_remotes_updated
@@ -58,7 +58,7 @@ class ConanRemoteController():
         sel_model = self._view.selectionModel()
         for column in range(self._model.columnCount(QModelIndex())):
             index = self._model.index(row_remote_to_sel, column, QModelIndex())
-            sel_model.select(index, QItemSelectionModel.Select)
+            sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
         return True
 
     def move_up(self):
@@ -71,7 +71,8 @@ class ConanRemoteController():
         remote_item = self.get_selected_remote()
         if not remote_item:
             return
-        app.conan_api.conan.remote_set_disabled_state(remote_item.remote.name, not remote_item.remote.disabled)
+        # TODO dedicated function
+        app.conan_api._conan.remote_set_disabled_state(remote_item.remote.name, not remote_item.remote.disabled)
         self.update()
 
     def get_selected_remote(self) -> Union[RemotesModelItem, None]:
@@ -79,7 +80,8 @@ class ConanRemoteController():
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug(f"No selected item for context action")
             return None
-        return indexes[0].internalPointer()
+        remote: RemotesModelItem = indexes[0].internalPointer() # type: ignore
+        return remote
 
     def copy_remote_name(self):
         remote_item = self.get_selected_remote()

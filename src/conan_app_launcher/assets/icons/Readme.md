@@ -38,4 +38,7 @@ restore -- https://icons8.com/icon/4Oupt5bWFn02/restore-down
 maximize --https://icons8.com/icon/KERvxIIUeDAL/maximize-button
 eye -- https://icons8.com/icon/16100/eye
 hide -- https://icons8.com/icon/34264/hide
-login --https://icons8.com/icon/26231/login
+login -- https://icons8.com/icon/26231/login
+plugins -- https://icons8.com/icon/16806/plugin
+edit file -- https://icons8.com/icon/14515/edit-file
+save -- https://icons8.com/icon/16255/save

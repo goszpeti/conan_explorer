@@ -1,12 +1,13 @@
 
+from typing import Optional
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.ui.common import (TreeModel, TreeModelItem,
                                           get_platform_icon)
 from conans.client.cache.remote_registry import Remote
 from conans.errors import ConanException
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, Qt
-from PyQt5.QtGui import QFont
+from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt
+from PySide6.QtGui import QFont
 
 
 class RemotesModelItem(TreeModelItem):
@@ -43,15 +44,15 @@ class RemotesTableModel(TreeModel):
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
             return None
-        item = index.internalPointer()
-        if role == Qt.DisplayRole:
+        item: RemotesModelItem = index.internalPointer() # type: ignore
+        if role == Qt.ItemDataRole.DisplayRole:
             try:
                 return item.data(index.column())
             except Exception:
                 return ""
 
         if isinstance(item, RemotesModelItem):
-            if role == Qt.FontRole and item.remote.disabled:
+            if role == Qt.ItemDataRole.FontRole and item.remote.disabled:
                 font = QFont()
                 font.setItalic(True)
                 return font
@@ -66,7 +67,8 @@ class RemotesTableModel(TreeModel):
         i = 0
         for remote_item in self.root_item.child_items:
             remote: Remote = remote_item.remote
-            app.conan_api.conan.remote_update(remote.name, remote.url, remote.verify_ssl, i)
+            # TODO dedicated function
+            app.conan_api._conan.remote_update(remote.name, remote.url, remote.verify_ssl, i)
             i += 1
 
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
@@ -83,16 +85,27 @@ class RemotesTableModel(TreeModel):
 class ProfilesModel(QAbstractListModel):
     def __init__(self):
         super().__init__()
-        self._profiles = app.conan_api.conan.profile_list()
+        self._profiles = app.conan_api.get_profiles()
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             text = self._profiles[index.row()]
             return text
         # platform logo
-        if role == Qt.DecorationRole:
+        if role == Qt.ItemDataRole.DecorationRole:
             text = self._profiles[index.row()]
             return get_platform_icon(text)
 
     def rowCount(self, index):
         return len(self._profiles)
+    
+    def update_profiles(self):
+        self._profiles = app.conan_api.get_profiles()
+
+    def get_index_from_profile(self, profile_name: str) -> Optional[QModelIndex]:
+        index = None
+        for i, profile in enumerate(self._profiles):
+            if profile == profile_name:
+                index = self.createIndex(i, 0)
+                break
+        return index

@@ -1,7 +1,7 @@
 import json
 from dataclasses import asdict
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 
 import jsonschema
 from packaging.version import Version
@@ -41,7 +41,7 @@ class JsonUiConfig(UiConfigInterface):
         self._json_file_path = Path(json_file_path)
 
         # create file, if not available for first start
-        if not self._json_file_path.is_file():
+        if not self._json_file_path.exists():
             Logger().info('UiConfig: Creating json file')
             self._json_file_path.touch()
         else:
@@ -51,7 +51,7 @@ class JsonUiConfig(UiConfigInterface):
     def get_file_ext(cls):
         return ".json"
 
-    T = TypeVar('T', bound=Union[UiTabConfig, UiAppLinkConfig])
+    T = TypeVar('T', bound="UiTabConfig | UiAppLinkConfig")
     @staticmethod
     def _convert_to_config_type(dict: Dict[str, Any], config_type: Type[T]) -> T:
         """ Convert the dict to the class representations. 
@@ -88,8 +88,8 @@ class JsonUiConfig(UiConfigInterface):
                 try:
                     json_app_config = json.load(fp)
                     jsonschema.validate(instance=json_app_config, schema=json_schema)
-                except Exception as error:
-                    Logger().error(f"Config file:\n{str(error)}")
+                except Exception as e:
+                    Logger().error(f"UiConfig: Failed validating:\n{str(e)}")
                     return UiConfig()
 
         # implement subsequent migration functions

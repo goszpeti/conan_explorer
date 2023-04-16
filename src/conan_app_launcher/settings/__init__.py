@@ -2,26 +2,31 @@
 """ Use constants in class, so they don't need to be separately accessed """
 
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Optional, Tuple
 
 from conan_app_launcher import PathLike
+
+GENERAL_SECTION_NAME = "General"
+VIEW_SECTION_NAME = "View"
+PLUGINS_SECTION_NAME = "Plugins"
 
 # Constants for option names (value is the entry name/id)
 # General
 LAST_CONFIG_FILE = "last_config_file"
-# Views
-DISPLAY_APP_VERSIONS = "disp_app_versions"
-DISPLAY_APP_USERS = "disp_app_users"
-DISPLAY_APP_CHANNELS = "disp_app_channels"
-APPLIST_ENABLED = "enable_app_list"
+FILE_EDITOR_EXECUTABLE = "file_editor"
+AUTO_INSTALL_QUICKLAUNCH_REFS = "auto_install_quicklaunch"
+DEFAULT_INSTALL_PROFILE = "default_install_profile"
 
-# enable combobox for app user/channel/version
-ENABLE_APP_COMBO_BOXES = "enable_app_link_combo_boxes"
 FONT_SIZE = "font_size"
 GUI_STYLE = "style"
 # style choices
-GUI_STYLE_DARK = "dark"
-GUI_STYLE_LIGHT = "light"
+GUI_STYLE_MATERIAL = "material"
+GUI_STYLE_FLUENT = "fluent"
+
+GUI_MODE = "mode"
+# mode choices
+GUI_MODE_DARK = "dark"
+GUI_MODE_LIGHT = "light"
 
 WINDOW_SIZE = "window_size"
 CONSOLE_SPLIT_SIZES = "console_split_sizes"
@@ -62,7 +67,14 @@ class SettingsInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get(self, name: str) -> Union[str, int, float, bool]:
+    def get_settings_from_node(self, node: str) -> Tuple[str]:
+        """ Get all settings names from a hierachical node.
+        If it is non-hierarchical, the name arg should be ignored and all settings returned.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get(self, name: str) -> "str | int | float | bool":
         """ Default getter, not good for typing """
         raise NotImplementedError
 
@@ -87,6 +99,16 @@ class SettingsInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, setting_name: str, value: Union[str, int, float, bool]):
-        """ Set the value of a specific setting """
+    def set(self, name: str, value: "str | int | float | bool"):
+        """ Set the value of an existing setting """
+        raise NotImplementedError
+
+    @abstractmethod
+    def add(self, name: str, value: "str | int | float | bool", node: Optional[str] = None):
+        """ Add a new setting """
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove(self, name: str):
+        """ Remove a setting """
         raise NotImplementedError

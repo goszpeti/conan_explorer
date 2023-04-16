@@ -1,36 +1,38 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Tuple
 
-import conan_app_launcher.app as app  # using global module pattern
+import conan_app_launcher.app as app
+from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.core import (open_cmd_in_path, open_file,
-                                     open_in_file_manager, run_file)
-from conan_app_launcher.core.conan import ConanPkg
-from conan_app_launcher.core.system import calc_paste_same_dir_name, copy_path_with_overwrite, delete_path
-from conan_app_launcher.ui.common import (AsyncLoader, FileSystemModel)
+from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef
+from conan_app_launcher.app.system import (calc_paste_same_dir_name, copy_path_with_overwrite,
+                                           delete_path, execute_cmd, open_cmd_in_path, open_in_file_manager, run_file)
+from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
+from conan_app_launcher.ui.common import FileSystemModel, show_conanfile
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
-from conan_app_launcher.ui.dialogs import ConanRemoveDialog
+from conan_app_launcher.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from conan_app_launcher.ui.views import AppGridView
-from PyQt5.QtCore import (QFile, QItemSelectionModel, QMimeData, QModelIndex,
-                          Qt, QUrl, QObject, pyqtBoundSignal)
-from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QLabel,
-                             QMessageBox, QWidget, QTreeView, QLineEdit)
+from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
+                            Qt, QUrl, SignalInstance)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QLabel,
+                               QLineEdit, QMessageBox, QTreeView, QWidget)
 
-from .model import PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem, PkgSelectModel
+from .model import (PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem,
+                    PkgSelectModel)
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.fluent_window import FluentWindow
-from conans.model.ref import ConanFileReference, PackageReference
+    from conan_app_launcher.ui.main_window import BaseSignals
 
 
 class PackageSelectionController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, package_filter_edit: QLineEdit, conan_pkg_selected: pyqtBoundSignal,
-                 conan_pkg_removed: pyqtBoundSignal, page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: QWidget, view: QTreeView, package_filter_edit: QLineEdit, conan_pkg_selected: SignalInstance,
+                 base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
-        self._conan_pkg_removed = conan_pkg_removed
+        self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
         self._model = None
         self._loader = AsyncLoader(self)
@@ -38,18 +40,17 @@ class PackageSelectionController(QObject):
         self._view = view
         self._package_filter_edit = package_filter_edit
 
-        conan_pkg_removed.connect(self.on_conan_pkg_removed)
+        base_signals.conan_pkg_removed.connect(self.on_conan_pkg_removed)
 
     def on_open_export_folder_requested(self):
         conan_ref = self.get_selected_conan_ref()
-        conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
+        conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_ref))
         open_in_file_manager(conanfile)
 
     def on_show_conanfile_requested(self):
         conan_ref = self.get_selected_conan_ref()
-        conanfile = app.conan_api.get_conanfile_path(ConanFileReference.loads(conan_ref))
         loader = AsyncLoader(self)
-        loader.async_loading(self._view, open_file, (conanfile,), loading_text="Opening Conanfile...")
+        loader.async_loading(self._view, show_conanfile, (conan_ref,), loading_text="Opening Conanfile...")
         loader.wait_for_finished()
 
     def on_pkg_refresh_clicked(self):
@@ -62,8 +63,16 @@ class PackageSelectionController(QObject):
             return None
         view_index = self._view.selectedIndexes()[0]
         model: PackageFilter = view_index.model()  # type: ignore
-        source_item: PackageTreeItem = model.mapToSource(view_index).internalPointer()
+        source_item: PackageTreeItem = model.mapToSource(view_index).internalPointer()  # type: ignore
         return source_item
+
+    def get_selected_ref_with_pkg_id(self) -> Tuple[str, str]:
+        conan_ref = self.get_selected_conan_ref()
+        pkg_info = self.get_selected_conan_pkg_info()
+        pkg_id = ""
+        if pkg_info:
+            pkg_id = pkg_info.get("id", "")
+        return conan_ref, pkg_id
 
     def get_selected_conan_ref(self) -> str:
         # no need to map from postition, since rightclick selects a single item
@@ -87,16 +96,20 @@ class PackageSelectionController(QObject):
         conan_ref = self.get_selected_conan_ref()
         QApplication.clipboard().setText(conan_ref)
 
-    def on_remove_ref_requested(self):
-        source_item = self.get_selected_pkg_source_item()
-        if not source_item:
+    def on_install_ref_requested(self):
+        conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
+        if not conan_ref:
             return
-        conan_ref = self.get_selected_conan_ref()
-        pkg_info = self.get_selected_conan_pkg_info()
-        pkg_id = ""
-        if pkg_info:
-            pkg_id = pkg_info.get("id", "")
-        dialog = ConanRemoveDialog(self._view, conan_ref, pkg_id, self._conan_pkg_removed)
+        if pkg_id:
+            conan_ref += ":" + pkg_id
+        dialog = ConanInstallDialog(self._view, conan_ref, self._base_signals.conan_pkg_installed, lock_ref=True)
+        dialog.show()
+
+    def on_remove_ref_requested(self):
+        conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
+        if not conan_ref:
+            return
+        dialog = ConanRemoveDialog(self._view, conan_ref, pkg_id, self._base_signals.conan_pkg_removed)
         dialog.show()
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
@@ -182,18 +195,18 @@ class PackageSelectionController(QObject):
         self._view.expand(view_model.mapFromSource(proxy_index))
 
         if pkg_id:
-            item: PackageTreeItem = proxy_index.internalPointer()
+            item: PackageTreeItem = proxy_index.internalPointer()  # type: ignore
             i = 0
             for i in range(len(item.child_items)):
                 if item.child_items[i].item_data[0].get("id", "") == pkg_id:
                     break
-            internal_sel_index = proxy_index.child(i, 0)
+            internal_sel_index = self._model.index(i, 0, proxy_index)
         else:
             internal_sel_index = proxy_index
 
         view_index = view_model.mapFromSource(internal_sel_index)
         self._view.scrollTo(view_index)
-        sel_model.select(view_index, QItemSelectionModel.ClearAndSelect)
+        sel_model.select(view_index, QItemSelectionModel.SelectionFlag.ClearAndSelect)
         sel_model.currentRowChanged.emit(proxy_index, internal_sel_index)
         Logger().debug(f"Selecting {view_index.data()} in Local Package Explorer")
 
@@ -209,15 +222,17 @@ class PackageSelectionController(QObject):
         conan_ref = self.get_selected_conan_ref()
         self._conan_pkg_selected.emit(conan_ref, self.get_selected_conan_pkg_info())
 
+
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QLabel, conan_pkg_selected: pyqtBoundSignal, conan_pkg_removed: pyqtBoundSignal, page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QLabel, conan_pkg_selected: SignalInstance,
+                 base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._model = None
         self._page_widgets = page_widgets
         self._view = view
         self._pkg_path_label = pkg_path_label
-        self._conan_pkg_removed = conan_pkg_removed
+        self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
         self._conan_pkg_selected.connect(self.on_pkg_selection_change)
 
@@ -229,27 +244,26 @@ class PackageFileExplorerController(QObject):
         self._current_ref = conan_ref
         self._current_pkg = pkg_info
         pkg_path = app.conan_api.get_package_folder(
-            ConanFileReference.loads(conan_ref), pkg_info.get("id", ""))
+            ConanRef.loads(conan_ref), pkg_info.get("id", ""))
         if not pkg_path.exists():
             Logger().warning(
                 f"Can't find package path for {conan_ref} and {str(pkg_info)} for File View")
             return
         self._model = FileSystemModel()
         self._model.setRootPath(str(pkg_path))
-        self._model.sort(0, Qt.AscendingOrder)
-        re_register_signal(self._model.fileRenamed, self.on_file_double_click)
+        self._model.sort(0, Qt.SortOrder.AscendingOrder)
+        re_register_signal(self._model.fileRenamed, self.on_file_double_click)  # type: ignore
         self._view.setModel(self._model)
         self._view.setRootIndex(self._model.index(str(pkg_path)))
         self._view.setColumnHidden(2, True)  # file type
         self._model.layoutChanged.connect(self.resize_file_columns)
-        self._view.header().setSortIndicator(0, Qt.AscendingOrder)
-        re_register_signal(self._view.doubleClicked,
-                           self.on_file_double_click)
+        self._view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
+        re_register_signal(self._view.doubleClicked, self.on_file_double_click)  # type: ignore
         # disable edit on double click, since we want to open
-        self._view.setEditTriggers(QAbstractItemView.EditKeyPressed)
+        self._view.setEditTriggers(QAbstractItemView.EditTrigger.EditKeyPressed)
         self._pkg_path_label.setText(str(pkg_path))
-
-        self._view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._pkg_path_label.setAlignment(Qt.AlignmentFlag.AlignRight) # must be called after every text set
+        self._view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.resize_file_columns()
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
@@ -264,7 +278,7 @@ class PackageFileExplorerController(QObject):
         self._current_ref = ""
         self._current_pkg = None
         self._pkg_path_label.setText("")
-        self._view.setModel(None)
+        self._view.setModel(None)  # type: ignore
         self._pkg_path_label.setText("")
 
     def on_file_double_click(self, model_index):
@@ -282,15 +296,28 @@ class PackageFileExplorerController(QObject):
             selected_path = selected_path.parent
         return open_cmd_in_path(selected_path)
 
+    def on_edit_file(self):
+        selected_path = Path(self.get_selected_pkg_path())
+        if not selected_path.is_file():
+            return
+        editor = app.active_settings.get_string(FILE_EDITOR_EXECUTABLE)
+        if not editor:
+            Logger().info("No editor set up! Please configure it in the settings menu.")
+            return
+        if not Path(editor).exists():
+            Logger().info("Can not find the configured editor:" + editor)
+            return
+        execute_cmd([editor, str(selected_path)], False)
+
     def on_file_delete(self):
         path_to_delete = Path(self.get_selected_pkg_path())
         msg = QMessageBox(parent=self._view)
         msg.setWindowTitle("Delete file")
         msg.setText("Are you sure, you want to permanently delete this file/folder?\t")
-        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-        msg.setIcon(QMessageBox.Warning)
-        reply = msg.exec_()
-        if reply != QMessageBox.Yes:
+        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
+        msg.setIcon(QMessageBox.Icon.Warning)
+        reply = msg.exec()
+        if reply != QMessageBox.StandardButton.Yes:
             return
         delete_path(Path(path_to_delete))
 
@@ -335,10 +362,10 @@ class PackageFileExplorerController(QObject):
                 msg = QMessageBox(parent=self._view)
                 msg.setWindowTitle("Overwrite file/folder")
                 msg.setText("Are you sure, you want to overwrite this file/folder?\t")
-                msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-                msg.setIcon(QMessageBox.Warning)
-                reply = msg.exec_()
-                if reply == QMessageBox.Yes:
+                msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
+                msg.setIcon(QMessageBox.Icon.Warning)
+                reply = msg.exec()
+                if reply == QMessageBox.StandardButton.Yes:
                     copy_path_with_overwrite(src, dst)
             else:
                 copy_path_with_overwrite(src, dst)
@@ -348,7 +375,7 @@ class PackageFileExplorerController(QObject):
         if not file_path.is_file():
             Logger().error("Please select a file, not a directory!")
             return
-        conan_ref = ConanFileReference.loads(self._current_ref)
+        conan_ref = ConanRef.loads(self._current_ref)
         # determine relpath from package
         pkg_info = self._current_pkg
         if not pkg_info:
@@ -378,18 +405,19 @@ class PackageFileExplorerController(QObject):
         file_view_index = self._get_pkg_file_source_item()
         # if nothing selected return root
         if not file_view_index:
-                return self._model.rootPath()
+            return self._model.rootPath()
         return self._model.fileInfo(file_view_index).absoluteFilePath()
 
     def _is_selected_item_expanded(self):
         file_view_index = self._get_pkg_file_source_item()
         # if nothing selected return root
         if not file_view_index:
-                return False
+            return False
         return self._view.isExpanded(file_view_index)
 
     def resize_file_columns(self):
-        self._view.resizeColumnToContents(3)
-        self._view.resizeColumnToContents(2)
-        self._view.resizeColumnToContents(1)
-        self._view.resizeColumnToContents(0)
+        if self._view:
+            self._view.resizeColumnToContents(3)
+            self._view.resizeColumnToContents(2)
+            self._view.resizeColumnToContents(1)
+            self._view.resizeColumnToContents(0)

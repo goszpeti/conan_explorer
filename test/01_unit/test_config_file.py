@@ -1,13 +1,15 @@
 import json
+import pytest
 import tempfile
-from distutils.file_util import copy_file
+from shutil import copyfile
 from pathlib import Path
 
 from conan_app_launcher.ui.config.json_file import JsonUiConfig
-from conans.model.ref import ConanFileReference
+from conan_app_launcher.conan_wrapper.types import ConanRef
+from test.conftest import PathSetup
 
 
-def test_new_filename_is_created(base_fixture):
+def test_new_filename_is_created(base_fixture: PathSetup):
     """
     Tests, that on reading a nonexistant file an error with an error mesage is printed to the logger.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -18,7 +20,7 @@ def test_new_filename_is_created(base_fixture):
     assert new_file_path.exists()
 
 
-def test_read_correct_file(base_fixture, ui_config_fixture):
+def test_read_correct_file(base_fixture: PathSetup, ui_config_fixture: Path):
     """
     Tests reading a correct config json with 2 tabs.
     Expects the same values as in the file.
@@ -49,10 +51,10 @@ def test_read_correct_file(base_fixture, ui_config_fixture):
     assert tab1_entries[0].name == "App2"
 
 
-def test_update(base_fixture):
+def test_update(base_fixture: PathSetup):
     """ Test that the oldest schema version updates correctly to the newest one """
     temp_file = Path(tempfile.gettempdir()) / "update.json"
-    copy_file(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
+    copyfile(str(base_fixture.testdata_path / "config_file" / "update.json"), str(temp_file))
 
     tabs = JsonUiConfig(temp_file).load().app_grid.tabs
     assert tabs[0].name == "Basics"
@@ -74,7 +76,7 @@ def test_update(base_fixture):
     assert read_obj.get("tabs")[0].get("apps")[0].get("console_application") is None
 
 
-def test_read_invalid_version(base_fixture, capfd):
+def test_read_invalid_version(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
     """
     Tests, that reading a config file with the wrong version will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -86,7 +88,7 @@ def test_read_invalid_version(base_fixture, capfd):
     assert "version" in captured.err
 
 
-def test_read_invalid_content(base_fixture, capfd):
+def test_read_invalid_content(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
     """
     Tests, that reading a config file with invalid syntax will print an error.
     Expects the sdterr to contain the error level(ERROR) and the error cause.
@@ -112,15 +114,14 @@ def check_config(ref_dict, test_dict):
             else:
                 try:  # test if it is conanref in string form.
                     # We don't care if it is written differently, as long as it is the same object
-                    ConanFileReference.loads(test_dict.get(
-                        key)) == ConanFileReference.loads(ref_dict.get(key))
+                    assert ConanRef.loads(test_dict.get(key)) == ConanRef.loads(ref_dict.get(key))
                 except Exception:
                     assert test_dict.get(key) == ref_dict.get(key)
         else:
             assert not test_dict.get(key)
 
 
-def test_write_config_file(base_fixture, ui_config_fixture, tmp_path):
+def test_write_config_file(base_fixture: PathSetup, ui_config_fixture: Path, tmp_path: Path):
     """
     Tests, that writing a config file from internal state is correct.
     Expects the same content, as the original file.

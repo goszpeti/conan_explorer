@@ -3,10 +3,15 @@ from pathlib import Path
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME, LEGACY_UI_CFG_FILE_NAME, user_save_path, legacy_user_save_path)
-from conan_app_launcher.settings import LAST_CONFIG_FILE
-from conan_app_launcher.ui.config import (UI_CONFIG_JSON_TYPE, UiConfig, get_ui_config_file_ext,
-                                        ui_config_factory, UiConfigInterface)
+from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME,
+                                LEGACY_UI_CFG_FILE_NAME, legacy_user_save_path,
+                                user_save_path)
+from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE
+from conan_app_launcher.ui.config import (UI_CONFIG_JSON_TYPE, UiConfig,
+                                          UiConfigInterface,
+                                          get_ui_config_file_ext,
+                                          ui_config_factory)
+
 from .views.app_grid.model import UiAppGridModel
 
 
@@ -18,7 +23,6 @@ class UiApplicationModel(UiConfig):
         UiConfig.__init__(self, *args, **kwargs)
         self.app_grid: UiAppGridModel
         self._ui_config_data: Optional[UiConfigInterface] = None
-
         self.conan_pkg_installed = conan_pkg_installed
         self.conan_pkg_removed = conan_pkg_removed
 
@@ -32,7 +36,7 @@ class UiApplicationModel(UiConfig):
         # update conan info
         self.app_grid = UiAppGridModel()
         self.app_grid.load(ui_config.app_grid, self)
-        if app.conan_worker:
+        if app.conan_worker and app.active_settings.get_bool(AUTO_INSTALL_QUICKLAUNCH_REFS):
             app.conan_worker.finish_working(3)
             app.conan_worker.update_all_info(self.app_grid.get_all_conan_worker_elements(),
                                              self.emit_conan_pkg_signal_callback)
