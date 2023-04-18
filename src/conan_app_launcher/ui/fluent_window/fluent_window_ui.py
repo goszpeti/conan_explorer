@@ -115,7 +115,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_10.setContentsMargins(9, 0, 3, 0)
         self.window_btns_frame = QFrame(self.top_center_right_frame)
         self.window_btns_frame.setObjectName(u"window_btns_frame")
-        self.window_btns_frame.setMinimumSize(QSize(0, 50))
+        self.window_btns_frame.setMinimumSize(QSize(0, 45))
         self.window_btns_frame.setMaximumSize(QSize(165, 60))
         self.window_btns_frame.setLayoutDirection(Qt.RightToLeft)
         self.window_btns_frame.setFrameShape(QFrame.NoFrame)
@@ -125,21 +125,21 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.close_button = QPushButton(self.window_btns_frame)
         self.close_button.setObjectName(u"close_button")
-        self.close_button.setMinimumSize(QSize(55, 40))
+        self.close_button.setMinimumSize(QSize(55, 35))
         self.close_button.setFlat(True)
 
         self.horizontalLayout_4.addWidget(self.close_button)
 
         self.restore_max_button = QPushButton(self.window_btns_frame)
         self.restore_max_button.setObjectName(u"restore_max_button")
-        self.restore_max_button.setMinimumSize(QSize(55, 40))
+        self.restore_max_button.setMinimumSize(QSize(55, 35))
         self.restore_max_button.setFlat(True)
 
         self.horizontalLayout_4.addWidget(self.restore_max_button)
 
         self.minimize_button = QPushButton(self.window_btns_frame)
         self.minimize_button.setObjectName(u"minimize_button")
-        self.minimize_button.setMinimumSize(QSize(55, 40))
+        self.minimize_button.setMinimumSize(QSize(55, 35))
         self.minimize_button.setFlat(True)
 
         self.horizontalLayout_4.addWidget(self.minimize_button)
