@@ -42,13 +42,16 @@ setup(
 )
 
 # Register plugin
-from conan_app_launcher.ui import PluginFile, PluginDescription
-import cal_example_plugin
-# cd away, so that not the current cwd module will be registered, but the site-packages one
-os.chdir(tempfile.gettempdir())
-plugin_dir_path = Path(cal_example_plugin.__file__).parent
-plugin_file_path = str(plugin_dir_path / "plugin.ini")
-plugin_descr = PluginDescription("My Example Plugin", VERSION, AUTHOR, f"{plugin_dir_path}/about.svg",
-                                 ".", "SamplePluginView", DESCRIPTION, True, "<2")
-PluginFile.write(plugin_file_path, [plugin_descr])
-PluginFile.register(plugin_file_path)
+try:
+    from conan_app_launcher.ui import PluginFile, PluginDescription
+    import cal_example_plugin
+    # cd away, so that not the current cwd module will be registered, but the site-packages one
+    os.chdir(tempfile.gettempdir())
+    plugin_dir_path = Path(cal_example_plugin.__file__).parent
+    plugin_file_path = str(plugin_dir_path / "plugin.ini")
+    plugin_descr = PluginDescription("My Example Plugin", VERSION, AUTHOR, f"{plugin_dir_path}/about.svg",
+                                    ".", "SamplePluginView", DESCRIPTION, True, "<2")
+    PluginFile.write(plugin_file_path, [plugin_descr])
+    PluginFile.register(plugin_file_path)
+except:
+    print("Auto registering did not work, please execute pip install again!")
