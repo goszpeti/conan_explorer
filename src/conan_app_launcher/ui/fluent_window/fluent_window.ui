@@ -942,35 +942,87 @@ li.checked::marker { content: &quot;\2612&quot;; }
               <number>0</number>
              </property>
              <item>
-              <widget class="QLabel" name="title_label">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>30</height>
-                </size>
+              <widget class="QFrame" name="frame">
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
                </property>
-               <property name="font">
-                <font>
-                 <italic>false</italic>
-                 <bold>true</bold>
-                 <stylestrategy>PreferAntialias</stylestrategy>
-                </font>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
                </property>
-               <property name="styleSheet">
-                <string notr="true">font: bold</string>
-               </property>
-               <property name="text">
-                <string>App Title</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
-               </property>
-               <property name="margin">
-                <number>0</number>
-               </property>
-               <property name="indent">
-                <number>5</number>
-               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout">
+                <property name="leftMargin">
+                 <number>4</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="title_icon_label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>25</width>
+                    <height>25</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="pixmap">
+                   <pixmap>../../assets/icons/icon.ico</pixmap>
+                  </property>
+                  <property name="scaledContents">
+                   <bool>true</bool>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="title_label">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <italic>false</italic>
+                    <bold>true</bold>
+                    <stylestrategy>PreferAntialias</stylestrategy>
+                   </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">font: bold</string>
+                  </property>
+                  <property name="text">
+                   <string>App Title</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                  </property>
+                  <property name="margin">
+                   <number>0</number>
+                  </property>
+                  <property name="indent">
+                   <number>5</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
              <item>

@@ -183,6 +183,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         # clear default strings
         # self.ui.page_info_label.setText("")
         self.ui.title_label.setText("")
+        self.ui.title_icon_label.hide()
 
         # initial maximize state
         self.set_restore_max_button_state()
@@ -333,8 +334,10 @@ class FluentWindow(QMainWindow, ThemedWidget):
         # hide title
         if maximize:
             self.ui.title_label.setText(self.title_text)
+            self.ui.title_icon_label.show()
         else:
             self.ui.title_label.setText("")
+            self.ui.title_icon_label.hide()
 
         # hide menu button texts
         # name, (button, _) in self.page_entries.items():

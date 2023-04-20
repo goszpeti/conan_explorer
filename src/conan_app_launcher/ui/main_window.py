@@ -11,7 +11,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
                                          GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
                                          GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, WINDOW_SIZE)
-from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style
+from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style, get_themed_asset_icon
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
 from conan_app_launcher.ui.plugin import PluginHandler
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
@@ -69,6 +69,7 @@ class MainWindow(FluentWindow):
         self.app_grid = AppGridView(self, self.model.app_grid, self.base_signals, self.page_widgets)
         self._init_left_menu()
         self._init_right_menu()
+        self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", force_light_mode=True).pixmap(20,20))
 
         self._plugin_handler.load_plugin.connect(self._post_load_plugin)
         self._plugin_handler.unload_plugin.connect(self._unload_plugin)
