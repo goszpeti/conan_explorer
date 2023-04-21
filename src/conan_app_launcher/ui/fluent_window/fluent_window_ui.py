@@ -429,6 +429,7 @@ class Ui_MainWindow(object):
         sizePolicy11.setVerticalStretch(0)
         sizePolicy11.setHeightForWidth(self.title_icon_label.sizePolicy().hasHeightForWidth())
         self.title_icon_label.setSizePolicy(sizePolicy11)
+        self.title_icon_label.setMinimumSize(QSize(25, 25))
         self.title_icon_label.setMaximumSize(QSize(25, 25))
         self.title_icon_label.setPixmap(QPixmap(u"../../assets/icons/icon.ico"))
         self.title_icon_label.setScaledContents(True)

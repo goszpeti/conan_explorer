@@ -32,7 +32,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="info_widget">
       <property name="styleSheet">
@@ -485,7 +485,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QTextBrowser" name="profiles_text_browser">
+          <widget class="PlainTextPasteBrowser" name="profiles_text_browser">
            <property name="undoRedoEnabled">
             <bool>true</bool>
            </property>
@@ -504,7 +504,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QTextBrowser" name="config_file_text_browser">
+        <widget class="PlainTextPasteBrowser" name="config_file_text_browser">
          <property name="tabChangesFocus">
           <bool>false</bool>
          </property>
@@ -571,7 +571,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QTextBrowser" name="settings_file_text_browser"/>
+        <widget class="PlainTextPasteBrowser" name="settings_file_text_browser"/>
        </item>
       </layout>
      </widget>
@@ -583,6 +583,11 @@
   <customwidget>
    <class>AnimatedToggle</class>
    <extends>QCheckBox</extends>
+   <header>conan_app_launcher.ui.widgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PlainTextPasteBrowser</class>
+   <extends>QTextBrowser</extends>
    <header>conan_app_launcher.ui.widgets.h</header>
   </customwidget>
  </customwidgets>
