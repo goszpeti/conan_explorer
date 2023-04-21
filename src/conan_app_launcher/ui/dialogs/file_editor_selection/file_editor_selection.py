@@ -38,8 +38,5 @@ class FileEditorSelDialog(QDialog):
                 Logger().debug("Can}'t set selected path: {e}.")
 
     def on_save(self):
-        if Path(self._ui.file_edit.text()).is_file():
-            app.active_settings.set(FILE_EDITOR_EXECUTABLE, self._ui.file_edit.text())
-        else:
-            Logger().warning(f"Path {self._ui.file_edit.text()} is not a file, setting will be discarded.")
+        app.active_settings.set(FILE_EDITOR_EXECUTABLE, self._ui.file_edit.text())
         self.close()

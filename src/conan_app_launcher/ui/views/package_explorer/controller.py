@@ -304,9 +304,6 @@ class PackageFileExplorerController(QObject):
         if not editor:
             Logger().info("No editor set up! Please configure it in the settings menu.")
             return
-        if not Path(editor).exists():
-            Logger().info("Can not find the configured editor:" + editor)
-            return
         execute_cmd([editor, str(selected_path)], False)
 
     def on_file_delete(self):

@@ -417,7 +417,7 @@ class Ui_MainWindow(object):
         self.left_menu_top_subframe_layout.setContentsMargins(3, 5, 3, 0)
         self.frame = QFrame(self.left_menu_top_subframe)
         self.frame.setObjectName(u"frame")
-        self.frame.setFrameShape(QFrame.StyledPanel)
+        self.frame.setFrameShape(QFrame.NoFrame)
         self.frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout = QHBoxLayout(self.frame)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
