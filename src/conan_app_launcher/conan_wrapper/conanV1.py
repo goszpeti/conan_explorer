@@ -140,7 +140,7 @@ class ConanApi(ConanUnifiedApi):
         Logger().info(install_message)
         profile_names = None
         if profile:
-            profile_names = [profile_names]
+            profile_names = [profile]
         try:
             infos = self._conan.install_reference(
                 conan_ref, settings=settings_list, options=options_list, update=update, profile_names=profile_names)
