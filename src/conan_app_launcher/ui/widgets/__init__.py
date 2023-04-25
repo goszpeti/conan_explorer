@@ -1,6 +1,7 @@
 from .conan_line_edit import ConanRefLineEdit
 from .clickable_icon import ClickableIcon
 from .toggle import AnimatedToggle
+from .text_broswer import PlainTextPasteBrowser
 
 from PySide6.QtWidgets import QMenu, QMessageBox
 from PySide6.QtCore import Qt

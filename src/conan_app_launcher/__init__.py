@@ -45,7 +45,7 @@ BUILT_IN_PLUGIN = "built-in"
 
 # Feature flags
 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True  # get versions directly from the custom cache
-USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH = False  # get pkg paths directly from the custom cache TODO can't handle options
+USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH = True  # get pkg paths directly from the custom cache TODO can't handle options
 # use conan worker to also search for the package path - works in a addition to USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH and also installs
 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL = True
 AUTOCLOSE_SIDE_MENU = False

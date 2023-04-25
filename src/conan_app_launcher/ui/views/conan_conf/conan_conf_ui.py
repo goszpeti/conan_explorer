@@ -18,10 +18,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QGridLayout,
     QGroupBox, QHBoxLayout, QHeaderView, QLabel,
     QListView, QPushButton, QScrollArea, QSizePolicy,
-    QSpacerItem, QTabWidget, QTextBrowser, QTreeView,
-    QVBoxLayout, QWidget)
+    QSpacerItem, QTabWidget, QTreeView, QVBoxLayout,
+    QWidget)
 
-from conan_app_launcher.ui.widgets import AnimatedToggle
+from conan_app_launcher.ui.widgets import (AnimatedToggle, PlainTextPasteBrowser)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -307,7 +307,7 @@ class Ui_Form(object):
 
         self.profiles_layout.addWidget(self.profiles_buttons_frame, 0, 1, 2, 1)
 
-        self.profiles_text_browser = QTextBrowser(self.profiles)
+        self.profiles_text_browser = PlainTextPasteBrowser(self.profiles)
         self.profiles_text_browser.setObjectName(u"profiles_text_browser")
         self.profiles_text_browser.setUndoRedoEnabled(True)
         self.profiles_text_browser.setReadOnly(False)
@@ -322,7 +322,7 @@ class Ui_Form(object):
         self.config.setObjectName(u"config")
         self.verticalLayout_3 = QVBoxLayout(self.config)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.config_file_text_browser = QTextBrowser(self.config)
+        self.config_file_text_browser = PlainTextPasteBrowser(self.config)
         self.config_file_text_browser.setObjectName(u"config_file_text_browser")
         self.config_file_text_browser.setTabChangesFocus(False)
         self.config_file_text_browser.setUndoRedoEnabled(True)
@@ -355,7 +355,7 @@ class Ui_Form(object):
         self.settings_file.setObjectName(u"settings_file")
         self.verticalLayout_6 = QVBoxLayout(self.settings_file)
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.settings_file_text_browser = QTextBrowser(self.settings_file)
+        self.settings_file_text_browser = PlainTextPasteBrowser(self.settings_file)
         self.settings_file_text_browser.setObjectName(u"settings_file_text_browser")
 
         self.verticalLayout_6.addWidget(self.settings_file_text_browser)
@@ -367,7 +367,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(2)
+        self.config_tab_widget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(Form)

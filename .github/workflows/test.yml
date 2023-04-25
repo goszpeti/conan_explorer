@@ -11,7 +11,6 @@ on:
   pull_request:
     branches:
       - master
-      - 'release/**'
   workflow_dispatch:
 
 jobs:

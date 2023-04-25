@@ -91,14 +91,17 @@ class PluginHandler(QObject):
 
                 class_ = getattr(module_, plugin.plugin_class)
                 plugin_object: PluginInterfaceV1 = class_(self.parent(), plugin, self._base_signals, self._page_widgets)
-                self.load_plugin.emit(plugin_object)
-                plugin_object.load_signal.emit()
                 self._active_plugins.append(plugin_object)
             except Exception as e:
                 Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
         else:
             Logger().info(
                 f"Can't load plugin {plugin.name}. Conan version restriction {plugin.conan_versions} applies.")
+
+    def post_load_plugins(self):
+        for plugin in self._active_plugins:
+            self.load_plugin.emit(plugin)
+            plugin.load_signal.emit()
 
     def _unload_plugin(self, plugin: PluginDescription):
         plugin_widget = self.get_plugin_by_description(plugin)

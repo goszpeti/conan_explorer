@@ -11,7 +11,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
                                          GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
                                          GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, WINDOW_SIZE)
-from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style
+from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style, get_themed_asset_icon
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
 from conan_app_launcher.ui.plugin import PluginHandler
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
@@ -69,8 +69,9 @@ class MainWindow(FluentWindow):
         self.app_grid = AppGridView(self, self.model.app_grid, self.base_signals, self.page_widgets)
         self._init_left_menu()
         self._init_right_menu()
+        self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", force_light_mode=True).pixmap(20,20))
 
-        self._plugin_handler.load_plugin.connect(self._load_plugin)
+        self._plugin_handler.load_plugin.connect(self._post_load_plugin)
         self._plugin_handler.unload_plugin.connect(self._unload_plugin)
 
         # size needs to be set as early as possible to correctly position loading windows
@@ -157,13 +158,21 @@ class MainWindow(FluentWindow):
         if not config_source:
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
         self._load_plugins()  # creates the objects - must be in this thread
-        self._load_job_quicklaunch(config_source_str)
+
+        loader = AsyncLoader(self)
+        loader.async_loading(self, self._load_job, (config_source_str,))
+        loader.wait_for_finished()
+       
         self.loaded = True
+
+    def _load_job(self, config_source: str):
+        self._plugin_handler.post_load_plugins()
+        self._load_quicklaunch(config_source)
 
     def _load_plugins(self):
         self._plugin_handler.load_all_plugins()
 
-    def _load_plugin(self, plugin_object: PluginInterfaceV1):
+    def _post_load_plugin(self, plugin_object: PluginInterfaceV1):
         try:
             self.add_left_menu_entry(plugin_object.plugin_description.name,
                                      plugin_object.plugin_description.icon, True, plugin_object,
@@ -174,9 +183,9 @@ class MainWindow(FluentWindow):
     def _unload_plugin(self, plugin_name: str):
         self.page_widgets.remove_page_extras_by_name(plugin_name)
 
-    def _load_job_quicklaunch(self, config_source_str):
+    def _load_quicklaunch(self, config_source: str):
         # load ui file definitions
-        self.model.loadf(config_source_str)
+        self.model.loadf(config_source)
         # now actually load the views - this need signals, to execute in the gui thread
         self.app_grid.model = self.model.app_grid
         self.app_grid.load_signal.emit()

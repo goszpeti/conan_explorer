@@ -85,13 +85,13 @@ class ConanInstallDialog(QDialog):
         conan_ref = ""
         try:
             conan_ref = conan_full_ref.split(":")[0]
-            loader = AsyncLoader(self)
-            loader.async_loading(self, self.on_options_query, (conan_ref, ), loading_text="Loading options...")
-            loader.wait_for_finished()
-            # TODO: CONAN V2 and make dedicated function from info and default options
-            default_options = self._default_options
+            ConanRef.loads(conan_ref)
         except Exception:
-            Logger().warning("Can't determine options of " + conan_ref)
+            return
+        loader = AsyncLoader(self)
+        loader.async_loading(self, self.on_options_query, (conan_ref, ), loading_text="Loading options...")
+        loader.wait_for_finished()
+        default_options = self._default_options
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
         for name, value in default_options.items():
             item = QTreeWidgetItem(self._ui.options_widget)

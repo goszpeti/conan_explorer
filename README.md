@@ -19,7 +19,7 @@ The goal of this project is to provide a standalone Graphical User Interface (GU
 
 It is end-user oriented and focuses on using packages, rather then developing them. It can be used on Windows and Linux x64 platforms.
 
-#### Application Link Grid
+#### Quicklaunch for Applications in Conan Packages
 # <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="512">
 
 #### Local Package Manager
@@ -60,6 +60,8 @@ Conan Config
 - view and edit your remotes - with multilogin to the same arifactory server for multiple remotes
 - see the most important paths and config at one glance
 
+Plugin Mechanism
+- All views are now plugins, which can be extended by the user
 
 ## How to install?
 
@@ -90,6 +92,7 @@ After checkout use the command:
 `pip install .`
 
 ## Running
+
 Execute `conan-app-launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder. 
 You can also assign its icon to it from the site packages folder in conan_app_launcher/assets/icons/icon.ico.
 

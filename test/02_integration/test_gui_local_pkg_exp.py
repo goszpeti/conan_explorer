@@ -244,16 +244,6 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     
     mock_execute_cmd.assert_called_with([str(file), str(file)], False)
 
-    # setting unset
-    mock_execute_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.execute_cmd")
-    app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
-    lpe._pkg_file_exp_ctrl.on_edit_file()
-    mock_execute_cmd.assert_not_called()
-
-    app.active_settings.set(FILE_EDITOR_EXECUTABLE, str(Path(conan_app_launcher.INVALID_PATH)))
-    lpe._pkg_file_exp_ctrl.on_edit_file()
-    mock_execute_cmd.assert_not_called()
-
     # check copy
     mime_file = lpe._pkg_file_exp_ctrl.on_file_copy()
     mime_file_text = mime_file.toString()

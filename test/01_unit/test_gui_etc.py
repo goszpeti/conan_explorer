@@ -43,8 +43,8 @@ def test_select_file_editor(app_qt_fixture, base_fixture, mocker):
     # press ok
     dialog._ui.button_box.accepted.emit()
 
-    # setting should not changed
-    assert app.active_settings.get_string(FILE_EDITOR_EXECUTABLE) == sys.executable
+    # setting should change - it could be a system command
+    assert app.active_settings.get_string(FILE_EDITOR_EXECUTABLE) == "unknown"
 
     # set valid path
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, "")
