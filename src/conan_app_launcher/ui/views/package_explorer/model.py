@@ -1,16 +1,39 @@
+from pathlib import Path
 import pprint
-from typing import List
+from typing import List, Union
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.conan_wrapper import ConanApi
 from conan_app_launcher.conan_wrapper.types import ConanPkg
-from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_icon, TreeModel, TreeModelItem
+from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_icon, TreeModel, TreeModelItem, FileSystemModel
 from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QColor
 
 REF_TYPE = 0
 PROFILE_TYPE = 1
 
+class CalFileSystemModel(FileSystemModel):
+    _disabled_items: set[str] = set() # Must be POSIX-Path!
+
+    def data(self, index: QModelIndex, role: Qt.ItemDataRole):  # override
+        if role == Qt.ItemDataRole.ForegroundRole and index.column() == 0:
+            try:
+                if self.rootPath() + "/" + index.data(0) in self._disabled_items:
+                    return QColor(Qt.GlobalColor.gray)
+            except Exception:
+                pass
+        return super().data(index, role)
+    
+    def add_disabled_items(self, item_paths: List[str]):
+        for item_path in item_paths:
+            self._disabled_items.add(Path(item_path).as_posix())
+
+    def remove_disabled_items(self, item_paths: List[str]):
+        for item_path in item_paths:
+            self._disabled_items.remove(Path(item_path).as_posix())
+
+    def clear_disabled_items(self):
+        self._disabled_items = set()
 
 class PackageFilter(QSortFilterProxyModel):
     """ Filter packages but always showing the parent (ref) of the packages """
@@ -65,7 +88,7 @@ class PackageFilter(QSortFilterProxyModel):
 class PackageTreeItem(TreeModelItem):
     """ Represents a tree item of a Conan pkg. To be used for the parent (ref) and the child (Profile)"""
 
-    def __init__(self, data: List["str | ConanPkg"], parent=None, item_type=REF_TYPE):
+    def __init__(self, data: List[Union[str, ConanPkg]], parent=None, item_type=REF_TYPE):
         super().__init__(data, parent)
         self.type = item_type
 
@@ -89,7 +112,7 @@ class PkgSelectModel(TreeModel):
                 conan_item.append_child(pkg_item)
             self.root_item.append_child(conan_item)
 
-    def data(self, index: QModelIndex, role):  # override
+    def data(self, index: QModelIndex, role: Qt.ItemDataRole):  # override
         if not index.isValid():
             return None
         item: PackageTreeItem = index.internalPointer() # type: ignore

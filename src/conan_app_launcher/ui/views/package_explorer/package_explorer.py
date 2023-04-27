@@ -137,7 +137,16 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.open_terminal_action.triggered.connect(self._pkg_file_exp_ctrl.on_open_terminal_in_dir)
 
         self.file_cntx_menu.addSeparator()
-        # TODO QAction::event: Ambiguous shortcut overload: Ctrl+V
+
+        self.rename_action = QAction("Rename", self)
+        self.set_themed_icon(self.rename_action, "icons/rename.svg")
+        self.rename_action.setShortcut(QKeySequence("F2"))
+        self.rename_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        self.file_cntx_menu.addAction(self.rename_action)
+        # for the shortcut to work, the action has to be added to a higher level widget
+        self.addAction(self.rename_action)
+        self.rename_action.triggered.connect(self._pkg_file_exp_ctrl.on_file_rename)
+
         self.copy_action = QAction("Copy", self)
         self.set_themed_icon(self.copy_action, "icons/copy.svg")
         self.copy_action.setShortcut(QKeySequence("Ctrl+c"))
@@ -146,6 +155,15 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         # for the shortcut to work, the action has to be added to a higher level widget
         self.addAction(self.copy_action)
         self.copy_action.triggered.connect(self._pkg_file_exp_ctrl.on_file_copy)
+
+        self.cut_action = QAction("Cut", self)
+        self.set_themed_icon(self.cut_action, "icons/cut.svg")
+        self.cut_action.setShortcut(QKeySequence("Ctrl+x"))
+        self.cut_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        self.file_cntx_menu.addAction(self.cut_action)
+        # for the shortcut to work, the action has to be added to a higher level widget
+        self.addAction(self.cut_action)
+        self.cut_action.triggered.connect(self._pkg_file_exp_ctrl.on_file_cut)
 
         self.paste_action = QAction("Paste", self)
         self.set_themed_icon(self.paste_action, "icons/paste.svg")
