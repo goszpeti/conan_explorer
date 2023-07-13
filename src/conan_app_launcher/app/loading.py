@@ -46,6 +46,10 @@ class AsyncLoader(QtCore.QObject):
         self.finished = False
 
         self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
+        self.progress_dialog.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+        self.progress_dialog.setAttribute(Qt.WidgetAttribute.WA_ShowModal)
+        self.progress_dialog.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
+
         self.progress_dialog.setLabelText(loading_text)
         # Window flags to disable close button
         self.progress_dialog.setWindowFlags(

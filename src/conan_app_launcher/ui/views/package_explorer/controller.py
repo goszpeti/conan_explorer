@@ -9,15 +9,14 @@ from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef
 from conan_app_launcher.app.system import (calc_paste_same_dir_name, copy_path_with_overwrite,
                                            delete_path, execute_cmd, open_cmd_in_path, open_in_file_manager, run_file)
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
-from conan_app_launcher.ui.common import FileSystemModel, show_conanfile
+from conan_app_launcher.ui.common import show_conanfile
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from conan_app_launcher.ui.views import AppGridView
 from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
                             Qt, QUrl, SignalInstance)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QLabel,
-                               QLineEdit, QMessageBox, QTreeView, QWidget)
+from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QMessageBox, QTreeView, QWidget)
 
 from .model import (PROFILE_TYPE, REF_TYPE, CalFileSystemModel, PackageFilter, PackageTreeItem,
                     PkgSelectModel)
@@ -342,11 +341,12 @@ class PackageFileExplorerController(QObject):
         QApplication.clipboard().setMimeData(data)
         return url
     
-    def on_file_rename(self) -> Optional[QUrl]:
+    def on_file_rename(self):
         file_view_index = self._get_pkg_file_source_item()
         if not file_view_index:
             return None
         self._view.edit(file_view_index)
+        return file_view_index
 
     def on_file_paste(self):
         data = QApplication.clipboard().mimeData()
