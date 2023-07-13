@@ -46,6 +46,7 @@ class ResizeDirection(Enum):
 
 
 class FluentWindow(QMainWindow, ThemedWidget):
+    MENU_ANIM_DURATION = 0 # disable for performance
 
     class PageStore():
         """ Saves all relevant information for pages accessible from the left menu and provides easy 
@@ -325,7 +326,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             maximize = False
 
         self.left_anim = QPropertyAnimation(self.ui.left_menu_frame, b"minimumWidth")  # type: ignore
-        self.left_anim.setDuration(400)
+        self.left_anim.setDuration(self.MENU_ANIM_DURATION)
         self.left_anim.setStartValue(width)
         self.left_anim.setEndValue(width_to_set)
         self.left_anim.setEasingCurve(QEasingCurve.Type.InOutQuart)
@@ -363,10 +364,10 @@ class FluentWindow(QMainWindow, ThemedWidget):
             width_to_set = RIGHT_MENU_MIN_WIDTH
             self.ui.settings_button.setChecked(False)
         self.right_anim = QPropertyAnimation(self.ui.right_menu_frame, b"minimumWidth")  # type: ignore
-        self.right_anim.setDuration(400)
+        self.right_anim.setDuration(self.MENU_ANIM_DURATION)
         self.right_anim.setStartValue(width)
         self.right_anim.setEndValue(width_to_set)
-        self.right_anim.setEasingCurve(QEasingCurve.Type.InOutQuart)
+        self.right_anim.setEasingCurve(QEasingCurve.Type.Linear)
         self.right_anim.start()
 
     def eventFilter(self, source: QObject, event: QEvent):  # override
