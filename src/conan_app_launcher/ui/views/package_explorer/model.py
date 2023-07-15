@@ -13,7 +13,7 @@ REF_TYPE = 0
 PROFILE_TYPE = 1
 
 class CalFileSystemModel(FileSystemModel):
-    _disabled_items: set[str] = set() # Must be POSIX-Path!
+    _disabled_items: "set[str]" = set() # Must be POSIX-Path!
 
     def data(self, index: QModelIndex, role: Qt.ItemDataRole):  # override
         if role == Qt.ItemDataRole.ForegroundRole and index.column() == 0:

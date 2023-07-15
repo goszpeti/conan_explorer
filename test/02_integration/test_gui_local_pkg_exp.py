@@ -310,8 +310,10 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
 
     # check auto renaming 
     mock_copy_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.copy_path_with_overwrite")
-    lpe._pkg_file_exp_ctrl.paste_path(pkg_root_path / config_path.name, pkg_root_path / config_path.name)
     renamed_file = pkg_root_path / "app_config_empty_refs (2).json"
+    assert (pkg_root_path / config_path.name).exists()
+    os.remove(renamed_file) # ensure file does not exist
+    lpe._pkg_file_exp_ctrl.paste_path(pkg_root_path / config_path.name, pkg_root_path / config_path.name)
     mock_copy_cmd.assert_called_with(pkg_root_path / config_path.name, renamed_file)
 
     # check delete
