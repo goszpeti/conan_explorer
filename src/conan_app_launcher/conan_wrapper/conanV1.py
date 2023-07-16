@@ -3,11 +3,11 @@ import platform
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
-from .types import ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, LoggerWriter, create_key_value_pair_list
+from .types import (ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, 
+ConanSettings, LoggerWriter, create_key_value_pair_list, Remote)
 from .unified_api import ConanUnifiedApi
 
 if TYPE_CHECKING:
-    from conans.client.cache.remote_registry import Remote
     from .conan_cache import ConanInfoCache
     from conans.client.conan_api import ClientCache, ConanAPIV1
 
@@ -142,8 +142,7 @@ class ConanApi(ConanUnifiedApi):
     
     ### Remotes
 
-
-    def get_remotes(self, include_disabled=False) -> List["Remote"]:
+    def get_remotes(self, include_disabled=False) -> List[Remote]:
         remotes = []
         try:
             if include_disabled:
@@ -223,7 +222,7 @@ class ConanApi(ConanUnifiedApi):
         self._conan.remove(conan_ref, packages=pkg_ids, force=True)
 
     def get_all_local_refs(self) -> List[ConanRef]:
-        return self._client_cache.all_refs()
+        return self._client_cache.all_refs() # type: ignore
 
     def get_local_pkgs_from_ref(self, conan_ref: ConanRef) -> List[ConanPkg]:
         result: List[ConanPkg] = []

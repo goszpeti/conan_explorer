@@ -33,14 +33,14 @@ class Worker(QtCore.QObject):
 
 class AsyncLoader(QtCore.QObject):
 
-    def __init__(self, parent: QtCore.QObject):
+    def __init__(self, parent: Optional[QtCore.QObject]):
         super().__init__(parent)
         self.progress_dialog: Optional[QtWidgets.QProgressDialog] = None
         self.worker: Optional[Worker] = None
         self.load_thread: Optional[QtCore.QThread] = None
         self.finished = True
 
-    def async_loading(self, dialog_parent: QtWidgets.QWidget, work_task: Callable, worker_args: Tuple[Any, ...] = (),
+    def async_loading(self, dialog_parent: Optional[QtWidgets.QWidget], work_task: Callable, worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,
                       loading_text: str = "Loading", cancel_button=True):
         self.finished = False

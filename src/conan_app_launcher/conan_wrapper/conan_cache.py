@@ -150,7 +150,7 @@ class ConanInfoCache():
 
     def invalidate_remote_package(self, conan_ref: ConanRef):
         """ Remove a package, wich was removed on the remote """
-        version_channels = self._remote_packages.get(conan_ref.name, {}).get(conan_ref.user, [])
+        version_channels = self._remote_packages.get(conan_ref.name, {}).get(str(conan_ref.user), [])
         invalid_version_channel = f"{conan_ref.version}/{conan_ref.channel}"
         if invalid_version_channel in version_channels:
             Logger().debug(f"Invalidated {str(conan_ref)} from remote cache.")
@@ -168,7 +168,7 @@ class ConanInfoCache():
                 self._save()
             for ref in remote_packages:
                 # convert back the official cache entries
-                user = ref.user
+                user = str(ref.user)
                 channel = ref.channel
                 if ref.user is None and ref.channel is None:
                     user = "_"

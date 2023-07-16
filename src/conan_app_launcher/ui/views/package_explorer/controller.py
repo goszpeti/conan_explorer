@@ -403,6 +403,8 @@ class PackageFileExplorerController(QObject):
         if not file_path.is_file():
             Logger().error("Please select a file, not a directory!")
             return
+        if not self._current_ref:
+            return 
         conan_ref = ConanRef.loads(self._current_ref)
         # determine relpath from package
         pkg_info = self._current_pkg

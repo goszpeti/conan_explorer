@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
-from conan_app_launcher import INVALID_PATH, SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, user_save_path
+from conan_app_launcher import INVALID_PATH, user_save_path
 from conan_app_launcher.app.logger import Logger
 
 from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPkg,
@@ -150,10 +150,7 @@ class ConanApi(ConanUnifiedApi):
             self._conan.remotes.enable(remote_name)
 
     def update_remote(self, remote_name: str, url: str, verify_ssl: bool, disabled: bool, index: Optional[int]):
-        remote = Remote(remote_name, url, verify_ssl, disabled)
-        if index is not None:
-            self._conan.remotes.move(remote, index)
-        self._conan.remotes.update(remote)
+        self._conan.remotes.update(remote_name, url, verify_ssl, disabled, index)
 
     def login_remote(self, remote_name: str, user_name: str, password: str):
         self._conan.remotes.login(self._conan.remotes.get(remote_name), user_name, password)
@@ -223,10 +220,14 @@ class ConanApi(ConanUnifiedApi):
     ### Local References and Packages ###
 
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str=""):
-        self._conan
+        if pkg_id:
+            conan_pkg_ref = ConanPkgRef.loads(str(conan_ref) + ":" + pkg_id)
+            self._conan.remove.package(conan_pkg_ref, remote=None) # type: ignore
+        else:
+            self._conan.remove.recipe(conan_ref ,remote=None) # type: ignore
 
     def get_all_local_refs(self) -> List[ConanRef]:
-        return self._client_cache.all_refs()
+        return self._client_cache.all_refs() # type: ignore
 
     def get_local_pkg_from_path(self, conan_ref: ConanRef, path: Path):
         found_package = None

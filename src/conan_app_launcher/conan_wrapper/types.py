@@ -1,7 +1,8 @@
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Union
-from conan_app_launcher import conan_version
+from __future__ import annotations
 
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from conan_app_launcher import conan_version
 if TYPE_CHECKING:
     from typing import TypedDict, TypeAlias, Literal
     from conan_app_launcher.conan_wrapper.conan_cache import ConanInfoCache
@@ -11,21 +12,42 @@ else:
     except ImportError:
         from typing_extensions import Literal, TypedDict, Protocol, TypeAlias
 
-if conan_version.startswith("1"):
+try:
+#if conan_version.startswith("1"):
     from conans.model.ref import ConanFileReference, PackageReference # type: ignore
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
     try:
         from conans.util.windows import CONAN_REAL_PATH
     except Exception:
         pass
-elif conan_version.startswith("2"):
-    from conans.model.recipe_ref import RecipeReference as ConanFileReference  # type: ignore
+except Exception:
+#elif conan_version.startswith("2"):
+    from conans.model.recipe_ref import RecipeReference as ConanFileRef  # type: ignore
     from conans.model.package_ref import PkgReference  # type: ignore
     class PackageReference(PkgReference): # type: ignore
         """ Compatibility class for changed package_id attribute """
+        ref: ConanRef
         @property
         def id(self):
             return self.package_id
+        @staticmethod
+        def loads(text: str) -> ConanPkgRef:
+            ...
+
+    class ConanFileReference(ConanFileRef):
+        name: str
+        version: str
+        user: Optional[str]
+        channel: Optional[str]
+
+        @staticmethod
+        def loads(text: str, validate=True) -> ConanRef:
+            ref: ConanRef = ConanFileRef().loads(text) # type: ignore
+            if validate:
+                ref.validate_ref(allow_uppercase=True)
+            return ref
+        
+
 else:
     raise RuntimeError("Can't recognize Conan version")
 

@@ -227,7 +227,7 @@ class ConanUnifiedApi(ABC):
 ### Local References and Packages ###
 
     @abstractmethod
-    def remove_reference(self, conan_ref: ConanRef, pkg_id: str=""):
+    def remove_reference(self, conan_ref: str, pkg_id: str=""):
         """ Remove a conan reference and it's package if specified via id """
         raise NotImplementedError
 

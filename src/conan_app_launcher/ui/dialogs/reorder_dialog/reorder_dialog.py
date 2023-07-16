@@ -24,7 +24,15 @@ class ReorderingModel(Protocol):
 
     def columnCount(self, parent: "QModelIndex | QPersistentModelIndex") -> int: ...
 
-    def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
+    def moveRow(self, source_parent: QModelIndex, source_row: int, 
+                destination_parent: QModelIndex, destination_child: int) -> bool:
+        ...
+
+    def beginMoveRows(self, sourceParent: QModelIndex, sourceFirst: int, sourceLast: int, 
+                      destinationParent: "QModelIndex | QPersistentModelIndex", destinationRow: int) -> bool:
+        ...
+
+    def endMoveRows(self):
         ...
 
     def save(self):
@@ -68,7 +76,8 @@ class ReorderController():
             Logger().info('Select at least one item from list!')
 
         try:
-            sel_indexes.sort()  # selected indexes need to be sorted
+            # selected indexes need to be sorted
+            sel_indexes.sort() # type: ignore 
             first_row = sel_indexes[0].row() - 1
             if first_row < 0:
                 return
@@ -97,7 +106,7 @@ class ReorderController():
             Logger().info('Select at least one item from list!')
 
         try:  # modify from reverse so qt index does not get reset
-            indexes.sort()
+            indexes.sort() # type: ignore
             self._view.selectionModel().clearSelection()
             last_sel_row = indexes[-1].row() + 1
             if last_sel_row >= max_row:  # cannot be moved down

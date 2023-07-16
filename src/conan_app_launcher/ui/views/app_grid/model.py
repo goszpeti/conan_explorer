@@ -211,8 +211,6 @@ class UiAppLinkModel(UiAppLinkConfig):
                                                         "options": self.conan_options, "update": True, "auto_install": True}
             app.conan_worker.put_ref_in_install_queue(
                 conan_worker_element, self.emit_conan_pkg_signal_callback)
-            app.conan_worker.put_ref_in_version_queue(
-                conan_worker_element,  self.emit_conan_pkg_signal_callback)
         except Exception as e:
             # errors happen fairly often, keep going
             Logger().warning(f"Conan reference invalid {str(e)}")
@@ -237,7 +235,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         self.conan_ref = str(ConanRef(self._conan_file_reference.name, new_value, user, channel))
 
     @classmethod
-    def convert_to_disp_channel(cls, channel: str) -> str:
+    def convert_to_disp_channel(cls, channel: Optional[str]) -> str:
         """ Substitute _ for official channel string """
         if not channel or channel == "_":
             return cls.OFFICIAL_RELEASE
@@ -260,7 +258,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             self._conan_file_reference.name, self._conan_file_reference.version, new_value, channel))
 
     @classmethod
-    def _convert_to_disp_user(cls, user: str) -> str:
+    def _convert_to_disp_user(cls, user: Optional[str]) -> str:
         """ Substitute _ for official user string """
         if not user or user == "_":
             return cls.OFFICIAL_USER

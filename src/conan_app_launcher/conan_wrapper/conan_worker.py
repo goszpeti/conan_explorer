@@ -73,7 +73,6 @@ class ConanWorker():
     def _work_on_conan_install_queue(self):
         """ Call conan install from queue """
         info_callback = None
-        conan_ref = None
         pkg_id = ""
         while not self._shutdown_requested and not self._conan_install_queue.empty():
             worker_element, info_callback = self._conan_install_queue.get()
@@ -86,13 +85,14 @@ class ConanWorker():
             auto_install = worker_element.get("auto_install", True)
             # package path will be updated in conan cache
             try:
+                conan_ref: ConanRef
                 if ":" in ref_pkg_id:  # pkg ref
-                    pkg_ref = ConanPkgRef.loads(ref_pkg_id)
-                    conan_ref = pkg_ref.ref
+                    pkg_ref: ConanPkgRef = ConanPkgRef.loads(ref_pkg_id) # type: ignore
+                    conan_ref = pkg_ref.ref # type: ignore
                     package = self._conan_api.get_remote_pkg_from_id(pkg_ref)
                     pkg_id, _ = self._conan_api.install_package(pkg_ref.ref, package, update)
                 else:
-                    conan_ref = ConanRef.loads(ref_pkg_id)
+                    conan_ref = ConanRef.loads(ref_pkg_id) # type: ignore
 
                     if auto_install:
                         pkg_id, _ = self._conan_api.get_path_or_auto_install(conan_ref, conan_options, update)
