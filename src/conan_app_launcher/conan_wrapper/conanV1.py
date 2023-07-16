@@ -57,17 +57,6 @@ class ConanApi(ConanUnifiedApi):
         self._conan.remove_locks()
         Logger().info("Removed Conan cache locks.")
 
-    def get_remotes(self, include_disabled=False) -> List["Remote"]:
-        remotes = []
-        try:
-            if include_disabled:
-                remotes = self._conan.remote_list()
-            else:
-                remotes = self._client_cache.registry.load_remotes().values()
-        except Exception as e:
-            Logger().error(f"Error while reading remotes file: {str(e)}")
-        return remotes
-
     def get_profiles(self) -> List[str]:
         return self._conan.profile_list()
 
@@ -89,6 +78,24 @@ class ConanApi(ConanUnifiedApi):
         except Exception:
             Logger().warning(f"Can't get user info for {remote_name}")
             return ("", False)
+
+    def get_config_file_path(self) -> Path:
+        return Path(self._client_cache.conan_conf_path)
+    
+    def get_config_entry(self, config_name: str):
+        return self._client_cache.config.get_item(config_name)
+    
+    def get_settings_file_path(self) -> Path:
+        return Path(self._client_cache.settings_path)
+    
+    def get_profiles_path(self) -> Path:
+        return Path(str(self._client_cache.default_profile_path)).parent
+    
+    def get_user_home_path(self) -> Path:
+        return Path(self._client_cache.cache_folder)
+    
+    def get_storage_path(self) -> Path:
+        return Path(self._client_cache.store)
 
     def get_short_path_root(self) -> Path:
         # only need to get once
@@ -126,6 +133,39 @@ class ConanApi(ConanUnifiedApi):
         except Exception as e:
             Logger().error(f"Can't get conanfile: {str(e)}")
         return Path(INVALID_PATH)
+    
+    ### Remotes
+
+
+    def get_remotes(self, include_disabled=False) -> List["Remote"]:
+        remotes = []
+        try:
+            if include_disabled:
+                remotes = self._conan.remote_list()
+            else:
+                remotes = self._client_cache.registry.load_remotes().values()
+        except Exception as e:
+            Logger().error(f"Error while reading remotes file: {str(e)}")
+        return remotes
+    
+    def add_remote(self, remote_name: str, url: str, verify_ssl: bool):
+        self._conan.remote_add(remote_name, url, verify_ssl)
+
+    def rename_remote(self, remote_name: str, new_name: str):
+        self._conan.remote_rename(remote_name, new_name)
+
+    def remove_remote(self, remote_name: str):
+        self._conan.remote_remove(remote_name)
+
+    def disable_remote(self, remote_name: str, disabled: bool):
+        self._conan.remote_set_disabled_state(remote_name, disabled)
+
+    def update_remote(self, remote_name: str, url: str, verify_ssl: bool, disabled: bool, index: Optional[int]):
+        self.disable_remote(remote_name, disabled)
+        self._conan.remote_update(remote_name, url, verify_ssl, index)
+
+    def login_remote(self, remote_name: str, user_name: str, password: str):
+        self._conan.authenticate(user_name, password, remote_name)
 
     ### Install related methods ###
 

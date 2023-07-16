@@ -16,6 +16,7 @@ from conan_app_launcher.ui.views.conan_conf import ConanConfigView
 
 Qt = QtCore.Qt
 
+@pytest.mark.conanv2
 def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_config_fixture, mocker):
     """
     Test Local Pacakge Explorer functions.
@@ -177,6 +178,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         os.system(f"conan remote remove local4")
         main_gui.close()
 
+@pytest.mark.conanv2
 def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test login with the local remote """
     from pytestqt.plugin import _qapp_instance
@@ -245,6 +247,7 @@ def profile_fixture():
     
 
 
+@pytest.mark.conanv2
 def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixture, ui_no_refs_config_fixture, mocker):
     """ Test all profile related functions """
     from pytestqt.plugin import _qapp_instance

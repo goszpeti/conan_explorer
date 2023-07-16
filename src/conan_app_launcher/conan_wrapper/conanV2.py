@@ -41,14 +41,6 @@ class ConanApi(ConanUnifiedApi):
     def remove_locks(self):
         pass  # command does not exist
 
-    def get_remotes(self, include_disabled=False) -> List["Remote"]:
-        remotes = []
-        try:
-            remotes = self._conan.remotes.list(None, only_enabled=not include_disabled)
-        except Exception as e:
-            Logger().error(f"Error while reading remotes: {str(e)}")
-        return remotes
-
     def get_profiles(self) -> List[str]:
         return self._conan.profiles.list()
 
@@ -106,9 +98,62 @@ class ConanApi(ConanUnifiedApi):
             return "", False
         return info.get("user_name", ""), info.get("authenticated", False)
 
+    def get_config_file_path(self) -> Path:
+        return Path(self._client_cache.new_config_path)
+    
+    def get_config_entry(self, config_name: str):
+        return self._client_cache.new_config.get(config_name)
+    
+    def get_settings_file_path(self) -> Path:
+        return Path(self._client_cache.settings_path)
+
+    def get_profiles_path(self) -> Path:
+        return Path(self._client_cache.profiles_path)
+
+    def get_user_home_path(self) -> Path:
+        return Path(self._client_cache.cache_folder)
+
+    def get_storage_path(self) -> Path:
+        return Path(str(self._client_cache.store))
+    
     def get_short_path_root(self) -> Path:
         # there is no short_paths feature in conan 2
         return Path(INVALID_PATH)
+    
+    ### Remotes
+
+    def get_remotes(self, include_disabled=False) -> List["Remote"]:
+        remotes = []
+        try:
+            remotes = self._conan.remotes.list(None, only_enabled=not include_disabled)
+        except Exception as e:
+            Logger().error(f"Error while reading remotes: {str(e)}")
+        return remotes
+    
+    def add_remote(self, remote_name: str, url: str, verify_ssl: bool):
+        remote = Remote(remote_name, url, verify_ssl, False)
+        self._conan.remotes.add(remote)
+
+    def rename_remote(self, remote_name: str, new_name: str):
+        self._conan.remotes.rename(self._conan.remotes.get(remote_name), new_name)
+
+    def remove_remote(self, remote_name: str):
+        self._conan.remotes.remove(remote_name)
+
+    def disable_remote(self, remote_name: str, disabled: bool):
+        if disabled:
+            self._conan.remotes.disable(remote_name)
+        else:
+            self._conan.remotes.enable(remote_name)
+
+    def update_remote(self, remote_name: str, url: str, verify_ssl: bool, disabled: bool, index: Optional[int]):
+        remote = Remote(remote_name, url, verify_ssl, disabled)
+        if index is not None:
+            self._conan.remotes.move(remote, index)
+        self._conan.remotes.update(remote)
+
+    def login_remote(self, remote_name: str, user_name: str, password: str):
+        self._conan.remotes.login(self._conan.remotes.get(remote_name), user_name, password)
 
     ### Install related methods ###
 

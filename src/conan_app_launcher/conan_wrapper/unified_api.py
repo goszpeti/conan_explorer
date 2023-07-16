@@ -34,11 +34,6 @@ class ConanUnifiedApi(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_remotes(self, include_disabled=False) -> List[Remote]:
-        """ Return a list of all remotes. """
-        raise NotImplementedError
-
-    @abstractmethod
     def get_profiles(self) -> List[str]:
         """ Return a list of all profiles """
         raise NotImplementedError
@@ -55,7 +50,7 @@ class ConanUnifiedApi(ABC):
             profiles_dict[profile] = self.get_profile_settings(profile)
         return profiles_dict
 
-    @abstractmethod  
+    @abstractmethod
     def get_default_settings(self) -> ConanSettings:
         """
         Return the settings of the conan default profile. 
@@ -63,14 +58,46 @@ class ConanUnifiedApi(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def get_profiles_path(self) -> Path:
+        """ Get the path to the folder where profiles are located"""
+        raise NotImplementedError
+
+    @abstractmethod
     def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, authenticated
         """ Get username and authenticated info for a remote. """
         raise NotImplementedError
 
-    def get_short_path_root(self) -> Path:
-        """ Return short path root for Windows. Sadly there is no built-in way to do so """
+    @abstractmethod
+    def get_settings_file_path(self) -> Path:
+        """ Return conan settings file path (settings.yml) """
         raise NotImplementedError
-    
+
+    @abstractmethod
+    def get_config_file_path(self) -> Path:
+        """ Return conan config file path (conan.conf) """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_config_entry(self, config_name: str) -> Any:
+        """ Return a conan config entry value (conan.conf) """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_user_home_path(self) -> Path:
+        """ Return Conan user home path, where e.g. settings reside """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_storage_path(self) -> Path:
+        """ Return Conan storage path, where packages are saved """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_short_path_root(self) -> Path:
+        """ Return short path root for Windows for Conan V1. Sadly there is no built-in way to do so. """
+        raise NotImplementedError
+
     @abstractmethod
     def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> ConanPackagePath:
         """ Get the fully resolved package path from the reference and the specific package (id) """
@@ -80,14 +107,51 @@ class ConanUnifiedApi(ABC):
     def get_export_folder(self, conan_ref: ConanRef) -> Path:
         """ Get the export folder form a reference """
         raise NotImplementedError
-    
+
     @abstractmethod
     def get_conanfile_path(self, conan_ref: ConanRef) -> Path:
         """ Get local conanfile path. If it is not localy available, download it."""
         raise NotImplementedError
+    
+### Remotes 
 
+    @abstractmethod
+    def get_remotes(self, include_disabled=False) -> List[Remote]:
+        """ Return a list of all remotes. """
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_remote(self, remote_name: str, url: str, verify_ssl: bool):
+        """  Add a new remote with the selected options. Disabled is always false. """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def rename_remote(self, remote_name: str, new_name: str):
+        """ Rename a remote """
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove_remote(self, remote_name: str):
+        """  Remove a remote """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def update_remote(self, remote_name: str, url: str, verify_ssl: bool, disabled: bool, index: Optional[int]):
+        """ Update a remote with new information and reorder with index  """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def disable_remote(self, remote_name: str, disabled: bool):
+        """ Enable or disable a remote """
+        raise NotImplementedError
+
+    @abstractmethod
+    def login_remote(self, remote_name: str, user_name: str, password: str):
+        """ Login to a remote with credentials """
+        raise NotImplementedError
 
 ### Install related methods ###
+
 
     @abstractmethod
     def install_reference(self, conan_ref: ConanRef, conan_settings:  ConanSettings = {},
@@ -123,7 +187,7 @@ class ConanUnifiedApi(ABC):
             Logger().error(f"Can't install package '<b>{str(conan_ref)}</b>': {str(e)}")
             return "", Path(INVALID_PATH)
 
-    def get_path_or_auto_install(self, conan_ref: ConanRef, conan_options: ConanOptions = {}, 
+    def get_path_or_auto_install(self, conan_ref: ConanRef, conan_options: ConanOptions = {},
                                  update=False) -> Tuple[ConanPackageId, ConanPackagePath]:
         """ Return the pkg_id and package folder of a conan reference 
         and auto-install it with the best matching package, if it is not available """
@@ -148,12 +212,14 @@ class ConanUnifiedApi(ABC):
             return pkg_id, package_path
         return "", Path(INVALID_PATH)
 
+    @abstractmethod
     def get_options_with_default_values(self, conan_ref: ConanRef) -> Tuple[ConanAvailableOptions, ConanOptions]:
         """ Return the available options and their default values as dict."""
         raise NotImplementedError
 
 
 ### Local References and Packages ###
+
 
     def find_best_matching_local_package(self, conan_ref: ConanRef, conan_options: ConanOptions = {}) -> ConanPkg:
         """ Find a package in the local cache """
@@ -179,7 +245,6 @@ class ConanUnifiedApi(ABC):
         if package.get("id", ""):
             return package.get("id", ""), self.get_package_folder(conan_ref, package.get("id", ""))
         return "", Path(INVALID_PATH)
-
 
     @abstractmethod
     def get_all_local_refs(self) -> List[ConanRef]:
@@ -210,7 +275,6 @@ class ConanUnifiedApi(ABC):
 
 
 ### Remote References and Packages ###
-
 
     @abstractmethod
     def search_recipes_in_remotes(self, query: str, remote_name="all") -> List[ConanRef]:

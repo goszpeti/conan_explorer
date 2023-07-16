@@ -63,12 +63,11 @@ class RemotesTableModel(TreeModel):
         return self.root_item.child_count()
 
     def save(self):
-        """ Update every remote with new index and thus save to conan remotes file """
+        """ Update every remote with new index and then save to conan remotes file """
         i = 0
         for remote_item in self.root_item.child_items:
             remote: Remote = remote_item.remote
-            # TODO dedicated function
-            app.conan_api._conan.remote_update(remote.name, remote.url, remote.verify_ssl, i)
+            app.conan_api.update_remote(remote.name, remote.url, remote.verify_ssl, remote.disabled, i)
             i += 1
 
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:

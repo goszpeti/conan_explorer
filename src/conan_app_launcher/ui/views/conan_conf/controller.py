@@ -71,14 +71,13 @@ class ConanRemoteController():
         remote_item = self.get_selected_remote()
         if not remote_item:
             return
-        # TODO dedicated function
-        app.conan_api._conan.remote_set_disabled_state(remote_item.remote.name, not remote_item.remote.disabled)
+        app.conan_api.disable_remote(remote_item.remote.name, not remote_item.remote.disabled)
         self.update()
 
     def get_selected_remote(self) -> Union[RemotesModelItem, None]:
         indexes = self._view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
-            Logger().debug(f"No selected item for context action")
+            Logger().debug("No selected item for context action")
             return None
         remote: RemotesModelItem = indexes[0].internalPointer() # type: ignore
         return remote
