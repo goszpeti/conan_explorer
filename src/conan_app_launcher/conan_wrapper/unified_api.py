@@ -43,10 +43,10 @@ class ConanUnifiedApi(ABC):
         """ Return a list of all profiles """
         raise NotImplementedError
 
-    # @abstractmethod
-    # def get_profile_settings(self, profile_name: str) -> ConanSettings:
-    #     """ Return a dict of settings for a profile """
-    #     raise NotImplementedError
+    @abstractmethod
+    def get_profile_settings(self, profile_name: str) -> ConanSettings:
+        """ Return a dict of settings for a profile """
+        raise NotImplementedError
 
     def get_profiles_with_settings(self) -> Dict[str, ConanSettings]:
         """ Return a list of all profiles and the corresponding settings """
@@ -63,14 +63,13 @@ class ConanUnifiedApi(ABC):
         """
         raise NotImplementedError
 
+    def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, authenticated
+        """ Get username and authenticated info for a remote. """
+        raise NotImplementedError
 
-    # def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, authenticated
-    #     """ Get username and authenticated info for a remote. """
-    #     raise NotImplementedError
-
-    # def get_short_path_root(self) -> Path:
-    #     """ Return short path root for Windows. Sadly there is no built-in way to do  """
-    #     raise NotImplementedError
+    def get_short_path_root(self) -> Path:
+        """ Return short path root for Windows. Sadly there is no built-in way to do  """
+        raise NotImplementedError
     
     @abstractmethod
     def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> ConanPackagePath:
@@ -89,7 +88,6 @@ class ConanUnifiedApi(ABC):
 
 
 ### Install related methods ###
-
 
     @abstractmethod
     def install_reference(self, conan_ref: ConanRef, conan_settings:  ConanSettings = {},
@@ -219,10 +217,10 @@ class ConanUnifiedApi(ABC):
         """ Search in all remotes for a specific query. Returns a list if unqiue and ordered ConanRefs. """
         raise NotImplementedError
 
-    # @abstractmethod
-    # def search_recipe_all_versions_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
-    #     """ Search in all remotes for all versions of a conan ref """
-    #     raise NotImplementedError
+    @abstractmethod
+    def search_recipe_all_versions_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
+        """ Search in all remotes for all versions of a conan ref """
+        raise NotImplementedError
 
     @abstractmethod
     def get_remote_pkgs_from_ref(self, conan_ref: ConanRef, remote: Optional[str], query=None) -> List[ConanPkg]:

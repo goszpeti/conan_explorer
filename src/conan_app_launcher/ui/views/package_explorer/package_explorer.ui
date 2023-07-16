@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>546</width>
-    <height>330</height>
+    <width>527</width>
+    <height>244</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -266,6 +266,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+      </property>
+      <property name="tabKeyNavigation">
+       <bool>true</bool>
       </property>
       <property name="dragDropMode">
        <enum>QAbstractItemView::DragDrop</enum>

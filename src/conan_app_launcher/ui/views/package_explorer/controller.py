@@ -9,17 +9,16 @@ from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef
 from conan_app_launcher.app.system import (calc_paste_same_dir_name, copy_path_with_overwrite,
                                            delete_path, execute_cmd, open_cmd_in_path, open_in_file_manager, run_file)
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
-from conan_app_launcher.ui.common import FileSystemModel, show_conanfile
+from conan_app_launcher.ui.common import show_conanfile
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from conan_app_launcher.ui.views import AppGridView
 from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
                             Qt, QUrl, SignalInstance)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QLabel,
-                               QLineEdit, QMessageBox, QTreeView, QWidget)
+from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QMessageBox, QTreeView, QWidget)
 
-from .model import (PROFILE_TYPE, REF_TYPE, PackageFilter, PackageTreeItem,
+from .model import (PROFILE_TYPE, REF_TYPE, CalFileSystemModel, PackageFilter, PackageTreeItem,
                     PkgSelectModel)
 
 if TYPE_CHECKING:
@@ -249,10 +248,10 @@ class PackageFileExplorerController(QObject):
             Logger().warning(
                 f"Can't find package path for {conan_ref} and {str(pkg_info)} for File View")
             return
-        self._model = FileSystemModel()
+        self._model = CalFileSystemModel()
         self._model.setRootPath(str(pkg_path))
         self._model.sort(0, Qt.SortOrder.AscendingOrder)
-        re_register_signal(self._model.fileRenamed, self.on_file_double_click)  # type: ignore
+        self._model.setReadOnly(False)
         self._view.setModel(self._model)
         self._view.setRootIndex(self._model.index(str(pkg_path)))
         self._view.setColumnHidden(2, True)  # file type
@@ -260,11 +259,11 @@ class PackageFileExplorerController(QObject):
         self._view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
         re_register_signal(self._view.doubleClicked, self.on_file_double_click)  # type: ignore
         # disable edit on double click, since we want to open
-        self._view.setEditTriggers(QAbstractItemView.EditTrigger.EditKeyPressed)
         self._pkg_path_label.setText(str(pkg_path))
-        self._pkg_path_label.setAlignment(Qt.AlignmentFlag.AlignRight) # must be called after every text set
+
         self._view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.resize_file_columns()
+
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
         # clear file view if this pkg is selected
@@ -328,6 +327,27 @@ class PackageFileExplorerController(QObject):
 
         QApplication.clipboard().setMimeData(data)
         return url
+    
+    def on_file_cut(self) -> Optional[QUrl]:
+        file = self.get_selected_pkg_path()
+        if not file:
+            return None
+        data = QMimeData()
+        url = QUrl.fromLocalFile(file)
+        data.setUrls([url])
+        data.setProperty("action", "cut")
+        self._model.clear_disabled_items() # type: ignore
+        self._model.add_disabled_items([file]) # type: ignore
+        self._view.repaint()
+        QApplication.clipboard().setMimeData(data)
+        return url
+    
+    def on_file_rename(self):
+        file_view_index = self._get_pkg_file_source_item()
+        if not file_view_index:
+            return None
+        self._view.edit(file_view_index)
+        return file_view_index
 
     def on_file_paste(self):
         data = QApplication.clipboard().mimeData()
@@ -340,17 +360,25 @@ class PackageFileExplorerController(QObject):
             # try to copy
             if not url.isLocalFile():
                 continue
+            source_path = Path(url.toLocalFile())
             sel_item_path = self.get_selected_pkg_path()
             if not sel_item_path:
                 return
             if self._is_selected_item_expanded():
                 dst_dir_path = Path(sel_item_path)
             else:
-                dst_dir_path = Path(sel_item_path).parent
+                dst_dir_path = Path(sel_item_path)
+                dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
             new_path_str = os.path.join(dst_dir_path, url.fileName())
-            self.paste_path(Path(url.toLocalFile()), Path(new_path_str))
+            cut = True if data.property("action") == "cut" else False
+            self.paste_path(source_path, Path(new_path_str), cut)
+            if cut: # restore disabled items
+                self._model.clear_disabled_items() # type: ignore
+                self._view.repaint()
 
-    def paste_path(self, src: Path, dst: Path):
+    def paste_path(self, src: Path, dst: Path, cut=False):
+        if src == dst and cut:
+            return # do nothing
         if src == dst:  # same target -> create numbered copies
             new_dst = calc_paste_same_dir_name(dst)
             copy_path_with_overwrite(src, new_dst)
@@ -366,6 +394,9 @@ class PackageFileExplorerController(QObject):
                     copy_path_with_overwrite(src, dst)
             else:
                 copy_path_with_overwrite(src, dst)
+            if cut:
+                delete_path(src)
+
 
     def on_add_app_link_from_file(self):
         file_path = Path(self.get_selected_pkg_path())

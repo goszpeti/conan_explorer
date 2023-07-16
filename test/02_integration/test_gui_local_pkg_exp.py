@@ -200,14 +200,14 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     # select a file
     Logger().debug("select a file")
 
-    root_path = Path(lpe._pkg_file_exp_ctrl._model.rootPath())
-    file = root_path / "conaninfo.txt"
-    sel_idx = lpe._pkg_file_exp_ctrl._model.index(str(file), 0)
+    pkg_root_path = Path(lpe._pkg_file_exp_ctrl._model.rootPath())
+    selected_pkg_file = pkg_root_path / "conaninfo.txt"
+    sel_idx = lpe._pkg_file_exp_ctrl._model.index(str(selected_pkg_file), 0)
     lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
 
     # check copy as path - don't check the clipboard, it has issues in windows with qtbot
     cp_text = lpe._pkg_file_exp_ctrl.on_copy_file_as_path()
-    assert Path(cp_text) == file
+    assert Path(cp_text) == selected_pkg_file
     sleep(1)
 
     # check open terminal
@@ -237,12 +237,14 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     assert str(last_app_link.conan_file_reference) == str(cfr)
 
     # check edit file
+    # Cheat here: use the selected file as the name of the editor and the file to be opened too 
+    # - only check the mocked CLI call
     mock_execute_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.execute_cmd")
-    app.active_settings.set(FILE_EDITOR_EXECUTABLE, str(file))
+    app.active_settings.set(FILE_EDITOR_EXECUTABLE, str(selected_pkg_file))
 
     lpe._pkg_file_exp_ctrl.on_edit_file()
     
-    mock_execute_cmd.assert_called_with([str(file), str(file)], False)
+    mock_execute_cmd.assert_called_with([str(selected_pkg_file), str(selected_pkg_file)], False)
 
     # check copy
     mime_file = lpe._pkg_file_exp_ctrl.on_file_copy()
@@ -256,47 +258,84 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     url = QtCore.QUrl.fromLocalFile(str(config_path))
     data.setUrls([url])
     _qapp_instance.clipboard().setMimeData(data)
-    lpe._pkg_file_exp_ctrl.on_file_paste()  # check new file
-    check.is_true((root_path / config_path.name).exists())
+    lpe._pkg_file_exp_ctrl.on_file_paste()
+    # check new file
+    check.is_true((pkg_root_path / config_path.name).exists())
+
+    # check cut
+    # use the previously copied file
+    Logger().debug("check cut")
+    (pkg_root_path / config_path.name).write_text("TEST")
+    sel_idx = lpe._pkg_file_exp_ctrl._model.index(str(pkg_root_path / config_path.name), 0)
+    lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+
+    mime_file = lpe._pkg_file_exp_ctrl.on_file_cut()
+    file_row = lpe._pkg_file_exp_ctrl._model.index((pkg_root_path / config_path.name).as_posix(), 0).row()
+    check.is_true(file_row in lpe._pkg_file_exp_ctrl._model._disabled_rows)
+
+    # check cut-paste
+    # create a new dir in the pkg to paste into
+    try:
+        os.remove(str(pkg_root_path / "newdir" / config_path.name))
+    except:
+        pass
+    (pkg_root_path / "newdir").mkdir(exist_ok=True)
+    # select dir
+    sel_idx = lpe._pkg_file_exp_ctrl._model.index(str(pkg_root_path / "newdir"), 0)
+    lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    lpe._pkg_file_exp_ctrl.on_file_paste()
+    check.is_true((pkg_root_path / "newdir" / config_path.name).exists())
+
+    # check rename
+    mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, 'edit')
+
+    file_view_index = lpe._pkg_file_exp_ctrl.on_file_rename()
+
+    mock_rename_cmd.assert_called_with(file_view_index)
 
     # check overwrite dialog
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
-    # paste just in case the previous one failed (clipboard is unreliable)
-    lpe._pkg_file_exp_ctrl.paste_path(config_path, root_path / config_path.name)
+    # recreate file for file usage in root pkg folder
+    (pkg_root_path / config_path.name).write_text("TEST")
 
     mock_copy_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.copy_path_with_overwrite")
 
-    lpe._pkg_file_exp_ctrl.paste_path(config_path, root_path / config_path.name)
+    lpe._pkg_file_exp_ctrl.paste_path(config_path, pkg_root_path / config_path.name)
 
-    mock_copy_cmd.assert_called_with(config_path, root_path / config_path.name)
+    mock_copy_cmd.assert_called_with(config_path, pkg_root_path / config_path.name)
     
     # select no in dialog
     mock_copy_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.copy_path_with_overwrite")
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Cancel)
     
-    lpe._pkg_file_exp_ctrl.paste_path(config_path, root_path / config_path.name)
+    lpe._pkg_file_exp_ctrl.paste_path(config_path, pkg_root_path / config_path.name)
 
     mock_copy_cmd.assert_not_called()
 
     # check auto renaming 
     mock_copy_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.copy_path_with_overwrite")
-    lpe._pkg_file_exp_ctrl.paste_path(root_path / config_path.name, root_path / config_path.name)
-    renamed_file = root_path / "app_config_empty_refs (2).json"
-    mock_copy_cmd.assert_called_with(root_path / config_path.name, renamed_file)
+    renamed_file = pkg_root_path / "app_config_empty_refs (2).json"
+    assert (pkg_root_path / config_path.name).exists()
+    try:
+        os.remove(renamed_file) # ensure file does not exist
+    except: # nothing to do here
+        pass
+    lpe._pkg_file_exp_ctrl.paste_path(pkg_root_path / config_path.name, pkg_root_path / config_path.name)
+    mock_copy_cmd.assert_called_with(pkg_root_path / config_path.name, renamed_file)
 
     # check delete
     Logger().debug("delete")
     sel_idx = lpe._pkg_file_exp_ctrl._model.index(
-        str(root_path / config_path.name), 0)  # (0, 0, QtCore.QModelIndex())
+        str(pkg_root_path / config_path.name), 0)  # (0, 0, QtCore.QModelIndex())
     lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
     sleep(1)
 
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     lpe._pkg_file_exp_ctrl.on_file_delete()  # check new file?
-    check.is_false((root_path / config_path.name).exists())
+    check.is_false((pkg_root_path / config_path.name).exists())
 
     pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
     print(f"Found packages: {str(pkgs)}")

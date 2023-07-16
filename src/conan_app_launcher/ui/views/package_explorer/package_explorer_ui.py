@@ -25,7 +25,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(546, 330)
+        Form.resize(527, 244)
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setSpacing(4)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -143,6 +143,8 @@ class Ui_Form(object):
         self.package_file_view.setMinimumSize(QSize(100, 0))
         self.package_file_view.setFrameShape(QFrame.NoFrame)
         self.package_file_view.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.package_file_view.setEditTriggers(QAbstractItemView.EditKeyPressed|QAbstractItemView.SelectedClicked)
+        self.package_file_view.setTabKeyNavigation(True)
         self.package_file_view.setDragDropMode(QAbstractItemView.DragDrop)
         self.package_file_view.setDefaultDropAction(Qt.TargetMoveAction)
         self.package_file_view.setIndentation(15)
