@@ -1,9 +1,9 @@
 import os
 import inspect as python_inspect
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
-from conan_app_launcher import (INVALID_CONAN_REF, INVALID_PATH,user_save_path)
+from conan_app_launcher import (INVALID_CONAN_REF, INVALID_PATH, user_save_path)
 from conan_app_launcher.app.logger import Logger
 from .types import ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, create_key_value_pair_list
 from .unified_api import ConanUnifiedApi
@@ -47,6 +47,9 @@ class ConanApi(ConanUnifiedApi):
     
     def get_profiles(self)-> List[str]:
         return self._conan.profiles.list()
+    
+    def get_profile_settings(self, profile_name: str) -> ConanSettings:
+        raise NotImplementedError
 
     def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> Path:
         if not package_id:  # will give the base path ortherwise
@@ -84,6 +87,12 @@ class ConanApi(ConanUnifiedApi):
         from conans.client.profile_loader import ProfileLoader
         profile = ProfileLoader(self._client_cache).load_profile(Path(self._conan.profiles.get_default_host()).name)
         return dict(profile.settings)
+    
+    def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, authenticated
+        raise NotImplementedError
+
+    def get_short_path_root(self) -> Path:
+        raise NotImplementedError
             
     ### Install related methods ###
 
@@ -200,6 +209,9 @@ class ConanApi(ConanUnifiedApi):
         search_results = list(set(search_results))  # make unique
         search_results.sort()
         return search_results
+    
+    def search_recipe_all_versions_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
+        raise NotImplementedError
     
     def get_remote_pkgs_from_ref(self, conan_ref: ConanRef, remote: Optional[str], query=None) -> List[ConanPkg]:
         found_pkgs: List[ConanPkg] = []
