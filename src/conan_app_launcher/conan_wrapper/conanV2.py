@@ -1,18 +1,21 @@
 import os
-import inspect as python_inspect
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
-from conan_app_launcher import (INVALID_CONAN_REF, INVALID_PATH, user_save_path)
+from conan_app_launcher import INVALID_PATH, user_save_path
 from conan_app_launcher.app.logger import Logger
-from .types import ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, create_key_value_pair_list
+
+from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPkg,
+    ConanPkgRef, ConanRef, ConanSettings, create_key_value_pair_list)
 from .unified_api import ConanUnifiedApi
 
 if TYPE_CHECKING:
-    from conans.client.cache.remote_registry import Remote
-    from .conan_cache import ConanInfoCache
-    from conans.client.cache.cache import ClientCache
     from conan.api.conan_api import ConanAPI
+    from conans.client.cache.cache import ClientCache
+    from conans.client.cache.remote_registry import Remote
+
+    from .conan_cache import ConanInfoCache
+
 
 class ConanApi(ConanUnifiedApi):
     """ Wrapper around ConanAPIV2 """
@@ -26,6 +29,7 @@ class ConanApi(ConanUnifiedApi):
     def init_api(self):
         from conan.api.conan_api import ConanAPI
         from conans.client.cache.cache import ClientCache
+
         from .conan_cache import ConanInfoCache
         self._conan = ConanAPI()
         self._client_cache = ClientCache(self._conan.cache_folder)
@@ -35,7 +39,7 @@ class ConanApi(ConanUnifiedApi):
     ### General commands ###
 
     def remove_locks(self):
-        pass # command does not exist
+        pass  # command does not exist
 
     def get_remotes(self, include_disabled=False) -> List["Remote"]:
         remotes = []
@@ -44,10 +48,10 @@ class ConanApi(ConanUnifiedApi):
         except Exception as e:
             Logger().error(f"Error while reading remotes: {str(e)}")
         return remotes
-    
-    def get_profiles(self)-> List[str]:
+
+    def get_profiles(self) -> List[str]:
         return self._conan.profiles.list()
-    
+
     def get_profile_settings(self, profile_name: str) -> ConanSettings:
         raise NotImplementedError
 
@@ -65,7 +69,7 @@ class ConanApi(ConanUnifiedApi):
 
     def get_export_folder(self, conan_ref: ConanRef) -> Path:
         return Path(self._conan.cache.export_path(conan_ref))
-    
+
     def get_conanfile_path(self, conan_ref: ConanRef) -> Path:
         try:
             if conan_ref not in self.get_all_local_refs():
@@ -82,30 +86,30 @@ class ConanApi(ConanUnifiedApi):
         except Exception as e:
             Logger().error(f"Can't get conanfile: {str(e)}")
         return Path(INVALID_PATH)
-    
+
     def get_default_settings(self) -> ConanSettings:
         from conans.client.profile_loader import ProfileLoader
         profile = ProfileLoader(self._client_cache).load_profile(Path(self._conan.profiles.get_default_host()).name)
         return dict(profile.settings)
-    
+
     def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, authenticated
         raise NotImplementedError
 
     def get_short_path_root(self) -> Path:
         raise NotImplementedError
-            
+
     ### Install related methods ###
 
-    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings={},
-                          conan_options: ConanOptions={}, update=True) -> Tuple[str, Path]:
+    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings = {},
+                          conan_options: ConanOptions = {}, update=True) -> Tuple[str, Path]:
         pkg_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
-        install_message=  f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
-        f"settings: {str(settings_list)}, " \
-        f"options: {str(options_list)} and update={update}\n"
+        install_message = f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
+            f"settings: {str(settings_list)}, " \
+            f"options: {str(options_list)} and update={update}\n"
         Logger().info(install_message)
-        from conan.cli.printers.graph import print_graph_packages, print_graph_basic
+        from conan.cli.printers.graph import print_graph_basic, print_graph_packages
 
         try:
             # Basic collaborators, remotes, lockfile, profiles
@@ -114,11 +118,11 @@ class ConanApi(ConanUnifiedApi):
             profile_host = self._conan.profiles.get_profile(profiles, settings=settings_list, options=options_list)
             requires = [conan_ref]
             deps_graph = self._conan.graph.load_graph_requires(requires, None, profile_host, profile_host, None,
-                                                                remotes, update)
+                                                               remotes, update)
             print_graph_basic(deps_graph)
             deps_graph.report_graph_error()
             self._conan.graph.analyze_binaries(deps_graph, build_mode=None, remotes=remotes, update=update,
-                                            lockfile=None)
+                                               lockfile=None)
             print_graph_packages(deps_graph)
             self._conan.install.install_binaries(deps_graph=deps_graph, remotes=remotes)
             # Currently unused
@@ -126,10 +130,10 @@ class ConanApi(ConanUnifiedApi):
             #                                 source_folder=gettempdir(), deploy=True)
             info = None
             for node in deps_graph.nodes:
-                if node.ref ==conan_ref:
+                if node.ref == conan_ref:
                     info = node
                     break
-            if info is None: 
+            if info is None:
                 raise ConanException("Can't read information of installed recipe from graph.")
             pkg_id = info.package_id
             Logger().info(f"Installation of '<b>{str(conan_ref)}</b>' finished")
@@ -139,7 +143,7 @@ class ConanApi(ConanUnifiedApi):
         except ConanException as error:
             Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return (pkg_id, Path(INVALID_PATH))
-        
+
     def get_options_with_default_values(self, conan_ref: ConanRef) -> Tuple[ConanAvailableOptions, ConanOptions]:
         # this calls external code of the recipe
         default_options = {}
@@ -175,7 +179,11 @@ class ConanApi(ConanUnifiedApi):
             conan_ref.user = None
         if conan_ref.channel == "_":
             conan_ref.channel = None
-        conan_ref_latest: "RecipeReference" = self._conan.list.latest_recipe_revision(conan_ref) # type: ignore
+        try:
+            conan_ref_latest: ConanRef = self._conan.list.latest_recipe_revision(conan_ref)  # type: ignore
+        except Exception as e:
+            Logger().debug(f"Error while getting latest recipe for {str(conan_ref)}: {str(e)}")
+            return result
         if not conan_ref_latest:
             return result
         refs = self._conan.list.packages_configurations(conan_ref_latest)
@@ -207,10 +215,10 @@ class ConanApi(ConanUnifiedApi):
         search_results = list(set(search_results))  # make unique
         search_results.sort()
         return search_results
-    
+
     def search_recipe_all_versions_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
         raise NotImplementedError
-    
+
     def get_remote_pkgs_from_ref(self, conan_ref: ConanRef, remote: Optional[str], query=None) -> List[ConanPkg]:
         found_pkgs: List[ConanPkg] = []
         try:
@@ -226,11 +234,12 @@ class ConanApi(ConanUnifiedApi):
             if search_results:
                 latest_rev = self._conan.list.latest_recipe_revision(conan_ref, remote_obj)
                 if latest_rev:
-                    found_pkgs_dict = search_results.recipes.get(str(conan_ref), {}).get("revisions", {}).get(latest_rev.revision, {}).get("packages", {})
+                    found_pkgs_dict = search_results.recipes.get(str(conan_ref), {}).get(
+                        "revisions", {}).get(latest_rev.revision, {}).get("packages", {})
                     for id, info in found_pkgs_dict.items():
                         found_pkgs.append(ConanPkg(id=id, options=info.get("info", {}).get("options", {}),
-                                        settings=info.get("info", {}).get("settings", {}),
-                                        requires=[], outdated=False))
+                                                   settings=info.get("info", {}).get("settings", {}),
+                                                   requires=[], outdated=False))
             Logger().debug(str(found_pkgs))
         except ConanException:  # no problem, next
             return []
