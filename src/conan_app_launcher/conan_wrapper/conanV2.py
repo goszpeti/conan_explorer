@@ -146,16 +146,14 @@ class ConanApi(ConanUnifiedApi):
         available_options = {}
         try:
             path = self.get_conanfile_path(conan_ref)
-            conanfile = self._conan.graph.load_conanfile_class(path)
-            inspection = python_inspect.getmembers(conanfile)
-            for field_name, field in inspection:
-                if field_name == "default_options":
-                    default_options = field
-                elif field_name == "options":
-                    available_options = field
+            from conan.internal.conan_app import ConanApp
+            app = ConanApp(self._conan.cache_folder)
+            conanfile = app.loader.load_conanfile(path, conan_ref)
+            default_options = conanfile.default_options
+            available_options = conanfile.options
             default_options = self._resolve_default_options(default_options)
-        except Exception:
-            Logger().debug(f"Error while getting default options for {str(conan_ref)}")
+        except Exception as e:
+            Logger().debug(f"Error while getting default options for {str(conan_ref)}: {str(e)}")
         return available_options, default_options
 
     ### Local References and Packages ###
