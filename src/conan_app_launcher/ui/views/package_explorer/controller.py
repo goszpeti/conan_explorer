@@ -16,7 +16,7 @@ from conan_app_launcher.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from conan_app_launcher.ui.views import AppGridView
 from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
                             Qt, QUrl, SignalInstance)
-from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QMessageBox, QTreeView, QWidget)
+from PySide6.QtWidgets import (QApplication, QTextBrowser, QLineEdit, QMessageBox, QTreeView, QWidget)
 
 from .model import (PROFILE_TYPE, REF_TYPE, CalFileSystemModel, PackageFilter, PackageTreeItem,
                     PkgSelectModel)
@@ -224,7 +224,7 @@ class PackageSelectionController(QObject):
 
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QLabel, conan_pkg_selected: SignalInstance,
+    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QTextBrowser, conan_pkg_selected: SignalInstance,
                  base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._model = None
