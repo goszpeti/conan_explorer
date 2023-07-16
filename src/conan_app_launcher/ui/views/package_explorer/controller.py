@@ -367,14 +367,18 @@ class PackageFileExplorerController(QObject):
             if self._is_selected_item_expanded():
                 dst_dir_path = Path(sel_item_path)
             else:
-                dst_dir_path = Path(sel_item_path).parent
+                dst_dir_path = Path(sel_item_path)
+                dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
             new_path_str = os.path.join(dst_dir_path, url.fileName())
-            self.paste_path(source_path, Path(new_path_str))
-            if data.property("action") == "cut":
-                delete_path(source_path)
+            cut = True if data.property("action") == "cut" else False
+            self.paste_path(source_path, Path(new_path_str), cut)
+            if cut: # restore disabled items
                 self._model.clear_disabled_items() # type: ignore
+                self._view.repaint()
 
-    def paste_path(self, src: Path, dst: Path):
+    def paste_path(self, src: Path, dst: Path, cut=False):
+        if src == dst and cut:
+            return # do nothing
         if src == dst:  # same target -> create numbered copies
             new_dst = calc_paste_same_dir_name(dst)
             copy_path_with_overwrite(src, new_dst)
@@ -390,6 +394,9 @@ class PackageFileExplorerController(QObject):
                     copy_path_with_overwrite(src, dst)
             else:
                 copy_path_with_overwrite(src, dst)
+            if cut:
+                delete_path(src)
+
 
     def on_add_app_link_from_file(self):
         file_path = Path(self.get_selected_pkg_path())
