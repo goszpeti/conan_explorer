@@ -68,7 +68,7 @@ class ConanUnifiedApi(ABC):
         raise NotImplementedError
 
     def get_short_path_root(self) -> Path:
-        """ Return short path root for Windows. Sadly there is no built-in way to do  """
+        """ Return short path root for Windows. Sadly there is no built-in way to do so """
         raise NotImplementedError
     
     @abstractmethod

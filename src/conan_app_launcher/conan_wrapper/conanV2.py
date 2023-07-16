@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
-from conan_app_launcher import INVALID_PATH, user_save_path
+from conan_app_launcher import INVALID_PATH, SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, user_save_path
 from conan_app_launcher.app.logger import Logger
 
 from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPkg,
@@ -53,7 +53,13 @@ class ConanApi(ConanUnifiedApi):
         return self._conan.profiles.list()
 
     def get_profile_settings(self, profile_name: str) -> ConanSettings:
-        raise NotImplementedError
+        from conans.client.profile_loader import ProfileLoader
+        try:
+            profile = ProfileLoader(self._client_cache).load_profile(profile_name)
+            return profile.settings
+        except Exception as e:
+            Logger().error(f"Can't get profile {profile_name} settings: {str(e)}")
+        return {}
 
     def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> Path:
         if not package_id:  # will give the base path ortherwise
@@ -93,10 +99,16 @@ class ConanApi(ConanUnifiedApi):
         return dict(profile.settings)
 
     def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:  # user_name, authenticated
-        raise NotImplementedError
+        try:
+            info = self._conan.remotes.user_info(self._conan.remotes.get(remote_name))
+        except Exception as e:
+            Logger().error(f"Can't get remote {remote_name} user info: {str(e)}")
+            return "", False
+        return info.get("user_name", ""), info.get("authenticated", False)
 
     def get_short_path_root(self) -> Path:
-        raise NotImplementedError
+        # there is no short_paths feature in conan 2
+        return Path(INVALID_PATH)
 
     ### Install related methods ###
 
@@ -156,7 +168,7 @@ class ConanApi(ConanUnifiedApi):
             default_options = conanfile.default_options
             available_options = conanfile.options
             default_options = self._resolve_default_options(default_options)
-        except Exception as e:
+        except Exception as e: # silent error - if we have no options don't spam the user
             Logger().debug(f"Error while getting default options for {str(conan_ref)}: {str(e)}")
         return available_options, default_options
 
@@ -179,13 +191,16 @@ class ConanApi(ConanUnifiedApi):
             conan_ref.user = None
         if conan_ref.channel == "_":
             conan_ref.channel = None
-        try:
-            conan_ref_latest: ConanRef = self._conan.list.latest_recipe_revision(conan_ref)  # type: ignore
-        except Exception as e:
-            Logger().debug(f"Error while getting latest recipe for {str(conan_ref)}: {str(e)}")
-            return result
-        if not conan_ref_latest:
-            return result
+        if not conan_ref.revision:
+            try:
+                conan_ref_latest: ConanRef = self._conan.list.latest_recipe_revision(conan_ref)  # type: ignore
+            except Exception as e:
+                Logger().error(f"Error while getting latest recipe for {str(conan_ref)}: {str(e)}")
+                return result
+            if not conan_ref_latest:
+                return result
+        else:
+            conan_ref_latest = conan_ref
         refs = self._conan.list.packages_configurations(conan_ref_latest)
         for ref, pkg_info in refs.items():
             pkg = ConanPkg()
@@ -217,7 +232,32 @@ class ConanApi(ConanUnifiedApi):
         return search_results
 
     def search_recipe_all_versions_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
-        raise NotImplementedError
+        search_results = []
+        local_results = []
+        try:
+            # no query possible with pattern
+            search_results: List = self.search_recipes_in_remotes(f"{conan_ref.name}/*@*/*",
+                                                              remote_name="all")
+        except Exception as e:
+            Logger().warning(str(e))
+        # TODO: There is no extra remote=None anymore... What to do with this?
+        # try:
+        #     if SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
+        #         local_results: List = self.search_recipes_in_remotes(f"{conan_ref.name}/*@*/*",
+        #                                                          remote_name=None)
+        # except Exception as e:
+        #     Logger().warning(str(e))
+        #     return []
+
+        res_list: List[ConanRef] = search_results
+        # for res in search_results + local_results:
+        #     for item in res.get("items", []):
+        #         res_list.append(ConanRef.loads(item.get("recipe", {}).get("id", "")))
+        # res_list = list(set(res_list))  # make unique
+        # res_list.sort()
+        # update cache
+        self.info_cache.update_remote_package_list(res_list)
+        return res_list
 
     def get_remote_pkgs_from_ref(self, conan_ref: ConanRef, remote: Optional[str], query=None) -> List[ConanPkg]:
         found_pkgs: List[ConanPkg] = []
