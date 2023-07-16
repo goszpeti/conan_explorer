@@ -1,7 +1,7 @@
 import os
 import platform
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from .types import ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, LoggerWriter, create_key_value_pair_list
 from .unified_api import ConanUnifiedApi
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .conan_cache import ConanInfoCache
     from conans.client.conan_api import ClientCache, ConanAPIV1
 
-from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_CONAN_REF, INVALID_PATH,
+from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_PATH,
                                 SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, user_save_path)
 from conan_app_launcher.app.logger import Logger
 
@@ -82,8 +82,14 @@ class ConanApi(ConanUnifiedApi):
     def get_config_file_path(self) -> Path:
         return Path(self._client_cache.conan_conf_path)
     
-    def get_config_entry(self, config_name: str):
-        return self._client_cache.config.get_item(config_name)
+    def get_config_entry(self, config_name: str, default_value: Any):
+        try:
+            return self._client_cache.config.get_item(config_name)
+        except Exception:
+            return default_value
+        
+    def get_revisions_enabled(self) -> bool:
+         return self._client_cache.config.revisions_enabled
     
     def get_settings_file_path(self) -> Path:
         return Path(self._client_cache.settings_path)
@@ -95,7 +101,7 @@ class ConanApi(ConanUnifiedApi):
         return Path(self._client_cache.cache_folder)
     
     def get_storage_path(self) -> Path:
-        return Path(self._client_cache.store)
+        return Path(str(self._client_cache.store))
 
     def get_short_path_root(self) -> Path:
         # only need to get once
@@ -205,12 +211,16 @@ class ConanApi(ConanUnifiedApi):
             for option, value in default_options_list:
                 default_options.update({option: value})
                 available_options.update({option: 
-                                          ref_info[0].root.dependencies[0].dst.conanfile.options._data[option]._possible_values})  # type: ignore
+                    ref_info[0].root.dependencies[0].dst.conanfile.options._data[option]._possible_values})  # type: ignore
         except Exception as e:
             Logger().debug(f"Error while getting default options for {str(conan_ref)}: {str(e)}")
         return available_options, default_options
 
     # Local References and Packages
+
+    def remove_reference(self, conan_ref: ConanRef, pkg_id: str=""):
+        pkg_ids = [pkg_id] if pkg_id else None
+        self._conan.remove(conan_ref, packages=pkg_ids, force=True)
 
     def get_all_local_refs(self) -> List[ConanRef]:
         return self._client_cache.all_refs()

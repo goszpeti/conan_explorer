@@ -79,8 +79,13 @@ class ConanUnifiedApi(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_config_entry(self, config_name: str) -> Any:
-        """ Return a conan config entry value (conan.conf) """
+    def get_config_entry(self, config_name: str, default_value: Any) -> Any:
+        """ Return a conan config entry value (conan.conf). Use default_value for non existing values. """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_revisions_enabled(self) -> bool:
+        """ Return if revisions are enabled for Conan V1. Always true in V2 mode. """
         raise NotImplementedError
 
     @abstractmethod
@@ -167,7 +172,8 @@ class ConanUnifiedApi(ABC):
         """
         Try to install a conan package (id) with the provided extra information.
         Returns the installed id and a valid package path, if installation was succesfull.
-        WARNING: The installed id can differ from the requested one, because there is no built-in way in conan to install a specific package id!
+        WARNING: The installed id can differ from the requested one, because there is no built-in 
+        way in conan to install a specific package id!
         """
         from conans.errors import ConanException
         package_id = package.get("id", "")
@@ -219,6 +225,11 @@ class ConanUnifiedApi(ABC):
 
 
 ### Local References and Packages ###
+
+    @abstractmethod
+    def remove_reference(self, conan_ref: ConanRef, pkg_id: str=""):
+        """ Remove a conan reference and it's package if specified via id """
+        raise NotImplementedError
 
 
     def find_best_matching_local_package(self, conan_ref: ConanRef, conan_options: ConanOptions = {}) -> ConanPkg:

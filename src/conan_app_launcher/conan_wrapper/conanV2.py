@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from conan_app_launcher import INVALID_PATH, SEARCH_APP_VERSIONS_IN_LOCAL_CACHE, user_save_path
 from conan_app_launcher.app.logger import Logger
@@ -101,8 +101,11 @@ class ConanApi(ConanUnifiedApi):
     def get_config_file_path(self) -> Path:
         return Path(self._client_cache.new_config_path)
     
-    def get_config_entry(self, config_name: str):
-        return self._client_cache.new_config.get(config_name)
+    def get_config_entry(self, config_name: str, default_value: Any):
+        return self._client_cache.new_config.get(config_name, default_value)
+    
+    def get_revisions_enabled(self) -> bool:
+        return True
     
     def get_settings_file_path(self) -> Path:
         return Path(self._client_cache.settings_path)
@@ -218,6 +221,9 @@ class ConanApi(ConanUnifiedApi):
         return available_options, default_options
 
     ### Local References and Packages ###
+
+    def remove_reference(self, conan_ref: ConanRef, pkg_id: str=""):
+        self._conan
 
     def get_all_local_refs(self) -> List[ConanRef]:
         return self._client_cache.all_refs()

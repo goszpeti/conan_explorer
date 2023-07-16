@@ -8,7 +8,7 @@ from typing import Optional, TYPE_CHECKING
 from conan_app_launcher import conan_version
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.app.system import delete_path
+from conan_app_launcher.app.system import delete_path, str2bool
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.ui.common.syntax_highlighting import ConfigHighlighter
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
@@ -68,12 +68,7 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.conan_cur_version_value_label.setText(conan_version)
         self._ui.python_exe_value_label.setText(sys.executable)
         self._ui.python_cur_version_value_label.setText(platform.python_version())
-        if conan_version.startswith("2"):
-            revisions_enabled = True # cannot be disabled anymore
-        else:
-            revisions_enabled = bool(app.conan_api.get_config_entry("general.revisions_enabled"))
-
-        self._ui.revision_enabled_checkbox.setChecked(revisions_enabled)
+        self._ui.revision_enabled_checkbox.setChecked(app.conan_api.get_revisions_enabled())
         self._ui.conan_usr_home_value_label.setText(str(app.conan_api.get_user_home_path()))
         if conan_version.startswith("2"):
             self._ui.conan_usr_cache_value_label.setVisible(False)

@@ -25,15 +25,14 @@ class ConanCleanup():
     def find_orphaned_references(self):
         from .types import PackageEditableLayout
         del_list = []
-        for ref in self._conan_api._client_cache.all_refs():
-            ref_cache = self._conan_api._client_cache.package_layout(ref)
-            try:
-                package_ids = ref_cache.package_ids()
-            except Exception:
-                package_ids = ref_cache.packages_ids()  # type: ignore - old API of Conan
-            for pkg_id in package_ids:
+        for ref in self._conan_api.get_all_local_refs():
+            pkgs = self._conan_api.get_local_pkgs_from_ref(ref)
+            for pkg in pkgs:
+                pkg_id = pkg.get("id", "")
                 short_path_dir = self._conan_api.get_package_folder(ref, pkg_id)
                 pkg_id_dir = None
+                # This will not updated to the unified API - only V1 relevant
+                ref_cache = self._conan_api._client_cache.package_layout(ref)
                 if not isinstance(ref_cache, PackageEditableLayout):
                     pkg_id_dir = Path(ref_cache.packages()) / pkg_id
                 if not short_path_dir.exists():
