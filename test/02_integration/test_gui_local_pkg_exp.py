@@ -265,14 +265,20 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     # check cut
     # use the previously copied file
     Logger().debug("check cut")
+    (pkg_root_path / config_path.name).write_text("TEST")
     sel_idx = lpe._pkg_file_exp_ctrl._model.index(str(pkg_root_path / config_path.name), 0)
     lpe._ui.package_file_view.selectionModel().select(sel_idx, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
 
     mime_file = lpe._pkg_file_exp_ctrl.on_file_cut()
-    check.is_false((pkg_root_path / config_path.name).exists())
+    file_row = lpe._pkg_file_exp_ctrl._model.index((pkg_root_path / config_path.name).as_posix(), 0).row()
+    check.is_true(file_row in lpe._pkg_file_exp_ctrl._model._disabled_rows)
 
     # check cut-paste
     # create a new dir in the pkg to paste into
+    try:
+        os.remove(str(pkg_root_path / "newdir" / config_path.name))
+    except:
+        pass
     (pkg_root_path / "newdir").mkdir(exist_ok=True)
     # select dir
     sel_idx = lpe._pkg_file_exp_ctrl._model.index(str(pkg_root_path / "newdir"), 0)
@@ -312,7 +318,10 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
     mock_copy_cmd = mocker.patch("conan_app_launcher.ui.views.package_explorer.controller.copy_path_with_overwrite")
     renamed_file = pkg_root_path / "app_config_empty_refs (2).json"
     assert (pkg_root_path / config_path.name).exists()
-    os.remove(renamed_file) # ensure file does not exist
+    try:
+        os.remove(renamed_file) # ensure file does not exist
+    except: # nothing to do here
+        pass
     lpe._pkg_file_exp_ctrl.paste_path(pkg_root_path / config_path.name, pkg_root_path / config_path.name)
     mock_copy_cmd.assert_called_with(pkg_root_path / config_path.name, renamed_file)
 

@@ -7,33 +7,38 @@ from conan_app_launcher.conan_wrapper import ConanApi
 from conan_app_launcher.conan_wrapper.types import ConanPkg
 from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_icon, TreeModel, TreeModelItem, FileSystemModel
 from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
-from PySide6.QtGui import QIcon, QColor
+from PySide6.QtGui import QIcon, QColor, QFont
 
 REF_TYPE = 0
 PROFILE_TYPE = 1
 
 class CalFileSystemModel(FileSystemModel):
-    _disabled_items: "set[str]" = set() # Must be POSIX-Path!
+    _disabled_rows: "set[int]" = set()
 
     def data(self, index: QModelIndex, role: Qt.ItemDataRole):  # override
-        if role == Qt.ItemDataRole.ForegroundRole and index.column() == 0:
+        if role == Qt.ItemDataRole.FontRole:
+            if self._row_is_disabled(index):
+                font = QFont() 
+                font.setItalic(True)
+                return font
+        if role == Qt.ItemDataRole.ForegroundRole:
             try:
-                if self.rootPath() + "/" + index.data(0) in self._disabled_items:
+                if self._row_is_disabled(index):
                     return QColor(Qt.GlobalColor.gray)
             except Exception:
                 pass
         return super().data(index, role)
-    
-    def add_disabled_items(self, item_paths: List[str]):
-        for item_path in item_paths:
-            self._disabled_items.add(Path(item_path).as_posix())
 
-    def remove_disabled_items(self, item_paths: List[str]):
+    def _row_is_disabled(self, index: QModelIndex):
+        return index.row() in self._disabled_rows
+
+    def add_disabled_items(self, item_paths: List[str]):
+        # parent_item = self.index(self.rootPath(), 0)
         for item_path in item_paths:
-            self._disabled_items.remove(Path(item_path).as_posix())
+             self._disabled_rows.add(self.index(Path(item_path).as_posix(), 0).row())
 
     def clear_disabled_items(self):
-        self._disabled_items = set()
+        self._disabled_rows = set()
 
 class PackageFilter(QSortFilterProxyModel):
     """ Filter packages but always showing the parent (ref) of the packages """

@@ -338,6 +338,7 @@ class PackageFileExplorerController(QObject):
         data.setProperty("action", "cut")
         self._model.clear_disabled_items() # type: ignore
         self._model.add_disabled_items([file]) # type: ignore
+        self._view.repaint()
         QApplication.clipboard().setMimeData(data)
         return url
     
