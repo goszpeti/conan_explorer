@@ -39,7 +39,6 @@ def test_conan_profile_name_alias_builder():
     profile_name = ConanApi.build_conan_profile_name_alias(settings)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
-# @pytest.mark.conanv2
 def test_conan_short_path_root():
     """ Test, that short path root can be read. """
     new_short_home = Path(tempfile.gettempdir()) / "._myconan_short"

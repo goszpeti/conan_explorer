@@ -4,8 +4,9 @@ from pathlib import Path
 import platform
 from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
-from test.conftest import TEST_REF, TEST_REF_OFFICIAL
+from test.conftest import TEST_REF, TEST_REF_OFFICIAL, conan_install_ref
 import pytest_check as check
+import pytest
 from time import sleep
 
 import conan_app_launcher  # for mocker
@@ -76,7 +77,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     assert not found_pkg.get("id", "")
     main_gui.close()
 
-
+@pytest.mark.conanv2
 def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_fixture):
     """
     Test Local Pacakge Explorer functions.
@@ -109,13 +110,11 @@ def test_local_package_explorer(qtbot, mocker, base_fixture, ui_no_refs_config_f
 
     # Switch to another package view
     # need new id
-    profiles_path = base_fixture.testdata_path / "conan" / "profile"
     print("*** Installing package from other platform ***")
     if platform.system() == "Windows":
-        assert 0 == os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/linux")
+        conan_install_ref(TEST_REF, profile="linux")
     else:
-        assert 0 == os.system(f"conan install {TEST_REF} -pr {str(profiles_path)}/windows")
-
+        conan_install_ref(TEST_REF, profile="windows")
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()

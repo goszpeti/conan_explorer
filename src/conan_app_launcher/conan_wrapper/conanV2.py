@@ -222,7 +222,6 @@ class ConanApi(ConanUnifiedApi):
             # no query possible with pattern
             for remote in self.get_remotes():
                 search_results: List["ConanRef"] = self._conan.search.recipes(query, remote=remote)
-                # .get("results", None)
         except Exception as e:
             Logger().error(f"Error while searching for recipe: {str(e)}")
             return []

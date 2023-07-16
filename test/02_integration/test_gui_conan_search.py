@@ -1,5 +1,5 @@
 
-import os
+import pytest
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from test.conftest import TEST_REF
 
@@ -13,7 +13,7 @@ from conan_app_launcher.ui.views import LocalConanPackageExplorer
 
 Qt = QtCore.Qt
 
-
+@pytest.mark.conanv2
 def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     """ Tests, that the Conan search dialog:
     - search button does not work under 3 characters

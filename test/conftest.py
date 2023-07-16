@@ -118,6 +118,7 @@ def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
         os.system(f"conan create {conanfile} {ref} {create_params}")
         os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
     elif conan_version.startswith("2"):
+        ref = ref.replace("@_/_", "") # does not work anymore...
         cfr = ConanRef.loads(ref)
         os.system(
             f"conan create {conanfile} --name={cfr.name} --version={cfr.version} --user={cfr.user} --channel={cfr.channel} {create_params}")
@@ -202,14 +203,16 @@ def start_conan_server():
         conanfile = str(paths.testdata_path / "conan" / "conanfile_no_settings.py")
         conan_create_and_upload(conanfile,  "nocompsettings/1.0.0@local/no_sets")
 
-
-def conan_install_ref(ref, args=""):
+def conan_install_ref(ref, args="", profile=None):
     paths = PathSetup()
     profiles_path = paths.testdata_path / "conan" / "profile"
     extra_cmd = ""
     if conan_version.startswith("2"):
         extra_cmd = "--requires"
-        profile = "windowsV2" if platform.system() == "Windows" else "linuxV2"
+        if not profile:
+            profile = platform.system().lower()
+        profile = "windowsV2" if profile == "windows" else "linuxV2"
+    if profile:
         args += " -pr " + str(profiles_path / profile)
     assert os.system(f"conan install {extra_cmd} {ref} {args}") == 0
 
