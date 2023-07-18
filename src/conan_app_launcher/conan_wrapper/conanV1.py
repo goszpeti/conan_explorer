@@ -175,14 +175,15 @@ class ConanApi(ConanUnifiedApi):
     ### Install related methods ###
 
     def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings = {},
-                          conan_options: ConanOptions = {}, update=True) -> Tuple[str, Path]:
+                          conan_options: ConanOptions = {}, update=True, quiet=False) -> Tuple[str, Path]:
         package_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
-        install_message = f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
-            f"settings: {str(settings_list)}, " \
-            f"options: {str(options_list)} and update={update}\n"
-        Logger().info(install_message)
+        if not quiet:
+            install_message = f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
+                f"settings: {str(settings_list)}, " \
+                f"options: {str(options_list)} and update={update}\n"
+            Logger().info(install_message)
         profile_names = None
         if profile:
             profile_names = [profile]

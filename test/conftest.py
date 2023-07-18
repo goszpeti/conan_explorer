@@ -94,7 +94,46 @@ def check_if_process_running(process_name, cmd_contains=[], kill=False, cmd_narg
     return False
 
 
+def conan_install_ref(ref, args="", profile=None):
+    paths = PathSetup()
+    profiles_path = paths.testdata_path / "conan" / "profile"
+    extra_cmd = ""
+    if conan_version.startswith("2"):
+        extra_cmd = "--requires"
+        if not profile:
+            profile = platform.system().lower()
+        profile = "windowsV2" if profile == "windows" else "linuxV2"
+    if profile:
+        args += " -pr " + str(profiles_path / profile)
+    assert os.system(f"conan install {extra_cmd} {ref} {args}") == 0
+
+def conan_remove_ref(ref):
+    if conan_version.startswith("2"):
+        os.system(f"conan remove {ref} -c")
+    else:
+        os.system(f"conan remove {ref} -f")
+
+
+def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
+    if conan_version.startswith("1"):
+        os.system(f"conan create {conanfile} {ref} {create_params}")
+        os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
+    elif conan_version.startswith("2"):
+        ref = ref.replace("@_/_", "") # does not work anymore...
+        cfr = ConanRef.loads(ref)
+        extra_args = ""
+        if cfr.user:
+            extra_args = "--user={cfr.user} "
+        if cfr.channel:
+            extra_args += "--channel={cfr.channel} "
+        os.system(
+            f"conan create {conanfile} --name={cfr.name} --version={cfr.version} {extra_args} {create_params}")
+        os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force")
+
+
 def create_test_ref(ref, paths, create_params=[""], update=False):
+    if conan_version.startswith("2"):
+        ref = ref.replace("@_/_", "") # does not work anymore...
     native_ref = str(ConanRef.loads(ref))
     conan = ConanApi()
     conan.init_api()
@@ -112,17 +151,18 @@ def create_test_ref(ref, paths, create_params=[""], update=False):
     for param in create_params:
         conan_create_and_upload(conanfile, ref, param)
 
-
-def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
+def login_test_remote(remote_name):
     if conan_version.startswith("1"):
-        os.system(f"conan create {conanfile} {ref} {create_params}")
-        os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
+        os.system(f"conan user demo -r {remote_name} -p demo")
+
     elif conan_version.startswith("2"):
-        ref = ref.replace("@_/_", "") # does not work anymore...
-        cfr = ConanRef.loads(ref)
-        os.system(
-            f"conan create {conanfile} --name={cfr.name} --version={cfr.version} --user={cfr.user} --channel={cfr.channel} {create_params}")
-        os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force")
+        os.system(f"conan remote login {remote_name} demo -p demo")
+
+def logout_all_remotes():
+    if conan_version.startswith("1"):
+        os.system("conan user --clean")
+    elif conan_version.startswith("2"):
+        os.system("conan remote logout *")
 
 
 def run_conan_server():
@@ -173,18 +213,16 @@ def start_conan_server():
         conan_server_thread.start()
         time.sleep(3)
     print("ADDING CONAN REMOTE")
-
     if conan_version.startswith("1"):
         if is_ci_job():
             os.system("conan remote clean")
         os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
-        os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
-
     elif conan_version.startswith("2"):
         if is_ci_job():
             os.system("conan remote remove conancenter")
-        os.system(f"conan remote add {TEST_REMOTE_NAME} http://localhost:9300/ --insecure")
+        os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ --insecure")
         os.system(f"conan remote login {TEST_REMOTE_NAME} demo -p demo")  # todo autogenerate and config
+    login_test_remote(TEST_REMOTE_NAME)
     os.system(f"conan remote enable {TEST_REMOTE_NAME}")
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
@@ -197,30 +235,12 @@ def start_conan_server():
     for profile in profiles:
         profile_path = profiles_path / profile
         create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
-                        f"-o shared=False -pr {str(profile_path)}"], update=True)
+                         f"-o shared=False -pr {str(profile_path)}"], update=True)
         create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=True)
         paths = PathSetup()
         conanfile = str(paths.testdata_path / "conan" / "conanfile_no_settings.py")
         conan_create_and_upload(conanfile,  "nocompsettings/1.0.0@local/no_sets")
 
-def conan_install_ref(ref, args="", profile=None):
-    paths = PathSetup()
-    profiles_path = paths.testdata_path / "conan" / "profile"
-    extra_cmd = ""
-    if conan_version.startswith("2"):
-        extra_cmd = "--requires"
-        if not profile:
-            profile = platform.system().lower()
-        profile = "windowsV2" if profile == "windows" else "linuxV2"
-    if profile:
-        args += " -pr " + str(profiles_path / profile)
-    assert os.system(f"conan install {extra_cmd} {ref} {args}") == 0
-
-def conan_remove_ref(ref):
-    if conan_version.startswith("2"):
-        os.system(f"conan remove {ref} -c")
-    else:
-        os.system(f"conan remove {ref} -f")
 
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():

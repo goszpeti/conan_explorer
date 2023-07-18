@@ -3,12 +3,9 @@ from pathlib import Path
 from typing import Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import asset_path
 from conans.client.cache.remote_registry import Remote
 from conan_app_launcher.app.logger import Logger
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QDialog, QWidget
 
 from conan_app_launcher.ui.common.theming import get_themed_asset_icon

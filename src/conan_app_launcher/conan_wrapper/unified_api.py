@@ -160,7 +160,7 @@ class ConanUnifiedApi(ABC):
 
     @abstractmethod
     def install_reference(self, conan_ref: ConanRef, conan_settings:  ConanSettings = {},
-                          conan_options: ConanOptions = {}, update=True) -> Tuple[ConanPackageId, ConanPackagePath]:
+                          conan_options: ConanOptions = {}, update=True, quiet=False) -> Tuple[ConanPackageId, ConanPackagePath]:
         """
         Try to install a conan reference (without id) with the provided extra information.
         Uses plain conan install (No auto determination of best matching package)
@@ -184,7 +184,7 @@ class ConanUnifiedApi(ABC):
             f"options: {str(options)} and update={update}\n")
         try:
             installed_id, package_path = self.install_reference(
-                conan_ref, update=update, conan_settings=settings, conan_options=options)
+                conan_ref, update=update, conan_settings=settings, conan_options=options, quiet=True)
             if installed_id != package_id:
                 Logger().warning(f"Installed {installed_id} instead of selected {package_id}."
                                  "This can happen, if there transitive settings changed in comparison to the build time.")

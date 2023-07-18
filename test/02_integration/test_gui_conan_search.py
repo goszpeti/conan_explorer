@@ -32,6 +32,7 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     cfr = ConanRef.loads(TEST_REF)
     # first with ref + id in constructor
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
+    assert id
     main_window = MainWindow(_qapp_instance)
     main_window.conan_remotes_updated.emit()
     main_window.load()

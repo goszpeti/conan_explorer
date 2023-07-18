@@ -140,7 +140,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
 
     profile = conan_install_dialog.get_selected_profile()
     assert profile == "default"
-    default_options =  {'variant': 'var1', 'shared': "True", 'fPIC': 'True'}
+    default_options =  {'variant': 'var1', 'shared': "True", 'fPIC2': 'True'}
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {}, "profile": profile,
                                                 "options": default_options, "update": False, "auto_install": False}
@@ -159,7 +159,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     conan_install_dialog._ui.auto_install_check_box.setCheckState(Qt.CheckState.Unchecked)
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {}, "profile": profile,
-                                                "options":  {'variant': 'MyVariant', 'shared': "True", 'fPIC': 'True'},
+                                                "options":  {'variant': 'MyVariant', 'shared': "True", 'fPIC2': 'True'},
                                                   "update": False, "auto_install": False}
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 

@@ -6,14 +6,12 @@ from conan_app_launcher import INVALID_PATH, user_save_path
 from conan_app_launcher.app.logger import Logger
 
 from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPkg,
-    ConanPkgRef, ConanRef, ConanSettings, create_key_value_pair_list)
+    ConanPkgRef, ConanRef, ConanSettings, create_key_value_pair_list, Remote)
 from .unified_api import ConanUnifiedApi
 
 if TYPE_CHECKING:
     from conan.api.conan_api import ConanAPI
     from conans.client.cache.cache import ClientCache
-    from conans.client.cache.remote_registry import Remote
-
     from .conan_cache import ConanInfoCache
 
 
@@ -96,7 +94,7 @@ class ConanApi(ConanUnifiedApi):
         except Exception as e:
             Logger().error(f"Can't get remote {remote_name} user info: {str(e)}")
             return "", False
-        return info.get("user_name", ""), info.get("authenticated", False)
+        return str(info.get("user_name", "")), info.get("authenticated", False)
 
     def get_config_file_path(self) -> Path:
         return Path(self._client_cache.new_config_path)
@@ -138,7 +136,7 @@ class ConanApi(ConanUnifiedApi):
         self._conan.remotes.add(remote)
 
     def rename_remote(self, remote_name: str, new_name: str):
-        self._conan.remotes.rename(self._conan.remotes.get(remote_name), new_name)
+        self._conan.remotes.rename(remote_name, new_name)
 
     def remove_remote(self, remote_name: str):
         self._conan.remotes.remove(remote_name)
@@ -158,14 +156,15 @@ class ConanApi(ConanUnifiedApi):
     ### Install related methods ###
 
     def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings = {},
-                          conan_options: ConanOptions = {}, update=True) -> Tuple[str, Path]:
+                          conan_options: ConanOptions = {}, update=True, quiet=False) -> Tuple[str, Path]:
         pkg_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
-        install_message = f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
-            f"settings: {str(settings_list)}, " \
-            f"options: {str(options_list)} and update={update}\n"
-        Logger().info(install_message)
+        if not quiet:
+            install_message = f"Installing '<b>{str(conan_ref)}</b>' with profile: {profile}, " \
+                f"settings: {str(settings_list)}, " \
+                f"options: {str(options_list)} and update={update}\n"
+            Logger().info(install_message)
         from conan.cli.printers.graph import print_graph_basic, print_graph_packages
 
         try:

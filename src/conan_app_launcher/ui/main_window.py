@@ -148,9 +148,13 @@ class MainWindow(FluentWindow):
 
     def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent
         super().resizeEvent(a0)
-        if self.loaded:
-            self.ui.page_stacked_widget.currentWidget().setMaximumWidth(self.ui.center_frame.width() - 4)
-            self.ui.page_stacked_widget.currentWidget().adjustSize()
+        try:
+            if self.loaded:
+                self.ui.page_stacked_widget.currentWidget().setMaximumWidth(self.ui.center_frame.width() - 4)
+                self.ui.page_stacked_widget.currentWidget().adjustSize()
+        except Exception as e:
+            Logger().error(f"Can't resize current view: {str(e)}")
+
 
     def load(self, config_source: Optional[PathLike] = None):
         """ Load all application gui elements specified in the GUI config (file) """
