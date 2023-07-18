@@ -12,16 +12,14 @@ else:
     except ImportError:
         from typing_extensions import Literal, TypedDict, Protocol, TypeAlias
 
-try:
-#if conan_version.startswith("1"):
+if conan_version.startswith("1"):
     from conans.model.ref import ConanFileReference, PackageReference # type: ignore
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
     try:
         from conans.util.windows import CONAN_REAL_PATH
     except Exception:
         pass
-except Exception:
-#elif conan_version.startswith("2"):
+elif conan_version.startswith("2"):
     from conans.model.recipe_ref import RecipeReference as ConanFileRef  # type: ignore
     from conans.model.package_ref import PkgReference  # type: ignore
     class PackageReference(PkgReference): # type: ignore

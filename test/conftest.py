@@ -123,9 +123,9 @@ def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
         cfr = ConanRef.loads(ref)
         extra_args = ""
         if cfr.user:
-            extra_args = "--user={cfr.user} "
+            extra_args = f"--user={cfr.user} "
         if cfr.channel:
-            extra_args += "--channel={cfr.channel} "
+            extra_args += f"--channel={cfr.channel} "
         os.system(
             f"conan create {conanfile} --name={cfr.name} --version={cfr.version} {extra_args} {create_params}")
         os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force")
