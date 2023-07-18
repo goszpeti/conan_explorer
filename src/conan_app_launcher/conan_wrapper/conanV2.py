@@ -252,7 +252,11 @@ class ConanApi(ConanUnifiedApi):
                 return result
         else:
             conan_ref_latest = conan_ref
-        refs = self._conan.list.packages_configurations(conan_ref_latest)
+        try: # errors with invalid pkg
+            refs = self._conan.list.packages_configurations(conan_ref_latest)
+        except Exception as e:
+            Logger().error(f"Error while getting packages for recipe {str(conan_ref)}: {str(e)}")
+            return result
         for ref, pkg_info in refs.items():
             pkg = ConanPkg()
             pkg["id"] = str(ref.package_id)
