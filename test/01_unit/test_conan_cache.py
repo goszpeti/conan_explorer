@@ -4,6 +4,7 @@ import pytest
 from shutil import copyfile
 from pathlib import Path
 from conan_app_launcher import INVALID_PATH
+from conan_app_launcher import conan_version
 
 from conan_app_launcher.conan_wrapper import ConanInfoCache
 from conan_app_launcher.conan_wrapper.types import ConanRef as CFR
@@ -29,12 +30,12 @@ def test_read_cache(base_fixture: PathSetup):
     copyfile(str(base_fixture.testdata_path / "cache" / "cache_read.json"), str(temp_cache_path))
 
     cache = ConanInfoCache(temp_cache_path.parent)
-    assert cache._local_packages == {"my_package/1.0.0@_/_": "",
-                                     "my_package/2.0.0@_/_": "C:\\.conan\\pkg"}
+    assert cache._local_packages == {"my_package/1.0.0@user/channel": "",
+                                     "my_package/2.0.0@user/channel": "C:\\.conan\\pkg"}
     assert cache._remote_packages == {
-        "my_package": {"_": [
-            "1.0.0/_",
-            "2.0.0/_"]
+        "my_package": {"user": [
+            "1.0.0/channel",
+            "2.0.0/channel"]
         },
         "other_package": {"others": [
             "1.0.0/testing",
@@ -45,13 +46,13 @@ def test_read_cache(base_fixture: PathSetup):
         ]
         }
     }
-    assert str(cache.get_local_package_path(CFR.loads("my_package/2.0.0@_/_"))) == "C:\\.conan\\pkg"
-    assert str(cache.get_local_package_path(CFR.loads("my_package/1.0.0@_/_"))) == INVALID_PATH
+    assert str(cache.get_local_package_path(CFR.loads("my_package/2.0.0@user/channel"))) == "C:\\.conan\\pkg"
+    assert str(cache.get_local_package_path(CFR.loads("my_package/1.0.0@user/channel"))) == INVALID_PATH
 
-    pkgs = cache.get_similar_remote_pkg_refs("my_package", "_")
+    pkgs = cache.get_similar_remote_pkg_refs("my_package", "user")
     assert len(pkgs) == 2
-    assert CFR.loads("my_package/1.0.0@_/_") in pkgs
-    assert CFR.loads("my_package/2.0.0@_/_") in pkgs
+    assert CFR.loads("my_package/1.0.0@user/channel") in pkgs
+    assert CFR.loads("my_package/2.0.0@user/channel") in pkgs
 
 
 @pytest.mark.conanv2
@@ -81,11 +82,12 @@ def test_update_cache(base_fixture: PathSetup):
     cache.update_local_package_path(pkg, path)
     assert cache.get_local_package_path(pkg) == path
 
-    # test official
-    pkg = CFR.loads("official_pkg/1.0.0@_/_")
-    path = Path(r"C:\temp")
-    cache.update_local_package_path(pkg, path)
-    assert cache.get_local_package_path(pkg) == path
+    # test official - does not work in Conan 2
+    if conan_version.startswith("1"):
+        pkg = CFR.loads("official_pkg/1.0.0@_/_")
+        path = Path(r"C:\temp")
+        cache.update_local_package_path(pkg, path)
+        assert cache.get_local_package_path(pkg) == path
 
     add_packages = [CFR.loads("new_pkg/1.0.0@me/stable"), CFR.loads("new_pkg/1.1.0@me/stable"),
                     CFR.loads("new_pkg/1.1.0@me/testing"), CFR.loads("new_pkg/2.0.0@me/stable")]

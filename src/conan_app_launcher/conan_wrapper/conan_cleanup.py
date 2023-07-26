@@ -26,9 +26,14 @@ class ConanCleanup():
         from .types import PackageEditableLayout
         del_list = []
         for ref in self._conan_api.get_all_local_refs():
-            pkgs = self._conan_api.get_local_pkgs_from_ref(ref)
-            for pkg in pkgs:
-                pkg_id = pkg.get("id", "")
+            # This will not updated to the unified API - only V1 relevant
+            ref_cache = self._conan_api._client_cache.package_layout(ref)
+            # get_local_pkgs_from_ref will not find orphaned packages...
+            try:
+                package_ids = ref_cache.package_ids()
+            except Exception:
+                package_ids = ref_cache.packages_ids()  # type: ignore - old API of Conan
+            for pkg_id in package_ids:
                 short_path_dir = self._conan_api.get_package_folder(ref, pkg_id)
                 pkg_id_dir = None
                 # This will not updated to the unified API - only V1 relevant

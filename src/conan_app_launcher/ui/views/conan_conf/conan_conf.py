@@ -209,6 +209,7 @@ class ConanConfigView(PluginInterfaceV1):
         # clear selection, otherwise an old selection could remain active in the profile content browser
         self._ui.profiles_list_view.selectionModel().clear()
         profile_model.update_profiles()
+        self._ui.profiles_list_view.repaint()
 
 # Remote
 
