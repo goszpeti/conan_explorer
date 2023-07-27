@@ -242,8 +242,7 @@ class PackageFileExplorerController(QObject):
         """ Change folder in file view """
         self._current_ref = conan_ref
         self._current_pkg = pkg_info
-        pkg_path = app.conan_api.get_package_folder(
-            ConanRef.loads(conan_ref), pkg_info.get("id", ""))
+        pkg_path = app.conan_api.get_package_folder(ConanRef.loads(conan_ref), pkg_info.get("id", ""))
         if not pkg_path.exists():
             Logger().warning(
                 f"Can't find package path for {conan_ref} and {str(pkg_info)} for File View")
@@ -259,7 +258,11 @@ class PackageFileExplorerController(QObject):
         self._view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
         re_register_signal(self._view.doubleClicked, self.on_file_double_click)  # type: ignore
         # disable edit on double click, since we want to open
-        self._pkg_path_label.setText(str(pkg_path))
+        disp_ref = conan_ref
+        if pkg_info.get("id", ""):
+            disp_ref += ":" + pkg_info.get("id", "")
+        # str(pkg_path)
+        self._pkg_path_label.setText(disp_ref)
 
         self._view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.resize_file_columns()

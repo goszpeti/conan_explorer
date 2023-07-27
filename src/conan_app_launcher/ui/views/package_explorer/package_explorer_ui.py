@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'package_explorer.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.5.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -18,14 +18,14 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplication, QFrame,
     QHBoxLayout, QHeaderView, QLabel, QLayout,
     QLineEdit, QPushButton, QSizePolicy, QSplitter,
-    QTextBrowser, QTextEdit, QTreeView, QVBoxLayout,
-    QWidget)
+    QTabWidget, QTextBrowser, QTextEdit, QTreeView,
+    QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(527, 244)
+        Form.resize(676, 384)
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setSpacing(4)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -133,13 +133,36 @@ class Ui_Form(object):
         self.package_select_view.setHeaderHidden(False)
         self.splitter.addWidget(self.package_select_view)
         self.package_select_view.header().setVisible(True)
-        self.package_file_view = QTreeView(self.splitter)
-        self.package_file_view.setObjectName(u"package_file_view")
-        sizePolicy7 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.package_tab_widget = QTabWidget(self.splitter)
+        self.package_tab_widget.setObjectName(u"package_tab_widget")
+        sizePolicy7 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy7.setHorizontalStretch(2)
-        sizePolicy7.setVerticalStretch(1)
-        sizePolicy7.setHeightForWidth(self.package_file_view.sizePolicy().hasHeightForWidth())
-        self.package_file_view.setSizePolicy(sizePolicy7)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(self.package_tab_widget.sizePolicy().hasHeightForWidth())
+        self.package_tab_widget.setSizePolicy(sizePolicy7)
+        self.package_tab_widget.setMinimumSize(QSize(0, 0))
+        self.package_tab_widget.setDocumentMode(False)
+        self.package_tab_widget.setTabsClosable(True)
+        self.package_tab_widget.setMovable(False)
+        self.package_tab_widget.setTabBarAutoHide(False)
+        self.tab = QWidget()
+        self.tab.setObjectName(u"tab")
+        sizePolicy8 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        sizePolicy8.setHorizontalStretch(2)
+        sizePolicy8.setVerticalStretch(0)
+        sizePolicy8.setHeightForWidth(self.tab.sizePolicy().hasHeightForWidth())
+        self.tab.setSizePolicy(sizePolicy8)
+        self.horizontalLayout = QHBoxLayout(self.tab)
+        self.horizontalLayout.setSpacing(0)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.package_file_view = QTreeView(self.tab)
+        self.package_file_view.setObjectName(u"package_file_view")
+        sizePolicy9 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy9.setHorizontalStretch(2)
+        sizePolicy9.setVerticalStretch(1)
+        sizePolicy9.setHeightForWidth(self.package_file_view.sizePolicy().hasHeightForWidth())
+        self.package_file_view.setSizePolicy(sizePolicy9)
         self.package_file_view.setMinimumSize(QSize(100, 0))
         self.package_file_view.setFrameShape(QFrame.NoFrame)
         self.package_file_view.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
@@ -152,12 +175,22 @@ class Ui_Form(object):
         self.package_file_view.setItemsExpandable(True)
         self.package_file_view.setSortingEnabled(True)
         self.package_file_view.setAnimated(True)
-        self.splitter.addWidget(self.package_file_view)
+
+        self.horizontalLayout.addWidget(self.package_file_view)
+
+        self.package_tab_widget.addTab(self.tab, "")
+        self.add_new_tab_tab = QWidget()
+        self.add_new_tab_tab.setObjectName(u"add_new_tab_tab")
+        self.package_tab_widget.addTab(self.add_new_tab_tab, "")
+        self.splitter.addWidget(self.package_tab_widget)
 
         self.verticalLayout.addWidget(self.splitter)
 
 
         self.retranslateUi(Form)
+
+        self.package_tab_widget.setCurrentIndex(0)
+
 
         QMetaObject.connectSlotsByName(Form)
     # setupUi
@@ -178,5 +211,7 @@ class Ui_Form(object):
 "li.checked::marker { content: \"\\2612\"; }\n"
 "</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
+        self.package_tab_widget.setTabText(self.package_tab_widget.indexOf(self.tab), QCoreApplication.translate("Form", u"New tab", None))
+        self.package_tab_widget.setTabText(self.package_tab_widget.indexOf(self.add_new_tab_tab), QCoreApplication.translate("Form", u"  +  ", None))
     # retranslateUi
 

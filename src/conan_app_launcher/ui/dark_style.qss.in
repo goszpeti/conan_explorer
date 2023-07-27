@@ -301,6 +301,13 @@ QTabWidget::tab-bar:bottom {
     bottom: 1px;
 }
 
+QTabBar::close-button {
+    image: url(icons:material/close_white.svg);
+}
+QTabBar::close-button:hover {
+    image: url(icons:material/close_white_lgr.svg);
+}
+
 QScrollArea, QLabel#logo_label{
     background-color: #808086;
 }
