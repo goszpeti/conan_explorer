@@ -24,7 +24,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
             DEFAULT_INSTALL_PROFILE: ""
         },
         VIEW_SECTION_NAME: {
-            FONT_SIZE: 12,
+            FONT_SIZE: 13,
             GUI_STYLE: GUI_STYLE_MATERIAL,
             GUI_MODE: GUI_MODE_LIGHT,
             WINDOW_SIZE: "0,0,800,600",
