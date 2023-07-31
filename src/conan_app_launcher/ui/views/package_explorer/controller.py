@@ -233,7 +233,7 @@ class PackageFileExplorerController(QObject):
         self._pkg_path_label = pkg_path_label
         self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
-        self._conan_pkg_selected.connect(self.on_pkg_selection_change)
+        # self._conan_pkg_selected.connect(self.on_pkg_selection_change)
 
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
@@ -256,13 +256,9 @@ class PackageFileExplorerController(QObject):
         self._view.setColumnHidden(2, True)  # file type
         self._model.layoutChanged.connect(self.resize_file_columns)
         self._view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
-        re_register_signal(self._view.doubleClicked, self.on_file_double_click)  # type: ignore
         # disable edit on double click, since we want to open
-        disp_ref = conan_ref
-        if pkg_info.get("id", ""):
-            disp_ref += ":" + pkg_info.get("id", "")
-        # str(pkg_path)
-        self._pkg_path_label.setText(disp_ref)
+        re_register_signal(self._view.doubleClicked, self.on_file_double_click)  # type: ignore
+        # self._pkg_path_label.setText(str(pkg_path))
 
         self._view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.resize_file_columns()

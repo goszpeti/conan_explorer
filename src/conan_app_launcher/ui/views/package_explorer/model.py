@@ -1,10 +1,9 @@
 from pathlib import Path
-import pprint
 from typing import List, Union
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.conan_wrapper import ConanApi
-from conan_app_launcher.conan_wrapper.types import ConanPkg
+from conan_app_launcher.conan_wrapper.types import ConanPkg, pretty_print_pkg_info
 from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_icon, TreeModel, TreeModelItem, FileSystemModel
 from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
 from PySide6.QtGui import QIcon, QColor, QFont
@@ -126,7 +125,7 @@ class PkgSelectModel(TreeModel):
             if item.type == PROFILE_TYPE:
                 data = item.data(0)
                 # remove dict style print characters
-                return pprint.pformat(data).translate({ord("{"): None, ord("}"): None, ord("'"): None})
+                return pretty_print_pkg_info(data)
         if role == Qt.ItemDataRole.DecorationRole:
             if item.type == REF_TYPE:
                 return QIcon(get_themed_asset_icon("icons/package.svg"))

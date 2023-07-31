@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import pprint
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from conan_app_launcher import conan_version
 if TYPE_CHECKING:
@@ -69,6 +70,10 @@ class ConanPkg(TypedDict, total=False):
     settings: ConanSettings
     requires: List[Any]
     outdated: bool
+
+def pretty_print_pkg_info(pkg_info: ConanPkg) -> str:
+    return pprint.pformat(pkg_info).translate({ord("{"): None, ord("}"): None, ord("'"): None})
+
 
 class LoggerWriter:
     """

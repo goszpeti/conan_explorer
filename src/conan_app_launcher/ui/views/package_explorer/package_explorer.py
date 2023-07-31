@@ -1,7 +1,7 @@
 import os
 from typing import TYPE_CHECKING
 
-from conan_app_launcher.conan_wrapper.types import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.common.theming import get_themed_asset_icon
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
@@ -61,10 +61,12 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
     def on_close_tab(self, index: int):
         # self._ui.package_tab_widget.tabBar().setTabVisible(index, False)
         self._ui.package_tab_widget.removeTab(index)
+        self._pkg_tabs_ctrl.pop(index)
 
     def on_tab_index_changed(self, index: int):
         assert self._base_signals
         assert self._page_widgets
+
         # adds new tab
         if self._ui.package_tab_widget.count() == index + 1:
             tab = QWidget(self._ui.package_tab_widget)
@@ -94,8 +96,12 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
             self._ui.package_tab_widget.insertTab(index, tab, "New tab")
             self._ui.package_tab_widget.setCurrentIndex(index)
+        else:
+            ctrl = self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()]
+            if ctrl._model:
+                self._ui.package_path_label.setText(ctrl._model.rootPath())
 
-    def on_pkg_selection_change(self, conan_ref, pkg):
+    def on_pkg_selection_change(self, conan_ref: str, pkg: ConanPkg):
         # init/update the context menu
         for ctrl in self._pkg_tabs_ctrl:
             re_register_signal(ctrl._view.customContextMenuRequested,
@@ -103,9 +109,15 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._init_pkg_file_context_menu()
         cfr = ConanRef.loads(conan_ref)
         disp_ref = f"{cfr.name}/{cfr.version}" # only package/version
-        self._ui.package_tab_widget.setTabText(self._ui.package_tab_widget.currentIndex(), disp_ref)
-        # self._ui.package_tab_widget.setTabToolTip(pkg.get)
+        idx = self._ui.package_tab_widget.currentIndex()
+        self._ui.package_tab_widget.setTabText(idx, disp_ref)
+        self._ui.package_tab_widget.setTabToolTip(idx, pretty_print_pkg_info(pkg))
         self._ui.package_tab_widget.tabBar().setExpanding(True)
+        ctrl = self._pkg_tabs_ctrl[idx]
+
+        ctrl.on_pkg_selection_change(conan_ref, pkg)
+        if ctrl._model:
+            self._ui.package_path_label.setText(ctrl._model.rootPath())
 
     def showEvent(self, a0: QShowEvent) -> None:
         self._pkg_sel_ctrl.refresh_pkg_selection_view(update=False)  # only update the first time
