@@ -216,7 +216,7 @@ class PackageSelectionController(QObject):
         source_item = self.get_selected_pkg_source_item()
         if not source_item:
             return
-        if source_item.type == ConanPkgType.ref:
+        if source_item.type in [ConanPkgType.ref, ConanPkgType.editable]:
             return
         conan_ref = self.get_selected_conan_ref()
         self._conan_pkg_selected.emit(conan_ref, self.get_selected_conan_pkg_info())
@@ -430,7 +430,7 @@ class PackageFileExplorerController(QObject):
     def _get_pkg_file_source_item(self) -> Optional[QModelIndex]:
         indexes = self._view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
-            Logger().debug(f"No selected item for context action")
+            Logger().debug("No selected item for context action")
             return None
         return self._view.selectedIndexes()[0]
 
