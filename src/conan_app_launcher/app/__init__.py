@@ -2,6 +2,7 @@ from conan_app_launcher.conan_wrapper import ConanWorker, ConanApi
 import os
 import platform
 import sys
+from tempfile import gettempdir
 
 from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsInterface, settings_factory
 from conan_app_launcher import APP_NAME, SETTINGS_FILE_NAME, __version__, asset_path, user_save_path
@@ -28,6 +29,11 @@ def run_application():
     elif platform.system() == "Darwin":
         print("Mac OS is currently not supported.")
         sys.exit(1)
+
+    # Change cwd to temp, so temporary files become writable, even if the current folder is not
+    # Fixes #168
+    os.chdir(gettempdir())
+
     qt_app = load_qapp()
     from .loading import AsyncLoader
     loader = AsyncLoader(None)
