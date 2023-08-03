@@ -10,6 +10,7 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Qt, Signal, SignalInstance
 
 from conan_app_launcher.app.system import str2bool
+progress_dialog = QtWidgets.QProgressDialog()
 
 class Worker(QtCore.QObject):
     """ Generic worker for Qt, which can call any function with args """
@@ -45,7 +46,7 @@ class AsyncLoader(QtCore.QObject):
                       loading_text: str = "Loading", cancel_button=True):
         self.finished = False
 
-        self.progress_dialog = QtWidgets.QProgressDialog(dialog_parent)
+        self.progress_dialog = progress_dialog # QtWidgets.QProgressDialog(dialog_parent)
         self.progress_dialog.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
         self.progress_dialog.setAttribute(Qt.WidgetAttribute.WA_ShowModal)
         self.progress_dialog.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
