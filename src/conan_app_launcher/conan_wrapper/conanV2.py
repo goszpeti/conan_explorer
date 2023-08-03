@@ -110,6 +110,9 @@ class ConanApi(ConanUnifiedApi):
 
     def get_profiles_path(self) -> Path:
         return Path(self._client_cache.profiles_path)
+    
+    def get_editables_file_path(self) -> Path:
+        return Path(INVALID_PATH)
 
     def get_user_home_path(self) -> Path:
         return Path(self._client_cache.cache_folder)

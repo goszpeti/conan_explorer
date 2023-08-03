@@ -18,7 +18,7 @@ from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject
                             Qt, QUrl, SignalInstance)
 from PySide6.QtWidgets import (QApplication, QTextBrowser, QLineEdit, QMessageBox, QTreeView, QWidget)
 
-from .model import (PROFILE_TYPE, REF_TYPE, CalFileSystemModel, PackageFilter, PackageTreeItem,
+from .model import (ConanPkgType, CalFileSystemModel, PackageFilter, PackageTreeItem,
                     PkgSelectModel)
 
 if TYPE_CHECKING:
@@ -79,7 +79,7 @@ class PackageSelectionController(QObject):
         if not source_item:
             return ""
         conan_ref_item = source_item
-        if source_item.type == PROFILE_TYPE:
+        if source_item.type == ConanPkgType.pkg:
             conan_ref_item = source_item.parent()
         if not conan_ref_item:
             return ""
@@ -87,7 +87,7 @@ class PackageSelectionController(QObject):
 
     def get_selected_conan_pkg_info(self) -> ConanPkg:
         source_item = self.get_selected_pkg_source_item()
-        if not source_item or source_item.type == REF_TYPE:
+        if not source_item or source_item.type == ConanPkgType.ref:
             return ConanPkg()
         return source_item.item_data[0]
 
@@ -216,7 +216,7 @@ class PackageSelectionController(QObject):
         source_item = self.get_selected_pkg_source_item()
         if not source_item:
             return
-        if source_item.type != PROFILE_TYPE:
+        if source_item.type == ConanPkgType.ref:
             return
         conan_ref = self.get_selected_conan_ref()
         self._conan_pkg_selected.emit(conan_ref, self.get_selected_conan_pkg_info())
@@ -242,11 +242,17 @@ class PackageFileExplorerController(QObject):
         """ Change folder in file view """
         self._current_ref = conan_ref
         self._current_pkg = pkg_info
-        pkg_path = app.conan_api.get_package_folder(ConanRef.loads(conan_ref), pkg_info.get("id", ""))
+        if pkg_info.get("id", "") == "editable":
+            pkg_path =  app.conan_api.get_editables_package_path(ConanRef.loads(conan_ref))
+        else:
+            pkg_path = app.conan_api.get_package_folder(ConanRef.loads(conan_ref), pkg_info.get("id", ""))
         if not pkg_path.exists():
             Logger().warning(
                 f"Can't find package path for {conan_ref} and {str(pkg_info)} for File View")
             return
+        if self._model:
+            if pkg_path == Path(self._model.rootPath()):
+                return
         self._model = CalFileSystemModel()
         self._model.setRootPath(str(pkg_path))
         self._model.sort(0, Qt.SortOrder.AscendingOrder)
@@ -258,7 +264,6 @@ class PackageFileExplorerController(QObject):
         self._view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
         # disable edit on double click, since we want to open
         re_register_signal(self._view.doubleClicked, self.on_file_double_click)  # type: ignore
-        # self._pkg_path_label.setText(str(pkg_path))
 
         self._view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.resize_file_columns()
@@ -414,7 +419,8 @@ class PackageFileExplorerController(QObject):
         rel_path = file_path.relative_to(pkg_path)
 
         app_config = UiAppLinkConfig(
-            name="NewLink", conan_ref=str(self._current_ref), executable=str(rel_path))
+            name="NewLink", conan_ref=str(self._current_ref), executable=str(rel_path), 
+            conan_options=pkg_info.get("options", {}))
         self._page_widgets.get_page_by_type(AppGridView).open_new_app_dialog_from_extern(app_config)
 
     def on_open_file_in_file_manager(self, model_index):

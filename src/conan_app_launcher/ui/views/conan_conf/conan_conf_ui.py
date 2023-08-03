@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_conf.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.5.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -318,6 +318,39 @@ class Ui_Form(object):
         self.verticalLayout_5.addLayout(self.profiles_layout)
 
         self.config_tab_widget.addTab(self.profiles, "")
+        self.editables = QWidget()
+        self.editables.setObjectName(u"editables")
+        self.verticalLayout_10 = QVBoxLayout(self.editables)
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.editables_file_text_browser = PlainTextPasteBrowser(self.editables)
+        self.editables_file_text_browser.setObjectName(u"editables_file_text_browser")
+        self.editables_file_text_browser.setTabChangesFocus(False)
+        self.editables_file_text_browser.setUndoRedoEnabled(True)
+        self.editables_file_text_browser.setReadOnly(False)
+
+        self.verticalLayout_10.addWidget(self.editables_file_text_browser)
+
+        self.editables_btns_frame = QFrame(self.editables)
+        self.editables_btns_frame.setObjectName(u"editables_btns_frame")
+        self.editables_btns_frame.setFrameShape(QFrame.StyledPanel)
+        self.editables_btns_frame.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_2 = QHBoxLayout(self.editables_btns_frame)
+        self.horizontalLayout_2.setSpacing(0)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.editables_save_button = QPushButton(self.editables_btns_frame)
+        self.editables_save_button.setObjectName(u"editables_save_button")
+
+        self.horizontalLayout_2.addWidget(self.editables_save_button)
+
+        self.editables_btns_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.editables_btns_spacer)
+
+
+        self.verticalLayout_10.addWidget(self.editables_btns_frame)
+
+        self.config_tab_widget.addTab(self.editables, "")
         self.config = QWidget()
         self.config.setObjectName(u"config")
         self.verticalLayout_3 = QVBoxLayout(self.config)
@@ -367,7 +400,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(3)
+        self.config_tab_widget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -407,6 +440,8 @@ class Ui_Form(object):
         self.profile_rename_button.setText(QCoreApplication.translate("Form", u"Rename", None))
         self.profile_save_button.setText(QCoreApplication.translate("Form", u"Save", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.profiles), QCoreApplication.translate("Form", u"Profiles", None))
+        self.editables_save_button.setText(QCoreApplication.translate("Form", u"Save", None))
+        self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.editables), QCoreApplication.translate("Form", u"Editables", None))
         self.config_file_save_button.setText(QCoreApplication.translate("Form", u"Save", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.config), QCoreApplication.translate("Form", u"Config File", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.settings_file), QCoreApplication.translate("Form", u"Settings YML File", None))

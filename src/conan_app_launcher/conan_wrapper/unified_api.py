@@ -79,6 +79,11 @@ class ConanUnifiedApi(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_editables_file_path(self) -> Path:
+        """ Return editables raw (json) file """
+        raise NotImplementedError
+
+    @abstractmethod
     def get_config_entry(self, config_name: str, default_value: Any) -> Any:
         """ Return a conan config entry value (conan.conf). Use default_value for non existing values. """
         raise NotImplementedError

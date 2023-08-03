@@ -1,3 +1,4 @@
+import json
 from os import devnull
 import platform
 import subprocess
@@ -38,7 +39,6 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)
-        self.config_file_path = Path("Unknown")
         self.profiles_path = Path("Unknown")
         self._edited_profile = None
 
@@ -48,7 +48,6 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.remotes_tree_view, self._base_signals.conan_remotes_updated)
         self._init_remotes_tab()
         self._init_profiles_tab()
-        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
 
         self.config_file_path = app.conan_api.get_config_file_path()
         self.profiles_path = app.conan_api.get_profiles_path()
@@ -57,12 +56,14 @@ class ConanConfigView(PluginInterfaceV1):
         self._load_profiles_tab()
         self._load_config_file_tab()
         self._load_settings_yml_tab()
+        self._load_editables_tab()
 
         # always show first tab on start
         self._ui.config_tab_widget.tabBar().setCurrentIndex(0)
         self._conan_config_highlighter = ConfigHighlighter(self._ui.config_file_text_browser.document(), "ini")
         self._profile_highlighter = ConfigHighlighter(self._ui.profiles_text_browser.document(), "ini")
         self._settings_highlighter = ConfigHighlighter(self._ui.settings_file_text_browser.document(), "yaml")
+        self._editable_highlighter = ConfigHighlighter(self._ui.editables_file_text_browser.document(), "yaml")
 
     def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(conan_version)
@@ -84,9 +85,10 @@ class ConanConfigView(PluginInterfaceV1):
             Logger().error("Cannot read settings.yaml file!")
 
     def _load_config_file_tab(self):
+        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
         try:
-            self._ui.config_file_text_browser.setText(self.config_file_path.read_text())
-            self._ui.config_file_save_button.clicked.connect(self.save_config_file)
+            self._ui.config_file_text_browser.setText(app.conan_api.get_config_file_path().read_text())
+            self._ui.config_file_save_button.clicked.connect(self.on_save_config_file)
         except Exception:
             Logger().error("Cannot read Conan config file!")
 
@@ -112,6 +114,15 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.profiles_list_view.setModel(profiles_model)
         self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
 
+    def _load_editables_tab(self):
+        self.set_themed_icon(self._ui.editables_save_button, "icons/save.svg")
+        try:
+            json_content = json.loads(Path(app.conan_api.get_editables_file_path()).read_text())
+            self._ui.editables_file_text_browser.setText(json.dumps(json_content, indent = 2, separators=(',', ': ')))
+            self._ui.editables_save_button.clicked.connect(self.on_save_editable_file)
+        except Exception:
+            Logger().error("Cannot read editables file!")
+
     def _init_profile_context_menu(self):
         self.profiles_cntx_menu = RoundedMenu()
         self._copy_profile_action = QAction("Copy profile name", self)
@@ -134,6 +145,7 @@ class ConanConfigView(PluginInterfaceV1):
         self._conan_config_highlighter = ConfigHighlighter(self._ui.config_file_text_browser.document(),"ini")
         self._profile_highlighter = ConfigHighlighter(self._ui.profiles_text_browser.document(),"ini")
         self._settings_highlighter = ConfigHighlighter(self._ui.settings_file_text_browser.document(), "yaml")
+        self._editable_highlighter = ConfigHighlighter(self._ui.editables_file_text_browser.document(), "yaml")
 
 # Profile
 
@@ -323,10 +335,16 @@ class ConanConfigView(PluginInterfaceV1):
 
 # Conan Config
 
-    def save_config_file(self):
-        self.config_file_path.write_text(self._ui.config_file_text_browser.toPlainText())
+    def on_save_config_file(self):
+        app.conan_api.get_config_file_path().write_text(self._ui.config_file_text_browser.toPlainText())
         # restart conan api to apply changes internally
         app.conan_api.init_api()
         Logger().info("Applying Changes to Conan...")
         # re-init info tab to show the changes
         self._load_info_tab()
+
+# Editables tab
+
+    def on_save_editable_file(self):
+        app.conan_api.get_editables_file_path().write_text(self._ui.editables_file_text_browser.toPlainText())
+        # TODO Reload local package explorer?

@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 from typing import List, Union
 
@@ -8,8 +9,10 @@ from conan_app_launcher.ui.common import get_platform_icon, get_themed_asset_ico
 from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
 from PySide6.QtGui import QIcon, QColor, QFont
 
-REF_TYPE = 0
-PROFILE_TYPE = 1
+class ConanPkgType(Enum):
+    ref = 0
+    pkg = 1
+    editable = 2
 
 class CalFileSystemModel(FileSystemModel):
     _disabled_rows: "set[int]" = set()
@@ -92,7 +95,7 @@ class PackageFilter(QSortFilterProxyModel):
 class PackageTreeItem(TreeModelItem):
     """ Represents a tree item of a Conan pkg. To be used for the parent (ref) and the child (Profile)"""
 
-    def __init__(self, data: List[Union[str, ConanPkg]], parent=None, item_type=REF_TYPE):
+    def __init__(self, data: List[Union[str, ConanPkg]], parent=None, item_type=ConanPkgType.ref):
         super().__init__(data, parent)
         self.type = item_type
 
@@ -113,31 +116,44 @@ class PkgSelectModel(TreeModel):
             conan_item = PackageTreeItem([str(conan_ref)], self.root_item)
             infos = app.conan_api.get_local_pkgs_from_ref(conan_ref)
             for info in infos:
-                pkg_item = PackageTreeItem([info], conan_item, PROFILE_TYPE)
+                pkg_item = PackageTreeItem([info], conan_item, ConanPkgType.pkg)
                 conan_item.append_child(pkg_item)
             self.root_item.append_child(conan_item)
+        for conan_ref in app.conan_api.get_editable_references():
+            conan_item = PackageTreeItem([str(conan_ref)], self.root_item, ConanPkgType.editable)
+            dummy_pkg: ConanPkg = {"id": "editable","options": {}, "settings": {}, "requires": [], "outdated": False}
+            pkg_item = PackageTreeItem([dummy_pkg], conan_item, ConanPkgType.pkg)
+            conan_item.append_child(pkg_item)
+            self.root_item.append_child(conan_item)
+
 
     def data(self, index: QModelIndex, role: Qt.ItemDataRole):  # override
         if not index.isValid():
             return None
         item: PackageTreeItem = index.internalPointer() # type: ignore
         if role == Qt.ItemDataRole.ToolTipRole:
-            if item.type == PROFILE_TYPE:
+            if item.type == ConanPkgType.pkg:
                 data = item.data(0)
                 # remove dict style print characters
                 return pretty_print_pkg_info(data)
         if role == Qt.ItemDataRole.DecorationRole:
-            if item.type == REF_TYPE:
+            if item.type == ConanPkgType.ref:
                 return QIcon(get_themed_asset_icon("icons/package.svg"))
-            if item.type == PROFILE_TYPE:
+            if item.type == ConanPkgType.editable:
+                return QIcon(get_themed_asset_icon("icons/edit.svg"))
+            if item.type == ConanPkgType.pkg:
                 profile_name = self.get_quick_profile_name(item)
                 return get_platform_icon(profile_name)
         if role == Qt.ItemDataRole.DisplayRole:
-            if item.type == REF_TYPE:
+            if item.type in [ConanPkgType.ref, ConanPkgType.editable]:
                 return item.data(index.column())
-            if item.type == PROFILE_TYPE:
+            if item.type == ConanPkgType.pkg:
                 return self.get_quick_profile_name(item)
-
+        if role == Qt.ItemDataRole.FontRole:
+            if item.type == ConanPkgType.editable:
+                font = QFont() 
+                font.setItalic(True)
+                return font
         return None
 
     def get_quick_profile_name(self, item) -> str:

@@ -103,6 +103,20 @@ class ConanApi(ConanUnifiedApi):
     def get_storage_path(self) -> Path:
         return Path(str(self._client_cache.store))
 
+    def get_editables_file_path(self) -> Path:
+        editable_file = Path(self._client_cache.editable_packages._edited_file)
+        editable_file.touch()
+        return editable_file
+    
+    def get_editable_references(self) -> List [str]:
+        return list(self._conan.editable_list().keys())
+
+    def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
+        editable_info = self._conan.editable_list().get(str(conan_ref))
+        if editable_info is None:
+            return Path(INVALID_PATH)
+        return Path(editable_info.get("path", INVALID_PATH)).parent
+    
     def get_short_path_root(self) -> Path:
         # only need to get once
         if self._short_path_root.exists() or platform.system() != "Windows":
