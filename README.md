@@ -4,7 +4,7 @@
 
 ![https://pypi.org/project/conan-app-launcher/](https://img.shields.io/pypi/v/conan-app-launcher)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
-![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/17)
+![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/20)
 ![Python tests](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
 ![Alerts](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_app_launcher&metric=alert_status)
 ![Downloads](https://img.shields.io/pypi/dm/conan_app_launcher)
@@ -46,9 +46,9 @@ Quicklaunch
 - quick controls to switch between versions and channels
 
 Local Package Explorer
-- view for browsing through installed packages
+- tabbed view for browsing through installed packages
 - understand package settings at a glance from a shortened representation, e.g. Linux_x64_ggc7
-- supports copy/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan workflow
+- supports rename/copy/cut/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan workflow
 
 Conan Search
 - search for references in selected remotes
