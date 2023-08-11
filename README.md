@@ -93,7 +93,7 @@ After checkout use the command:
 
 ## Running
 
-Execute `conan-app-launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder. 
+Execute `conan_explorer` or `conan_app_launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder. 
 You can also assign its icon to it from the site packages folder in conan_app_launcher/assets/icons/icon.ico.
 
 ### Main dependencies
