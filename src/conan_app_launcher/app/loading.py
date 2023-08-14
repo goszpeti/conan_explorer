@@ -10,7 +10,6 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtCore import Qt, Signal, SignalInstance
 
 from conan_app_launcher.app.system import str2bool
-progress_dialog = QtWidgets.QProgressDialog()
 
 class Worker(QtCore.QObject):
     """ Generic worker for Qt, which can call any function with args """
@@ -33,10 +32,30 @@ class Worker(QtCore.QObject):
 
 
 class AsyncLoader(QtCore.QObject):
+    # reuse the same progress_dialog instance for every loading dialog - there can only be one at a time
+    __progress_dialog: Optional[QtWidgets.QProgressDialog] = None
 
     def __init__(self, parent: Optional[QtCore.QObject]):
         super().__init__(parent)
-        self.progress_dialog: Optional[QtWidgets.QProgressDialog] = None
+        # initial setup
+        if AsyncLoader.__progress_dialog is None: # implicit check for init
+            progress_dialog = QtWidgets.QProgressDialog()
+            progress_dialog.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+            progress_dialog.setAttribute(Qt.WidgetAttribute.WA_ShowModal)
+            progress_dialog.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
+
+            # Window flags to disable close button
+            progress_dialog.setWindowFlags(
+                Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint)
+            progress_dialog.setWindowTitle("Loading...")
+            progress_dialog.setCancelButton(None)  # type: ignore
+            progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
+            progress_dialog.setRange(0, 0)
+            progress_dialog.setMinimumDuration(1000)
+            progress_dialog.setMinimumWidth(500)
+            progress_dialog.setMaximumWidth(600)
+            AsyncLoader.__progress_dialog = progress_dialog
+        self.progress_dialog = AsyncLoader.__progress_dialog
         self.worker: Optional[Worker] = None
         self.load_thread: Optional[QtCore.QThread] = None
         self.finished = True
@@ -45,26 +64,13 @@ class AsyncLoader(QtCore.QObject):
                       finish_task: Optional[Callable] = None,
                       loading_text: str = "Loading", cancel_button=True):
         self.finished = False
-
-        self.progress_dialog = progress_dialog # QtWidgets.QProgressDialog(dialog_parent)
-        self.progress_dialog.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
-        self.progress_dialog.setAttribute(Qt.WidgetAttribute.WA_ShowModal)
-        self.progress_dialog.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
-
         self.progress_dialog.setLabelText(loading_text)
-        # Window flags to disable close button
-        self.progress_dialog.setWindowFlags(
-            Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint)
-        self.progress_dialog.setWindowTitle("Loading...")
-        self.progress_dialog.setCancelButton(None)  # type: ignore
-        self.progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
-        self.progress_dialog.setRange(0, 0)
-        self.progress_dialog.setMinimumDuration(1000)
-        self.progress_dialog.setMinimumWidth(500)
-        self.progress_dialog.setMaximumWidth(600)
+
         if cancel_button:
             self.cancel_button = QtWidgets.QPushButton("Cancel")
             self.progress_dialog.setCancelButton(self.cancel_button)
+        else:
+            self.progress_dialog.setCancelButton(None) # type: ignore
 
         # set position in middle of window
         qapp: QtWidgets.QApplication = QtWidgets.QApplication.instance()  # type: ignore
