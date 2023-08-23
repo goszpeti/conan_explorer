@@ -89,6 +89,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             file_explorer_view.setItemsExpandable(True)
             file_explorer_view.setSortingEnabled(True)
             file_explorer_view.setAnimated(True)
+            file_explorer_view.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
 
             self._pkg_tabs_ctrl.append(PackageFileExplorerController(
                 self, file_explorer_view, self._ui.package_path_label,
@@ -165,13 +166,16 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.select_cntx_menu.addAction(self.install_ref_action)
         self.install_ref_action.triggered.connect(self._pkg_sel_ctrl.on_install_ref_requested)
 
-        self.remove_ref_action = QAction("Remove package", self)
+        self.remove_ref_action = QAction("Remove package(s)", self)
         self.set_themed_icon(self.remove_ref_action, "icons/delete.svg")
         self.select_cntx_menu.addAction(self.remove_ref_action)
         self.remove_ref_action.triggered.connect(self._pkg_sel_ctrl.on_remove_ref_requested)
 
     def on_selection_context_menu_requested(self, position):
+        self._pkg_sel_ctrl.get_selected_conan_ref()
         self.select_cntx_menu.exec(self._ui.package_select_view.mapToGlobal(position))
+
+    # Package File Explorer context menu
 
     def on_open_file_in_file_manager(self, model_index):
         self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_file_in_file_manager(model_index)

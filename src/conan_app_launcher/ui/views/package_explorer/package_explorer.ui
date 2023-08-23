@@ -229,6 +229,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>
       </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::ExtendedSelection</enum>
+      </property>
       <property name="indentation">
        <number>15</number>
       </property>
@@ -333,6 +336,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
           </property>
           <property name="defaultDropAction">
            <enum>Qt::TargetMoveAction</enum>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ExtendedSelection</enum>
           </property>
           <property name="indentation">
            <number>15</number>

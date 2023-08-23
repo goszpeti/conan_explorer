@@ -145,8 +145,10 @@ class PkgSelectModel(TreeModel):
                 profile_name = self.get_quick_profile_name(item)
                 return get_platform_icon(profile_name)
         if role == Qt.ItemDataRole.DisplayRole:
-            if item.type in [ConanPkgType.ref, ConanPkgType.editable]:
+            if item.type == ConanPkgType.ref:
                 return item.data(index.column())
+            if item.type == ConanPkgType.editable:
+                return item.data(index.column()) + " (editable)"
             if item.type == ConanPkgType.pkg:
                 return self.get_quick_profile_name(item)
         if role == Qt.ItemDataRole.FontRole:

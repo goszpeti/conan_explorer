@@ -1,7 +1,16 @@
+import json
 import os
 import platform
 from pathlib import Path
+import sys
+from tempfile import gettempdir, tempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+
+try:
+    from contextlib import chdir
+except ImportError:
+    from contextlib_chdir import chdir
+
 
 from .types import (ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException, 
 ConanSettings, LoggerWriter, create_key_value_pair_list, Remote)
@@ -189,7 +198,8 @@ class ConanApi(ConanUnifiedApi):
     ### Install related methods ###
 
     def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings = {},
-                          conan_options: ConanOptions = {}, update=True, quiet=False) -> Tuple[str, Path]:
+                          conan_options: ConanOptions = {}, update=True, quiet=False,
+                          generators: List[str]=[]) -> Tuple[str, Path]:
         package_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
@@ -203,7 +213,8 @@ class ConanApi(ConanUnifiedApi):
             profile_names = [profile]
         try:
             infos = self._conan.install_reference(
-                conan_ref, settings=settings_list, options=options_list, update=update, profile_names=profile_names)
+                conan_ref, settings=settings_list, options=options_list, update=update,
+                profile_names=profile_names, generators=generators)
             if not infos.get("error", True):
                 package_id = infos.get("installed", [{}])[0].get("packages", [{}])[0].get("id", "")
             Logger().info(f"Installation of '<b>{str(conan_ref)}</b>' finished")
@@ -214,6 +225,22 @@ class ConanApi(ConanUnifiedApi):
         except ConanException as error:
             Logger().error(f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return package_id, Path(INVALID_PATH)
+        
+    def get_conan_buildinfo(self, conan_ref: ConanRef, profile="", conan_options: ConanOptions = {}):
+        # install ref to temp dir and use generator
+        temp_path = Path(gettempdir()) / str(ConanPkgRef(conan_ref)).replace("/", ".").replace(":", ".").replace("@", ".")
+        temp_path.mkdir(parents=True, exist_ok=True)
+        with chdir(temp_path): # use cli here, API cannnot do job easily and we wan to parse the file output
+            self.install_reference(conan_ref, generators=["txt"])
+        # read conanbuildinfo json
+        from conans.client.generators import TXTGenerator
+        content = None
+        try:
+            content = TXTGenerator.loads((temp_path / "conanbuildinfo.txt").read_text())
+        except Exception as e:
+            Logger().error(f"Can't read conanbuildinfo.txt for '<b>{str(conan_ref)}</b>': {str(e)}")
+        return content
+
 
     def get_options_with_default_values(self, conan_ref: ConanRef) -> Tuple[ConanAvailableOptions, ConanOptions]:
         # this calls external code of the recipe
