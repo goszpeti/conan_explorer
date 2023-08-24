@@ -159,14 +159,14 @@ class UiAppLinkModel(UiAppLinkConfig):
         pkg_path = Path(INVALID_PATH)
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
             pkg_path = app.conan_api.info_cache.get_local_package_path(self._conan_file_reference)
+            if not pkg_path.exists():
+                _, pkg_path = app.conan_api.get_best_matching_local_package_path(self._conan_file_reference, self.conan_options)
             if self.conan_options:
                 pkg_info = app.conan_api.get_local_pkg_from_path(self._conan_file_reference, pkg_path)
                 # user options should be a subset of full pkg options
                 if pkg_info:
                     if not self.conan_options.items() <= pkg_info.get("options", {}).items():
                         return
-        else:
-            _, pkg_path = app.conan_api.get_best_matching_local_package_path(self._conan_file_reference, self.conan_options)
         if not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
             _, pkg_path = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
 
@@ -318,7 +318,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @property
     def executable(self) -> str:
-        """ The executabel for this link to trigger """
+        """ The executable for this link to trigger """
         return self._executable
 
     @executable.setter
