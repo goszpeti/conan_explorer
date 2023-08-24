@@ -79,7 +79,7 @@ class PackageSelectionController(QObject):
         if not source_item:
             return ""
         conan_ref_item = source_item
-        if source_item.type == ConanPkgType.pkg:
+        if source_item.type in [ConanPkgType.pkg, ConanPkgType.export]:
             conan_ref_item = source_item.parent()
         if not conan_ref_item:
             return ""
@@ -238,12 +238,17 @@ class PackageFileExplorerController(QObject):
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
 
+    def get_conan_pkg_info(self):
+        return self._current_pkg
+
     def on_pkg_selection_change(self, conan_ref: str, pkg_info: ConanPkg):
         """ Change folder in file view """
         self._current_ref = conan_ref
         self._current_pkg = pkg_info
         if pkg_info.get("id", "") == "editable":
             pkg_path =  app.conan_api.get_editables_package_path(ConanRef.loads(conan_ref))
+        elif pkg_info.get("id", "") == "export":
+            pkg_path =  app.conan_api.get_export_folder(ConanRef.loads(conan_ref))
         else:
             pkg_path = app.conan_api.get_package_folder(ConanRef.loads(conan_ref), pkg_info.get("id", ""))
         if not pkg_path.exists():
@@ -416,7 +421,7 @@ class PackageFileExplorerController(QObject):
             Logger().error("Error on trying to adding Applink: No package info found.")
             return
         pkg_path = app.conan_api.get_package_folder(conan_ref, pkg_info.get("id", ""))
-        rel_path = file_path.relative_to(pkg_path)
+        rel_path = file_path.relative_to(pkg_path).as_posix() # no \ for UI config
 
         app_config = UiAppLinkConfig(
             name="NewLink", conan_ref=str(self._current_ref), executable=str(rel_path), 

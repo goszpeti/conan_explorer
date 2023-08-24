@@ -13,6 +13,7 @@ class ConanPkgType(Enum):
     ref = 0
     pkg = 1
     editable = 2
+    export = 3
 
 class CalFileSystemModel(FileSystemModel):
     _disabled_rows: "set[int]" = set()
@@ -114,6 +115,9 @@ class PkgSelectModel(TreeModel):
     def setup_model_data(self):
         for conan_ref in app.conan_api.get_all_local_refs():
             conan_item = PackageTreeItem([str(conan_ref)], self.root_item)
+            dummy_pkg: ConanPkg = {"id": "export","options": {}, "settings": {}, "requires": [], "outdated": False}
+            pkg_item = PackageTreeItem([dummy_pkg], conan_item, ConanPkgType.export)
+            conan_item.append_child(pkg_item)
             infos = app.conan_api.get_local_pkgs_from_ref(conan_ref)
             for info in infos:
                 pkg_item = PackageTreeItem([info], conan_item, ConanPkgType.pkg)
@@ -139,18 +143,22 @@ class PkgSelectModel(TreeModel):
         if role == Qt.ItemDataRole.DecorationRole:
             if item.type == ConanPkgType.ref:
                 return QIcon(get_themed_asset_icon("icons/package.svg"))
-            if item.type == ConanPkgType.editable:
+            elif item.type == ConanPkgType.editable:
                 return QIcon(get_themed_asset_icon("icons/edit.svg"))
-            if item.type == ConanPkgType.pkg:
+            elif item.type == ConanPkgType.pkg:
                 profile_name = self.get_quick_profile_name(item)
                 return get_platform_icon(profile_name)
+            elif item.type == ConanPkgType.export:
+                return QIcon(get_themed_asset_icon("icons/export_notes.svg"))
         if role == Qt.ItemDataRole.DisplayRole:
             if item.type == ConanPkgType.ref:
                 return item.data(index.column())
-            if item.type == ConanPkgType.editable:
+            elif item.type == ConanPkgType.editable:
                 return item.data(index.column()) + " (editable)"
-            if item.type == ConanPkgType.pkg:
+            elif item.type == ConanPkgType.pkg:
                 return self.get_quick_profile_name(item)
+            elif item.type == ConanPkgType.export:
+                return "export"
         if role == Qt.ItemDataRole.FontRole:
             if item.type == ConanPkgType.editable:
                 font = QFont() 

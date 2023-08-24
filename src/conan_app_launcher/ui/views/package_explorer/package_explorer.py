@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 
 from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from conan_app_launcher.ui.common.model import re_register_signal
-from conan_app_launcher.ui.common.theming import get_themed_asset_icon
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.views.package_explorer.controller import PackageFileExplorerController, PackageSelectionController
 from conan_app_launcher.ui.widgets import RoundedMenu
@@ -110,6 +109,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._init_pkg_file_context_menu()
         cfr = ConanRef.loads(conan_ref)
         disp_ref = f"{cfr.name}/{cfr.version}" # only package/version
+        if pkg.get("id", "") == "export":
+            disp_ref += " (export)"
         idx = self._ui.package_tab_widget.currentIndex()
         self._ui.package_tab_widget.setTabText(idx, disp_ref)
         self._ui.package_tab_widget.setTabToolTip(idx, pretty_print_pkg_info(pkg))
@@ -297,6 +298,11 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         else:
             self._add_link_action.setVisible(True)
             self._edit_file_action.setVisible(True)
+        pkg_info  = self._pkg_tabs_ctrl[tab_idx].get_conan_pkg_info()
+        if pkg_info.get("id") == "export":
+            self._add_link_action.setVisible(False)
+        else:
+            self._add_link_action.setVisible(True)
         self.file_cntx_menu.exec(self._ui.package_file_view.mapToGlobal(position))
 
     def select_local_package_from_ref(self, conan_ref: str) -> bool:
