@@ -18,7 +18,7 @@ from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject
                             Qt, QUrl, SignalInstance)
 from PySide6.QtWidgets import (QApplication, QTextBrowser, QLineEdit, QMessageBox, QTreeView, QWidget)
 
-from .model import (ConanPkgType, CalFileSystemModel, PackageFilter, PackageTreeItem,
+from .model import (PkgSelectionType, CalFileSystemModel, PackageFilter, PackageTreeItem,
                     PkgSelectModel)
 
 if TYPE_CHECKING:
@@ -41,6 +41,9 @@ class PackageSelectionController(QObject):
 
         base_signals.conan_pkg_removed.connect(self.on_conan_pkg_removed)
 
+    def on_pkg_refresh_clicked(self):
+        self.refresh_pkg_selection_view(update=True)
+
     def on_open_export_folder_requested(self):
         conan_ref = self.get_selected_conan_ref()
         conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_ref))
@@ -52,8 +55,26 @@ class PackageSelectionController(QObject):
         loader.async_loading(self._view, show_conanfile, (conan_ref,), loading_text="Opening Conanfile...")
         loader.wait_for_finished()
 
-    def on_pkg_refresh_clicked(self):
-        self.refresh_pkg_selection_view(update=True)
+
+    def on_show_build_info(self):
+        conan_ref = self.get_selected_conan_ref()
+        buildinfos = app.conan_api.get_conan_buildinfo(ConanRef.loads(conan_ref))
+        # loader = AsyncLoader(self)
+        # loader.async_loading(self._view, app.conan_api.conan.get_conan_buildinfo,
+        #                       (ConanRef.loads(conan_ref),), loading_text="Loading build info...")
+        # loader.wait_for_finished()
+        from conan_app_launcher.ui.dialogs.crash.crash_ui import Ui_Dialog, QDialog
+        dialog = QDialog()
+        dialog_ui = Ui_Dialog()
+        dialog_ui.setupUi(dialog)
+        # dialog_ui.crash_message_label.setText(html_crash_text)
+        dialog_ui.error_text_browser.setText(buildinfos)
+        # pixmapi = QStyle.StandardPixmap.SP_MessageBoxCritical
+        # icon = dialog.style().standardIcon(pixmapi)
+        # dialog.setWindowIcon(icon)
+        dialog.setMinimumWidth(800)
+        dialog.exec()
+
 
     def get_selected_pkg_source_item(self) -> Optional[PackageTreeItem]:
         indexes = self._view.selectedIndexes()
@@ -79,7 +100,7 @@ class PackageSelectionController(QObject):
         if not source_item:
             return ""
         conan_ref_item = source_item
-        if source_item.type in [ConanPkgType.pkg, ConanPkgType.export]:
+        if source_item.type in [PkgSelectionType.pkg, PkgSelectionType.export]:
             conan_ref_item = source_item.parent()
         if not conan_ref_item:
             return ""
@@ -87,7 +108,7 @@ class PackageSelectionController(QObject):
 
     def get_selected_conan_pkg_info(self) -> ConanPkg:
         source_item = self.get_selected_pkg_source_item()
-        if not source_item or source_item.type == ConanPkgType.ref:
+        if not source_item or source_item.type == PkgSelectionType.ref:
             return ConanPkg()
         return source_item.item_data[0]
 
@@ -216,10 +237,10 @@ class PackageSelectionController(QObject):
         source_item = self.get_selected_pkg_source_item()
         if not source_item:
             return
-        if source_item.type in [ConanPkgType.ref, ConanPkgType.editable]:
+        if source_item.type in [PkgSelectionType.ref, PkgSelectionType.editable]:
             return
         conan_ref = self.get_selected_conan_ref()
-        self._conan_pkg_selected.emit(conan_ref, self.get_selected_conan_pkg_info())
+        self._conan_pkg_selected.emit(conan_ref, self.get_selected_conan_pkg_info(), source_item.type)
 
 
 class PackageFileExplorerController(QObject):
@@ -233,7 +254,7 @@ class PackageFileExplorerController(QObject):
         self._pkg_path_label = pkg_path_label
         self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
-        # self._conan_pkg_selected.connect(self.on_pkg_selection_change)
+        self._type = PkgSelectionType.ref
 
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
@@ -241,13 +262,16 @@ class PackageFileExplorerController(QObject):
     def get_conan_pkg_info(self):
         return self._current_pkg
 
-    def on_pkg_selection_change(self, conan_ref: str, pkg_info: ConanPkg):
+    def get_conan_pkg_type(self):
+        return self._type
+
+    def on_pkg_selection_change(self, conan_ref: str, pkg_info: ConanPkg, type: PkgSelectionType):
         """ Change folder in file view """
         self._current_ref = conan_ref
         self._current_pkg = pkg_info
-        if pkg_info.get("id", "") == "editable":
+        if type == PkgSelectionType.editable:
             pkg_path =  app.conan_api.get_editables_package_path(ConanRef.loads(conan_ref))
-        elif pkg_info.get("id", "") == "export":
+        if type == PkgSelectionType.export:
             pkg_path =  app.conan_api.get_export_folder(ConanRef.loads(conan_ref))
         else:
             pkg_path = app.conan_api.get_package_folder(ConanRef.loads(conan_ref), pkg_info.get("id", ""))

@@ -228,15 +228,16 @@ class ConanApi(ConanUnifiedApi):
         
     def get_conan_buildinfo(self, conan_ref: ConanRef, profile="", conan_options: ConanOptions = {}):
         # install ref to temp dir and use generator
-        temp_path = Path(gettempdir()) / str(ConanPkgRef(conan_ref)).replace("/", ".").replace(":", ".").replace("@", ".")
+        temp_path = Path(gettempdir()) / str(conan_ref).replace("/", ".").replace("@", ".")
         temp_path.mkdir(parents=True, exist_ok=True)
         with chdir(temp_path): # use cli here, API cannnot do job easily and we wan to parse the file output
             self.install_reference(conan_ref, generators=["txt"])
         # read conanbuildinfo json
-        from conans.client.generators import TXTGenerator
-        content = None
+        # from conans.client.generators import TXTGenerator
+        content = ""
         try:
-            content = TXTGenerator.loads((temp_path / "conanbuildinfo.txt").read_text())
+            content = (temp_path / "conanbuildinfo.txt").read_text()
+            #content = TXTGenerator.loads((temp_path / "conanbuildinfo.txt").read_text())
         except Exception as e:
             Logger().error(f"Can't read conanbuildinfo.txt for '<b>{str(conan_ref)}</b>': {str(e)}")
         return content

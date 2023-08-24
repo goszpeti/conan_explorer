@@ -5,6 +5,7 @@ from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef, pretty_pr
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.views.package_explorer.controller import PackageFileExplorerController, PackageSelectionController
+from conan_app_launcher.ui.views.package_explorer.model import PkgSelectionType
 from conan_app_launcher.ui.widgets import RoundedMenu
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QKeySequence, QShowEvent, QResizeEvent, QAction
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class LocalConanPackageExplorer(PluginInterfaceV1):
-    conan_pkg_selected = Signal(str, dict)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
+    conan_pkg_selected = Signal(str, dict, PkgSelectionType)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
                  base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
@@ -101,7 +102,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             if ctrl._model:
                 self._ui.package_path_label.setText(ctrl._model.rootPath())
 
-    def on_pkg_selection_change(self, conan_ref: str, pkg: ConanPkg):
+    def on_pkg_selection_change(self, conan_ref: str, pkg: ConanPkg, type: PkgSelectionType):
         # init/update the context menu
         for ctrl in self._pkg_tabs_ctrl:
             re_register_signal(ctrl._view.customContextMenuRequested,
@@ -109,7 +110,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._init_pkg_file_context_menu()
         cfr = ConanRef.loads(conan_ref)
         disp_ref = f"{cfr.name}/{cfr.version}" # only package/version
-        if pkg.get("id", "") == "export":
+        if type == PkgSelectionType.export:
             disp_ref += " (export)"
         idx = self._ui.package_tab_widget.currentIndex()
         self._ui.package_tab_widget.setTabText(idx, disp_ref)
@@ -117,7 +118,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.package_tab_widget.tabBar().setExpanding(True)
         ctrl = self._pkg_tabs_ctrl[idx]
 
-        ctrl.on_pkg_selection_change(conan_ref, pkg)
+        ctrl.on_pkg_selection_change(conan_ref, pkg, type)
         if ctrl._model:
             self._ui.package_path_label.setText(ctrl._model.rootPath())
 
@@ -166,6 +167,11 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.set_themed_icon(self.install_ref_action, "icons/download_pkg.svg")
         self.select_cntx_menu.addAction(self.install_ref_action)
         self.install_ref_action.triggered.connect(self._pkg_sel_ctrl.on_install_ref_requested)
+
+        self.show_build_info_action = QAction("Show package build info", self)
+        self.set_themed_icon(self.show_build_info_action, "icons/download.svg")
+        self.select_cntx_menu.addAction(self.show_build_info_action)
+        self.show_build_info_action.triggered.connect(self._pkg_sel_ctrl.on_show_build_info)
 
         self.remove_ref_action = QAction("Remove package(s)", self)
         self.set_themed_icon(self.remove_ref_action, "icons/delete.svg")
@@ -298,8 +304,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         else:
             self._add_link_action.setVisible(True)
             self._edit_file_action.setVisible(True)
-        pkg_info  = self._pkg_tabs_ctrl[tab_idx].get_conan_pkg_info()
-        if pkg_info.get("id") == "export":
+        pkg_type  = self._pkg_tabs_ctrl[tab_idx].get_conan_pkg_type()
+        if pkg_type == PkgSelectionType.export:
             self._add_link_action.setVisible(False)
         else:
             self._add_link_action.setVisible(True)
