@@ -79,7 +79,7 @@ def load_qapp():
         Logger().debug("Can't set DPI Rounding")
     qt_app = QtWidgets.QApplication([])
     qt_app.setApplicationName(APP_NAME)
-    qt_app.setApplicationDisplayName(APP_NAME)
+    qt_app.setApplicationDisplayName(APP_NAME + " " + __version__)
     from .crash import bug_dialog_exc_hook
     sys.excepthook = bug_dialog_exc_hook  # dialog needs qt_app
     from conan_app_launcher.ui.common import activate_theme

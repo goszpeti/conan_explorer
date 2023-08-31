@@ -69,6 +69,7 @@ class PackageSelectionController(QObject):
         loader.wait_for_finished()
 
     def show_build_info_dialog(self, conan_ref: str):
+        # TODO: show install dialog to select profile and options
         buildinfos = app.conan_api.get_conan_buildinfo(ConanRef.loads(conan_ref))
         if not buildinfos:
             return
