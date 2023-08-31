@@ -1,23 +1,23 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import conan_app_launcher.app as app
+from conan_app_launcher import asset_path
 from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef
 from conan_app_launcher.app.system import (calc_paste_same_dir_name, copy_path_with_overwrite,
                                            delete_path, execute_cmd, open_cmd_in_path, open_in_file_manager, run_file)
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
-from conan_app_launcher.ui.common import show_conanfile
-from conan_app_launcher.ui.common.model import re_register_signal
+from conan_app_launcher.ui.common import show_conanfile, re_register_signal, ConfigHighlighter
 from conan_app_launcher.ui.config import UiAppLinkConfig
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from conan_app_launcher.ui.views import AppGridView
 from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
                             Qt, QUrl, SignalInstance)
-from PySide6.QtWidgets import (QApplication, QTextBrowser, QLineEdit, QMessageBox, QTreeView, QWidget)
-
+from PySide6.QtWidgets import (QApplication, QTextBrowser, QLineEdit, QMessageBox, QTreeView, QWidget, QDialog, QVBoxLayout)
+from PySide6.QtGui import QIcon
 from .model import (PkgSelectionType, CalFileSystemModel, PackageFilter, PackageTreeItem,
                     PkgSelectModel)
 
@@ -45,76 +45,91 @@ class PackageSelectionController(QObject):
         self.refresh_pkg_selection_view(update=True)
 
     def on_open_export_folder_requested(self):
-        conan_ref = self.get_selected_conan_ref()
-        conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_ref))
+        conan_refs = self.get_selected_conan_refs()
+        if len(conan_refs) != 1:
+            return
+        conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_refs[0]))
         open_in_file_manager(conanfile)
 
     def on_show_conanfile_requested(self):
-        conan_ref = self.get_selected_conan_ref()
+        conan_refs = self.get_selected_conan_refs()
+        if len(conan_refs) != 1:
+            return
         loader = AsyncLoader(self)
-        loader.async_loading(self._view, show_conanfile, (conan_ref,), loading_text="Opening Conanfile...")
+        loader.async_loading(self._view, show_conanfile, (conan_refs[0],), loading_text="Opening Conanfile...")
         loader.wait_for_finished()
 
-
     def on_show_build_info(self):
-        conan_ref = self.get_selected_conan_ref()
+        conan_refs = self.get_selected_conan_refs()
+        if len(conan_refs) != 1:
+            return
+        loader = AsyncLoader(self)
+        loader.async_loading(self._view, self.show_build_info_dialog,
+                              (conan_refs[0],), loading_text="Loading build info...")
+        loader.wait_for_finished()
+
+    def show_build_info_dialog(self, conan_ref: str):
         buildinfos = app.conan_api.get_conan_buildinfo(ConanRef.loads(conan_ref))
-        # loader = AsyncLoader(self)
-        # loader.async_loading(self._view, app.conan_api.conan.get_conan_buildinfo,
-        #                       (ConanRef.loads(conan_ref),), loading_text="Loading build info...")
-        # loader.wait_for_finished()
-        from conan_app_launcher.ui.dialogs.crash.crash_ui import Ui_Dialog, QDialog
+        if not buildinfos:
+            return
         dialog = QDialog()
-        dialog_ui = Ui_Dialog()
-        dialog_ui.setupUi(dialog)
-        # dialog_ui.crash_message_label.setText(html_crash_text)
-        dialog_ui.error_text_browser.setText(buildinfos)
-        # pixmapi = QStyle.StandardPixmap.SP_MessageBoxCritical
-        # icon = dialog.style().standardIcon(pixmapi)
-        # dialog.setWindowIcon(icon)
-        dialog.setMinimumWidth(800)
+        dialog.setWindowIcon(QIcon(str(asset_path / "icons" / "icon.ico")))
+        dialog.setWindowTitle("Build Info")
+        dialog.resize(800, 500)
+        verticalLayout = QVBoxLayout(dialog)
+        text_browser = QTextBrowser(dialog)
+        text_browser.setReadOnly(True)
+        text_browser.setOpenExternalLinks(True)
+        text_browser.setText(buildinfos)
+        verticalLayout.addWidget(text_browser)
+        self.conan_config_highlighter = ConfigHighlighter(text_browser.document(), "ini")
         dialog.exec()
 
 
-    def get_selected_pkg_source_item(self) -> Optional[PackageTreeItem]:
+    def get_selected_pkg_source_items(self) -> List[PackageTreeItem]:
         indexes = self._view.selectedIndexes()
-        if len(indexes) != 1:
-            Logger().debug(f"Mismatch in selected items for context action: {str(len(indexes))}")
-            return None
-        view_index = self._view.selectedIndexes()[0]
-        model: PackageFilter = view_index.model()  # type: ignore
-        source_item: PackageTreeItem = model.mapToSource(view_index).internalPointer()  # type: ignore
-        return source_item
+        if len(indexes) == 0:
+            return []
+        model: PackageFilter = indexes[0].model()  # type: ignore
+        source_items: List[PackageTreeItem] = []
+        for index in indexes:
+            source_items.append(model.mapToSource(index).internalPointer())  # type: ignore
+        return source_items
 
     def get_selected_ref_with_pkg_id(self) -> Tuple[str, str]:
-        conan_ref = self.get_selected_conan_ref()
+        conan_refs = self.get_selected_conan_refs()
+        if len(conan_refs) > 1:
+            return "", ""
         pkg_info = self.get_selected_conan_pkg_info()
         pkg_id = ""
         if pkg_info:
             pkg_id = pkg_info.get("id", "")
-        return conan_ref, pkg_id
+        return conan_refs[0], pkg_id
 
-    def get_selected_conan_ref(self) -> str:
+    def get_selected_conan_refs(self) -> List[str]:
         # no need to map from postition, since rightclick selects a single item
-        source_item = self.get_selected_pkg_source_item()
-        if not source_item:
-            return ""
-        conan_ref_item = source_item
-        if source_item.type in [PkgSelectionType.pkg, PkgSelectionType.export]:
-            conan_ref_item = source_item.parent()
-        if not conan_ref_item:
-            return ""
-        return conan_ref_item.item_data[0]
+        source_items = self.get_selected_pkg_source_items()
+        conan_refs = []
+        for conan_ref_item in source_items:
+            if conan_ref_item.type in [PkgSelectionType.pkg, PkgSelectionType.export]:
+                conan_ref_item: PackageTreeItem = conan_ref_item.parent()
+            if not conan_ref_item:
+                conan_refs.append("")
+            conan_refs.append(conan_ref_item.item_data[0])
+        return list(set(conan_refs))
 
     def get_selected_conan_pkg_info(self) -> ConanPkg:
-        source_item = self.get_selected_pkg_source_item()
-        if not source_item or source_item.type == PkgSelectionType.ref:
+        source_items = self.get_selected_pkg_source_items()
+        if not len(source_items) == 1:
+            return ConanPkg()
+        source_item = source_items[0]
+        if  source_item.type == PkgSelectionType.ref:
             return ConanPkg()
         return source_item.item_data[0]
 
     def on_copy_ref_requested(self):
-        conan_ref = self.get_selected_conan_ref()
-        QApplication.clipboard().setText(conan_ref)
+        conan_refs = self.get_selected_conan_refs()
+        QApplication.clipboard().setText("\n".join(conan_refs))
 
     def on_install_ref_requested(self):
         conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
@@ -234,13 +249,13 @@ class PackageSelectionController(QObject):
 
     def on_pkg_selection_change(self):
         # get conan ref and pkg_id and emit signal
-        source_item = self.get_selected_pkg_source_item()
-        if not source_item:
+        source_items = self.get_selected_pkg_source_items()
+        if len(source_items) != 1:
             return
-        if source_item.type in [PkgSelectionType.ref, PkgSelectionType.editable]:
+        if source_items[0].type in [PkgSelectionType.ref, PkgSelectionType.editable]:
             return
-        conan_ref = self.get_selected_conan_ref()
-        self._conan_pkg_selected.emit(conan_ref, self.get_selected_conan_pkg_info(), source_item.type)
+        conan_refs = self.get_selected_conan_refs()
+        self._conan_pkg_selected.emit(conan_refs[0], self.get_selected_conan_pkg_info(), source_items[0].type)
 
 
 class PackageFileExplorerController(QObject):
@@ -317,91 +332,115 @@ class PackageFileExplorerController(QObject):
         file_path = Path(model_index.model().fileInfo(model_index).absoluteFilePath())
         run_file(file_path, True, args="")
 
-    def on_copy_file_as_path(self) -> str:
-        file = self.get_selected_pkg_path()
-        QApplication.clipboard().setText(file)
-        return file
+    def on_copy_file_as_path(self) ->   str:
+        files = self.get_selected_pkg_paths()
+        file_paths = "\n".join(files)
+        QApplication.clipboard().setText(file_paths)
+        return file_paths
 
     def on_open_terminal_in_dir(self) -> int:
-        selected_path = Path(self.get_selected_pkg_path())
+        selected_path = Path(self.get_selected_pkg_paths()[0]) # TODO!
         if selected_path.is_file():
             selected_path = selected_path.parent
         return open_cmd_in_path(selected_path)
 
     def on_edit_file(self):
-        selected_path = Path(self.get_selected_pkg_path())
-        if not selected_path.is_file():
+        selected_paths = self.get_selected_pkg_paths()
+        if len(selected_paths) != 1:
             return
-        editor = app.active_settings.get_string(FILE_EDITOR_EXECUTABLE)
-        if not editor:
-            Logger().info("No editor set up! Please configure it in the settings menu.")
-            return
-        execute_cmd([editor, str(selected_path)], False)
+        for selected_path in selected_paths:
+            if not Path(selected_path).is_file():
+                continue
+            editor = app.active_settings.get_string(FILE_EDITOR_EXECUTABLE)
+            if not editor:
+                Logger().info("No editor set up! Please configure it in the settings menu.")
+                return
+            execute_cmd([editor, selected_path], False)
 
     def on_file_delete(self):
-        path_to_delete = Path(self.get_selected_pkg_path())
+        selected_paths = self.get_selected_pkg_paths()
+        if len(selected_paths) != 1:
+            return
         msg = QMessageBox(parent=self._view)
         msg.setWindowTitle("Delete file")
-        msg.setText("Are you sure, you want to permanently delete this file/folder?\t")
+        msg.setText("Are you sure, you want to permanently delete this file(s)/folder(s)?\t")
         msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
         msg.setIcon(QMessageBox.Icon.Warning)
         reply = msg.exec()
         if reply != QMessageBox.StandardButton.Yes:
             return
-        delete_path(Path(path_to_delete))
+        for path in selected_paths:
+            delete_path(Path(path))
 
-    def on_file_copy(self) -> Optional[QUrl]:
-        file = self.get_selected_pkg_path()
-        if not file:
-            return None
+    def on_files_copy(self) -> List[QUrl]:
+        files = self.get_selected_pkg_paths()
+        if not files:
+            return []
         data = QMimeData()
-        url = QUrl.fromLocalFile(file)
-        data.setUrls([url])
+        urls = []
+        for file in files:
+            urls.append(QUrl.fromLocalFile(file))
+        data.setUrls(urls)
 
         QApplication.clipboard().setMimeData(data)
-        return url
+        return urls
     
-    def on_file_cut(self) -> Optional[QUrl]:
-        file = self.get_selected_pkg_path()
-        if not file:
-            return None
+    def on_files_cut(self) -> List[QUrl]:
+        files = self.get_selected_pkg_paths()
+        if not files:
+            return []
+        urls = []
+        for file in files:
+            urls.append(QUrl.fromLocalFile(file))
         data = QMimeData()
-        url = QUrl.fromLocalFile(file)
-        data.setUrls([url])
+        data.setUrls(urls)
         data.setProperty("action", "cut")
         self._model.clear_disabled_items() # type: ignore
-        self._model.add_disabled_items([file]) # type: ignore
+        self._model.add_disabled_items(files) # type: ignore
         self._view.repaint()
         QApplication.clipboard().setMimeData(data)
-        return url
+        return urls
     
     def on_file_rename(self):
-        file_view_index = self._get_pkg_file_source_item()
-        if not file_view_index:
+        file_view_indexes = self._get_pkg_file_source_items()
+        if not file_view_indexes:
             return None
-        self._view.edit(file_view_index)
-        return file_view_index
+        self._view.edit(file_view_indexes[-1])
+        return file_view_indexes
 
-    def on_file_paste(self):
+    def on_files_paste(self):
         data = QApplication.clipboard().mimeData()
         if not data:
             return
         if not data.hasUrls():
             return
         urls = data.urls()
+        # determine destination path
+        sel_item_paths = self.get_selected_pkg_paths()
+        if not sel_item_paths:
+            return
+        if len(sel_item_paths) == 1:
+            if self._is_selected_item_expanded():
+                dst_dir_path = Path(sel_item_paths)
+            else:
+                dst_dir_path = Path(sel_item_paths)
+                dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
+
         for url in urls:
             # try to copy
             if not url.isLocalFile():
                 continue
+            # determine destination path
             source_path = Path(url.toLocalFile())
-            sel_item_path = self.get_selected_pkg_path()
-            if not sel_item_path:
+            sel_item_paths = self.get_selected_pkg_paths()
+            if not sel_item_paths:
                 return
-            if self._is_selected_item_expanded():
-                dst_dir_path = Path(sel_item_path)
-            else:
-                dst_dir_path = Path(sel_item_path)
-                dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
+            if len(sel_item_paths) == 1:
+                if self._is_selected_item_expanded():
+                    dst_dir_path = Path(sel_item_paths)
+                else:
+                    dst_dir_path = Path(sel_item_paths)
+                    dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
             new_path_str = os.path.join(dst_dir_path, url.fileName())
             cut = True if data.property("action") == "cut" else False
             self.paste_path(source_path, Path(new_path_str), cut)
@@ -432,7 +471,7 @@ class PackageFileExplorerController(QObject):
 
 
     def on_add_app_link_from_file(self):
-        file_path = Path(self.get_selected_pkg_path())
+        file_path = Path(self.get_selected_pkg_paths())
         if not file_path.is_file():
             Logger().error("Please select a file, not a directory!")
             return
@@ -453,31 +492,35 @@ class PackageFileExplorerController(QObject):
         self._page_widgets.get_page_by_type(AppGridView).open_new_app_dialog_from_extern(app_config)
 
     def on_open_file_in_file_manager(self, model_index):
-        file_path = Path(self.get_selected_pkg_path())
+        file_path = Path(self.get_selected_pkg_paths()[-1])
         open_in_file_manager(file_path)
 
-    def _get_pkg_file_source_item(self) -> Optional[QModelIndex]:
-        indexes = self._view.selectedIndexes()
-        if len(indexes) == 0:  # can be multiple - always get 0
-            Logger().debug("No selected item for context action")
-            return None
-        return self._view.selectedIndexes()[0]
+    def _get_pkg_file_source_items(self) -> List[QModelIndex]:
+        indexes = []
+        for index in self._view.selectedIndexes():
+            if index.column() == 0: # we only need a row once
+                indexes.append(index)
+        return indexes
 
-    def get_selected_pkg_path(self) -> str:
+
+    def get_selected_pkg_paths(self) -> List[str]:
+        file_paths = []
         if not self._model:
-            return ""
-        file_view_index = self._get_pkg_file_source_item()
+            return file_paths
+        file_view_indexes = self._get_pkg_file_source_items()
         # if nothing selected return root
-        if not file_view_index:
-            return self._model.rootPath()
-        return self._model.fileInfo(file_view_index).absoluteFilePath()
+        if not file_view_indexes:
+            return [self._model.rootPath()]
+        for file_view_index in file_view_indexes:
+            file_paths.append(self._model.fileInfo(file_view_index).absoluteFilePath())
+        return file_paths 
 
     def _is_selected_item_expanded(self):
-        file_view_index = self._get_pkg_file_source_item()
+        file_view_indexes = self._get_pkg_file_source_items()
         # if nothing selected return root
-        if not file_view_index:
+        if len(file_view_indexes) != 1:
             return False
-        return self._view.isExpanded(file_view_index)
+        return self._view.isExpanded(file_view_indexes)
 
     def resize_file_columns(self):
         if self._view:

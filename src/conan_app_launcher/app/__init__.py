@@ -39,13 +39,13 @@ def run_application():
     loader = AsyncLoader(None)
     loader.async_loading(None, load_conan, (), cancel_button=False)
     loader.wait_for_finished()
+    # inline imports to optimize load times
     from conan_app_launcher.ui.main_window import MainWindow
     main_window = MainWindow(qt_app)
-    from PySide6 import QtGui
+    from PySide6 import QtGui 
     main_window.setWindowIcon(QtGui.QIcon(str(asset_path / "icons" / "icon.ico")))
     main_window.show()  # show first, then load appsgrid with progress bar
     main_window.load()
-    main_window.installEventFilter(main_window)
 
     qt_app.exec()
 
@@ -64,9 +64,11 @@ def load_conan():
 
 
 def load_qapp():
-    # apply Qt attributes (only possible before QApplication is created)
+    """ Load bootstrapping to be able to display a first widget. """
+    # this import takes seconds - it could only be possibly parallelized with a more basics gui frameworks
+    # loading screen or splash screen
     from PySide6 import QtCore, QtWidgets
-
+    # apply Qt attributes (only possible before QApplication is created)
     # to use icons in qss file
     QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
     # Passthrough seems to work well for high dpi scaling

@@ -205,18 +205,8 @@ class ListAppLink(QFrame):
         del edit_app_dialog  # call delete manually for faster thread cleanup
 
     def remove(self):
-        # last link can't be deleted!
-        if len(self.model.parent.apps) == 1:
-            msg = QMessageBox(parent=self)  # self._parent_tab
-            msg.setWindowTitle("Info")
-            msg.setText("Can't delete the last link!")
-            msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.exec()
-            return
-
         # confirmation dialog
-        message_box = QMessageBox(parent=self)  # self.parentWidget())
+        message_box = QMessageBox(parent=self)
         message_box.setWindowTitle("Delete app link")
         message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}\"?")
         message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)

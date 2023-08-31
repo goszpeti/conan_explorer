@@ -189,6 +189,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         # initial maximize state
         self.set_restore_max_button_state()
         self.enable_windows_native_animations()
+        self.installEventFilter(self) # used for resizing
 
     def nativeEvent(self, eventType, message):  # override
         """ Platform native events """

@@ -4,14 +4,15 @@ import os
 from time import sleep
 from typing import Any, Callable, Optional, Tuple
 
-from conan_app_launcher import DEBUG_LEVEL
+from conan_app_launcher import DEBUG_LEVEL, asset_path
 from conan_app_launcher.app.logger import Logger
-from PySide6 import QtCore, QtWidgets
-from PySide6.QtCore import Qt, Signal, SignalInstance
+from PySide6.QtCore import Qt, QObject, QThread, Signal, SignalInstance
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication, QProgressDialog, QPushButton, QWidget
 
 from conan_app_launcher.app.system import str2bool
 
-class Worker(QtCore.QObject):
+class Worker(QObject):
     """ Generic worker for Qt, which can call any function with args """
     finished: SignalInstance = Signal()  # type: ignore
 
@@ -31,15 +32,15 @@ class Worker(QtCore.QObject):
         self.finished.emit()
 
 
-class AsyncLoader(QtCore.QObject):
+class AsyncLoader(QObject):
     # reuse the same progress_dialog instance for every loading dialog - there can only be one at a time
-    __progress_dialog: Optional[QtWidgets.QProgressDialog] = None
+    __progress_dialog: Optional[QProgressDialog] = None
 
-    def __init__(self, parent: Optional[QtCore.QObject]):
+    def __init__(self, parent: Optional[QObject]):
         super().__init__(parent)
         # initial setup
         if AsyncLoader.__progress_dialog is None: # implicit check for init
-            progress_dialog = QtWidgets.QProgressDialog()
+            progress_dialog = QProgressDialog()
             progress_dialog.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
             progress_dialog.setAttribute(Qt.WidgetAttribute.WA_ShowModal)
             progress_dialog.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
@@ -54,30 +55,31 @@ class AsyncLoader(QtCore.QObject):
             progress_dialog.setMinimumDuration(1000)
             progress_dialog.setMinimumWidth(500)
             progress_dialog.setMaximumWidth(600)
+            progress_dialog.setWindowIcon(QIcon(str(asset_path / "icons" / "icon.ico")))
             AsyncLoader.__progress_dialog = progress_dialog
         self.progress_dialog = AsyncLoader.__progress_dialog
         self.worker: Optional[Worker] = None
-        self.load_thread: Optional[QtCore.QThread] = None
+        self.load_thread: Optional[QThread] = None
         self.finished = True
 
-    def async_loading(self, dialog_parent: Optional[QtWidgets.QWidget], work_task: Callable, worker_args: Tuple[Any, ...] = (),
+    def async_loading(self, dialog_parent: Optional[QWidget], work_task: Callable, worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,
                       loading_text: str = "Loading", cancel_button=True):
         self.finished = False
         self.progress_dialog.setLabelText(loading_text)
 
         if cancel_button:
-            self.cancel_button = QtWidgets.QPushButton("Cancel")
+            self.cancel_button = QPushButton("Cancel")
             self.progress_dialog.setCancelButton(self.cancel_button)
         else:
             self.progress_dialog.setCancelButton(None) # type: ignore
 
         # set position in middle of window
-        qapp: QtWidgets.QApplication = QtWidgets.QApplication.instance()  # type: ignore
+        qapp: QApplication = QApplication.instance()  # type: ignore
         rectangle = self.progress_dialog.frameGeometry()
         if dialog_parent:
             while not qapp.activeWindow():
-                QtWidgets.QApplication.processEvents()
+                QApplication.processEvents()
             if qapp.activeWindow():
                 rectangle.moveCenter(qapp.activeWindow().frameGeometry().center())
                 self.progress_dialog.move(rectangle.topLeft())
@@ -92,7 +94,7 @@ class AsyncLoader(QtCore.QObject):
             return
 
         self.worker = Worker(work_task, worker_args)
-        self.load_thread = QtCore.QThread(dialog_parent)
+        self.load_thread = QThread(dialog_parent)
         self.load_thread.setObjectName(f"loader_thread_{str(self)}")
         self.worker.moveToThread(self.load_thread)
         self.load_thread.started.connect(self.worker.work)
@@ -120,4 +122,4 @@ class AsyncLoader(QtCore.QObject):
         # execute once
         while not self.finished:
             sleep(0.01)
-            QtWidgets.QApplication.processEvents()
+            QApplication.processEvents()

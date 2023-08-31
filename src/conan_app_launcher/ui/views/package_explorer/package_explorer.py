@@ -52,7 +52,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.package_path_label.setText("<Package path>")
         self._ui.package_path_label.setAlignment(Qt.AlignmentFlag.AlignRight)  # must be called after every text set
         self._ui.package_tab_widget.currentChanged.connect(self.on_tab_index_changed)
-        self._ui.package_tab_widget.tabBar().setTabButton(1, QTabBar.ButtonPosition.RightSide, None)
+        self._ui.package_tab_widget.tabBar().setTabButton(1, QTabBar.ButtonPosition.RightSide, None) # type: ignore
         self._ui.package_tab_widget.tabCloseRequested.connect(self.on_close_tab)
         self._ui.package_tab_widget.tabBar().setSelectionBehaviorOnRemove(QTabBar.SelectionBehavior.SelectLeftTab)
         self.updateGeometry()
@@ -153,10 +153,10 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self._pkg_sel_ctrl.on_copy_ref_requested)
 
-        self.open_export_action = QAction("Open export Folder", self)
-        self.set_themed_icon(self.open_export_action, "icons/opened_folder.svg")
-        self.select_cntx_menu.addAction(self.open_export_action)
-        self.open_export_action.triggered.connect(self._pkg_sel_ctrl.on_open_export_folder_requested)
+        # self.open_export_action = QAction("Open export Folder", self)
+        # self.set_themed_icon(self.open_export_action, "icons/opened_folder.svg")
+        # self.select_cntx_menu.addAction(self.open_export_action)
+        # self.open_export_action.triggered.connect(self._pkg_sel_ctrl.on_open_export_folder_requested)
 
         self.show_conanfile_action = QAction("Show conanfile", self)
         self.set_themed_icon(self.show_conanfile_action, "icons/file_preview.svg")
@@ -179,7 +179,17 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.remove_ref_action.triggered.connect(self._pkg_sel_ctrl.on_remove_ref_requested)
 
     def on_selection_context_menu_requested(self, position):
-        self._pkg_sel_ctrl.get_selected_conan_ref()
+        if len(self._pkg_sel_ctrl.get_selected_conan_refs()) > 1:
+            self.show_build_info_action.setVisible(False)
+            self.show_conanfile_action.setVisible(False)
+            self.install_ref_action.setVisible(False)
+            self.remove_ref_action.setVisible(False)
+        else:
+            self.show_build_info_action.setVisible(True)
+            self.show_conanfile_action.setVisible(True)
+            self.install_ref_action.setVisible(True)
+            self.remove_ref_action.setVisible(False)
+
         self.select_cntx_menu.exec(self._ui.package_select_view.mapToGlobal(position))
 
     # Package File Explorer context menu
@@ -200,13 +210,13 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_rename()
 
     def on_file_copy(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_copy()
+        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_copy()
 
     def on_file_cut(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_cut()
+        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_cut()
 
     def on_file_paste(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_paste()
+        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_paste()
 
     def on_file_delete(self, model_index):
         self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_delete()
@@ -295,20 +305,26 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         """ Disable some context menu items depending on context """
         if not self.file_cntx_menu:
             return
-        tab_idx = self._ui.package_tab_widget.currentIndex()
-        path = self._pkg_tabs_ctrl[tab_idx].get_selected_pkg_path()
         self._add_link_action.setEnabled(True)
-        if os.path.isdir(path):
+        self._edit_file_action.setVisible(True)
+        self._rename_action.setVisible(True)
+
+        tab_idx = self._ui.package_tab_widget.currentIndex()
+        paths = self._pkg_tabs_ctrl[tab_idx].get_selected_pkg_paths()
+        if len (paths) > 1:
             self._add_link_action.setVisible(False)
             self._edit_file_action.setVisible(False)
-        else:
-            self._add_link_action.setVisible(True)
-            self._edit_file_action.setVisible(True)
+            self._rename_action.setVisible(False)
+        elif os.path.isdir(paths[0]):
+            self._add_link_action.setVisible(False)
+            self._edit_file_action.setVisible(False)
+
         pkg_type  = self._pkg_tabs_ctrl[tab_idx].get_conan_pkg_type()
         if pkg_type == PkgSelectionType.export:
             self._add_link_action.setVisible(False)
         else:
             self._add_link_action.setVisible(True)
+
         self.file_cntx_menu.exec(self._ui.package_file_view.mapToGlobal(position))
 
     def select_local_package_from_ref(self, conan_ref: str) -> bool:
