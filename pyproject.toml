@@ -3,5 +3,4 @@ line-length=88
 
 [tool.autopep8]
 max_line_length = 88
-exclude = .git,__pycache__,build,dist,venv
 in-place = true

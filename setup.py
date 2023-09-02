@@ -36,7 +36,7 @@ if conan_major_version == "1":
 if conan_major_version == "2":
     conan_req_spec = "conan>=2.0, <2.1"
 REQUIRES = [
-    'PySide6-Essentials>=6.3.0', # LGPLv3
+    "PySide6-Essentials>=6.3.0", # LGPLv3
     conan_req_spec,  # MIT License
     "jsonschema>=3.2.0, <4",  # MIT License
     # compatibility
@@ -49,12 +49,12 @@ REQUIRES = [
 ]
 
 TEST_REQUIRES = [
-    "pytest==6.2.5",
+    "pytest==6.2.5", # TODO update to 7
     "pytest-cov==4.0.0",
-    "pytest-mock==3.9.0",
-    "pytest-qt==4.1.0",
-    "pytest-check==1.0.10",
-    "psutil",
+    "pytest-mock==3.11.1",
+    "pytest-qt==4.2.0",
+    "pytest-check==1.3.0",
+    "psutil==5.9.5",
     "pywin32; sys_platform=='win32'",
 ]
 
