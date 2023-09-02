@@ -1,20 +1,20 @@
 
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
-import conan_app_launcher.app as app
+
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon, QAction
+from PySide6.QtWidgets import (QDialog, QFrame, QMessageBox, QWidget)
 
 from conan_app_launcher import ICON_SIZE, INVALID_PATH
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import open_in_file_manager, run_file
 from conan_app_launcher.ui.common import get_themed_asset_icon, measure_font_width
-from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
-from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
+from conan_app_launcher.ui.dialogs.reorder_dialog import ReorderDialog
 from conan_app_launcher.ui.widgets import RoundedMenu
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import (QDialog, QFrame, QMessageBox, QWidget)
 
 from .dialogs import AppEditDialog
+from .model import UiAppLinkModel
 
 if TYPE_CHECKING:
     from .tab import TabList, TabList  # TabGrid
@@ -36,7 +36,8 @@ class ListAppLink(QFrame):
     """
     icon_size: int
 
-    def __init__(self, parent: Optional[QWidget], parent_tab: "TabList", model: UiAppLinkModel, icon_size=ICON_SIZE):
+    def __init__(self, parent: Optional[QWidget], parent_tab: "TabList",
+                 model: UiAppLinkModel, icon_size=ICON_SIZE):
         super().__init__(parent)
         self.setObjectName(repr(self))
         self.icon_size = icon_size
@@ -47,10 +48,14 @@ class ListAppLink(QFrame):
         self._ui = Ui_Form()
         self._ui.setupUi(self)
 
-        self._ui.edit_button.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
-        self._ui.remove_button.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
-        self._ui.app_button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self._ui.app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
+        self._ui.edit_button.setIcon(
+            QIcon(get_themed_asset_icon("icons/edit.svg")))
+        self._ui.remove_button.setIcon(
+            QIcon(get_themed_asset_icon("icons/delete.svg")))
+        self._ui.app_button.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu)
+        self._ui.app_button.customContextMenuRequested.connect(
+            self.on_context_menu_requested)
 
         # connect signals
         self._ui.app_button.clicked.connect(self.on_click)
@@ -62,31 +67,36 @@ class ListAppLink(QFrame):
         """ Setup context menu. """
         self.menu = RoundedMenu()
         self.open_fm_action = QAction("Show in File Manager", self)
-        self.open_fm_action.setIcon(QIcon(get_themed_asset_icon("icons/file_explorer.svg")))
+        self.open_fm_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/file_explorer.svg")))
         self.menu.addAction(self.open_fm_action)
         self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
 
         self.menu.addSeparator()
 
         self.add_action = QAction("Add new App Link", self)
-        self.add_action.setIcon(QIcon(get_themed_asset_icon("icons/add_link.svg")))
+        self.add_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/add_link.svg")))
         self.menu.addAction(self.add_action)
         self.add_action.triggered.connect(self.open_app_link_add_dialog)
 
         self.edit_action = QAction("Edit", self)
-        self.edit_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
+        self.edit_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/edit.svg")))
         self.menu.addAction(self.edit_action)
         self.edit_action.triggered.connect(self.open_edit_dialog)
 
         self.remove_action = QAction("Remove App Link", self)
-        self.remove_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
+        self.remove_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/delete.svg")))
         self.menu.addAction(self.remove_action)
         self.remove_action.triggered.connect(self.remove)
 
         self.menu.addSeparator()
 
         self.reorder_action = QAction("Reorder App Links", self)
-        self.reorder_action.setIcon(QIcon(get_themed_asset_icon("icons/rearrange.svg")))
+        self.reorder_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/rearrange.svg")))
         self.reorder_action.triggered.connect(self.on_move)
 
         self.menu.addAction(self.reorder_action)
@@ -104,7 +114,8 @@ class ListAppLink(QFrame):
     def resizeEvent(self, event):
         if not self._parent_tab:
             return
-        content_frame: QWidget = self._parent_tab.parent().parent().parent().parent().parent()  # type: ignore
+        content_frame: QWidget = self._parent_tab.parent(
+        ).parent().parent().parent().parent()  # type: ignore
         max_cl_width = content_frame.width() - self._ui.left_frame.width() - \
             self._ui.right_frame.width()
         if max_cl_width < 400:  # TODO find better solution
@@ -164,7 +175,8 @@ class ListAppLink(QFrame):
             if len(word) < max_length:
                 new_word = word
             else:
-                n_to_short = int(len(word) / max_length) + int(len(word) % max_length > 0)
+                n_to_short = int(len(word) / max_length) + \
+                    int(len(word) % max_length > 0)
                 new_word = ""
                 for i in range(n_to_short):
                     new_word += word[max_length*i:max_length*(i+1)] + "\n"
@@ -184,7 +196,8 @@ class ListAppLink(QFrame):
         self._ui.app_button.set_icon(self.model.get_icon())
         self._ui.executable_value_label.setText(self.model.executable)
         self._ui.arguments_value_label.setText(self.model.args)
-        self._ui.open_shell_checkbox.setChecked(self.model.is_console_application)
+        self._ui.open_shell_checkbox.setChecked(
+            self.model.is_console_application)
 
         self.apply_conan_info()  # update with offline information
 
@@ -208,8 +221,10 @@ class ListAppLink(QFrame):
         # confirmation dialog
         message_box = QMessageBox(parent=self)
         message_box.setWindowTitle("Delete app link")
-        message_box.setText(f"Are you sure, you want to delete the link \"{self.model.name}\"?")
-        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setText(
+            f"Are you sure, you want to delete the link \"{self.model.name}\"?")
+        message_box.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
@@ -228,9 +243,10 @@ class ListAppLink(QFrame):
     def on_click(self):
         """ Callback for opening the executable on click """
         if not self.model.get_executable_path().is_file():
-            Logger().error(
-                f"Can't find file in package {self.model.conan_ref}:\n    {str(self.model._executable)}")
-        run_file(self.model.get_executable_path(), self.model.is_console_application, self.model.args)
+            Logger().error(("Can't find file in package " 
+                            f"{self.model.conan_ref}:\n    {str(self.model._executable)}"))
+        run_file(self.model.get_executable_path(),
+                 self.model.is_console_application, self.model.args)
 
     def apply_conan_info(self):
         """ Update with new conan data """

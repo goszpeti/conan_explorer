@@ -9,10 +9,10 @@ from conan_app_launcher import BUILT_IN_PLUGIN, PathLike, base_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import get_default_file_editor
 
-from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
-               GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL,
-               GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, VIEW_SECTION_NAME, WINDOW_SIZE,
-               SettingsInterface)
+from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE,
+               FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_FLUENT,
+               GUI_STYLE_MATERIAL, GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, PLUGINS_SECTION_NAME,
+               VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
 
 
 def application_settings_spec() -> Dict[str, Dict[str, Any]]:
@@ -46,7 +46,8 @@ class IniSettings(SettingsInterface):
     """
 
     def __init__(self, ini_file_path: Optional[PathLike], auto_save=True,
-                 default_values: Dict[str, Dict[str, Any]] = application_settings_spec(),
+                 default_values: Dict[str, Dict[str, Any]
+                                      ] = application_settings_spec(),
                  custom_key_enabled_sections=[PLUGINS_SECTION_NAME]):
         """
         Read config.ini file to load settings.
@@ -150,8 +151,10 @@ class IniSettings(SettingsInterface):
             for node in self._parser.sections():
                 setting_keys = set(list(self._values.get(node, {}).keys()))
                 if node in self._custom_key_enabled_sections:
-                    setting_keys = setting_keys.union(set(self._get_section(node).keys()))
-                if not self._values.get(node):  # empty section - this is a user filled dict
+                    setting_keys = setting_keys.union(
+                        set(self._get_section(node).keys()))
+                # empty section - this is a user filled dict
+                if not self._values.get(node):
                     update_needed |= self._read_dict_setting(node)
                 for setting in setting_keys:
                     update_needed |= self._read_setting(setting, node)
@@ -160,7 +163,8 @@ class IniSettings(SettingsInterface):
             Logger().error(
                 f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
             try:
-                os.remove(str(self._ini_file_path))  # let an exeception to the user, file can't be deleted
+                # let an exeception to the user, file can't be deleted
+                os.remove(str(self._ini_file_path))
             except Exception:
                 Logger().error(f"Settings: Can't delete ini file: {str(e)}.")
 
@@ -215,7 +219,8 @@ class IniSettings(SettingsInterface):
         elif isinstance(default_value, int):
             value = int(section.get(name))
         if value is None:  # dict type, value will be taken as a string
-            self._logger.error(f"Settings: Setting {name} to write is unknown", )
+            self._logger.error(
+                f"Settings: Setting {name} to write is unknown", )
             return False
         if value == "" and default_value:
             value = default_value

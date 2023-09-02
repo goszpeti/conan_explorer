@@ -11,6 +11,7 @@ from conan_app_launcher.app.system import str2bool
 from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from conan_app_launcher.ui.plugin.types import PluginDescription
 
+
 class PluginFile():
     """ 
     Plugin file related methods.
@@ -23,17 +24,20 @@ class PluginFile():
         plugin_file_path = Path(plugin_file_path)
         # check, if path already registered
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
-            settings_plugin_file_path = app.active_settings.get_string(plugin_group_name)
+            settings_plugin_file_path = app.active_settings.get_string(
+                plugin_group_name)
             if Path(settings_plugin_file_path) == plugin_file_path:
                 return
-        app.active_settings.add(str(uuid.uuid1()), str(plugin_file_path), PLUGINS_SECTION_NAME)
+        app.active_settings.add(str(uuid.uuid1()), str(
+            plugin_file_path), PLUGINS_SECTION_NAME)
 
     @staticmethod
     def unregister(plugin_file_path: Union[Path, str]):
         """ Unregister given plugin file from application settings """
         plugin_file_path = Path(plugin_file_path)
         for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
-            settings_plugin_file_path = app.active_settings.get_string(plugin_group_name)
+            settings_plugin_file_path = app.active_settings.get_string(
+                plugin_group_name)
             if Path(settings_plugin_file_path) == plugin_file_path:
                 app.active_settings.remove(plugin_group_name)
 
@@ -43,7 +47,7 @@ class PluginFile():
         plugin_file_path = Path(plugin_file_path)
         if not plugin_file_path.is_file():
             Logger().error(f"Plugin file {plugin_file_path} does not exist.")
-            return [] # error
+            return []  # error
         plugins = []
         parser = configparser.ConfigParser()
         parser.read(plugin_file_path, encoding="utf-8")
@@ -62,12 +66,16 @@ class PluginFile():
                     icon = icon_str
                 else:
                     icon_path = plugin_file_path.parent / icon_str
-                    assert icon_path.is_file(), f"icon {str(icon_path)} does not exist."
+                    assert icon_path.is_file(
+                    ), f"icon {str(icon_path)} does not exist."
                     icon = str(icon_path)
 
-                assert  plugin_info.get("import_path"), "field 'import_path' is required"
-                import_path = plugin_file_path.parent / plugin_info.get("import_path")
-                assert import_path.is_dir(), f"import_path {str(import_path)} does not exist."
+                assert plugin_info.get(
+                    "import_path"), "field 'import_path' is required"
+                import_path = plugin_file_path.parent / \
+                    plugin_info.get("import_path")
+                assert import_path.is_dir(
+                ), f"import_path {str(import_path)} does not exist."
                 if import_path.is_dir():  # needs an __init__.py
                     assert (import_path / "__init__.py").exists()
 
@@ -81,7 +89,8 @@ class PluginFile():
                                          plugin_class, description, side_menu, conan_versions)
                 plugins.append(desc)
             except Exception as e:
-                Logger().error(f"Can't read {section} plugin information from {plugin_file_path}: {str(e)}.")
+                Logger().error(
+                    f"Can't read {section} plugin information from {plugin_file_path}: {str(e)}.")
 
         return plugins
 
@@ -96,4 +105,3 @@ class PluginFile():
                 parser[section_name][setting] = str(value)
         with open(plugin_file_path, 'w', encoding="utf-8") as fd:
             parser.write(fd)
-

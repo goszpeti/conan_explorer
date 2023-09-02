@@ -1,14 +1,13 @@
 from threading import Thread
 from typing import Callable, List
 
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.conan_wrapper.types import ConanRef, ConanPkgRef
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit, QListView
 
+import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.conan_wrapper.types import ConanRef, ConanPkgRef
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode
-from conan_app_launcher import conan_version
 
 class ConanRefLineEdit(QLineEdit):
     """ Adds completions for Conan references and a validator. """

@@ -4,27 +4,35 @@ import os
 import platform
 import shutil
 import subprocess
+import tempfile
 
 from pathlib import Path
-from typing import List, Optional
+from typing import List
+
+from jinja2 import Template
 
 from conan_app_launcher import INVALID_PATH, PKG_NAME, asset_path
 from conan_app_launcher.app.logger import Logger
 
 WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
 
+
 def str2bool(value: str) -> bool:
+    """ Own impl. isntead of distutils.util.strtobool
+      because distutils will be deprecated """
     value = value.lower()
     if value in {'yes', 'true', 'y', '1'}:
         return True
-    if value in  {'no', 'false','n', '0'}:
+    if value in {'no', 'false', 'n', '0'}:
         return False
     return False
+
 
 def is_windows_11():
     """ Main version number is still 10 - thanks MS! """
     from packaging import version
-    if platform.system() == "Windows" and version.parse(platform.version()) >= version.parse("10.0.22000"):
+    if platform.system() == "Windows" and \
+            version.parse(platform.version()) >= version.parse("10.0.22000"):
         return True
     return False
 
@@ -39,7 +47,8 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
         else:
             open_file(file_path)
     except Exception:
-        Logger().error(f"Error while executing {str(file_path)} with args: {args}.")
+        Logger().error(
+            f"Error while executing {str(file_path)} with args: {args}.")
 
 
 def open_in_file_manager(file_path: Path):
@@ -56,7 +65,8 @@ def open_in_file_manager(file_path: Path):
             from packaging import version
             if version.parse(platform.python_version()) >= version.parse("3.7.0"):
                 creationflags = subprocess.CREATE_NO_WINDOW  # available since 3.7
-            return subprocess.Popen("explorer /select," + str(file_path), creationflags=creationflags)
+            return subprocess.Popen("explorer /select," + str(file_path),
+                                    creationflags=creationflags)
     except Exception as e:
         Logger().error(f"Can't show path in file-manager: {str(e)}")
 
@@ -77,8 +87,9 @@ def open_cmd_in_path(file_path: Path) -> int:
 
 
 def is_file_executable(file_path: Path) -> bool:
-    """ Checking execution mode is ok on linux, but not enough on windows, since every file with an associated
-     program has this flag. Use custom pathext lists to determine executable file extensions. """
+    """ Checking execution mode is ok on linux, but not enough on windows, 
+    since every file with an associated program has this flag. 
+    Use custom pathext like list to determine executable file extensions. """
     is_executable = False
     if platform.system() == "Linux":
         if os.access(str(file_path), os.X_OK):
@@ -93,8 +104,7 @@ def is_file_executable(file_path: Path) -> bool:
 
 def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     """
-    Executes an application with args and optionally spawns a new shell
-    as specified in the app entry.
+    Executes an application with args and optionally spawns a new shell as specified in the app entry.
     Returns the pid of the new process.
     """
     if executable.absolute().is_file():
@@ -106,7 +116,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     return 0
 
 
-def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
+def execute_cmd(cmd: List[str], is_console_app: bool) -> int: # pid
     """ Generic process execute method. Returns pid. """
     command_path = Path(cmd[0]).parent
     try:
@@ -116,17 +126,16 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
             if is_console_app:
                 creationflags = subprocess.CREATE_NEW_CONSOLE
                 cmd = [generate_launch_script(cmd)]
-            # don't use 'executable' arg of Popen, because then shell scripts won't execute correctly
-            proc = subprocess.Popen(cmd, creationflags=creationflags, cwd=str(command_path))
+            # don't use 'executable' arg of Popen, because shell scripts won't execute correctly
+            proc = subprocess.Popen(
+                cmd, creationflags=creationflags, cwd=str(command_path))
             return proc.pid
         elif platform.system() == "Linux":
             if is_console_app:
-                # Sadly, there is no default way to do this, because of the miriad terminal emulators available
-                # Use the default distro emulator, with x-terminal-emulator
-                # (sudo update-alternatives --config x-terminal-emulator)
-                # This works only on debian distros.
-                cmd = [generate_launch_script(cmd)]
-                cmd = ["x-terminal-emulator", "-e"] + cmd
+            # Sadly, there is no default way to do this, because of the miriad terminal
+            # emulators available. Use the default distro emulator through x-terminal-emulator
+            # This works only on debian distros.
+                cmd = ["x-terminal-emulator", "-e"] + [generate_launch_script(cmd)]
             proc = subprocess.Popen(cmd, cwd=str(command_path))
             return proc.pid
         return 0
@@ -136,17 +145,20 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:
 
 
 def generate_launch_script(cmd: List[str]) -> str:
-    import tempfile
-    from jinja2 import Template
-
+    """
+    Generate a launch script for shell cmd, which will halt on error and not close
+    the terminal.
+    """
     launch_templ_file = ""
 
     if platform.system() == 'Windows':
         launch_templ_file = "launch.bat.in"
-        temp_fd, temp_path_str = tempfile.mkstemp(".bat", prefix=PKG_NAME, text=True)
+        temp_fd, temp_path_str = tempfile.mkstemp(
+            ".bat", prefix=PKG_NAME, text=True)
     elif platform.system() == "Linux":
         launch_templ_file = "launch.sh.in"
-        temp_fd, temp_path_str = tempfile.mkstemp(".sh", prefix=PKG_NAME, text=True)
+        temp_fd, temp_path_str = tempfile.mkstemp(
+            ".sh", prefix=PKG_NAME, text=True)
     else:
         Logger().warning(f"Not supported OS.")
         return ""
@@ -201,7 +213,8 @@ def copy_path_with_overwrite(src: Path, dst: Path):
         if src.is_file():
             copy2(str(src), str(dst))
         else:
-            if platform.python_version_tuple()[1] == "7": # 3.7 has no dirs_exist_ok
+            # 3.7 has no dirs_exist_ok
+            if platform.python_version_tuple()[1] == "7":
                 from distutils.dir_util import copy_tree
                 copy_tree(str(src), str(dst))
             else:
@@ -231,7 +244,8 @@ def calc_paste_same_dir_name(dst: Path, index=1):
 
 def get_default_file_editor():
     if platform.system() == "Windows":
-        editor_executable = find_program_in_windows("Notepad++", partial_match=True, key_to_find="DisplayIcon")
+        editor_executable = find_program_in_windows(
+            "Notepad++", partial_match=True, key_to_find="DisplayIcon")
         if Path(editor_executable).exists():
             return editor_executable
         return "notepad.exe"
@@ -252,7 +266,8 @@ def find_program_in_windows(app_name: str, partial_match=False, key_to_find="Ins
             sub_key_name = winreg.EnumKey(key, i)
             sub_key = winreg.OpenKey(key, sub_key_name)
             try:
-                current_app_name = winreg.QueryValueEx(sub_key, "DisplayName")[0]
+                current_app_name = winreg.QueryValueEx(
+                    sub_key, "DisplayName")[0]
                 if partial_match:
                     if app_name in current_app_name:
                         location = winreg.QueryValueEx(sub_key, key_to_find)[0]

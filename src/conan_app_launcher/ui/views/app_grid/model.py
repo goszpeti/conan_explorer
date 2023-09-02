@@ -4,9 +4,8 @@ from pathlib import Path
 from typing import Callable, List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import (
-    INVALID_CONAN_REF, INVALID_PATH, USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
-    USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
+from conan_app_launcher import (INVALID_CONAN_REF, INVALID_PATH, 
+    USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL, USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
 from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
@@ -45,9 +44,10 @@ class UiAppGridModel(UiAppGridConfig, QObject):
         conan_refs: List[ConanWorkerElement] = []
         for tab in self.tabs:
             for app in tab.apps:
-                conan_worker_element: ConanWorkerElement = {"ref_pkg_id": app.conan_ref, "settings": {},
-                                                            "options": app.conan_options, "update": False,
-                                                            "profile": "", "auto_install": True}
+                conan_worker_element: ConanWorkerElement = \
+                    {"ref_pkg_id": app.conan_ref, "settings": {},
+                     "options": app.conan_options, "update": False,
+                     "profile": "", "auto_install": True}
                 if conan_worker_element not in conan_refs:
                     conan_refs.append(conan_worker_element)
         return conan_refs
@@ -102,7 +102,8 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
         self.apps.pop(row)
         return super().removeRow(row, parent=parent)
 
-    def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
+    def moveRow(self, source_parent: QModelIndex, source_row: int, 
+                destination_parent: QModelIndex, destination_child: int) -> bool:
         app_to_move = self.apps[source_row]
         self.apps.insert(destination_child, app_to_move)
         if source_row < destination_child:
@@ -141,8 +142,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         if trigger_update:
             self.lock_changes = False  # don't trigger updates to worker - will be done in batch
 
-        super().__init__(config.name, config.executable, config.icon,
-                         config.is_console_application, config.args, config.conan_options, config.conan_ref)
+        super().__init__(config.name, config.executable, config.icon, config.is_console_application,
+                         config.args, config.conan_options, config.conan_ref)
         self.lock_changes = False  # unlock for futher use now that everything is loaded
         return self
 
@@ -232,7 +233,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not self._conan_file_reference.user or not self._conan_file_reference.channel:
             user = "_"
             channel = "_"  # both must be unset if channel is official
-        self.conan_ref = str(ConanRef(self._conan_file_reference.name, new_value, user, channel))
+        self.conan_ref = str(ConanRef(self._conan_file_reference.name, 
+                                      new_value, user, channel))
 
     @classmethod
     def convert_to_disp_channel(cls, channel: Optional[str]) -> str:
@@ -254,8 +256,8 @@ class UiAppLinkModel(UiAppLinkConfig):
             channel = "_"  # both must be unset if channel is official
         if not channel or channel == "_":
             channel = "NA"
-        self.conan_ref = str(ConanRef(
-            self._conan_file_reference.name, self._conan_file_reference.version, new_value, channel))
+        self.conan_ref = str(ConanRef(self._conan_file_reference.name, 
+                            self._conan_file_reference.version, new_value, channel))
 
     @classmethod
     def _convert_to_disp_user(cls, user: Optional[str]) -> str:
@@ -307,7 +309,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         channels = set()
         channels.add(self.channel)
         for ref in self._available_refs:
-            if ref.version == self.version and self._convert_to_disp_user(ref.user) == self.user:
+            if ref.version == self.version and \
+               self._convert_to_disp_user(ref.user) == self.user:
                 channels.add(self.convert_to_disp_channel(ref.channel))
         # extra handling for only one existing channel found
         if len(channels) == 2 and self.INVALID_DESCR in channels:
@@ -345,11 +348,12 @@ class UiAppLinkModel(UiAppLinkConfig):
                 for match in possible_matches:
                     # don't allow for ambiguity!
                     if match_found:
-                        Logger().error(
-                            f"Multiple candidates found for {exe_rel_path} in {self.name}: e.g. {str(match.name)}")
+                        Logger().error((f"Multiple candidates found for {exe_rel_path}" 
+                                        f"in {self.name}: e.g. {str(match.name)}"))
                     match_found = True
                 if not match_found:
-                    Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
+                    Logger().debug(f"Can't find file in package {self.conan_ref}:\n\t" + 
+                                    str(exe_rel_path))
                 else:
                     return match
             except NotImplementedError:
@@ -358,7 +362,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         else:
             possible_match = self.package_folder / exe_rel_path
             if not possible_match.exists():
-                Logger().debug(f"Can't find file in package {self.conan_ref}:\n    {str(exe_rel_path)}")
+                Logger().debug(f"Can't find file in package {self.conan_ref}:\n\t" + 
+                               str(exe_rel_path))
                 return Path(INVALID_PATH)
             return possible_match
 
@@ -418,13 +423,14 @@ class UiAppLinkModel(UiAppLinkConfig):
 
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
             if self.package_folder != package_folder:
-                app.conan_api.info_cache.update_local_package_path(self._conan_file_reference, package_folder)
+                app.conan_api.info_cache.update_local_package_path(
+                    self._conan_file_reference, package_folder)
         self.package_folder = package_folder
 
         if not quiet:
             if not package_folder.exists():
-                Logger().info(
-                f"Can't find a package for <b>{str(self.conan_ref)}</b> and options {repr(self.conan_options)} <b>locally</b>")
+                Logger().info(f"Can't find a package for <b>{str(self.conan_ref)}" + 
+                            f"</b> and options {repr(self.conan_options)} <b>locally</b>")
 
         # call registered update callback
         if self._update_cbk_func:

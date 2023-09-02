@@ -1,9 +1,8 @@
 from typing import List, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.ui.fluent_window import RIGHT_MENU_MAX_WIDTH
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QGridLayout, QLayout, QScrollArea, QSizePolicy, QFrame, QApplication,
+from PySide6.QtWidgets import (QLayout, QScrollArea, QSizePolicy, QFrame,
                              QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
 
 from .app_link import ListAppLink # ,GridAppLink

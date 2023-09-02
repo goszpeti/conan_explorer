@@ -36,9 +36,11 @@ class SearchedPackageTreeItem(TreeModelItem):
         for remote in self.data(1).split(","):
             recipe_ref = self.data(0)
             # cross reference with installed packages
-            infos = app.conan_api.get_local_pkgs_from_ref(ConanRef.loads(recipe_ref))
+            infos = app.conan_api.get_local_pkgs_from_ref(
+                ConanRef.loads(recipe_ref))
             installed_ids = [info.get("id") for info in infos]
-            packages = app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(recipe_ref), remote)
+            packages = app.conan_api.get_remote_pkgs_from_ref(
+                ConanRef.loads(recipe_ref), remote)
             for pkg in packages:
                 pkg_id = pkg.get("id", "")
                 if pkg_id in pkgs_to_be_added.keys():  # package already found in another remote
@@ -48,7 +50,8 @@ class SearchedPackageTreeItem(TreeModelItem):
                 if pkg_id in installed_ids:
                     installed = True
                 pkgs_to_be_added[pkg_id] = SearchedPackageTreeItem(
-                    [pkg_id, remote,  ConanApi.build_conan_profile_name_alias(pkg.get("settings", {}))],
+                    [pkg_id, remote,  ConanApi.build_conan_profile_name_alias(
+                        pkg.get("settings", {}))],
                     self, pkg, PROFILE_TYPE, False, installed)
         for pkg in pkgs_to_be_added.values():
             self.child_items.append(pkg)
@@ -79,7 +82,8 @@ class PkgSearchModel(TreeModel):
 
     def __init__(self, conan_pkg_installed: Optional[SignalInstance] = None, conan_pkg_removed: Optional[SignalInstance] = None, *args, **kwargs):
         super(PkgSearchModel, self).__init__(*args, **kwargs)
-        self.root_item = SearchedPackageTreeItem(["Packages", "Remote(s)", "Quick Profile"])
+        self.root_item = SearchedPackageTreeItem(
+            ["Packages", "Remote(s)", "Quick Profile"])
         self.proxy_model = QtCore.QSortFilterProxyModel()  # for sorting
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
@@ -121,7 +125,7 @@ class PkgSearchModel(TreeModel):
     def data(self, index: QtCore.QModelIndex, role: Qt.ItemDataRole):  # override
         if not index.isValid():
             return None
-        item: SearchedPackageTreeItem = index.internalPointer() # type: ignore
+        item: SearchedPackageTreeItem = index.internalPointer()  # type: ignore
         if role == Qt.ItemDataRole.DecorationRole:
             if index.column() != 0:  # only display icon for first column
                 return
@@ -150,7 +154,8 @@ class PkgSearchModel(TreeModel):
         ref_row = 0
         for ref_row in range(self.root_item.child_count()):
             current_item = self.root_item.child_items[ref_row]
-            for child_row in range(len(current_item.child_items)):  # always has one dummy child count
+            # always has one dummy child count
+            for child_row in range(len(current_item.child_items)):
                 current_child_item = current_item.child_items[child_row]
                 if current_child_item == item:
                     found_item = True
@@ -180,7 +185,8 @@ class PkgSearchModel(TreeModel):
         pkg_items = item.child_items
         for pkg_item in pkg_items:
             if installed and pkg_item.pkg_data.get("id", "") == pkg_id:
-                Logger().debug(f"Set {pkg_id} as install status to {installed}")
+                Logger().debug(
+                    f"Set {pkg_id} as install status to {installed}")
                 pkg_item.is_installed = installed
                 break
             if not pkg_id and not installed:  # if ref was removed, all pkgs are deleted too
@@ -190,5 +196,6 @@ class PkgSearchModel(TreeModel):
         item = index.internalPointer()
         loader = AsyncLoader(self)
         self._loader_widget_parent = QtWidgets.QWidget()
-        loader.async_loading(self._loader_widget_parent, item.load_children, loading_text="Loading Packages...")
+        loader.async_loading(self._loader_widget_parent,
+                             item.load_children, loading_text="Loading Packages...")
         loader.wait_for_finished()

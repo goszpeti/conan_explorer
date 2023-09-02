@@ -21,7 +21,8 @@ class ConanRemoteController():
         self._model = RemotesTableModel()
         # save selected remote, if triggering a re-init
         sel_remote = self.get_selected_remote()
-        self._remote_reorder_controller = ReorderController(self._view, self._model)
+        self._remote_reorder_controller = ReorderController(
+            self._view, self._model)
 
         self._model.setup_model_data()
         self._view.setItemsExpandable(False)
@@ -71,7 +72,8 @@ class ConanRemoteController():
         remote_item = self.get_selected_remote()
         if not remote_item:
             return
-        app.conan_api.disable_remote(remote_item.remote.name, not remote_item.remote.disabled)
+        app.conan_api.disable_remote(
+            remote_item.remote.name, not remote_item.remote.disabled)
         self.update()
 
     def get_selected_remote(self) -> Union[RemotesModelItem, None]:
@@ -79,7 +81,7 @@ class ConanRemoteController():
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug("No selected item for context action")
             return None
-        remote: RemotesModelItem = indexes[0].internalPointer() # type: ignore
+        remote: RemotesModelItem = indexes[0].internalPointer()  # type: ignore
         return remote
 
     def copy_remote_name(self):

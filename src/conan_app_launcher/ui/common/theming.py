@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union
 import conan_app_launcher.app as app
 from conan_app_launcher import base_path
 from conan_app_launcher.app.system import is_windows_11
-from conan_app_launcher.settings import FONT_SIZE, GUI_MODE, GUI_MODE_LIGHT, GUI_MODE_DARK, GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL
+from conan_app_launcher.settings import (FONT_SIZE, GUI_MODE, GUI_MODE_LIGHT, GUI_MODE_DARK,
+                                        GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL)
 from conan_app_launcher.app.logger import Logger
 
 from jinja2 import Template
@@ -13,7 +14,8 @@ from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtGui import QIcon, QPixmap, QImage, QFont, QFontDatabase
 from PySide6.QtCore import QSize
 
-from conan_app_launcher.ui.common.icon import draw_svg_with_color, get_icon_from_image_file, get_inverted_asset_image
+from conan_app_launcher.ui.common import (draw_svg_with_color, get_icon_from_image_file, 
+                                          get_inverted_asset_image)
 
 
 if TYPE_CHECKING:
@@ -139,7 +141,7 @@ def activate_theme(qt_app: QApplication):
         window_border_radius = 7
 
     style_sheet = configure_theme(base_path / "ui" / style_file,
-                                  app.active_settings.get_int(FONT_SIZE), user_color, window_border_radius)
+                app.active_settings.get_int(FONT_SIZE), user_color, window_border_radius)
 
     qt_app.setStyleSheet(style_sheet)
 

@@ -35,18 +35,24 @@ ICON_SIZE = 64  # Icon size (width and height) in pixels on an Applink
 MAX_FONT_SIZE = 16
 MIN_FONT_SIZE = 10
 INVALID_PATH = "Unknown"
-INVALID_CONAN_REF = "Invalid/0.0.1@NA/NA"  # used to indicate a conan reference is invalid
+# used to indicate a conan reference is invalid
+INVALID_CONAN_REF = "Invalid/0.0.1@NA/NA"
 SETTINGS_FILE_NAME = "settings"  # for storing application settings
-LEGACY_SETTINGS_FILE_NAME = ".cal_config"  # for backwards compatibility till 1.4.1
+# for backwards compatibility till 1.4.1
+LEGACY_SETTINGS_FILE_NAME = ".cal_config"
 DEFAULT_UI_CFG_FILE_NAME = "ui_cfg"  # no extension from 1.4.1
-LEGACY_UI_CFG_FILE_NAME = "cal_ui.json"  # for backwards compatibility till 1.4.1
+# for backwards compatibility till 1.4.1
+LEGACY_UI_CFG_FILE_NAME = "cal_ui.json"
 CONAN_LOG_PREFIX = "CONAN: "  # logger uses this to indicate a log comes from Conan
 BUILT_IN_PLUGIN = "built-in"
 
 # Feature flags
-SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True  # get versions directly from the custom cache
-USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH = True  # get pkg paths directly from the custom cache TODO can't handle options
-# use conan worker to also search for the package path - works in a addition to USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH and also installs
+# get versions directly from the custom cache
+SEARCH_APP_VERSIONS_IN_LOCAL_CACHE = True
+# get pkg paths directly from the custom cache TODO can't handle options
+USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH = True
+# use conan worker to also search for the package path
+# works in a addition to USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH and also installs
 USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL = True
 AUTOCLOSE_SIDE_MENU = False
 ENABLE_GUI_STYLES = False
@@ -63,8 +69,8 @@ conan_version = conan_pkg_info.version
 
 base_path = Path(__file__).absolute().parent
 asset_path = base_path / "assets"
-# to be used for all default paths of configuration files, which will be used for multiple versions
-# noninvasive storage, legacy will be moved
+# to be used for all default paths of configuration files, 
+# which will be used for multiple versions (noninvasive storage, 1.X legacy will be moved)
 legacy_user_save_path = Path().home()
 user_save_path = Path(os.getenv("XDG_CONFIG_HOME", str(legacy_user_save_path / ".config"))) / PKG_NAME if platform.system() == "Linux" \
     else Path(os.getenv("APPDATA", str(legacy_user_save_path))) / PKG_NAME
@@ -76,11 +82,15 @@ if user_save_path != legacy_user_save_path:
     # don't copy if the migrated files already exist
     if (legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME).exists() and \
             not (user_save_path / (SETTINGS_FILE_NAME + ".ini")).exists():
-        print(f"INFO: Moving application settings file from {str(user_save_path)} to {str(legacy_user_save_path)}")
+        print(
+            ("INFO: Moving application settings file from" 
+             f"{str(user_save_path)} to {str(legacy_user_save_path)}"))
         shutil.move(str(legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME),
                     str(user_save_path / (SETTINGS_FILE_NAME + ".ini")))
     if (legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME).exists() and \
             not (user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")).exists():
-        print(f"INFO: Moving default ui config file from {str(user_save_path)} to {str(legacy_user_save_path)}")
+        print(
+            "INFO: Moving default ui config file from "
+            f"{str(user_save_path)} to {str(legacy_user_save_path)}")
         shutil.move(str(legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME),
                     str(user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")))

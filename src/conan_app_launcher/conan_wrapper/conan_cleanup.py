@@ -51,7 +51,8 @@ class ConanCleanup():
         from .types import CONAN_REAL_PATH
 
         del_list = []
-        short_path_folders = [f for f in self._conan_api.get_short_path_root().iterdir() if f.is_dir()]
+        short_path_folders = [f for f in self._conan_api.get_short_path_root().iterdir()
+                              if f.is_dir()]
         for short_path in short_path_folders:
             rp_file = short_path / CONAN_REAL_PATH
             if rp_file.is_file():

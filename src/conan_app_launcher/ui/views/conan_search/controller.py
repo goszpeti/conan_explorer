@@ -10,8 +10,6 @@ from PySide6.QtWidgets import (QApplication, QTreeView, QPushButton, QTextBrowse
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
 
 from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
-if TYPE_CHECKING:
-    from conan_app_launcher.ui.main_window import BaseSignals
 
 class ConanSearchController(QObject):
 
@@ -47,7 +45,7 @@ class ConanSearchController(QObject):
         """ Initialize tree view model by searching in conan """
         self._model.setup_model_data(self._search_line.text(), self.get_selected_remotes())
 
-    def _finish_load_search_model(self):
+    def _finish_load_search_model(self, ret=None):
         """ After conan search adjust the view """
         self._view.setModel(self._model.proxy_model)
         self._resize_package_columns()

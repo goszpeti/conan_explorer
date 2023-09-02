@@ -26,8 +26,10 @@ class RemotesTableModel(TreeModel):
     """
 
     def __init__(self, *args, **kwargs):
-        super(RemotesTableModel, self).__init__(checkable=True, *args, **kwargs)
-        self.root_item = TreeModelItem(["Name", "URL", "SSL", "User", "Authenticated"])
+        super(RemotesTableModel, self).__init__(
+            checkable=True, *args, **kwargs)
+        self.root_item = TreeModelItem(
+            ["Name", "URL", "SSL", "User", "Authenticated"])
 
     def setup_model_data(self):
         self.root_item.child_items = []
@@ -35,16 +37,18 @@ class RemotesTableModel(TreeModel):
             user_name = ""
             auth = False
             try:
-                user_name, auth = app.conan_api.get_remote_user_info(remote.name)
+                user_name, auth = app.conan_api.get_remote_user_info(
+                    remote.name)
             except ConanException as e:  # This methods throws an error on older conan version, if a remote is disabled
                 Logger().debug(str(e))
-            remote_item = RemotesModelItem(remote, user_name, auth, self.root_item)
+            remote_item = RemotesModelItem(
+                remote, user_name, auth, self.root_item)
             self.root_item.append_child(remote_item)
 
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
             return None
-        item: RemotesModelItem = index.internalPointer() # type: ignore
+        item: RemotesModelItem = index.internalPointer()  # type: ignore
         if role == Qt.ItemDataRole.DisplayRole:
             try:
                 return item.data(index.column())
@@ -67,7 +71,8 @@ class RemotesTableModel(TreeModel):
         i = 0
         for remote_item in self.root_item.child_items:
             remote: Remote = remote_item.remote
-            app.conan_api.update_remote(remote.name, remote.url, remote.verify_ssl, remote.disabled, i)
+            app.conan_api.update_remote(
+                remote.name, remote.url, remote.verify_ssl, remote.disabled, i)
             i += 1
 
     def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
@@ -97,7 +102,7 @@ class ProfilesModel(QAbstractListModel):
 
     def rowCount(self, index):
         return len(self._profiles)
-    
+
     def update_profiles(self):
         self._profiles = app.conan_api.get_profiles()
 

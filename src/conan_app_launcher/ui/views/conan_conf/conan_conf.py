@@ -9,9 +9,8 @@ from typing import Optional, TYPE_CHECKING
 from conan_app_launcher import conan_version
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.app.system import delete_path, str2bool
-from conan_app_launcher.ui.common import get_themed_asset_icon
-from conan_app_launcher.ui.common.syntax_highlighting import ConfigHighlighter
+from conan_app_launcher.app.system import delete_path
+from conan_app_launcher.ui.common import get_themed_asset_icon, ConfigHighlighter
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.conan_wrapper.types import Remote
@@ -60,10 +59,14 @@ class ConanConfigView(PluginInterfaceV1):
 
         # always show first tab on start
         self._ui.config_tab_widget.tabBar().setCurrentIndex(0)
-        self._conan_config_highlighter = ConfigHighlighter(self._ui.config_file_text_browser.document(), "ini")
-        self._profile_highlighter = ConfigHighlighter(self._ui.profiles_text_browser.document(), "ini")
-        self._settings_highlighter = ConfigHighlighter(self._ui.settings_file_text_browser.document(), "yaml")
-        self._editable_highlighter = ConfigHighlighter(self._ui.editables_file_text_browser.document(), "yaml")
+        self._conan_config_highlighter = ConfigHighlighter(
+            self._ui.config_file_text_browser.document(), "ini")
+        self._profile_highlighter = ConfigHighlighter(
+            self._ui.profiles_text_browser.document(), "ini")
+        self._settings_highlighter = ConfigHighlighter(
+            self._ui.settings_file_text_browser.document(), "yaml")
+        self._editable_highlighter = ConfigHighlighter(
+            self._ui.editables_file_text_browser.document(), "yaml")
 
     def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(conan_version)
@@ -142,10 +145,14 @@ class ConanConfigView(PluginInterfaceV1):
         super().reload_themed_icons()
         self._init_profile_context_menu()
         self._init_remote_context_menu()
-        self._conan_config_highlighter = ConfigHighlighter(self._ui.config_file_text_browser.document(),"ini")
-        self._profile_highlighter = ConfigHighlighter(self._ui.profiles_text_browser.document(),"ini")
-        self._settings_highlighter = ConfigHighlighter(self._ui.settings_file_text_browser.document(), "yaml")
-        self._editable_highlighter = ConfigHighlighter(self._ui.editables_file_text_browser.document(), "yaml")
+        self._conan_config_highlighter = ConfigHighlighter(
+            self._ui.config_file_text_browser.document(),"ini")
+        self._profile_highlighter = ConfigHighlighter(
+            self._ui.profiles_text_browser.document(),"ini")
+        self._settings_highlighter = ConfigHighlighter(
+            self._ui.settings_file_text_browser.document(), "yaml")
+        self._editable_highlighter = ConfigHighlighter(
+            self._ui.editables_file_text_browser.document(), "yaml")
 
 # Profile
 

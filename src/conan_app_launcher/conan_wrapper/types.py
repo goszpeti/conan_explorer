@@ -72,13 +72,15 @@ class ConanPkg(TypedDict, total=False):
     outdated: bool
 
 def pretty_print_pkg_info(pkg_info: ConanPkg) -> str:
-    return pprint.pformat(pkg_info).translate({ord("{"): None, ord("}"): None, ord("'"): None})
+    return pprint.pformat(pkg_info).translate(
+        {ord("{"): None, ord("}"): None, ord("'"): None})
 
 
 class LoggerWriter:
     """
     Dummy stream to log directly to a logger object, when writing in the stream.
-    Used to redirect custom stream from Conan. Adds a prefix to do some custom formatting in the Logger.
+    Used to redirect custom stream from Conan. 
+    Adds a prefix to do some custom formatting in the Logger.
     """
 
     def __init__(self, level, prefix: str):

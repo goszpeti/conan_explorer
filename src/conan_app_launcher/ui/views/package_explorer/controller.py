@@ -7,8 +7,9 @@ from conan_app_launcher import asset_path
 from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef
-from conan_app_launcher.app.system import (calc_paste_same_dir_name, copy_path_with_overwrite,
-                                           delete_path, execute_cmd, open_cmd_in_path, open_in_file_manager, run_file)
+from conan_app_launcher.app.system import (
+    calc_paste_same_dir_name, copy_path_with_overwrite, delete_path, execute_cmd, 
+    open_cmd_in_path, open_in_file_manager, run_file)
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common import show_conanfile, re_register_signal, ConfigHighlighter
 from conan_app_launcher.ui.config import UiAppLinkConfig
@@ -16,7 +17,8 @@ from conan_app_launcher.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from conan_app_launcher.ui.views import AppGridView
 from PySide6.QtCore import (QItemSelectionModel, QMimeData, QModelIndex, QObject,
                             Qt, QUrl, SignalInstance)
-from PySide6.QtWidgets import (QApplication, QTextBrowser, QLineEdit, QMessageBox, QTreeView, QWidget, QDialog, QVBoxLayout)
+from PySide6.QtWidgets import (QApplication, QTextBrowser, QLineEdit, QMessageBox, 
+                               QTreeView, QWidget, QDialog, QVBoxLayout)
 from PySide6.QtGui import QIcon
 from .model import (PkgSelectionType, CalFileSystemModel, PackageFilter, PackageTreeItem,
                     PkgSelectModel)
@@ -64,13 +66,14 @@ class PackageSelectionController(QObject):
         if len(conan_refs) != 1:
             return
         loader = AsyncLoader(self)
-        loader.async_loading(self._view, self.show_build_info_dialog,
-                              (conan_refs[0],), loading_text="Loading build info...")
+        loader.async_loading(self._view, app.conan_api.get_conan_buildinfo,
+                              (ConanRef.loads(conan_refs[0]),), self.show_buildinfo_dialog,
+                              loading_text="Loading build info...")
         loader.wait_for_finished()
 
-    def show_build_info_dialog(self, conan_ref: str):
-        # TODO: show install dialog to select profile and options
-        buildinfos = app.conan_api.get_conan_buildinfo(ConanRef.loads(conan_ref))
+
+    def show_buildinfo_dialog(self):
+        buildinfos = ""
         if not buildinfos:
             return
         dialog = QDialog()
@@ -85,7 +88,6 @@ class PackageSelectionController(QObject):
         verticalLayout.addWidget(text_browser)
         self.conan_config_highlighter = ConfigHighlighter(text_browser.document(), "ini")
         dialog.exec()
-
 
     def get_selected_pkg_source_items(self) -> List[PackageTreeItem]:
         indexes = self._view.selectedIndexes()
@@ -113,7 +115,7 @@ class PackageSelectionController(QObject):
         conan_refs = []
         for conan_ref_item in source_items:
             if conan_ref_item.type in [PkgSelectionType.pkg, PkgSelectionType.export]:
-                conan_ref_item: PackageTreeItem = conan_ref_item.parent()
+                conan_ref_item: PackageTreeItem = conan_ref_item.parent() # type: ignore
             if not conan_ref_item:
                 conan_refs.append("")
             conan_refs.append(conan_ref_item.item_data[0])

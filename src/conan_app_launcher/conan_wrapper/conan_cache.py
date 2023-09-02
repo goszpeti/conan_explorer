@@ -1,6 +1,5 @@
 import json
 from multiprocessing import RLock
-import os
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -8,7 +7,8 @@ from conan_app_launcher import INVALID_CONAN_REF, INVALID_PATH, conan_version
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import delete_path
 from .types import ConanRef
-from .unified_api import ConanUnifiedApi
+from .unified_api import ConanCommonUnifiedApi as ConanAPI
+
 
 class ConanInfoCache():
     """
@@ -19,7 +19,7 @@ class ConanInfoCache():
     if conan_version.startswith("2"):
         CACHE_FILE_NAME = "cacheV2.json"
 
-    def __init__(self, cache_dir: Path, local_refs: Optional[List[ConanRef]]=None):
+    def __init__(self, cache_dir: Path, local_refs: Optional[List[ConanRef]] = None):
         if not local_refs:
             local_refs = []
 
@@ -37,11 +37,10 @@ class ConanInfoCache():
 
         # read cached info
         self._load()
-        
 
     def get_local_package_path(self, conan_ref: ConanRef) -> Path:
         """ Return cached package path of a locally installed package. """
-        conan_ref_str = ConanUnifiedApi.generate_canonical_ref(conan_ref)
+        conan_ref_str = ConanAPI.generate_canonical_ref(conan_ref)
         if not conan_ref_str or conan_ref_str == INVALID_CONAN_REF:
             return Path(INVALID_PATH)
 
@@ -60,7 +59,8 @@ class ConanInfoCache():
 
     def get_similar_pkg_refs(self, name: str, user: str):
         """ Return cached info on all available conan refs from the same ref name and user. """
-        return self.get_similar_remote_pkg_refs(name, user) + self.get_similar_local_pkg_refs(name, user)
+        return self.get_similar_remote_pkg_refs(name, user) + \
+            self.get_similar_local_pkg_refs(name, user)
 
     def get_similar_remote_pkg_refs(self, name: str, user: str) -> List[ConanRef]:
         """ Return cached info on remotely available conan refs from the same ref name and user. """
@@ -100,7 +100,8 @@ class ConanInfoCache():
                 for user in self._remote_packages[name]:
                     for version_channel in self._remote_packages.get(name, {}).get(user, []):
                         version, channel = version_channel.split("/")
-                        refs.append(str(ConanRef(name, version, user, channel)))
+                        refs.append(
+                            str(ConanRef(name, version, user, channel)))
         return refs
 
     def get_all_local_refs(self) -> List[str]:
@@ -145,12 +146,13 @@ class ConanInfoCache():
             if self._local_packages.get(str(conan_ref)) == str(folder):
                 return
             self._local_packages.update(
-                {ConanUnifiedApi.generate_canonical_ref(conan_ref): str(folder.as_posix())})
+                {ConanAPI.generate_canonical_ref(conan_ref): str(folder.as_posix())})
             self._save()
 
     def invalidate_remote_package(self, conan_ref: ConanRef):
         """ Remove a package, wich was removed on the remote """
-        version_channels = self._remote_packages.get(conan_ref.name, {}).get(str(conan_ref.user), [])
+        version_channels = self._remote_packages.get(
+            conan_ref.name, {}).get(str(conan_ref.user), [])
         invalid_version_channel = f"{conan_ref.version}/{conan_ref.channel}"
         if invalid_version_channel in version_channels:
             Logger().debug(f"Invalidated {str(conan_ref)} from remote cache.")
@@ -174,13 +176,15 @@ class ConanInfoCache():
                     user = "_"
                     channel = "_"
                 current_version_channel = f"{ref.version}/{channel}"
-                version_channels = set(self._remote_packages.get(ref.name, {}).get(user, []))
+                version_channels = set(
+                    self._remote_packages.get(ref.name, {}).get(user, []))
                 if current_version_channel not in version_channels:
                     version_channels.add(current_version_channel)
                     version_channels_list = list(version_channels)
                     if not self._remote_packages.get(ref.name):
                         self._remote_packages.update({ref.name: {}})
-                    self._remote_packages.get(ref.name, {}).update({user: version_channels_list})
+                    self._remote_packages.get(ref.name, {}).update(
+                        {user: version_channels_list})
 
             self._save()
 

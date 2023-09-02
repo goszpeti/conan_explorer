@@ -14,7 +14,7 @@ from conan_app_launcher.app.system import str2bool
 
 class Worker(QObject):
     """ Generic worker for Qt, which can call any function with args """
-    finished: SignalInstance = Signal()  # type: ignore
+    finished: SignalInstance = Signal(object)  # type: ignore
 
     def __init__(self, func, args: Tuple[Any, ...] = ()):
         super().__init__()
@@ -28,8 +28,8 @@ class Worker(QObject):
                 debugpy.debug_this_thread()
             except Exception:
                 Logger().debug("Debugger not loaded!")
-        self.func(*self.args)
-        self.finished.emit()
+        ret = self.func(*self.args)
+        self.finished.emit(ret)
 
 
 class AsyncLoader(QObject):
@@ -99,7 +99,7 @@ class AsyncLoader(QObject):
         self.load_thread.started.connect(self.worker.work)
 
         if finish_task:
-            self.load_thread.finished.connect(finish_task)
+            self.worker.finished.connect(finish_task)
         self.load_thread.finished.connect(self.thread_finished)
 
         self.worker.finished.connect(self.worker.deleteLater)

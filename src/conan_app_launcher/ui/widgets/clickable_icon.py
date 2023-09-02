@@ -5,7 +5,7 @@ from typing import Optional
 
 from conan_app_launcher import ICON_SIZE, INVALID_PATH
 
-from PySide6.QtCore import Signal, QSize, Qt
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import QPushButton, QGraphicsColorizeEffect, QGraphicsPixmapItem
 from PySide6.QtGui import QColor, QIcon, QPixmap
 
@@ -60,7 +60,7 @@ class ClickableIcon(QPushButton):
     def set_icon_from_file(self, image: Optional[Path]):
         if not image or not image.exists():
             return
-        #Logger().debug("Setting icon to " + str(image))
+        # Logger().debug("Setting icon to " + str(image))
         self._image = image
         if self._image.suffix == ".ico":
             self._ic = QIcon(str(self._image))
