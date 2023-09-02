@@ -58,22 +58,30 @@ class PackageSelectionController(QObject):
         if len(conan_refs) != 1:
             return
         loader = AsyncLoader(self)
-        loader.async_loading(self._view, show_conanfile, (conan_refs[0],), loading_text="Opening Conanfile...")
+        loader.async_loading(self._view, show_conanfile, (conan_refs[0],), 
+                             loading_text="Opening Conanfile...")
         loader.wait_for_finished()
 
     def on_show_build_info(self):
         conan_refs = self.get_selected_conan_refs()
         if len(conan_refs) != 1:
             return
+        conan_ref = conan_refs[0]
+        install_dialog = ConanInstallDialog(self.parent(), conan_ref, capture_install_info=True)
+        install_dialog.exec_()
+        install_info = install_dialog.conan_selected_install
+        if install_info is None:
+            Logger().error("Canceling show build info.")
+            return
         loader = AsyncLoader(self)
         loader.async_loading(self._view, app.conan_api.get_conan_buildinfo,
-                              (ConanRef.loads(conan_refs[0]),), self.show_buildinfo_dialog,
-                              loading_text="Loading build info...")
+                (ConanRef.loads(conan_ref), install_info.get("profile", ""), 
+                 install_info.get("options", {})), self.show_buildinfo_dialog,
+                loading_text="Loading build info...")
         loader.wait_for_finished()
 
 
-    def show_buildinfo_dialog(self):
-        buildinfos = ""
+    def show_buildinfo_dialog(self, buildinfos: str):
         if not buildinfos:
             return
         dialog = QDialog()
@@ -140,7 +148,7 @@ class PackageSelectionController(QObject):
             return
         if pkg_id:
             conan_ref += ":" + pkg_id
-        dialog = ConanInstallDialog(self._view, conan_ref, self._base_signals.conan_pkg_installed, lock_ref=True)
+        dialog = ConanInstallDialog(self._view, conan_ref, self._base_signals.conan_pkg_installed, lock_reference=True)
         dialog.show()
 
     def on_remove_ref_requested(self):

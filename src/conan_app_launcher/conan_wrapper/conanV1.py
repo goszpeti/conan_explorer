@@ -246,7 +246,6 @@ class ConanApi(ConanCommonUnifiedApi):
         content = ""
         try:
             content = (temp_path / "conanbuildinfo.txt").read_text()
-            # content = TXTGenerator.loads((temp_path / "conanbuildinfo.txt").read_text())
         except Exception as e:
             Logger().error(
                 f"Can't read conanbuildinfo.txt for '<b>{str(conan_ref)}</b>': {str(e)}")
