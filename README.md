@@ -98,11 +98,12 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 
 ### Main dependencies
 
-* Pyside6 >= 6.4.0
+* Pyside6 >= 6.3.0
 * conan >= 1.24.0
 
-> **Warning** - **Deprecation of Python 3.6**  
-> From version 2.0.0 Python 3.6 will not be supported anymore, because end-of-life support has been reached.
+> **Warning** - **Deprecation of Python 3.X**  
+> From version 2.0.0 Python 3.6 support will be dropped, having reached end-of-life.    
+> From version 2.2.0 Python 3.7 support will be dropped, having reached end-of-life.    
 
 ## Toolchain
 
