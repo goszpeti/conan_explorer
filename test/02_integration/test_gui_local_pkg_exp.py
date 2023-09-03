@@ -296,7 +296,6 @@ def test_local_package_explorer_simple_functions(qtbot, mocker, base_fixture,
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, str(selected_pkg_file))
 
     lpe._pkg_tabs_ctrl[0].on_edit_file()
-    
     mock_execute_cmd.assert_called_with([str(selected_pkg_file), str(selected_pkg_file)], False)
 
 def test_local_package_explorer_file_functions(qtbot, mocker, base_fixture, 

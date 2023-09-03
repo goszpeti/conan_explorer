@@ -243,6 +243,21 @@ class ConanApi(ConanCommonUnifiedApi):
 
     ### Local References and Packages ###
 
+    def get_conan_buildinfo(self, conan_ref: ConanRef, profile="", 
+                            conan_options: ConanOptions = {}) -> str:
+        """ Read conan buildinfo and return as string """
+        raise NotImplementedError
+    
+    def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
+        """ Get package path of an editable reference. """
+        editables_dict = self._conan.local.editable_list()
+        return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH))
+
+    def get_editable_references(self) -> List[str]:
+        """ Get all local editable references. """
+        editables_dict = self._conan.local.editable_list()
+        return list(map(str, editables_dict.keys()))
+
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str = ""):
         if pkg_id:
             conan_pkg_ref = ConanPkgRef.loads(str(conan_ref) + ":" + pkg_id)

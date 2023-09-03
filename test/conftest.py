@@ -114,6 +114,10 @@ def conan_remove_ref(ref):
     else:
         os.system(f"conan remove {ref} -f")
 
+def conan_add_editables(ref):
+    # V2:
+    #conan editable add --version 9.9.9 --channel editable --user local  conanfileV2.py 
+    pass
 
 def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
     if conan_version.startswith("1"):

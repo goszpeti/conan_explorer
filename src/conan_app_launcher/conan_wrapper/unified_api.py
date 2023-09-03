@@ -201,6 +201,22 @@ class ConanUnifiedApiInterface(ABC):
 ### Local References and Packages ###
 
     @abstractmethod
+    def get_conan_buildinfo(self, conan_ref: ConanRef, profile="", 
+                            conan_options: ConanOptions = {}) -> str:
+        """ Read conan buildinfo and return as string """
+        raise NotImplementedError
+    
+    @abstractmethod
+    def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
+        """ Get package path of an editable reference. """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_editable_references(self) -> List[str]:
+        """ Get all local editable references. """
+        raise NotImplementedError
+
+    @abstractmethod
     def remove_reference(self, conan_ref: str, pkg_id: str=""):
         """ Remove a conan reference and it's package if specified via id """
         raise NotImplementedError
@@ -356,22 +372,6 @@ class ConanCommonUnifiedApi(ConanUnifiedApiInterface):
         return "", Path(INVALID_PATH)
 
 ### Local References and Packages ###
-
-    @abstractmethod
-    def get_conan_buildinfo(self, conan_ref: ConanRef, profile="", 
-                            conan_options: ConanOptions = {}) -> str:
-        """ Read conan buildinfo and return as string """
-        raise NotImplementedError
-    
-    @abstractmethod
-    def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
-        """ Get package path of an editable reference. """
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_editable_references(self) -> List[str]:
-        """ Get all local editable references. """
-        raise NotImplementedError
 
     def find_best_matching_local_package(self, conan_ref: ConanRef, conan_options: ConanOptions = {}) -> ConanPkg:
         """ Find a package in the local cache """
