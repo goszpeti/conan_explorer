@@ -16,6 +16,12 @@ from conan_app_launcher.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_app_launcher.conan_wrapper.types import ConanRef
 
 
+def test_conan_get_conan_buildinfo():
+    conan = ConanApi().init_api()
+    # id, _ = conan.get_best_matching_local_package_path(ConanRef.loads(TEST_REF))
+    ret = conan.get_conan_buildinfo(ConanRef.loads(TEST_REF), "4ee9d5e762db5f8ef32218f76f6ce05a5b13e687")
+    pass
+
 def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
     # check empty - should return a default name

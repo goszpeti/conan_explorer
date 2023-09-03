@@ -1,6 +1,7 @@
 """ QT Loading dialog. Placed outside of ui, becauseit is needed to boostrap the loading of all uis. """
 
 import os
+from datetime import datetime
 from time import sleep
 from typing import Any, Callable, Optional, Tuple
 
@@ -77,8 +78,12 @@ class AsyncLoader(QObject):
         qapp: QApplication = QApplication.instance()  # type: ignore
         rectangle = self.progress_dialog.frameGeometry()
         if dialog_parent:
+            start_time = datetime.now()
             while not qapp.activeWindow():
                 QApplication.processEvents()
+                time_delta = datetime.now() - start_time
+                if time_delta.total_seconds() >= 2:
+                    break
             if qapp.activeWindow():
                 rectangle.moveCenter(qapp.activeWindow().frameGeometry().center())
                 self.progress_dialog.move(rectangle.topLeft())

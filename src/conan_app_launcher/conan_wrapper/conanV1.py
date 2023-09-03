@@ -257,13 +257,15 @@ class ConanApi(ConanCommonUnifiedApi):
         available_options = {}
         try:
             ref_info = self._conan.info(self.generate_canonical_ref(conan_ref))
-            recipe = ref_info[0].root.dependencies[0].conanfile  # type: ignore
+            # 0. element is always the conanfile itself
+            recipe = ref_info[0].root.dependencies[0].dst.conanfile  # type: ignore
             # type: ignore
-            default_options_list = recipe.dst.conanfile.options.items(
-            )
+            default_options_list = recipe.options.items()
             for option, value in default_options_list:
                 default_options.update({option: value})
-                opts = recipe.dst.conanfile.options._data[option]._possible_values
+                # No public API for this :( - seems stable for all versions, in worst case
+                # we don't get option defaults
+                opts = recipe.options._data[option]._possible_values
                 available_options.update({option: opts})
         except Exception as e:
             Logger().debug(

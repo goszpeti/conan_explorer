@@ -128,8 +128,10 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     mock_install_func = mocker.patch(
         'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
     conan_install_dialog._ui.button_box.accepted.emit()
-    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, "settings": {}, "profile": "",
-                                                "options": {}, "update": True, "auto_install": True}
+    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, 
+                                                "settings": {}, "profile": "",
+                                                "options": {}, "update": True, 
+                                                "auto_install": True}
 
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 

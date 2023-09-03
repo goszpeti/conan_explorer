@@ -108,7 +108,8 @@ class ConanInstallDialog(QDialog):
         except Exception:
             return
         loader = AsyncLoader(self)
-        loader.async_loading(self, self.on_options_query, (conan_ref, ), loading_text="Loading options...")
+        loader.async_loading(self, self.on_options_query, (conan_ref, ), 
+                             loading_text="Loading options...")
         loader.wait_for_finished()
         default_options = self._default_options
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
@@ -137,7 +138,8 @@ class ConanInstallDialog(QDialog):
 
     def on_options_query(self, conan_ref: str):
         try:
-            self._available_options, self._default_options = app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))           
+            self._available_options, self._default_options = \
+            app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))
         except Exception:
             return
 
