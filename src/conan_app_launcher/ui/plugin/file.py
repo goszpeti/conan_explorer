@@ -98,10 +98,10 @@ class PluginFile():
     def write(plugin_file_path: Union[Path, str], plugin_descriptions: List[PluginDescription]):
         """ Write plugin file to specified path with the given the plugin descripton """
         parser = configparser.ConfigParser()
-        for i in range(len(plugin_descriptions)):
+        for i, description in enumerate(plugin_descriptions):
             section_name = "PluginDescription" + str(i)
             parser.add_section(section_name)
-            for setting, value in plugin_descriptions[i].__dict__.items():
+            for setting, value in description.__dict__.items():
                 parser[section_name][setting] = str(value)
         with open(plugin_file_path, 'w', encoding="utf-8") as fd:
             parser.write(fd)

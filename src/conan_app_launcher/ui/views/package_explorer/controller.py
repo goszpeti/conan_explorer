@@ -7,9 +7,8 @@ from conan_app_launcher import asset_path
 from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef
-from conan_app_launcher.app.system import (
-    calc_paste_same_dir_name, copy_path_with_overwrite, delete_path, execute_cmd, 
-    open_cmd_in_path, open_in_file_manager, run_file)
+from conan_app_launcher.app.system import (calc_paste_same_dir_name, open_in_file_manager,
+    copy_path_with_overwrite, delete_path, execute_cmd,  open_cmd_in_path, run_file)
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common import show_conanfile, re_register_signal, ConfigHighlighter
 from conan_app_launcher.ui.config import UiAppLinkConfig
@@ -67,9 +66,11 @@ class PackageSelectionController(QObject):
         if len(conan_refs) != 1:
             return
         conan_ref = conan_refs[0]
-        install_dialog = ConanInstallDialog(self.parent(), conan_ref, capture_install_info=True)
-        install_dialog.exec_()
-        install_info = install_dialog.conan_selected_install
+        install_dialog = ConanInstallDialog(self.parent(), conan_ref, # type: ignore
+                                            capture_install_info=True)
+        install_dialog.exec()
+        install_info = install_dialog.get_selected_install_info()
+        install_dialog.close()
         if install_info is None:
             Logger().error("Canceling show build info.")
             return
@@ -205,24 +206,29 @@ class PackageSelectionController(QObject):
                     return ref_row
         return -1
 
-    def select_local_package_from_ref(self, conan_ref: str) -> bool:
-        """ Selects a reference:id pkg in the left pane and opens the file view"""
+    def select_local_package_from_ref(self, conan_ref: str, export=False) -> bool:
+        """ Selects a reference:id pkg in the left pane and opens the file view """
         self._page_widgets.get_button_by_type(type(self.parent())).click()  # changes to this page and loads
         self._loader.wait_for_finished()
-
-        if not self._model:  # guard
+        if not self._model:
             return False
 
         # Reset filter, otherwise the element to be shown could be hidden
         self._package_filter_edit.setText("*")
 
         # find out if we need to find a ref or or a package
+        error_message_suffix = " in Local Package Explorer for selection."
         split_ref = conan_ref.split(":")
         pkg_id = ""
         if len(split_ref) > 1:  # has id
+            if export:
+                Logger().debug("Cannot use pkg id and export arg at the same time" + 
+                               error_message_suffix)
+                return False
             conan_ref = split_ref[0]
             pkg_id = split_ref[1]
 
+        # not found ref or id - start refresh package list
         if self.find_item_in_pkg_sel_model(conan_ref, pkg_id) == -1:
             self.refresh_pkg_selection_view()
 
@@ -230,9 +236,9 @@ class PackageSelectionController(QObject):
         self._loader.wait_for_finished()
         ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
         if ref_row == -1:
-            Logger().debug(f"Cannot find {conan_ref} in Local Package Explorer for selection")
+            Logger().debug(f"Cannot find {conan_ref}" + error_message_suffix)
             return False
-        Logger().debug(f"Found {conan_ref}@{str(ref_row)} in Local Package Explorer for selection")
+        Logger().debug(f"Found {conan_ref}@{str(ref_row)}" + error_message_suffix)
 
         # map to package view model
         proxy_index = self._model.index(ref_row, 0, QModelIndex())
@@ -240,15 +246,25 @@ class PackageSelectionController(QObject):
         view_model: PackageFilter = self._view.model()  # type: ignore
         self._view.expand(view_model.mapFromSource(proxy_index))
 
+        # retrieve item from id, export or ref
         if pkg_id:
             item: PackageTreeItem = proxy_index.internalPointer()  # type: ignore
             i = 0
-            for i in range(len(item.child_items)):
-                if item.child_items[i].item_data[0].get("id", "") == pkg_id:
-                    break
+            for i, child_item in enumerate(item.child_items):
+                if child_item.type == PkgSelectionType.pkg:
+                    if child_item.item_data[0].get("id", "") == pkg_id:
+                        break
             internal_sel_index = self._model.index(i, 0, proxy_index)
         else:
-            internal_sel_index = proxy_index
+            if export:
+                item: PackageTreeItem = proxy_index.internalPointer()  # type: ignore
+                i = 0
+                for i, child_item in enumerate(item.child_items):
+                    if child_item.type == PkgSelectionType.export:
+                        break
+                internal_sel_index = self._model.index(i, 0, proxy_index)
+            else:
+                internal_sel_index = proxy_index
 
         view_index = view_model.mapFromSource(internal_sel_index)
         self._view.scrollTo(view_index)

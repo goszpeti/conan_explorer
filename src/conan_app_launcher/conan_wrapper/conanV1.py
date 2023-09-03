@@ -1,9 +1,7 @@
-import json
 import os
 import platform
 from pathlib import Path
-import sys
-from tempfile import gettempdir, tempdir
+from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 try:
@@ -12,8 +10,8 @@ except ImportError:
     from contextlib_chdir import chdir
 
 
-from .types import (ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, ConanException,
-                    ConanSettings, LoggerWriter, create_key_value_pair_list, Remote)
+from .types import (ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, 
+                    ConanException, ConanSettings, LoggerWriter, create_key_value_pair_list, Remote)
 from .unified_api import ConanCommonUnifiedApi
 
 if TYPE_CHECKING:
@@ -83,7 +81,11 @@ class ConanApi(ConanCommonUnifiedApi):
 
     # user_name, autheticated
     def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:
-        user_info = self._conan.users_list(remote_name).get("remotes", {})
+        user_info = {}
+        try:
+            user_info = self._conan.users_list(remote_name).get("remotes", {})
+        except Exception:
+            Logger().error(f"Cannot find remote {remote_name} in remote list for fetching user.")
         if len(user_info) < 1:
             return ("", False)
         try:

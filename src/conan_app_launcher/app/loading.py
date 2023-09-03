@@ -90,11 +90,14 @@ class AsyncLoader(QObject):
         self.progress_dialog.show()
 
         if str2bool(os.getenv("DISABLE_ASYNC_LOADER", "")):
-            work_task(*worker_args)
+            ret = work_task(*worker_args)
             self.thread_finished()
             self.progress_dialog.hide()
             if finish_task:
-                finish_task()
+                try: # difficult to handle without Qt signals - so just try
+                    finish_task(ret)
+                except Exception:
+                    finish_task()
             return
 
         self.worker = Worker(work_task, worker_args)

@@ -12,6 +12,7 @@ from pathlib import Path
 from shutil import copy
 from subprocess import CalledProcessError, check_output
 from threading import Thread
+from typing import Generator
 from unittest import mock
 
 import psutil
@@ -216,11 +217,11 @@ def start_conan_server():
     if conan_version.startswith("1"):
         if is_ci_job():
             os.system("conan remote clean")
-        os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ false")
+        os.system(f"conan remote add {TEST_REMOTE_NAME} {TEST_REMOTE_URL} false")
     elif conan_version.startswith("2"):
         if is_ci_job():
             os.system("conan remote remove conancenter")
-        os.system(f"conan remote add {TEST_REMOTE_NAME} http://127.0.0.1:9300/ --insecure")
+        os.system(f"conan remote add {TEST_REMOTE_NAME} {TEST_REMOTE_URL} --insecure")
         os.system(f"conan remote login {TEST_REMOTE_NAME} demo -p demo")  # todo autogenerate and config
     login_test_remote(TEST_REMOTE_NAME)
     os.system(f"conan remote enable {TEST_REMOTE_NAME}")
@@ -276,7 +277,7 @@ def app_qt_fixture(qtbot):
 
 
 @pytest.fixture
-def base_fixture():
+def base_fixture()-> Generator[PathSetup, None, None]:
     """
     Set up the global variables to be able to start the application.
     Needs to be used, if the tested component uses the global Logger.

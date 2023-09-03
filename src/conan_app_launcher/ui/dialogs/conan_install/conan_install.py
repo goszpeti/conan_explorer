@@ -30,7 +30,7 @@ class ConanInstallDialog(QDialog):
         self._ui.setupUi(self)
         self.pkg_installed_signal = pkg_installed_signal
         self._capture_install_info = capture_install_info
-        self.conan_selected_install: Optional[ConanWorkerElement] = None
+        self._conan_selected_install: Optional[ConanWorkerElement] = None
         # style
         icon = get_themed_asset_icon("icons/download_pkg.svg", True)
         self.setWindowIcon(icon)
@@ -176,13 +176,13 @@ class ConanInstallDialog(QDialog):
         else:
             # options from selection
             options = self.get_user_options()
-        self.conan_selected_install = {"ref_pkg_id": ref_text,
+        self._conan_selected_install = {"ref_pkg_id": ref_text,
                                         "settings": {},
                                         "profile": self.get_selected_profile(),
                                         "options": options, "update": update_check_state,
                                         "auto_install": auto_install_checked}
         if not self._capture_install_info:
-            app.conan_worker.put_ref_in_install_queue(self.conan_selected_install, 
+            app.conan_worker.put_ref_in_install_queue(self._conan_selected_install, 
                                                       self.emit_conan_pkg_signal_callback)
 
     def emit_conan_pkg_signal_callback(self, conan_ref: str, pkg_id: str):
@@ -212,3 +212,6 @@ class ConanInstallDialog(QDialog):
                 value = widget.currentText()
             options[item.data(0, 0)] = value
         return options
+
+    def get_selected_install_info(self):
+        return self._conan_selected_install

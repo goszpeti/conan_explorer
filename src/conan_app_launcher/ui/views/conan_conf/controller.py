@@ -89,31 +89,3 @@ class ConanRemoteController():
         if not remote_item:
             return
         QApplication.clipboard().setText(remote_item.remote.name)
-
-    def get_remotes_from_same_server(self, remote: Remote):
-        remote_groups = self.get_remote_groups()
-        for remotes in remote_groups.values():
-            for check_remote in remotes:
-                if check_remote == remote:
-                    return remotes
-        return None
-
-    def get_remote_groups(self) -> Dict[str, List[Remote]]:
-        """
-        Try to group similar URLs(currently only for artifactory links) 
-        and return them in a dict grouped by the full URL.
-        """
-        remote_groups: Dict[str, List[Remote]] = {}
-        for remote in app.conan_api.get_remotes(include_disabled=True):
-            if "artifactory" in remote.url:
-                # try to determine root address
-                possible_base_url = "/".join(remote.url.split("/")[0:3])
-                if not remote_groups.get(possible_base_url):
-                    remote_groups[possible_base_url] = [remote]
-                else:
-                    remotes = remote_groups[possible_base_url]
-                    remotes.append(remote)
-                    remote_groups.update({possible_base_url: remotes})
-            else:
-                remote_groups[remote.url] = [remote]
-        return remote_groups

@@ -4,12 +4,15 @@ from typing import TYPE_CHECKING
 from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
-from conan_app_launcher.ui.views.package_explorer.controller import PackageFileExplorerController, PackageSelectionController
-from conan_app_launcher.ui.views.package_explorer.model import PkgSelectionType
 from conan_app_launcher.ui.widgets import RoundedMenu
+
+from .controller import PackageFileExplorerController, PackageSelectionController
+from .model import PkgSelectionType
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QKeySequence, QShowEvent, QResizeEvent, QAction
-from PySide6.QtWidgets import QWidget, QTabBar, QTreeView, QHBoxLayout, QFrame, QAbstractItemView, QAbstractScrollArea
+from PySide6.QtWidgets import (QWidget, QTabBar, QTreeView, QHBoxLayout, QFrame, 
+                               QAbstractItemView, QAbstractScrollArea)
 
 
 if TYPE_CHECKING:

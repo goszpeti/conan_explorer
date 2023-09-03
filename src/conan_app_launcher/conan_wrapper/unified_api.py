@@ -9,7 +9,7 @@ from .types import (ConanAvailableOptions, ConanOptions, ConanPackageId, ConanPa
 if TYPE_CHECKING:
     from conan_app_launcher.conan_wrapper.conan_cache import ConanInfoCache
 
-
+#### Interface
 class ConanUnifiedApiInterface(ABC):
     """ 
     API abstraction to provide compatiblity betwwen ConanV1 and V2 APIs. 
@@ -206,7 +206,8 @@ class ConanUnifiedApiInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def find_best_matching_local_package(self, conan_ref: ConanRef, conan_options: ConanOptions = {}) -> ConanPkg:
+    def find_best_matching_local_package(self, conan_ref: ConanRef, 
+                                         conan_options: ConanOptions = {}) -> ConanPkg:
         """ Find a package in the local cache """
         raise NotImplementedError
 
@@ -279,6 +280,8 @@ class ConanUnifiedApiInterface(ABC):
         """ Build a human readable pseduo profile name, like Windows_x64_vs16_v142_release """
         raise NotImplementedError
 
+##### Common functions - these use either only the version specific base commands 
+# or do not depend on any version specifics at all
 class ConanCommonUnifiedApi(ConanUnifiedApiInterface):
     """ 
     API abstraction to provide compatiblity betwwen ConanV1 and V2 APIs. 
@@ -566,4 +569,35 @@ class ConanCommonUnifiedApi(ConanUnifiedApiInterface):
                 alias += "_" + item
 
         return alias
-    
+
+    def get_remotes_from_same_server(self, remote: Remote) -> List[Remote]:
+        """
+        Pass in a remote and return all other remotes with the same base url.
+        Currently only for artifactory links.
+        """
+        remote_groups = self._get_remote_groups()
+        for remotes in remote_groups.values():
+            for check_remote in remotes:
+                if check_remote == remote:
+                    return remotes
+        return [remote]
+
+    def _get_remote_groups(self) -> Dict[str, List[Remote]]:
+        """
+        Try to group similar URLs(currently only for artifactory links) 
+        and return them in a dict grouped by the full URL.
+        """
+        remote_groups: Dict[str, List[Remote]] = {}
+        for remote in self.get_remotes(include_disabled=True):
+            if "artifactory" in remote.url:
+                # try to determine root address
+                possible_base_url = "/".join(remote.url.split("/")[0:3])
+                if not remote_groups.get(possible_base_url):
+                    remote_groups[possible_base_url] = [remote]
+                else:
+                    remotes = remote_groups[possible_base_url]
+                    remotes.append(remote)
+                    remote_groups.update({possible_base_url: remotes})
+            else:
+                remote_groups[remote.url] = [remote]
+        return remote_groups

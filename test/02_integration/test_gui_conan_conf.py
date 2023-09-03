@@ -220,7 +220,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     # now enter a wrong password and call save
     conan_conf_view.remote_login_dialog._ui.name_line_edit.setText("wrong")
     conan_conf_view.remote_login_dialog._ui.password_line_edit.setText("wrong")
-    conan_conf_view.remote_login_dialog.save()
+    conan_conf_view.remote_login_dialog.on_ok()
     # throws error on console, but still logged in
     assert conan.get_remote_user_info("local") == ("demo", True)
     
@@ -231,13 +231,12 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     # now enter the correct password and call save
     conan_conf_view.remote_login_dialog._ui.name_line_edit.setText("demo")
     conan_conf_view.remote_login_dialog._ui.password_line_edit.setText("demo")
-    conan_conf_view.remote_login_dialog.save()
+    conan_conf_view.remote_login_dialog.on_ok()
 
     # logged in
     assert conan.get_remote_user_info("local") == ("demo", True)
     # assert password is empty (does not really test, if it worked correctly)
     assert conan_conf_view.remote_login_dialog._ui.password_line_edit.text() == ""
-    main_gui.close()
 
 @pytest.fixture
 def profile_fixture():
@@ -330,3 +329,7 @@ def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixt
 
     ## check model
     assert "new_profile_test" in model._profiles
+
+@pytest.mark.conanv2
+def test_conan_config_view_editables(qtbot, base_fixture: PathSetup, profile_fixture, ui_no_refs_config_fixture, mocker):
+    pass

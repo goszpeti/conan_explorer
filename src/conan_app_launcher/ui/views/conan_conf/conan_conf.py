@@ -305,7 +305,7 @@ class ConanConfigView(PluginInterfaceV1):
         remote_item = self._remotes_controller.get_selected_remote()
         if not remote_item:
             return
-        remotes = self._remotes_controller.get_remotes_from_same_server(remote_item.remote)
+        remotes = app.conan_api.get_remotes_from_same_server(remote_item.remote)
         if not remotes:
             return
         self.remote_login_dialog = RemoteLoginDialog(remotes, self)
