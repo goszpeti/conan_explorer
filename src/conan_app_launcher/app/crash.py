@@ -3,7 +3,7 @@ import sys
 import traceback
 from types import TracebackType
 
-from conan_app_launcher import __version__, user_save_path
+from conan_app_launcher import user_save_path
 
 def bug_dialog_exc_hook(exctype: "type[BaseException]", excvalue: BaseException, 
                         tracebock: TracebackType):

@@ -1,5 +1,5 @@
 import platform
-from conan_app_launcher.settings import GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL
+from conan_app_launcher.settings import GUI_STYLE_FLUENT
 
 from conan_app_launcher.ui.common import ThemedWidget
 from . import LEFT_MENU_MAX_WIDTH, LEFT_MENU_MIN_WIDTH, RIGHT_MENU_MAX_WIDTH, RIGHT_MENU_MIN_WIDTH, gen_obj_name
@@ -133,14 +133,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         self.main_general_settings_menu = SideSubMenu(
             self.ui.right_menu_bottom_content_sw, "General Settings", True)
-        self.ui.right_menu_bottom_content_sw.addWidget(
-            self.main_general_settings_menu)
+        self.ui.right_menu_bottom_content_sw.addWidget(self.main_general_settings_menu)
         self.ui.right_menu_bottom_content_sw.setCurrentWidget(
-            self.main_general_settings_menu)
+                                                        self.main_general_settings_menu)
 
-        hints = Qt.WindowType
-        self.setWindowFlags(hints.FramelessWindowHint | hints.WindowSystemMenuHint |  # type: ignore
-                           hints.WindowMinimizeButtonHint | hints.WindowMaximizeButtonHint)
+        wt = Qt.WindowType
+        self.setWindowFlags(wt.FramelessWindowHint | wt.WindowSystemMenuHint |  # type: ignore
+                           wt.WindowMinimizeButtonHint | wt.WindowMaximizeButtonHint)
         if is_windows_11() or platform.system() == "Linux":  # To hide black edges around the border rounding
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
@@ -431,57 +430,58 @@ class FluentWindow(QMainWindow, ThemedWidget):
         position = event.position().toPoint()  # relative pos to window
         width = self.width()
         height = self.height()
-
+        Cs = Qt.CursorShape
         if QRect(top_left.x() + x_offset, top_left.y(), 
                  width - 2*x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top
-            self.setCursor(Qt.CursorShape.SizeVerCursor)
+            self.setCursor(Cs.SizeVerCursor)
         elif QRect(bottom_left.x() + x_offset, bottom_left.y(), 
                    width - 2*x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom
-            self.setCursor(Qt.CursorShape.SizeVerCursor)
+            self.setCursor(Cs.SizeVerCursor)
         elif QRect(top_right.x() - x_offset, top_right.y() + y_offset, 
                    x_offset, height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.right
-            self.setCursor(Qt.CursorShape.SizeHorCursor)
+            self.setCursor(Cs.SizeHorCursor)
         elif QRect(top_left.x() + x_offset, top_left.y() + y_offset, -x_offset, 
                    height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.left
-            self.setCursor(Qt.CursorShape.SizeHorCursor)
+            self.setCursor(Cs.SizeHorCursor)
         elif QRect(top_right.x(), top_right.y(), -x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_right
-            self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+            self.setCursor(Cs.SizeBDiagCursor)
         elif QRect(bottom_left.x(), bottom_left.y(), x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_left
-            self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+            self.setCursor(Cs.SizeBDiagCursor)
         elif QRect(top_left.x(), top_left.y(), x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_left
-            self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+            self.setCursor(Cs.SizeFDiagCursor)
         elif QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_right
-            self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+            self.setCursor(Cs.SizeFDiagCursor)
         else:  # no resize
             self._resize_direction = ResizeDirection.default
-            self.setCursor(Qt.CursorShape.ArrowCursor)
+            self.setCursor(Cs.ArrowCursor)
 
     def resizing(self, event):
+        Ed = Qt.Edge
         window = self.window().windowHandle()
         if self._resize_direction == ResizeDirection.top:
-            window.startSystemResize(Qt.Edge.TopEdge)
+            window.startSystemResize(Ed.TopEdge)
         elif self._resize_direction == ResizeDirection.bottom:
-            window.startSystemResize(Qt.Edge.BottomEdge)
+            window.startSystemResize(Ed.BottomEdge)
         elif self._resize_direction == ResizeDirection.right:
-            window.startSystemResize(Qt.Edge.RightEdge)
+            window.startSystemResize(Ed.RightEdge)
         elif self._resize_direction == ResizeDirection.left:
-            window.startSystemResize(Qt.Edge.LeftEdge)
+            window.startSystemResize(Ed.LeftEdge)
         elif self._resize_direction == ResizeDirection.top_right:
-            window.startSystemResize(Qt.Edge.TopEdge | Qt.Edge.RightEdge)
+            window.startSystemResize(Ed.TopEdge | Ed.RightEdge)
         elif self._resize_direction == ResizeDirection.bottom_right:
-            window.startSystemResize(Qt.Edge.BottomEdge | Qt.Edge.RightEdge)
+            window.startSystemResize(Ed.BottomEdge | Ed.RightEdge)
         elif self._resize_direction == ResizeDirection.bottom_left:
-            window.startSystemResize(Qt.Edge.BottomEdge | Qt.Edge.LeftEdge)
+            window.startSystemResize(Ed.BottomEdge | Ed.LeftEdge)
         elif self._resize_direction == ResizeDirection.top_left:
-            window.startSystemResize(Qt.Edge.TopEdge | Qt.Edge.LeftEdge)
+            window.startSystemResize(Ed.TopEdge | Ed.LeftEdge)
 
     def maximize_restore(self, event=None):  # dummy arg to be used as an event slot
         if self.isMaximized():

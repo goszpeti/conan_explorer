@@ -41,14 +41,15 @@ class AsyncLoader(QObject):
         super().__init__(parent)
         # initial setup
         if AsyncLoader.__progress_dialog is None: # implicit check for init
+            wt = Qt.WindowType
             progress_dialog = QProgressDialog()
-            progress_dialog.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+            progress_dialog.setWindowFlags(wt.WindowStaysOnTopHint)
             progress_dialog.setAttribute(Qt.WidgetAttribute.WA_ShowModal)
             progress_dialog.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
 
             # Window flags to disable close button
             progress_dialog.setWindowFlags(
-                Qt.WindowType.Window | Qt.WindowType.WindowTitleHint | Qt.WindowType.CustomizeWindowHint)
+                wt.Window | wt.WindowTitleHint | wt.CustomizeWindowHint)
             progress_dialog.setCancelButton(None)  # type: ignore
             progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
             progress_dialog.setRange(0, 0)

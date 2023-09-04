@@ -47,9 +47,10 @@ class ConanApi(ConanCommonUnifiedApi):
         else:
             raise NotImplementedError
         # Experimental fast search - Conan search_packages is VERY slow
-        # HACK: Removed the  @api_method decorator by getting the original function from the closure attribute
-        self.search_packages = self._conan.search_packages.__closure__[
-            0].cell_contents  # type: ignore
+        # HACK: Removed the  @api_method decorator by getting the original function 
+        # from the closure attribute
+        self.search_packages = \
+                self._conan.search_packages.__closure__[0].cell_contents  # type: ignore
         # don't hang on startup
         try:  # use try-except because of Conan 1.24 envvar errors in tests
             self.remove_locks()
@@ -77,7 +78,10 @@ class ConanApi(ConanCommonUnifiedApi):
 
     def get_default_settings(self) -> ConanSettings:
         # type: ignore
-        return dict(self._client_cache.default_profile.settings)
+        default_profile = self._client_cache.default_profile
+        if not default_profile:
+            return {}
+        return dict(default_profile.settings)
 
     # user_name, autheticated
     def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:
