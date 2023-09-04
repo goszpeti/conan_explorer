@@ -1,8 +1,8 @@
 """
-A simple setup script to create an executable using PyQt6. This also
+A simple setup script to create an executable using PyQt5. This also
 demonstrates the method for creating a Windows executable that does not have
 an associated console.
-PyQt6app.py is a very simple type of PyQt6 application
+PyQt5app.py is a very simple type of PyQt5 application
 Run the build process by running the command 'python setup.py build'
 If everything works well you should find a subdirectory in the build
 subdirectory that contains the files needed to run the application
@@ -33,9 +33,10 @@ build_exe_options = {
     "includes": "conan_app_launcher",
     "excludes": ["debugpy"],
     "bin_excludes": ['Qt5dbus.dll', 'Qt5Network.dll', 'Qt5Qml.dll', "Qt5QmlModels.dll",
-                     'Qt5Quick.dll', 'Qt5Svg.dll', 'Qt5WebSockets.dll', "d3dcompiler_47.dll", "opengl32sw.dll",
-    "libicudata.so.66", "libgtk-3.so.0", "libQt5Quick.so.5", "libQt5Qml.so.5", "libicui18n.so.66", "libicui18n.so.66",
-    "libQt5Network.so.5", "libQt5QmlModels.so.5"],
+        'Qt5Quick.dll', 'Qt5Svg.dll', 'Qt5WebSockets.dll', "d3dcompiler_47.dll", 
+        "opengl32sw.dll", "libicudata.so.66", "libgtk-3.so.0", "libQt5Quick.so.5", 
+        "libQt5Qml.so.5", "libicui18n.so.66", "libicui18n.so.66", 
+        "libQt5Network.so.5", "libQt5QmlModels.so.5"],
     "include_files": include_files,
     "zip_include_packages" : ['PyQt6', "conans"]
 }

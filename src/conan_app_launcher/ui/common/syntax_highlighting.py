@@ -30,27 +30,30 @@ class ConfigHighlighter(QSyntaxHighlighter):
             self.key_color = "#001EFD"
             self.value_color = "#AC1613"
         self.comment_color = "#6B9857"
+
+        # key value constants
         if type == "ini":
             self._separator = "="
             self._key_regex = "(.*?)(?=\=)"
-            self._value_regex = "(?<=\=)(.*?)$" # ((.|\n)*)(?=\=)            
+            self._value_regex = "(?<=\=)(.*?)$"
         elif type == "yaml":
             self._separator = ":"
             self._key_regex ="(.*?)(?=:)"
             self._value_regex = "(?<=:)(.*?)$"
 
     def highlightBlock(self, text: str):
+        # set default value color for everything
+        # modify every other construct with special cases
         value_format = QTextCharFormat()
         value_format.setForeground(QColor(self.value_color))
-        if not self._separator in text:
+        if self._separator not in text:
             self.setFormat(0, len(text), value_format)
         else:
             expression = QRegularExpression(self._value_regex)
-            i = expression.globalMatch(text)
-            while i.hasNext():
-                match = i.next()
-                self.setFormat(match.capturedStart(), match.capturedLength(), value_format)
+            match = expression.match(text)
+            self.setFormat(match.capturedStart(), match.capturedLength(), value_format)
 
+        # sections
         if self._type == "ini":
             section_format = QTextCharFormat()
             section_format.setFontWeight(QFont.Weight.Bold)
@@ -60,15 +63,14 @@ class ConfigHighlighter(QSyntaxHighlighter):
             while i.hasNext():
                 match = i.next()
                 self.setFormat(match.capturedStart(), match.capturedLength(), section_format)
-
+        # key-values
         key_format = QTextCharFormat()
         key_format.setForeground(QColor(self.key_color))
         expression = QRegularExpression(self._key_regex)
-        i = expression.globalMatch(text)
-        while i.hasNext():
-            match = i.next()
-            self.setFormat(match.capturedStart(), match.capturedLength(), key_format)
+        match = expression.match(text)
+        self.setFormat(match.capturedStart(), match.capturedLength(), key_format)
 
+        # comments
         comment_format = QTextCharFormat()
         comment_format.setForeground(QColor(self.comment_color))
         expression = QRegularExpression("#(?:\s.*?)$")
