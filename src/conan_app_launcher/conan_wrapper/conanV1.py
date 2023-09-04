@@ -238,13 +238,15 @@ class ConanApi(ConanCommonUnifiedApi):
                 f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return package_id, Path(INVALID_PATH)
 
-    def get_conan_buildinfo(self, conan_ref: ConanRef, profile="", conan_options: ConanOptions = {}):
+    def get_conan_buildinfo(self, conan_ref: ConanRef, conan_settings: ConanSettings, 
+                            conan_options: ConanOptions = {}):
         # install ref to temp dir and use generator
         temp_path = Path(gettempdir()) / "cal_cuild_info"
         temp_path.mkdir(parents=True, exist_ok=True)
         # use cli here, API cannnot do job easily and we wan to parse the file output
         with chdir(temp_path):
-            self.install_reference(conan_ref, generators=["txt"])
+            self.install_reference(conan_ref, conan_settings=conan_settings, 
+                                   conan_options=conan_options,generators=["txt"])
         content = ""
         try:
             content = (temp_path / "conanbuildinfo.txt").read_text()

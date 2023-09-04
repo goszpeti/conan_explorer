@@ -6,7 +6,7 @@ import conan_app_launcher.app as app
 from conan_app_launcher import asset_path
 from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanPkgRef, ConanRef
 from conan_app_launcher.app.system import (calc_paste_same_dir_name, open_in_file_manager,
     copy_path_with_overwrite, delete_path, execute_cmd,  open_cmd_in_path, run_file)
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
@@ -62,22 +62,12 @@ class PackageSelectionController(QObject):
         loader.wait_for_finished()
 
     def on_show_build_info(self):
-        conan_refs = self.get_selected_conan_refs()
-        if len(conan_refs) != 1:
-            return
-        conan_ref = conan_refs[0]
-        install_dialog = ConanInstallDialog(self.parent(), conan_ref, # type: ignore
-                                            capture_install_info=True)
-        install_dialog.exec()
-        install_info = install_dialog.get_selected_install_info()
-        install_dialog.close()
-        if install_info is None:
-            Logger().error("Canceling show build info.")
-            return
+        conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
+        pkg_info = app.conan_api.get_local_pkg_from_id(ConanPkgRef.loads(conan_ref + ":" + pkg_id))
         loader = AsyncLoader(self)
         loader.async_loading(self._view, app.conan_api.get_conan_buildinfo,
-                (ConanRef.loads(conan_ref), install_info.get("profile", ""), 
-                 install_info.get("options", {})), self.show_buildinfo_dialog,
+                (ConanRef.loads(conan_ref), pkg_info.get("settings", ""), 
+                 pkg_info.get("options", {})), self.show_buildinfo_dialog,
                 loading_text="Loading build info...")
         loader.wait_for_finished()
 

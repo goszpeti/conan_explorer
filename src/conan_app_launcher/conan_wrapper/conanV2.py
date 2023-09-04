@@ -243,7 +243,7 @@ class ConanApi(ConanCommonUnifiedApi):
 
     ### Local References and Packages ###
 
-    def get_conan_buildinfo(self, conan_ref: ConanRef, profile="", 
+    def get_conan_buildinfo(self, conan_ref: ConanRef, conan_settings: ConanSettings,
                             conan_options: ConanOptions = {}) -> str:
         """ Read conan buildinfo and return as string """
         raise NotImplementedError
