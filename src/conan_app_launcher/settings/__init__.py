@@ -1,7 +1,7 @@
 
 """ Use constants in class, so they don't need to be separately accessed """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Optional, Tuple
 
 from conan_app_launcher import PathLike
@@ -51,7 +51,7 @@ def settings_factory(type: str, source: PathLike) -> "SettingsInterface":
 # Interface for Settings to implement
 
 
-class SettingsInterface(ABC):
+class SettingsInterface():
     """
     Abstract Class to implement settings mechanisms.
     Source artefact location is passed by constructor and not changeable.
@@ -100,7 +100,7 @@ class SettingsInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, name: str, value: "str | int | float | bool"):
+    def set(self, name: str, value: "str | int | float | bool | dict"):
         """ Set the value of an existing setting """
         raise NotImplementedError
 

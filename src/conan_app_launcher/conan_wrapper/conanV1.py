@@ -4,14 +4,16 @@ from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
+from conan_app_launcher.app.typing import SignatureCheckMeta
+
 try:
     from contextlib import chdir
 except ImportError:
     from contextlib_chdir import chdir
 
-
-from .types import (ConanAvailableOptions, ConanOptions, ConanPackageId, ConanPackagePath, ConanPkg, ConanRef, ConanPkgRef, 
-                    ConanException, ConanSettings, LoggerWriter, create_key_value_pair_list, Remote)
+from .types import (ConanAvailableOptions, ConanOptions, ConanPackageId, ConanPackagePath, 
+                    ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, 
+                    LoggerWriter, Remote, create_key_value_pair_list)
 from .unified_api import ConanCommonUnifiedApi
 
 if TYPE_CHECKING:
@@ -23,7 +25,7 @@ from conan_app_launcher import (CONAN_LOG_PREFIX, INVALID_PATH,
 from conan_app_launcher.app.logger import Logger
 
 
-class ConanApi(ConanCommonUnifiedApi):
+class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     """ Wrapper around ConanAPIV1 """
 
     def __init__(self):
@@ -102,7 +104,7 @@ class ConanApi(ConanCommonUnifiedApi):
     def get_config_file_path(self) -> Path:
         return Path(self._client_cache.conan_conf_path)
 
-    def get_config_entry(self, config_name: str, default_value: Any):
+    def get_config_entry(self, config_name: str, default_value: Any) -> Any:
         try:
             return self._client_cache.config.get_item(config_name)
         except Exception:
@@ -210,10 +212,14 @@ class ConanApi(ConanCommonUnifiedApi):
 
     ### Install related methods ###
 
-    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings = {},
-                          conan_options: ConanOptions = {}, update=True, quiet=False,
-                          generators: List[str] = []) -> Tuple[ConanPackageId, ConanPackagePath]:
+    def install_reference(self, conan_ref: ConanRef, conan_settings: Optional[ConanSettings]=None,
+            conan_options: Optional[ConanOptions]=None, profile="", update=True, quiet=False,
+            generators: List[str] = []) -> Tuple[ConanPackageId, ConanPackagePath]:
         package_id = ""
+        if conan_options is None:
+            conan_options = {}
+        if conan_settings is None:
+            conan_settings = {}
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
         if not quiet:
@@ -242,18 +248,22 @@ class ConanApi(ConanCommonUnifiedApi):
                 f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return package_id, Path(INVALID_PATH)
 
-    def get_conan_buildinfo(self, conan_ref: ConanRef, conan_settings: ConanSettings, 
-                            conan_options: ConanOptions = {}):
+    def get_conan_buildinfo(self, conan_ref: ConanRef, conan_settings: ConanSettings,
+                            conan_options: Optional[ConanOptions]=None) -> str:
         # install ref to temp dir and use generator
         temp_path = Path(gettempdir()) / "cal_cuild_info"
         temp_path.mkdir(parents=True, exist_ok=True)
+        generated_file = (temp_path / "conanbuildinfo.txt")
+        # clean up possible last run
+        generated_file.unlink(missing_ok=True)
+
         # use cli here, API cannnot do job easily and we wan to parse the file output
         with chdir(temp_path):
             self.install_reference(conan_ref, conan_settings=conan_settings, 
-                                   conan_options=conan_options,generators=["txt"])
+                                   conan_options=conan_options, generators=["txt"])
         content = ""
         try:
-            content = (temp_path / "conanbuildinfo.txt").read_text()
+            content = generated_file.read_text()
         except Exception as e:
             Logger().error(
                 f"Can't read conanbuildinfo.txt for '<b>{str(conan_ref)}</b>': {str(e)}")
@@ -284,7 +294,7 @@ class ConanApi(ConanCommonUnifiedApi):
 
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str = ""):
         pkg_ids = [pkg_id] if pkg_id else None
-        self._conan.remove(conan_ref, packages=pkg_ids, force=True)
+        self._conan.remove(str(conan_ref), packages=pkg_ids, force=True)
 
     def get_all_local_refs(self) -> List[ConanRef]:
         return self._client_cache.all_refs()  # type: ignore

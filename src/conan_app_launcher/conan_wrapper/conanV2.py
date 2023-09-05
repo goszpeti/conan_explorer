@@ -6,9 +6,11 @@ from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from conan_app_launcher import INVALID_PATH, user_save_path
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.app.typing import SignatureCheckMeta
 
-from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPackageId, ConanPackagePath, ConanPkg,
-                    ConanPkgRef, ConanRef, ConanSettings, create_key_value_pair_list, Remote)
+from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPackageId,
+    ConanPackagePath, ConanPkg, ConanPkgRef, ConanRef, ConanSettings, Remote, 
+    create_key_value_pair_list)
 from .unified_api import ConanCommonUnifiedApi
 
 if TYPE_CHECKING:
@@ -17,7 +19,7 @@ if TYPE_CHECKING:
     from .conan_cache import ConanInfoCache
 
 
-class ConanApi(ConanCommonUnifiedApi):
+class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     """ Wrapper around ConanAPIV2 """
 
     def __init__(self):
@@ -112,7 +114,7 @@ class ConanApi(ConanCommonUnifiedApi):
     def get_config_file_path(self) -> Path:
         return Path(self._client_cache.new_config_path)
 
-    def get_config_entry(self, config_name: str, default_value: Any):
+    def get_config_entry(self, config_name: str, default_value: Any) -> Any:
         return self._client_cache.new_config.get(config_name, default_value)
 
     def get_revisions_enabled(self) -> bool:
@@ -175,10 +177,14 @@ class ConanApi(ConanCommonUnifiedApi):
 
     ### Install related methods ###
 
-    def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings = {},
-                          conan_options: ConanOptions = {}, update=True, quiet=False, 
-                          generators: List[str] = []) -> Tuple[ConanPackageId, ConanPackagePath]:
+    def install_reference(self, conan_ref: ConanRef, conan_settings: Optional[ConanSettings],
+            conan_options: Optional[ConanOptions]=None, profile="", update=True, quiet=False,
+            generators: List[str] = []) -> Tuple[ConanPackageId, ConanPackagePath]:
         pkg_id = ""
+        if conan_options is None:
+            conan_options = {}
+        if conan_settings is None:
+            conan_settings = {}
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
         if not quiet:
@@ -226,7 +232,8 @@ class ConanApi(ConanCommonUnifiedApi):
                 f"Can't install reference '<b>{str(conan_ref)}</b>': {str(error)}")
             return (pkg_id, Path(INVALID_PATH))
 
-    def get_options_with_default_values(self, conan_ref: ConanRef) -> Tuple[ConanAvailableOptions, ConanOptions]:
+    def get_options_with_default_values(self, 
+                    conan_ref: ConanRef) -> Tuple[ConanAvailableOptions, ConanOptions]:
         # this calls external code of the recipe
         default_options = {}
         available_options = {}
@@ -246,8 +253,8 @@ class ConanApi(ConanCommonUnifiedApi):
     ### Local References and Packages ###
 
     def get_conan_buildinfo(self, conan_ref: ConanRef, conan_settings: ConanSettings,
-                            conan_options: ConanOptions = {}) -> str:
-        """ TODO: Currently there is no equivalent to txt generator ConanV1 """
+                            conan_options: Optional[ConanOptions]=None) -> str:
+        """ TODO: Currently there is no equivalent to txt generator from ConanV1 """
         raise NotImplementedError
     
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:

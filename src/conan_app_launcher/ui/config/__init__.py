@@ -2,7 +2,7 @@
 """ Classes representing the ui config (Data Transfer Objects) 
 this is a bit overblown for this usecase, but it is worth an experiment """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List
 
@@ -70,7 +70,7 @@ def get_ui_config_file_ext(type: str) -> str:
     return file_ext
 
 
-class UiConfigInterface(ABC):
+class UiConfigInterface():
     """
     Abstract Class to implement ui config mechanism.
     Source artefact should be passed by constructor an and is not changeable.

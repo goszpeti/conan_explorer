@@ -15,11 +15,17 @@ from conan_app_launcher.conan_wrapper.conan_worker import (ConanWorker,
 from conan_app_launcher.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_app_launcher.conan_wrapper.types import ConanRef
 
+WINDOWS_x64_VS16_SETTINGS = {'os': 'Windows', 'os_build': 'Windows', 'arch': 'x86_64', 
+                             'arch_build': 'x86_64', 'compiler': 'Visual Studio', 
+                             'compiler.version': '16', 'compiler.toolset': 'v142', 
+                             'build_type': 'Release'}
+LINUX_X64_GCC7_SETTINGS = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 
+                           'compiler.version': '7.4', 'build_type': 'Debug'}
 
 def test_conan_get_conan_buildinfo():
     conan = ConanApi().init_api()
     # id, _ = conan.get_best_matching_local_package_path(ConanRef.loads(TEST_REF))
-    ret = conan.get_conan_buildinfo(ConanRef.loads(TEST_REF), "4ee9d5e762db5f8ef32218f76f6ce05a5b13e687")
+    ret = conan.get_conan_buildinfo(ConanRef.loads(TEST_REF), LINUX_X64_GCC7_SETTINGS)
     pass
 
 def test_conan_profile_name_alias_builder():
@@ -34,15 +40,12 @@ def test_conan_profile_name_alias_builder():
     assert profile_name == "Windows_x64"
 
     # check windows
-    settings = {'os': 'Windows', 'os_build': 'Windows', 'arch': 'x86_64', 'arch_build': 'x86_64',
-                'compiler': 'Visual Studio', 'compiler.version': '16', 'compiler.toolset': 'v142', 'build_type': 'Release'}
-    profile_name = ConanApi.build_conan_profile_name_alias(settings)
+    profile_name = ConanApi.build_conan_profile_name_alias(WINDOWS_x64_VS16_SETTINGS)
     assert profile_name == "Windows_x64_vs16_v142_release"
 
     # check linux
-    settings = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc',
-                'compiler.version': '7.4', 'build_type': 'Debug'}
-    profile_name = ConanApi.build_conan_profile_name_alias(settings)
+
+    profile_name = ConanApi.build_conan_profile_name_alias(LINUX_X64_GCC7_SETTINGS)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
 def test_conan_short_path_root():
@@ -156,10 +159,10 @@ def test_install_with_any_settings(mocker, capfd):
     conan_remove_ref(TEST_REF)
     # Create the "any" package
     conan = ConanApi().init_api()
-    assert conan.install_package(
-        ConanRef.loads(TEST_REF),
-        {'id': '325c44fdb228c32b3de52146f3e3ff8d94dddb60', 'options': {}, 'settings': {
-            'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"}, 'requires': [], 'outdated': False},)
+    assert conan.install_package(ConanRef.loads(TEST_REF), {
+        'id': '325c44fdb228c32b3de52146f3e3ff8d94dddb60', 'options': {},
+        'settings': {'arch_build': 'any', 'os_build': 'Linux', "build_type": "ANY"},
+        'requires': [], 'outdated': False},)
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
     assert "Cannot install package" not in captured.err
@@ -233,11 +236,12 @@ def test_conan_worker(base_fixture, mocker):
     Test, if conan worker works on the queue.
     It is expected,that the queue size decreases over time.
     """
-    conan_refs: List[ConanWorkerElement] = [{"ref_pkg_id": "m4/1.4.19@_/_", "options": {},
-                                            "settings": {}, "update": False,  "auto_install": True, "profile": ""},
-                                            {"ref_pkg_id": "zlib/1.2.11@conan/stable", "options": {"shared": "True"},
-                                             "settings": {}, "update": False,  "auto_install": True, "profile": ""}
-                                            ]
+    conan_refs: List[ConanWorkerElement] = \
+    [{"ref_pkg_id": "m4/1.4.19@_/_", "options": {},
+    "settings": {}, "update": False,  "auto_install": True, "profile": ""},
+    {"ref_pkg_id": "zlib/1.2.11@conan/stable", "options": {"shared": "True"},
+        "settings": {}, "update": False,  "auto_install": True, "profile": ""}
+    ]
 
     mock_func = mocker.patch('conan_app_launcher.conan_wrapper.ConanApi.get_path_or_auto_install')
     import conan_app_launcher.app as app

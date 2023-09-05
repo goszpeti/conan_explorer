@@ -8,9 +8,7 @@ from conan_app_launcher import (DEFAULT_UI_CFG_FILE_NAME,
                                 user_save_path)
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE
 from conan_app_launcher.ui.config import (UI_CONFIG_JSON_TYPE, UiConfig,
-                                          UiConfigInterface,
-                                          get_ui_config_file_ext,
-                                          ui_config_factory)
+                        UiConfigInterface, get_ui_config_file_ext, ui_config_factory)
 
 from .views.app_grid.model import UiAppGridModel
 

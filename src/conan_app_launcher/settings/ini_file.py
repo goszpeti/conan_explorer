@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Tuple
 from conan_app_launcher import BUILT_IN_PLUGIN, PathLike, base_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import get_default_file_editor
+from conan_app_launcher.app.typing import SignatureCheckMeta
 
 from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE,
                FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE,
@@ -37,7 +38,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
     }
 
 
-class IniSettings(SettingsInterface):
+class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
     """
     Settings mechanism with an ini file to use as a storage.
     File and entries are automatically created from the default value of the class.
@@ -121,7 +122,9 @@ class IniSettings(SettingsInterface):
         if self._auto_save:
             self.save()
 
-    def add(self, name: str, value: "str | int | float | bool", node: str):
+    def add(self, name: str, value: "str | int | float | bool", node: Optional[str] = None):
+        if node is None:
+            node = GENERAL_SECTION_NAME
         if not self._values.get(node):
             self._values[node] = {}
         self._values[node][name] = value
