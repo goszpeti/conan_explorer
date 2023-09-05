@@ -1,11 +1,13 @@
+from contextlib import chdir
 import os
 from pathlib import Path
+from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from conan_app_launcher import INVALID_PATH, user_save_path
 from conan_app_launcher.app.logger import Logger
 
-from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPkg,
+from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPackageId, ConanPackagePath, ConanPkg,
                     ConanPkgRef, ConanRef, ConanSettings, create_key_value_pair_list, Remote)
 from .unified_api import ConanCommonUnifiedApi
 
@@ -174,7 +176,8 @@ class ConanApi(ConanCommonUnifiedApi):
     ### Install related methods ###
 
     def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings = {},
-                          conan_options: ConanOptions = {}, update=True, quiet=False) -> Tuple[str, Path]:
+                          conan_options: ConanOptions = {}, update=True, quiet=False, 
+                          generators: List[str] = []) -> Tuple[ConanPackageId, ConanPackagePath]:
         pkg_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)
@@ -189,21 +192,20 @@ class ConanApi(ConanCommonUnifiedApi):
             # Basic collaborators, remotes, lockfile, profiles
             remotes = self._conan.remotes.list(None)
             profiles = [profile] if profile else []
-            profile_host = self._conan.profiles.get_profile(
-                profiles, settings=settings_list, options=options_list)
+            profile_host = self._conan.profiles.get_profile(profiles, 
+                                        settings=settings_list, options=options_list)
             requires = [conan_ref]
-            deps_graph = self._conan.graph.load_graph_requires(requires, None, profile_host, profile_host, None,
-                                                               remotes, update)
+            deps_graph = self._conan.graph.load_graph_requires(requires, None, 
+                            profile_host, profile_host, None, remotes, update)
             print_graph_basic(deps_graph)
             deps_graph.report_graph_error()
             self._conan.graph.analyze_binaries(deps_graph, build_mode=None, remotes=remotes, update=update,
                                                lockfile=None)
             print_graph_packages(deps_graph)
-            self._conan.install.install_binaries(
-                deps_graph=deps_graph, remotes=remotes)
+            self._conan.install.install_binaries(deps_graph=deps_graph, remotes=remotes)
             # Currently unused
-            # self.conan.install.install_consumer(deps_graph=deps_graph, generators=None, output_folder=None,
-            #                                 source_folder=gettempdir(), deploy=True)
+            self._conan.install.install_consumer(deps_graph=deps_graph, generators=generators, output_folder=None,
+                                            source_folder=gettempdir())
             info = None
             for node in deps_graph.nodes:
                 if node.ref == conan_ref:
@@ -245,7 +247,7 @@ class ConanApi(ConanCommonUnifiedApi):
 
     def get_conan_buildinfo(self, conan_ref: ConanRef, conan_settings: ConanSettings,
                             conan_options: ConanOptions = {}) -> str:
-        """ Read conan buildinfo and return as string """
+        """ TODO: Currently there is no equivalent to txt generator ConanV1 """
         raise NotImplementedError
     
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:

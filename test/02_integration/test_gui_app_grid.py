@@ -3,8 +3,6 @@ import os
 import tempfile
 from pathlib import Path
 import pytest
-from time import sleep
-from typing import List
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from test.conftest import TEST_REF, app_qt_fixture
 

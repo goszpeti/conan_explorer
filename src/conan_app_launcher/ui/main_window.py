@@ -266,15 +266,16 @@ class MainWindow(FluentWindow):
             path_list = str(paths)
 
         msg = WideMessageBox(parent=self)
+        Ws = WideMessageBox.StandardButton
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(WideMessageBox.StandardButton.Yes | WideMessageBox.StandardButton.Cancel)  # type: ignore
+        msg.setStandardButtons(Ws.Yes | Ws.Cancel)  # type: ignore
         msg.setIcon(WideMessageBox.Icon.Question)
         msg.setWidth(800)
         msg.setMaximumHeight(600)
         reply = msg.exec()
-        if reply == WideMessageBox.StandardButton.Yes:
+        if reply == Ws.Yes:
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
@@ -321,7 +322,8 @@ class MainWindow(FluentWindow):
             app.active_settings.set(WINDOW_SIZE, "maximized")
         else:
             geometry = self.geometry()
-            geo_str = f"{geometry.left()},{geometry.top()},{geometry.width()},{geometry.height()}"
+            geo_str = (f"{geometry.left()},{geometry.top()},"
+                       f"{geometry.width()},{geometry.height()}")
             app.active_settings.set(WINDOW_SIZE, geo_str)
         # save console size
         sizes = self.ui.content_footer_splitter.sizes()
@@ -331,5 +333,5 @@ class MainWindow(FluentWindow):
         app.active_settings.set(CONSOLE_SPLIT_SIZES, sizes_str)
 
         # save last view
-        page = self.ui.page_stacked_widget.currentWidget()
+        page: PluginInterfaceV1 = self.ui.page_stacked_widget.currentWidget() # type: ignore
         app.active_settings.set(LAST_VIEW, page.plugin_description.name)

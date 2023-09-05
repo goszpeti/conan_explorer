@@ -10,7 +10,7 @@ except ImportError:
     from contextlib_chdir import chdir
 
 
-from .types import (ConanAvailableOptions, ConanOptions, ConanPkg, ConanRef, ConanPkgRef, 
+from .types import (ConanAvailableOptions, ConanOptions, ConanPackageId, ConanPackagePath, ConanPkg, ConanRef, ConanPkgRef, 
                     ConanException, ConanSettings, LoggerWriter, create_key_value_pair_list, Remote)
 from .unified_api import ConanCommonUnifiedApi
 
@@ -212,7 +212,7 @@ class ConanApi(ConanCommonUnifiedApi):
 
     def install_reference(self, conan_ref: ConanRef, profile="", conan_settings: ConanSettings = {},
                           conan_options: ConanOptions = {}, update=True, quiet=False,
-                          generators: List[str] = []) -> Tuple[str, Path]:
+                          generators: List[str] = []) -> Tuple[ConanPackageId, ConanPackagePath]:
         package_id = ""
         options_list = create_key_value_pair_list(conan_options)
         settings_list = create_key_value_pair_list(conan_settings)

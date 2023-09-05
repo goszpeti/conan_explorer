@@ -161,7 +161,8 @@ class ConanUnifiedApiInterface(ABC):
 
     @abstractmethod
     def install_reference(self, conan_ref: ConanRef, conan_settings:  ConanSettings = {},
-            conan_options: ConanOptions = {}, update=True, quiet=False) -> Tuple[ConanPackageId, ConanPackagePath]:
+            conan_options: ConanOptions = {}, update=True, quiet=False, 
+            generators: List[str] = []) -> Tuple[ConanPackageId, ConanPackagePath]:
         """
         Try to install a conan reference (without id) with the provided extra information.
         Uses plain conan install (No auto determination of best matching package)

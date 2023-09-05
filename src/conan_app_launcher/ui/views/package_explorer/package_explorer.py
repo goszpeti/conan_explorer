@@ -1,5 +1,6 @@
 import os
 from typing import TYPE_CHECKING
+from conan_app_launcher import conan_version
 
 from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from conan_app_launcher.ui.common.model import re_register_signal
@@ -156,11 +157,6 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.select_cntx_menu.addAction(self.copy_ref_action)
         self.copy_ref_action.triggered.connect(self._pkg_sel_ctrl.on_copy_ref_requested)
 
-        # self.open_export_action = QAction("Open export Folder", self)
-        # self.set_themed_icon(self.open_export_action, "icons/opened_folder.svg")
-        # self.select_cntx_menu.addAction(self.open_export_action)
-        # self.open_export_action.triggered.connect(self._pkg_sel_ctrl.on_open_export_folder_requested)
-
         self.show_conanfile_action = QAction("Show conanfile", self)
         self.set_themed_icon(self.show_conanfile_action, "icons/file_preview.svg")
         self.select_cntx_menu.addAction(self.show_conanfile_action)
@@ -171,10 +167,11 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.select_cntx_menu.addAction(self.install_ref_action)
         self.install_ref_action.triggered.connect(self._pkg_sel_ctrl.on_install_ref_requested)
 
-        self.show_build_info_action = QAction("Show package build info", self)
-        self.set_themed_icon(self.show_build_info_action, "icons/download.svg")
-        self.select_cntx_menu.addAction(self.show_build_info_action)
-        self.show_build_info_action.triggered.connect(self._pkg_sel_ctrl.on_show_build_info)
+        if not conan_version.startswith("2"): # Currently not doable
+            self.show_build_info_action = QAction("Show package build info", self)
+            self.set_themed_icon(self.show_build_info_action, "icons/download.svg")
+            self.select_cntx_menu.addAction(self.show_build_info_action)
+            self.show_build_info_action.triggered.connect(self._pkg_sel_ctrl.on_show_build_info)
 
         self.remove_ref_action = QAction("Remove package(s)", self)
         self.set_themed_icon(self.remove_ref_action, "icons/delete.svg")

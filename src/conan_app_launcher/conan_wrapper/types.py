@@ -26,12 +26,16 @@ elif conan_version.startswith("2"):
     class PackageReference(PkgReference): # type: ignore
         """ Compatibility class for changed package_id attribute """
         ref: ConanRef
+        
         @property
         def id(self):
             return self.package_id
+
         @staticmethod
         def loads(text: str) -> ConanPkgRef:
-            ...
+            pkg_ref = PkgReference.loads(text)
+            return PackageReference(pkg_ref.ref, pkg_ref.package_id, 
+                                    pkg_ref.revision,pkg_ref.timestamp)
 
     class ConanFileReference(ConanFileRef):
         name: str

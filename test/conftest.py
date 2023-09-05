@@ -9,7 +9,6 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from shutil import copy
 from subprocess import CalledProcessError, check_output
 from threading import Thread
 from typing import Generator
@@ -242,9 +241,10 @@ def start_conan_server():
         create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
                          f"-o shared=False -pr {str(profile_path)}"], update=True)
         create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=True)
-        paths = PathSetup()
-        conanfile = str(paths.testdata_path / "conan" / "conanfile_no_settings.py")
-        conan_create_and_upload(conanfile,  "nocompsettings/1.0.0@local/no_sets")
+        if not conan_version.startswith("2"):
+            paths = PathSetup()
+            conanfile = str(paths.testdata_path / "conan" / "conanfile_no_settings.py")
+            conan_create_and_upload(conanfile,  "nocompsettings/1.0.0@local/no_sets")
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -330,7 +330,7 @@ def light_theme_fixture(base_fixture):
 
 
 def temp_ui_config(config_file_path: Path):
-    temp_config_file_path = copy(config_file_path, tempfile.gettempdir())
+    temp_config_file_path = shutil.copy(config_file_path, tempfile.gettempdir())
     tmp_file = tempfile.mkstemp()
     import conan_app_launcher.app as app
 
