@@ -10,7 +10,7 @@ from conan_app_launcher.app.loading import AsyncLoader
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
                                          GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
-                                         GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, WINDOW_SIZE)
+                                         GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style, get_themed_asset_icon
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
 from conan_app_launcher.ui.plugin import PluginHandler
@@ -172,6 +172,13 @@ class MainWindow(FluentWindow):
     def _load_job(self, config_source: str):
         self._plugin_handler.post_load_plugins()
         self._load_quicklaunch(config_source)
+        # Restore last view
+        try:
+            last_view = app.active_settings.get_string(LAST_VIEW)
+            page = self.page_widgets.get_page_by_name(last_view)
+            self.page_widgets.get_button_by_type(type(page)).click()
+        except Exception:
+            pass
 
     def _load_plugins(self):
         self._plugin_handler.load_all_plugins()
@@ -322,3 +329,7 @@ class MainWindow(FluentWindow):
             Logger().warning("Can't save splitter size")
         sizes_str = f"{int(sizes[0])},{int(sizes[1])}"
         app.active_settings.set(CONSOLE_SPLIT_SIZES, sizes_str)
+
+        # save last view
+        page = self.ui.page_stacked_widget.currentWidget()
+        app.active_settings.set(LAST_VIEW, page.plugin_description.name)

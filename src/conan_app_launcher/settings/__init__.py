@@ -30,6 +30,7 @@ GUI_MODE_LIGHT = "light"
 
 WINDOW_SIZE = "window_size"
 CONSOLE_SPLIT_SIZES = "console_split_sizes"
+LAST_VIEW = "last_view"
 
 # Implementation types for factory
 SETTINGS_INI_TYPE = "ini"

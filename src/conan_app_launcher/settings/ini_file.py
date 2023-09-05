@@ -2,7 +2,6 @@ import configparser
 from copy import deepcopy
 import os
 from pathlib import Path
-import platform
 from typing import Any, Dict, Optional, Tuple
 
 from conan_app_launcher import BUILT_IN_PLUGIN, PathLike, base_path
@@ -10,8 +9,8 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import get_default_file_editor
 
 from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE,
-               FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_FLUENT,
-               GUI_STYLE_MATERIAL, GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, PLUGINS_SECTION_NAME,
+               FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE,
+               GUI_STYLE_MATERIAL, GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, LAST_VIEW, PLUGINS_SECTION_NAME,
                VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
 
 
@@ -28,7 +27,8 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
             GUI_STYLE: GUI_STYLE_MATERIAL,
             GUI_MODE: GUI_MODE_LIGHT,
             WINDOW_SIZE: "0,0,800,600",
-            CONSOLE_SPLIT_SIZES: "413,126"
+            CONSOLE_SPLIT_SIZES: "413,126",
+            LAST_VIEW: ""
         },
         PLUGINS_SECTION_NAME: {
             BUILT_IN_PLUGIN: str(base_path / "ui" / "plugins.ini")
@@ -62,15 +62,17 @@ class IniSettings(SettingsInterface):
         self._custom_key_enabled_sections = custom_key_enabled_sections
         self._logger = Logger()
         self._parser = configparser.ConfigParser()
+
+        ### default setting values ###
+        self._values: Dict[str, Dict[str, Any]] = deepcopy(default_values)
+
         # create Settings ini file, if not available for first start
         if not self._ini_file_path.is_file():
             self._ini_file_path.open('a').close()
             self._logger.info('Settings: Creating settings ini-file')
+            self.save()
         else:
             self._logger.info(f'Settings: Using {self._ini_file_path}')
-
-        ### default setting values ###
-        self._values: Dict[str, Dict[str, Any]] = deepcopy(default_values)
 
         self._read_ini()
 
@@ -103,7 +105,7 @@ class IniSettings(SettingsInterface):
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
 
-    def set(self, name: str, value: "str | int | float | bool"):
+    def set(self, name: str, value: "str | int | float | bool | dict"):
         """ Set the value of a specific setting. Does not write to file, if value is already set. """
         if name in self._values.keys() and isinstance(value, dict):  # dict type setting
             if self._values[name] == value:
