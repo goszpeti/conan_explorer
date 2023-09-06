@@ -40,8 +40,15 @@ class CalFileSystemModel(FileSystemModel):
         for item_path in item_paths:
              self._disabled_rows.add(self.index(Path(item_path).as_posix(), 0).row())
 
-    def clear_disabled_items(self):
+    def clear_all_disabled_items(self):
         self._disabled_rows = set()
+
+    def clear_disabled_item(self, item_path: str):
+        try:
+            disabled_item = self.index(Path(item_path).as_posix(), 0).row()
+            self._disabled_rows.remove(disabled_item)
+        except Exception:
+            pass # element not found
 
 class PackageFilter(QSortFilterProxyModel):
     """ Filter packages but always showing the parent (ref) of the packages """

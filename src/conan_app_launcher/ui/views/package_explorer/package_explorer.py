@@ -179,6 +179,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.remove_ref_action.triggered.connect(self._pkg_sel_ctrl.on_remove_ref_requested)
 
     def on_selection_context_menu_requested(self, position):
+        # no multiselect
         if len(self._pkg_sel_ctrl.get_selected_conan_refs()) > 1:
             self.show_build_info_action.setVisible(False)
             self.show_conanfile_action.setVisible(False)
@@ -305,25 +306,34 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         """ Disable some context menu items depending on context """
         if not self.file_cntx_menu:
             return
-        self._add_link_action.setEnabled(True)
+        self._add_link_action.setVisible(True)
         self._edit_file_action.setVisible(True)
         self._rename_action.setVisible(True)
 
         tab_idx = self._ui.package_tab_widget.currentIndex()
-        paths = self._pkg_tabs_ctrl[tab_idx].get_selected_pkg_paths()
-        if len (paths) > 1:
-            self._add_link_action.setVisible(False)
-            self._edit_file_action.setVisible(False)
-            self._rename_action.setVisible(False)
-        elif os.path.isdir(paths[0]):
-            self._add_link_action.setVisible(False)
-            self._edit_file_action.setVisible(False)
-
+        # Add Link only works on actual packages
         pkg_type  = self._pkg_tabs_ctrl[tab_idx].get_conan_pkg_type()
         if pkg_type == PkgSelectionType.export:
             self._add_link_action.setVisible(False)
         else:
             self._add_link_action.setVisible(True)
+
+        # multiselect options
+        paths = self._pkg_tabs_ctrl[tab_idx].get_selected_pkg_paths()
+        if len (paths) > 1: # no multiselect
+            self._add_link_action.setVisible(False)
+            self._edit_file_action.setVisible(False)
+            self._rename_action.setVisible(False)
+            self._open_fm_action.setVisible(False)
+            self._copy_as_path_action.setVisible(False)
+            self._open_terminal_action.setVisible(False)
+        elif os.path.isdir(paths[0]):
+            self._add_link_action.setVisible(False)
+            self._edit_file_action.setVisible(False)
+            self._rename_action.setVisible(True)
+            self._open_fm_action.setVisible(True)
+            self._copy_as_path_action.setVisible(True)
+            self._open_terminal_action.setVisible(True)
 
         self.file_cntx_menu.exec(self._ui.package_file_view.mapToGlobal(position))
 

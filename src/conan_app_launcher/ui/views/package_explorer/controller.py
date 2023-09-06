@@ -277,8 +277,9 @@ class PackageSelectionController(QObject):
 
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QTextBrowser, conan_pkg_selected: SignalInstance,
-                 base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QTextBrowser, 
+                 conan_pkg_selected: SignalInstance, base_signals: "BaseSignals", 
+                 page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._model = None
         self._page_widgets = page_widgets
@@ -338,7 +339,7 @@ class PackageFileExplorerController(QObject):
     def close_files_view(self):
         if self._model:
             self._model.deleteLater()
-        self._model = None
+        self._model = None # type: ignore
         self._current_ref = ""
         self._current_pkg = None
         self._pkg_path_label.setText("")
@@ -349,7 +350,7 @@ class PackageFileExplorerController(QObject):
         file_path = Path(model_index.model().fileInfo(model_index).absoluteFilePath())
         run_file(file_path, True, args="")
 
-    def on_copy_file_as_path(self) ->   str:
+    def on_copy_file_as_path(self) -> str:
         files = self.get_selected_pkg_paths()
         file_paths = "\n".join(files)
         QApplication.clipboard().setText(file_paths)
@@ -390,6 +391,8 @@ class PackageFileExplorerController(QObject):
             delete_path(Path(path))
 
     def on_files_copy(self) -> List[QUrl]:
+        if not self._model:
+            return []
         files = self.get_selected_pkg_paths()
         if not files:
             return []
@@ -397,12 +400,16 @@ class PackageFileExplorerController(QObject):
         urls = []
         for file in files:
             urls.append(QUrl.fromLocalFile(file))
+            self._model.clear_disabled_item(file)
+            self._view.repaint()
         data.setUrls(urls)
 
         QApplication.clipboard().setMimeData(data)
         return urls
     
     def on_files_cut(self) -> List[QUrl]:
+        if not self._model:
+            return []
         files = self.get_selected_pkg_paths()
         if not files:
             return []
@@ -412,9 +419,10 @@ class PackageFileExplorerController(QObject):
         data = QMimeData()
         data.setUrls(urls)
         data.setProperty("action", "cut")
-        self._model.clear_disabled_items() # type: ignore
+        self._model.clear_all_disabled_items() # type: ignore
         self._model.add_disabled_items(files) # type: ignore
         self._view.repaint()
+
         QApplication.clipboard().setMimeData(data)
         return urls
     
@@ -422,47 +430,39 @@ class PackageFileExplorerController(QObject):
         file_view_indexes = self._get_pkg_file_source_items()
         if not file_view_indexes:
             return None
+        # for multiselect: edit last item
         self._view.edit(file_view_indexes[-1])
         return file_view_indexes
 
     def on_files_paste(self):
         data = QApplication.clipboard().mimeData()
-        if not data:
-            return
-        if not data.hasUrls():
+        if not data or not data.hasUrls():
             return
         urls = data.urls()
         # determine destination path
         sel_item_paths = self.get_selected_pkg_paths()
         if not sel_item_paths:
             return
-        if len(sel_item_paths) == 1:
-            if self._is_selected_item_expanded():
-                dst_dir_path = Path(sel_item_paths)
-            else:
-                dst_dir_path = Path(sel_item_paths)
-                dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
+        # determine destination path
+        dst_dir_path = Path(sel_item_paths[0])
 
+        # on multiselect it will paste once in the parent dir of the selected items
+        if len(sel_item_paths) > 1:
+            dst_dir_path = dst_dir_path.parent
+
+        elif not self._is_selected_file_item_expanded():
+            dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
+            
         for url in urls:
             # try to copy
             if not url.isLocalFile():
                 continue
-            # determine destination path
             source_path = Path(url.toLocalFile())
-            sel_item_paths = self.get_selected_pkg_paths()
-            if not sel_item_paths:
-                return
-            if len(sel_item_paths) == 1:
-                if self._is_selected_item_expanded():
-                    dst_dir_path = Path(sel_item_paths)
-                else:
-                    dst_dir_path = Path(sel_item_paths)
-                    dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
             new_path_str = os.path.join(dst_dir_path, url.fileName())
             cut = True if data.property("action") == "cut" else False
             self.paste_path(source_path, Path(new_path_str), cut)
             if cut: # restore disabled items
-                self._model.clear_disabled_items() # type: ignore
+                self._model.clear_all_disabled_items() # type: ignore
                 self._view.repaint()
 
     def paste_path(self, src: Path, dst: Path, cut=False):
@@ -488,7 +488,10 @@ class PackageFileExplorerController(QObject):
 
 
     def on_add_app_link_from_file(self):
-        file_path = Path(self.get_selected_pkg_paths())
+        selected_paths = self.get_selected_pkg_paths()
+        if len(selected_paths) != 1:
+            return
+        file_path = Path(selected_paths[0])
         if not file_path.is_file():
             Logger().error("Please select a file, not a directory!")
             return
@@ -532,12 +535,12 @@ class PackageFileExplorerController(QObject):
             file_paths.append(self._model.fileInfo(file_view_index).absoluteFilePath())
         return file_paths 
 
-    def _is_selected_item_expanded(self):
+    def _is_selected_file_item_expanded(self):
         file_view_indexes = self._get_pkg_file_source_items()
         # if nothing selected return root
         if len(file_view_indexes) != 1:
             return False
-        return self._view.isExpanded(file_view_indexes)
+        return self._view.isExpanded(file_view_indexes[0])
 
     def resize_file_columns(self):
         if self._view:

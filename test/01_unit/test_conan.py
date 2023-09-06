@@ -15,18 +15,16 @@ from conan_app_launcher.conan_wrapper.conan_worker import (ConanWorker,
 from conan_app_launcher.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_app_launcher.conan_wrapper.types import ConanRef
 
-WINDOWS_x64_VS16_SETTINGS = {'os': 'Windows', 'os_build': 'Windows', 'arch': 'x86_64', 
-                             'arch_build': 'x86_64', 'compiler': 'Visual Studio', 
-                             'compiler.version': '16', 'compiler.toolset': 'v142', 
-                             'build_type': 'Release'}
-LINUX_X64_GCC7_SETTINGS = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 
-                           'compiler.version': '7.4', 'build_type': 'Debug'}
-
 def test_conan_get_conan_buildinfo():
+    """
+    Check, that get_conan_buildinfo actually retrieves as a string for the linux pkg 
+    """
     conan = ConanApi().init_api()
-    # id, _ = conan.get_best_matching_local_package_path(ConanRef.loads(TEST_REF))
-    ret = conan.get_conan_buildinfo(ConanRef.loads(TEST_REF), LINUX_X64_GCC7_SETTINGS)
-    pass
+    LINUX_X64_GCC9_SETTINGS = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 
+        "compiler.libcxx": "libstdc++11",'compiler.version': '9', 'build_type': 'Release'}
+    buildinfo = conan.get_conan_buildinfo(ConanRef.loads(TEST_REF), LINUX_X64_GCC9_SETTINGS)
+    assert "USER_example" in buildinfo
+    assert "ENV_example" in buildinfo
 
 def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
@@ -40,11 +38,16 @@ def test_conan_profile_name_alias_builder():
     assert profile_name == "Windows_x64"
 
     # check windows
+    WINDOWS_x64_VS16_SETTINGS = {'os': 'Windows', 'os_build': 'Windows', 'arch': 'x86_64', 
+                             'arch_build': 'x86_64', 'compiler': 'Visual Studio', 
+                             'compiler.version': '16', 'compiler.toolset': 'v142', 
+                             'build_type': 'Release'}
     profile_name = ConanApi.build_conan_profile_name_alias(WINDOWS_x64_VS16_SETTINGS)
     assert profile_name == "Windows_x64_vs16_v142_release"
 
     # check linux
-
+    LINUX_X64_GCC7_SETTINGS = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 
+                           'compiler.version': '7.4', 'build_type': 'Debug'}
     profile_name = ConanApi.build_conan_profile_name_alias(LINUX_X64_GCC7_SETTINGS)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 

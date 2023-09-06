@@ -206,15 +206,13 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     # check show buildinfo
     Logger().debug("show buildinfo")
     mock_b = mocker.patch.object(app.conan_api, 'get_conan_buildinfo', return_value="Dummy")
-    mock_install_dialog.reset_mock()
-    # mock.return_value patches the actual object instance!
-    mock_install_dialog.return_value.get_selected_install_info.return_value = {"ref_pkg_id": "id",
-            "options": {"opt": "opt_value"}, "settings": {"os": "Windows"},
-             "profile": "MyProfile", "update": False, "auto_install": False}
     mocker.patch.object(QtWidgets.QDialog, 'exec',
                         return_value=QtWidgets.QDialog.DialogCode.Accepted)
     lpe._pkg_sel_ctrl.on_show_build_info()
-    mock_b.assert_called_with(ConanRef.loads(TEST_REF), "MyProfile", {"opt": "opt_value"})
+    settings = {'arch': 'x86_64', 'build_type': 'Release', 'compiler': 'Visual Studio', 
+                'compiler.runtime': 'MD', 'compiler.version': '16', 'os': 'Windows'}
+    options = {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}
+    mock_b.assert_called_with(ConanRef.loads(TEST_REF), settings, options)
 
 
 @pytest.mark.conanv2
