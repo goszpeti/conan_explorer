@@ -71,7 +71,6 @@ class PackageSelectionController(QObject):
                 loading_text="Loading build info...")
         loader.wait_for_finished()
 
-
     def show_buildinfo_dialog(self, buildinfos: str):
         if not buildinfos:
             return
@@ -377,8 +376,6 @@ class PackageFileExplorerController(QObject):
 
     def on_file_delete(self):
         selected_paths = self.get_selected_pkg_paths()
-        if len(selected_paths) != 1:
-            return
         msg = QMessageBox(parent=self._view)
         msg.setWindowTitle("Delete file")
         msg.setText("Are you sure, you want to permanently delete this file(s)/folder(s)?\t")

@@ -56,6 +56,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.package_path_label.setText("<Package path>")
         self._ui.package_path_label.setAlignment(Qt.AlignmentFlag.AlignRight)  # must be called after every text set
         self._ui.package_tab_widget.currentChanged.connect(self.on_tab_index_changed)
+        # removes X of new Tab button
         self._ui.package_tab_widget.tabBar().setTabButton(1, QTabBar.ButtonPosition.RightSide, None) # type: ignore
         self._ui.package_tab_widget.tabCloseRequested.connect(self.on_close_tab)
         self._ui.package_tab_widget.tabBar().setSelectionBehaviorOnRemove(QTabBar.SelectionBehavior.SelectLeftTab)
