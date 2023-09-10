@@ -11,7 +11,7 @@ from .controller import PackageFileExplorerController, PackageSelectionControlle
 from .model import PkgSelectionType
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QKeySequence, QShowEvent, QResizeEvent, QAction
+from PySide6.QtGui import QKeySequence, QResizeEvent, QAction
 from PySide6.QtWidgets import (QWidget, QTabBar, QTreeView, QHBoxLayout, QFrame, 
                                QAbstractItemView, QAbstractScrollArea)
 
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class LocalConanPackageExplorer(PluginInterfaceV1):
-    conan_pkg_selected = Signal(str, dict, PkgSelectionType)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
+    conan_pkg_selected = Signal(str, ConanPkg, PkgSelectionType)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
                  base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
@@ -62,6 +62,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.package_tab_widget.tabBar().setSelectionBehaviorOnRemove(QTabBar.SelectionBehavior.SelectLeftTab)
         self.updateGeometry()
         self.resize_filter()
+        self._pkg_sel_ctrl.refresh_pkg_selection_view(loading_dialog=False)
 
     def on_close_tab(self, index: int):
         # self._ui.package_tab_widget.tabBar().setTabVisible(index, False)
@@ -126,10 +127,6 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         ctrl.on_pkg_selection_change(conan_ref, pkg, type)
         if ctrl._model:
             self._ui.package_path_label.setText(ctrl._model.rootPath())
-
-    def showEvent(self, a0: QShowEvent) -> None:
-        self._pkg_sel_ctrl.refresh_pkg_selection_view(update=False)  # only update the first time
-        return super().showEvent(a0)
 
     def resizeEvent(self, a0: QResizeEvent) -> None:
         for pkg_file_exp_ctrl in self._pkg_tabs_ctrl:

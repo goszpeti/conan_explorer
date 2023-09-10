@@ -43,7 +43,7 @@ class PackageSelectionController(QObject):
         base_signals.conan_pkg_removed.connect(self.on_conan_pkg_removed)
 
     def on_pkg_refresh_clicked(self):
-        self.refresh_pkg_selection_view(update=True)
+        self.refresh_pkg_selection_view()
 
     def on_open_export_folder_requested(self):
         conan_refs = self.get_selected_conan_refs()
@@ -153,16 +153,17 @@ class PackageSelectionController(QObject):
 
     # Global pane and cross connection slots
 
-    def refresh_pkg_selection_view(self, update=True):
+    def refresh_pkg_selection_view(self, loading_dialog=True):
         """
         Refresh all packages by reading it from local drive. Can take a while.
-        Update flag can be used for enabling and disabling it. 
         """
-        if not update and self._model:  # loads only at first init
-            return
         self._model = PkgSelectModel()
-        self._loader.async_loading(
-            self._view, self._model.setup_model_data, (), self.finish_select_model_init, "Reading Packages")
+        if loading_dialog:
+            self._loader.async_loading(
+                self._view, self._model.setup_model_data, (), self.finish_select_model_init, "Reading Packages")
+        else:
+            self._model.setup_model_data()
+            self.finish_select_model_init()
 
     def finish_select_model_init(self):
         if self._model:
