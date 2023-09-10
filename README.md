@@ -70,17 +70,22 @@ Plugin Mechanism
 Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04.
 
 1. Pip must be updated to at least pip 20.3, so using a venv like this is recommended:
-    sudo apt install python3-venv
-    python3 -m venv .venv 
-    source .venv/bin/activate
-    python3 -m pip install --upgrade pip
-    pip install conan_app_launcher
+
+```bash
+sudo apt install python3-venv
+python3 -m venv .venv 
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+pip install conan_app_launcher
+```
 
 2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type "x-terminal-emulator" to get a list of available terminals.
 
 3. To open files with its associated program xdg-open is used:
 
     sudo apt install xdg-utils
+
+4. Not all Qt6 versions support the Wayland lib of the base system. For Ubuntu 20.04 please install PySide6-Essentials 6.4.3.
 
 
 ### With pip from PyPi
