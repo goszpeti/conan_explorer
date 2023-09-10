@@ -6,11 +6,10 @@ from typing import Generator, Tuple
 
 from pytest_mock import MockerFixture
 from PySide6.QtWidgets import QApplication
-from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.views.package_explorer.model import PkgSelectionType
-from test.conftest import TEST_REF, TEST_REF_OFFICIAL, conan_install_ref
+from test.conftest import TEST_REF, TEST_REF_OFFICIAL, conan_install_ref, conan_add_editables
 import pytest_check as check
 import pytest
 from time import sleep
@@ -141,7 +140,8 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
 def test_local_package_explorer_pkg_selection_editables(qtbot, mocker, 
                 setup_local_package_explorer: LPESetupType,
                 base_fixture, ui_no_refs_config_fixture: Path):
-    pass
+    """ """
+    conan_add_editables
 
 
 def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, base_fixture,
@@ -210,7 +210,11 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     mocker.patch.object(QtWidgets.QDialog, 'exec',
                         return_value=QtWidgets.QDialog.DialogCode.Accepted)
     lpe._pkg_sel_ctrl.on_show_build_info()
-    settings = {'arch': 'x86_64', 'build_type': 'Release', 'compiler': 'Visual Studio', 
+    if platform.system() == "Linux":
+        settings = {'arch': 'x86_64', 'build_type': 'Release', 'compiler': 'gcc', 
+                    'compiler.libcxx': 'libstdc++11', 'compiler.version': '9', 'os': 'Linux'}
+    else:
+        settings = {'arch': 'x86_64', 'build_type': 'Release', 'compiler': 'Visual Studio', 
                 'compiler.runtime': 'MD', 'compiler.version': '16', 'os': 'Windows'}
     options = {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}
     mock_b.assert_called_with(ConanRef.loads(TEST_REF), settings, options)

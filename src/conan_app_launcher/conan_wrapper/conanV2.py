@@ -1,15 +1,19 @@
-from contextlib import chdir
 import os
 from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+
+try:
+    from contextlib import chdir
+except ImportError:
+    from contextlib_chdir import chdir
 
 from conan_app_launcher import INVALID_PATH, user_save_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.typing import SignatureCheckMeta
 
 from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPackageId,
-    ConanPackagePath, ConanPkg, ConanPkgRef, ConanRef, ConanSettings, Remote, 
+    ConanPackagePath, ConanPkg, ConanPkgRef, ConanRef, ConanSettings, Remote,
     create_key_value_pair_list)
 from .unified_api import ConanCommonUnifiedApi
 
@@ -141,7 +145,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     # Remotes
 
-    def get_remotes(self, include_disabled=False) -> List["Remote"]:
+    def get_remotes(self, include_disabled=False) -> List[Remote]:
         remotes = []
         try:
             remotes = self._conan.remotes.list(
@@ -176,8 +180,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             remote_name), user_name, password)
 
     ### Install related methods ###
-
-    def install_reference(self, conan_ref: ConanRef, conan_settings: Optional[ConanSettings],
+    def install_reference(self, conan_ref: ConanRef, conan_settings: Optional[ConanSettings]=None,
             conan_options: Optional[ConanOptions]=None, profile="", update=True, quiet=False,
             generators: List[str] = []) -> Tuple[ConanPackageId, ConanPackagePath]:
         pkg_id = ""
@@ -322,7 +325,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     ### Remote References and Packages ###
 
-    def search_recipes_in_remotes(self, query: str, remote_name="all") -> List["ConanRef"]:
+    def search_recipes_in_remotes(self, query: str, remote_name="all") -> List[ConanRef]:
         search_results = []
         if remote_name == "all":
             remote_name = None
