@@ -38,6 +38,9 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         """ Instantiate the internal Conan api. """
         from conans.client.conan_api import (ConanAPIV1, UserIO)
         from conans.client.output import ConanOutput
+
+        self._fix_editable_file()
+
         self._conan = ConanAPIV1(output=ConanOutput(LoggerWriter(
             Logger().info, CONAN_LOG_PREFIX), LoggerWriter(Logger().error, CONAN_LOG_PREFIX)))
         self._conan.user_io = UserIO(out=ConanOutput(LoggerWriter(
@@ -59,11 +62,27 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         except Exception as e:
             Logger().debug(str(e))
         from .conan_cache import ConanInfoCache
-        self.info_cache = ConanInfoCache(
-            user_save_path, self.get_all_local_refs())
-        return self
+        self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
 
-    ### General commands ###
+        return self
+    
+    def _fix_editable_file(self):
+        """ Ensure editables json is valid (Workaround for empty json bug)  
+        Must work without using ConanAPIV1, because it can't be called without this
+        """
+        from conans.client.cache.editable import EDITABLE_PACKAGES_FILE
+        from conans.paths import get_conan_user_home # use internal fnc
+        try:
+            editable_file_path = Path(get_conan_user_home()) / ".conan" / EDITABLE_PACKAGES_FILE
+            if not editable_file_path.exists():
+                editable_file_path.write_text("{}")
+            content = editable_file_path.read_text()
+            if not content:
+                editable_file_path.write_text("{}")
+        except Exception:
+            Logger().debug("Reinit editable file package")
+
+    ### General commands ###if 
 
     def remove_locks(self):
         self._conan.remove_locks()
@@ -131,7 +150,11 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return editable_file
 
     def get_editable_references(self) -> List[str]:
-        return list(self._conan.editable_list().keys())
+        try:
+            return list(self._conan.editable_list().keys())
+        except Exception:
+            self._fix_editable_file() # to not crash conan without this
+            return []
 
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
         editable_info = self._conan.editable_list().get(str(conan_ref))
