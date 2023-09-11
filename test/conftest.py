@@ -168,7 +168,7 @@ def logout_all_remotes():
     if conan_version.startswith("1"):
         os.system("conan user --clean")
     elif conan_version.startswith("2"):
-        os.system("conan remote logout *")
+        os.system('conan remote logout "*"') # need " for linux
 
 
 def run_conan_server():

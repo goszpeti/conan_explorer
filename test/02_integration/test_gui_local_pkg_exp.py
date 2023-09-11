@@ -2,6 +2,7 @@
 import os
 import platform
 from pathlib import Path
+from conan_app_launcher.app.system import delete_path
 from test.conftest import (TEST_REF, TEST_REF_OFFICIAL, PathSetup,
                            conan_add_editables, conan_install_ref)
 from time import sleep
@@ -108,7 +109,8 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
                 if child.type.value == PkgSelectionType.export.value:
                     continue
                 assert pkg_sel_model.get_quick_profile_name(child) in [
-                    "Windows_x64_vs16_release", "Linux_x64_gcc9_release"]
+                    "Windows_x64_vs16_release", "Linux_x64_gcc9_release", 
+                    "Windows_x64_msvc192_release"] # ConanV2
     assert found_tst_pkg
 
     # 2. select package (ref, not profile)
@@ -147,8 +149,7 @@ def test_local_package_explorer_pkg_selection_editables(qtbot, mocker,
     editable_ref = "example/9.9.9@editable/testing"
     base_path = base_fixture.testdata_path / "conan"
     if conan_version.startswith("2"):
-        conan_add_editables(str(base_path / "conanfileV2.py"), 
-                        ConanRef.loads(editable_ref))
+        conan_add_editables(str(base_path / "conanfileV2.py"), ConanRef.loads(editable_ref))
     else:
         conan_add_editables(str(base_path), ConanRef.loads(editable_ref))
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
@@ -434,7 +435,8 @@ def test_local_package_explorer_file_functions(qtbot, mocker, base_fixture,
     url = QtCore.QUrl.fromLocalFile(str(config_path))
     data.setUrls([url])
     _qapp_instance.clipboard().setMimeData(data)
-    (pkg_root_path / config_path.name).unlink(missing_ok=True) # delete file is there
+    
+    delete_path((pkg_root_path / config_path.name)) # delete file is there
     lpe._pkg_tabs_ctrl[0].on_files_paste()
     # check new file
     check.is_true((pkg_root_path / config_path.name).exists())
