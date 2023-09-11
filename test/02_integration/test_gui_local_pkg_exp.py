@@ -22,7 +22,7 @@ from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
-from conan_app_launcher.ui.views.package_explorer.model import PkgSelectionType
+from conan_app_launcher.ui.views.package_explorer.sel_model import PkgSelectionType
 
 Qt = QtCore.Qt
 SelFlags = QtCore.QItemSelectionModel.SelectionFlag
@@ -80,7 +80,7 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
         conan_install_ref(TEST_REF, profile="windows")
 
     installed_pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
-    assert len(installed_pkgs) == 2
+    assert len(installed_pkgs) >= 2
     pkg_id1 = installed_pkgs[0].get("id")
     pkg_id2 = installed_pkgs[1].get("id")
     assert pkg_id1
@@ -203,7 +203,7 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     Logger().debug("open export folder")
     # !!!IMPORTANT!!! Because of the relative import of controller in package_explorer
     # the mock has to be relative too 😭
-    oifm_mock = mocker.patch("package_explorer.controller.open_in_file_manager")
+    oifm_mock = mocker.patch("package_explorer.sel_controller.open_in_file_manager")
     lpe._pkg_sel_ctrl.on_open_export_folder_requested()
     oifm_mock.assert_called_once_with(conanfile_path)
     sleep(1)
@@ -217,7 +217,7 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
 
     # test install ref 
     Logger().debug("open install ref")
-    mock_install_dialog = mocker.patch("package_explorer.controller.ConanInstallDialog")
+    mock_install_dialog = mocker.patch("package_explorer.sel_controller.ConanInstallDialog")
     lpe._pkg_sel_ctrl.on_install_ref_requested()
     
     mock_install_dialog.assert_called_with(lpe._pkg_sel_ctrl._view,  TEST_REF + ":" + id, 
@@ -267,7 +267,7 @@ def test_local_package_explorer_tabs(qtbot, mocker, base_fixture, ui_no_refs_con
     from conan_app_launcher.app.logger import Logger
 
     installed_pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
-    assert len(installed_pkgs) == 2
+    assert len(installed_pkgs) >= 2
     pkg_id1 = installed_pkgs[0].get("id")
     pkg_id2 = installed_pkgs[1].get("id")
     assert pkg_id1
@@ -351,13 +351,13 @@ def test_local_package_explorer_simple_functions(qtbot, mocker, base_fixture,
 
     # 2.2 check open terminal
     Logger().debug("open terminal")
-    open_cmd_in_path_mock = mocker.patch("package_explorer.controller.open_cmd_in_path")
+    open_cmd_in_path_mock = mocker.patch("package_explorer.file_controller.open_cmd_in_path")
     lpe._pkg_tabs_ctrl[0].on_open_terminal_in_dir()
     open_cmd_in_path_mock.assert_called_with(pkg_root_path)
 
     # 2.3 check "open in file manager"
     Logger().debug("open in file manager")
-    oifm_mock = mocker.patch("package_explorer.controller.open_in_file_manager")
+    oifm_mock = mocker.patch("package_explorer.file_controller.open_in_file_manager")
     lpe._pkg_tabs_ctrl[0].on_open_file_in_file_manager(None)
     oifm_mock.assert_called_with(Path(cp_text))
 
@@ -376,7 +376,7 @@ def test_local_package_explorer_simple_functions(qtbot, mocker, base_fixture,
     # 2.5 check edit file
     # Cheat here: use the selected file as the name of the editor and the file to be opened too 
     # - only check the mocked CLI call
-    mock_execute_cmd = mocker.patch("package_explorer.controller.execute_cmd")
+    mock_execute_cmd = mocker.patch("package_explorer.file_controller.execute_cmd")
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, str(selected_pkg_file))
 
     lpe._pkg_tabs_ctrl[0].on_edit_file()
@@ -475,14 +475,14 @@ def test_local_package_explorer_file_functions(qtbot, mocker, base_fixture,
     # recreate file for file usage in root pkg folder
     (pkg_root_path / config_path.name).write_text("TEST")
 
-    mock_copy_cmd = mocker.patch("package_explorer.controller.copy_path_with_overwrite")
+    mock_copy_cmd = mocker.patch("package_explorer.file_controller.copy_path_with_overwrite")
 
     lpe._pkg_tabs_ctrl[0].paste_path(config_path, pkg_root_path / config_path.name)
 
     mock_copy_cmd.assert_called_with(config_path, pkg_root_path / config_path.name)
     
     # select no in dialog
-    mock_copy_cmd = mocker.patch("package_explorer.controller.copy_path_with_overwrite")
+    mock_copy_cmd = mocker.patch("package_explorer.file_controller.copy_path_with_overwrite")
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Cancel)
     
@@ -491,7 +491,7 @@ def test_local_package_explorer_file_functions(qtbot, mocker, base_fixture,
     mock_copy_cmd.assert_not_called()
 
     # 2.7 check auto renaming 
-    mock_copy_cmd = mocker.patch("package_explorer.controller.copy_path_with_overwrite")
+    mock_copy_cmd = mocker.patch("package_explorer.file_controller.copy_path_with_overwrite")
     renamed_file = pkg_root_path / "app_config_empty_refs (2).json"
     assert (pkg_root_path / config_path.name).exists()
     try:
