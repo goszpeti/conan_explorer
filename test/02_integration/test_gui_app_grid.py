@@ -3,8 +3,6 @@ import os
 import tempfile
 from pathlib import Path
 import pytest
-from time import sleep
-from typing import List
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from test.conftest import TEST_REF, app_qt_fixture
 
@@ -216,12 +214,6 @@ def test_remove_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture,
 
     config_tabs = JsonUiConfig(ui_no_refs_config_fixture).load().app_grid.tabs
     assert len(config_tabs[0].apps) == prev_count - 1
-
-    # press again - last link warning dialog must spawn and link not deleted
-    app_link = tabs[1].app_links[0]
-    app_link.remove()
-    assert len(apps) == 1
-    main_gui.close()
 
 
 def test_add_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mocker):

@@ -4,7 +4,7 @@
 
 ![https://pypi.org/project/conan-app-launcher/](https://img.shields.io/pypi/v/conan-app-launcher)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
-![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/17)
+![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/20)
 ![Python tests](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
 ![Alerts](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_app_launcher&metric=alert_status)
 ![Downloads](https://img.shields.io/pypi/dm/conan_app_launcher)
@@ -46,9 +46,9 @@ Quicklaunch
 - quick controls to switch between versions and channels
 
 Local Package Explorer
-- view for browsing through installed packages
+- tabbed view for browsing through installed packages
 - understand package settings at a glance from a shortened representation, e.g. Linux_x64_ggc7
-- supports copy/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan workflow
+- supports rename/copy/cut/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan workflow
 
 Conan Search
 - search for references in selected remotes
@@ -70,17 +70,22 @@ Plugin Mechanism
 Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04.
 
 1. Pip must be updated to at least pip 20.3, so using a venv like this is recommended:
-    sudo apt install python3-venv
-    python3 -m venv .venv 
-    source .venv/bin/activate
-    python3 -m pip install --upgrade pip
-    pip install conan_app_launcher
+
+```bash
+sudo apt install python3-venv
+python3 -m venv .venv 
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+pip install conan_app_launcher
+```
 
 2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type "x-terminal-emulator" to get a list of available terminals.
 
 3. To open files with its associated program xdg-open is used:
 
     sudo apt install xdg-utils
+
+4. Not all Qt6 versions support the Wayland lib of the base system. For Ubuntu 20.04 please install PySide6-Essentials 6.4.3.
 
 
 ### With pip from PyPi
@@ -93,16 +98,17 @@ After checkout use the command:
 
 ## Running
 
-Execute `conan_explorer` or `conan_app_launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder. 
+Execute `conan-app-launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder. 
 You can also assign its icon to it from the site packages folder in conan_app_launcher/assets/icons/icon.ico.
 
 ### Main dependencies
 
-* Pyside6 >= 6.4.0
-* conan >= 1.24.0
+* Pyside6 >= 6.3.0
+* 1.24.0 <= conan < 2.1
 
-> **Warning** - **Deprecation of Python 3.6**  
-> From version 2.0.0 Python 3.6 will not be supported anymore, because end-of-life support has been reached.
+> **Warning** - **Deprecation of Python 3.X**  
+> From version 2.0.0 Python 3.6 support will be dropped, having reached end-of-life.    
+> From version 2.2.0 Python 3.7 support will be dropped, having reached end-of-life.    
 
 ## Toolchain
 
@@ -133,7 +139,6 @@ See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for St
 * Using a modified version of Toggle Widget from QtWidgets (https://github.com/pythonguis/python-qtwidgets) under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 
 ##### PyPi backports for older Python versions
+* contextlib-chdir by Álvaro Mondéjar Rubio under [BSD License (BSD-3-Clause) ](https://opensource.org/license/BSD-3-clause/)
 * importlib-metadata by Jason R. Coombs under [ Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * typing-extensions by Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee under [Python Software Foundation License(PSF)](https://docs.python.org/3/license.html)
-
-

@@ -21,7 +21,8 @@ class ConanRemoteController():
         self._model = RemotesTableModel()
         # save selected remote, if triggering a re-init
         sel_remote = self.get_selected_remote()
-        self._remote_reorder_controller = ReorderController(self._view, self._model)
+        self._remote_reorder_controller = ReorderController(
+            self._view, self._model)
 
         self._model.setup_model_data()
         self._view.setItemsExpandable(False)
@@ -71,16 +72,16 @@ class ConanRemoteController():
         remote_item = self.get_selected_remote()
         if not remote_item:
             return
-        # TODO dedicated function
-        app.conan_api._conan.remote_set_disabled_state(remote_item.remote.name, not remote_item.remote.disabled)
+        app.conan_api.disable_remote(
+            remote_item.remote.name, not remote_item.remote.disabled)
         self.update()
 
     def get_selected_remote(self) -> Union[RemotesModelItem, None]:
         indexes = self._view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
-            Logger().debug(f"No selected item for context action")
+            Logger().debug("No selected item for context action")
             return None
-        remote: RemotesModelItem = indexes[0].internalPointer() # type: ignore
+        remote: RemotesModelItem = indexes[0].internalPointer()  # type: ignore
         return remote
 
     def copy_remote_name(self):
@@ -88,31 +89,3 @@ class ConanRemoteController():
         if not remote_item:
             return
         QApplication.clipboard().setText(remote_item.remote.name)
-
-    def get_remotes_from_same_server(self, remote: Remote):
-        remote_groups = self.get_remote_groups()
-        for remotes in remote_groups.values():
-            for check_remote in remotes:
-                if check_remote == remote:
-                    return remotes
-        return None
-
-    def get_remote_groups(self) -> Dict[str, List[Remote]]:
-        """
-        Try to group similar URLs(currently only for artifactory links) 
-        and return them in a dict grouped by the full URL.
-        """
-        remote_groups: Dict[str, List[Remote]] = {}
-        for remote in app.conan_api.get_remotes(include_disabled=True):
-            if "artifactory" in remote.url:
-                # try to determine root address
-                possible_base_url = "/".join(remote.url.split("/")[0:3])
-                if not remote_groups.get(possible_base_url):
-                    remote_groups[possible_base_url] = [remote]
-                else:
-                    remotes = remote_groups[possible_base_url]
-                    remotes.append(remote)
-                    remote_groups.update({possible_base_url: remotes})
-            else:
-                remote_groups[remote.url] = [remote]
-        return remote_groups

@@ -82,7 +82,6 @@ class AppGridView(PluginInterfaceV1):
         quicklaunch_submenu.add_toggle_menu_entry(
             "Auto-install quicklaunch packages", self.on_toggle_auto_install, app.active_settings.get_bool(AUTO_INSTALL_QUICKLAUNCH_REFS))
 
-
     def reload_themed_icons(self):
         self.re_init(self.model)
 
@@ -214,7 +213,7 @@ class AppGridView(PluginInterfaceV1):
 
     def on_add_link(self):
         tab: TabList = self.tab_widget.currentWidget()  # type: ignore
-        tab.app_links[0].open_app_link_add_dialog()
+        tab.open_app_link_add_dialog()
 
     def on_reorder(self):
         tab: TabList = self.tab_widget.currentWidget()  # type: ignore

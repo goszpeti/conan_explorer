@@ -8,13 +8,11 @@
         "files.associations": {
             "*.qss.in": "qss"
         },
+        "editor.defaultFormatter": "ms-python.autopep8",
         "pyqt-integration.pyuic.compile.filepath": "${ui_name}.py",
-        "python.formatting.provider": "autopep8",
         "editor.formatOnPaste": true,
         "git.autofetch": true,
         "python.analysis.typeCheckingMode": "basic",
-        "python.linting.lintOnSave": true,
-        "python.linting.pylintCategorySeverity.refactor": "Information",
         "python.testing.pytestEnabled": true,
         "python.testing.pytestArgs": [
             "-v",
@@ -33,15 +31,16 @@
         "python.terminal.activateEnvInCurrentTerminal": true,
         "python.terminal.activateEnvironment": true,
         "editor.rulers": [
-            120
+            88
         ],
         "python.analysis.exclude": [
             "**/*_ui.py",
-            ".venv"
+            ".venv",
+            "test"
         ],
         "python.analysis.autoImportCompletions": true,
         "python.analysis.inlayHints.functionReturnTypes": false,
-        "python.analysis.inlayHints.pytestParameters": true,
+        "python.analysis.inlayHints.pytestParameters": false,
         "python.analysis.inlayHints.variableTypes": false,
         "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
         "colorInfo.languages": [
@@ -70,5 +69,6 @@
                 "colors": "css"
             },
         ],
+        "python.analysis.downloadStubs": true,
     }
 }

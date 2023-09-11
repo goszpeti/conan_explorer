@@ -23,7 +23,7 @@ if conan_version_env: # eval as spec
 
 # Package meta-data.
 NAME = "conan-app-launcher"
-VERSION = "2.1.0"
+VERSION = "2.1.1"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
@@ -36,22 +36,25 @@ if conan_major_version == "1":
 if conan_major_version == "2":
     conan_req_spec = "conan>=2.0, <2.1"
 REQUIRES = [
-    'PySide6-Essentials>=6.3.0', # LGPLv3
     conan_req_spec,  # MIT License
+    "PySide6-Essentials>=6.3.0", # LGPLv3
     "jsonschema>=3.2.0, <4",  # MIT License
+    # compatibility
+    'contextlib-chdir==1.0.2; python_version<"3.11"',  # BSD License (BSD-3-Clause)
     'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)
     'typing-extensions>=3.10.0.2, <5; python_version<="3.10"',  # Python Software Foundation License(PSF)
     "packaging",  # use the built-in, or get latest if there is some issue with pip
+    # transitive compatibility
     "Jinja2>=2.3, <4"  # BSD License (BSD-3-Clause) (restriction from conan 1.24, since it is included there)
 ]
 
 TEST_REQUIRES = [
-    "pytest==6.2.5",
+    "pytest==7.4.1",
     "pytest-cov==4.0.0",
-    "pytest-mock==3.9.0",
-    "pytest-qt==4.1.0",
-    "pytest-check==1.0.10",
-    "psutil",
+    "pytest-mock==3.11.1",
+    "pytest-qt==4.2.0",
+    "pytest-check==1.3.0",
+    "psutil==5.9.5",
     "pywin32; sys_platform=='win32'",
 ]
 

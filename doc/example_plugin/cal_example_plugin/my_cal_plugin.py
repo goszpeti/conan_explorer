@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import Optional
 import sys
 
-from conan_app_launcher.ui import BaseSignals, PluginInterfaceV1, FluentWindow, PluginDescription, compile_ui_file_if_newer
+from conan_app_launcher.ui import (BaseSignals, PluginInterfaceV1, FluentWindow, 
+                                   PluginDescription, compile_ui_file_if_newer)
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
 
 current_dir = Path(__file__).parent
@@ -28,9 +29,11 @@ class SamplePluginView(PluginInterfaceV1):
         self._ui.setupUi(self)
 
         # apply an icon which is inverted, when turning on dark mode
-        self.set_themed_icon(self._ui.icon_label, str(current_dir / "about.svg"), size=(20, 20))
+        self.set_themed_icon(self._ui.icon_label, str(current_dir / "about.svg"), 
+                             size=(20, 20))
        
-        # register load method for load signal (runs when GUI is starting and displays loading screen) 
+        # register load method for load signal
+        # runs when GUI is starting and displays loading screen
         self.load_signal.connect(self.load)
 
 
@@ -49,7 +52,8 @@ class SamplePluginView(PluginInterfaceV1):
         menu = self._page_widgets.get_side_menu_by_type(type(self))
         assert menu
         menu.reset_widgets()
-        menu.add_button_menu_entry("My Button", self.on_option_button, "icons/opened_folder.svg")
+        menu.add_button_menu_entry("My Button", self.on_option_button, 
+                                                            "icons/opened_folder.svg")
         menu.add_menu_line()
         menu.add_toggle_menu_entry("My Toggle", self.on_option_toggled, True)
 

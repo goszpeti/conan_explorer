@@ -4,17 +4,19 @@ from packaging import specifiers, version
 
 from pathlib import Path
 from typing import List, Optional
-from conan_app_launcher import BUILT_IN_PLUGIN, conan_version
 
-import conan_app_launcher.app as app
-from conan_app_launcher import base_path
-from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.settings import PLUGINS_SECTION_NAME
 from PySide6.QtCore import Signal, QObject, SignalInstance
 from PySide6.QtWidgets import QWidget
-from conan_app_launcher.ui.plugin.file import PluginFile
 
-from conan_app_launcher.ui.plugin.types import PluginDescription, PluginInterfaceV1
+
+import conan_app_launcher.app as app
+from conan_app_launcher import BUILT_IN_PLUGIN, base_path, conan_version
+from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.settings import PLUGINS_SECTION_NAME
+
+
+from .file import PluginFile
+from .types import PluginDescription, PluginInterfaceV1
 
 
 class PluginHandler(QObject):
@@ -36,12 +38,14 @@ class PluginHandler(QObject):
                 # fix potentially outdated setting
                 correct_plugin_path = str(base_path / "ui" / "plugins.ini")
                 if plugin_path != correct_plugin_path:
-                    app.active_settings.add(BUILT_IN_PLUGIN, correct_plugin_path, PLUGINS_SECTION_NAME)
+                    app.active_settings.add(
+                        BUILT_IN_PLUGIN, correct_plugin_path, PLUGINS_SECTION_NAME)
                     plugin_path = correct_plugin_path
             self._load_plugins_from_file(plugin_path)
 
     def get_plugin_descr_from_name(self, plugin_name: str) -> Optional[PluginDescription]:
-        plugins: List[PluginDescription] = self.get_same_file_plugins_from_name(plugin_name)
+        plugins: List[PluginDescription] = self.get_same_file_plugins_from_name(
+            plugin_name)
         for plugin in plugins:
             if plugin.name == plugin_name:
                 return plugin
@@ -83,14 +87,16 @@ class PluginHandler(QObject):
                 sys.path.append(str(import_path.parent))
                 module_ = importlib.import_module(import_path.stem)
                 if reload:
-                    modules_to_del = [x for x in sys.modules if import_path.stem in x]
+                    modules_to_del = [
+                        x for x in sys.modules if import_path.stem in x]
                     # importlib reload does not work with relative imports
                     for module_to_del in modules_to_del:
                         del sys.modules[module_to_del]
                     module_ = importlib.import_module(import_path.stem)
 
                 class_ = getattr(module_, plugin.plugin_class)
-                plugin_object: PluginInterfaceV1 = class_(self.parent(), plugin, self._base_signals, self._page_widgets)
+                plugin_object: PluginInterfaceV1 = class_(
+                    self.parent(), plugin, self._base_signals, self._page_widgets)
                 self._active_plugins.append(plugin_object)
             except Exception as e:
                 Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
@@ -121,8 +127,8 @@ class PluginHandler(QObject):
                     if plugin.plugin_description == plugin_descr:
                         return plugin
                 except Exception as e:
-                    Logger().error(f"Can't retrive plugin information: {str(e)}")
-
+                    Logger().error(
+                        f"Can't retrive plugin information: {str(e)}")
 
     @staticmethod
     def eval_conan_version_spec(spec: str, conan_version: str = conan_version) -> bool:

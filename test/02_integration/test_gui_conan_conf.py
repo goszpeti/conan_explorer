@@ -7,7 +7,8 @@ import pytest
 import conan_app_launcher
 from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.conan_wrapper import ConanApi
-from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, PathSetup
+from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, PathSetup, login_test_remote, logout_all_remotes
+from conan_app_launcher import conan_version
 
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher.ui import main_window
@@ -16,6 +17,7 @@ from conan_app_launcher.ui.views.conan_conf import ConanConfigView
 
 Qt = QtCore.Qt
 
+@pytest.mark.conanv2
 def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_config_fixture, mocker):
     """
     Test Local Pacakge Explorer functions.
@@ -33,8 +35,13 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
     """
     from pytestqt.plugin import _qapp_instance
     # add 2 more remotes
-    os.system(f"conan remote add local2 http://127.0.0.1:9301/ false")
-    os.system(f"conan remote add local3 http://127.0.0.1:9302/ false")
+    ssl_disable_flag = ""
+    if conan_version.startswith("1"):
+        ssl_disable_flag = "false"
+    elif conan_version.startswith("2"):
+        ssl_disable_flag = "--insecure"
+    os.system(f"conan remote add local2 http://127.0.0.1:9301/ {ssl_disable_flag}")
+    os.system(f"conan remote add local3 http://127.0.0.1:9302/ {ssl_disable_flag}")
     # remove potentially created remotes from this testcase
     os.system(f"conan remote remove local4")
     os.system(f"conan remote remove New")
@@ -72,7 +79,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
             if remote_item.item_data[0] in ["local2", "local3"]:
                 assert "http://127.0.0.1:930" in remote_item.item_data[1]
                 assert remote_item.item_data[2] == "False"
-                assert remote_item.item_data[3] == "None"
+                assert str(remote_item.item_data[3]) == "None"
                 assert remote_item.item_data[4] == "False"
 
         #### 2. Select new remote
@@ -111,7 +118,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         assert second_last_item.remote.name == last_item.remote.name
 
         # 6. Add a new remote via cli -> push refresh -> new remote should appear
-        os.system(f"conan remote add local4 http://127.0.0.1:9303/ false")
+        os.system(f"conan remote add local4 http://127.0.0.1:9303/ {ssl_disable_flag}")
         conan_conf_view._ui.remote_refresh_button.click()
         assert conan_conf_view._remotes_controller._select_remote("local4")
 
@@ -177,10 +184,11 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         os.system(f"conan remote remove local4")
         main_gui.close()
 
+@pytest.mark.conanv2
 def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test login with the local remote """
     from pytestqt.plugin import _qapp_instance
-    os.system(f"conan user demo -r {TEST_REMOTE_NAME} -p demo")  # todo autogenerate and config
+    login_test_remote(TEST_REMOTE_NAME)
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
@@ -212,24 +220,23 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     # now enter a wrong password and call save
     conan_conf_view.remote_login_dialog._ui.name_line_edit.setText("wrong")
     conan_conf_view.remote_login_dialog._ui.password_line_edit.setText("wrong")
-    conan_conf_view.remote_login_dialog.save()
+    conan_conf_view.remote_login_dialog.on_ok()
     # throws error on console, but still logged in
     assert conan.get_remote_user_info("local") == ("demo", True)
     
     # log out with cli
-    assert os.system(f"conan user --clean") == 0
+    logout_all_remotes()
     assert conan.get_remote_user_info("local") == ("None", False)
 
     # now enter the correct password and call save
     conan_conf_view.remote_login_dialog._ui.name_line_edit.setText("demo")
     conan_conf_view.remote_login_dialog._ui.password_line_edit.setText("demo")
-    conan_conf_view.remote_login_dialog.save()
+    conan_conf_view.remote_login_dialog.on_ok()
 
     # logged in
     assert conan.get_remote_user_info("local") == ("demo", True)
     # assert password is empty (does not really test, if it worked correctly)
     assert conan_conf_view.remote_login_dialog._ui.password_line_edit.text() == ""
-    main_gui.close()
 
 @pytest.fixture
 def profile_fixture():
@@ -242,9 +249,9 @@ def profile_fixture():
     delete_path(profiles_path / "new_profile_add")
     delete_path(profiles_path / "new_profile_rename")
     delete_path(profiles_path / "new_profile_test")
-    
 
 
+@pytest.mark.conanv2
 def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixture, ui_no_refs_config_fixture, mocker):
     """ Test all profile related functions """
     from pytestqt.plugin import _qapp_instance
@@ -322,3 +329,7 @@ def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixt
 
     ## check model
     assert "new_profile_test" in model._profiles
+
+@pytest.mark.conanv2
+def test_conan_config_view_editables(qtbot, base_fixture: PathSetup, profile_fixture, ui_no_refs_config_fixture, mocker):
+    pass

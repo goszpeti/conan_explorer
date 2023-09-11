@@ -11,6 +11,7 @@ from PySide6.QtCore import QSize
 from conan_app_launcher.ui.widgets.toggle import AnimatedToggle
 from . import RIGHT_MENU_MAX_WIDTH, gen_obj_name
 
+
 class SideSubMenu(ThemedWidget):
 
     def __init__(self, parent_stacked_widget: QStackedWidget, title: str = "", is_top_level=False):
@@ -47,17 +48,21 @@ class SideSubMenu(ThemedWidget):
         """
         if not self.is_top_level:
             return False
-        self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.svg")
-        self.ui.side_menu_title_button.clicked.connect(self.on_expand_minimize)  # off per default
+        self.set_themed_icon(
+            self.ui.side_menu_title_button, "icons/expand.svg")
+        self.ui.side_menu_title_button.clicked.connect(
+            self.on_expand_minimize)  # off per default
         return True
 
     def on_expand_minimize(self):
         """ The title button can be used to minimize a submenu """
         if self.ui.side_menu_content_frame.height() > 0:
             self.ui.side_menu_content_frame.setMaximumHeight(0)
-            self.set_themed_icon(self.ui.side_menu_title_button, "icons/forward.svg")
+            self.set_themed_icon(
+                self.ui.side_menu_title_button, "icons/forward.svg")
         else:
-            self.set_themed_icon(self.ui.side_menu_title_button, "icons/expand.svg")
+            self.set_themed_icon(
+                self.ui.side_menu_title_button, "icons/expand.svg")
             self.ui.side_menu_content_frame.setMaximumHeight(4096)
 
     def get_menu_entry_by_name(self, name: str) -> Optional[QWidget]:
@@ -67,7 +72,8 @@ class SideSubMenu(ThemedWidget):
         """ Very basic custom entry, no extra functions """
         if name:
             widget.setObjectName(gen_obj_name(name))
-        self._content_layout.insertWidget(self._content_layout.count() - 1, widget)
+        self._content_layout.insertWidget(
+            self._content_layout.count() - 1, widget)
 
     def add_menu_line(self):
         line = QFrame(self)
@@ -82,8 +88,9 @@ class SideSubMenu(ThemedWidget):
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
         label.setObjectName(gen_obj_name(name) + "_label")
         label.setMaximumHeight(30)
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        label.setSizePolicy(sizePolicy)
+        size_policy = QSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        label.setSizePolicy(size_policy)
         icon = None
         if asset_icon:
             icon = QLabel(parent=self)
@@ -128,13 +135,17 @@ class SideSubMenu(ThemedWidget):
         toggle = AnimatedToggle(self)
         toggle.setChecked(initial_state)
         toggle.stateChanged.connect(target)
-        self.add_named_custom_entry(name, toggle, asset_icon, force_v_layout=True)
+        self.add_named_custom_entry(
+            name, toggle, asset_icon, force_v_layout=True)
         return toggle
 
     def add_sub_menu(self, sub_menu: "SideSubMenu", asset_icon: str = ""):
-        button = self.add_button_menu_entry(sub_menu.title, sub_menu.ui.side_menu_title_button.show, asset_icon)
-        button.clicked.connect(lambda: self.parent_stacked_widget.setCurrentWidget(sub_menu))
-        sub_menu.ui.side_menu_title_button.clicked.connect(lambda: self.parent_stacked_widget.setCurrentWidget(self))
+        button = self.add_button_menu_entry(
+            sub_menu.title, sub_menu.ui.side_menu_title_button.show, asset_icon)
+        button.clicked.connect(
+            lambda: self.parent_stacked_widget.setCurrentWidget(sub_menu))
+        sub_menu.ui.side_menu_title_button.clicked.connect(
+            lambda: self.parent_stacked_widget.setCurrentWidget(self))
         sub_menu.setObjectName(gen_obj_name(sub_menu.title) + "_widget")
         return button
 

@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
-from gc import isenabled
 from PySide6.QtCore import (QEasingCurve, QPoint, QPointF, QPropertyAnimation,
-                          QRectF, QSequentialAnimationGroup, QSize, Qt, 
-                          Property, Slot) # type: ignore
+                          QRectF, QSequentialAnimationGroup, Qt, Property, Slot) # type: ignore
 from PySide6.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen
-from PySide6.QtWidgets import QCheckBox, QApplication, QGraphicsDropShadowEffect
+from PySide6.QtWidgets import QCheckBox, QApplication
 
 
 class AnimatedToggle(QCheckBox):

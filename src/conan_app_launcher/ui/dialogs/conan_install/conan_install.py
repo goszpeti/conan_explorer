@@ -10,20 +10,27 @@ from conan_app_launcher.ui.common import get_themed_asset_icon
 from PySide6.QtCore import QSize, Qt, SignalInstance
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem, QComboBox
 
-from conan_app_launcher.conan_wrapper.types import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanOptions, ConanRef
 
 
 class ConanInstallDialog(QDialog):
     MARK_AS_DEFAULT_INSTALL_PROFILE = " *"
 
-    def __init__(self, parent: Optional[QWidget], conan_full_ref: str, pkg_installed_signal: Optional[SignalInstance] = None, lock_ref=False):
-        """ conan_ref can be in full ref format with <ref>:<id> """
+    def __init__(self, parent: Optional[QWidget], conan_full_ref: str, 
+                 pkg_installed_signal: Optional[SignalInstance] = None, 
+                 lock_reference=False, capture_install_info=False):
+        """
+        conan_ref can be in full ref format with <ref>:<id> 
+        lock_reference disables conan reference editing.
+        capture_install_info does not actually install, just return the selected info.
+        """
         super().__init__(parent)
         from .conan_install_ui import Ui_Dialog
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
         self.pkg_installed_signal = pkg_installed_signal
-
+        self._capture_install_info = capture_install_info
+        self._conan_selected_install: Optional[ConanWorkerElement] = None
         # style
         icon = get_themed_asset_icon("icons/download_pkg.svg", True)
         self.setWindowIcon(icon)
@@ -31,7 +38,7 @@ class ConanInstallDialog(QDialog):
         # init search bar
         self._ui.conan_ref_line_edit.validator_enabled = False
         self._ui.conan_ref_line_edit.setText(conan_full_ref)
-        if lock_ref:
+        if lock_reference:
             self._ui.conan_ref_line_edit.setEnabled(False)
 
         # button box
@@ -46,10 +53,15 @@ class ConanInstallDialog(QDialog):
         # profiles
         self.load_profiles()
         self.load_options(conan_full_ref)
-      
+
+        if capture_install_info: # auto install makes no sense in this mode
+            self.hide_for_install_info()
+            self.resize(self.width(), self.height() - 150)
+
         # disable profile and options on activating this
         self._ui.auto_install_check_box.clicked.connect(self.on_auto_install_check)
-        self._ui.set_default_install_profile_button.clicked.connect(self.on_set_default_install_profile)
+        self._ui.set_default_install_profile_button.clicked.connect(
+            self.on_set_default_install_profile)
 
     def hide_config_elements(self):
         self._ui.profile_cbox.hide()
@@ -60,6 +72,13 @@ class ConanInstallDialog(QDialog):
         self._ui.line.hide()
         self._ui.auto_install_label.hide()
         self._ui.auto_install_check_box.hide()
+
+    def hide_for_install_info(self):
+        self._ui.auto_install_check_box.hide()
+        self._ui.auto_install_label.hide()
+        self._ui.update_label.hide()
+        self._ui.update_check_box.hide()
+        self._ui.line.hide()
 
     def load_profiles(self):
         self._ui.profile_cbox.clear()
@@ -89,7 +108,8 @@ class ConanInstallDialog(QDialog):
         except Exception:
             return
         loader = AsyncLoader(self)
-        loader.async_loading(self, self.on_options_query, (conan_ref, ), loading_text="Loading options...")
+        loader.async_loading(self, self.on_options_query, (conan_ref, ), 
+                             loading_text="Loading options...")
         loader.wait_for_finished()
         default_options = self._default_options
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
@@ -118,7 +138,8 @@ class ConanInstallDialog(QDialog):
 
     def on_options_query(self, conan_ref: str):
         try:
-            self._available_options, self._default_options = app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))           
+            self._available_options, self._default_options = \
+            app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))
         except Exception:
             return
 
@@ -155,13 +176,14 @@ class ConanInstallDialog(QDialog):
         else:
             # options from selection
             options = self.get_user_options()
-        conan_worker_element: ConanWorkerElement = {"ref_pkg_id": ref_text,                                                     #"settings": settings,
-                                                    "settings": {},
-                                                    "profile": self.get_selected_profile(),
-                                                    "options": options, "update": update_check_state,
-                                                    "auto_install": auto_install_checked}
-
-        app.conan_worker.put_ref_in_install_queue(conan_worker_element, self.emit_conan_pkg_signal_callback)
+        self._conan_selected_install = {"ref_pkg_id": ref_text,
+                                        "settings": {},
+                                        "profile": self.get_selected_profile(),
+                                        "options": options, "update": update_check_state,
+                                        "auto_install": auto_install_checked}
+        if not self._capture_install_info:
+            app.conan_worker.put_ref_in_install_queue(self._conan_selected_install, 
+                                                      self.emit_conan_pkg_signal_callback)
 
     def emit_conan_pkg_signal_callback(self, conan_ref: str, pkg_id: str):
         if not self.pkg_installed_signal:
@@ -179,7 +201,7 @@ class ConanInstallDialog(QDialog):
         selected_profile = self._ui.profile_cbox.currentText()
         return selected_profile.rstrip(self.MARK_AS_DEFAULT_INSTALL_PROFILE)
 
-    def get_user_options(self):
+    def get_user_options(self) -> ConanOptions:
         options = {}
         self._ui.options_widget.updateEditorData()
         for i in range(0, self._ui.options_widget.topLevelItemCount()):
@@ -190,3 +212,6 @@ class ConanInstallDialog(QDialog):
                 value = widget.currentText()
             options[item.data(0, 0)] = value
         return options
+
+    def get_selected_install_info(self):
+        return self._conan_selected_install

@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Type, TypeVar
 import jsonschema
 from packaging.version import Version
 
+from conan_app_launcher.app.typing import SignatureCheckMeta
+
 from . import (UiAppGridConfig, UiAppLinkConfig, UiConfig, UiConfigInterface,
                UiTabConfig)
 
@@ -35,7 +37,7 @@ class ConanOptionConfig(TypedDict):
     value: str
 
 
-class JsonUiConfig(UiConfigInterface):
+class JsonUiConfig(UiConfigInterface, metaclass=SignatureCheckMeta):
 
     def __init__(self, json_file_path: PathLike):
         self._json_file_path = Path(json_file_path)

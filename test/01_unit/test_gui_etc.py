@@ -7,9 +7,12 @@ from pathlib import Path
 import platform
 import sys
 import traceback
+from unittest.mock import Mock
 from conan_app_launcher.app.crash import bug_dialog_exc_hook
+from conan_app_launcher.conan_wrapper.conanV1 import ConanApi
 from conan_app_launcher.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common.theming import get_user_theme_color
+from conan_app_launcher.ui.views.conan_conf.dialogs.remote_login_dialog import RemoteLoginDialog
 from test.conftest import TEST_REF, app_qt_fixture, conan_remove_ref
 
 import conan_app_launcher  # for mocker
@@ -20,7 +23,7 @@ from conan_app_launcher.ui.views import AboutPage
 from conan_app_launcher.ui.dialogs import show_bug_reporting_dialog, FileEditorSelDialog
 from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
 from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
-from conan_app_launcher.conan_wrapper.types import ConanRef
+from conan_app_launcher.conan_wrapper.types import ConanRef, Remote
 from PySide6 import QtCore, QtWidgets, QtGui
 
 Qt = QtCore.Qt
@@ -128,8 +131,10 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     mock_install_func = mocker.patch(
         'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
     conan_install_dialog._ui.button_box.accepted.emit()
-    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, "settings": {}, "profile": "",
-                                                "options": {}, "update": True, "auto_install": True}
+    conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, 
+                                                "settings": {}, "profile": "",
+                                                "options": {}, "update": True, 
+                                                "auto_install": True}
 
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 
@@ -140,7 +145,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
 
     profile = conan_install_dialog.get_selected_profile()
     assert profile == "default"
-    default_options =  {'variant': 'var1', 'shared': "True", 'fPIC': 'True'}
+    default_options =  {'variant': 'var1', 'shared': "True", 'fPIC2': 'True'}
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {}, "profile": profile,
                                                 "options": default_options, "update": False, "auto_install": False}
@@ -159,7 +164,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     conan_install_dialog._ui.auto_install_check_box.setCheckState(Qt.CheckState.Unchecked)
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF, "settings": {}, "profile": profile,
-                                                "options":  {'variant': 'MyVariant', 'shared': "True", 'fPIC': 'True'},
+                                                "options":  {'variant': 'MyVariant', 'shared': "True", 'fPIC2': 'True'},
                                                   "update": False, "auto_install": False}
     mock_install_func.assert_called_with(conan_worker_element, conan_install_dialog.emit_conan_pkg_signal_callback)
 
@@ -255,3 +260,50 @@ def test_get_accent_color(mocker):
     elif platform.system() == "Linux":
         color = get_user_theme_color()
         assert color == "#000000"
+
+def test_remote_url_groups(base_fixture, mocker):
+    """ Test, that url groups for remotes are discovered (used in login dialog)
+    Currently only for artifactory.
+    """
+    remote = Remote("test_arti1", 
+                    "http://mydomain.com/artifactory/api/conan/conan1", False, False)
+    remote2 = Remote("test_arti2", 
+                    "http://mydomain.com/artifactory/api/conan/conan2", False, False)
+    mocker.patch.object(ConanApi, 'get_remotes', return_value=[remote, remote2])
+    remotes = app.conan_api.get_remotes_from_same_server(remote)
+    assert remote2 in remotes 
+    assert remote in remotes 
+
+def test_multi_remote_login_dialog(app_qt_fixture, base_fixture, mocker):
+    """ Test, that on remote login dialog selecting and deselecting remotes work """
+    app.conan_api.init_api()
+    app.active_settings.set(DEFAULT_INSTALL_PROFILE, "default")
+    remote1 = Remote("test_arti1", 
+                    "http://mydomain.com/artifactory/api/conan/conan1", False, False)
+    remote2 = Remote("test_arti2", 
+                    "http://mydomain.com/artifactory/api/conan/conan2", False, False)
+    remote3 = Remote("test_arti3", 
+                    "http://mydomain.com/artifactory/api/conan/conan3", False, False)
+    root_obj = QtWidgets.QWidget()
+    mocker.patch.object(ConanApi, 'get_remotes', return_value=[remote1, remote2, remote3])
+    login_cmd: Mock = mocker.patch.object(ConanApi, 'login_remote')
+
+
+    dialog = RemoteLoginDialog([remote1, remote2, remote3], root_obj)
+    username = "user"
+    password = "pw"
+    dialog._ui.name_line_edit.setText(username)
+    dialog._ui.password_line_edit.setText(password)
+
+    app_qt_fixture.addWidget(root_obj)
+    dialog.show()
+    app_qt_fixture.waitExposed(dialog)
+    # uncheck remote3
+    dialog._ui.remote_list.item(2).setCheckState(Qt.CheckState.Unchecked)
+    # Press Ok in dialog
+    dialog.on_ok()
+    calls = [mocker.call("test_arti1", username, password),
+            mocker.call("test_arti2", username, password)]
+    login_cmd.assert_has_calls(calls, any_order=True)
+
+    dialog.close()

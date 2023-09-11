@@ -3,12 +3,10 @@ On catching an uncaught execution show a dialog with a link to post an issue,
 with prefilled text and stacktrace.
 """
 import platform
-import sys
 import traceback
 from types import TracebackType
 
-from conan_app_launcher import REPO_URL, __version__, user_save_path
-from PySide6.QtCore import Qt
+from conan_app_launcher import REPO_URL, __version__
 from PySide6.QtWidgets import QStyle
 
 

@@ -7,6 +7,8 @@ from conan_app_launcher.app.logger import Logger
 from PySide6.QtCore import SignalInstance
 from PySide6.QtWidgets import QMessageBox, QWidget
 
+from conan_app_launcher.conan_wrapper.types import ConanRef
+
 
 class ConanRemoveDialog(QMessageBox):
 
@@ -35,9 +37,7 @@ class ConanRemoveDialog(QMessageBox):
     def remove(self):
         try:
             Logger().info(f"Deleting {self._conan_ref} {self._pkg_id}")
-            pkg_ids = [self._pkg_id] if self._pkg_id else None
-            # TODO dedicated function
-            app.conan_api._conan.remove(self._conan_ref, packages=pkg_ids, force=True)
+            app.conan_api.remove_reference(ConanRef.loads(self._conan_ref), self._pkg_id)
         except Exception as e:
             Logger().error(f"Error while removing package {self._conan_ref}: {str(e)}")
         if not self._conan_pkg_removed_sig:

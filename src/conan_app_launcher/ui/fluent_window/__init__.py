@@ -5,7 +5,8 @@ import platform
 
 
 def gen_obj_name(name: str) -> str:
-    """ Generates an object name from a menu title or name (spaces to underscores and lowercase) """
+    """ Generates an object name from a menu title or name
+    (spaces to underscores and lowercase) """
     return name.replace(" ", "_").lower()
 
 def get_display_scaling():

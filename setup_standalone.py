@@ -1,29 +1,13 @@
 """
-A simple setup script to create an executable using PyQt6. This also
+A simple setup script to create an executable using PySide6. This also
 demonstrates the method for creating a Windows executable that does not have
 an associated console.
-PyQt6app.py is a very simple type of PyQt6 application
-Run the build process by running the command 'python setup.py build'
-If everything works well you should find a subdirectory in the build
-subdirectory that contains the files needed to run the application
 """
 
 import sys
-from setup import AUTHOR, DESCRIPTION, URL, VERSION
+from setup import AUTHOR, URL, VERSION
 from cx_Freeze import Executable, setup
-try:
-    from cx_Freeze.hooks import get_qt_plugins_paths
-except ImportError:
-    include_files = []
-else:
-    # Inclusion of extra plugins (new in cx_Freeze 6.8b2)
-    # cx_Freeze imports automatically the following plugins depending of the
-    # use of some modules:
-    # imageformats - QtGui
-    # platforms - QtGui
-    # mediaservice - QtMultimedia
-    # printsupport - QtPrintSupport
-    include_files = get_qt_plugins_paths("PyQt6", "platforms") + get_qt_plugins_paths("PyQt6", "styles")
+include_files = []
 
 # base="Win32GUI" should be used only for Windows GUI app
 base = None
@@ -32,16 +16,22 @@ if sys.platform == "win32":
 build_exe_options = {
     "includes": "conan_app_launcher",
     "excludes": ["debugpy"],
-    "bin_excludes": ['Qt5dbus.dll', 'Qt5Network.dll', 'Qt5Qml.dll', "Qt5QmlModels.dll",
-                     'Qt5Quick.dll', 'Qt5Svg.dll', 'Qt5WebSockets.dll', "d3dcompiler_47.dll", "opengl32sw.dll",
-    "libicudata.so.66", "libgtk-3.so.0", "libQt5Quick.so.5", "libQt5Qml.so.5", "libicui18n.so.66", "libicui18n.so.66",
-    "libQt5Network.so.5", "libQt5QmlModels.so.5"],
+    "bin_excludes": ['Qt6dbus.dll', 'Qt6Network.dll', 'Qt6Qml.dll', "Qt6QmlModels.dll",
+        'Qt6Quick.dll', 'Qt6WebSockets.dll',  "Qt6QuickTemplates2.dll", "Qt6QmlCompiler.dll",
+         "Qt6QuickDialogs2QuickImpl.dll", "Qt6LanguageServer.dll", "d3dcompiler_47.dll", 
+         "QtOpenGL.pyi","Qt6DesignerComponents.dll", "Qt6Designer.dll",
+        "opengl32sw.dll", "lupdate.exe", "QtOpenGL.pyd", "icudtl.dat", "qmlls.exe",
+        "assistant.exe", "designer.exe", "linguist.exe", "qmlformat.exe"
+        # examples, qml dir, lupdate.exe QtOpenGL.pyd
+        "libicudata.so.66", "libgtk-3.so.0", "libQt6Quick.so.5", 
+        "libQt6Qml.so.5", "libicui18n.so.66", "libicui18n.so.66", 
+        "libQt6Network.so.5", "libQt6QmlModels.so.5"],
     "include_files": include_files,
-    "zip_include_packages" : ['PyQt6', "conans"]
+    "zip_include_packages" : ['PySide6', "conans"]
 }
 
 icon = "src/conan_app_launcher/assets/icons/icon.ico"
-app_name = "Conan App Launcher"
+app_name = "Conan Explorer"
 
 bdist_mac_options = {
     "bundle_name": app_name,
@@ -70,12 +60,12 @@ msi_data = {
 }
 
 bdist_msi_options = {
-    #"target_name": "conan_app_launcher_setup",
+    #"target_name": "conan_explorer_setup",
     "data": msi_data,
     "install_icon": icon}
 
 executables = [Executable("./src/conan_app_launcher/__main__.py",
-                          base=base, target_name="conan_app_launcher",
+                          base=base, target_name="Conan Explorer",
                           icon=icon, shortcut_name=app_name,
                           shortcut_dir="DesktopFolder",
                           ),
@@ -87,7 +77,7 @@ setup(
     name=app_name,
     author=AUTHOR,
     version=VERSION,
-    description=DESCRIPTION,
+    description=app_name,
     url=URL,
     options={
         "build_exe": build_exe_options,

@@ -1,6 +1,5 @@
-from os import devnull
+import json
 import platform
-import subprocess
 from pathlib import Path
 import sys
 from typing import Optional, TYPE_CHECKING
@@ -9,14 +8,13 @@ from conan_app_launcher import conan_version
 import conan_app_launcher.app as app
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import delete_path
-from conan_app_launcher.ui.common import get_themed_asset_icon
-from conan_app_launcher.ui.common.syntax_highlighting import ConfigHighlighter
+from conan_app_launcher.ui.common import get_themed_asset_icon, ConfigHighlighter
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.conan_wrapper.types import Remote
-from PySide6.QtCore import Qt, Signal, QItemSelectionModel
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QApplication, QInputDialog
+from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog
 
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
 from .model import ProfilesModel
@@ -38,7 +36,6 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)
-        self.config_file_path = Path("Unknown")
         self.profiles_path = Path("Unknown")
         self._edited_profile = None
 
@@ -48,46 +45,63 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.remotes_tree_view, self._base_signals.conan_remotes_updated)
         self._init_remotes_tab()
         self._init_profiles_tab()
-        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
 
-        self.config_file_path = Path(app.conan_api._client_cache.conan_conf_path)
-        self.profiles_path = Path(str(app.conan_api._client_cache.default_profile_path)).parent
+        self.config_file_path = app.conan_api.get_config_file_path()
+        self.profiles_path = app.conan_api.get_profiles_path()
         self._load_info_tab()
         self._load_remotes_tab()
         self._load_profiles_tab()
         self._load_config_file_tab()
         self._load_settings_yml_tab()
+        self._load_editables_tab()
 
         # always show first tab on start
         self._ui.config_tab_widget.tabBar().setCurrentIndex(0)
-        self._conan_config_highlighter = ConfigHighlighter(self._ui.config_file_text_browser.document(), "ini")
-        self._profile_highlighter = ConfigHighlighter(self._ui.profiles_text_browser.document(), "ini")
-        self._settings_highlighter = ConfigHighlighter(self._ui.settings_file_text_browser.document(), "yaml")
+        self._conan_config_highlighter = ConfigHighlighter(
+            self._ui.config_file_text_browser.document(), "ini")
+        self._profile_highlighter = ConfigHighlighter(
+            self._ui.profiles_text_browser.document(), "ini")
+        self._settings_highlighter = ConfigHighlighter(
+            self._ui.settings_file_text_browser.document(), "yaml")
+        self._editable_highlighter = ConfigHighlighter(
+            self._ui.editables_file_text_browser.document(), "yaml")
 
     def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(conan_version)
         self._ui.python_exe_value_label.setText(sys.executable)
         self._ui.python_cur_version_value_label.setText(platform.python_version())
-        self._ui.revision_enabled_checkbox.setChecked(app.conan_api._client_cache.config.revisions_enabled)
-        self._ui.conan_usr_home_value_label.setText(app.conan_api._client_cache.cache_folder)
-        self._ui.conan_usr_cache_value_label.setText(str(app.conan_api.get_short_path_root()))
-        self._ui.conan_storage_path_value_label.setText(str(app.conan_api._client_cache.store))
+        self._ui.revision_enabled_checkbox.setChecked(
+            app.conan_api.get_revisions_enabled())
+        self._ui.conan_usr_home_value_label.setText(
+            str(app.conan_api.get_user_home_path()))
+        if conan_version.startswith("2"):
+            self._ui.conan_usr_cache_value_label.setVisible(False)
+            self._ui.conan_usr_cache_label.setVisible(False)
+        else:
+            self._ui.conan_usr_cache_value_label.setText(
+                str(app.conan_api.get_short_path_root()))
+        self._ui.conan_storage_path_value_label.setText(
+            str(app.conan_api.get_storage_path()))
 
     def _load_settings_yml_tab(self):
         try:
-            self._ui.settings_file_text_browser.setText(Path(app.conan_api._client_cache.settings_path).read_text())
+            self._ui.settings_file_text_browser.setText(
+                app.conan_api.get_settings_file_path().read_text())
         except Exception:
             Logger().error("Cannot read settings.yaml file!")
 
     def _load_config_file_tab(self):
+        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
         try:
-            self._ui.config_file_text_browser.setText(self.config_file_path.read_text())
-            self._ui.config_file_save_button.clicked.connect(self.save_config_file)
+            self._ui.config_file_text_browser.setText(
+                app.conan_api.get_config_file_path().read_text())
+            self._ui.config_file_save_button.clicked.connect(self.on_save_config_file)
         except Exception:
             Logger().error("Cannot read Conan config file!")
 
     def _init_profiles_tab(self):
-        self._ui.profiles_list_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self._ui.profiles_list_view.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.profiles_list_view.customContextMenuRequested.connect(
             self.on_profile_context_menu_requested)
         self._init_profile_context_menu()
@@ -102,16 +116,28 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.profile_remove_button, "icons/delete.svg")
         self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.svg")
         self.set_themed_icon(self._ui.profile_rename_button, "icons/rename.svg")
-        
+
     def _load_profiles_tab(self):
         profiles_model = ProfilesModel()
         self._ui.profiles_list_view.setModel(profiles_model)
         self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
 
+    def _load_editables_tab(self):
+        self.set_themed_icon(self._ui.editables_save_button, "icons/save.svg")
+        try:
+            json_content = json.loads(
+                Path(app.conan_api.get_editables_file_path()).read_text())
+            self._ui.editables_file_text_browser.setText(
+                json.dumps(json_content, indent=2, separators=(',', ': ')))
+            self._ui.editables_save_button.clicked.connect(self.on_save_editable_file)
+        except Exception:
+            Logger().error("Cannot read editables file!")
+
     def _init_profile_context_menu(self):
         self.profiles_cntx_menu = RoundedMenu()
         self._copy_profile_action = QAction("Copy profile name", self)
-        self._copy_profile_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.svg")))
+        self._copy_profile_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/copy_link.svg")))
         self.profiles_cntx_menu.addAction(self._copy_profile_action)
         self._copy_profile_action.triggered.connect(self.on_copy_profile_requested)
 
@@ -127,9 +153,14 @@ class ConanConfigView(PluginInterfaceV1):
         super().reload_themed_icons()
         self._init_profile_context_menu()
         self._init_remote_context_menu()
-        self._conan_config_highlighter = ConfigHighlighter(self._ui.config_file_text_browser.document(),"ini")
-        self._profile_highlighter = ConfigHighlighter(self._ui.profiles_text_browser.document(),"ini")
-        self._settings_highlighter = ConfigHighlighter(self._ui.settings_file_text_browser.document(), "yaml")
+        self._conan_config_highlighter = ConfigHighlighter(
+            self._ui.config_file_text_browser.document(), "ini")
+        self._profile_highlighter = ConfigHighlighter(
+            self._ui.profiles_text_browser.document(), "ini")
+        self._settings_highlighter = ConfigHighlighter(
+            self._ui.settings_file_text_browser.document(), "yaml")
+        self._editable_highlighter = ConfigHighlighter(
+            self._ui.editables_file_text_browser.document(), "yaml")
 
 # Profile
 
@@ -166,7 +197,8 @@ class ConanConfigView(PluginInterfaceV1):
 
     def on_add_profile(self):
         new_profile_dialog = QInputDialog(self)
-        profile_name, accepted = new_profile_dialog.getText(self, "New profile", 'Enter name:', text="")
+        profile_name, accepted = new_profile_dialog.getText(
+            self, "New profile", 'Enter name:', text="")
         if accepted and profile_name:
             (self.profiles_path / profile_name).touch()
             self.on_refresh_profiles()
@@ -177,7 +209,8 @@ class ConanConfigView(PluginInterfaceV1):
             return
         profile_name: str = view_indexes[0].data(0)
         rename_profile_dialog = QInputDialog(self)
-        new_profile_name, accepted = rename_profile_dialog.getText(self, "Rename profile", 'Enter new name:', text=profile_name)
+        new_profile_name, accepted = rename_profile_dialog.getText(
+            self, "Rename profile", 'Enter new name:', text=profile_name)
         if accepted and profile_name:
             try:
                 (self.profiles_path / profile_name).rename(self.profiles_path / new_profile_name)
@@ -192,8 +225,10 @@ class ConanConfigView(PluginInterfaceV1):
         profile_name: str = view_indexes[0].data(0)
         message_box = QMessageBox(parent=self)
         message_box.setWindowTitle("Remove profile")
-        message_box.setText(f"Are you sure, you want to delete the profile {profile_name}?")
-        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setText(
+            f"Are you sure, you want to delete the profile {profile_name}?")
+        message_box.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
@@ -201,10 +236,11 @@ class ConanConfigView(PluginInterfaceV1):
             self.on_refresh_profiles()
 
     def on_refresh_profiles(self):
-        profile_model: ProfilesModel = self._ui.profiles_list_view.model() # type: ignore
+        profile_model: ProfilesModel = self._ui.profiles_list_view.model()  # type: ignore
         # clear selection, otherwise an old selection could remain active in the profile content browser
         self._ui.profiles_list_view.selectionModel().clear()
         profile_model.update_profiles()
+        self._ui.profiles_list_view.repaint()
 
 # Remote
 
@@ -224,12 +260,15 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.remote_remove, "icons/delete.svg")
         self._ui.remote_move_up_button.clicked.connect(self._remotes_controller.move_up)
         self.set_themed_icon(self._ui.remote_move_up_button, "icons/arrow_up.svg")
-        self._ui.remote_move_down_button.clicked.connect(self._remotes_controller.move_down)
+        self._ui.remote_move_down_button.clicked.connect(
+            self._remotes_controller.move_down)
         self.set_themed_icon(self._ui.remote_move_down_button, "icons/arrow_down.svg")
 
         self._ui.remotes_tree_view.doubleClicked.connect(self.on_remote_edit)
-        self._ui.remotes_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self._ui.remotes_tree_view.customContextMenuRequested.connect(self.on_remote_context_menu_requested)
+        self._ui.remotes_tree_view.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu)
+        self._ui.remotes_tree_view.customContextMenuRequested.connect(
+            self.on_remote_context_menu_requested)
 
         self._init_remote_context_menu()
 
@@ -239,7 +278,8 @@ class ConanConfigView(PluginInterfaceV1):
     def _init_remote_context_menu(self):
         self._remotes_cntx_menu = RoundedMenu()
         self._copy_remote_action = QAction("Copy remote name", self)
-        self._copy_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.svg")))
+        self._copy_remote_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/copy_link.svg")))
         self._remotes_cntx_menu.addAction(self._copy_remote_action)
         self._copy_remote_action.triggered.connect(self.on_copy_remote_name_requested)
 
@@ -249,22 +289,26 @@ class ConanConfigView(PluginInterfaceV1):
         self._edit_remote_action.triggered.connect(self.on_remote_edit)
 
         self._add_remote_action = QAction("Add new remote", self)
-        self._add_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/plus_rounded.svg")))
+        self._add_remote_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/plus_rounded.svg")))
         self._remotes_cntx_menu.addAction(self._add_remote_action)
         self._add_remote_action.triggered.connect(self.on_remote_add)
 
         self._remove_remote_action = QAction("Remove remote", self)
-        self._remove_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
+        self._remove_remote_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/delete.svg")))
         self._remotes_cntx_menu.addAction(self._remove_remote_action)
         self._remove_remote_action.triggered.connect(self.on_remote_remove)
 
         self._disable_profile_action = QAction("Disable/Enable remote", self)
-        self._disable_profile_action.setIcon(QIcon(get_themed_asset_icon("icons/hide.svg")))
+        self._disable_profile_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/hide.svg")))
         self._remotes_cntx_menu.addAction(self._disable_profile_action)
         self._disable_profile_action.triggered.connect(self.on_remote_disable)
 
         self._login_remotes_action = QAction("(Multi)Login to remote", self)
-        self._login_remotes_action.setIcon(QIcon(get_themed_asset_icon("icons/login.svg")))
+        self._login_remotes_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/login.svg")))
         self._remotes_cntx_menu.addAction(self._login_remotes_action)
         self._login_remotes_action.triggered.connect(self.on_remotes_login)
 
@@ -281,7 +325,7 @@ class ConanConfigView(PluginInterfaceV1):
         remote_item = self._remotes_controller.get_selected_remote()
         if not remote_item:
             return
-        remotes = self._remotes_controller.get_remotes_from_same_server(remote_item.remote)
+        remotes = app.conan_api.get_remotes_from_same_server(remote_item.remote)
         if not remotes:
             return
         self.remote_login_dialog = RemoteLoginDialog(remotes, self)
@@ -302,13 +346,14 @@ class ConanConfigView(PluginInterfaceV1):
             return
         message_box = QMessageBox(parent=self)
         message_box.setWindowTitle("Remove remote")
-        message_box.setText(f"Are you sure, you want to delete the remote {remote_item.remote.name}?")
-        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setText(
+            f"Are you sure, you want to delete the remote {remote_item.remote.name}?")
+        message_box.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
-            # TODO dedicated function
-            app.conan_api._conan.remote_remove(remote_item.remote.name)
+            app.conan_api.remove_remote(remote_item.remote.name)
             self._remotes_controller.update()
 
     def on_remote_disable(self, model_index):
@@ -319,10 +364,17 @@ class ConanConfigView(PluginInterfaceV1):
 
 # Conan Config
 
-    def save_config_file(self):
-        self.config_file_path.write_text(self._ui.config_file_text_browser.toPlainText())
+    def on_save_config_file(self):
+        app.conan_api.get_config_file_path().write_text(
+            self._ui.config_file_text_browser.toPlainText())
         # restart conan api to apply changes internally
         app.conan_api.init_api()
         Logger().info("Applying Changes to Conan...")
         # re-init info tab to show the changes
         self._load_info_tab()
+
+# Editables tab
+
+    def on_save_editable_file(self):
+        app.conan_api.get_editables_file_path().write_text(
+            self._ui.editables_file_text_browser.toPlainText())

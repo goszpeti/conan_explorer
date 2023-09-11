@@ -74,7 +74,7 @@ class PluginsPage(PluginInterfaceV1):
         message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
-        if reply == QMessageBox.StandardButton.Yes:        
+        if reply == QMessageBox.StandardButton.Yes:
             self._controller.remove_plugin(selected_item.plugin_path)
             self._controller.update()
 

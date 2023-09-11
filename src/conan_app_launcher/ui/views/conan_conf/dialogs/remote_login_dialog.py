@@ -8,7 +8,7 @@ from conan_app_launcher.app.logger import Logger
 from conans.client.cache.remote_registry import Remote
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QDialog, QWidget, QListWidgetItem
+from PySide6.QtWidgets import QDialog, QWidget, QListWidgetItem, QCheckBox
 
 from conan_app_launcher.ui.common.theming import get_themed_asset_icon
 
@@ -43,10 +43,10 @@ class RemoteLoginDialog(QDialog):
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             item.setCheckState(Qt.CheckState.Checked)
         self.setWindowIcon(get_themed_asset_icon("icons/login.svg", True))
-        self._ui.button_box.accepted.connect(self.save)
+        self._ui.button_box.accepted.connect(self.on_ok)
         self.adjustSize()
 
-    def save(self):
+    def on_ok(self):
         """ Is triggered on OK and tries to login while showing a loading dialog """
         loader = AsyncLoader(self)
         loader.async_loading(self, self.login, loading_text="Logging you in...")
@@ -55,16 +55,20 @@ class RemoteLoginDialog(QDialog):
 
     def login(self):
         """ Try to login to all selected remotes """
-        for remote in self._remotes:
+        selected_remotes: List[str] = []
+        for idx in range(self._ui.remote_list.count()):
+            if self._ui.remote_list.item(idx).checkState() == Qt.CheckState.Checked:
+                selected_remotes.append(self._ui.remote_list.item(idx).data(0))
+        for remote in selected_remotes:
             # will be canceled after the first error, so no lockout will occur, because of multiple incorrect logins
             # error is printed on the console
             try:
-                app.conan_api._conan.authenticate(self._ui.name_line_edit.text(),
-                                                self._ui.password_line_edit.text(), remote.name)
+                app.conan_api.login_remote(remote, self._ui.name_line_edit.text(),
+                                                self._ui.password_line_edit.text())
             except Exception as e:
-                Logger().error(f"Can't sign in to {remote.name}: {str(e)}")
+                Logger().error(f"Can't sign in to {remote}: {str(e)}")
                 return
-            Logger().info(f"Successfully logged in to {remote.name}")
+            Logger().info(f"Successfully logged in to {remote}")
         self.clear_password()
 
     def clear_password(self):

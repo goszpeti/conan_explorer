@@ -10,7 +10,7 @@ from conan_app_launcher.app.loading import AsyncLoader
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
                                          GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
-                                         GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, WINDOW_SIZE)
+                                         GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
 from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style, get_themed_asset_icon
 from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
 from conan_app_launcher.ui.plugin import PluginHandler
@@ -58,7 +58,7 @@ class MainWindow(FluentWindow):
                                         self.conan_remotes_updated, self.page_size_changed)
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
         self._plugin_handler = PluginHandler(self, self.base_signals, self.page_widgets)
-        self.setWindowTitle(APP_NAME)
+        self.setWindowTitle("") # app display name is already there
         # connect logger to console widget to log possible errors at init
         init_qt_logger(Logger(), self.qt_logger_name, self.log_console_message)
         self.log_console_message.connect(self.write_log)
@@ -148,9 +148,13 @@ class MainWindow(FluentWindow):
 
     def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent
         super().resizeEvent(a0)
-        if self.loaded:
-            self.ui.page_stacked_widget.currentWidget().setMaximumWidth(self.ui.center_frame.width() - 4)
-            self.ui.page_stacked_widget.currentWidget().adjustSize()
+        try:
+            if self.loaded:
+                self.ui.page_stacked_widget.currentWidget().setMaximumWidth(self.ui.center_frame.width() - 4)
+                self.ui.page_stacked_widget.currentWidget().adjustSize()
+        except Exception as e:
+            Logger().error(f"Can't resize current view: {str(e)}")
+
 
     def load(self, config_source: Optional[PathLike] = None):
         """ Load all application gui elements specified in the GUI config (file) """
@@ -168,6 +172,13 @@ class MainWindow(FluentWindow):
     def _load_job(self, config_source: str):
         self._plugin_handler.post_load_plugins()
         self._load_quicklaunch(config_source)
+        # Restore last view
+        try:
+            last_view = app.active_settings.get_string(LAST_VIEW)
+            page = self.page_widgets.get_page_by_name(last_view)
+            self.page_widgets.get_button_by_type(type(page)).click()
+        except Exception:
+            pass
 
     def _load_plugins(self):
         self._plugin_handler.load_all_plugins()
@@ -255,15 +266,16 @@ class MainWindow(FluentWindow):
             path_list = str(paths)
 
         msg = WideMessageBox(parent=self)
+        sb = WideMessageBox.StandardButton
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(WideMessageBox.StandardButton.Yes | WideMessageBox.StandardButton.Cancel)  # type: ignore
+        msg.setStandardButtons(sb.Yes | sb.Cancel)  # type: ignore
         msg.setIcon(WideMessageBox.Icon.Question)
         msg.setWidth(800)
         msg.setMaximumHeight(600)
         reply = msg.exec()
-        if reply == WideMessageBox.StandardButton.Yes:
+        if reply == sb.Yes:
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 
@@ -310,7 +322,8 @@ class MainWindow(FluentWindow):
             app.active_settings.set(WINDOW_SIZE, "maximized")
         else:
             geometry = self.geometry()
-            geo_str = f"{geometry.left()},{geometry.top()},{geometry.width()},{geometry.height()}"
+            geo_str = (f"{geometry.left()},{geometry.top()},"
+                       f"{geometry.width()},{geometry.height()}")
             app.active_settings.set(WINDOW_SIZE, geo_str)
         # save console size
         sizes = self.ui.content_footer_splitter.sizes()
@@ -318,3 +331,7 @@ class MainWindow(FluentWindow):
             Logger().warning("Can't save splitter size")
         sizes_str = f"{int(sizes[0])},{int(sizes[1])}"
         app.active_settings.set(CONSOLE_SPLIT_SIZES, sizes_str)
+
+        # save last view
+        page: PluginInterfaceV1 = self.ui.page_stacked_widget.currentWidget() # type: ignore
+        app.active_settings.set(LAST_VIEW, page.plugin_description.name)

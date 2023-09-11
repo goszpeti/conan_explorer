@@ -275,6 +275,13 @@ QTabWidget {
     background-color: white;
 }
 
+QTabBar::close-button {
+    image: url(icons:material/close.svg);
+}
+QTabBar::close-button:hover {
+    image: url(icons:material/close_lgr.svg);
+}
+
 QTabBar::tab {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
@@ -309,6 +316,7 @@ QTabBar::tab:!selected:hover {
     margin-top: 2px;
     /* make non-selected tabs look smaller */
 }
+
 
 QListView,
 QTreeView,

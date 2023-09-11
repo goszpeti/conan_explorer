@@ -1,8 +1,5 @@
-from pathlib import Path
 from PySide6.QtWidgets import QLineEdit
 from conan_app_launcher.ui.common import get_themed_asset_icon
-from conan_app_launcher.ui.common.icon import get_icon_from_image_file
-
 
 class PasswordLineEdit(QLineEdit):
 

@@ -2,17 +2,17 @@ import configparser
 from copy import deepcopy
 import os
 from pathlib import Path
-import platform
 from typing import Any, Dict, Optional, Tuple
 
 from conan_app_launcher import BUILT_IN_PLUGIN, PathLike, base_path
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import get_default_file_editor
+from conan_app_launcher.app.typing import SignatureCheckMeta
 
-from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
-               GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL,
-               GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, PLUGINS_SECTION_NAME, VIEW_SECTION_NAME, WINDOW_SIZE,
-               SettingsInterface)
+from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE,
+               FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE,
+               GUI_STYLE_MATERIAL, GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, LAST_VIEW, PLUGINS_SECTION_NAME,
+               VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
 
 
 def application_settings_spec() -> Dict[str, Dict[str, Any]]:
@@ -24,11 +24,12 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
             DEFAULT_INSTALL_PROFILE: ""
         },
         VIEW_SECTION_NAME: {
-            FONT_SIZE: 12,
+            FONT_SIZE: 13,
             GUI_STYLE: GUI_STYLE_MATERIAL,
             GUI_MODE: GUI_MODE_LIGHT,
             WINDOW_SIZE: "0,0,800,600",
-            CONSOLE_SPLIT_SIZES: "413,126"
+            CONSOLE_SPLIT_SIZES: "413,126",
+            LAST_VIEW: ""
         },
         PLUGINS_SECTION_NAME: {
             BUILT_IN_PLUGIN: str(base_path / "ui" / "plugins.ini")
@@ -37,7 +38,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
     }
 
 
-class IniSettings(SettingsInterface):
+class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
     """
     Settings mechanism with an ini file to use as a storage.
     File and entries are automatically created from the default value of the class.
@@ -46,7 +47,8 @@ class IniSettings(SettingsInterface):
     """
 
     def __init__(self, ini_file_path: Optional[PathLike], auto_save=True,
-                 default_values: Dict[str, Dict[str, Any]] = application_settings_spec(),
+                 default_values: Dict[str, Dict[str, Any]
+                                      ] = application_settings_spec(),
                  custom_key_enabled_sections=[PLUGINS_SECTION_NAME]):
         """
         Read config.ini file to load settings.
@@ -61,15 +63,17 @@ class IniSettings(SettingsInterface):
         self._custom_key_enabled_sections = custom_key_enabled_sections
         self._logger = Logger()
         self._parser = configparser.ConfigParser()
+
+        ### default setting values ###
+        self._values: Dict[str, Dict[str, Any]] = deepcopy(default_values)
+
         # create Settings ini file, if not available for first start
         if not self._ini_file_path.is_file():
             self._ini_file_path.open('a').close()
             self._logger.info('Settings: Creating settings ini-file')
+            self.save()
         else:
             self._logger.info(f'Settings: Using {self._ini_file_path}')
-
-        ### default setting values ###
-        self._values: Dict[str, Dict[str, Any]] = deepcopy(default_values)
 
         self._read_ini()
 
@@ -102,7 +106,7 @@ class IniSettings(SettingsInterface):
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
 
-    def set(self, name: str, value: "str | int | float | bool"):
+    def set(self, name: str, value: "str | int | float | bool | dict"):
         """ Set the value of a specific setting. Does not write to file, if value is already set. """
         if name in self._values.keys() and isinstance(value, dict):  # dict type setting
             if self._values[name] == value:
@@ -118,7 +122,9 @@ class IniSettings(SettingsInterface):
         if self._auto_save:
             self.save()
 
-    def add(self, name: str, value: "str | int | float | bool", node: str):
+    def add(self, name: str, value: "str | int | float | bool", node: Optional[str] = None):
+        if node is None:
+            node = GENERAL_SECTION_NAME
         if not self._values.get(node):
             self._values[node] = {}
         self._values[node][name] = value
@@ -150,8 +156,10 @@ class IniSettings(SettingsInterface):
             for node in self._parser.sections():
                 setting_keys = set(list(self._values.get(node, {}).keys()))
                 if node in self._custom_key_enabled_sections:
-                    setting_keys = setting_keys.union(set(self._get_section(node).keys()))
-                if not self._values.get(node):  # empty section - this is a user filled dict
+                    setting_keys = setting_keys.union(
+                        set(self._get_section(node).keys()))
+                # empty section - this is a user filled dict
+                if not self._values.get(node):
                     update_needed |= self._read_dict_setting(node)
                 for setting in setting_keys:
                     update_needed |= self._read_setting(setting, node)
@@ -160,7 +168,8 @@ class IniSettings(SettingsInterface):
             Logger().error(
                 f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
             try:
-                os.remove(str(self._ini_file_path))  # let an exeception to the user, file can't be deleted
+                # let an exeception to the user, file can't be deleted
+                os.remove(str(self._ini_file_path))
             except Exception:
                 Logger().error(f"Settings: Can't delete ini file: {str(e)}.")
 
@@ -215,7 +224,8 @@ class IniSettings(SettingsInterface):
         elif isinstance(default_value, int):
             value = int(section.get(name))
         if value is None:  # dict type, value will be taken as a string
-            self._logger.error(f"Settings: Setting {name} to write is unknown", )
+            self._logger.error(
+                f"Settings: Setting {name} to write is unknown", )
             return False
         if value == "" and default_value:
             value = default_value
