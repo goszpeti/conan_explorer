@@ -190,6 +190,7 @@ def delete_path(dst: Path):
     """
     Delete file or (non-empty) folder recursively.
     Exceptions will be caught and message logged to stdout.
+    TODO: Could be rempved, after Python 3.7 is deprecated (use Path.unlink)
     """
     from shutil import rmtree
     try:

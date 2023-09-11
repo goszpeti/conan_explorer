@@ -3,6 +3,7 @@ import platform
 from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from conan_app_launcher.app.system import delete_path
 
 from conan_app_launcher.app.typing import SignatureCheckMeta
 
@@ -278,7 +279,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         temp_path.mkdir(parents=True, exist_ok=True)
         generated_file = (temp_path / "conanbuildinfo.txt")
         # clean up possible last run
-        generated_file.unlink(missing_ok=True)
+        delete_path(generated_file)
 
         # use cli here, API cannnot do job easily and we wan to parse the file output
         with chdir(temp_path):
