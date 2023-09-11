@@ -116,9 +116,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
             widget.deleteLater()
 
         def remove_page_extras_by_name(self, name: str):
-            """ Remove page but not the widget itself, in case it is managed by another mechanism like plugins """
-            button, widget, menu, _ = self._page_widgets.pop(
-                gen_obj_name(name))
+            """ Remove page but not the widget itself, in case it is managed 
+            by another mechanism like plugins """
+            button, _, menu, _ = self._page_widgets.pop(gen_obj_name(name))
             button.hide()
             button.deleteLater()
             if menu:
@@ -430,58 +430,58 @@ class FluentWindow(QMainWindow, ThemedWidget):
         position = event.position().toPoint()  # relative pos to window
         width = self.width()
         height = self.height()
-        Cs = Qt.CursorShape
+        cs = Qt.CursorShape
         if QRect(top_left.x() + x_offset, top_left.y(), 
                  width - 2*x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top
-            self.setCursor(Cs.SizeVerCursor)
+            self.setCursor(cs.SizeVerCursor)
         elif QRect(bottom_left.x() + x_offset, bottom_left.y(), 
                    width - 2*x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom
-            self.setCursor(Cs.SizeVerCursor)
+            self.setCursor(cs.SizeVerCursor)
         elif QRect(top_right.x() - x_offset, top_right.y() + y_offset, 
                    x_offset, height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.right
-            self.setCursor(Cs.SizeHorCursor)
+            self.setCursor(cs.SizeHorCursor)
         elif QRect(top_left.x() + x_offset, top_left.y() + y_offset, -x_offset, 
                    height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.left
-            self.setCursor(Cs.SizeHorCursor)
+            self.setCursor(cs.SizeHorCursor)
         elif QRect(top_right.x(), top_right.y(), -x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_right
-            self.setCursor(Cs.SizeBDiagCursor)
+            self.setCursor(cs.SizeBDiagCursor)
         elif QRect(bottom_left.x(), bottom_left.y(), x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_left
-            self.setCursor(Cs.SizeBDiagCursor)
+            self.setCursor(cs.SizeBDiagCursor)
         elif QRect(top_left.x(), top_left.y(), x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_left
-            self.setCursor(Cs.SizeFDiagCursor)
+            self.setCursor(cs.SizeFDiagCursor)
         elif QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_right
-            self.setCursor(Cs.SizeFDiagCursor)
+            self.setCursor(cs.SizeFDiagCursor)
         else:  # no resize
             self._resize_direction = ResizeDirection.default
-            self.setCursor(Cs.ArrowCursor)
+            self.setCursor(cs.ArrowCursor)
 
     def resizing(self, event):
-        Ed = Qt.Edge
+        ed = Qt.Edge
         window = self.window().windowHandle()
         if self._resize_direction == ResizeDirection.top:
-            window.startSystemResize(Ed.TopEdge)
+            window.startSystemResize(ed.TopEdge)
         elif self._resize_direction == ResizeDirection.bottom:
-            window.startSystemResize(Ed.BottomEdge)
+            window.startSystemResize(ed.BottomEdge)
         elif self._resize_direction == ResizeDirection.right:
-            window.startSystemResize(Ed.RightEdge)
+            window.startSystemResize(ed.RightEdge)
         elif self._resize_direction == ResizeDirection.left:
-            window.startSystemResize(Ed.LeftEdge)
+            window.startSystemResize(ed.LeftEdge)
         elif self._resize_direction == ResizeDirection.top_right:
-            window.startSystemResize(Ed.TopEdge | Ed.RightEdge)
+            window.startSystemResize(ed.TopEdge | ed.RightEdge)
         elif self._resize_direction == ResizeDirection.bottom_right:
-            window.startSystemResize(Ed.BottomEdge | Ed.RightEdge)
+            window.startSystemResize(ed.BottomEdge | ed.RightEdge)
         elif self._resize_direction == ResizeDirection.bottom_left:
-            window.startSystemResize(Ed.BottomEdge | Ed.LeftEdge)
+            window.startSystemResize(ed.BottomEdge | ed.LeftEdge)
         elif self._resize_direction == ResizeDirection.top_left:
-            window.startSystemResize(Ed.TopEdge | Ed.LeftEdge)
+            window.startSystemResize(ed.TopEdge | ed.LeftEdge)
 
     def maximize_restore(self, event=None):  # dummy arg to be used as an event slot
         if self.isMaximized():

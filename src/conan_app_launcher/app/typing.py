@@ -26,7 +26,7 @@ class SignatureCheckMeta(type):
                     base_method = getattr(base_class, method_name)
                     base_argspec = inspect.getfullargspec(base_method)
                     method_argspec = inspect.getfullargspec(method)
-                    if not method_argspec == base_argspec:
+                    if method_argspec != base_argspec:
                         raise SignatureMismatchException(f"{str(method_name)}\n"
                             f"Expected: {str(base_argspec)}\n"
                             f"Actual: {str(method_argspec)}")

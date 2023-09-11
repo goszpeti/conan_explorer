@@ -266,16 +266,16 @@ class MainWindow(FluentWindow):
             path_list = str(paths)
 
         msg = WideMessageBox(parent=self)
-        Ws = WideMessageBox.StandardButton
+        sb = WideMessageBox.StandardButton
         msg.setWindowTitle("Delete folders")
         msg.setText("Are you sure, you want to delete the found folders?\t")
         msg.setDetailedText(path_list)
-        msg.setStandardButtons(Ws.Yes | Ws.Cancel)  # type: ignore
+        msg.setStandardButtons(sb.Yes | sb.Cancel)  # type: ignore
         msg.setIcon(WideMessageBox.Icon.Question)
         msg.setWidth(800)
         msg.setMaximumHeight(600)
         reply = msg.exec()
-        if reply == Ws.Yes:
+        if reply == sb.Yes:
             for path in paths:
                 rmtree(str(path), ignore_errors=True)
 

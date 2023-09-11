@@ -88,9 +88,9 @@ class SideSubMenu(ThemedWidget):
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
         label.setObjectName(gen_obj_name(name) + "_label")
         label.setMaximumHeight(30)
-        sizePolicy = QSizePolicy(
+        size_policy = QSizePolicy(
             QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        label.setSizePolicy(sizePolicy)
+        label.setSizePolicy(size_policy)
         icon = None
         if asset_icon:
             icon = QLabel(parent=self)

@@ -344,29 +344,14 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def search_recipe_all_versions_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
         search_results = []
-        local_results = []
         try:
             # no query possible with pattern
             search_results: List = self.search_recipes_in_remotes(f"{conan_ref.name}/*@*/*",
                                                                   remote_name="all")
         except Exception as e:
             Logger().warning(str(e))
-        # TODO: There is no extra remote=None anymore... What to do with this?
-        # try:
-        #     if SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
-        #         local_results: List = self.search_recipes_in_remotes(f"{conan_ref.name}/*@*/*",
-        #                                                          remote_name=None)
-        # except Exception as e:
-        #     Logger().warning(str(e))
-        #     return []
 
         res_list: List[ConanRef] = search_results
-        # for res in search_results + local_results:
-        #     for item in res.get("items", []):
-        #         res_list.append(ConanRef.loads(item.get("recipe", {}).get("id", "")))
-        # res_list = list(set(res_list))  # make unique
-        # res_list.sort()
-        # update cache
         self.info_cache.update_remote_package_list(res_list)
         return res_list
 

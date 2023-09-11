@@ -43,9 +43,9 @@ class PluginInterfaceV1(ThemedWidget):
         self._page_widgets = page_widgets
         # save PluginDescription to query data from outside
         self.plugin_description = plugin_description
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        sizePolicy.setVerticalStretch(0)
-        self.setSizePolicy(sizePolicy)
+        size_policy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        size_policy.setVerticalStretch(0)
+        self.setSizePolicy(size_policy)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
     def resizeEvent(self, a0) -> None:
