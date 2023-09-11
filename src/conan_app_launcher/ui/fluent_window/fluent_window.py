@@ -404,7 +404,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             return super().eventFilter(source, event)
         # Use isinstance instead of type because of typehinting
         if isinstance(event, QHoverEvent):
-            if event.type() == event.Type.HoverMove and self._resize_press == 0:
+            if event.type() == event.Type.HoverMove:
                 # cursor position control for cursor shape setup
                 self.handle_resize_cursor(event)
         elif isinstance(event, QMouseEvent):
