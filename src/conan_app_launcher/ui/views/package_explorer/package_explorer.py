@@ -7,8 +7,9 @@ from conan_app_launcher.ui.common.model import re_register_signal
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.widgets import RoundedMenu
 
-from .controller import PackageFileExplorerController, PackageSelectionController
-from .model import PkgSelectionType
+from .file_controller import PackageFileExplorerController
+from .sel_controller import PackageSelectionController
+from .sel_model import PkgSelectionType
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QKeySequence, QResizeEvent, QAction

@@ -3,4 +3,3 @@ line-length=88
 
 [tool.autopep8]
 max_line_length = 88
-in-place = true

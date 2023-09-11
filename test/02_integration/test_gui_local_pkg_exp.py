@@ -1,28 +1,28 @@
 
 import os
-from pathlib import Path
 import platform
+from pathlib import Path
+from test.conftest import (TEST_REF, TEST_REF_OFFICIAL, PathSetup,
+                           conan_add_editables, conan_install_ref)
+from time import sleep
 from typing import Generator, Tuple
 
-from pytest_mock import MockerFixture
-from PySide6.QtWidgets import QApplication
-
-from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
-from conan_app_launcher.ui.views.package_explorer.model import PkgSelectionType
-from test.conftest import TEST_REF, TEST_REF_OFFICIAL, conan_install_ref, conan_add_editables
-import pytest_check as check
 import pytest
-from time import sleep
+import pytest_check as check
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QApplication
+from pytest_mock import MockerFixture
 
 import conan_app_launcher  # for mocker
 import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher import conan_version
+from conan_app_launcher.conan_wrapper.types import ConanRef
+from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui import main_window
 from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
-from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
-from conan_app_launcher.conan_wrapper.types import ConanRef
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
-
-from PySide6 import QtCore, QtWidgets
+from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
+from conan_app_launcher.ui.views.package_explorer.model import PkgSelectionType
 
 Qt = QtCore.Qt
 SelFlags = QtCore.QItemSelectionModel.SelectionFlag
@@ -37,6 +37,7 @@ LPESetupType = Tuple[QApplication, LocalConanPackageExplorer, main_window.MainWi
 def setup_local_package_explorer(qtbot,
     base_fixture, ui_no_refs_config_fixture) -> Generator[LPESetupType, None, None]:
     from pytestqt.plugin import _qapp_instance
+
     # 1. Switch to another package view
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
@@ -139,9 +140,27 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
 @pytest.mark.conanv2
 def test_local_package_explorer_pkg_selection_editables(qtbot, mocker, 
                 setup_local_package_explorer: LPESetupType,
-                base_fixture, ui_no_refs_config_fixture: Path):
-    """ """
-    conan_add_editables
+                base_fixture :PathSetup, ui_no_refs_config_fixture: Path):
+    """
+    Check editable packages open set root path.
+    """
+    editable_ref = "example/9.9.9@editable/testing"
+    base_path = base_fixture.testdata_path / "conan"
+    if conan_version.startswith("2"):
+        conan_add_editables(str(base_path / "conanfileV2.py"), 
+                        ConanRef.loads(editable_ref))
+    else:
+        conan_add_editables(str(base_path), ConanRef.loads(editable_ref))
+    _qapp_instance, lpe, main_gui = setup_local_package_explorer
+
+    lpe._ui.refresh_button.clicked.emit()
+    lpe._pkg_sel_ctrl._loader.wait_for_finished()
+
+    assert lpe.select_local_package_from_ref(editable_ref)
+
+    assert lpe._pkg_tabs_ctrl[0]._model  # view selected -> fs_model is set
+    assert Path(lpe._pkg_tabs_ctrl[0]._model.rootPath()) == base_path
+
 
 
 def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, base_fixture,
