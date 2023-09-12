@@ -1,9 +1,9 @@
 import logging
-from typing import Optional
-
+from typing import TYPE_CHECKING, Optional
+if TYPE_CHECKING:
+    from typing import Self
 
 from conan_app_launcher import DEBUG_LEVEL, PKG_NAME
-
 
 class Logger(logging.Logger):
     """
@@ -12,17 +12,17 @@ class Logger(logging.Logger):
     _instance: Optional[logging.Logger] = None
     formatter = logging.Formatter(r"%(levelname)s: %(message)s")
 
-    def __new__(cls):
+    def __new__(cls) -> "Self":
         if cls._instance is None:
             # the user excepts a logger
             cls._instance = cls._init_logger()
-        return cls._instance
+        return cls._instance # type: ignore
 
     def __init__(self) -> None:
         return None
 
     @classmethod
-    def _init_logger(cls) -> logging.Logger:
+    def _init_logger(cls):
         """ Set up format and a debug level and register console logger. """
         # restrict root logger
         root = logging.getLogger()

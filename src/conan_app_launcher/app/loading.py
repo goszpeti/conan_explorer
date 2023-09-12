@@ -1,4 +1,5 @@
-""" QT Loading dialog. Placed outside of ui, becauseit is needed to boostrap the loading of all uis. """
+""" QT Loading dialog. Placed outside of ui, because 
+it is needed to boostrap the loading of all uis. """
 
 import os
 from datetime import datetime
@@ -34,7 +35,8 @@ class Worker(QObject):
 
 
 class AsyncLoader(QObject):
-    # reuse the same progress_dialog instance for every loading dialog - there can only be one at a time
+    # Reuse the same progress_dialog instance for every loading dialog - 
+    # there can only be one at a time
     __progress_dialog: Optional[QProgressDialog] = None
 
     def __init__(self, parent: Optional[QObject]):
@@ -51,7 +53,7 @@ class AsyncLoader(QObject):
             progress_dialog.setWindowFlags(
                 wt.Window | wt.WindowTitleHint | wt.CustomizeWindowHint)
             progress_dialog.setCancelButton(None)  # type: ignore
-            progress_dialog.setModal(True)  # otherwise user can trigger it twice -> crash
+            progress_dialog.setModal(True)  # user could trigger it twice -> crash
             progress_dialog.setRange(0, 0)
             progress_dialog.setMinimumDuration(1000)
             progress_dialog.setMinimumWidth(500)
@@ -63,7 +65,8 @@ class AsyncLoader(QObject):
         self.load_thread: Optional[QThread] = None
         self.finished = True
 
-    def async_loading(self, dialog_parent: Optional[QWidget], work_task: Callable, worker_args: Tuple[Any, ...] = (),
+    def async_loading(self, dialog_parent: Optional[QWidget], work_task: Callable, 
+                      worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,
                       loading_text: str = "Loading", cancel_button=True):
         self.finished = False

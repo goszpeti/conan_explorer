@@ -18,6 +18,13 @@
             "justMyCode": false
         },
         {
+            "name": "Python: Attach using Process Id",
+            "type": "python",
+            "request": "attach",
+            "processId": "${command:pickProcess}",
+            "justMyCode": false
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
@@ -35,7 +42,7 @@
             "python": "${command:python.interpreterPath}",
             "env": {
                 "CAL_DEBUG_LEVEL": "2",
-                "SKIP_CREATE_CONAN_TEST_DATA": "True",
+                "SKIP_CREATE_CONAN_TEST_DATA": "False",
             },
         },
     ]

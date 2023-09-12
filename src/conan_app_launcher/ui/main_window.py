@@ -3,27 +3,29 @@ from dataclasses import dataclass
 from shutil import rmtree
 from typing import Optional
 
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE, MIN_FONT_SIZE, PathLike, conan_version
-from conan_app_launcher.app.loading import AsyncLoader
+from PySide6.QtCore import QRect, Signal, SignalInstance
+from PySide6.QtGui import QKeySequence
+from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
+    QVBoxLayout, QWidget)
 
+import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
+    MIN_FONT_SIZE, PathLike, conan_version)
+from conan_app_launcher.app.loading import AsyncLoader
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE, FONT_SIZE,
-                                         GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
-                                         GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
-from conan_app_launcher.ui.common.theming import get_gui_dark_mode, get_gui_style, get_themed_asset_icon
-from conan_app_launcher.ui.dialogs.file_editor_selection.file_editor_selection import FileEditorSelDialog
+from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
+    FONT_SIZE, GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
+    GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
+from conan_app_launcher.ui.common.theming import (get_gui_dark_mode, get_gui_style, 
+                                                  get_themed_asset_icon)
+from conan_app_launcher.ui.dialogs import FileEditorSelDialog
 from conan_app_launcher.ui.plugin import PluginHandler
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
-from PySide6.QtCore import QRect, SignalInstance, Signal
-from PySide6.QtGui import QKeySequence
-from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QFrame, QVBoxLayout, QRadioButton
 
-from .common import (activate_theme, init_qt_logger,
-                     remove_qt_logger)
+from .common import activate_theme, init_qt_logger, remove_qt_logger
 from .fluent_window import FluentWindow, SideSubMenu
-from .plugin import PluginInterfaceV1
 from .model import UiApplicationModel
+from .plugin import PluginInterfaceV1
 from .views import AboutPage, AppGridView, PluginsPage
 
 
@@ -166,12 +168,6 @@ class MainWindow(FluentWindow):
         loader = AsyncLoader(self)
         loader.async_loading(self, self._load_job, (config_source_str,))
         loader.wait_for_finished()
-       
-        self.loaded = True
-
-    def _load_job(self, config_source: str):
-        self._plugin_handler.post_load_plugins()
-        self._load_quicklaunch(config_source)
         # Restore last view
         try:
             last_view = app.active_settings.get_string(LAST_VIEW)
@@ -179,6 +175,12 @@ class MainWindow(FluentWindow):
             self.page_widgets.get_button_by_type(type(page)).click()
         except Exception:
             pass
+        
+        self.loaded = True
+
+    def _load_job(self, config_source: str):
+        self._plugin_handler.post_load_plugins()
+        self._load_quicklaunch(config_source)
 
     def _load_plugins(self):
         self._plugin_handler.load_all_plugins()

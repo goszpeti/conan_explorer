@@ -36,8 +36,7 @@ class QtLogHandler(logging.Handler):
 
 
 def init_qt_logger(logger: Logger, name: str, update_signal: SignalInstance):
-    """
-    Redirects the logger to QT widget.
+    """Redirects the logger to QT widget.
     Needs to be called when GUI objects are available.
     update_signal needs str as argument.
     """

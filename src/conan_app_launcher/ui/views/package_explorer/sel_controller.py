@@ -10,7 +10,8 @@ from conan_app_launcher.ui.common import show_conanfile, ConfigHighlighter
 from conan_app_launcher.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from PySide6.QtCore import (QItemSelectionModel, QModelIndex, QObject,
                             SignalInstance)
-from PySide6.QtWidgets import (QApplication, QTextBrowser, QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout)
+from PySide6.QtWidgets import (QApplication, QTextBrowser,
+                               QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout)
 from PySide6.QtGui import QIcon
 from .sel_model import PkgSelectionType, PackageFilter, PackageTreeItem, PkgSelectModel
 
@@ -21,8 +22,9 @@ if TYPE_CHECKING:
 
 class PackageSelectionController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, package_filter_edit: QLineEdit, conan_pkg_selected: SignalInstance,
-                 base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: QWidget, view: QTreeView, package_filter_edit: QLineEdit, 
+                 conan_pkg_selected: SignalInstance, base_signals: "BaseSignals", 
+                 page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
@@ -165,17 +167,16 @@ class PackageSelectionController(QObject):
         self._conan_pkg_selected.emit(
             conan_refs[0], self.get_selected_conan_pkg_info(), source_items[0].type)
 
-    def refresh_pkg_selection_view(self, loading_dialog=True):
+    def refresh_pkg_selection_view(self):
         """
         Refresh all packages by reading it from local drive. Can take a while.
         """
+        if self._model:  # loads only at first init
+            return
         self._model = PkgSelectModel()
-        if loading_dialog:
-            self._loader.async_loading(
-                self._view, self._model.setup_model_data, (), self.finish_select_model_init, "Reading Packages")
-        else:
-            self._model.setup_model_data()
-            self.finish_select_model_init()
+        self._loader.async_loading(
+            self._view, self._model.setup_model_data, (),
+            self.finish_select_model_init, "Reading Packages")
 
     def finish_select_model_init(self):
         if self._model:
@@ -211,7 +212,7 @@ class PackageSelectionController(QObject):
     def select_local_package_from_ref(self, conan_ref: str, export=False) -> bool:
         """ Selects a reference:id pkg in the left pane and opens the file view """
         # change to this page and loads
-        self._page_widgets.get_button_by_type(type(self.parent())).click()  
+        self._page_widgets.get_button_by_type(type(self.parent())).click()
         self._loader.wait_for_finished()
         if not self._model:
             return False
@@ -277,5 +278,3 @@ class PackageSelectionController(QObject):
         Logger().debug(f"Selecting {view_index.data()} in Local Package Explorer")
 
         return True
-
-

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 try:
     from contextlib import chdir
 except ImportError:
-    from contextlib_chdir import chdir
+    from contextlib_chdir import chdir # type: ignore
 
 from conan_app_launcher import INVALID_PATH, user_save_path
 from conan_app_launcher.app.logger import Logger

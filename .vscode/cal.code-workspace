@@ -25,8 +25,7 @@
             "--capture=no", // print output
             "--no-cov", // no coverage while debugging
             // "-m conanv2"
-        ],
-        "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+        ], // ${workspaceFolder}/.venv/bin/python ${workspaceFolder}/.venv/Scripts/python.exe
         "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
         "python.terminal.activateEnvInCurrentTerminal": true,
         "python.terminal.activateEnvironment": true,
@@ -36,7 +35,8 @@
         "python.analysis.exclude": [
             "**/*_ui.py",
             ".venv",
-            "test"
+            "test",
+            "build"
         ],
         "python.analysis.autoImportCompletions": true,
         "python.analysis.inlayHints.functionReturnTypes": false,
@@ -70,5 +70,8 @@
             },
         ],
         "python.analysis.downloadStubs": true,
-    }
+        "[jsonc]": {
+            "editor.defaultFormatter": "vscode.json-language-features"
+        },
+    },
 }

@@ -62,7 +62,7 @@ DEBUG_LEVEL = int(os.getenv("CAL_DEBUG_LEVEL", "0"))
 
 # Conan version
 conan_pkg_info = distribution("conan")
-conan_version = conan_pkg_info.version
+conan_version: str = conan_pkg_info.version
 
 # Paths to find folders - points to the folder of this file
 # must be initialized later, otherwise setup.py can't parse this file
