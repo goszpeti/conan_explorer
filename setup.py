@@ -38,7 +38,7 @@ if conan_major_version == "2":
 REQUIRES = [
     conan_req_spec,  # MIT License
     "PySide6-Essentials>=6.3.0", # LGPLv3
-    "jsonschema>=3.2.0, <4",  # MIT License
+    "jsonschema>=3.2.0, <5",  # MIT License
     # compatibility
     'contextlib-chdir==1.0.2; python_version<"3.11"',  # BSD License (BSD-3-Clause)
     'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)
