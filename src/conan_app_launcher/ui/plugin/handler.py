@@ -61,7 +61,10 @@ class PluginHandler(QObject):
 
     def add_plugin(self, plugin_path: str):
         PluginFile.register(plugin_path)
-        self._load_plugins_from_file(plugin_path)
+        plugins = self._load_plugins_from_file(plugin_path)
+        for plugin in plugins:
+            self.load_plugin.emit(plugin)
+            plugin.load_signal.emit()
 
     def remove_plugin(self, plugin_path: str):
         PluginFile.unregister(plugin_path)
@@ -75,12 +78,16 @@ class PluginHandler(QObject):
         self._unload_plugin(plugin)
         self._load_plugin(plugin, reload=True)
 
-    def _load_plugins_from_file(self, plugin_path: str):
-        file_plugins = PluginFile.read(plugin_path)
-        for plugin in file_plugins:
-            self._load_plugin(plugin)
+    def _load_plugins_from_file(self, plugin_path: str) -> List [PluginInterfaceV1]:
+        file_plugin_descrs = PluginFile.read(plugin_path)
+        loaded_plugins = []
+        for plugin_descr in file_plugin_descrs:
+            loaded_plugins.append(self._load_plugin(plugin_descr))
+        return loaded_plugins
 
-    def _load_plugin(self, plugin: PluginDescription, reload=False) -> Optional[PluginInterfaceV1]:
+    def _load_plugin(self, plugin: PluginDescription, 
+                                        reload=False) -> Optional[PluginInterfaceV1]:
+        loaded_plugin = None
         if self.is_plugin_enabled(plugin):
             try:
                 import_path = Path(plugin.import_path)
@@ -97,12 +104,15 @@ class PluginHandler(QObject):
                 class_ = getattr(module_, plugin.plugin_class)
                 plugin_object: PluginInterfaceV1 = class_(
                     self.parent(), plugin, self._base_signals, self._page_widgets)
-                self._active_plugins.append(plugin_object)
+                loaded_plugin = plugin_object
             except Exception as e:
                 Logger().error(f"Can't load plugin {plugin.name}: {str(e)}")
         else:
             Logger().info(
-                f"Can't load plugin {plugin.name}. Conan version restriction {plugin.conan_versions} applies.")
+                f"Can't load plugin {plugin.name}."
+                f"Conan version restriction {plugin.conan_versions} applies.")
+        self._active_plugins.append(loaded_plugin)
+        return loaded_plugin
 
     def post_load_plugins(self):
         for plugin in self._active_plugins:

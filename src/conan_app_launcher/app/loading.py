@@ -8,11 +8,12 @@ from typing import Any, Callable, Optional, Tuple
 
 from conan_app_launcher import DEBUG_LEVEL, asset_path
 from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.app.system import str2bool
+
 from PySide6.QtCore import Qt, QObject, QThread, Signal, SignalInstance
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QProgressDialog, QPushButton, QWidget
 
-from conan_app_launcher.app.system import str2bool
 
 class Worker(QObject):
     """ Generic worker for Qt, which can call any function with args """

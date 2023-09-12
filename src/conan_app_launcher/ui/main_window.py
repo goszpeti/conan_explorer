@@ -178,12 +178,12 @@ class MainWindow(FluentWindow):
         
         self.loaded = True
 
+    def _load_plugins(self):
+        self._plugin_handler.load_all_plugins()
+
     def _load_job(self, config_source: str):
         self._plugin_handler.post_load_plugins()
         self._load_quicklaunch(config_source)
-
-    def _load_plugins(self):
-        self._plugin_handler.load_all_plugins()
 
     def _post_load_plugin(self, plugin_object: PluginInterfaceV1):
         try:

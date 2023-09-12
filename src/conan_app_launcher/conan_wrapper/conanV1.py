@@ -4,7 +4,6 @@ from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 from conan_app_launcher.app.system import delete_path
-
 from conan_app_launcher.app.typing import SignatureCheckMeta
 
 try:

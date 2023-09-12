@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, Optional
-from conan_app_launcher import AUTHOR, BUILT_IN_PLUGIN, DEBUG_LEVEL, __version__
+from conan_app_launcher import AUTHOR, BUILT_IN_PLUGIN, DEBUG_LEVEL
+from conan_app_launcher import base_path
+
 from PySide6.QtWidgets import QWidget, QFileDialog, QMessageBox
 from conan_app_launcher.ui.plugin import PluginDescription, PluginHandler, PluginInterfaceV1
 from conan_app_launcher.ui.views.plugins_manager.model import PluginModelItem
@@ -45,7 +47,8 @@ class PluginsPage(PluginInterfaceV1):
             return
         self._ui.path_label.setText(plugin.plugin_path)
         if plugin.data(1) == BUILT_IN_PLUGIN:
-            self.set_themed_icon(self._ui.remove_plugin_button, "icons/delete.svg", force_light_mode=True)
+            self.set_themed_icon(self._ui.remove_plugin_button, "icons/delete.svg", 
+                                 force_light_mode=True)
             self._ui.remove_plugin_button.setEnabled(False)
         else:
             self.set_themed_icon(self._ui.remove_plugin_button, "icons/delete.svg")
@@ -54,7 +57,7 @@ class PluginsPage(PluginInterfaceV1):
     def on_add(self):
         """ Open File dialog with filter for ini files, then load the plugin"""
         dialog = QFileDialog(parent=self, caption="Select Plugin description file",
-                             filter="Plugin files (*.ini)")
+                             filter="Plugin files (*.ini)", directory=str(base_path))
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             new_file = dialog.selectedFiles()[0]
@@ -71,7 +74,8 @@ class PluginsPage(PluginInterfaceV1):
         message_box = QMessageBox(parent=self)
         message_box.setWindowTitle("Remove plugin?")
         message_box.setText(f"Are you sure, you want to remove the plugin {selected_item.data(0)}?")
-        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setStandardButtons(QMessageBox.StandardButton.Yes | 
+                                       QMessageBox.StandardButton.No)
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:

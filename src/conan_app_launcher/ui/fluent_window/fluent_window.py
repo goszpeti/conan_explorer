@@ -118,11 +118,15 @@ class FluentWindow(QMainWindow, ThemedWidget):
         def remove_page_extras_by_name(self, name: str):
             """ Remove page but not the widget itself, in case it is managed 
             by another mechanism like plugins """
-            button, _, menu, _ = self._page_widgets.pop(gen_obj_name(name))
-            button.hide()
-            button.deleteLater()
-            if menu:
-                menu.deleteLater()
+            try:
+                button, _, menu, _ = self._page_widgets.pop(gen_obj_name(name))
+                button.hide()
+                button.deleteLater()
+                if menu:
+                    menu.deleteLater()
+            except Exception: # fail silently - nothing to remove
+                pass
+    
 
     def __init__(self, title_text: str = "", native_windows_fcns=True):
         QMainWindow.__init__(self)
