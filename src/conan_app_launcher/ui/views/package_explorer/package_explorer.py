@@ -12,7 +12,7 @@ from .sel_controller import PackageSelectionController
 from .sel_model import PkgSelectionType
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QKeySequence, QResizeEvent, QAction
+from PySide6.QtGui import QKeySequence, QResizeEvent, QAction, QShowEvent
 from PySide6.QtWidgets import (QWidget, QTabBar, QTreeView, QHBoxLayout, QFrame, 
                                QAbstractItemView, QAbstractScrollArea)
 
@@ -128,7 +128,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         if ctrl._model:
             self._ui.package_path_label.setText(ctrl._model.rootPath())
 
-    def showEvent(self, a0: "QShowEvent") -> None:
+    def showEvent(self, a0: QShowEvent) -> None:
         self._pkg_sel_ctrl.refresh_pkg_selection_view(force_update=False)  # only update the first time
         return super().showEvent(a0)
 
@@ -191,7 +191,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self.show_build_info_action.setVisible(True)
             self.show_conanfile_action.setVisible(True)
             self.install_ref_action.setVisible(True)
-            self.remove_ref_action.setVisible(False)
+            self.remove_ref_action.setVisible(True)
 
         self.select_cntx_menu.exec(self._ui.package_select_view.mapToGlobal(position))
 

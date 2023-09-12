@@ -103,8 +103,8 @@ class ConanWorker():
                         pkg_id, _ = self._conan_api.get_path_or_auto_install(
                             conan_ref, conan_options, update)
                     else:
-                        pkg_id, _ = self._conan_api.install_reference(
-                            conan_ref, conan_profile, conan_settings, conan_options, update)
+                        pkg_id, _ = self._conan_api.install_reference(conan_ref,
+                            conan_settings, conan_options, conan_profile, update)
             except Exception as e:
                 try:
                     self._conan_install_queue.task_done()

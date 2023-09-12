@@ -355,7 +355,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         self.info_cache.update_remote_package_list(res_list)
         return res_list
 
-    def get_remote_pkgs_from_ref(self, conan_ref: ConanRef, remote: Optional[str], query=None) -> List[ConanPkg]:
+    def get_remote_pkgs_from_ref(self, conan_ref: ConanRef, remote: Optional[str], 
+                                 query=None) -> List[ConanPkg]:
         found_pkgs: List[ConanPkg] = []
         try:
             from conan.api.model import ListPattern
@@ -366,8 +367,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                 for remote_obj in self.get_remotes():
                     if remote_obj.name == remote:
                         break
-            search_results = self._conan.list.select(
-                pattern, remote=remote_obj, package_query=query)
+            search_results = self._conan.list.select(pattern, remote=remote_obj, 
+                                                     package_query=query)
             if search_results:
                 latest_rev = self._conan.list.latest_recipe_revision(
                     conan_ref, remote_obj)
