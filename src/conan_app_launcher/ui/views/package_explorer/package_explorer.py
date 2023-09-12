@@ -129,7 +129,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self._ui.package_path_label.setText(ctrl._model.rootPath())
 
     def showEvent(self, a0: "QShowEvent") -> None:
-        self._pkg_sel_ctrl.refresh_pkg_selection_view()  # only update the first time
+        self._pkg_sel_ctrl.refresh_pkg_selection_view(force_update=False)  # only update the first time
         return super().showEvent(a0)
 
     def resizeEvent(self, a0: QResizeEvent) -> None:

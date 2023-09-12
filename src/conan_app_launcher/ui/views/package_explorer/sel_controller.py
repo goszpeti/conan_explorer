@@ -167,11 +167,11 @@ class PackageSelectionController(QObject):
         self._conan_pkg_selected.emit(
             conan_refs[0], self.get_selected_conan_pkg_info(), source_items[0].type)
 
-    def refresh_pkg_selection_view(self):
+    def refresh_pkg_selection_view(self, force_update=True):
         """
         Refresh all packages by reading it from local drive. Can take a while.
         """
-        if self._model:  # loads only at first init
+        if self._model and not force_update:  # loads only at first init
             return
         self._model = PkgSelectModel()
         self._loader.async_loading(
