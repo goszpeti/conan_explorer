@@ -1,9 +1,14 @@
 from __future__ import annotations
 
-from pathlib import Path
+import os
 import pprint
+
+from contextlib import redirect_stderr, redirect_stdout
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
 from conan_app_launcher import conan_version
+
 if TYPE_CHECKING:
     from typing import TypedDict, TypeAlias, Literal
 else:
@@ -11,6 +16,7 @@ else:
         from typing import Literal, TypedDict, Protocol, TypeAlias
     except ImportError:
         from typing_extensions import Literal, TypedDict, Protocol, TypeAlias
+
 
 if conan_version.startswith("1"):
     from conans.model.ref import ConanFileReference, PackageReference # type: ignore
@@ -46,7 +52,12 @@ elif conan_version.startswith("2"):
         def loads(text: str, validate=True) -> ConanRef:
             ref: ConanRef = ConanFileRef().loads(text) # type: ignore
             if validate:
-                ref.validate_ref(allow_uppercase=True)
+                # validate_ref creates an own output stream which can't log to console
+                # if it is running as a gui application
+                devnull = open(os.devnull, 'w')
+                with redirect_stdout(devnull):
+                    with redirect_stderr(devnull):
+                        ref.validate_ref(allow_uppercase=True)
             return ref
         
 
