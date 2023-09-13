@@ -10,12 +10,13 @@ from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
 from conan_app_launcher.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_icon, get_asset_image_path
-from conan_app_launcher.ui.config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.conan_wrapper.types import ConanRef
 
 # from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import QAbstractListModel, QModelIndex, QPersistentModelIndex, Qt, QObject
+
+from .config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 
 
 class UiAppGridModel(UiAppGridConfig, QObject):

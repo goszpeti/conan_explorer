@@ -12,11 +12,12 @@ from typing import Callable
 import pytest
 from pytest_mock import MockerFixture
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, GUI_STYLE_MATERIAL
+from conan_app_launcher.ui.views.app_grid.config import UiAppGridConfig, UiTabConfig
+from conan_app_launcher.ui.views.app_grid.config.model import UiApplicationModel
 from test.conftest import TEST_REF, PathSetup, check_if_process_running, conan_install_ref
 
 import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.ui.config import UiAppGridConfig, UiTabConfig
-from conan_app_launcher.ui.model import UiApplicationModel
+
 from conan_app_launcher.ui.views.app_grid.app_link import ListAppLink, ListAppLink
 from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
     AppEditDialog

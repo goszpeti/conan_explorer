@@ -9,7 +9,7 @@ from conan_app_launcher.app.system import (calc_paste_same_dir_name, open_in_fil
                                            copy_path_with_overwrite, delete_path, execute_cmd,  open_cmd_in_path, run_file)
 from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
 from conan_app_launcher.ui.common import re_register_signal
-from conan_app_launcher.ui.config import UiAppLinkConfig
+from conan_app_launcher.ui.views.app_grid import UiAppLinkConfig
 from conan_app_launcher.ui.views import AppGridView
 from PySide6.QtCore import (QMimeData, QModelIndex, QObject,
                             Qt, QUrl, SignalInstance)

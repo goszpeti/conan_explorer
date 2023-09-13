@@ -4,7 +4,7 @@ import tempfile
 from shutil import copyfile
 from pathlib import Path
 
-from conan_app_launcher.ui.config.json_file import JsonUiConfig
+from conan_app_launcher.ui.views.app_grid.config.json_file import JsonUiConfig
 from conan_app_launcher.conan_wrapper.types import ConanRef
 from test.conftest import PathSetup
 

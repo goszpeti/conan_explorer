@@ -7,7 +7,6 @@ from conan_app_launcher.app.logger import Logger
 # using global module pattern
 from conan_app_launcher.ui.common import get_themed_asset_icon
 from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE  # using global module pattern
-from conan_app_launcher.ui.config import UiAppLinkConfig, UiTabConfig
 from conan_app_launcher.ui.fluent_window import FluentWindow
 from conan_app_launcher.ui.plugin import PluginInterfaceV1
 from conan_app_launcher.ui.plugin.types import PluginDescription
@@ -19,6 +18,7 @@ from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget, QFileDialog, QVBoxLayout)
 
 from .model import UiAppLinkModel, UiTabModel
+from .config import UiAppLinkConfig, UiTabConfig
 from .tab import TabList, TabList  # TabGrid
 
 if TYPE_CHECKING:

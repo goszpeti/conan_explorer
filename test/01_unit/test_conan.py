@@ -1,5 +1,6 @@
 import os
 import platform
+from pprint import pprint
 import tempfile
 import time
 from pathlib import Path
@@ -9,7 +10,7 @@ from test.conftest import TEST_REF, conan_install_ref, conan_remove_ref
 from typing import List
 
 from conan_app_launcher.conan_wrapper import ConanApi
-from conan_app_launcher.conan_wrapper.types import create_key_value_pair_list
+from conan_app_launcher.conan_wrapper.types import ConanPkg, create_key_value_pair_list
 from conan_app_launcher.conan_wrapper.conan_worker import (ConanWorker,
                                                            ConanWorkerElement)
 from conan_app_launcher.conan_wrapper.conan_cleanup import ConanCleanup
@@ -86,7 +87,8 @@ def test_conan_find_remote_pkg(base_fixture):
     conan = ConanApi().init_api()
     default_settings = conan.get_default_settings()
 
-    pkgs = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"shared": "True"})
+    pkgs = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF), 
+                                                        {"shared": "True"})
     assert len(pkgs) > 0
     pkg = pkgs[0]
     assert {"shared": "True"}.items() <= pkg["options"].items()
@@ -105,7 +107,8 @@ def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     conan_remove_ref(TEST_REF)
     conan = ConanApi().init_api()
-    pkg = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF),  {"BogusOption": "True"})
+    pkg = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF),  
+                                                      {"BogusOption": "True"})
     assert not pkg
 
 @pytest.mark.conanv2
@@ -257,3 +260,22 @@ def test_conan_worker(base_fixture, mocker):
     mock_func.assert_called()
 
     assert conan_worker._conan_install_queue.qsize() == 0
+
+def test_conan_diff(base_fixture):
+    conan = ConanApi()
+    conan.init_api()
+    available_refs = conan.get_remote_pkgs_from_ref(ConanRef.loads(TEST_REF), None)
+    wanted_ref = { # add default options
+        'id': '', 'options': {"shared": "False", "variant": "var1", "fPIC2": "True"},
+        'settings': {'arch_build': 'x86_64', 'os_build': 'Linux', "build_type": "Release"},
+        'requires': [], 'outdated': False}
+    pkg_diff = []
+    from deepdiff import DeepDiff, Delta
+    from dictdiffer import diff
+    for remote_ref in available_refs:
+        opt_diff = diff(remote_ref.get("options", {}), wanted_ref.get("options", {}))
+                            #ignore_type_subclasses=True)
+        settings_diff = diff(remote_ref.get("settings", {}), wanted_ref.get("settings", {}))
+        pkg_diff.append({"options": opt_diff, "settings": settings_diff})
+    pprint(pkg_diff)
+    # Delta(pkg_diff)

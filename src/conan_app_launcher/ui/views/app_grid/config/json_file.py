@@ -44,10 +44,10 @@ class JsonUiConfig(UiConfigInterface, metaclass=SignatureCheckMeta):
 
         # create file, if not available for first start
         if not self._json_file_path.exists():
-            Logger().info('UiConfig: Creating json file')
+            Logger().info("Quicklaunch: Creating json file")
             self._json_file_path.touch()
         else:
-            Logger().info(f'UiConfig: Using {self._json_file_path}')
+            Logger().info(f"Quicklaunch: Using {self._json_file_path}")
 
     @classmethod
     def get_file_ext(cls):
@@ -79,7 +79,7 @@ class JsonUiConfig(UiConfigInterface, metaclass=SignatureCheckMeta):
     def load(self) -> UiConfig:
         """ Parse the json config file, validate and convert to object structure """
         json_app_config: JsonAppConfig = {"version": "0.0.0", "tabs": []}
-        Logger().debug(f"UiConfig: Loading file '{self._json_file_path}'...")
+        Logger().debug(f"Quicklaunch: Loading file '{self._json_file_path}'...")
 
         with open(asset_path / "config_schema.json") as schema_file:
             json_schema = json.load(schema_file)
@@ -91,7 +91,7 @@ class JsonUiConfig(UiConfigInterface, metaclass=SignatureCheckMeta):
                     json_app_config = json.load(fp)
                     jsonschema.validate(instance=json_app_config, schema=json_schema)
                 except Exception as e:
-                    Logger().error(f"UiConfig: Failed validating:\n{str(e)}")
+                    Logger().error(f"Quicklaunch: Failed validating:\n{str(e)}")
                     return UiConfig()
 
         # implement subsequent migration functions

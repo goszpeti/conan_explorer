@@ -4,14 +4,14 @@ import tempfile
 from pathlib import Path
 import pytest
 from conan_app_launcher.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
+from conan_app_launcher.ui.views.app_grid.config import UiAppLinkConfig
+from conan_app_launcher.ui.views.app_grid.config.json_file import JsonUiConfig
 from test.conftest import TEST_REF, app_qt_fixture
 
 import conan_app_launcher.app as app
 from conan_app_launcher.settings import *
 from conan_app_launcher.settings.ini_file import IniSettings
 from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.config import UiAppLinkConfig
-from conan_app_launcher.ui.config.json_file import JsonUiConfig
 from conan_app_launcher.ui.views.app_grid.model import UiAppLinkModel
 from conan_app_launcher.ui.views.app_grid.tab import (AppEditDialog, ListAppLink)
 from conan_app_launcher.conan_wrapper.types import ConanRef

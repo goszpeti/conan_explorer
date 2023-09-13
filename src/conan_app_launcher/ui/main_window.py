@@ -24,7 +24,7 @@ from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
 
 from .common import activate_theme, init_qt_logger, remove_qt_logger
 from .fluent_window import FluentWindow, SideSubMenu
-from .model import UiApplicationModel
+from .views.app_grid.config.model import UiApplicationModel
 from .plugin import PluginInterfaceV1
 from .views import AboutPage, AppGridView, PluginsPage
 
