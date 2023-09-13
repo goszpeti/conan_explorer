@@ -474,6 +474,9 @@ QTextBrowser{
     background-color: #474747;
     font-family: {{CONSOLE_FONT_FAMILY}};
     font-size: {{MAIN_FONT_SIZE - 2}}pt;
+    selection-color: #FFFFFF;
+    selection-background-color: #6699CC;
+    border-bottom-right-radius: 7px;
 }
 
 QTextBrowser#console{ 
