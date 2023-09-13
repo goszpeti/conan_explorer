@@ -261,21 +261,19 @@ def test_conan_worker(base_fixture, mocker):
 
     assert conan_worker._conan_install_queue.qsize() == 0
 
-def test_conan_diff(base_fixture):
-    conan = ConanApi()
-    conan.init_api()
-    available_refs = conan.get_remote_pkgs_from_ref(ConanRef.loads(TEST_REF), None)
-    wanted_ref = { # add default options
-        'id': '', 'options': {"shared": "False", "variant": "var1", "fPIC2": "True"},
-        'settings': {'arch_build': 'x86_64', 'os_build': 'Linux', "build_type": "Release"},
-        'requires': [], 'outdated': False}
-    pkg_diff = []
-    from deepdiff import DeepDiff, Delta
-    from dictdiffer import diff
-    for remote_ref in available_refs:
-        opt_diff = diff(remote_ref.get("options", {}), wanted_ref.get("options", {}))
-                            #ignore_type_subclasses=True)
-        settings_diff = diff(remote_ref.get("settings", {}), wanted_ref.get("settings", {}))
-        pkg_diff.append({"options": opt_diff, "settings": settings_diff})
-    pprint(pkg_diff)
-    # Delta(pkg_diff)
+# def test_conan_diff(base_fixture):
+#     conan = ConanApi()
+#     conan.init_api()
+#     available_refs = conan.get_remote_pkgs_from_ref(ConanRef.loads(TEST_REF), None)
+#     wanted_ref = { # add default options
+#         'id': '', 'options': {"shared": "False", "variant": "var1", "fPIC2": "True"},
+#         'settings': {'arch_build': 'x86_64', 'os_build': 'Linux', "build_type": "Release"},
+#         'requires': [], 'outdated': False}
+#     pkg_diff = []
+#     from dictdiffer import diff
+#     for remote_ref in available_refs:
+#         opt_diff = diff(remote_ref.get("options", {}), wanted_ref.get("options", {}))
+#                             #ignore_type_subclasses=True)
+#         settings_diff = diff(remote_ref.get("settings", {}), wanted_ref.get("settings", {}))
+#         pkg_diff.append({"options": opt_diff, "settings": settings_diff})
+#     pprint(pkg_diff)
