@@ -27,7 +27,7 @@ jobs:
             "ubuntu-py39",
             "ubuntu-py310",
             "windows-py311",
-            "ubuntu-conan1.24-py38",
+            "ubuntu-conan1.48-py38",
             "ubuntu-conan2-py311",
             "windows-conan2-py311",
           ]
@@ -52,10 +52,10 @@ jobs:
             os: windows-latest
             conan: "<2"
             pytest_args: ""
-          - name: "ubuntu-conan1.24-py38"
+          - name: "ubuntu-conan1.48-py38"
             python: "3.8"
             os: ubuntu-20.04
-            conan: "==1.24.0"
+            conan: "==1.48.0"
             pytest_args: ""
           - name: "ubuntu-conan2-py311"
             python: "3.11"
