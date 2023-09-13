@@ -68,6 +68,12 @@ class ConanRemoteController():
     def move_down(self):
         self._remote_reorder_controller.move_down()
 
+    def move_to_top(self):
+        self._remote_reorder_controller.move_to_position(0)
+
+    def move_to_bottom(self):
+        self._remote_reorder_controller.move_to_position(-1)
+
     def remote_disable(self, model_index):
         remote_item = self.get_selected_remote()
         if not remote_item:

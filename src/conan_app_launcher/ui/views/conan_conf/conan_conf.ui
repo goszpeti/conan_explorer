@@ -32,7 +32,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="info_widget">
       <property name="styleSheet">
@@ -317,6 +317,13 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="remote_move_top_button">
+               <property name="text">
+                <string>Move to Top</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="remote_move_up_button">
                <property name="text">
                 <string>Move Up</string>
@@ -331,28 +338,35 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="remote_login">
+              <widget class="QPushButton" name="remote_move_bottom_button">
+               <property name="text">
+                <string>Move to Bottom</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="remote_login_button">
                <property name="text">
                 <string>(Multi)Login</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="remote_toggle_disabled">
+              <widget class="QPushButton" name="remote_toggle_disabled_button">
                <property name="text">
                 <string>Enable/Disable</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="remote_add">
+              <widget class="QPushButton" name="remote_add_button">
                <property name="text">
                 <string>Add</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="remote_remove">
+              <widget class="QPushButton" name="remote_remove_button">
                <property name="text">
                 <string>Remove</string>
                </property>
@@ -399,24 +413,49 @@
       <attribute name="title">
        <string>Profiles</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_5">
+      <layout class="QVBoxLayout" name="verticalLayout_11">
        <item>
-        <layout class="QGridLayout" name="profiles_layout">
+        <layout class="QGridLayout" name="gridLayout_6">
          <item row="0" column="0">
-          <widget class="QListView" name="profiles_list_view">
-           <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
+          <widget class="QSplitter" name="splitter">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="movement">
-            <enum>QListView::Free</enum>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
            </property>
-           <property name="uniformItemSizes">
-            <bool>true</bool>
-           </property>
+           <widget class="QListView" name="profiles_list_view">
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="movement">
+             <enum>QListView::Free</enum>
+            </property>
+            <property name="uniformItemSizes">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="PlainTextPasteBrowser" name="profiles_text_browser">
+            <property name="undoRedoEnabled">
+             <bool>true</bool>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
+            </property>
+           </widget>
           </widget>
          </item>
-         <item row="0" column="1" rowspan="2">
+         <item row="0" column="1">
           <widget class="QFrame" name="profiles_buttons_frame">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="styleSheet">
             <string notr="true">QPushButton {Text-align:left}</string>
            </property>
@@ -484,16 +523,6 @@
            </layout>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="PlainTextPasteBrowser" name="profiles_text_browser">
-           <property name="undoRedoEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="readOnly">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
       </layout>
@@ -502,66 +531,84 @@
       <attribute name="title">
        <string>Editables</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_10">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
-        <widget class="PlainTextPasteBrowser" name="editables_file_text_browser">
-         <property name="tabChangesFocus">
-          <bool>false</bool>
-         </property>
-         <property name="undoRedoEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="editables_btns_frame">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QPushButton" name="editables_save_button">
-            <property name="text">
-             <string>Save</string>
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="0" column="0">
+          <widget class="QSplitter" name="splitter_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <widget class="QTreeView" name="treeView"/>
+           <widget class="QTreeView" name="treeView_2"/>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QFrame" name="frame">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <property name="leftMargin">
+             <number>0</number>
             </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="editables_btns_spacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+            <property name="rightMargin">
+             <number>0</number>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
+            <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_2">
+              <property name="text">
+               <string>Remove</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_3">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_4">
+              <property name="text">
+               <string>PushButton</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

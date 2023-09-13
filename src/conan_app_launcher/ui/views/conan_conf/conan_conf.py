@@ -63,8 +63,8 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.profiles_text_browser.document(), "ini")
         self._settings_highlighter = ConfigHighlighter(
             self._ui.settings_file_text_browser.document(), "yaml")
-        self._editable_highlighter = ConfigHighlighter(
-            self._ui.editables_file_text_browser.document(), "yaml")
+        # self._editable_highlighter = ConfigHighlighter(
+        #     self._ui.editables_file_text_browser.document(), "yaml")
 
     def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(conan_version)
@@ -123,13 +123,14 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
 
     def _load_editables_tab(self):
-        self.set_themed_icon(self._ui.editables_save_button, "icons/save.svg")
+        # self.set_themed_icon(self._ui.editables_save_button, "icons/save.svg")
         try:
-            json_content = json.loads(
-                Path(app.conan_api.get_editables_file_path()).read_text())
-            self._ui.editables_file_text_browser.setText(
-                json.dumps(json_content, indent=2, separators=(',', ': ')))
-            self._ui.editables_save_button.clicked.connect(self.on_save_editable_file)
+            pass
+            # json_content = json.loads(
+            #     Path(app.conan_api.get_editables_file_path()).read_text())
+            # self._ui.editables_file_text_browser.setText(
+            #     json.dumps(json_content, indent=2, separators=(',', ': ')))
+            # self._ui.editables_save_button.clicked.connect(self.on_save_editable_file)
         except Exception:
             Logger().error("Cannot read editables file!")
 
@@ -159,8 +160,8 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.profiles_text_browser.document(), "ini")
         self._settings_highlighter = ConfigHighlighter(
             self._ui.settings_file_text_browser.document(), "yaml")
-        self._editable_highlighter = ConfigHighlighter(
-            self._ui.editables_file_text_browser.document(), "yaml")
+        # self._editable_highlighter = ConfigHighlighter(
+        #     self._ui.editables_file_text_browser.document(), "yaml")
 
 # Profile
 
@@ -250,19 +251,27 @@ class ConanConfigView(PluginInterfaceV1):
     def _init_remotes_tab(self):
         self._ui.remote_refresh_button.clicked.connect(self._remotes_controller.update)
         self.set_themed_icon(self._ui.remote_refresh_button, "icons/refresh.svg")
-        self._ui.remote_login.clicked.connect(self.on_remotes_login)
-        self.set_themed_icon(self._ui.remote_login, "icons/login.svg")
-        self._ui.remote_toggle_disabled.clicked.connect(self.on_remote_disable)
-        self.set_themed_icon(self._ui.remote_toggle_disabled, "icons/hide.svg")
-        self._ui.remote_add.clicked.connect(self.on_remote_add)
-        self.set_themed_icon(self._ui.remote_add, "icons/plus_rounded.svg")
-        self._ui.remote_remove.clicked.connect(self.on_remote_remove)
-        self.set_themed_icon(self._ui.remote_remove, "icons/delete.svg")
+        self._ui.remote_login_button.clicked.connect(self.on_remotes_login)
+        self.set_themed_icon(self._ui.remote_login_button, "icons/login.svg")
+        self._ui.remote_toggle_disabled_button.clicked.connect(self.on_remote_disable)
+        self.set_themed_icon(self._ui.remote_toggle_disabled_button, "icons/hide.svg")
+        self._ui.remote_add_button.clicked.connect(self.on_remote_add)
+        self.set_themed_icon(self._ui.remote_add_button, "icons/plus_rounded.svg")
+        self._ui.remote_remove_button.clicked.connect(self.on_remote_remove)
+        self.set_themed_icon(self._ui.remote_remove_button, "icons/delete.svg")
+
         self._ui.remote_move_up_button.clicked.connect(self._remotes_controller.move_up)
         self.set_themed_icon(self._ui.remote_move_up_button, "icons/arrow_up.svg")
         self._ui.remote_move_down_button.clicked.connect(
             self._remotes_controller.move_down)
         self.set_themed_icon(self._ui.remote_move_down_button, "icons/arrow_down.svg")
+
+        self._ui.remote_move_top_button.clicked.connect(
+            self._remotes_controller.move_to_top)
+        self.set_themed_icon(self._ui.remote_move_top_button, "icons/expand_less.svg")
+        self._ui.remote_move_bottom_button.clicked.connect(
+            self._remotes_controller.move_to_bottom)
+        self.set_themed_icon(self._ui.remote_move_bottom_button, "icons/expand.svg")
 
         self._ui.remotes_tree_view.doubleClicked.connect(self.on_remote_edit)
         self._ui.remotes_tree_view.setContextMenuPolicy(
@@ -376,5 +385,6 @@ class ConanConfigView(PluginInterfaceV1):
 # Editables tab
 
     def on_save_editable_file(self):
-        app.conan_api.get_editables_file_path().write_text(
-            self._ui.editables_file_text_browser.toPlainText())
+        pass
+        # app.conan_api.get_editables_file_path().write_text(
+        #     self._ui.editables_file_text_browser.toPlainText())
