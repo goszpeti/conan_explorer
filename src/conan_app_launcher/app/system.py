@@ -61,12 +61,9 @@ def open_in_file_manager(file_path: Path):
             return subprocess.Popen(("xdg-open", str(dir_to_view)))
         elif platform.system() == "Windows":
             # select switch for highlighting
-            creationflags = 0
-            from packaging import version
-            if version.parse(platform.python_version()) >= version.parse("3.7.0"):
-                creationflags = subprocess.CREATE_NO_WINDOW  # available since 3.7
+            creationflags = subprocess.CREATE_NO_WINDOW  # available since 3.7
             return subprocess.Popen("explorer /select," + str(file_path),
-                                    creationflags=creationflags)
+                                                    creationflags=creationflags)
     except Exception as e:
         Logger().error(f"Can't show path in file-manager: {str(e)}")
 
@@ -190,7 +187,6 @@ def delete_path(dst: Path):
     """
     Delete file or (non-empty) folder recursively.
     Exceptions will be caught and message logged to stdout.
-    TODO: Could be rempved, after Python 3.7 is deprecated (use Path.unlink)
     """
     from shutil import rmtree
     try:
@@ -214,12 +210,7 @@ def copy_path_with_overwrite(src: Path, dst: Path):
         if src.is_file():
             copy2(str(src), str(dst))
         else:
-            # 3.7 has no dirs_exist_ok
-            if platform.python_version_tuple()[1] == "7":
-                from distutils.dir_util import copy_tree
-                copy_tree(str(src), str(dst))
-            else:
-                copytree(str(src), str(dst), dirs_exist_ok=True)
+            copytree(str(src), str(dst), dirs_exist_ok=True)
     except Exception as e:
         Logger().warning(f"Can't copy {str(src)} to {str(dst)}: {str(e)}")
 

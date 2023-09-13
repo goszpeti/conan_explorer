@@ -19,7 +19,7 @@ VERSION = "0.1.0"
 DESCRIPTION = "Example Plugin"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
-PYTHON_REQUIRES = ">=3.7.0"
+PYTHON_REQUIRES = ">=3.8.0"
 
 # What packages are required for this module to be executed?
 REQUIRES = [

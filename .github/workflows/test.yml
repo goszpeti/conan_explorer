@@ -23,7 +23,6 @@ jobs:
       matrix:
         name:
           [
-            "ubuntu-py37",
             "ubuntu-py38",
             "ubuntu-py39",
             "ubuntu-py310",
@@ -33,11 +32,6 @@ jobs:
             "windows-conan2-py311",
           ]
         include:
-          - name: "ubuntu-py37"
-            python: "3.7"
-            os: ubuntu-20.04
-            conan: "<2"
-            pytest_args: ""
           - name: "ubuntu-py38"
             python: "3.8"
             os: ubuntu-20.04

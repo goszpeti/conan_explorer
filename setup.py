@@ -27,7 +27,7 @@ VERSION = "2.2.0"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
-PYTHON_REQUIRES = ">=3.7.0"
+PYTHON_REQUIRES = ">=3.8.0"
 
 # What packages are required for this module to be executed?
 conan_req_spec = "conan>=1.24, <2.1"
@@ -41,7 +41,6 @@ REQUIRES = [
     "jsonschema>=3.2.0, <5",  # MIT License
     # compatibility
     'contextlib-chdir==1.0.2; python_version<"3.11"',  # BSD License (BSD-3-Clause)
-    'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)
     'typing-extensions>=3.10.0.2, <5; python_version<="3.10"',  # Python Software Foundation License(PSF)
     "packaging",  # use the built-in, or get latest if there is some issue with pip
     # transitive compatibility
@@ -122,11 +121,11 @@ setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        # "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: Implementation :: CPython",
         "Environment :: X11 Applications :: Qt",
         "Environment :: Win32 (MS Windows)"

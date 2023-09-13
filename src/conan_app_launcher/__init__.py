@@ -5,10 +5,7 @@ No imports from own modules allowed! This is done to resolve circular dependenci
 import os
 import shutil
 import platform
-try:  # from Python 3.8
-    from importlib.metadata import distribution, PackageNotFoundError
-except ImportError:
-    from importlib_metadata import distribution, PackageNotFoundError  # type: ignore
+from importlib.metadata import distribution, PackageNotFoundError
 from pathlib import Path
 from typing import TypeVar
 
