@@ -63,7 +63,7 @@ def open_in_file_manager(file_path: Path):
             # select switch for highlighting
             creationflags = subprocess.CREATE_NO_WINDOW  # available since 3.7
             return subprocess.Popen("explorer /select," + str(file_path),
-                                                    creationflags=creationflags)
+                                    creationflags=creationflags)
     except Exception as e:
         Logger().error(f"Can't show path in file-manager: {str(e)}")
 
@@ -113,7 +113,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     return 0
 
 
-def execute_cmd(cmd: List[str], is_console_app: bool) -> int: # pid
+def execute_cmd(cmd: List[str], is_console_app: bool) -> int:  # pid
     """ Generic process execute method. Returns pid. """
     command_path = Path(cmd[0]).parent
     try:
@@ -129,9 +129,9 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int: # pid
             return proc.pid
         elif platform.system() == "Linux":
             if is_console_app:
-            # Sadly, there is no default way to do this, because of the miriad terminal
-            # emulators available. Use the default distro emulator through x-terminal-emulator
-            # This works only on debian distros.
+                # Sadly, there is no default way to do this, because of the miriad terminal
+                # emulators available. Use the default distro emulator through x-terminal-emulator
+                # This works only on debian distros.
                 cmd = ["x-terminal-emulator", "-e"] + [generate_launch_script(cmd)]
             proc = subprocess.Popen(cmd, cwd=str(command_path))
             return proc.pid
@@ -272,3 +272,12 @@ def find_program_in_windows(app_name: str, partial_match=False, key_to_find="Ins
             finally:
                 sub_key.Close()
     return ""
+
+
+def check_for_wayland() -> bool:
+    if platform.system() != "Linux":
+        return False
+    if os.getenv("XDG_SESSION_TYPE", "").lower() == "wayland" or os.getenv("WAYLAND_DISPLAY"):
+        Logger().debug("Found XDG_SESSION_TYPE==wayland or WAYLAND_DISPLAY")
+        return True
+    return False

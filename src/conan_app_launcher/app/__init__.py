@@ -3,6 +3,7 @@ import platform
 import sys
 from tempfile import gettempdir
 from typing import TYPE_CHECKING
+from conan_app_launcher.app.system import check_for_wayland
 
 from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsInterface, settings_factory
 from conan_app_launcher import (APP_NAME, SETTINGS_FILE_NAME, __version__, asset_path,
@@ -82,6 +83,10 @@ def load_qapp():
             QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     except Exception:
         Logger().debug("Can't set DPI Rounding")
+
+    if check_for_wayland(): # enable native Wayland support
+        os.environ["QT_QPA_PLATFORM"] = "wayland"
+
     qt_app = QtWidgets.QApplication([])
     qt_app.setApplicationName(APP_NAME)
     qt_app.setApplicationDisplayName(APP_NAME + " " + __version__)
