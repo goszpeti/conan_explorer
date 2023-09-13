@@ -103,7 +103,7 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 
 ### Main dependencies
 
-* Pyside6 >= 6.3.0
+* Pyside6 >= 6.4.0
 * 1.48.0 <= conan < 2.1
 
 > **Warning** - **Deprecation of Python 3.X**  
