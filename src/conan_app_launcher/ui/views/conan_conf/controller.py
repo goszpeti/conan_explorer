@@ -59,7 +59,7 @@ class ConanRemoteController():
         sel_model = self._view.selectionModel()
         for column in range(self._model.columnCount(QModelIndex())):
             index = self._model.index(row_remote_to_sel, column, QModelIndex())
-            sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
+            sel_model.select(index, command=QItemSelectionModel.SelectionFlag.Select)
         return True
 
     def move_up(self):

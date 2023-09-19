@@ -477,7 +477,7 @@ class Ui_Form(object):
         self.remote_move_top_button.setText(QCoreApplication.translate("Form", u"Move to Top", None))
         self.remote_move_up_button.setText(QCoreApplication.translate("Form", u"Move Up", None))
         self.remote_move_down_button.setText(QCoreApplication.translate("Form", u"Move Down", None))
-        self.remote_move_bottom_button.setText(QCoreApplication.translate("Form", u"Move to Last", None))
+        self.remote_move_bottom_button.setText(QCoreApplication.translate("Form", u"Move to Bottom", None))
         self.remote_login_button.setText(QCoreApplication.translate("Form", u"(Multi)Login", None))
         self.remote_toggle_disabled_button.setText(QCoreApplication.translate("Form", u"Enable/Disable", None))
         self.remote_add_button.setText(QCoreApplication.translate("Form", u"Add", None))

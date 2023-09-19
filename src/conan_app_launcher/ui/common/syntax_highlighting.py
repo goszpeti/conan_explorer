@@ -34,8 +34,8 @@ class ConfigHighlighter(QSyntaxHighlighter):
         # key value constants
         if type == "ini":
             self._separator = "="
-            self._key_regex = "(.*?)(?=\=)"
-            self._value_regex = "(?<=\=)(.*?)$"
+            self._key_regex = r"(.*?)(?=\=)"
+            self._value_regex = r"(?<=\=)(.*?)$"
         elif type == "yaml":
             self._separator = ":"
             self._key_regex ="(.*?)(?=:)"
@@ -58,11 +58,12 @@ class ConfigHighlighter(QSyntaxHighlighter):
             section_format = QTextCharFormat()
             section_format.setFontWeight(QFont.Weight.Bold)
             section_format.setForeground(QColor(self.section_color))
-            expression = QRegularExpression("\[(.*?)\]")
+            expression = QRegularExpression(r"\[(.*?)\]")
             i = expression.globalMatch(text)
             while i.hasNext():
                 match = i.next()
-                self.setFormat(match.capturedStart(), match.capturedLength(), section_format)
+                self.setFormat(match.capturedStart(), 
+                               match.capturedLength(), section_format)
         # key-values
         key_format = QTextCharFormat()
         key_format.setForeground(QColor(self.key_color))
@@ -73,8 +74,9 @@ class ConfigHighlighter(QSyntaxHighlighter):
         # comments
         comment_format = QTextCharFormat()
         comment_format.setForeground(QColor(self.comment_color))
-        expression = QRegularExpression("#(?:\s.*?)$")
+        expression = QRegularExpression(r"#(?:\s.*?)$")
         i = expression.globalMatch(text)
         while i.hasNext():
             match = i.next()
-            self.setFormat(match.capturedStart(), match.capturedLength(), comment_format)
+            self.setFormat(match.capturedStart(), 
+                           match.capturedLength(), comment_format)

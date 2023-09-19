@@ -1,4 +1,3 @@
-from email.policy import default
 from typing import Optional
 
 import conan_app_launcher.app as app
