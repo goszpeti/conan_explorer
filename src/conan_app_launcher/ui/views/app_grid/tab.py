@@ -45,11 +45,6 @@ class TabList(QWidget):
         # spacer for compressing app links, when hiding cboxes
         self.tab_layout.addItem(self._v_spacer)
 
-    # def resizeEvent(self, event):
-    #     for app_link in self.app_links:
-    #         app_link.resizeEvent(event)
-    #     super().resizeEvent(event)
-
     def open_app_link_add_dialog(self, new_model: Optional[UiAppLinkModel] =None):
         if not new_model:
             new_model = UiAppLinkModel()
@@ -126,15 +121,6 @@ class TabList(QWidget):
 
         self.tab_scroll_area.setWidget(self.tab_scroll_area_widgets)
         self.layout().addWidget(self.tab_scroll_area)
-
-    # def get_max_columns(self, offset=0):
-    #     if self._initialized:
-    #         width = self._parent_tab.width()
-    #         max_columns = int((width + offset) / (ListAppLink.max_width()))
-    #         if max_columns == 0:
-    #             max_columns = 1
-    #         return max_columns
-    #     return 1  # always enable one row
 
     def add_app_link_to_tab(self, app_link: ListAppLink):
         """ To be called from a child AppLink """

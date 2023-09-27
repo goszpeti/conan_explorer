@@ -63,6 +63,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             Logger().debug(str(e))
         from .conan_cache import ConanInfoCache
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
+        Logger().debug("Initialized Conan V1 API wrapper")
 
         return self
     

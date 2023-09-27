@@ -39,8 +39,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         from .conan_cache import ConanInfoCache
         self._conan = ConanAPI()
         self._client_cache = ClientCache(self._conan.cache_folder)
-        self.info_cache = ConanInfoCache(
-            user_save_path, self.get_all_local_refs())
+        self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
+        Logger().debug("Initialized Conan V2 API wrapper")
         return self
 
     ### General commands ###
@@ -58,8 +58,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                 self._client_cache).load_profile(profile_name)
             return profile.settings
         except Exception as e:
-            Logger().error(
-                f"Can't get profile {profile_name} settings: {str(e)}")
+            Logger().error(f"Can't get profile {profile_name} settings: {str(e)}")
         return {}
 
     def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> Path:
