@@ -33,7 +33,7 @@ class Ui_Form(object):
         self.verticalLayout.setContentsMargins(1, 2, 2, 2)
         self.config_tab_widget = QTabWidget(Form)
         self.config_tab_widget.setObjectName(u"config_tab_widget")
-        self.config_tab_widget.setStyleSheet(u"")
+        self.config_tab_widget.setStyleSheet(u"QPushButton {Text-align:left}")
         self.info_widget = QWidget()
         self.info_widget.setObjectName(u"info_widget")
         self.info_widget.setStyleSheet(u"")
@@ -364,6 +364,7 @@ class Ui_Form(object):
 
         self.editables_button_frame = QFrame(self.editables)
         self.editables_button_frame.setObjectName(u"editables_button_frame")
+        self.editables_button_frame.setStyleSheet(u"QPushButton {Text-align:left}")
         self.editables_button_frame.setFrameShape(QFrame.StyledPanel)
         self.editables_button_frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout_10 = QVBoxLayout(self.editables_button_frame)

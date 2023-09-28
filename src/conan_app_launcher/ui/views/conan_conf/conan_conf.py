@@ -131,6 +131,13 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.editables_ref_view.resizeColumnToContents(2)
         self._ui.editables_ref_view.resizeColumnToContents(1)
         self._ui.editables_ref_view.resizeColumnToContents(0)
+
+        self._ui.editables_add_button.clicked.connect(self._remotes_controller.move_to_bottom)
+        self.set_themed_icon(self._ui.editables_add_button, "icons/plus_rounded.svg")
+        self.set_themed_icon(self._ui.editables_remove_button, "icons/delete.svg")
+        self.set_themed_icon(self._ui.editables_refresh_button, "icons/refresh.svg")
+        self.set_themed_icon(self._ui.editables_edit_button, "icons/edit.svg")
+
         # self.set_themed_icon(self._ui.editables_save_button, "icons/save.svg")
         try:
             pass
@@ -281,7 +288,10 @@ class ConanConfigView(PluginInterfaceV1):
             self._remotes_controller.move_to_bottom)
         self.set_themed_icon(self._ui.remote_move_bottom_button, "icons/expand.svg")
 
+        self._ui.remotes_edit_button.clicked.connect(self.on_remote_edit)
+        self.set_themed_icon(self._ui.remotes_edit_button, "icons/edit.svg")
         self._ui.remotes_tree_view.doubleClicked.connect(self.on_remote_edit)
+
         self._ui.remotes_tree_view.setContextMenuPolicy(
             Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.remotes_tree_view.customContextMenuRequested.connect(
