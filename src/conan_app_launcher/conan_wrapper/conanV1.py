@@ -1,5 +1,7 @@
 import os
 import platform
+
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
@@ -259,12 +261,16 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         if profile:
             profile_names = [profile]
         try:
-            infos = self._conan.install_reference(
-                conan_ref, settings=settings_list, options=options_list, update=update,
-                profile_names=profile_names, generators=generators)
+            # Try to redirect custom streams in conanfile, to avoid missing flush method
+            devnull = open(os.devnull, 'w')
+            with redirect_stdout(devnull):
+                with redirect_stderr(devnull):
+                    infos = self._conan.install_reference(conan_ref, 
+                        settings=settings_list, options=options_list, update=update,
+                        profile_names=profile_names, generators=generators)
             if not infos.get("error", True):
                 package_id = infos.get("installed", [{}])[0].get(
-                    "packages", [{}])[0].get("id", "")
+                                                    "packages", [{}])[0].get("id", "")
             Logger().info(
                 f"Installation of '<b>{str(conan_ref)}</b>' finished")
             # Update cache with this package
