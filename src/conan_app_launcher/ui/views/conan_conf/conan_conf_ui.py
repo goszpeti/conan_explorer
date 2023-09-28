@@ -243,6 +243,11 @@ class Ui_Form(object):
 
         self.verticalLayout_8.addWidget(self.remote_remove_button)
 
+        self.remotes_edit_button = QPushButton(self.remotes_buttons_frame)
+        self.remotes_edit_button.setObjectName(u"remotes_edit_button")
+
+        self.verticalLayout_8.addWidget(self.remotes_edit_button)
+
         self.remotes_btns_spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_8.addItem(self.remotes_btns_spacer)
@@ -267,8 +272,8 @@ class Ui_Form(object):
         self.profiles.setObjectName(u"profiles")
         self.verticalLayout_11 = QVBoxLayout(self.profiles)
         self.verticalLayout_11.setObjectName(u"verticalLayout_11")
-        self.gridLayout_6 = QGridLayout()
-        self.gridLayout_6.setObjectName(u"gridLayout_6")
+        self.profiles_grid_layout = QGridLayout()
+        self.profiles_grid_layout.setObjectName(u"profiles_grid_layout")
         self.splitter = QSplitter(self.profiles)
         self.splitter.setObjectName(u"splitter")
         sizePolicy2 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
@@ -289,7 +294,7 @@ class Ui_Form(object):
         self.profiles_text_browser.setReadOnly(False)
         self.splitter.addWidget(self.profiles_text_browser)
 
-        self.gridLayout_6.addWidget(self.splitter, 0, 0, 1, 1)
+        self.profiles_grid_layout.addWidget(self.splitter, 0, 0, 1, 1)
 
         self.profiles_buttons_frame = QFrame(self.profiles)
         self.profiles_buttons_frame.setObjectName(u"profiles_buttons_frame")
@@ -334,68 +339,65 @@ class Ui_Form(object):
         self.verticalLayout_9.addItem(self.profiles_btns_spacer)
 
 
-        self.gridLayout_6.addWidget(self.profiles_buttons_frame, 0, 1, 1, 1)
+        self.profiles_grid_layout.addWidget(self.profiles_buttons_frame, 0, 1, 1, 1)
 
 
-        self.verticalLayout_11.addLayout(self.gridLayout_6)
+        self.verticalLayout_11.addLayout(self.profiles_grid_layout)
 
         self.config_tab_widget.addTab(self.profiles, "")
         self.editables = QWidget()
         self.editables.setObjectName(u"editables")
         self.verticalLayout_5 = QVBoxLayout(self.editables)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.gridLayout_5 = QGridLayout()
-        self.gridLayout_5.setObjectName(u"gridLayout_5")
-        self.splitter_2 = QSplitter(self.editables)
-        self.splitter_2.setObjectName(u"splitter_2")
-        sizePolicy2.setHeightForWidth(self.splitter_2.sizePolicy().hasHeightForWidth())
-        self.splitter_2.setSizePolicy(sizePolicy2)
-        self.splitter_2.setOrientation(Qt.Vertical)
-        self.treeView = QTreeView(self.splitter_2)
-        self.treeView.setObjectName(u"treeView")
-        self.splitter_2.addWidget(self.treeView)
-        self.treeView_2 = QTreeView(self.splitter_2)
-        self.treeView_2.setObjectName(u"treeView_2")
-        self.splitter_2.addWidget(self.treeView_2)
+        self.editables_grid_layout = QGridLayout()
+        self.editables_grid_layout.setObjectName(u"editables_grid_layout")
+        self.editables_splitter = QSplitter(self.editables)
+        self.editables_splitter.setObjectName(u"editables_splitter")
+        sizePolicy2.setHeightForWidth(self.editables_splitter.sizePolicy().hasHeightForWidth())
+        self.editables_splitter.setSizePolicy(sizePolicy2)
+        self.editables_splitter.setOrientation(Qt.Vertical)
+        self.editables_ref_view = QTreeView(self.editables_splitter)
+        self.editables_ref_view.setObjectName(u"editables_ref_view")
+        self.editables_splitter.addWidget(self.editables_ref_view)
 
-        self.gridLayout_5.addWidget(self.splitter_2, 0, 0, 1, 1)
+        self.editables_grid_layout.addWidget(self.editables_splitter, 0, 0, 1, 1)
 
-        self.frame = QFrame(self.editables)
-        self.frame.setObjectName(u"frame")
-        self.frame.setFrameShape(QFrame.StyledPanel)
-        self.frame.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_10 = QVBoxLayout(self.frame)
+        self.editables_button_frame = QFrame(self.editables)
+        self.editables_button_frame.setObjectName(u"editables_button_frame")
+        self.editables_button_frame.setFrameShape(QFrame.StyledPanel)
+        self.editables_button_frame.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_10 = QVBoxLayout(self.editables_button_frame)
         self.verticalLayout_10.setObjectName(u"verticalLayout_10")
         self.verticalLayout_10.setContentsMargins(0, -1, 0, -1)
-        self.pushButton = QPushButton(self.frame)
-        self.pushButton.setObjectName(u"pushButton")
+        self.editables_refresh_button = QPushButton(self.editables_button_frame)
+        self.editables_refresh_button.setObjectName(u"editables_refresh_button")
 
-        self.verticalLayout_10.addWidget(self.pushButton)
+        self.verticalLayout_10.addWidget(self.editables_refresh_button)
 
-        self.pushButton_2 = QPushButton(self.frame)
-        self.pushButton_2.setObjectName(u"pushButton_2")
+        self.editables_add_button = QPushButton(self.editables_button_frame)
+        self.editables_add_button.setObjectName(u"editables_add_button")
 
-        self.verticalLayout_10.addWidget(self.pushButton_2)
+        self.verticalLayout_10.addWidget(self.editables_add_button)
 
-        self.pushButton_3 = QPushButton(self.frame)
-        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.editables_remove_button = QPushButton(self.editables_button_frame)
+        self.editables_remove_button.setObjectName(u"editables_remove_button")
 
-        self.verticalLayout_10.addWidget(self.pushButton_3)
+        self.verticalLayout_10.addWidget(self.editables_remove_button)
 
-        self.pushButton_4 = QPushButton(self.frame)
-        self.pushButton_4.setObjectName(u"pushButton_4")
+        self.editables_edit_button = QPushButton(self.editables_button_frame)
+        self.editables_edit_button.setObjectName(u"editables_edit_button")
 
-        self.verticalLayout_10.addWidget(self.pushButton_4)
+        self.verticalLayout_10.addWidget(self.editables_edit_button)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.editables_button_vspacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.verticalLayout_10.addItem(self.verticalSpacer_2)
-
-
-        self.gridLayout_5.addWidget(self.frame, 0, 1, 1, 1)
+        self.verticalLayout_10.addItem(self.editables_button_vspacer)
 
 
-        self.verticalLayout_5.addLayout(self.gridLayout_5)
+        self.editables_grid_layout.addWidget(self.editables_button_frame, 0, 1, 1, 1)
+
+
+        self.verticalLayout_5.addLayout(self.editables_grid_layout)
 
         self.config_tab_widget.addTab(self.editables, "")
         self.config = QWidget()
@@ -447,7 +449,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(1)
+        self.config_tab_widget.setCurrentIndex(3)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -482,6 +484,7 @@ class Ui_Form(object):
         self.remote_toggle_disabled_button.setText(QCoreApplication.translate("Form", u"Enable/Disable", None))
         self.remote_add_button.setText(QCoreApplication.translate("Form", u"Add", None))
         self.remote_remove_button.setText(QCoreApplication.translate("Form", u"Remove", None))
+        self.remotes_edit_button.setText(QCoreApplication.translate("Form", u"Edit", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.remotes), QCoreApplication.translate("Form", u"Remotes", None))
         self.profile_refresh_button.setText(QCoreApplication.translate("Form", u"Refresh list", None))
         self.profile_add_button.setText(QCoreApplication.translate("Form", u"Add", None))
@@ -489,10 +492,10 @@ class Ui_Form(object):
         self.profile_rename_button.setText(QCoreApplication.translate("Form", u"Rename", None))
         self.profile_save_button.setText(QCoreApplication.translate("Form", u"Save", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.profiles), QCoreApplication.translate("Form", u"Profiles", None))
-        self.pushButton.setText(QCoreApplication.translate("Form", u"Add", None))
-        self.pushButton_2.setText(QCoreApplication.translate("Form", u"Remove", None))
-        self.pushButton_3.setText(QCoreApplication.translate("Form", u"PushButton", None))
-        self.pushButton_4.setText(QCoreApplication.translate("Form", u"PushButton", None))
+        self.editables_refresh_button.setText(QCoreApplication.translate("Form", u"Refresh List", None))
+        self.editables_add_button.setText(QCoreApplication.translate("Form", u"Add", None))
+        self.editables_remove_button.setText(QCoreApplication.translate("Form", u"Remove", None))
+        self.editables_edit_button.setText(QCoreApplication.translate("Form", u"Edit", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.editables), QCoreApplication.translate("Form", u"Editables", None))
         self.config_file_save_button.setText(QCoreApplication.translate("Form", u"Save", None))
         self.config_tab_widget.setTabText(self.config_tab_widget.indexOf(self.config), QCoreApplication.translate("Form", u"Config File", None))

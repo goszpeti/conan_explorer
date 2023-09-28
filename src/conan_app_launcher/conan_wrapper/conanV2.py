@@ -263,6 +263,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         """ Get package path of an editable reference. """
         editables_dict = self._conan.local.editable_list()
         return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH)).parent
+    
+    def get_editables_output_folder(self, conan_ref: ConanRef) -> str:
+        editables_dict = self._conan.local.editable_list()
+        return editables_dict.get(conan_ref, {}).get("output_folder", "None")
 
     def get_editable_references(self) -> List[str]:
         """ Get all local editable references. """

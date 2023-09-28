@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 class LocalConanPackageExplorer(PluginInterfaceV1):
-    conan_pkg_selected = Signal(str, ConanPkg, PkgSelectionType)  # conan_ref, ConanPkg -> needs dict for Qt to resolve it
+    conan_pkg_selected = Signal(str, ConanPkg, PkgSelectionType)
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
                  base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
@@ -95,7 +95,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             file_explorer_view.setItemsExpandable(True)
             file_explorer_view.setSortingEnabled(True)
             file_explorer_view.setAnimated(True)
-            file_explorer_view.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+            file_explorer_view.setSelectionMode(
+                                    QAbstractItemView.SelectionMode.ExtendedSelection)
 
             self._pkg_tabs_ctrl.append(PackageFileExplorerController(
                 self, file_explorer_view, self._ui.package_path_label,

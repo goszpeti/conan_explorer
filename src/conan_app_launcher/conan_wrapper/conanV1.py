@@ -161,13 +161,15 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
         pkg_path = Path(INVALID_PATH)
-        editable_info = self._conan.editable_list().get(str(conan_ref))
-        if editable_info is None:
-            return pkg_path
-        pkg_path = Path(editable_info.get("path", INVALID_PATH))
+        editable_dict = self._conan.editable_list().get(str(conan_ref), {})
+        pkg_path = Path(editable_dict.get("path", INVALID_PATH))
         if pkg_path.is_file():
             return pkg_path.parent
         return pkg_path
+    
+    def get_editables_output_folder(self, conan_ref: ConanRef) -> str:
+        editable_dict = self._conan.editable_list().get(str(conan_ref), {})
+        return editable_dict.get("output_folder", "None")
 
     def get_short_path_root(self) -> Path:
         # only need to get once

@@ -10,6 +10,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.ui.common import get_themed_asset_icon, ConfigHighlighter
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
+from conan_app_launcher.ui.views.conan_conf.editable_model import EditableModel
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.conan_wrapper.types import Remote
 from PySide6.QtCore import Qt, Signal
@@ -17,8 +18,8 @@ from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog
 
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
-from .model import ProfilesModel
-from .controller import ConanRemoteController
+from .remotes_controller import ConanRemoteController
+from .profiles_model import ProfilesModel
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import BaseSignals
@@ -37,7 +38,7 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)
         self.profiles_path = Path("Unknown")
-        self._edited_profile = None
+        self._edited_profile = ""
 
     def load(self):
         assert self._base_signals
@@ -123,6 +124,13 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
 
     def _load_editables_tab(self):
+        editables_model = EditableModel()
+        self._ui.editables_ref_view.setModel(editables_model)
+        self._ui.editables_ref_view.setItemsExpandable(False)
+        self._ui.editables_ref_view.setRootIsDecorated(False)
+        self._ui.editables_ref_view.resizeColumnToContents(2)
+        self._ui.editables_ref_view.resizeColumnToContents(1)
+        self._ui.editables_ref_view.resizeColumnToContents(0)
         # self.set_themed_icon(self._ui.editables_save_button, "icons/save.svg")
         try:
             pass
@@ -178,7 +186,7 @@ class ConanConfigView(PluginInterfaceV1):
         if not view_indexes:
             return
         view_index = view_indexes[0]
-        profile_name = view_index.data()
+        profile_name: str = view_index.data()
         self._edited_profile = profile_name
         try:
             profile_content = (self.profiles_path / profile_name).read_text()
@@ -240,7 +248,7 @@ class ConanConfigView(PluginInterfaceV1):
         profile_model: ProfilesModel = self._ui.profiles_list_view.model()  # type: ignore
         # clear selection, otherwise an old selection could remain active in the profile content browser
         self._ui.profiles_list_view.selectionModel().clear()
-        profile_model.update_profiles()
+        profile_model.setup_model_data()
         self._ui.profiles_list_view.repaint()
 
 # Remote
