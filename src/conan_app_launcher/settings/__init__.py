@@ -11,12 +11,13 @@ VIEW_SECTION_NAME = "View"
 PLUGINS_SECTION_NAME = "Plugins"
 
 # Constants for option names (value is the entry name/id)
-# General
+### General
 LAST_CONFIG_FILE = "last_config_file"
 FILE_EDITOR_EXECUTABLE = "file_editor"
 AUTO_INSTALL_QUICKLAUNCH_REFS = "auto_install_quicklaunch"
 DEFAULT_INSTALL_PROFILE = "default_install_profile"
 
+### View
 FONT_SIZE = "font_size"
 GUI_STYLE = "style"
 # style choices
@@ -31,6 +32,7 @@ GUI_MODE_LIGHT = "light"
 WINDOW_SIZE = "window_size"
 CONSOLE_SPLIT_SIZES = "console_split_sizes"
 LAST_VIEW = "last_view"
+AUTO_OPEN_LAST_VIEW = "auto_open_last_view"
 
 # Implementation types for factory
 SETTINGS_INI_TYPE = "ini"

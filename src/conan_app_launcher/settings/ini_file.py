@@ -9,9 +9,10 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import get_default_file_editor
 from conan_app_launcher.app.typing import SignatureCheckMeta
 
-from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE,
-               FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE,
-               GUI_STYLE_MATERIAL, GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, LAST_VIEW, PLUGINS_SECTION_NAME,
+from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, 
+               DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE, FONT_SIZE, 
+               GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_MATERIAL, GUI_MODE_LIGHT, 
+               GUI_MODE, LAST_CONFIG_FILE, LAST_VIEW, PLUGINS_SECTION_NAME,
                VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
 
 
@@ -29,7 +30,8 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
             GUI_MODE: GUI_MODE_LIGHT,
             WINDOW_SIZE: "0,0,800,600",
             CONSOLE_SPLIT_SIZES: "413,126",
-            LAST_VIEW: ""
+            LAST_VIEW: "",
+            AUTO_OPEN_LAST_VIEW: True,
         },
         PLUGINS_SECTION_NAME: {
             BUILT_IN_PLUGIN: str(base_path / "ui" / "plugins.ini")

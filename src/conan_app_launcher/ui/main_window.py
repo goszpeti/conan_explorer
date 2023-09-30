@@ -13,7 +13,7 @@ from conan_app_launcher import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
     MIN_FONT_SIZE, PathLike, conan_version)
 from conan_app_launcher.app.loading import AsyncLoader
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
+from conan_app_launcher.settings import (AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
     FONT_SIZE, GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
     GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
 from conan_app_launcher.ui.common.theming import (get_gui_dark_mode, get_gui_style, 
@@ -113,13 +113,20 @@ class MainWindow(FluentWindow):
         self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/view.svg")
 
         view_settings_submenu.add_button_menu_entry(
-            "Font Size +", self.on_font_size_increased, "icons/increase_font.svg", QKeySequence("CTRL++"), self)
+            "Font Size +", self.on_font_size_increased, "icons/increase_font.svg", 
+            QKeySequence("CTRL++"), self)
         view_settings_submenu.add_button_menu_entry(
-            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.svg", QKeySequence("CTRL+-"), self)
+            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.svg", 
+            QKeySequence("CTRL+-"), self)
         view_settings_submenu.add_menu_line()
 
         view_settings_submenu.add_toggle_menu_entry(
-            "Dark Mode", self.on_dark_mode_changed, get_gui_dark_mode(), "icons/dark_mode.svg")
+            "Dark Mode", self.on_dark_mode_changed, get_gui_dark_mode(), 
+            "icons/dark_mode.svg")
+        
+        view_settings_submenu.add_toggle_menu_entry(
+            "Open latest view", self.on_auto_open_last_view_changed, 
+            app.active_settings.get_bool(AUTO_OPEN_LAST_VIEW), "icons/refresh.svg")
         if ENABLE_GUI_STYLES:
             self._init_style_chooser()
             view_settings_submenu.add_named_custom_entry("Icon Style", self._style_chooser_frame, 
@@ -169,12 +176,13 @@ class MainWindow(FluentWindow):
         loader.async_loading(self, self._load_job, (config_source_str,))
         loader.wait_for_finished()
         # Restore last view
-        try:
-            last_view = app.active_settings.get_string(LAST_VIEW)
-            page = self.page_widgets.get_page_by_name(last_view)
-            self.page_widgets.get_button_by_type(type(page)).click()
-        except Exception:
-            pass
+        if app.active_settings.get_bool(AUTO_OPEN_LAST_VIEW):
+            try:
+                last_view = app.active_settings.get_string(LAST_VIEW)
+                page = self.page_widgets.get_page_by_name(last_view)
+                self.page_widgets.get_button_by_type(type(page)).click()
+            except Exception:
+                pass
         
         self.loaded = True
 
@@ -250,6 +258,11 @@ class MainWindow(FluentWindow):
         self.apply_theme()
         for page in self.page_widgets.get_all_pages():
             page.reload_themed_icons()
+
+    def on_auto_open_last_view_changed(self):
+        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
+        sender_toggle.wait_for_anim_finish()
+        app.active_settings.set(AUTO_OPEN_LAST_VIEW, sender_toggle.isChecked())
 
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
