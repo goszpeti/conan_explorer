@@ -66,10 +66,12 @@ conan_version: str = conan_pkg_info.version
 
 base_path = Path(__file__).absolute().parent
 asset_path = base_path / "assets"
-# to be used for all default paths of configuration files, 
-# which will be used for multiple versions (noninvasive storage, 1.X legacy will be moved)
+# to be used for all default paths of configuration files, which will be used 
+# for multiple versions (noninvasive storage, 1.X legacy will be moved)
 legacy_user_save_path = Path().home()
-user_save_path = Path(os.getenv("XDG_CONFIG_HOME", str(legacy_user_save_path / ".config"))) / PKG_NAME if platform.system() == "Linux" \
+user_save_path = Path(os.getenv("XDG_CONFIG_HOME", 
+    str(legacy_user_save_path / ".config"))) / PKG_NAME \
+    if platform.system() == "Linux" \
     else Path(os.getenv("APPDATA", str(legacy_user_save_path))) / PKG_NAME
 
 # user path migration - move settings and default gui file

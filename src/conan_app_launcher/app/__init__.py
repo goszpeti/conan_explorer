@@ -3,12 +3,13 @@ import platform
 import sys
 from tempfile import gettempdir
 from typing import TYPE_CHECKING
-from conan_app_launcher.app.system import check_for_wayland
 
-from conan_app_launcher.settings import SETTINGS_INI_TYPE, SettingsInterface, settings_factory
+from conan_app_launcher.settings import (SETTINGS_INI_TYPE, SettingsInterface, 
+                                         settings_factory)
 from conan_app_launcher import (APP_NAME, SETTINGS_FILE_NAME, __version__, asset_path,
                                 user_save_path)
 from .logger import Logger
+from .system import check_for_wayland
 
 if TYPE_CHECKING:
     from conan_app_launcher.conan_wrapper import ConanApi, ConanWorker
@@ -47,7 +48,7 @@ def run_application():
     qt_app.exec()
 
     main_window.save_window_state()
-    # cancel conan worker tasks on exit - this can possibly cancel an ongoing install task
+    # cancel conan worker tasks on exit
     if conan_worker:
         conan_worker.finish_working(10)
 
@@ -71,14 +72,13 @@ def load_conan():
 
 def load_qapp():
     """ Load bootstrapping to be able to display a first widget. """
-    # this import takes seconds - it could only be possibly parallelized with a more basics gui frameworks
-    # loading screen or splash screen
+    # this import takes seconds - it could only be possibly parallelized 
+    # with more basics gui frameworks
     from PySide6 import QtCore, QtWidgets
-    # apply Qt attributes (only possible before QApplication is created)
-    # to use icons in qss file
-    QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
-    # Passthrough seems to work well for high dpi scaling
+
+    # Apply Qt attributes (only possible before QApplication is created)
     try:
+        # Passthrough seems to work well for high dpi scaling
         QtWidgets.QApplication.setHighDpiScaleFactorRoundingPolicy(
             QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     except Exception:
@@ -86,6 +86,9 @@ def load_qapp():
 
     if check_for_wayland(): # enable native Wayland support
         os.environ["QT_QPA_PLATFORM"] = "wayland"
+
+    # to use icons in qss file
+    QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
 
     qt_app = QtWidgets.QApplication([])
     qt_app.setApplicationName(APP_NAME)

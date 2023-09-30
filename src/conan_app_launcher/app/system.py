@@ -38,7 +38,7 @@ def is_windows_11():
 
 
 def run_file(file_path: Path, is_console_app: bool, args: str):
-    """ Decide, if a file should be opened or executed and call the appropriate method """
+    " Decide, if a file should be opened or executed and call the appropriate method "
     if not file_path.is_file():
         return
     try:
@@ -56,7 +56,7 @@ def open_in_file_manager(file_path: Path):
     try:
         if platform.system() == "Linux":
             # no standardized select functionailty.
-            # However xdg-open on a dir will open the folder in the default file explorer.
+            # xdg-open on a dir will open the folder in the default file explorer.
             dir_to_view = file_path.parent if file_path.is_file() else file_path
             return subprocess.Popen(("xdg-open", str(dir_to_view)))
         elif platform.system() == "Windows":
@@ -72,7 +72,8 @@ def open_cmd_in_path(file_path: Path) -> int:
     """ Open a terminal in the selected folder. """
     try:
         if platform.system() == "Linux":
-            return execute_cmd(["x-terminal-emulator", "-e", '"', "cd", f"{str(file_path)}", "&&", "bash", '"'], True)
+            return execute_cmd(["x-terminal-emulator", "-e", '"', 
+                                "cd", f"{str(file_path)}", "&&", "bash", '"'], True)
         elif platform.system() == "Windows":
             cmd_path = shutil.which("cmd")
             if cmd_path:
@@ -101,7 +102,7 @@ def is_file_executable(file_path: Path) -> bool:
 
 def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     """
-    Executes an application with args and optionally spawns a new shell as specified in the app entry.
+    Executes an application with args and optionally spawns a new shell.
     Returns the pid of the new process.
     """
     if executable.absolute().is_file():
@@ -157,7 +158,7 @@ def generate_launch_script(cmd: List[str]) -> str:
         temp_fd, temp_path_str = tempfile.mkstemp(
             ".sh", prefix=PKG_NAME, text=True)
     else:
-        Logger().warning(f"Not supported OS.")
+        Logger().warning("Not supported OS.")
         return ""
     launch_templ_path = asset_path / launch_templ_file
     with open(launch_templ_path, "r") as fd:
@@ -201,7 +202,8 @@ def delete_path(dst: Path):
 def copy_path_with_overwrite(src: Path, dst: Path):
     """
     Copy files/directories while overwriting possible files and adding missing ones.
-    Directories will be copied from under source, so you may need to add the orig. folder name, if you want that!
+    Directories will be copied from under source, so you may need to add the original
+    folder name, if you want that!
     Exceptions will be caught and message logged to stdout.
     """
     from shutil import copytree, copy2
@@ -245,7 +247,8 @@ def get_default_file_editor():
         return "gedit"  # distro dependent, but make something
 
 
-def find_program_in_windows(app_name: str, partial_match=False, key_to_find="InstallLocation") -> str:
+def find_program_in_windows(app_name: str, partial_match=False, 
+                                                key_to_find="InstallLocation") -> str:
     if platform.system() != "Windows":
         return ""
 
@@ -253,7 +256,8 @@ def find_program_in_windows(app_name: str, partial_match=False, key_to_find="Ins
     arch_keys = {winreg.KEY_WOW64_32KEY, winreg.KEY_WOW64_64KEY}
     for arch_key in arch_keys:
         key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                             r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", 0, winreg.KEY_READ | arch_key)
+            r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", 
+            0, winreg.KEY_READ | arch_key)
         for i in range(0, winreg.QueryInfoKey(key)[0]):
             sub_key_name = winreg.EnumKey(key, i)
             sub_key = winreg.OpenKey(key, sub_key_name)
@@ -277,7 +281,8 @@ def find_program_in_windows(app_name: str, partial_match=False, key_to_find="Ins
 def check_for_wayland() -> bool:
     if platform.system() != "Linux":
         return False
-    if os.getenv("XDG_SESSION_TYPE", "").lower() == "wayland" or os.getenv("WAYLAND_DISPLAY"):
+    if os.getenv("XDG_SESSION_TYPE", "").lower() == "wayland" or \
+       os.getenv("WAYLAND_DISPLAY"):
         Logger().debug("Found XDG_SESSION_TYPE==wayland or WAYLAND_DISPLAY")
         return True
     return False

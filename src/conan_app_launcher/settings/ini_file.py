@@ -109,7 +109,8 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
         return bool(self.get(name))
 
     def set(self, name: str, value: "str | int | float | bool | dict"):
-        """ Set the value of a specific setting. Does not write to file, if value is already set. """
+        """ Set the value of a specific setting. 
+        Does not write to file, if value is already set. """
         if name in self._values.keys() and isinstance(value, dict):  # dict type setting
             if self._values[name] == value:
                 return
@@ -124,7 +125,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
         if self._auto_save:
             self.save()
 
-    def add(self, name: str, value: "str | int | float | bool", node: Optional[str] = None):
+    def add(self, name: str, value: "str|int|float|bool", node: Optional[str]=None):
         if node is None:
             node = GENERAL_SECTION_NAME
         if not self._values.get(node):
@@ -167,8 +168,8 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
                     update_needed |= self._read_setting(setting, node)
 
         except Exception as e:
-            Logger().error(
-                f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
+            Logger().error((f"Settings: Can't read ini file: {str(e)}",
+                             "trying to delete and create a new one..."))
             try:
                 # let an exeception to the user, file can't be deleted
                 os.remove(str(self._ini_file_path))
@@ -182,7 +183,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
             self._parser.write(ini_file)
 
     def _get_section(self, node: str) -> configparser.SectionProxy:
-        """ Helper function to get a section from ini, or create it, if it does not exist."""
+        """ Get a section from ini, or create it, if it does not exist."""
         if node not in self._parser:
             self._parser.add_section(node)
         if node not in self._values:
@@ -191,7 +192,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
 
     def _read_dict_setting(self, node: str) -> bool:
         """ 
-        Helper function to get a dict style setting.
+        Get a dict style setting.
         Dict settings are section itself and are read dynamically.
         """
         section = self._get_section(node)
@@ -201,7 +202,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
         return update_needed
 
     def _read_setting(self, name: str, node: str) -> bool:
-        """ Helper function to get a setting, which uses the init value to determine the type. 
+        """ Get a setting, which uses the init value to determine the type. 
         Returns, if file needs tobe updated
         """
         section = self._get_section(node)
@@ -231,7 +232,8 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
             return False
         if value == "" and default_value:
             value = default_value
-        # autosave must be disabled, otherwise we overwrite the other settings in the file
+        # autosave must be disabled temporarily, 
+        # otherwise we overwrite the other settings in the file
         auto_save = self._auto_save
         self._auto_save = False
         self._values[node][name] = value
