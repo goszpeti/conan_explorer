@@ -36,8 +36,8 @@ class ConanSearchView(PluginInterfaceV1):
             conan_pkg_installed = self._base_signals.conan_pkg_installed
             conan_pkg_removed = self._base_signals.conan_pkg_removed
 
-        self._search_controller = ConanSearchController(
-            self._ui.search_results_tree_view, self._ui.search_line, self._ui.search_button, self._ui.remote_list,
+        self._search_controller = ConanSearchController(self._ui.search_results_tree_view, 
+            self._ui.search_line, self._ui.search_button, self._ui.remote_list,
             self._ui.package_info_text, conan_pkg_installed, conan_pkg_removed)
 
         self._ui.search_button.clicked.connect(self._search_controller.on_search)

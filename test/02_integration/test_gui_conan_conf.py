@@ -86,14 +86,14 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         assert conan_conf_view._remotes_controller._select_remote("local3")
 
         #### 3. Test Disable/Enable
-        conan_conf_view._ui.remote_toggle_disabled.click()
+        conan_conf_view._ui.remote_toggle_disabled_button.click()
 
         remotes = app.conan_api.get_remotes(include_disabled=True)
         for remote in remotes:
             if remote.name == "local3":
                 assert remote.disabled
 
-        conan_conf_view._ui.remote_toggle_disabled.click()
+        conan_conf_view._ui.remote_toggle_disabled_button.click()
 
         remotes = app.conan_api.get_remotes()
         for remote in remotes:
@@ -128,13 +128,13 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
         mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                             return_value=QtWidgets.QMessageBox.StandardButton.Cancel)
-        conan_conf_view._ui.remote_remove.click()
+        conan_conf_view._ui.remote_remove_button.click()
         assert conan_conf_view._remotes_controller._select_remote("local4")
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
         mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                             return_value=QtWidgets.QMessageBox.StandardButton.Yes)
-        conan_conf_view._ui.remote_remove.click()
+        conan_conf_view._ui.remote_remove_button.click()
         assert conan_conf_view._remotes_controller._model.root_item.child_count()  == remotes_count - 1
 
         # 8. Add a new remote via button/dialog -> save
@@ -143,12 +143,12 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
         mocker.patch.object(QtWidgets.QDialog, 'exec',
                             return_value=QtWidgets.QDialog.DialogCode.Rejected)
-        conan_conf_view._ui.remote_add.click()
+        conan_conf_view._ui.remote_add_button.click()
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
         mocker.patch.object(QtWidgets.QDialog, 'exec',
                             return_value=QtWidgets.QDialog.DialogCode.Accepted)
-        conan_conf_view._ui.remote_add.click()
+        conan_conf_view._ui.remote_add_button.click()
         # can't easily call this, while dialog is opened - so call it on the saved, but now hidden dialog manually
         conan_conf_view.remote_edit_dialog.save()
         conan_conf_view.remote_edit_dialog.save() # save a second time (errors under the hood), to see if Exception from conan is handled
@@ -209,7 +209,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
 
     mocker.patch.object(QtWidgets.QDialog, 'exec',
                         return_value=QtWidgets.QDialog.DialogCode.Rejected)
-    conan_conf_view._ui.remote_login.click()
+    conan_conf_view._ui.remote_login_button.click()
     assert conan.get_remote_user_info(TEST_REMOTE_NAME) == ("demo", True)  # still logged in
 
     # evaluate dialog, after it closed
