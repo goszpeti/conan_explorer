@@ -159,6 +159,6 @@ jobs:
             -Dsonar.exclusions=**/*_ui.py
             -Dsonar.tests=./test
             -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.python.version=3.7,3.8,3.9,3.10,3.11
+            -Dsonar.python.version=3.8,3.9,3.10,3.11
             -Dsonar.python.coverage.reportPaths=cov/cov-*.xml
             -Dsonar.python.xunit.reportPath=results/result-*-ubuntu-py39.xml
