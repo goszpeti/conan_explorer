@@ -102,12 +102,12 @@ class SettingsInterface():
         raise NotImplementedError
 
     @abstractmethod
-    def set(self, name: str, value: "str | int | float | bool | dict"):
+    def set(self, name: str, value: "str|int|float|bool"):
         """ Set the value of an existing setting """
         raise NotImplementedError
 
     @abstractmethod
-    def add(self, name: str, value: "str | int | float | bool", node: Optional[str] = None):
+    def add(self, name: str, value: "str|int|float|bool", node: Optional[str] = None):
         """ Add a new setting """
         raise NotImplementedError
 
