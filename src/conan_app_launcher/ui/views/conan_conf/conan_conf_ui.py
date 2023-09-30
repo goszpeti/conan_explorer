@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_conf.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,9 +17,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QGridLayout,
     QGroupBox, QHBoxLayout, QHeaderView, QLabel,
-    QListView, QPushButton, QScrollArea, QSizePolicy,
-    QSpacerItem, QSplitter, QTabWidget, QTreeView,
-    QVBoxLayout, QWidget)
+    QLineEdit, QListView, QPushButton, QScrollArea,
+    QSizePolicy, QSpacerItem, QSplitter, QTabWidget,
+    QTreeView, QVBoxLayout, QWidget)
 
 from conan_app_launcher.ui.widgets import (AnimatedToggle, PlainTextPasteBrowser)
 
@@ -131,6 +131,31 @@ class Ui_Form(object):
         self.gridLayout_2.setColumnStretch(1, 2)
 
         self.verticalLayout_7.addWidget(self.paths_box)
+
+        self.docs_box = QGroupBox(self.info_contents)
+        self.docs_box.setObjectName(u"docs_box")
+        self.gridLayout_5 = QGridLayout(self.docs_box)
+        self.gridLayout_5.setObjectName(u"gridLayout_5")
+        self.docs_search_lineedit = QLineEdit(self.docs_box)
+        self.docs_search_lineedit.setObjectName(u"docs_search_lineedit")
+
+        self.gridLayout_5.addWidget(self.docs_search_lineedit, 1, 0, 1, 1)
+
+        self.docs_link_label = QLabel(self.docs_box)
+        self.docs_link_label.setObjectName(u"docs_link_label")
+        self.docs_link_label.setTextFormat(Qt.RichText)
+        self.docs_link_label.setOpenExternalLinks(True)
+        self.docs_link_label.setTextInteractionFlags(Qt.LinksAccessibleByKeyboard|Qt.LinksAccessibleByMouse)
+
+        self.gridLayout_5.addWidget(self.docs_link_label, 0, 0, 1, 1)
+
+        self.docs_search_button = QPushButton(self.docs_box)
+        self.docs_search_button.setObjectName(u"docs_search_button")
+
+        self.gridLayout_5.addWidget(self.docs_search_button, 1, 1, 1, 1)
+
+
+        self.verticalLayout_7.addWidget(self.docs_box)
 
         self.features_box = QGroupBox(self.info_contents)
         self.features_box.setObjectName(u"features_box")
@@ -450,7 +475,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(3)
+        self.config_tab_widget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -472,6 +497,10 @@ class Ui_Form(object):
         self.conan_storage_path_value_label.setText("")
         self.conan_usr_cache_label.setText(QCoreApplication.translate("Form", u"Conan Short Path Cache:", None))
         self.conan_usr_cache_value_label.setText("")
+        self.docs_box.setTitle(QCoreApplication.translate("Form", u"Docs", None))
+        self.docs_search_lineedit.setText("")
+        self.docs_link_label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><a href=\"https://docs.conan.io/en/1.60/index.html\"><span style=\" text-decoration: underline; color:#0000ff;\">Conan docs for this version</span></a></p></body></html>", None))
+        self.docs_search_button.setText(QCoreApplication.translate("Form", u"Search docs", None))
         self.features_box.setTitle(QCoreApplication.translate("Form", u"Features", None))
         self.revision_enabled_label.setText(QCoreApplication.translate("Form", u"Revisions enabled:", None))
         self.revision_enabled_checkbox.setText("")

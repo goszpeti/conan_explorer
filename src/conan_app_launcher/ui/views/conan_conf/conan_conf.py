@@ -1,4 +1,3 @@
-import json
 import platform
 from pathlib import Path
 import sys
@@ -14,7 +13,7 @@ from conan_app_launcher.ui.views.conan_conf.editable_model import EditableModel
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.conan_wrapper.types import Remote
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QAction
+from PySide6.QtGui import QIcon, QAction, QDesktopServices, QShortcut
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog
 
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
@@ -25,13 +24,13 @@ if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import BaseSignals
     from conan_app_launcher.ui.fluent_window.fluent_window import FluentWindow
 
-
 class ConanConfigView(PluginInterfaceV1):
 
     load_signal = Signal()  # type: ignore
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
-                 base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"] = None):
+                 base_signals: "BaseSignals", 
+                 page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent, plugin_description, base_signals)
         from .conan_conf_ui import Ui_Form
         self._ui = Ui_Form()
@@ -39,6 +38,8 @@ class ConanConfigView(PluginInterfaceV1):
         self.load_signal.connect(self.load)
         self.profiles_path = Path("Unknown")
         self._edited_profile = ""
+        self._conan_minor_version = ".".join(conan_version.split(".")[0:2]) # for docs
+
 
     def load(self):
         assert self._base_signals
@@ -64,8 +65,6 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.profiles_text_browser.document(), "ini")
         self._settings_highlighter = ConfigHighlighter(
             self._ui.settings_file_text_browser.document(), "yaml")
-        # self._editable_highlighter = ConfigHighlighter(
-        #     self._ui.editables_file_text_browser.document(), "yaml")
 
     def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(conan_version)
@@ -83,6 +82,14 @@ class ConanConfigView(PluginInterfaceV1):
                 str(app.conan_api.get_short_path_root()))
         self._ui.conan_storage_path_value_label.setText(
             str(app.conan_api.get_storage_path()))
+        self._ui.docs_link_label.setText(f"""<html><head/><body><p>
+            <a href="https://docs.conan.io/en/{self._conan_minor_version}/index.html">
+            <span style="text-decoration: underline; color:#0000ff;">
+            Conan docs for this version</span></a></p></body></html>""")
+        self._ui.docs_search_button.clicked.connect(self.on_docs_searched)
+        for key in ("Enter", "Return",):
+            shorcut = QShortcut(key, self)
+            shorcut.activated.connect(self._ui.docs_search_button.animateClick)
 
     def _load_settings_yml_tab(self):
         try:
@@ -138,17 +145,6 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.editables_refresh_button, "icons/refresh.svg")
         self.set_themed_icon(self._ui.editables_edit_button, "icons/edit.svg")
 
-        # self.set_themed_icon(self._ui.editables_save_button, "icons/save.svg")
-        try:
-            pass
-            # json_content = json.loads(
-            #     Path(app.conan_api.get_editables_file_path()).read_text())
-            # self._ui.editables_file_text_browser.setText(
-            #     json.dumps(json_content, indent=2, separators=(',', ': ')))
-            # self._ui.editables_save_button.clicked.connect(self.on_save_editable_file)
-        except Exception:
-            Logger().error("Cannot read editables file!")
-
     def _init_profile_context_menu(self):
         self.profiles_cntx_menu = RoundedMenu()
         self._copy_profile_action = QAction("Copy profile name", self)
@@ -160,10 +156,7 @@ class ConanConfigView(PluginInterfaceV1):
     def resizeEvent(self, a0):  # override
         """ Resize remote view columns automatically if window size changes """
         super().resizeEvent(a0)
-
         self._remotes_controller.resize_remote_columns()
-        # self._ui.conan_usr_cache_label.adjustSize()
-        # self._ui.revision_enabled_label.setMaximumWidth(self._ui.conan_usr_cache_label.width())
 
     def reload_themed_icons(self):
         super().reload_themed_icons()
@@ -175,8 +168,13 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.profiles_text_browser.document(), "ini")
         self._settings_highlighter = ConfigHighlighter(
             self._ui.settings_file_text_browser.document(), "yaml")
-        # self._editable_highlighter = ConfigHighlighter(
-        #     self._ui.editables_file_text_browser.document(), "yaml")
+
+# Info
+
+    def on_docs_searched(self):
+        search_url = (f"https://docs.conan.io/en/{self._conan_minor_version}/search.html"
+                      f"?q={self._ui.docs_search_lineedit.text()}&check_keywords=yes&area=default")
+        QDesktopServices.openUrl(search_url)
 
 # Profile
 
@@ -229,7 +227,8 @@ class ConanConfigView(PluginInterfaceV1):
             self, "Rename profile", 'Enter new name:', text=profile_name)
         if accepted and profile_name:
             try:
-                (self.profiles_path / profile_name).rename(self.profiles_path / new_profile_name)
+                (self.profiles_path / profile_name).rename(
+                                                self.profiles_path / new_profile_name)
             except Exception as e:
                 Logger().error(f"Can't rename {profile_name}: {e}")
             self.on_refresh_profiles()
@@ -252,8 +251,8 @@ class ConanConfigView(PluginInterfaceV1):
             self.on_refresh_profiles()
 
     def on_refresh_profiles(self):
-        profile_model: ProfilesModel = self._ui.profiles_list_view.model()  # type: ignore
-        # clear selection, otherwise an old selection could remain active in the profile content browser
+        profile_model: ProfilesModel = self._ui.profiles_list_view.model() # type: ignore
+        # clear selection, otherwise an old selection could remain active
         self._ui.profiles_list_view.selectionModel().clear()
         profile_model.setup_model_data()
         self._ui.profiles_list_view.repaint()
