@@ -110,8 +110,8 @@ class ConanUnifiedApiInterface():
         raise NotImplementedError
 
     @abstractmethod
-    def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> ConanPackagePath:
-        """ Get the fully resolved package path from the reference and the specific package (id) """
+    def get_package_folder(self, conan_ref:ConanRef, package_id:str) -> ConanPackagePath:
+        " Get the fully resolved pkg path from the ref and the specific package (id) "
         raise NotImplementedError
 
     @abstractmethod
@@ -166,9 +166,11 @@ class ConanUnifiedApiInterface():
 
 
     @abstractmethod
-    def install_reference(self, conan_ref: ConanRef, conan_settings: Optional[ConanSettings]=None,
-            conan_options: Optional[ConanOptions]=None, profile="", update=True, quiet=False,
-            generators: List[str] = []) -> Tuple[ConanPackageId, ConanPackagePath]:
+    def install_reference(self, conan_ref: ConanRef, 
+                          conan_settings: Optional[ConanSettings]=None,
+                          conan_options: Optional[ConanOptions]=None, profile="", 
+                          update=True, quiet=False, generators: List[str] = []
+                          ) -> Tuple[ConanPackageId, ConanPackagePath]:
         """
         Try to install a conan reference (without id) with the provided extra information.
         Uses plain conan install (No auto determination of best matching package)
@@ -181,9 +183,9 @@ class ConanUnifiedApiInterface():
                             update=True) -> Tuple[ConanPackageId, ConanPackagePath]:
         """
         Try to install a conan package (id) with the provided extra information.
-        Returns the installed id and a valid package path, if installation was succesfull.
-        WARNING: The installed id can differ from the requested one, because there is no built-in 
-        way in conan to install a specific package id!
+        Returns the installed id and a valid pkg path, if installation was succesfull.
+        WARNING: The installed id can differ from the requested one, 
+        because there is no built-in way in conan to install a specific package id!
         """
         raise NotImplementedError
 
@@ -244,8 +246,9 @@ class ConanUnifiedApiInterface():
 
     @abstractmethod
     def get_best_matching_local_package_path(self, conan_ref: ConanRef, 
-            conan_options: Optional[ConanOptions]=None) -> Tuple[ConanPackageId, ConanPackagePath]:
-        """ Return the pkg_id and package folder of a conan reference, if it is installed. """
+            conan_options: Optional[ConanOptions]=None
+            ) -> Tuple[ConanPackageId, ConanPackagePath]:
+        " Return the pkg_id and pkg folder of a conan reference, if it is installed. "
         raise NotImplementedError
 
     @abstractmethod
@@ -282,7 +285,7 @@ class ConanUnifiedApiInterface():
     @abstractmethod
     def get_remote_pkgs_from_ref(self, conan_ref: ConanRef, remote: Optional[str],
                                  query=None) -> List[ConanPkg]:
-        """ Return all packages for a reference in a specific remote with an optional query. """
+        " Return all packages for a reference in a specific remote with an optional query. "
         raise NotImplementedError
 
     @abstractmethod
@@ -308,11 +311,12 @@ class ConanUnifiedApiInterface():
 
     @staticmethod
     def generate_canonical_ref(conan_ref: ConanRef) -> str:
+        "Creates a full ref from a short ref, e.g. product/1.0.0 -> product/1.0.0@_/_"
         raise NotImplementedError
 
     @staticmethod
     def build_conan_profile_name_alias(conan_settings: ConanSettings) -> str:
-        """ Build a human readable pseduo profile name, like Windows_x64_vs16_v142_release """
+        "Build a human readable pseduo profile name, like Windows_x64_vs16_v142_release"
         raise NotImplementedError
 
 
@@ -402,9 +406,9 @@ class ConanCommonUnifiedApi(ConanUnifiedApiInterface):
         if packages:
             if len(packages) > 1:
                 settings = packages[0].get("settings", {})
-                id = packages[0].get("id", "")
+                pkg_id = packages[0].get("id", "")
                 Logger().warning(f"Multiple matching packages found for '<b>{str(conan_ref)}</b>'!\n"
-                                 f"Choosing this: {id} ({self.build_conan_profile_name_alias(settings)})")
+                                 f"Choosing this: {pkg_id} ({self.build_conan_profile_name_alias(settings)})")
             # Update cache with this package
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
@@ -555,14 +559,12 @@ class ConanCommonUnifiedApi(ConanUnifiedApiInterface):
 
     @staticmethod
     def generate_canonical_ref(conan_ref: ConanRef) -> str:
-        """ Creates a full ref from a short ref, e.g. product/1.0.0 -> product/1.0.0@_/_ """
         if conan_ref.user is None and conan_ref.channel is None:
             return str(conan_ref) + "@_/_"
         return str(conan_ref)
 
     @staticmethod
     def build_conan_profile_name_alias(conan_settings: ConanSettings) -> str:
-        """ Build a human readable pseduo profile name, like Windows_x64_vs16_v142_release """
         if not conan_settings:
             return "No Settings"
 
