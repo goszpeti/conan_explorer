@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>851</width>
-    <height>795</height>
+    <width>602</width>
+    <height>475</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -226,10 +226,7 @@
                  <height>0</height>
                 </size>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_10">
-                <property name="spacing">
-                 <number>0</number>
-                </property>
+               <layout class="QGridLayout" name="gridLayout">
                 <property name="leftMargin">
                  <number>9</number>
                 </property>
@@ -242,7 +239,7 @@
                 <property name="bottomMargin">
                  <number>0</number>
                 </property>
-                <item>
+                <item row="0" column="1">
                  <widget class="QFrame" name="window_btns_frame">
                   <property name="minimumSize">
                    <size>
@@ -329,8 +326,8 @@
                   </layout>
                  </widget>
                 </item>
-                <item>
-                 <spacer name="verticalSpacer_3">
+                <item row="1" column="1">
+                 <spacer name="top_center_vspacer">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
                   </property>
@@ -341,6 +338,52 @@
                    </size>
                   </property>
                  </spacer>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QFrame" name="top_center_search_frame">
+                  <property name="layoutDirection">
+                   <enum>Qt::RightToLeft</enum>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Raised</enum>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QLineEdit" name="search_bar_line_edit">
+                     <property name="maximumSize">
+                      <size>
+                       <width>400</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                     <property name="layoutDirection">
+                      <enum>Qt::RightToLeft</enum>
+                     </property>
+                     <property name="inputMask">
+                      <string/>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                     <property name="placeholderText">
+                      <string/>
+                     </property>
+                     <property name="clearButtonEnabled">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
                 </item>
                </layout>
               </widget>
@@ -712,7 +755,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   <x>0</x>
                   <y>0</y>
                   <width>93</width>
-                  <height>716</height>
+                  <height>411</height>
                  </rect>
                 </property>
                 <property name="minimumSize">

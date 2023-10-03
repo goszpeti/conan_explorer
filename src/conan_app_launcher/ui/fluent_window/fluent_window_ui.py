@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'fluent_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -17,15 +17,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplication, QFrame,
     QGridLayout, QHBoxLayout, QLabel, QLayout,
-    QListView, QMainWindow, QPushButton, QScrollArea,
-    QSizePolicy, QSpacerItem, QSplitter, QStackedWidget,
-    QTextBrowser, QTextEdit, QVBoxLayout, QWidget)
+    QLineEdit, QListView, QMainWindow, QPushButton,
+    QScrollArea, QSizePolicy, QSpacerItem, QSplitter,
+    QStackedWidget, QTextBrowser, QTextEdit, QVBoxLayout,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(851, 795)
+        MainWindow.resize(602, 475)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -109,10 +110,9 @@ class Ui_MainWindow(object):
         sizePolicy3.setHeightForWidth(self.top_center_right_frame.sizePolicy().hasHeightForWidth())
         self.top_center_right_frame.setSizePolicy(sizePolicy3)
         self.top_center_right_frame.setMinimumSize(QSize(0, 0))
-        self.verticalLayout_10 = QVBoxLayout(self.top_center_right_frame)
-        self.verticalLayout_10.setSpacing(0)
-        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
-        self.verticalLayout_10.setContentsMargins(9, 0, 3, 0)
+        self.gridLayout = QGridLayout(self.top_center_right_frame)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setContentsMargins(9, 0, 3, 0)
         self.window_btns_frame = QFrame(self.top_center_right_frame)
         self.window_btns_frame.setObjectName(u"window_btns_frame")
         self.window_btns_frame.setMinimumSize(QSize(0, 45))
@@ -145,11 +145,30 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.addWidget(self.minimize_button)
 
 
-        self.verticalLayout_10.addWidget(self.window_btns_frame)
+        self.gridLayout.addWidget(self.window_btns_frame, 0, 1, 1, 1)
 
-        self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.top_center_vspacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.verticalLayout_10.addItem(self.verticalSpacer_3)
+        self.gridLayout.addItem(self.top_center_vspacer, 1, 1, 1, 1)
+
+        self.top_center_search_frame = QFrame(self.top_center_right_frame)
+        self.top_center_search_frame.setObjectName(u"top_center_search_frame")
+        self.top_center_search_frame.setLayoutDirection(Qt.RightToLeft)
+        self.top_center_search_frame.setFrameShape(QFrame.StyledPanel)
+        self.top_center_search_frame.setFrameShadow(QFrame.Raised)
+        self.verticalLayout = QVBoxLayout(self.top_center_search_frame)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(0, -1, 0, -1)
+        self.search_bar_line_edit = QLineEdit(self.top_center_search_frame)
+        self.search_bar_line_edit.setObjectName(u"search_bar_line_edit")
+        self.search_bar_line_edit.setMaximumSize(QSize(400, 16777215))
+        self.search_bar_line_edit.setLayoutDirection(Qt.RightToLeft)
+        self.search_bar_line_edit.setClearButtonEnabled(True)
+
+        self.verticalLayout.addWidget(self.search_bar_line_edit)
+
+
+        self.gridLayout.addWidget(self.top_center_search_frame, 0, 0, 1, 1)
 
 
         self.top_center_frame_layout.addWidget(self.top_center_right_frame)
@@ -311,7 +330,7 @@ class Ui_MainWindow(object):
         self.right_menu_scroll_area.setWidgetResizable(True)
         self.right_menu_scroll_area_widgets = QWidget()
         self.right_menu_scroll_area_widgets.setObjectName(u"right_menu_scroll_area_widgets")
-        self.right_menu_scroll_area_widgets.setGeometry(QRect(0, 0, 93, 716))
+        self.right_menu_scroll_area_widgets.setGeometry(QRect(0, 0, 93, 411))
         self.right_menu_scroll_area_widgets.setMinimumSize(QSize(0, 0))
         self.right_menu_scroll_area_widgets_layout = QVBoxLayout(self.right_menu_scroll_area_widgets)
         self.right_menu_scroll_area_widgets_layout.setSpacing(2)
@@ -540,6 +559,9 @@ class Ui_MainWindow(object):
         self.close_button.setText("")
         self.restore_max_button.setText("")
         self.minimize_button.setText("")
+        self.search_bar_line_edit.setInputMask("")
+        self.search_bar_line_edit.setText("")
+        self.search_bar_line_edit.setPlaceholderText("")
         self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
         self.title_icon_label.setText("")

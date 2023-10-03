@@ -38,8 +38,6 @@ class ConanConfigView(PluginInterfaceV1):
         self.load_signal.connect(self.load)
         self.profiles_path = Path("Unknown")
         self._edited_profile = ""
-        self._conan_minor_version = ".".join(conan_version.split(".")[0:2]) # for docs
-
 
     def load(self):
         assert self._base_signals
@@ -82,14 +80,6 @@ class ConanConfigView(PluginInterfaceV1):
                 str(app.conan_api.get_short_path_root()))
         self._ui.conan_storage_path_value_label.setText(
             str(app.conan_api.get_storage_path()))
-        self._ui.docs_link_label.setText(f"""<html><head/><body><p>
-            <a href="https://docs.conan.io/en/{self._conan_minor_version}/index.html">
-            <span style="text-decoration: underline; color:#0000ff;">
-            Conan docs for this version</span></a></p></body></html>""")
-        self._ui.docs_search_button.clicked.connect(self.on_docs_searched)
-        for key in ("Enter", "Return",):
-            shorcut = QShortcut(key, self)
-            shorcut.activated.connect(self._ui.docs_search_button.animateClick)
 
     def _load_settings_yml_tab(self):
         try:
@@ -168,13 +158,6 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.profiles_text_browser.document(), "ini")
         self._settings_highlighter = ConfigHighlighter(
             self._ui.settings_file_text_browser.document(), "yaml")
-
-# Info
-
-    def on_docs_searched(self):
-        search_url = (f"https://docs.conan.io/en/{self._conan_minor_version}/search.html"
-                      f"?q={self._ui.docs_search_lineedit.text()}&check_keywords=yes&area=default")
-        QDesktopServices.openUrl(search_url)
 
 # Profile
 

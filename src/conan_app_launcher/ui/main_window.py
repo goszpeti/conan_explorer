@@ -4,7 +4,7 @@ from shutil import rmtree
 from typing import Optional
 
 from PySide6.QtCore import QRect, Signal, SignalInstance
-from PySide6.QtGui import QKeySequence
+from PySide6.QtGui import QKeySequence, QDesktopServices, QShortcut
 from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
     QVBoxLayout, QWidget)
 
@@ -68,16 +68,34 @@ class MainWindow(FluentWindow):
         # Default pages
         self.about_page = AboutPage(self, self.base_signals)
         self.plugins_page = PluginsPage(self, self._plugin_handler)
-        self.app_grid = AppGridView(self, self.model.app_grid, self.base_signals, self.page_widgets)
+        self.app_grid = AppGridView(self, self.model.app_grid, self.base_signals, 
+                                                                    self.page_widgets)
         self._init_left_menu()
         self._init_right_menu()
-        self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", force_light_mode=True).pixmap(20,20))
+        self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", 
+                                                    force_light_mode=True).pixmap(20,20))
+        # self.ui.search_bar_line_edit.clicked.connect(self.on_docs_searched)
+        self._conan_minor_version = ".".join(conan_version.split(".")[0:2]) # for docs
+        self.ui.search_bar_line_edit.setPlaceholderText(
+                                    f"Search Conan {self._conan_minor_version} docs")
 
+        for key in ("Enter", "Return",):
+            shorcut = QShortcut(key, self.ui.search_bar_line_edit)
+            shorcut.activated.connect(self.on_docs_searched)
         self._plugin_handler.load_plugin.connect(self._post_load_plugin)
         self._plugin_handler.unload_plugin.connect(self._unload_plugin)
+        # self._ui.docs_link_label.setText(f"""<html><head/><body><p>
+        #     <a href="https://docs.conan.io/en/{self._conan_minor_version}/index.html">
+        #     <span style="text-decoration: underline; color:#0000ff;">
+        #     Conan docs for this version</span></a></p></body></html>""")
 
         # size needs to be set as early as possible to correctly position loading windows
         self.restore_window_state()
+
+    def on_docs_searched(self):
+        search_url = (f"https://docs.conan.io/en/{self._conan_minor_version}/search.html"
+                      f"?q={self.ui.search_bar_line_edit.text()}&check_keywords=yes&area=default")
+        QDesktopServices.openUrl(search_url)
 
     def resize_page(self, widget: QWidget):
         pass
