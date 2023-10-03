@@ -13,7 +13,7 @@ from conan_app_launcher.ui.views.conan_conf.editable_model import EditableModel
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.conan_wrapper.types import Remote
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QAction, QDesktopServices, QShortcut
+from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog
 
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
@@ -125,9 +125,8 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.editables_ref_view.setModel(editables_model)
         self._ui.editables_ref_view.setItemsExpandable(False)
         self._ui.editables_ref_view.setRootIsDecorated(False)
-        self._ui.editables_ref_view.resizeColumnToContents(2)
-        self._ui.editables_ref_view.resizeColumnToContents(1)
-        self._ui.editables_ref_view.resizeColumnToContents(0)
+        for i in reversed(range(editables_model.root_item.column_count() - 1)):
+            self._ui.editables_ref_view.resizeColumnToContents(i)
 
         self._ui.editables_add_button.clicked.connect(self._remotes_controller.move_to_bottom)
         self.set_themed_icon(self._ui.editables_add_button, "icons/plus_rounded.svg")

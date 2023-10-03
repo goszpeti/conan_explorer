@@ -6,7 +6,7 @@ from conan_app_launcher.ui.common import ThemedWidget
 from PySide6.QtWidgets import (QStackedWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout,
                                QPushButton, QSizePolicy, QWidget, QSpacerItem)
 from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Qt
 
 from conan_app_launcher.ui.widgets.toggle import AnimatedToggle
 from . import RIGHT_MENU_MAX_WIDTH, gen_obj_name
@@ -172,4 +172,6 @@ class SideSubMenu(ThemedWidget):
         shortcut_obj = QShortcut(shortcut, shortcut_parent)
         shortcut_obj.activated.connect(target)
         button.setText(f"{button.text()} ({shortcut.toString()})")
+        shortcut_obj.setContext(Qt.ShortcutContext.ApplicationShortcut)
+
         return button

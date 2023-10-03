@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from shutil import rmtree
 from typing import Optional
 
-from PySide6.QtCore import QRect, Signal, SignalInstance
+from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
 from PySide6.QtGui import QKeySequence, QDesktopServices, QShortcut
 from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
     QVBoxLayout, QWidget)
@@ -80,8 +80,9 @@ class MainWindow(FluentWindow):
                                     f"Search Conan {self._conan_minor_version} docs")
 
         for key in ("Enter", "Return",):
-            shorcut = QShortcut(key, self.ui.search_bar_line_edit)
-            shorcut.activated.connect(self.on_docs_searched)
+            self._search_shorcut = QShortcut(key, self.ui.search_bar_line_edit, 
+                            self.on_docs_searched)
+            self._search_shorcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self._plugin_handler.load_plugin.connect(self._post_load_plugin)
         self._plugin_handler.unload_plugin.connect(self._unload_plugin)
         # self._ui.docs_link_label.setText(f"""<html><head/><body><p>

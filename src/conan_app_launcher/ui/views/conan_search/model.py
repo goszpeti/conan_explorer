@@ -108,7 +108,8 @@ class PkgSearchModel(TreeModel):
 
         if not recipes_with_remotes:
             self.root_item.append_child(SearchedPackageTreeItem(
-                ["No package found!", "", ""], self.root_item, None, PROFILE_TYPE, empty=True))
+                ["No package found!", "", ""], self.root_item, None,
+                  PROFILE_TYPE, empty=True))
             return
 
         # add info if it is installed
@@ -119,7 +120,8 @@ class PkgSearchModel(TreeModel):
             if recipe in installed_refs:
                 installed = True
             conan_item = SearchedPackageTreeItem(
-                [str(recipe), recipe_remotes, ""], self.root_item, None, REF_TYPE, lazy_loading=True, installed=installed)
+                [str(recipe), recipe_remotes, ""], self.root_item, None, REF_TYPE, 
+                lazy_loading=True, installed=installed)
             self.root_item.append_child(conan_item)
 
     def data(self, index: QtCore.QModelIndex, role: Qt.ItemDataRole):  # override

@@ -126,6 +126,5 @@ class ConanSearchController(QObject):
         return source_item
 
     def _resize_package_columns(self):
-        self._view.resizeColumnToContents(2)
-        self._view.resizeColumnToContents(1)
-        self._view.resizeColumnToContents(0)
+        for i in reversed(range(self._model.root_item.column_count() - 1)):
+            self._view.resizeColumnToContents(i)
