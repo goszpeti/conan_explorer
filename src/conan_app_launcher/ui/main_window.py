@@ -85,10 +85,6 @@ class MainWindow(FluentWindow):
             self._search_shorcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self._plugin_handler.load_plugin.connect(self._post_load_plugin)
         self._plugin_handler.unload_plugin.connect(self._unload_plugin)
-        # self._ui.docs_link_label.setText(f"""<html><head/><body><p>
-        #     <a href="https://docs.conan.io/en/{self._conan_minor_version}/index.html">
-        #     <span style="text-decoration: underline; color:#0000ff;">
-        #     Conan docs for this version</span></a></p></body></html>""")
 
         # size needs to be set as early as possible to correctly position loading windows
         self.restore_window_state()
