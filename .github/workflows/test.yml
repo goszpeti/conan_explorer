@@ -57,12 +57,12 @@ jobs:
             os: ubuntu-20.04
             conan: "==1.48.0"
             pytest_args: ""
-          - name: "ubuntu-conan2-py311"
+          - name: "ubuntu-conan2-py312"
             python: "3.11"
             os: ubuntu-20.04
             conan: "<3"
             pytest_args: "-m conanv2"
-          - name:  "windows-conan2-py311"
+          - name:  "windows-conan2-py312"
             python: "3.11"
             os: windows-latest
             conan: "<3"
@@ -77,7 +77,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up a display for gui in Linux
-        if: matrix.os == 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-20.04' # u22: libfontconfig1 qt6-wayland
         run: |
           sudo apt update
           sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 libxcb-shape0
