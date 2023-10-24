@@ -23,7 +23,7 @@ if conan_version_env: # eval as spec
 
 # Package meta-data.
 NAME = "conan-app-launcher"
-VERSION = "2.2.0"
+VERSION = "2.2.0a1"
 DESCRIPTION = "App Launcher and Package Explorer for Conan"
 URL = "https://github.com/goszpeti/conan_app_launcher"
 AUTHOR = "Péter Gosztolya and Contributors"
@@ -125,7 +125,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
-        # "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: Implementation :: CPython",
         "Environment :: X11 Applications :: Qt",
         "Environment :: Win32 (MS Windows)"
