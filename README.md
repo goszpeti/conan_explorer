@@ -67,7 +67,7 @@ Plugin Mechanism
 
 ### Prerequisites on Linux
 
-Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04.
+Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04 and 22.04.
 
 1. Pip must be updated to at least pip 20.3, so using a venv like this is recommended:
 
@@ -85,7 +85,9 @@ pip install conan_app_launcher
 
     sudo apt install xdg-utils
 
-4. Not all Qt6 versions support the Wayland lib of the base system. For Ubuntu 20.04 please install PySide6-Essentials 6.4.3.
+4. Not all Qt6 versions support the Wayland lib of the base system.
+  * For Ubuntu 20.04 please execute "pip install PySide6-Essentials==6.4.3" to get the correct Qt6 version
+  * For Ubuntu 22.04 please ensure that the system Qt6 packages are available. Simply execute "sudo apt-get install qt6-wayland" on a wayland system, or "sudo apt-get install qt6-base-dev" for an X based system.
 
 
 ### With pip from PyPi
@@ -98,7 +100,7 @@ After checkout use the command:
 
 ## Running
 
-Execute `conan-app-launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder. 
+Execute `conan-explorer`, if the Python "scripts" or "bin" folder is on your system path, or look it up manually in the site-packages folder. 
 You can also assign its icon to it from the site packages folder in conan_app_launcher/assets/icons/icon.ico.
 
 ### Main dependencies

@@ -108,7 +108,6 @@ jobs:
           sudo apt install lxterminal nautilus x11-utils mousepad xdg-utils
           sudo apt install dbus-x11 at-spi2-core
           sudo apt install qt6-wayland
-          pip install PySide6-Essentials==6.4.3
       ######### Platform specifics end #########
       - name: Install specific Conan version
         run: | # markupsafe is a workaround fix for broken conan dependencies
