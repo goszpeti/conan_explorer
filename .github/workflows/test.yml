@@ -23,26 +23,29 @@ jobs:
       matrix:
         name:
           [
-            "ubuntu-py38",
-            "ubuntu-py39",
-            "ubuntu-py310",
+            # latest conan 1.X on U20 and Windows
+            "ubuntu20-py38",
+            "ubuntu20-py39",
+            "ubuntu20-py310",
             "windows-py311",
-            "ubuntu-conan1.48-py38",
-            "ubuntu-conan2-py312",
+            # conan minimum version with python minimum version
+            "ubuntu20-conan1.48-py38",
+            # conan 2 stuff with bleeding edge - use Python 3.12 (U22 needed)
+            "ubuntu22-conan2-py312",
             "windows-conan2-py312",
           ]
         include:
-          - name: "ubuntu-py38"
+          - name: "ubuntu20-py38"
             python: "3.8"
             os: ubuntu-20.04
             conan: "<2"
             pytest_args: ""
-          - name: "ubuntu-py39"
+          - name: "ubuntu20-py39"
             python: "3.9"
             conan: "<2"
             os: ubuntu-20.04
             pytest_args: ""
-          - name: "ubuntu-py310"
+          - name: "ubuntu20-py310"
             python: "3.10"
             conan: "<2"
             os: ubuntu-20.04
@@ -52,12 +55,12 @@ jobs:
             os: windows-latest
             conan: "<2"
             pytest_args: ""
-          - name: "ubuntu-conan1.48-py38"
+          - name: "ubuntu20-conan1.48-py38"
             python: "3.8"
             os: ubuntu-20.04
             conan: "==1.48.0"
             pytest_args: ""
-          - name: "ubuntu-conan2-py312"
+          - name: "ubuntu22-conan2-py312"
             python: "3.12"
             os: ubuntu-22.04
             conan: "<3"
