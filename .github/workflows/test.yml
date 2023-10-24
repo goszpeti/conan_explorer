@@ -28,8 +28,8 @@ jobs:
             "ubuntu-py310",
             "windows-py311",
             "ubuntu-conan1.48-py38",
-            "ubuntu-conan2-py311",
-            "windows-conan2-py311",
+            "ubuntu-conan2-py312",
+            "windows-conan2-py312",
           ]
         include:
           - name: "ubuntu-py38"
@@ -58,12 +58,12 @@ jobs:
             conan: "==1.48.0"
             pytest_args: ""
           - name: "ubuntu-conan2-py312"
-            python: "3.11"
+            python: "3.12"
             os: ubuntu-20.04
             conan: "<3"
             pytest_args: "-m conanv2"
           - name:  "windows-conan2-py312"
-            python: "3.11"
+            python: "3.12"
             os: windows-latest
             conan: "<3"
             pytest_args: "-m conanv2"
@@ -97,9 +97,9 @@ jobs:
         run: | # markupsafe is a workaround fix for broken conan dependencies
           pip install markupsafe==2.0.1 --use-pep517
           pip install "conan${{ matrix.conan }}" --use-pep517
-      - name: Install specific PySide6 version
-        run: |  # 6.5.0 does currently not work on Linux 
-          pip install PySide6-Essentials==6.4.3
+      # - name: Install specific PySide6 version
+      #   run: |  # 6.5.0 does currently not work on Linux 
+      #     pip install PySide6-Essentials==6.4.3
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
