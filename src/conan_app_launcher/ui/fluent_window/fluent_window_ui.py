@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'fluent_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.2
+## Created by: Qt User Interface Compiler version 6.5.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -154,8 +154,6 @@ class Ui_MainWindow(object):
         self.top_center_search_frame = QFrame(self.top_center_right_frame)
         self.top_center_search_frame.setObjectName(u"top_center_search_frame")
         self.top_center_search_frame.setLayoutDirection(Qt.RightToLeft)
-        self.top_center_search_frame.setFrameShape(QFrame.StyledPanel)
-        self.top_center_search_frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout = QVBoxLayout(self.top_center_search_frame)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, -1, 0, -1)
