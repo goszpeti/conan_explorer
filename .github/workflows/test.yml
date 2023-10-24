@@ -89,7 +89,6 @@ jobs:
           sudo apt update
           sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 libxcb-shape0
           /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
-          sudo apt install qt6-wayland
       - name: Install system dependencies for testing on Ubuntu 20
         if: matrix.os == 'ubuntu-20.04'
         run: |  # terminal, file manager, xwininfo, text-editor
@@ -108,6 +107,7 @@ jobs:
         run: |  # terminal, file manager, xwininfo, text-editor
           sudo apt install lxterminal nautilus x11-utils mousepad xdg-utils
           sudo apt install dbus-x11 at-spi2-core
+          sudo apt install qt6-wayland
           pip install PySide6-Essentials==6.4.3
       ######### Platform specifics end #########
       - name: Install specific Conan version
