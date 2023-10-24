@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from shutil import rmtree
 from typing import Optional
 
-from PySide6.QtCore import QRect, Signal, SignalInstance
-from PySide6.QtGui import QKeySequence
+from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
+from PySide6.QtGui import QKeySequence, QDesktopServices, QShortcut
 from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
     QVBoxLayout, QWidget)
 
@@ -13,7 +13,7 @@ from conan_app_launcher import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
     MIN_FONT_SIZE, PathLike, conan_version)
 from conan_app_launcher.app.loading import AsyncLoader
 from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.settings import (CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
+from conan_app_launcher.settings import (AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
     FONT_SIZE, GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
     GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
 from conan_app_launcher.ui.common.theming import (get_gui_dark_mode, get_gui_style, 
@@ -68,16 +68,31 @@ class MainWindow(FluentWindow):
         # Default pages
         self.about_page = AboutPage(self, self.base_signals)
         self.plugins_page = PluginsPage(self, self._plugin_handler)
-        self.app_grid = AppGridView(self, self.model.app_grid, self.base_signals, self.page_widgets)
+        self.app_grid = AppGridView(self, self.model.app_grid, self.base_signals, 
+                                                                    self.page_widgets)
         self._init_left_menu()
         self._init_right_menu()
-        self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", force_light_mode=True).pixmap(20,20))
+        self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", 
+                                                    force_light_mode=True).pixmap(20,20))
+        # self.ui.search_bar_line_edit.clicked.connect(self.on_docs_searched)
+        self._conan_minor_version = ".".join(conan_version.split(".")[0:2]) # for docs
+        self.ui.search_bar_line_edit.setPlaceholderText(
+                                    f"Search Conan {self._conan_minor_version} docs")
 
+        for key in ("Enter", "Return",):
+            self._search_shorcut = QShortcut(key, self.ui.search_bar_line_edit, 
+                            self.on_docs_searched)
+            self._search_shorcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self._plugin_handler.load_plugin.connect(self._post_load_plugin)
         self._plugin_handler.unload_plugin.connect(self._unload_plugin)
 
         # size needs to be set as early as possible to correctly position loading windows
         self.restore_window_state()
+
+    def on_docs_searched(self):
+        search_url = (f"https://docs.conan.io/en/{self._conan_minor_version}/search.html"
+                      f"?q={self.ui.search_bar_line_edit.text()}&check_keywords=yes&area=default")
+        QDesktopServices.openUrl(search_url)
 
     def resize_page(self, widget: QWidget):
         pass
@@ -113,13 +128,20 @@ class MainWindow(FluentWindow):
         self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/view.svg")
 
         view_settings_submenu.add_button_menu_entry(
-            "Font Size +", self.on_font_size_increased, "icons/increase_font.svg", QKeySequence("CTRL++"), self)
+            "Font Size +", self.on_font_size_increased, "icons/increase_font.svg", 
+            QKeySequence("CTRL++"), self)
         view_settings_submenu.add_button_menu_entry(
-            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.svg", QKeySequence("CTRL+-"), self)
+            "Font Size - ", self.on_font_size_decreased, "icons/decrease_font.svg", 
+            QKeySequence("CTRL+-"), self)
         view_settings_submenu.add_menu_line()
 
         view_settings_submenu.add_toggle_menu_entry(
-            "Dark Mode", self.on_dark_mode_changed, get_gui_dark_mode(), "icons/dark_mode.svg")
+            "Dark Mode", self.on_dark_mode_changed, get_gui_dark_mode(), 
+            "icons/dark_mode.svg")
+        
+        view_settings_submenu.add_toggle_menu_entry(
+            "Open latest view", self.on_auto_open_last_view_changed, 
+            app.active_settings.get_bool(AUTO_OPEN_LAST_VIEW), "icons/refresh.svg")
         if ENABLE_GUI_STYLES:
             self._init_style_chooser()
             view_settings_submenu.add_named_custom_entry("Icon Style", self._style_chooser_frame, 
@@ -169,12 +191,13 @@ class MainWindow(FluentWindow):
         loader.async_loading(self, self._load_job, (config_source_str,))
         loader.wait_for_finished()
         # Restore last view
-        try:
-            last_view = app.active_settings.get_string(LAST_VIEW)
-            page = self.page_widgets.get_page_by_name(last_view)
-            self.page_widgets.get_button_by_type(type(page)).click()
-        except Exception:
-            pass
+        if app.active_settings.get_bool(AUTO_OPEN_LAST_VIEW):
+            try:
+                last_view = app.active_settings.get_string(LAST_VIEW)
+                page = self.page_widgets.get_page_by_name(last_view)
+                self.page_widgets.get_button_by_type(type(page)).click()
+            except Exception:
+                pass
         
         self.loaded = True
 
@@ -250,6 +273,11 @@ class MainWindow(FluentWindow):
         self.apply_theme()
         for page in self.page_widgets.get_all_pages():
             page.reload_themed_icons()
+
+    def on_auto_open_last_view_changed(self):
+        sender_toggle: AnimatedToggle = self.sender()  # type: ignore
+        sender_toggle.wait_for_anim_finish()
+        app.active_settings.set(AUTO_OPEN_LAST_VIEW, sender_toggle.isChecked())
 
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """

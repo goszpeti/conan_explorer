@@ -1,4 +1,4 @@
-""" QT Loading dialog. Placed outside of ui, because 
+""" Qt Loading dialog. Placed outside of ui, because 
 it is needed to boostrap the loading of all uis. """
 
 import os

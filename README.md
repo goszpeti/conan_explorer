@@ -103,8 +103,8 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 
 ### Main dependencies
 
-* Pyside6 >= 6.3.0
-* 1.24.0 <= conan < 2.1
+* Pyside6 >= 6.4.0
+* 1.48.0 <= conan < 2.1
 
 > **Warning** - **Deprecation of Python 3.X**  
 > From version 2.0.0 Python 3.6 support will be dropped, having reached end-of-life.    
@@ -140,5 +140,4 @@ See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for St
 
 ##### PyPi backports for older Python versions
 * contextlib-chdir by Álvaro Mondéjar Rubio under [BSD License (BSD-3-Clause) ](https://opensource.org/license/BSD-3-clause/)
-* importlib-metadata by Jason R. Coombs under [ Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * typing-extensions by Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee under [Python Software Foundation License(PSF)](https://docs.python.org/3/license.html)

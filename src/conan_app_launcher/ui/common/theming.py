@@ -17,7 +17,6 @@ from PySide6.QtCore import QSize
 from conan_app_launcher.ui.common import (draw_svg_with_color, get_icon_from_image_file, 
                                           get_inverted_asset_image)
 
-
 if TYPE_CHECKING:
     from typing import TypedDict, Protocol, runtime_checkable
 else:

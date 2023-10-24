@@ -111,7 +111,8 @@ class PluginHandler(QObject):
             Logger().info(
                 f"Can't load plugin {plugin.name}."
                 f"Conan version restriction {plugin.conan_versions} applies.")
-        self._active_plugins.append(loaded_plugin)
+        if loaded_plugin:
+            self._active_plugins.append(loaded_plugin)
         return loaded_plugin
 
     def post_load_plugins(self):

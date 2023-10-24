@@ -7,6 +7,7 @@ from types import FunctionType
 class SignatureMismatchException(Exception):
     pass
 
+
 class SignatureCheckMeta(type):
     def __new__(cls, name, base_classes, methods):
         """ 
@@ -15,7 +16,7 @@ class SignatureCheckMeta(type):
         """
         for method_name in methods:
             # allow for different constructors through factories
-            if method_name == "__init__": 
+            if method_name == "__init__":
                 continue
             method = methods[method_name]
 
@@ -28,8 +29,8 @@ class SignatureCheckMeta(type):
                     method_argspec = inspect.getfullargspec(method)
                     if method_argspec != base_argspec:
                         raise SignatureMismatchException(f"{str(method_name)}\n"
-                            f"Expected: {str(base_argspec)}\n"
-                            f"Actual: {str(method_argspec)}")
+                                                    f"Expected: {str(base_argspec)}\n"
+                                                    f"Actual: {str(method_argspec)}")
                 except AttributeError:
                     # method was not defined in base class, skip
                     continue

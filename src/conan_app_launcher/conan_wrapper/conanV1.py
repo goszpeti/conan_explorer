@@ -1,5 +1,7 @@
 import os
 import platform
+
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
@@ -63,6 +65,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             Logger().debug(str(e))
         from .conan_cache import ConanInfoCache
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
+        Logger().debug("Initialized Conan V1 API wrapper")
 
         return self
     
@@ -158,13 +161,15 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
         pkg_path = Path(INVALID_PATH)
-        editable_info = self._conan.editable_list().get(str(conan_ref))
-        if editable_info is None:
-            return pkg_path
-        pkg_path = Path(editable_info.get("path", INVALID_PATH))
+        editable_dict = self._conan.editable_list().get(str(conan_ref), {})
+        pkg_path = Path(editable_dict.get("path", INVALID_PATH))
         if pkg_path.is_file():
             return pkg_path.parent
         return pkg_path
+    
+    def get_editables_output_folder(self, conan_ref: ConanRef) -> str:
+        editable_dict = self._conan.editable_list().get(str(conan_ref), {})
+        return editable_dict.get("output_folder", "None")
 
     def get_short_path_root(self) -> Path:
         # only need to get once
@@ -258,12 +263,16 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         if profile:
             profile_names = [profile]
         try:
-            infos = self._conan.install_reference(
-                conan_ref, settings=settings_list, options=options_list, update=update,
-                profile_names=profile_names, generators=generators)
+            # Try to redirect custom streams in conanfile, to avoid missing flush method
+            devnull = open(os.devnull, 'w')
+            with redirect_stdout(devnull):
+                with redirect_stderr(devnull):
+                    infos = self._conan.install_reference(conan_ref, 
+                        settings=settings_list, options=options_list, update=update,
+                        profile_names=profile_names, generators=generators)
             if not infos.get("error", True):
                 package_id = infos.get("installed", [{}])[0].get(
-                    "packages", [{}])[0].get("id", "")
+                                                    "packages", [{}])[0].get("id", "")
             Logger().info(
                 f"Installation of '<b>{str(conan_ref)}</b>' finished")
             # Update cache with this package

@@ -1,4 +1,3 @@
-import json
 import platform
 from pathlib import Path
 import sys
@@ -10,6 +9,7 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.ui.common import get_themed_asset_icon, ConfigHighlighter
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
+from conan_app_launcher.ui.views.conan_conf.editable_model import EditableModel
 from conan_app_launcher.ui.widgets import RoundedMenu
 from conan_app_launcher.conan_wrapper.types import Remote
 from PySide6.QtCore import Qt, Signal
@@ -17,27 +17,27 @@ from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog
 
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
-from .model import ProfilesModel
-from .controller import ConanRemoteController
+from .remotes_controller import ConanRemoteController
+from .profiles_model import ProfilesModel
 
 if TYPE_CHECKING:
     from conan_app_launcher.ui.main_window import BaseSignals
     from conan_app_launcher.ui.fluent_window.fluent_window import FluentWindow
-
 
 class ConanConfigView(PluginInterfaceV1):
 
     load_signal = Signal()  # type: ignore
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
-                 base_signals: "BaseSignals", page_widgets: Optional["FluentWindow.PageStore"] = None):
+                 base_signals: "BaseSignals", 
+                 page_widgets: Optional["FluentWindow.PageStore"] = None):
         super().__init__(parent, plugin_description, base_signals)
         from .conan_conf_ui import Ui_Form
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)
         self.profiles_path = Path("Unknown")
-        self._edited_profile = None
+        self._edited_profile = ""
 
     def load(self):
         assert self._base_signals
@@ -63,8 +63,6 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.profiles_text_browser.document(), "ini")
         self._settings_highlighter = ConfigHighlighter(
             self._ui.settings_file_text_browser.document(), "yaml")
-        self._editable_highlighter = ConfigHighlighter(
-            self._ui.editables_file_text_browser.document(), "yaml")
 
     def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(conan_version)
@@ -123,15 +121,18 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
 
     def _load_editables_tab(self):
-        self.set_themed_icon(self._ui.editables_save_button, "icons/save.svg")
-        try:
-            json_content = json.loads(
-                Path(app.conan_api.get_editables_file_path()).read_text())
-            self._ui.editables_file_text_browser.setText(
-                json.dumps(json_content, indent=2, separators=(',', ': ')))
-            self._ui.editables_save_button.clicked.connect(self.on_save_editable_file)
-        except Exception:
-            Logger().error("Cannot read editables file!")
+        editables_model = EditableModel()
+        self._ui.editables_ref_view.setModel(editables_model)
+        self._ui.editables_ref_view.setItemsExpandable(False)
+        self._ui.editables_ref_view.setRootIsDecorated(False)
+        for i in reversed(range(editables_model.root_item.column_count() - 1)):
+            self._ui.editables_ref_view.resizeColumnToContents(i)
+
+        self._ui.editables_add_button.clicked.connect(self._remotes_controller.move_to_bottom)
+        self.set_themed_icon(self._ui.editables_add_button, "icons/plus_rounded.svg")
+        self.set_themed_icon(self._ui.editables_remove_button, "icons/delete.svg")
+        self.set_themed_icon(self._ui.editables_refresh_button, "icons/refresh.svg")
+        self.set_themed_icon(self._ui.editables_edit_button, "icons/edit.svg")
 
     def _init_profile_context_menu(self):
         self.profiles_cntx_menu = RoundedMenu()
@@ -144,10 +145,7 @@ class ConanConfigView(PluginInterfaceV1):
     def resizeEvent(self, a0):  # override
         """ Resize remote view columns automatically if window size changes """
         super().resizeEvent(a0)
-
         self._remotes_controller.resize_remote_columns()
-        # self._ui.conan_usr_cache_label.adjustSize()
-        # self._ui.revision_enabled_label.setMaximumWidth(self._ui.conan_usr_cache_label.width())
 
     def reload_themed_icons(self):
         super().reload_themed_icons()
@@ -159,8 +157,6 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.profiles_text_browser.document(), "ini")
         self._settings_highlighter = ConfigHighlighter(
             self._ui.settings_file_text_browser.document(), "yaml")
-        self._editable_highlighter = ConfigHighlighter(
-            self._ui.editables_file_text_browser.document(), "yaml")
 
 # Profile
 
@@ -177,7 +173,7 @@ class ConanConfigView(PluginInterfaceV1):
         if not view_indexes:
             return
         view_index = view_indexes[0]
-        profile_name = view_index.data()
+        profile_name: str = view_index.data()
         self._edited_profile = profile_name
         try:
             profile_content = (self.profiles_path / profile_name).read_text()
@@ -213,7 +209,8 @@ class ConanConfigView(PluginInterfaceV1):
             self, "Rename profile", 'Enter new name:', text=profile_name)
         if accepted and profile_name:
             try:
-                (self.profiles_path / profile_name).rename(self.profiles_path / new_profile_name)
+                (self.profiles_path / profile_name).rename(
+                                                self.profiles_path / new_profile_name)
             except Exception as e:
                 Logger().error(f"Can't rename {profile_name}: {e}")
             self.on_refresh_profiles()
@@ -236,10 +233,10 @@ class ConanConfigView(PluginInterfaceV1):
             self.on_refresh_profiles()
 
     def on_refresh_profiles(self):
-        profile_model: ProfilesModel = self._ui.profiles_list_view.model()  # type: ignore
-        # clear selection, otherwise an old selection could remain active in the profile content browser
+        profile_model: ProfilesModel = self._ui.profiles_list_view.model() # type: ignore
+        # clear selection, otherwise an old selection could remain active
         self._ui.profiles_list_view.selectionModel().clear()
-        profile_model.update_profiles()
+        profile_model.setup_model_data()
         self._ui.profiles_list_view.repaint()
 
 # Remote
@@ -250,21 +247,32 @@ class ConanConfigView(PluginInterfaceV1):
     def _init_remotes_tab(self):
         self._ui.remote_refresh_button.clicked.connect(self._remotes_controller.update)
         self.set_themed_icon(self._ui.remote_refresh_button, "icons/refresh.svg")
-        self._ui.remote_login.clicked.connect(self.on_remotes_login)
-        self.set_themed_icon(self._ui.remote_login, "icons/login.svg")
-        self._ui.remote_toggle_disabled.clicked.connect(self.on_remote_disable)
-        self.set_themed_icon(self._ui.remote_toggle_disabled, "icons/hide.svg")
-        self._ui.remote_add.clicked.connect(self.on_remote_add)
-        self.set_themed_icon(self._ui.remote_add, "icons/plus_rounded.svg")
-        self._ui.remote_remove.clicked.connect(self.on_remote_remove)
-        self.set_themed_icon(self._ui.remote_remove, "icons/delete.svg")
+        self._ui.remote_login_button.clicked.connect(self.on_remotes_login)
+        self.set_themed_icon(self._ui.remote_login_button, "icons/login.svg")
+        self._ui.remote_toggle_disabled_button.clicked.connect(self.on_remote_disable)
+        self.set_themed_icon(self._ui.remote_toggle_disabled_button, "icons/hide.svg")
+        self._ui.remote_add_button.clicked.connect(self.on_remote_add)
+        self.set_themed_icon(self._ui.remote_add_button, "icons/plus_rounded.svg")
+        self._ui.remote_remove_button.clicked.connect(self.on_remote_remove)
+        self.set_themed_icon(self._ui.remote_remove_button, "icons/delete.svg")
+
         self._ui.remote_move_up_button.clicked.connect(self._remotes_controller.move_up)
         self.set_themed_icon(self._ui.remote_move_up_button, "icons/arrow_up.svg")
         self._ui.remote_move_down_button.clicked.connect(
             self._remotes_controller.move_down)
         self.set_themed_icon(self._ui.remote_move_down_button, "icons/arrow_down.svg")
 
+        self._ui.remote_move_top_button.clicked.connect(
+            self._remotes_controller.move_to_top)
+        self.set_themed_icon(self._ui.remote_move_top_button, "icons/expand_less.svg")
+        self._ui.remote_move_bottom_button.clicked.connect(
+            self._remotes_controller.move_to_bottom)
+        self.set_themed_icon(self._ui.remote_move_bottom_button, "icons/expand.svg")
+
+        self._ui.remotes_edit_button.clicked.connect(self.on_remote_edit)
+        self.set_themed_icon(self._ui.remotes_edit_button, "icons/edit.svg")
         self._ui.remotes_tree_view.doubleClicked.connect(self.on_remote_edit)
+
         self._ui.remotes_tree_view.setContextMenuPolicy(
             Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.remotes_tree_view.customContextMenuRequested.connect(
@@ -376,5 +384,6 @@ class ConanConfigView(PluginInterfaceV1):
 # Editables tab
 
     def on_save_editable_file(self):
-        app.conan_api.get_editables_file_path().write_text(
-            self._ui.editables_file_text_browser.toPlainText())
+        pass
+        # app.conan_api.get_editables_file_path().write_text(
+        #     self._ui.editables_file_text_browser.toPlainText())

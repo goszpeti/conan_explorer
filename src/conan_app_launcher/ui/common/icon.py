@@ -11,7 +11,8 @@ from PySide6.QtWidgets import QFileIconProvider
 def get_inverted_asset_image(image_path: Path) -> Path:
     """ Inverts a given image and saves it beside the original one with _inv in the name.
     To be used for icons to switch between light and dark mode themes. """
-    inverted_img_path = image_path.parent / ((image_path.with_suffix('').name + "_inv") + image_path.suffix)
+    inverted_img_path = image_path.parent / (
+                        (image_path.with_suffix('').name + "_inv") + image_path.suffix)
 
     if not inverted_img_path.exists():
         img = QImage(str(image_path))

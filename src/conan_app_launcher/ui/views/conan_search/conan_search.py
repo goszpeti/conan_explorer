@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
-import conan_app_launcher.app as app
-from conan_app_launcher.ui.common.syntax_highlighting import ConfigHighlighter  # using global module pattern
+import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher.ui.common.syntax_highlighting import ConfigHighlighter
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
 from conan_app_launcher.ui.widgets import RoundedMenu
@@ -36,8 +36,8 @@ class ConanSearchView(PluginInterfaceV1):
             conan_pkg_installed = self._base_signals.conan_pkg_installed
             conan_pkg_removed = self._base_signals.conan_pkg_removed
 
-        self._search_controller = ConanSearchController(
-            self._ui.search_results_tree_view, self._ui.search_line, self._ui.search_button, self._ui.remote_list,
+        self._search_controller = ConanSearchController(self._ui.search_results_tree_view, 
+            self._ui.search_line, self._ui.search_button, self._ui.remote_list,
             self._ui.package_info_text, conan_pkg_installed, conan_pkg_removed)
 
         self._ui.search_button.clicked.connect(self._search_controller.on_search)
@@ -46,8 +46,9 @@ class ConanSearchView(PluginInterfaceV1):
         self._ui.search_line.validator_enabled = False
         self._ui.search_line.textChanged.connect(self._enable_search_button)
         for key in ("Enter", "Return",):
-            shorcut = QShortcut(key, self)
-            shorcut.activated.connect(self._ui.search_button.animateClick)
+            self._search_shorcut = QShortcut(key, self._ui.search_line, 
+                                             self._ui.search_button.animateClick)
+            self._search_shorcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
 
         # init remotes list
         self._init_remotes()

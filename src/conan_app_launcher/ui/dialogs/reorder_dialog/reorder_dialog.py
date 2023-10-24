@@ -38,6 +38,9 @@ class ReorderingModel(Protocol):
     def save(self):
         ...
 
+    def rowCount(self) -> int:
+        ...
+
 class ReorderDialog(QDialog):
 
     def __init__(self, model: ReorderingModel, parent: Optional[QWidget]):
@@ -68,6 +71,37 @@ class ReorderController():
     def __init__(self, view: "QListView| QTreeView", model: ReorderingModel) -> None:
         self._view = view
         self._model = model
+
+    def move_to_position(self, position: int):
+        """ Moves the selected item(s) up in the list """
+        sel_indexes = self._view.selectedIndexes()
+        if len(sel_indexes) == 0:
+            Logger().info('Select at least one item from list!')
+
+        if position == -1: # use -1 for last element
+            position = self._model.rowCount() - 1
+
+        try:
+            # selected indexes need to be sorted
+            sel_indexes.sort() # type: ignore 
+            self._view.selectionModel().clearSelection()
+
+            for idx in sel_indexes:
+                if idx is None:
+                    continue
+                row = idx.row()
+                if row == position:
+                    return
+                pre_idx = self._model.index(position, 0, self._view.rootIndex())
+                self._view.model().beginMoveRows(idx, row, row, pre_idx, pre_idx.row())
+                self._view.model().moveRow(idx, row, pre_idx, pre_idx.row())
+                self._view.model().endMoveRows()
+                # for all columns
+                for column in range(self._model.columnCount(QModelIndex())):
+                    index = self._model.index(position, column, QModelIndex())
+                    self._view.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
+        except Exception as e:
+            print(e)
 
     def move_up(self):
         """ Moves the selected item(s) up in the list """

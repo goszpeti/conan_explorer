@@ -32,12 +32,13 @@ class AppGridView(PluginInterfaceV1):
     def __init__(self, parent, model: "UiAppGridModel", base_signals: "BaseSignals", page_widgets: FluentWindow.PageStore):
         plugin_descr = PluginDescription("Conan Quicklaunch", BUILT_IN_PLUGIN, AUTHOR, "", "", "", " ", False, "")
         super().__init__(parent, plugin_descr, base_signals, page_widgets) # TODO
-        self.setLayout(QVBoxLayout(self))
-        self.layout().setContentsMargins(0, 0, 0, 0)
+
         self.tab_widget = QTabWidget(self)
         self.tab_widget.setContentsMargins(0, 0, 0, 0)
         self.tab_widget.setElideMode(Qt.TextElideMode.ElideLeft)
         self.tab_widget.setUsesScrollButtons(True)
+        self.setLayout(QVBoxLayout(self))
+        self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().addWidget(self.tab_widget)
 
         self.model = model

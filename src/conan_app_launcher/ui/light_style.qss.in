@@ -456,6 +456,13 @@ QHeaderView::section {
     border-width: 2px;
 }
 
+QLineEdit {
+    border-width: 1px;
+    border-color: rgb(58, 58, 58);
+    border-style: inset;
+    padding: 0 8px;
+}
+
 QToolTip {
     border-style: none;
     /* needed, otherwise the background color is not applied */

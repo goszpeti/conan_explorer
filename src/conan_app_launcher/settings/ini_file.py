@@ -9,9 +9,10 @@ from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.app.system import get_default_file_editor
 from conan_app_launcher.app.typing import SignatureCheckMeta
 
-from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE,
-               FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME, GUI_STYLE,
-               GUI_STYLE_MATERIAL, GUI_MODE_LIGHT, GUI_MODE, LAST_CONFIG_FILE, LAST_VIEW, PLUGINS_SECTION_NAME,
+from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, 
+               DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE, FONT_SIZE, 
+               GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_MATERIAL, GUI_MODE_LIGHT, 
+               GUI_MODE, LAST_CONFIG_FILE, LAST_VIEW, PLUGINS_SECTION_NAME,
                VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
 
 
@@ -29,7 +30,8 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
             GUI_MODE: GUI_MODE_LIGHT,
             WINDOW_SIZE: "0,0,800,600",
             CONSOLE_SPLIT_SIZES: "413,126",
-            LAST_VIEW: ""
+            LAST_VIEW: "",
+            AUTO_OPEN_LAST_VIEW: True,
         },
         PLUGINS_SECTION_NAME: {
             BUILT_IN_PLUGIN: str(base_path / "ui" / "plugins.ini")
@@ -106,8 +108,9 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
 
-    def set(self, name: str, value: "str | int | float | bool | dict"):
-        """ Set the value of a specific setting. Does not write to file, if value is already set. """
+    def set(self, name: str, value: "str|int|float|bool"):
+        """ Set the value of a specific setting. 
+        Does not write to file, if value is already set. """
         if name in self._values.keys() and isinstance(value, dict):  # dict type setting
             if self._values[name] == value:
                 return
@@ -122,7 +125,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
         if self._auto_save:
             self.save()
 
-    def add(self, name: str, value: "str | int | float | bool", node: Optional[str] = None):
+    def add(self, name: str, value: "str|int|float|bool", node: Optional[str]=None):
         if node is None:
             node = GENERAL_SECTION_NAME
         if not self._values.get(node):
@@ -165,8 +168,8 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
                     update_needed |= self._read_setting(setting, node)
 
         except Exception as e:
-            Logger().error(
-                f"Settings: Can't read ini file: {str(e)}, trying to delete and create a new one...")
+            Logger().error((f"Settings: Can't read ini file: {str(e)}",
+                             "trying to delete and create a new one..."))
             try:
                 # let an exeception to the user, file can't be deleted
                 os.remove(str(self._ini_file_path))
@@ -180,7 +183,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
             self._parser.write(ini_file)
 
     def _get_section(self, node: str) -> configparser.SectionProxy:
-        """ Helper function to get a section from ini, or create it, if it does not exist."""
+        """ Get a section from ini, or create it, if it does not exist."""
         if node not in self._parser:
             self._parser.add_section(node)
         if node not in self._values:
@@ -189,7 +192,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
 
     def _read_dict_setting(self, node: str) -> bool:
         """ 
-        Helper function to get a dict style setting.
+        Get a dict style setting.
         Dict settings are section itself and are read dynamically.
         """
         section = self._get_section(node)
@@ -199,7 +202,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
         return update_needed
 
     def _read_setting(self, name: str, node: str) -> bool:
-        """ Helper function to get a setting, which uses the init value to determine the type. 
+        """ Get a setting, which uses the init value to determine the type. 
         Returns, if file needs tobe updated
         """
         section = self._get_section(node)
@@ -229,7 +232,8 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
             return False
         if value == "" and default_value:
             value = default_value
-        # autosave must be disabled, otherwise we overwrite the other settings in the file
+        # autosave must be disabled temporarily, 
+        # otherwise we overwrite the other settings in the file
         auto_save = self._auto_save
         self._auto_save = False
         self._values[node][name] = value

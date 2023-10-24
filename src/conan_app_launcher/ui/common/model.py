@@ -2,6 +2,9 @@ from typing import Any, Callable, List
 from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
 from PySide6.QtWidgets import QFileSystemModel
 
+QAF = Qt.AlignmentFlag
+QORI = Qt.Orientation
+QIDR = Qt.ItemDataRole
 
 def re_register_signal(signal: SignalInstance, slot: Callable):
     try:  # need to be removed, otherwise will be called multiple times
@@ -15,15 +18,15 @@ def re_register_signal(signal: SignalInstance, slot: Callable):
 class FileSystemModel(QFileSystemModel):
     """ This fixes an issue with the header not being centered vertically """
 
-    def __init__(self, h_align=Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, 
-                    v_align=Qt.AlignmentFlag.AlignVCenter, parent=None):
+    def __init__(self, h_align=QAF.AlignLeft | QAF.AlignVCenter, 
+                       v_align=QAF.AlignVCenter, parent=None):
         super().__init__(parent)
-        self.alignments = {Qt.Orientation.Horizontal: h_align, Qt.Orientation.Vertical: v_align}
+        self.alignments = {QORI.Horizontal: h_align, QORI.Vertical: v_align}
 
     def headerData(self, section, orientation, role):
-        if role == Qt.ItemDataRole.TextAlignmentRole:
+        if role == QIDR.TextAlignmentRole:
             return self.alignments[orientation]
-        elif role == Qt.ItemDataRole.DecorationRole:
+        elif role == QIDR.DecorationRole:
             return None
         else:
             return QFileSystemModel.headerData(self, section, orientation, role)
@@ -140,7 +143,7 @@ class TreeModel(QAbstractItemModel):
         return self.createIndex(parent_item.row(), 0, parent_item)
 
     def headerData(self, section, orientation, role):  # override
-        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
+        if orientation == Qt.Orientation.Horizontal and role == QIDR.DisplayRole:
             return self.root_item.data(section)
 
         return None

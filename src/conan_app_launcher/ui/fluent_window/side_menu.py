@@ -6,7 +6,7 @@ from conan_app_launcher.ui.common import ThemedWidget
 from PySide6.QtWidgets import (QStackedWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout,
                                QPushButton, QSizePolicy, QWidget, QSpacerItem)
 from PySide6.QtGui import QKeySequence, QShortcut
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Qt
 
 from conan_app_launcher.ui.widgets.toggle import AnimatedToggle
 from . import RIGHT_MENU_MAX_WIDTH, gen_obj_name
@@ -105,8 +105,9 @@ class SideSubMenu(ThemedWidget):
         if force_v_layout or label.width() > (RIGHT_MENU_MAX_WIDTH - widget.width() - 30):  # aggressive 30 px padding
             layout = QVBoxLayout(frame)
             frame.setLayout(layout)
-            if icon is not None:  # in vmode the icomn still needs to be placed in the same row, so we need an extra h-layout
-                horizontal_layout = QHBoxLayout(frame)
+            if icon is not None:  # in vmode the icon still needs to be placed in the 
+                # same row, so we need an extra h-layout
+                horizontal_layout = QHBoxLayout()
                 horizontal_layout.addWidget(icon)
                 horizontal_layout.addWidget(label)
                 horizontal_layout.addSpacerItem(QSpacerItem(
@@ -135,8 +136,7 @@ class SideSubMenu(ThemedWidget):
         toggle = AnimatedToggle(self)
         toggle.setChecked(initial_state)
         toggle.stateChanged.connect(target)
-        self.add_named_custom_entry(
-            name, toggle, asset_icon, force_v_layout=True)
+        self.add_named_custom_entry(name, toggle, asset_icon, force_v_layout=True)
         return toggle
 
     def add_sub_menu(self, sub_menu: "SideSubMenu", asset_icon: str = ""):
@@ -172,4 +172,6 @@ class SideSubMenu(ThemedWidget):
         shortcut_obj = QShortcut(shortcut, shortcut_parent)
         shortcut_obj.activated.connect(target)
         button.setText(f"{button.text()} ({shortcut.toString()})")
+        shortcut_obj.setContext(Qt.ShortcutContext.ApplicationShortcut)
+
         return button

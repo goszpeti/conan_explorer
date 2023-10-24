@@ -39,8 +39,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         from .conan_cache import ConanInfoCache
         self._conan = ConanAPI()
         self._client_cache = ClientCache(self._conan.cache_folder)
-        self.info_cache = ConanInfoCache(
-            user_save_path, self.get_all_local_refs())
+        self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
+        Logger().debug("Initialized Conan V2 API wrapper")
         return self
 
     ### General commands ###
@@ -58,8 +58,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                 self._client_cache).load_profile(profile_name)
             return profile.settings
         except Exception as e:
-            Logger().error(
-                f"Can't get profile {profile_name} settings: {str(e)}")
+            Logger().error(f"Can't get profile {profile_name} settings: {str(e)}")
         return {}
 
     def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> Path:
@@ -264,6 +263,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         """ Get package path of an editable reference. """
         editables_dict = self._conan.local.editable_list()
         return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH)).parent
+    
+    def get_editables_output_folder(self, conan_ref: ConanRef) -> str:
+        editables_dict = self._conan.local.editable_list()
+        return editables_dict.get(conan_ref, {}).get("output_folder", "None")
 
     def get_editable_references(self) -> List[str]:
         """ Get all local editable references. """

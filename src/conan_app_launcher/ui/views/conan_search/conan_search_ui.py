@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_search.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.5.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -45,6 +45,7 @@ class Ui_Form(object):
         self.search_line.setMaximumSize(QSize(16777215, 16777215))
         self.search_line.setSizeIncrement(QSize(0, 0))
         self.search_line.setBaseSize(QSize(500, 0))
+        self.search_line.setLayoutDirection(Qt.RightToLeft)
         self.search_line.setClearButtonEnabled(True)
 
         self.search_text_button_layout.addWidget(self.search_line)
