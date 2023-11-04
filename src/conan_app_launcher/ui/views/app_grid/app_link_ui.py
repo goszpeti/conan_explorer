@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'app_link.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.5.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -52,8 +52,8 @@ class Ui_Form(object):
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.app_button.sizePolicy().hasHeightForWidth())
         self.app_button.setSizePolicy(sizePolicy1)
-        self.app_button.setMinimumSize(QSize(180, 100))
-        self.app_button.setMaximumSize(QSize(180, 100))
+        self.app_button.setMinimumSize(QSize(150, 100))
+        self.app_button.setMaximumSize(QSize(150, 100))
 
         self.verticalLayout_2.addWidget(self.app_button)
 
