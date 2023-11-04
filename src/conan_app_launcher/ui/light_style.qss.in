@@ -459,7 +459,7 @@ QHeaderView::section {
 QLineEdit {
     border-width: 1px;
     border-color: rgb(58, 58, 58);
-    border-style: inset;
+    border-style: none;
     padding: 0 8px;
 }
 
