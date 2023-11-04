@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_search.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.2
+## Created by: Qt User Interface Compiler version 6.5.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -164,6 +164,7 @@ class Ui_Form(object):
         self.search_results_tree_view.setSizePolicy(sizePolicy4)
         self.search_results_tree_view.setFrameShape(QFrame.NoFrame)
         self.search_results_tree_view.setSizeAdjustPolicy(QAbstractScrollArea.AdjustIgnored)
+        self.search_results_tree_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.search_results_tree_view.setSortingEnabled(True)
         self.search_results_tree_view.setAnimated(True)
 

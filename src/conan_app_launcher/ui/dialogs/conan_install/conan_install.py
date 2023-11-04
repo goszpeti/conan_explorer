@@ -6,14 +6,16 @@ from conan_app_launcher.app.logger import Logger  # using global module pattern
 from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import DEFAULT_INSTALL_PROFILE
 from conan_app_launcher.ui.common import get_themed_asset_icon
-from PySide6.QtCore import QSize, Qt, SignalInstance
+from PySide6.QtCore import QSize, Qt, Signal, SignalInstance
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem, QComboBox
 
 from conan_app_launcher.conan_wrapper.types import ConanOptions, ConanRef
+from conan_app_launcher.ui.dialogs.pkg_diff.diff import PkgDiffDialog
 
 
 class ConanInstallDialog(QDialog):
     MARK_AS_DEFAULT_INSTALL_PROFILE = " *"
+    conan_diff_requested: SignalInstance = Signal(str)  # type: ignore - conan_ref
 
     def __init__(self, parent: Optional[QWidget], conan_full_ref: str, 
                  pkg_installed_signal: Optional[SignalInstance] = None, 
@@ -61,6 +63,7 @@ class ConanInstallDialog(QDialog):
         self._ui.auto_install_check_box.clicked.connect(self.on_auto_install_check)
         self._ui.set_default_install_profile_button.clicked.connect(
             self.on_set_default_install_profile)
+        self.conan_diff_requested.connect(self.show_package_diffs)
 
     def hide_config_elements(self):
         self._ui.profile_cbox.hide()
@@ -187,7 +190,18 @@ class ConanInstallDialog(QDialog):
     def emit_conan_pkg_signal_callback(self, conan_ref: str, pkg_id: str):
         if not self.pkg_installed_signal:
             return
+        if not pkg_id:
+            self.conan_diff_requested.emit(conan_ref)
         self.pkg_installed_signal.emit(conan_ref, pkg_id)
+
+    def show_package_diffs(self, conan_ref):
+        # installation failed
+        dialog = PkgDiffDialog(self)
+        dialog.set_left_content(self._conan_selected_install)
+        available_refs = app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(conan_ref), None)
+        dialog.set_right_content(available_refs[0])
+        dialog.update_diff()
+        dialog.show()
 
     def on_set_default_install_profile(self):
         selected_profile = self.get_selected_profile()

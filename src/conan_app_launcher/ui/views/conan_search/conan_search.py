@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 import conan_app_launcher.app as app  # using global module pattern
+from conan_app_launcher.ui.dialogs.pkg_diff import PkgDiffDialog
 from conan_app_launcher.ui.common.syntax_highlighting import ConfigHighlighter
 from conan_app_launcher.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_app_launcher.ui.views import LocalConanPackageExplorer
@@ -122,9 +123,24 @@ class ConanSearchView(PluginInterfaceV1):
         self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
         self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 
+        self.diff_pkgs_action = QAction("Diff pkgs", self)
+        self.set_themed_icon(self.diff_pkgs_action, "icons/global/search_packages.svg")
+        self.select_cntx_menu.addAction(self.diff_pkgs_action)
+        self.diff_pkgs_action.triggered.connect(self.on_diff_requested)
+
     def reload_themed_icons(self):
         self._conan_config_highlighter = ConfigHighlighter(self._ui.package_info_text.document(), "yaml")
         super().reload_themed_icons()
+
+    def on_diff_requested(self):
+        dialog = PkgDiffDialog(self)
+        item_left = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view)
+        item_right = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view, idx=3)
+        dialog.set_left_content(item_left.pkg_data)
+        dialog.set_right_content(item_right.pkg_data)
+        dialog.update_diff()
+        dialog.show()
+
 
     @Slot(QPoint)
     def on_pkg_context_menu_requested(self, position: QPoint):
