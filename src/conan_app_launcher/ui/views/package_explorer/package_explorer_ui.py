@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'package_explorer.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.5.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -168,7 +168,7 @@ class Ui_Form(object):
         self.package_file_view.setFrameShape(QFrame.NoFrame)
         self.package_file_view.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         self.package_file_view.setEditTriggers(QAbstractItemView.EditKeyPressed|QAbstractItemView.SelectedClicked)
-        self.package_file_view.setTabKeyNavigation(True)
+        self.package_file_view.setTabKeyNavigation(False)
         self.package_file_view.setDragDropMode(QAbstractItemView.DragDrop)
         self.package_file_view.setDefaultDropAction(Qt.TargetMoveAction)
         self.package_file_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
