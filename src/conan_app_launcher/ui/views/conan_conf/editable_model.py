@@ -15,7 +15,7 @@ class EditableModelItem(TreeModelItem):
 class EditableModel(TreeModel):
     def __init__(self):
         super(EditableModel, self).__init__(checkable=True)
-        self.root_item = TreeModelItem(["Name", "Path", "Output folder"]) # "Layout", 
+        self.root_item = TreeModelItem(["Name", "Path", "Output folder"])  # "Layout",
         self.setup_model_data()
 
     def setup_model_data(self):
@@ -25,7 +25,8 @@ class EditableModel(TreeModel):
             ref_obj = ConanRef.loads(editable_ref)
             path = app.conan_api.get_editables_package_path(ref_obj)
             output = app.conan_api.get_editables_output_folder(ref_obj)
-            remote_item = EditableModelItem(editable_ref, str(path), output, self.root_item)
+            remote_item = EditableModelItem(
+                editable_ref, str(path), output, self.root_item)
             self.root_item.append_child(remote_item)
 
     def data(self, index: QModelIndex, role):  # override

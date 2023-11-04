@@ -35,7 +35,7 @@ class RemotesTableModel(TreeModel):
             try:
                 user_name, auth = app.conan_api.get_remote_user_info(remote.name)
             # Throws an error on older conan version, if a remote is disabled
-            except ConanException as e: 
+            except ConanException as e:
                 Logger().debug(str(e))
             remote_item = RemotesModelItem(remote, user_name, auth, self.root_item)
             self.root_item.append_child(remote_item)

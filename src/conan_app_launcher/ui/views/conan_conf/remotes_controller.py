@@ -6,7 +6,7 @@ from conan_app_launcher.ui.dialogs import ReorderController
 from PySide6.QtCore import QModelIndex, QItemSelectionModel, SignalInstance
 from PySide6.QtWidgets import QApplication, QTreeView
 
-from conan_app_launcher.ui.views.conan_conf.remotes_model import RemotesModelItem, RemotesTableModel
+from .remotes_model import RemotesModelItem, RemotesTableModel
 
 
 class ConanRemoteController():
@@ -41,7 +41,6 @@ class ConanRemoteController():
         # TODO calculate, if we need to make the name smaller
         self._view.setColumnWidth(1, 400)
         self._view.columnViewportPosition(0)
-
 
     def _select_remote(self, remote_name: str) -> bool:
         """ Selects a remote in the view and returns true if it exists. """
