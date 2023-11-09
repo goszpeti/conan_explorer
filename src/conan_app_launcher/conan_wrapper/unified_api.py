@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 #### Interface
 class ConanUnifiedApiInterface():
     """ 
-    API abstraction to provide compatiblity betwwen ConanV1 and V2 APIs. 
+    API abstraction to provide compatibility between ConanV1 and V2 APIs. 
     """
 
     @abstractmethod

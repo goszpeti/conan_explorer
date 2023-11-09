@@ -5,6 +5,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from unittest.mock import patch
 from conan_app_launcher.app.system import delete_path
 from conan_app_launcher.app.typing import SignatureCheckMeta
 
@@ -265,11 +266,18 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         try:
             # Try to redirect custom streams in conanfile, to avoid missing flush method
             devnull = open(os.devnull, 'w')
-            with redirect_stdout(devnull):
-                with redirect_stderr(devnull):
-                    infos = self._conan.install_reference(conan_ref, 
-                        settings=settings_list, options=options_list, update=update,
-                        profile_names=profile_names, generators=generators)
+            # also spoof os.terminal_size(
+            spoof_size = os.terminal_size([80,20])
+            patched_tersize = patch("os.get_terminal_size")
+            with redirect_stdout(devnull), redirect_stderr(devnull):
+                mock = patched_tersize.start()
+                mock.return_value = spoof_size
+
+                infos = self._conan.install_reference(conan_ref, 
+                    settings=settings_list, options=options_list, update=update,
+                    profile_names=profile_names, generators=generators)
+
+                patched_tersize.stop()
             if not infos.get("error", True):
                 package_id = infos.get("installed", [{}])[0].get(
                                                     "packages", [{}])[0].get("id", "")

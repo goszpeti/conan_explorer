@@ -26,7 +26,9 @@ class Ui_Dialog(object):
         Dialog.resize(418, 384)
         Dialog.setSizeGripEnabled(True)
         self.horizontalLayout_2 = QHBoxLayout(Dialog)
+        self.horizontalLayout_2.setSpacing(0)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.pkgs_list_widget = QListWidget(Dialog)
         self.pkgs_list_widget.setObjectName(u"pkgs_list_widget")
 
