@@ -22,7 +22,7 @@ if conan_version_env: # eval as spec
     print(f"Using Conan version {conan_major_version} from spec: {conan_version_env}")
 
 # Package meta-data.
-NAME = "conan-app-launcher"
+NAME = "conan-explorer"
 VERSION = "2.2.0a2"
 DESCRIPTION = "Package Explorer and App Launcher for Conan"
 URL = "https://github.com/goszpeti/conan_explorer"
