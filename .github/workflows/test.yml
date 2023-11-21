@@ -86,14 +86,16 @@ jobs:
           cache: 'pip' # caching pip dependencies
           cache-dependency-path: setup.py
       ######### Ubuntu 20.04 #########
-      - name: Set up a display for gui on Ubuntu 20
+      - name: Set up a virtual display for GUI on Ubuntu 20
         if: matrix.os == 'ubuntu-20.04' # libfontconfig1 
         run: |
           sudo apt update
-          sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \ 
+          sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \
               libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 \
               libxcb-xfixes0 libxcb-shape0
-          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \
+          --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 \
+          -ac +extension GLX
       - name: Install system dependencies for testing on Ubuntu 20
         if: matrix.os == 'ubuntu-20.04'
         run: |  # terminal, file manager, xwininfo, text-editor
@@ -101,13 +103,13 @@ jobs:
           sudo apt install dbus-x11 at-spi2-core
           pip install PySide6-Essentials==6.4.3
       ######### Ubuntu 22.04 #########
-      - name: Set up a display for gui on Ubuntu 22
+      - name: Set up a virtual display for GUI on Ubuntu 22
         if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt update
           sudo apt install xvfb libegl1-mesa libxkbcommon-x11-0 '^libxcb.*'
-          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \ 
-            --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 \ 
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \
+            --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 \
             -ac +extension GLX
       # apt-get install -y libglib2.0-0 libsm6 libxrender1 libxext6
       - name: Install system dependencies for testing on Ubuntu 22
@@ -135,14 +137,14 @@ jobs:
         env:
             SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
-          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml \ 
+          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml \
           --cov=conan_explorer --cov-branch --cov-append --capture=no ${{matrix.pytest_args}}
       - name: Execute system with pytest # Reinstall into site-packages to find install and pkg problems
         env:
             SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
           pip install .[test]
-          pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml \ 
+          pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml \
           --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_explorer --cov-branch --cov-append ${{matrix.pytest_args}}
       - name: Upload Test results
         uses: actions/upload-artifact@v3
