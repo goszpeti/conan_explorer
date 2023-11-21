@@ -1,7 +1,7 @@
 import pprint
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
-from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
+from conan_app_launcher.app import AsyncLoader  # using global module pattern
 from conan_app_launcher.ui.common import show_conanfile
 from conan_app_launcher.ui.dialogs import ConanInstallDialog
 from PySide6.QtCore import Qt, SignalInstance, QObject

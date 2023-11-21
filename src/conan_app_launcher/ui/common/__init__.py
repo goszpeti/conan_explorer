@@ -11,9 +11,9 @@ from PySide6.QtGui import QFontMetrics, QFont
 from .icon import extract_icon, get_icon_from_image_file, get_inverted_asset_image, get_platform_icon, draw_svg_with_color
 from .logger import init_qt_logger, remove_qt_logger
 from .model import TreeModel, TreeModelItem, FileSystemModel, re_register_signal
-from .theming import (activate_theme, configure_theme, get_user_theme_color,
-                    CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol, ThemedWidget, 
-                    get_themed_asset_icon, get_asset_image_path, get_gui_dark_mode, get_gui_style)
+from .theming import (get_user_theme_color, get_themed_asset_icon, get_asset_image_path, 
+                      get_gui_dark_mode, get_gui_style,
+                      CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol, ThemedWidget)
 from .syntax_highlighting import ConfigHighlighter
 
 

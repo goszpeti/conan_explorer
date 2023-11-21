@@ -1,4 +1,4 @@
-
+# Typing helpers for enforced interfaces
 
 import inspect
 from types import FunctionType

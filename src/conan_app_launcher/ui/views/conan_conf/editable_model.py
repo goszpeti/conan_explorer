@@ -52,10 +52,10 @@ class EditableModel(TreeModel):
     #         text = self._profiles[index.column()]
     #         return get_platform_icon(text)
 
-    def get_index_from_profile(self, profile_name: str) -> Optional[QModelIndex]:
-        index = None
-        for i, profile in enumerate(self._profiles):
-            if profile == profile_name:
-                index = self.createIndex(i, 0)
-                break
-        return index
+    # def get_index_from_profile(self, profile_name: str) -> Optional[QModelIndex]:
+    #     index = None
+    #     for i, profile in enumerate(self._profiles):
+    #         if profile == profile_name:
+    #             index = self.createIndex(i, 0)
+    #             break
+    #     return index

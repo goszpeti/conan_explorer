@@ -1,7 +1,7 @@
 from typing import Optional
 
 import conan_app_launcher.app as app
-from conan_app_launcher.app.loading import AsyncLoader
+from conan_app_launcher.app import AsyncLoader
 from conan_app_launcher.app.logger import Logger  # using global module pattern
 from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_app_launcher.settings import DEFAULT_INSTALL_PROFILE
@@ -196,12 +196,15 @@ class ConanInstallDialog(QDialog):
 
     def show_package_diffs(self, conan_ref):
         # installation failed
-        dialog = PkgDiffDialog(self)
-        dialog.set_left_content(self._conan_selected_install)
-        available_refs = app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(conan_ref), None)
-        dialog.set_right_content(available_refs[0])
-        dialog.update_diff()
-        dialog.show()
+        try:
+            dialog = PkgDiffDialog(self)
+            dialog.set_left_content(self._conan_selected_install)
+            available_refs = app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(conan_ref), None)
+            dialog.set_right_content(available_refs[0])
+            dialog.update_diff()
+            dialog.show()
+        except Exception as e:
+            Logger().error(str(e))
 
     def on_set_default_install_profile(self):
         selected_profile = self.get_selected_profile()

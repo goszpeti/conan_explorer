@@ -10,6 +10,9 @@ from conan_app_launcher import (APP_NAME, SETTINGS_FILE_NAME, __version__, asset
                                 user_save_path)
 from .logger import Logger
 from .system import check_for_wayland
+from .base_ui.loading import AsyncLoader
+from .base_ui.crash import bug_dialog_exc_hook
+from .base_ui.theming import activate_theme
 
 if TYPE_CHECKING:
     from conan_app_launcher.conan_wrapper import ConanApi, ConanWorker
@@ -32,7 +35,6 @@ def run_application():
     qt_app = load_qapp()
 
     # Loading dialog until Conan is available
-    from .loading import AsyncLoader
     loader = AsyncLoader(None)
     loader.async_loading(None, load_conan, (), cancel_button=False)
     loader.wait_for_finished()
@@ -96,8 +98,6 @@ def load_qapp():
 
     # Overwrite the excepthook with our own -
     # this will provide a method to report bugs for the user
-    from .crash import bug_dialog_exc_hook
     sys.excepthook = bug_dialog_exc_hook  # dialog needs qt_app
-    from conan_app_launcher.ui.common import activate_theme
     activate_theme(qt_app)
     return qt_app

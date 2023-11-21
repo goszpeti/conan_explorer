@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, List, Tuple
 
 import conan_app_launcher.app as app
 from conan_app_launcher import asset_path
-from conan_app_launcher.app.loading import AsyncLoader  # using global module pattern
+from conan_app_launcher.app import AsyncLoader  # using global module pattern
 from conan_app_launcher.app.logger import Logger
 from conan_app_launcher.conan_wrapper.types import ConanPkg, ConanPkgRef, ConanRef
 from conan_app_launcher.app.system import (open_in_file_manager)

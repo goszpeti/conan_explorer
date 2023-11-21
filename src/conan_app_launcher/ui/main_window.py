@@ -11,8 +11,8 @@ from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
 import conan_app_launcher.app as app  # using global module pattern
 from conan_app_launcher import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
     MIN_FONT_SIZE, PathLike, conan_version)
-from conan_app_launcher.app.loading import AsyncLoader
-from conan_app_launcher.app.logger import Logger
+from conan_app_launcher.app import AsyncLoader
+from conan_app_launcher.app import Logger, activate_theme
 from conan_app_launcher.settings import (AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
     FONT_SIZE, GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
     GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
@@ -22,7 +22,7 @@ from conan_app_launcher.ui.dialogs import FileEditorSelDialog
 from conan_app_launcher.ui.plugin import PluginHandler
 from conan_app_launcher.ui.widgets import AnimatedToggle, WideMessageBox
 
-from .common import activate_theme, init_qt_logger, remove_qt_logger
+from .common import init_qt_logger, remove_qt_logger
 from .fluent_window import FluentWindow, SideSubMenu
 from .views.app_grid.config.model import UiApplicationModel
 from .plugin import PluginInterfaceV1
