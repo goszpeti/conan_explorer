@@ -90,7 +90,9 @@ jobs:
         if: matrix.os == 'ubuntu-20.04' # libfontconfig1 
         run: |
           sudo apt update
-          sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 libxcb-shape0
+          sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \ 
+              libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 \
+              libxcb-xfixes0 libxcb-shape0
           /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
       - name: Install system dependencies for testing on Ubuntu 20
         if: matrix.os == 'ubuntu-20.04'
@@ -104,7 +106,9 @@ jobs:
         run: |
           sudo apt update
           sudo apt install xvfb libegl1-mesa libxkbcommon-x11-0 '^libxcb.*'
-          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \ 
+            --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 \ 
+            -ac +extension GLX
       # apt-get install -y libglib2.0-0 libsm6 libxrender1 libxext6
       - name: Install system dependencies for testing on Ubuntu 22
         if: matrix.os == 'ubuntu-22.04'
@@ -125,18 +129,21 @@ jobs:
           CONAN_VERSION: ${{ matrix.conan}}
       - name: Execute unitests with pytest
         run: |
-          pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no ${{matrix.pytest_args}}
+          pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml \
+           --cov=conan_explorer --cov-branch --cov-append --capture=no ${{matrix.pytest_args}}
       - name: Execute integration with pytest
         env:
             SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
-          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append --capture=no ${{matrix.pytest_args}}
+          pytest -v test/02_integration --junit-xml=./results/result-integration-${{matrix.name}}.xml \ 
+          --cov=conan_explorer --cov-branch --cov-append --capture=no ${{matrix.pytest_args}}
       - name: Execute system with pytest # Reinstall into site-packages to find install and pkg problems
         env:
             SKIP_CREATE_CONAN_TEST_DATA: True
         run: |
           pip install .[test]
-          pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_app_launcher --cov-branch --cov-append ${{matrix.pytest_args}}
+          pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml \ 
+          --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_explorer --cov-branch --cov-append ${{matrix.pytest_args}}
       - name: Upload Test results
         uses: actions/upload-artifact@v3
         with:
@@ -153,7 +160,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          # Disabling shallow clone is recommended for improving relevancy of reporting, cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
+          # Disabling shallow clone is recommended for improving relevancy of reporting,
+          # cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
           fetch-depth: 0
       - uses: actions/download-artifact@v3
         with:
@@ -162,7 +170,7 @@ jobs:
       - name: Fix code coverage paths
         working-directory: ./cov
         run: |
-          sed -i 's@/home/runner/work/conan_app_launcher/conan_app_launcher@.@g' cov-*.xml
+          sed -i 's@/home/runner/work/conan_explorer/conan_explorer@.@g' cov-*.xml
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:

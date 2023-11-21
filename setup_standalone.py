@@ -14,7 +14,7 @@ base = None
 if sys.platform == "win32":
     base = "Win32GUI"
 build_exe_options = {
-    "includes": "conan_app_launcher",
+    "includes": "conan_explorer",
     "excludes": ["debugpy"],
     "bin_excludes": ['Qt6dbus.dll', 'Qt6Network.dll', 'Qt6Qml.dll', "Qt6QmlModels.dll",
         'Qt6Quick.dll', 'Qt6WebSockets.dll',  "Qt6QuickTemplates2.dll", "Qt6QmlCompiler.dll",
@@ -30,7 +30,7 @@ build_exe_options = {
     "zip_include_packages" : ['PySide6', "conans"]
 }
 
-icon = "src/conan_app_launcher/assets/icons/icon.ico"
+icon = "src/conan_explorer/assets/icons/icon.ico"
 app_name = "Conan Explorer"
 
 bdist_mac_options = {
@@ -64,7 +64,7 @@ bdist_msi_options = {
     "data": msi_data,
     "install_icon": icon}
 
-executables = [Executable("./src/conan_app_launcher/__main__.py",
+executables = [Executable("./src/conan_explorer/__main__.py",
                           base=base, target_name="Conan Explorer",
                           icon=icon, shortcut_name=app_name,
                           shortcut_dir="DesktopFolder",

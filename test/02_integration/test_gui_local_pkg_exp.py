@@ -2,7 +2,7 @@
 import os
 import platform
 from pathlib import Path
-from conan_app_launcher.app.system import delete_path
+from conan_explorer.app.system import delete_path
 from test.conftest import (TEST_REF, TEST_REF_OFFICIAL, PathSetup,
                            conan_add_editables, conan_install_ref)
 from time import sleep
@@ -14,16 +14,16 @@ from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import QApplication
 from pytest_mock import MockerFixture
 
-import conan_app_launcher  # for mocker
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import conan_version
-from conan_app_launcher.conan_wrapper.types import ConanRef
-from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
-from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.dialogs.conan_remove import ConanRemoveDialog
-from conan_app_launcher.ui.views import LocalConanPackageExplorer
-from conan_app_launcher.ui.views.app_grid.tab import AppEditDialog
-from conan_app_launcher.ui.views.package_explorer.sel_model import PkgSelectionType
+import conan_explorer  # for mocker
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer import conan_version
+from conan_explorer.conan_wrapper.types import ConanRef
+from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
+from conan_explorer.ui import main_window
+from conan_explorer.ui.dialogs.conan_remove import ConanRemoveDialog
+from conan_explorer.ui.views import LocalConanPackageExplorer
+from conan_explorer.ui.views.app_grid.tab import AppEditDialog
+from conan_explorer.ui.views.package_explorer.sel_model import PkgSelectionType
 
 Qt = QtCore.Qt
 SelFlags = QtCore.QItemSelectionModel.SelectionFlag
@@ -69,7 +69,7 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
     4. Select another profile of the seame package
     5. Select export folder
     """
-    from conan_app_launcher.app.logger import Logger
+    from conan_explorer.app.logger import Logger
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
     # 1. Switch to another package view
     # need new id
@@ -181,7 +181,7 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, "UNKNOWN")
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
 
-    from conan_app_launcher.app.logger import Logger
+    from conan_explorer.app.logger import Logger
     cfr = ConanRef.loads(TEST_REF)
     conanfile_path = app.conan_api.get_conanfile_path(cfr)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
@@ -211,7 +211,7 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
 
     # test show conanfile
     Logger().debug("open show conanfile")
-    mock_open_file = mocker.patch("conan_app_launcher.ui.common.open_file")
+    mock_open_file = mocker.patch("conan_explorer.ui.common.open_file")
     lpe._pkg_sel_ctrl.on_show_conanfile_requested()
     mock_open_file.assert_called_once_with(conanfile_path)
     sleep(1)
@@ -265,7 +265,7 @@ def test_local_package_explorer_tabs(qtbot, mocker, base_fixture, ui_no_refs_con
         conan_install_ref(TEST_REF, profile="linux")
     else:
         conan_install_ref(TEST_REF, profile="windows")
-    from conan_app_launcher.app.logger import Logger
+    from conan_explorer.app.logger import Logger
 
     installed_pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
     assert len(installed_pkgs) >= 2
@@ -323,7 +323,7 @@ def test_local_package_explorer_simple_functions(qtbot, mocker, base_fixture,
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, "UNKNOWN")
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
 
-    from conan_app_launcher.app.logger import Logger
+    from conan_explorer.app.logger import Logger
 
     cfr = ConanRef.loads(TEST_REF)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
@@ -399,7 +399,7 @@ def test_local_package_explorer_file_functions(qtbot, mocker, base_fixture,
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, "UNKNOWN")
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
 
-    from conan_app_launcher.app.logger import Logger
+    from conan_explorer.app.logger import Logger
 
     cfr = ConanRef.loads(TEST_REF)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)

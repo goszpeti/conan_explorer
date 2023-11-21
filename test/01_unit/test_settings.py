@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from conan_app_launcher.settings import *
-from conan_app_launcher.settings.ini_file import IniSettings, PLUGINS_SECTION_NAME
+from conan_explorer.settings import *
+from conan_explorer.settings.ini_file import IniSettings, PLUGINS_SECTION_NAME
 from test.conftest import PathSetup
 
 

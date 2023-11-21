@@ -4,6 +4,7 @@ import sys
 import os
 from pathlib import Path
 from shutil import copyfile
+from conans.client.output import ScopedOutput, ConanOutput
 
 class Example(ConanFile):
     name = "example"
@@ -13,7 +14,8 @@ class Example(ConanFile):
     default_options = {"shared": True, "fPIC2": True, "variant": "var1"}
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    short_paths = True
+    short_paths = True#
+    generators = "txt",
 
     def package(self):
         # repackage some executable
@@ -21,12 +23,14 @@ class Example(ConanFile):
         renamed_executable = Path(gettempdir()) / ("python" + python_path.suffix)
         copyfile(str(python_path), str(renamed_executable))
         self.copy(renamed_executable.name, src=str(renamed_executable.parent), dst="bin")
-
+        
     def package_info(self):
         self.cpp_info.includedirs = ['include']  # Ordered list of include paths
         self.env_info.path.append("ANOTHER VALUE") # Append "ANOTHER VALUE" to the path variable
         self.env_info.othervar = "OTHER VALUE" # Assign "OTHER VALUE" to the othervar variable
         self.user_info.var1 = 2
+        out = ScopedOutput("111", ConanOutput(sys.stdout, sys.stderr))
+        out.highlight("test logging")
 
     def layout(self):
         self.folders.source = "src"

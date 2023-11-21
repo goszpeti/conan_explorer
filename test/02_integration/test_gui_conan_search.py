@@ -1,15 +1,15 @@
 
 import pytest
-from conan_app_launcher.settings import FILE_EDITOR_EXECUTABLE
+from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from test.conftest import TEST_REF
 
-import conan_app_launcher  # for mocker
-import conan_app_launcher.app as app
-from conan_app_launcher.ui.main_window import MainWindow
-from conan_app_launcher.conan_wrapper.types import ConanRef
+import conan_explorer  # for mocker
+import conan_explorer.app as app
+from conan_explorer.ui.main_window import MainWindow
+from conan_explorer.conan_wrapper.types import ConanRef
 from PySide6 import QtCore
-from conan_app_launcher.ui.views import ConanSearchView
-from conan_app_launcher.ui.views import LocalConanPackageExplorer
+from conan_explorer.ui.views import ConanSearchView
+from conan_explorer.ui.views import LocalConanPackageExplorer
 
 Qt = QtCore.Qt
 
@@ -108,7 +108,7 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
                                            TEST_REF + ":" + id, search_dialog._search_controller.conan_pkg_installed)
 
     # check show conanfile
-    mock_open_file = mocker.patch("conan_app_launcher.ui.common.open_file")
+    mock_open_file = mocker.patch("conan_explorer.ui.common.open_file")
     search_dialog._search_controller.on_show_conanfile_requested()
     conanfile = app.conan_api.get_export_folder(cfr) / "conanfile.py"
     mock_open_file.assert_called_with(conanfile)

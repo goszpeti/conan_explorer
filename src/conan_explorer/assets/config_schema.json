@@ -1,0 +1,120 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "App Config",
+    "description": "Layout for conan app launcher",
+    "type": "object",
+    "properties": {
+        "version": {
+            "type": "string",
+            "enum": [
+                "0.2.0",
+                "0.3.0",
+                "0.3.1",
+                "0.4.0"
+            ],
+            "description": "Schema version"
+        },
+        "tabs": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/tab",
+                "description": "Array of tabs to be displayed."
+            }
+        }
+    },
+    "required": [
+        "version",
+        "tabs"
+    ],
+    "definitions": {
+        "tab": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Displayed name for tab."
+                },
+                "apps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/app",
+                        "description": "Array of applications displayed on tab."
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "apps"
+            ]
+        },
+        "app": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Displayed name for application."
+                },
+                "package_id": {
+                    "type": "string",
+                    "description": "DEPRECATED - Conan package reference id, like app/1.0.0@usr/stable"
+                },
+                "conan_ref": {
+                    "type": "string",
+                    "description": "Conan package reference id, like app/1.0.0@usr/stable"
+                },
+                "conan_options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/conan_option",
+                        "description": "Array of conan option key-value pairs"
+                    }
+                },
+                "executable": {
+                    "type": "string",
+                    "description": "Relative path in package to the executable."
+                },
+                "args": {
+                    "type": "string",
+                    "description": "Optional arguments for the executable."
+                },
+                "is_console_application": {
+                    "type": "boolean",
+                    "default": "False",
+                    "description": "CMD style application like bash. Opens in new shell window."
+                },
+                "icon": {
+                    "type": "string",
+                    "description": "Displayed custom icon for application."
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "anyOf": [
+                {
+                    "required": [
+                        "package_id"
+                    ]
+                },
+                {
+                    "required": [
+                        "conan_ref"
+                    ]
+                }
+            ]
+        },
+        "conan_option": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of conan option"
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Value of conan option (Bools and ints are represented as strings too)"
+                }
+            }
+        }
+    }
+}

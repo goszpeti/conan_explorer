@@ -12,19 +12,19 @@ from pathlib import Path
 from shutil import rmtree
 
 import pytest
-from conan_app_launcher.ui.fluent_window.side_menu import SideSubMenu
-from conan_app_launcher.ui.plugin.handler import PluginFile
-from conan_app_launcher.ui.views.app_grid.tab import TabList
-from conan_app_launcher import DEFAULT_UI_CFG_FILE_NAME, user_save_path
-from conan_app_launcher.conan_wrapper import ConanApi
-from conan_app_launcher.conan_wrapper.conan_cleanup import ConanCleanup
-from conan_app_launcher.app.logger import Logger
-from conan_app_launcher.settings import *
-from conan_app_launcher.ui import main_window
-from conan_app_launcher.ui.views import AboutPage
-import conan_app_launcher.app as app  # using global module pattern
+from conan_explorer.ui.fluent_window.side_menu import SideSubMenu
+from conan_explorer.ui.plugin.handler import PluginFile
+from conan_explorer.ui.views.app_grid.tab import TabList
+from conan_explorer import DEFAULT_UI_CFG_FILE_NAME, user_save_path
+from conan_explorer.conan_wrapper import ConanApi
+from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
+from conan_explorer.app.logger import Logger
+from conan_explorer.settings import *
+from conan_explorer.ui import main_window
+from conan_explorer.ui.views import AboutPage
+import conan_explorer.app as app  # using global module pattern
 
-from conan_app_launcher.conan_wrapper.types import ConanRef
+from conan_explorer.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtWidgets
 
 from test.conftest import PathSetup, conan_remove_ref

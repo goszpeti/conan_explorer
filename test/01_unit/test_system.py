@@ -10,10 +10,10 @@ from pathlib import Path
 from subprocess import check_output
 from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 
-import conan_app_launcher  # for mocker
+import conan_explorer  # for mocker
 import psutil
-from conan_app_launcher import INVALID_PATH, PKG_NAME
-from conan_app_launcher.app.system import (calc_paste_same_dir_name,
+from conan_explorer import INVALID_PATH, PKG_NAME
+from conan_explorer.app.system import (calc_paste_same_dir_name,
                                            copy_path_with_overwrite,
                                            delete_path, execute_app, find_program_in_windows,
                                            open_file, open_in_file_manager,
@@ -26,14 +26,14 @@ def test_choose_run_file(tmp_path, mocker):
     Existing path with a filesize > 0 expected
     """
     # Mock away the calls
-    mocker.patch('conan_app_launcher.app.system.open_file')
-    mocker.patch('conan_app_launcher.app.system.execute_app')
+    mocker.patch('conan_explorer.app.system.open_file')
+    mocker.patch('conan_explorer.app.system.execute_app')
 
     # test with nonexistant path - nothing should happen (no exception raising)
 
     run_file(Path(INVALID_PATH), False, "")
-    conan_app_launcher.app.system.open_file.assert_not_called()
-    conan_app_launcher.app.system.execute_app.assert_not_called()
+    conan_explorer.app.system.open_file.assert_not_called()
+    conan_explorer.app.system.execute_app.assert_not_called()
 
     # test with existing path
     test_file = Path(tmp_path) / "test.txt"
@@ -42,7 +42,7 @@ def test_choose_run_file(tmp_path, mocker):
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.app.system.open_file.assert_called_once_with(test_file)
+    conan_explorer.app.system.open_file.assert_called_once_with(test_file)
 
 
 def test_open_in_file_manager(mocker):
@@ -83,7 +83,7 @@ def test_choose_run_script(tmp_path, mocker):
     """
 
     # Mock away the calls
-    mocker.patch('conan_app_launcher.app.system.execute_app')
+    mocker.patch('conan_explorer.app.system.execute_app')
 
     if platform.system() == "Windows":
         test_file = Path(tmp_path) / "test.bat"
@@ -99,7 +99,7 @@ def test_choose_run_script(tmp_path, mocker):
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.app.system.execute_app.assert_called_once_with(test_file, False, "")
+    conan_explorer.app.system.execute_app.assert_called_once_with(test_file, False, "")
 
 
 def test_choose_run_exe(tmp_path, mocker):
@@ -107,7 +107,7 @@ def test_choose_run_exe(tmp_path, mocker):
     Test, that run_file will call execute_app with the correct argumnenst.
     Mock away the actual calls.
     """
-    mocker.patch('conan_app_launcher.app.system.execute_app')
+    mocker.patch('conan_explorer.app.system.execute_app')
     test_file = Path()
     if platform.system() == "Linux":
         test_file = Path(tmp_path) / "test"
@@ -123,7 +123,7 @@ def test_choose_run_exe(tmp_path, mocker):
 
     run_file(test_file, False, "")
 
-    conan_app_launcher.app.system.execute_app.assert_called_once_with(test_file, False, "")
+    conan_explorer.app.system.execute_app.assert_called_once_with(test_file, False, "")
 
 
 def test_start_cli_option_app():

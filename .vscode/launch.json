@@ -5,7 +5,7 @@
             "name": "Main",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/conan_app_launcher/__main__.py",
+            "program": "${workspaceFolder}/src/conan_explorer/__main__.py",
             "env": {
                 "CAL_DEBUG_LEVEL": "2",
                 "DISABLE_ASYNC_LOADER": "False"

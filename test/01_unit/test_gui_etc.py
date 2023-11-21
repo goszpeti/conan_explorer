@@ -8,22 +8,22 @@ import platform
 import sys
 import traceback
 from unittest.mock import Mock
-from conan_app_launcher.app.crash import bug_dialog_exc_hook
-from conan_app_launcher.conan_wrapper.conanV1 import ConanApi
-from conan_app_launcher.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
-from conan_app_launcher.ui.common.theming import get_user_theme_color
-from conan_app_launcher.ui.views.conan_conf.dialogs.remote_login_dialog import RemoteLoginDialog
+from conan_explorer.app.crash import bug_dialog_exc_hook
+from conan_explorer.conan_wrapper.conanV1 import ConanApi
+from conan_explorer.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
+from conan_explorer.ui.common.theming import get_user_theme_color
+from conan_explorer.ui.views.conan_conf.dialogs.remote_login_dialog import RemoteLoginDialog
 from test.conftest import TEST_REF, app_qt_fixture, conan_remove_ref
 
-import conan_app_launcher  # for mocker
-import conan_app_launcher.app as app
+import conan_explorer  # for mocker
+import conan_explorer.app as app
 import pytest
-from conan_app_launcher.conan_wrapper.conan_worker import ConanWorkerElement
-from conan_app_launcher.ui.views import AboutPage
-from conan_app_launcher.ui.dialogs import show_bug_reporting_dialog, FileEditorSelDialog
-from conan_app_launcher.ui.dialogs.conan_install import ConanInstallDialog
-from conan_app_launcher.ui.widgets.conan_line_edit import ConanRefLineEdit
-from conan_app_launcher.conan_wrapper.types import ConanRef, Remote
+from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
+from conan_explorer.ui.views import AboutPage
+from conan_explorer.ui.dialogs import show_bug_reporting_dialog, FileEditorSelDialog
+from conan_explorer.ui.dialogs.conan_install import ConanInstallDialog
+from conan_explorer.ui.widgets.conan_line_edit import ConanRefLineEdit
+from conan_explorer.conan_wrapper.types import ConanRef, Remote
 from PySide6 import QtCore, QtWidgets, QtGui
 
 Qt = QtCore.Qt
@@ -129,7 +129,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     # with update flag
     conan_install_dialog._ui.update_check_box.setCheckState(Qt.CheckState.Checked)
     mock_install_func = mocker.patch(
-        'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
+        'conan_explorer.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
     conan_install_dialog._ui.button_box.accepted.emit()
     conan_worker_element: ConanWorkerElement = {"ref_pkg_id": TEST_REF + ":" + id, 
                                                 "settings": {}, "profile": "",
@@ -210,7 +210,7 @@ def test_about_dialog(app_qt_fixture, base_fixture):
     widget.show()
     app_qt_fixture.waitExposed(widget)
 
-    assert conan_app_launcher.APP_NAME in widget._ui.about_label.text()
+    assert conan_explorer.APP_NAME in widget._ui.about_label.text()
 
 
 def test_bug_dialog(qtbot, base_fixture, mocker):

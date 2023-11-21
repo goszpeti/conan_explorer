@@ -4,16 +4,16 @@ from pathlib import Path
 from time import sleep
 
 import pytest
-import conan_app_launcher
-from conan_app_launcher.app.system import delete_path
-from conan_app_launcher.conan_wrapper import ConanApi
+import conan_explorer
+from conan_explorer.app.system import delete_path
+from conan_explorer.conan_wrapper import ConanApi
 from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, PathSetup, login_test_remote, logout_all_remotes
-from conan_app_launcher import conan_version
+from conan_explorer import conan_version
 
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.ui import main_window
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer.ui import main_window
 from PySide6 import QtCore, QtWidgets
-from conan_app_launcher.ui.views.conan_conf import ConanConfigView
+from conan_explorer.ui.views.conan_conf import ConanConfigView
 
 Qt = QtCore.Qt
 

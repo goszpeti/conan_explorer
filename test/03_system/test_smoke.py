@@ -11,8 +11,8 @@ from subprocess import Popen
 import platform
 
 import pytest
-import conan_app_launcher
-from conan_app_launcher.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
+import conan_explorer
+from conan_explorer.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
                                          settings_factory)
 from PySide6 import QtWidgets
 from pytest_check import check
@@ -28,12 +28,12 @@ def test_main_loop_mock(base_fixture, mocker):
     """
     os.environ["DISABLE_ASYNC_LOADER"] = "False"  # for code coverage of async loader
 
-    main_ui_mock = mocker.patch("conan_app_launcher.ui.main_window.MainWindow")
+    main_ui_mock = mocker.patch("conan_explorer.ui.main_window.MainWindow")
     qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec")
     # delayed import necessary, so the mocker can patch the object before
-    from conan_app_launcher import __main__
+    from conan_explorer import __main__
 
-    __main__.run_conan_app_launcher()
+    __main__.run_conan_explorer()
     time.sleep(2)
 
     main_ui_mock.assert_called_once()
@@ -48,17 +48,17 @@ def test_main_loop(base_fixture):
     Start the actual executable, to test, that the entrypoints are correctly specified.
     """
 
-    settings_file_path = Path.home() / (conan_app_launcher.SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE)
+    settings_file_path = Path.home() / (conan_explorer.SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE)
     settings = settings_factory(SETTINGS_INI_TYPE, settings_file_path)
     config_file_path = base_fixture.testdata_path / "app_config.json"
     settings.set(LAST_CONFIG_FILE, str(config_file_path))
     settings.save()
 
-    # conan_app_launcher
-    Popen(["conan_app_launcher"])
+    # conan_explorer
+    Popen(["conan_explorer"])
 
     if platform.system() == "Windows":
-        script = ["Scripts\\conan_app_launcher-script.pyw"]
+        script = ["Scripts\\conan_explorer-script.pyw"]
         proc_name = Path(sys.executable).name
     else:
         script = []

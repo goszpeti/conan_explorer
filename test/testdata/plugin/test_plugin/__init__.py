@@ -1,7 +1,7 @@
 
 
 from typing import Optional
-from conan_app_launcher.ui import BaseSignals, PluginInterfaceV1, FluentWindow, PluginDescription
+from conan_explorer.ui import BaseSignals, PluginInterfaceV1, FluentWindow, PluginDescription
 from PySide6.QtWidgets import QWidget, QDialog
 
 class TestPlugin(PluginInterfaceV1):

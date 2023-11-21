@@ -81,8 +81,8 @@ try:
         if len(branch) == 1:
             branch = os.getenv("GITHUB_REF", "").split("tags")
         if len(branch) > 1:
-            link = "conan_app_launcher" + branch[1].replace(" ", "")
-            master_link = "conan_app_launcher/master"
+            link = "conan_explorer" + branch[1].replace(" ", "")
+            master_link = "conan_explorer/master"
             for line in long_description.splitlines():
                 if master_link in line:
                     line = line.replace(master_link, link)
@@ -135,8 +135,9 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         "gui_scripts": [
-            "conan_app_launcher=conan_app_launcher.__main__:run_conan_app_launcher",
-            "conan_explorer=conan_app_launcher.__main__:run_conan_app_launcher",
+            "conan_explorer=conan_explorer.__main__:run_conan_explorer",
+            # for legacy backwards compatibility
+            "conan_app_launcher=conan_explorer.__main__:run_conan_explorer",
         ]
     },
 )

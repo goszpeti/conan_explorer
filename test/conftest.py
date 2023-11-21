@@ -16,15 +16,15 @@ from unittest import mock
 
 import psutil
 import pytest
-import conan_app_launcher.app as app  # resolve circular dependencies
-from conan_app_launcher import SETTINGS_FILE_NAME, base_path, user_save_path
-from conan_app_launcher.app.system import str2bool
-from conan_app_launcher.conan_wrapper import ConanApi, ConanInfoCache, ConanWorker
-from conan_app_launcher.ui.common import remove_qt_logger
-from conan_app_launcher.ui.main_window import MainWindow
-from conan_app_launcher.settings import *
-from conan_app_launcher.conan_wrapper.types import ConanRef
-from conan_app_launcher import conan_version
+import conan_explorer.app as app  # resolve circular dependencies
+from conan_explorer import SETTINGS_FILE_NAME, base_path, user_save_path
+from conan_explorer.app.system import str2bool
+from conan_explorer.conan_wrapper import ConanApi, ConanInfoCache, ConanWorker
+from conan_explorer.ui.common import remove_qt_logger
+from conan_explorer.ui.main_window import MainWindow
+from conan_explorer.settings import *
+from conan_explorer.conan_wrapper.types import ConanRef
+from conan_explorer import conan_version
 
 exe_ext = ".exe" if platform.system() == "Windows" else ""
 conan_server_thread = None
@@ -274,7 +274,7 @@ def test_output():
 @pytest.fixture
 def app_qt_fixture(qtbot):
     yield qtbot
-    import conan_app_launcher.app as app
+    import conan_explorer.app as app
     # remove logger, so the logger doesn't log into nonexistant qt gui
     remove_qt_logger(app.Logger(), MainWindow.qt_logger_name)
     # finish worker - otherwise errors and crashes will occur!
@@ -292,7 +292,7 @@ def base_fixture()-> Generator[PathSetup, None, None]:
     paths = PathSetup()
     os.environ["CONAN_REVISIONS_ENABLED"] = "1"
     os.environ["DISABLE_ASYNC_LOADER"] = "True"  # for code coverage to work
-    import conan_app_launcher.app as app
+    import conan_explorer.app as app
 
     settings_ini_path = user_save_path / (SETTINGS_FILE_NAME + "." + SETTINGS_INI_TYPE)
     os.remove(str(settings_ini_path))
@@ -326,7 +326,7 @@ def base_fixture()-> Generator[PathSetup, None, None]:
 
 @pytest.fixture
 def light_theme_fixture(base_fixture):
-    import conan_app_launcher.app as app
+    import conan_explorer.app as app
     app.active_settings.set(GUI_MODE, GUI_MODE_LIGHT)
     app.active_settings.set(GUI_STYLE, GUI_STYLE_MATERIAL)
 
@@ -334,7 +334,7 @@ def light_theme_fixture(base_fixture):
 def temp_ui_config(config_file_path: Path):
     temp_config_file_path = shutil.copy(config_file_path, tempfile.gettempdir())
     tmp_file = tempfile.mkstemp()
-    import conan_app_launcher.app as app
+    import conan_explorer.app as app
 
     app.active_settings = settings_factory(SETTINGS_INI_TYPE, Path(tmp_file[1]))
     app.active_settings.set(LAST_CONFIG_FILE, str(temp_config_file_path))
