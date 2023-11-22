@@ -73,33 +73,35 @@ class ReorderController():
         self._model = model
 
     def move_to_position(self, position: int):
-        """ Moves the selected item(s) up in the list """
+        """ Moves the selected item up in the list """
         sel_indexes = self._view.selectedIndexes()
-        if len(sel_indexes) == 0:
-            Logger().info('Select at least one item from list!')
+        rows_selected = set([index.row() for index in sel_indexes])
 
+        if len(rows_selected) != 1:
+            Logger().info('Select at exactly one item from list!')
+            return
+
+        target_position = position
         if position == -1: # use -1 for last element
             position = self._model.rowCount() - 1
+            target_position = position  + 1 # insert after last element
 
         try:
-            # selected indexes need to be sorted
-            sel_indexes.sort() # type: ignore 
             self._view.selectionModel().clearSelection()
-
-            for idx in sel_indexes:
-                if idx is None:
-                    continue
-                row = idx.row()
-                if row == position:
-                    return
-                pre_idx = self._model.index(position, 0, self._view.rootIndex())
-                self._view.model().beginMoveRows(idx, row, row, pre_idx, pre_idx.row())
-                self._view.model().moveRow(idx, row, pre_idx, pre_idx.row())
-                self._view.model().endMoveRows()
-                # for all columns
-                for column in range(self._model.columnCount(QModelIndex())):
-                    index = self._model.index(position, column, QModelIndex())
-                    self._view.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
+            idx = sel_indexes[0]
+            if idx is None:
+                return
+            row = idx.row()
+            if row == position:
+                return
+            pre_idx = self._model.index(position, 0, self._view.rootIndex())
+            self._view.model().beginMoveRows(idx, row, row, pre_idx, pre_idx.row())
+            self._view.model().moveRow(idx, row, pre_idx, target_position)
+            self._view.model().endMoveRows()
+            # for all columns
+            for column in range(self._model.columnCount(QModelIndex())):
+                index = self._model.index(position, column, QModelIndex())
+                self._view.selectionModel().select(index, QItemSelectionModel.SelectionFlag.Select)
         except Exception as e:
             print(e)
 
@@ -108,6 +110,7 @@ class ReorderController():
         sel_indexes = self._view.selectedIndexes()
         if len(sel_indexes) == 0:
             Logger().info('Select at least one item from list!')
+            return
 
         try:
             # selected indexes need to be sorted
@@ -117,10 +120,15 @@ class ReorderController():
                 return
             self._view.selectionModel().clearSelection()
 
+            rows_moved = [] # optimize for multiple coloumns
             for idx in sel_indexes:
                 if idx is None:
                     continue
                 row = idx.row()
+                if row in rows_moved:
+                    continue
+                rows_moved.append(row)
+
                 pre_idx = self._model.index(row - 1, 0, self._view.rootIndex())
                 self._view.model().beginMoveRows(idx, row, row, pre_idx, pre_idx.row())
                 self._view.model().moveRow(idx, row, pre_idx, pre_idx.row())
@@ -138,6 +146,7 @@ class ReorderController():
         indexes = self._view.selectedIndexes()
         if len(indexes) == 0:
             Logger().info('Select at least one item from list!')
+            return
 
         try:  # modify from reverse so qt index does not get reset
             indexes.sort() # type: ignore
@@ -145,15 +154,21 @@ class ReorderController():
             last_sel_row = indexes[-1].row() + 1
             if last_sel_row >= max_row:  # cannot be moved down
                 return
+            rows_moved = [] # optimize for multiple coloumns
             for idx in reversed(indexes):
                 if idx is None:
                     continue
                 row = idx.row()
+                if row in rows_moved:
+                    continue
+                rows_moved.append(row)
+
                 post_idx = self._model.index(row + 2, 0, self._view.rootIndex())
                 post_sel_idx = self._model.index(row + 1, 0, self._view.rootIndex())
                 self._model.beginMoveRows(idx, row, row, post_sel_idx, post_sel_idx.row())
                 self._model.moveRow(idx, row, post_idx, row + 2)
                 self._model.endMoveRows()
+
                 # for all columns
                 for column in range(self._model.columnCount(QModelIndex())):
                     index = self._model.index(row+1, column, QModelIndex())

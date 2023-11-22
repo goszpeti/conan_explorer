@@ -27,6 +27,8 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
     3. Disable/Enable remote, check with conan API
     4. Move last remote up, check order
     5. Move this remote down, check order
+    5a. Move last remote to top
+    5b. Move top remote to last
     6. Add a new remote via cli -> push refresh -> new remote should appear
     7. Delete the new remote
     8. Add a new remote via button/dialog -> save
@@ -99,6 +101,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         for remote in remotes:
             if remote.name == "local3":
                 assert not remote.disabled
+
         # 4. Move last remote up, check order
         last_item = remotes_model.root_item.child_items[-1]
         assert conan_conf_view._remotes_controller._select_remote(last_item.remote.name)
@@ -116,6 +119,24 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         remotes_model = conan_conf_view._remotes_controller._model
         last_item = remotes_model.root_item.child_items[-1]
         assert second_last_item.remote.name == last_item.remote.name
+
+        # 5a. Move last remote to top
+        last_item = remotes_model.root_item.child_items[-1]
+        assert conan_conf_view._remotes_controller._select_remote(last_item.remote.name)
+        conan_conf_view._ui.remote_move_top_button.click()
+        sleep(1)
+        remotes_model = conan_conf_view._remotes_controller._model
+        first_item = remotes_model.root_item.child_items[0]
+
+        assert first_item.remote.name == last_item.remote.name
+
+        # 5b. Move top remote to last
+        assert conan_conf_view._remotes_controller._select_remote(first_item.remote.name)
+        conan_conf_view._ui.remote_move_bottom_button.click()
+        sleep(1)
+        remotes_model = conan_conf_view._remotes_controller._model
+        last_item = remotes_model.root_item.child_items[-1]
+        assert first_item.remote.name == last_item.remote.name
 
         # 6. Add a new remote via cli -> push refresh -> new remote should appear
         os.system(f"conan remote add local4 http://127.0.0.1:9303/ {ssl_disable_flag}")

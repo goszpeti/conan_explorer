@@ -259,6 +259,7 @@ class Ui_Form(object):
         self.remotes_tree_view.setObjectName(u"remotes_tree_view")
         self.remotes_tree_view.setFrameShape(QFrame.NoFrame)
         self.remotes_tree_view.setDragEnabled(True)
+        self.remotes_tree_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.remotes_tree_view.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.remotes_tree_view.setSortingEnabled(False)
 
@@ -450,7 +451,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(0)
+        self.config_tab_widget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(Form)

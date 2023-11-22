@@ -64,7 +64,6 @@ class MainWindow(FluentWindow):
         # connect logger to console widget to log possible errors at init
         init_qt_logger(Logger(), self.qt_logger_name, self.log_console_message)
         self.log_console_message.connect(self.write_log)
-        self.page_size_changed.connect(self.resize_page)
         # Default pages
         self.about_page = AboutPage(self, self.base_signals)
         self.plugins_page = PluginsPage(self, self._plugin_handler)
@@ -74,7 +73,6 @@ class MainWindow(FluentWindow):
         self._init_right_menu()
         self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", 
                                                     force_light_mode=True).pixmap(20,20))
-        # self.ui.search_bar_line_edit.clicked.connect(self.on_docs_searched)
         self._conan_minor_version = ".".join(conan_version.split(".")[0:2]) # for docs
         self.ui.search_bar_line_edit.setPlaceholderText(
                                     f"Search Conan {self._conan_minor_version} docs")
@@ -93,10 +91,6 @@ class MainWindow(FluentWindow):
         search_url = (f"https://docs.conan.io/en/{self._conan_minor_version}/search.html"
                       f"?q={self.ui.search_bar_line_edit.text()}&check_keywords=yes&area=default")
         QDesktopServices.openUrl(search_url)
-
-    def resize_page(self, widget: QWidget):
-        pass
-        # widget.setMaximumWidth(self.ui.center_frame.width() - 4)
 
     def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.svg", is_upper_menu=True, page_widget=self.app_grid,

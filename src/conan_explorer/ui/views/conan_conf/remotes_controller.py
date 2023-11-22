@@ -56,6 +56,7 @@ class ConanRemoteController():
             Logger().debug("No remote to select")
             return False
         sel_model = self._view.selectionModel()
+        sel_model.clearSelection()
         for column in range(self._model.columnCount(QModelIndex())):
             index = self._model.index(row_remote_to_sel, column, QModelIndex())
             sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
