@@ -171,11 +171,10 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     # Check profile selection
 
     ## check that profile set default works
-    profiles_path = Path(str(app.conan_api._client_cache.default_profile_path)).parent
+    profiles_path = app.conan_api.get_profiles_path()
     new_profile_path = profiles_path / "new_profile"
     new_profile_path.touch()
     conan_install_dialog.load_profiles()
-
     # default must be fisrt item and has a * after the name
     first_profile = conan_install_dialog._ui.profile_cbox.itemText(0)
     assert first_profile == "default *"

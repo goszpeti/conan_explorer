@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from conan.api.conan_api import ConanAPI
     from conans.client.cache.cache import ClientCache
     from .conan_cache import ConanInfoCache
-
+    from conan.internal.cache.home_paths import HomePaths
 
 class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     """ Wrapper around ConanAPIV2 """
@@ -31,6 +31,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         self._conan: "ConanAPI"
         self._client_cache: "ClientCache"
         self._short_path_root = Path("Unknown")
+        self._home_paths: "HomePaths"
 
     def init_api(self):
         from conan.api.conan_api import ConanAPI
@@ -38,11 +39,13 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
         from .conan_cache import ConanInfoCache
         self._conan = ConanAPI()
-        # TODO: Remove after 2.1 release
+        # Workaround for 2.0.14 API changes
         try:
             self._client_cache = ClientCache(self._conan.cache_folder)
         except Exception:
             self._client_cache = ClientCache(self._conan.cache_folder, self._conan.config.global_conf)
+            from conan.internal.cache.home_paths import HomePaths
+            self._home_paths = HomePaths(self._conan.cache_folder)
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
         Logger().debug("Initialized Conan V2 API wrapper")
         return self
@@ -102,7 +105,11 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def get_default_settings(self) -> ConanSettings:
         from conans.client.profile_loader import ProfileLoader
-        profile = ProfileLoader(self._client_cache).load_profile(
+        try:
+            profile = ProfileLoader(self._client_cache).load_profile(
+            Path(self._conan.profiles.get_default_host()).name)
+        except Exception: # 2.0.14
+            profile = ProfileLoader(self._client_cache.cache_folder).load_profile(
             Path(self._conan.profiles.get_default_host()).name)
         return dict(profile.settings)
 
@@ -118,16 +125,12 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return str(info.get("user_name", "")), info.get("authenticated", False)
 
     def get_config_file_path(self) -> Path:
-        # TODO: Remove after 2.1 release
+        # Workaround for 2.0.14 API changes
         cf_path = None
         try:
             cf_path = Path(self._client_cache.new_config_path)
         except Exception:
-            self._conan.config.global_conf
-            cache_folder = self._conan.cache_folder
-            from conan.internal.cache.home_paths import HomePaths
-            home_paths = HomePaths(cache_folder)
-            cf_path = Path(home_paths.new_config_path)
+            cf_path = Path(self._home_paths.global_conf_path)
         return cf_path
 
     def get_config_entry(self, config_name: str, default_value: Any) -> Any:
@@ -137,10 +140,20 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return True
 
     def get_settings_file_path(self) -> Path:
-        return Path(self._client_cache.settings_path)
+        settings_path = None
+        try:
+            settings_path = Path(self._client_cache.settings_path)
+        except Exception:
+            settings_path = Path(self._home_paths.settings_path)
+        return settings_path
 
     def get_profiles_path(self) -> Path:
-        return Path(self._client_cache.profiles_path)
+        profiles_path = None
+        try:
+            profiles_path = Path(self._client_cache.profiles_path)
+        except Exception:
+            profiles_path = Path(self._home_paths.profiles_path)
+        return profiles_path
 
     def get_editables_file_path(self) -> Path:
         return  Path(self._client_cache.editable_packages._edited_file)
@@ -255,7 +268,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         try:
             path = self.get_conanfile_path(conan_ref)
             from conan.internal.conan_app import ConanApp
-            app = ConanApp(self._conan.cache_folder)
+            try:
+                app = ConanApp(self._conan.cache_folder)
+            except Exception:
+                app = ConanApp(self._conan.cache_folder, self._conan.config.global_conf)
             conanfile = app.loader.load_conanfile(path, conan_ref)
             default_options = conanfile.default_options
             available_options = conanfile.options
