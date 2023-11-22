@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from conan.api.conan_api import ConanAPI
     from conans.client.cache.cache import ClientCache
     from .conan_cache import ConanInfoCache
+    from conan.internal.cache.home_paths import HomePaths
 
 
 class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
@@ -31,7 +32,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         self._conan: "ConanAPI"
         self._client_cache: "ClientCache"
         self._short_path_root = Path("Unknown")
-        self._home_paths = "HomePaths"
+        self._home_paths: "HomePaths"
 
     def init_api(self):
         from conan.api.conan_api import ConanAPI
