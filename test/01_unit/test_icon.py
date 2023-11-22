@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from conan_app_launcher.ui.common.icon import extract_icon
+from conan_explorer.ui.common.icon import extract_icon
 
 
 def test_extract_icon_from_exe(tmp_path, qtbot):

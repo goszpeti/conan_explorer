@@ -19,7 +19,7 @@
             "--junit-xml=${workspaceFolder}/result.xml",
             "--cov-report=xml:cov.xml",
             "--cov-report=term",
-            "--cov=conan_app_launcher",
+            "--cov=conan_explorer",
             "--cov-append",
             "--cov-branch",
             "--capture=no", // print output
@@ -70,6 +70,7 @@
             },
         ],
         "python.analysis.downloadStubs": true,
+        "python.analysis.autoFormatStrings": true,
         "[jsonc]": {
             "editor.defaultFormatter": "vscode.json-language-features"
         },

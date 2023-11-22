@@ -1,10 +1,10 @@
 from pathlib import Path
 import tempfile
 import pytest
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher import BUILT_IN_PLUGIN, INVALID_PATH, AUTHOR
-from conan_app_launcher.settings import PLUGINS_SECTION_NAME
-from conan_app_launcher.ui.plugin import PluginHandler, PluginFile, PluginDescription
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer import BUILT_IN_PLUGIN, INVALID_PATH, AUTHOR
+from conan_explorer.settings import PLUGINS_SECTION_NAME
+from conan_explorer.ui.plugin import PluginHandler, PluginFile, PluginDescription
 from test.conftest import PathSetup
 from PySide6 import QtWidgets
 
@@ -126,7 +126,7 @@ def test_plugin_handler_conan_version():
     assert PluginHandler.eval_conan_version_spec("<2", "1.58.0")
 
     plugin = PluginDescription("", "1.58.0", "", "", "", "", "", False, "<2")
-    from conan_app_launcher import conan_version
+    from conan_explorer import conan_version
 
     if conan_version.startswith("1"):
         assert PluginHandler.is_plugin_enabled(plugin)

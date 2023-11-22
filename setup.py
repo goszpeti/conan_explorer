@@ -22,26 +22,25 @@ if conan_version_env: # eval as spec
     print(f"Using Conan version {conan_major_version} from spec: {conan_version_env}")
 
 # Package meta-data.
-NAME = "conan-app-launcher"
-VERSION = "2.1.1"
-DESCRIPTION = "App Launcher and Package Explorer for Conan"
-URL = "https://github.com/goszpeti/conan_app_launcher"
+NAME = "conan-explorer"
+VERSION = "2.2.0a2"
+DESCRIPTION = "Package Explorer and App Launcher for Conan"
+URL = "https://github.com/goszpeti/conan_explorer"
 AUTHOR = "Péter Gosztolya and Contributors"
-PYTHON_REQUIRES = ">=3.7.0"
+PYTHON_REQUIRES = ">=3.8.0"
 
 # What packages are required for this module to be executed?
-conan_req_spec = "conan>=1.24, <2.1"
+conan_req_spec = "conan>=1.48, <2.1"
 if conan_major_version == "1":
-    conan_req_spec = "conan>=1.24, <2.0"
+    conan_req_spec = "conan>=1.48, <2.0"
 if conan_major_version == "2":
     conan_req_spec = "conan>=2.0, <2.1"
 REQUIRES = [
     conan_req_spec,  # MIT License
-    "PySide6-Essentials>=6.3.0", # LGPLv3
+    "PySide6-Essentials>=6.4.0", # LGPLv3
     "jsonschema>=3.2.0, <5",  # MIT License
     # compatibility
     'contextlib-chdir==1.0.2; python_version<"3.11"',  # BSD License (BSD-3-Clause)
-    'importlib-metadata>=4.8.2, <5; python_version<"3.8"',  # Apache Software License (Apache)
     'typing-extensions>=3.10.0.2, <5; python_version<="3.10"',  # Python Software Foundation License(PSF)
     "packaging",  # use the built-in, or get latest if there is some issue with pip
     # transitive compatibility
@@ -49,12 +48,12 @@ REQUIRES = [
 ]
 
 TEST_REQUIRES = [
-    "pytest==7.4.1",
+    "pytest==7.4.3",
     "pytest-cov==4.1.0",
-    "pytest-mock==3.11.1",
+    "pytest-mock==3.12.0",
     "pytest-qt==4.2.0",
-    "pytest-check==1.3.0",
-    "psutil==5.9.5",
+    "psutil==5.9.6",
+    "pytest-check==2.2.2",
     "pywin32; sys_platform=='win32'",
 ]
 
@@ -82,8 +81,8 @@ try:
         if len(branch) == 1:
             branch = os.getenv("GITHUB_REF", "").split("tags")
         if len(branch) > 1:
-            link = "conan_app_launcher" + branch[1].replace(" ", "")
-            master_link = "conan_app_launcher/master"
+            link = "conan_explorer" + branch[1].replace(" ", "")
+            master_link = "conan_explorer/master"
             for line in long_description.splitlines():
                 if master_link in line:
                     line = line.replace(master_link, link)
@@ -122,11 +121,11 @@ setup(
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: Implementation :: CPython",
         "Environment :: X11 Applications :: Qt",
         "Environment :: Win32 (MS Windows)"
@@ -136,8 +135,9 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         "gui_scripts": [
-            "conan_app_launcher=conan_app_launcher.__main__:run_conan_app_launcher",
-            "conan_explorer=conan_app_launcher.__main__:run_conan_app_launcher",
+            "conan_explorer=conan_explorer.__main__:run_conan_explorer",
+            # for legacy backwards compatibility
+            "conan_app_launcher=conan_explorer.__main__:run_conan_explorer",
         ]
     },
 )

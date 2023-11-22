@@ -11,20 +11,20 @@ from pathlib import Path
 from typing import Callable
 import pytest
 from pytest_mock import MockerFixture
-from conan_app_launcher.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, GUI_STYLE_MATERIAL
-from conan_app_launcher.ui.views.app_grid.config import UiAppGridConfig, UiTabConfig
-from conan_app_launcher.ui.views.app_grid.config.model import UiApplicationModel
+from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, GUI_STYLE_MATERIAL
+from conan_explorer.ui.views.app_grid.config import UiAppGridConfig, UiTabConfig
+from conan_explorer.ui.views.app_grid.config.model import UiApplicationModel
 from test.conftest import TEST_REF, PathSetup, check_if_process_running, conan_install_ref
 
-import conan_app_launcher.app as app  # using global module pattern
+import conan_explorer.app as app  # using global module pattern
 
-from conan_app_launcher.ui.views.app_grid.app_link import ListAppLink, ListAppLink
-from conan_app_launcher.ui.views.app_grid.dialogs.app_edit_dialog import \
+from conan_explorer.ui.views.app_grid.app_link import ListAppLink, ListAppLink
+from conan_explorer.ui.views.app_grid.dialogs.app_edit_dialog import \
     AppEditDialog
-from conan_app_launcher.ui.views.app_grid.model import (UiAppGridModel,
+from conan_explorer.ui.views.app_grid.model import (UiAppGridModel,
                                                         UiAppLinkConfig,
                                                         UiAppLinkModel)
-from conan_app_launcher.conan_wrapper.types import ConanRef as CFR
+from conan_explorer.conan_wrapper.types import ConanRef as CFR
 from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -212,7 +212,7 @@ def test_AppEditDialog_save_values(qtbot, base_fixture: PathSetup, mocker):
     # the caller must call save_data manually
 
     mock_install_func = mocker.patch(
-        'conan_app_launcher.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
+        'conan_explorer.conan_wrapper.conan_worker.ConanWorker.put_ref_in_install_queue')
     diag.save_data()
 
     # assert that all infos where saved
@@ -268,7 +268,7 @@ def test_AppLink_open(qtbot, base_fixture: PathSetup):
     elif platform.system() == "Windows":
         process_name = "cmd"
 
-    assert check_if_process_running(process_name, cmd_contains=["conan_app_launcher"], kill=True, cmd_narg=2)
+    assert check_if_process_running(process_name, cmd_contains=["conan_explorer"], kill=True, cmd_narg=2)
 
 
 @pytest.mark.conanv2

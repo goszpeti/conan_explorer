@@ -13,5 +13,5 @@ cov.xml
 .coverage
 htmlcov/*
 crash.log
-src/conan_app_launcher/cache.json
+src/conan_explorer/cache.json
 doc/example_plugin/cal_example_plugin/plugin.ini

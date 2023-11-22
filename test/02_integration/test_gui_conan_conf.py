@@ -4,16 +4,16 @@ from pathlib import Path
 from time import sleep
 
 import pytest
-import conan_app_launcher
-from conan_app_launcher.app.system import delete_path
-from conan_app_launcher.conan_wrapper import ConanApi
+import conan_explorer
+from conan_explorer.app.system import delete_path
+from conan_explorer.conan_wrapper import ConanApi
 from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, PathSetup, login_test_remote, logout_all_remotes
-from conan_app_launcher import conan_version
+from conan_explorer import conan_version
 
-import conan_app_launcher.app as app  # using global module pattern
-from conan_app_launcher.ui import main_window
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer.ui import main_window
 from PySide6 import QtCore, QtWidgets
-from conan_app_launcher.ui.views.conan_conf import ConanConfigView
+from conan_explorer.ui.views.conan_conf import ConanConfigView
 
 Qt = QtCore.Qt
 
@@ -27,6 +27,8 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
     3. Disable/Enable remote, check with conan API
     4. Move last remote up, check order
     5. Move this remote down, check order
+    5a. Move last remote to top
+    5b. Move top remote to last
     6. Add a new remote via cli -> push refresh -> new remote should appear
     7. Delete the new remote
     8. Add a new remote via button/dialog -> save
@@ -86,19 +88,20 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         assert conan_conf_view._remotes_controller._select_remote("local3")
 
         #### 3. Test Disable/Enable
-        conan_conf_view._ui.remote_toggle_disabled.click()
+        conan_conf_view._ui.remote_toggle_disabled_button.click()
 
         remotes = app.conan_api.get_remotes(include_disabled=True)
         for remote in remotes:
             if remote.name == "local3":
                 assert remote.disabled
 
-        conan_conf_view._ui.remote_toggle_disabled.click()
+        conan_conf_view._ui.remote_toggle_disabled_button.click()
 
         remotes = app.conan_api.get_remotes()
         for remote in remotes:
             if remote.name == "local3":
                 assert not remote.disabled
+
         # 4. Move last remote up, check order
         last_item = remotes_model.root_item.child_items[-1]
         assert conan_conf_view._remotes_controller._select_remote(last_item.remote.name)
@@ -117,6 +120,24 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         last_item = remotes_model.root_item.child_items[-1]
         assert second_last_item.remote.name == last_item.remote.name
 
+        # 5a. Move last remote to top
+        last_item = remotes_model.root_item.child_items[-1]
+        assert conan_conf_view._remotes_controller._select_remote(last_item.remote.name)
+        conan_conf_view._ui.remote_move_top_button.click()
+        sleep(1)
+        remotes_model = conan_conf_view._remotes_controller._model
+        first_item = remotes_model.root_item.child_items[0]
+
+        assert first_item.remote.name == last_item.remote.name
+
+        # 5b. Move top remote to last
+        assert conan_conf_view._remotes_controller._select_remote(first_item.remote.name)
+        conan_conf_view._ui.remote_move_bottom_button.click()
+        sleep(1)
+        remotes_model = conan_conf_view._remotes_controller._model
+        last_item = remotes_model.root_item.child_items[-1]
+        assert first_item.remote.name == last_item.remote.name
+
         # 6. Add a new remote via cli -> push refresh -> new remote should appear
         os.system(f"conan remote add local4 http://127.0.0.1:9303/ {ssl_disable_flag}")
         conan_conf_view._ui.remote_refresh_button.click()
@@ -128,13 +149,13 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
         mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                             return_value=QtWidgets.QMessageBox.StandardButton.Cancel)
-        conan_conf_view._ui.remote_remove.click()
+        conan_conf_view._ui.remote_remove_button.click()
         assert conan_conf_view._remotes_controller._select_remote("local4")
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
         mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                             return_value=QtWidgets.QMessageBox.StandardButton.Yes)
-        conan_conf_view._ui.remote_remove.click()
+        conan_conf_view._ui.remote_remove_button.click()
         assert conan_conf_view._remotes_controller._model.root_item.child_count()  == remotes_count - 1
 
         # 8. Add a new remote via button/dialog -> save
@@ -143,12 +164,12 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
         mocker.patch.object(QtWidgets.QDialog, 'exec',
                             return_value=QtWidgets.QDialog.DialogCode.Rejected)
-        conan_conf_view._ui.remote_add.click()
+        conan_conf_view._ui.remote_add_button.click()
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
         mocker.patch.object(QtWidgets.QDialog, 'exec',
                             return_value=QtWidgets.QDialog.DialogCode.Accepted)
-        conan_conf_view._ui.remote_add.click()
+        conan_conf_view._ui.remote_add_button.click()
         # can't easily call this, while dialog is opened - so call it on the saved, but now hidden dialog manually
         conan_conf_view.remote_edit_dialog.save()
         conan_conf_view.remote_edit_dialog.save() # save a second time (errors under the hood), to see if Exception from conan is handled
@@ -209,7 +230,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
 
     mocker.patch.object(QtWidgets.QDialog, 'exec',
                         return_value=QtWidgets.QDialog.DialogCode.Rejected)
-    conan_conf_view._ui.remote_login.click()
+    conan_conf_view._ui.remote_login_button.click()
     assert conan.get_remote_user_info(TEST_REMOTE_NAME) == ("demo", True)  # still logged in
 
     # evaluate dialog, after it closed
@@ -241,7 +262,7 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
 @pytest.fixture
 def profile_fixture():
     """ Delete all created profiles in case of errors for test_conan_config_view_profiles"""
-    profiles_path = Path(str(app.conan_api._client_cache.default_profile_path)).parent
+    profiles_path = app.conan_api.get_profiles_path()
     delete_path(profiles_path / "new_profile_add")
     delete_path(profiles_path / "new_profile_rename")
     delete_path(profiles_path / "new_profile_test")
@@ -268,7 +289,7 @@ def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixt
 
     # check, that all conan profiles are displayed
     model = conan_conf_view._ui.profiles_list_view.model()
-    profiles_path = Path(str(app.conan_api._client_cache.default_profile_path)).parent
+    profiles_path = app.conan_api.get_profiles_path()
     default_profile_path = profiles_path / "default"
 
     profile_model_count = model.rowCount(0)

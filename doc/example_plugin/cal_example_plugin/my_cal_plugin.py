@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional
 import sys
 
-from conan_app_launcher.ui import (BaseSignals, PluginInterfaceV1, FluentWindow, 
+from conan_explorer.ui import (BaseSignals, PluginInterfaceV1, FluentWindow, 
                                    PluginDescription, compile_ui_file_if_newer)
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
 

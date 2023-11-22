@@ -7,7 +7,7 @@ source =
 branch = True
 parallel = True
 source = 
-    conan_app_launcher
+    conan_explorer
 
 [report]
 precision = 2

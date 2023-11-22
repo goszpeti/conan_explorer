@@ -1,13 +1,19 @@
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/src/conan_app_launcher/assets/icons/icon.ico" width="128">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/src/conan_explorer/assets/icons/icon.ico" width="128">
 
-# Conan App Launcher and Local Package Explorer
+# Conan Explorer: Local Package Explorer and App Launcher
 
-![https://pypi.org/project/conan-app-launcher/](https://img.shields.io/pypi/v/conan-app-launcher)
-![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-app-launcher)
-![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_app_launcher/20)
-![Python tests](https://github.com/goszpeti/conan_app_launcher/workflows/Python%20tests/badge.svg)
-![Alerts](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_app_launcher&metric=alert_status)
-![Downloads](https://img.shields.io/pypi/dm/conan_app_launcher)
+![https://pypi.org/project/conan-explorer/](https://img.shields.io/pypi/v/conan-explorer)
+![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-explorer)
+![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_explorer/21)
+![Python tests](https://github.com/goszpeti/conan_explorer/workflows/Python%20tests/badge.svg)
+![Alerts](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_explorer&metric=alert_status)
+![Downloads](https://img.shields.io/pypi/dm/conan_explorer)
+
+## ⚠ conan-app-launcher is now conan-explorer
+
+This package has been renamed. Use `pip install conan-explorer` instead.
+
+New package: https://pypi.org/project/conan-explorer/
 
 ## Quick Overview
 
@@ -20,16 +26,16 @@ The goal of this project is to provide a standalone Graphical User Interface (GU
 It is end-user oriented and focuses on using packages, rather then developing them. It can be used on Windows and Linux x64 platforms.
 
 #### Quicklaunch for Applications in Conan Packages
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot.png" width="512">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/doc/screenshot.png" width="512">
 
 #### Local Package Manager
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_pkg_explorer.png" width="512">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/doc/screenshot_pkg_explorer.png" width="512">
 
 #### Conan Search
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_conan_search.png" width="512">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/doc/screenshot_conan_search.png" width="512">
 
 #### Conan Config
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_app_launcher/master/doc/screenshot_conan_conf.png" width="512">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/doc/screenshot_conan_conf.png" width="512">
 
 **Main Features**
 - compatible with a wide range of conan versions (from 1.24 onwards)
@@ -57,7 +63,7 @@ Conan Search
 
 Conan Config
 - view and edit your profiles
-- view and edit your remotes - with multilogin to the same arifactory server for multiple remotes
+- view and edit your remotes - with multi-login to the same artifactory server for multiple remotes
 - see the most important paths and config at one glance
 
 Plugin Mechanism
@@ -67,7 +73,7 @@ Plugin Mechanism
 
 ### Prerequisites on Linux
 
-Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04.
+Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04 and 22.04.
 
 1. Pip must be updated to at least pip 20.3, so using a venv like this is recommended:
 
@@ -76,7 +82,7 @@ sudo apt install python3-venv
 python3 -m venv .venv 
 source .venv/bin/activate
 python3 -m pip install --upgrade pip
-pip install conan_app_launcher
+pip install conan_explorer
 ```
 
 2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type "x-terminal-emulator" to get a list of available terminals.
@@ -85,26 +91,30 @@ pip install conan_app_launcher
 
     sudo apt install xdg-utils
 
-4. Not all Qt6 versions support the Wayland lib of the base system. For Ubuntu 20.04 please install PySide6-Essentials 6.4.3.
+4. Not all Qt6 versions support the Wayland lib of the base system.
+  * For Ubuntu 20.04 please execute "pip install PySide6-Essentials==6.4.3" to get the correct Qt6 version
+  * For Ubuntu 22.04 please ensure that the system Qt6 packages are available. Simply execute "sudo apt-get install qt6-wayland" on a wayland system, or "sudo apt-get install qt6-base-dev" for an X based system.
 
 
 ### With pip from PyPi
-`pip install conan-app-launcher`
+
+    pip install conan-explorer
 
 ### From source
 
 After checkout use the command:
-`pip install .`
+
+    pip install .
 
 ## Running
 
-Execute `conan-app-launcher`, if the Python "scripts" folder is on your system path, or look it up manually in the site-packages folder. 
-You can also assign its icon to it from the site packages folder in conan_app_launcher/assets/icons/icon.ico.
+Execute `conan-explorer`, if the Python "scripts" or "bin" folder is on your system path, or look it up manually in the site-packages folder. 
+You can also assign its icon to it from the site packages folder in **conan_explorer/assets/icons/icon.ico**.
 
 ### Main dependencies
 
-* Pyside6 >= 6.3.0
-* 1.24.0 <= conan < 2.1
+* Pyside6 >= 6.4.0
+* 1.48.0 <= conan < 2.1
 
 > **Warning** - **Deprecation of Python 3.X**  
 > From version 2.0.0 Python 3.6 support will be dropped, having reached end-of-life.    
@@ -115,7 +125,7 @@ You can also assign its icon to it from the site packages folder in conan_app_la
 This project uses Python with Qt as a frontend using the PySide6 integration.
 An IDE configuration is available for VsCode.
 
-See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for Static Code Analysis.
+See https://sonarcloud.io/project/overview?id=goszpeti_conan_explorer for Static Code Analysis.
 
 ## Licenses of used libraries and code
 
@@ -140,5 +150,4 @@ See https://sonarcloud.io/project/overview?id=goszpeti_conan_app_launcher for St
 
 ##### PyPi backports for older Python versions
 * contextlib-chdir by Álvaro Mondéjar Rubio under [BSD License (BSD-3-Clause) ](https://opensource.org/license/BSD-3-clause/)
-* importlib-metadata by Jason R. Coombs under [ Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * typing-extensions by Guido van Rossum, Jukka Lehtosalo, Łukasz Langa, Michael Lee under [Python Software Foundation License(PSF)](https://docs.python.org/3/license.html)

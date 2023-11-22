@@ -1,10 +1,10 @@
 
-from conan_app_launcher.ui.views.plugins_manager.plugins import PluginsPage
+from conan_explorer.ui.views.plugins_manager.plugins import PluginsPage
 
-import conan_app_launcher  # for mocker
-import conan_app_launcher.app as app
-from conan_app_launcher.ui.main_window import MainWindow
-from conan_app_launcher.conan_wrapper.types import ConanRef
+import conan_explorer  # for mocker
+import conan_explorer.app as app
+from conan_explorer.ui.main_window import MainWindow
+from conan_explorer.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt
@@ -39,7 +39,7 @@ def test_plugin_page(qtbot, base_fixture, mocker):
 
     mocker.patch.object(QtWidgets.QFileDialog, 'exec', return_value=QtWidgets.QDialog.DialogCode.Accepted)
     mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles', return_value=[str(plugin_file_path)])
-    # mock_add_func = mocker.patch("conan_app_launcher.ui.plugin.handler.PluginHandler.add_plugin")
+    # mock_add_func = mocker.patch("conan_explorer.ui.plugin.handler.PluginHandler.add_plugin")
 
     plugins_page._ui.add_plugin_button.click()
 
@@ -50,7 +50,7 @@ def test_plugin_page(qtbot, base_fixture, mocker):
     # check remove button
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
-    mock_remove_func = mocker.patch("conan_app_launcher.ui.plugin.handler.PluginHandler.remove_plugin")
+    mock_remove_func = mocker.patch("conan_explorer.ui.plugin.handler.PluginHandler.remove_plugin")
     sel_model = plugins_page._controller._view.selectionModel()
     # select built-in plugin
     sel_model.select(model.index(0, 0, QtCore.QModelIndex()), QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)

@@ -17,13 +17,13 @@ from setuptools import find_packages, setup
 NAME = "cal-example-plugin"
 VERSION = "0.1.0"
 DESCRIPTION = "Example Plugin"
-URL = "https://github.com/goszpeti/conan_app_launcher"
+URL = "https://github.com/goszpeti/conan_explorer"
 AUTHOR = "Péter Gosztolya and Contributors"
-PYTHON_REQUIRES = ">=3.7.0"
+PYTHON_REQUIRES = ">=3.8.0"
 
 # What packages are required for this module to be executed?
 REQUIRES = [
-    "conan_app_launcher>=2.0.0-alpha"
+    "conan_explorer>=2.0.0-alpha"
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -42,7 +42,7 @@ setup(
 )
 
 # Register plugin
-from conan_app_launcher.ui import PluginFile, PluginDescription
+from conan_explorer.ui import PluginFile, PluginDescription
 import cal_example_plugin
 # cd away, so that not the current cwd module will be registered, but the site-packages one
 os.chdir(tempfile.gettempdir())

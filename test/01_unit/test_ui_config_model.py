@@ -3,14 +3,14 @@ from shutil import copy2
 from pathlib import Path
 
 import pytest
-from conan_app_launcher.settings import GUI_STYLE_MATERIAL
+from conan_explorer.settings import GUI_STYLE_MATERIAL
 from test.conftest import TEST_REF_OFFICIAL, PathSetup
 
-from conan_app_launcher import INVALID_PATH, asset_path
-from conan_app_launcher.ui.views.app_grid.model import (UiAppLinkConfig,
+from conan_explorer import INVALID_PATH, asset_path
+from conan_explorer.ui.views.app_grid.model import (UiAppLinkConfig,
                                                           UiAppLinkModel)
-from conan_app_launcher.conan_wrapper.types import ConanRef
-from conan_app_launcher.conan_wrapper.unified_api import ConanCommonUnifiedApi
+from conan_explorer.conan_wrapper.types import ConanRef
+from conan_explorer.conan_wrapper.unified_api import ConanCommonUnifiedApi
 
 
 def test_executable_eval(base_fixture: PathSetup):
