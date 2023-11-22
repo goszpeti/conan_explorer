@@ -12,6 +12,7 @@ from pathlib import Path
 from shutil import rmtree
 
 import pytest
+import requests
 from conan_explorer.ui.fluent_window.side_menu import SideSubMenu
 from conan_explorer.ui.plugin.handler import PluginFile
 from conan_explorer.ui.views.app_grid.tab import TabList
@@ -33,7 +34,7 @@ Qt = QtCore.Qt
 
 
 @pytest.mark.conanv2
-def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
+def test_startup_no_config(qtbot, base_fixture, ui_config_fixture, mocker):
     """ Test, that when no config file is set,
     a new tab with a new default app is automatically added."""
     from pytestqt.plugin import _qapp_instance
@@ -59,6 +60,16 @@ def test_startup_no_config(qtbot, base_fixture, ui_config_fixture):
         assert tab.model.name == "New Tab"
         for test_app in tab.app_links:
             assert test_app.model.name == "New App"
+
+    # check, if doc search works
+    open_url_mock = mocker.patch("PySide6.QtGui.QDesktopServices.openUrl")
+    main_gui.ui.search_bar_line_edit.setText("query")
+    main_gui.on_docs_searched()
+    url = open_url_mock.call_args[0][0]
+    assert "query" in url
+    # check via html query
+    res = requests.get(url)
+    assert res.status_code == 200
 
     # check, if save_window_state doesn't crash
     main_gui.save_window_state()
