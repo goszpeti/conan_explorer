@@ -31,6 +31,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         self._conan: "ConanAPI"
         self._client_cache: "ClientCache"
         self._short_path_root = Path("Unknown")
+        self._home_paths = "HomePaths"
 
     def init_api(self):
         from conan.api.conan_api import ConanAPI
@@ -38,9 +39,14 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
         from .conan_cache import ConanInfoCache
         self._conan = ConanAPI()
-        self._client_cache = ClientCache(self._conan.cache_folder)
-        self.info_cache = ConanInfoCache(
-            user_save_path, self.get_all_local_refs())
+        # Workaround for 2.0.14 API changes
+        try:
+            self._client_cache = ClientCache(self._conan.cache_folder)
+        except Exception:
+            self._client_cache = ClientCache(self._conan.cache_folder, self._conan.config.global_conf)
+            from conan.internal.cache.home_paths import HomePaths
+            self._home_paths = HomePaths(self._conan.cache_folder)
+        self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
         return self
 
     ### General commands ###
@@ -116,19 +122,35 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return str(info.get("user_name", "")), info.get("authenticated", False)
 
     def get_config_file_path(self) -> Path:
-        return Path(self._client_cache.new_config_path)
+        # Workaround for 2.0.14 API changes
+        cf_path = None
+        try:
+            cf_path = Path(self._client_cache.new_config_path)
+        except Exception:
+            cf_path = Path(self._home_paths.global_conf_path)
+        return cf_path
 
     def get_config_entry(self, config_name: str, default_value: Any) -> Any:
-        return self._client_cache.new_config.get(config_name, default_value)
+        return self._conan.config.get(config_name, default_value)
 
     def get_revisions_enabled(self) -> bool:
         return True
 
     def get_settings_file_path(self) -> Path:
-        return Path(self._client_cache.settings_path)
+        settings_path = None
+        try:
+            settings_path = Path(self._client_cache.settings_path)
+        except Exception:
+            settings_path = Path(self._home_paths.settings_path)
+        return settings_path
 
     def get_profiles_path(self) -> Path:
-        return Path(self._client_cache.profiles_path)
+        profiles_path = None
+        try:
+            profiles_path = Path(self._client_cache.profiles_path)
+        except Exception:
+            profiles_path = Path(self._home_paths.profiles_path)
+        return profiles_path
 
     def get_editables_file_path(self) -> Path:
         return  Path(self._client_cache.editable_packages._edited_file)
