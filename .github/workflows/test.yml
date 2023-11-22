@@ -63,12 +63,12 @@ jobs:
           - name: "ubuntu22-conan2-py312"
             python: "3.12"
             os: ubuntu-22.04
-            conan: "<3"
+            conan: "==2.0.13" # pre 2.0.14 API changes
             pytest_args: "-m conanv2"
           - name:  "windows-conan2-py312"
             python: "3.12"
             os: windows-latest
-            conan: "<3"
+            conan: "<3" # post 2.0.14 API changes
             pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
