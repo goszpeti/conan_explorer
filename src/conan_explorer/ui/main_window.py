@@ -88,7 +88,10 @@ class MainWindow(FluentWindow):
         self.restore_window_state()
 
     def on_docs_searched(self):
-        search_url = (f"https://docs.conan.io/en/{self._conan_minor_version}/search.html"
+        extra_addr = ""
+        if conan_version.startswith("1"):
+            extra_addr = "en/"
+        search_url = (f"https://docs.conan.io/{extra_addr}{self._conan_minor_version}/search.html"
                       f"?q={self.ui.search_bar_line_edit.text()}&check_keywords=yes&area=default")
         QDesktopServices.openUrl(search_url)
 
