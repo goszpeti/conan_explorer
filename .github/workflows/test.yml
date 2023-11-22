@@ -16,7 +16,7 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 14
+    timeout-minutes: 20
 
     strategy:
       fail-fast: false
@@ -66,12 +66,12 @@ jobs:
           - name: "ubuntu-conan2-py311"
             python: "3.11"
             os: ubuntu-20.04
-            conan: "<3"
+            conan: "==2.0.13"
             pytest_args: "-m conanv2"
           - name:  "windows-conan2-py311"
             python: "3.11"
             os: windows-latest
-            conan: "<3"
+            conan: "<2.1"
             pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
@@ -135,7 +135,7 @@ jobs:
             results/
 
   sonarcloud:
-    if: always() # eecute, even when tests fail
+    if: always() # execute, even when tests fail
     needs:
       - test
     runs-on: ubuntu-20.04

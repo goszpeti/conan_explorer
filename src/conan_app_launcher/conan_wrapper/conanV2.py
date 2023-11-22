@@ -106,7 +106,11 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def get_default_settings(self) -> ConanSettings:
         from conans.client.profile_loader import ProfileLoader
-        profile = ProfileLoader(self._client_cache).load_profile(
+        try:
+            profile = ProfileLoader(self._client_cache).load_profile(
+            Path(self._conan.profiles.get_default_host()).name)
+        except Exception: # 2.0.14
+            profile = ProfileLoader(self._client_cache.cache_folder).load_profile(
             Path(self._conan.profiles.get_default_host()).name)
         return dict(profile.settings)
 
@@ -265,7 +269,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         try:
             path = self.get_conanfile_path(conan_ref)
             from conan.internal.conan_app import ConanApp
-            app = ConanApp(self._conan.cache_folder)
+            try:
+                app = ConanApp(self._conan.cache_folder)
+            except Exception:
+                app = ConanApp(self._conan.cache_folder, self._conan.config.global_conf)
             conanfile = app.loader.load_conanfile(path, conan_ref)
             default_options = conanfile.default_options
             available_options = conanfile.options
