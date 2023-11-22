@@ -38,7 +38,11 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
         from .conan_cache import ConanInfoCache
         self._conan = ConanAPI()
-        self._client_cache = ClientCache(self._conan.cache_folder)
+        # TODO: Remove after 2.1 release
+        try:
+            self._client_cache = ClientCache(self._conan.cache_folder)
+        except Exception:
+            self._client_cache = ClientCache(self._conan.cache_folder, self._conan.config.global_conf)
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
         Logger().debug("Initialized Conan V2 API wrapper")
         return self
@@ -54,8 +58,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def get_profile_settings(self, profile_name: str) -> ConanSettings:
         from conans.client.profile_loader import ProfileLoader
         try:
-            profile = ProfileLoader(
-                self._client_cache).load_profile(profile_name)
+            profile = ProfileLoader(self._client_cache).load_profile(profile_name)
             return profile.settings
         except Exception as e:
             Logger().error(f"Can't get profile {profile_name} settings: {str(e)}")
@@ -115,10 +118,20 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return str(info.get("user_name", "")), info.get("authenticated", False)
 
     def get_config_file_path(self) -> Path:
-        return Path(self._client_cache.new_config_path)
+        # TODO: Remove after 2.1 release
+        cf_path = None
+        try:
+            cf_path = Path(self._client_cache.new_config_path)
+        except Exception:
+            self._conan.config.global_conf
+            cache_folder = self._conan.cache_folder
+            from conan.internal.cache.home_paths import HomePaths
+            home_paths = HomePaths(cache_folder)
+            cf_path = Path(home_paths.new_config_path)
+        return cf_path
 
     def get_config_entry(self, config_name: str, default_value: Any) -> Any:
-        return self._client_cache.new_config.get(config_name, default_value)
+        return self._conan.config.get(config_name, default_value)
 
     def get_revisions_enabled(self) -> bool:
         return True
