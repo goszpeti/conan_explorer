@@ -8,7 +8,7 @@ import platform
 import sys
 import traceback
 from unittest.mock import Mock
-from conan_explorer.app.crash import bug_dialog_exc_hook
+from conan_explorer.app import bug_dialog_exc_hook
 from conan_explorer.conan_wrapper.conanV1 import ConanApi
 from conan_explorer.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui.common.theming import get_user_theme_color
