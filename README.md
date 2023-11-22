@@ -2,11 +2,11 @@
 
 # Conan Explorer: Local Package Explorer and App Launcher
 
-![https://pypi.org/project/conan-explorer/](https://img.shields.io/pypi/v/conan-explorer)
-![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-explorer)
+![https://pypi.org/project/conan-explorer/](https://img.shields.io/pypi/v/conan-explorer?logo=pypi)
+![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-explorer?logo=python)
 ![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_explorer/21)
 ![Python tests](https://github.com/goszpeti/conan_explorer/workflows/Python%20tests/badge.svg)
-![Alerts](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_explorer&metric=alert_status)
+![SonarStatus](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_explorer&metric=alert_status)
 ![Downloads](https://img.shields.io/pypi/dm/conan_explorer)
 
 ## ⚠ conan-app-launcher is now conan-explorer
