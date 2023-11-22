@@ -9,7 +9,6 @@ from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import delete_path
 from conan_explorer.ui.common import get_themed_asset_icon, ConfigHighlighter
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
-from conan_explorer.ui.views.conan_conf.editable_model import EditableModel
 from conan_explorer.ui.widgets import RoundedMenu
 from conan_explorer.conan_wrapper.types import Remote
 from PySide6.QtCore import Qt, Signal
@@ -18,6 +17,7 @@ from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInpu
 
 from .dialogs import RemoteEditDialog, RemoteLoginDialog
 from .remotes_controller import ConanRemoteController
+from .editable_controller import ConanEditableController
 from .profiles_model import ProfilesModel
 
 if TYPE_CHECKING:
@@ -41,8 +41,10 @@ class ConanConfigView(PluginInterfaceV1):
 
     def load(self):
         assert self._base_signals
-        self._remotes_controller = ConanRemoteController(
-            self._ui.remotes_tree_view, self._base_signals.conan_remotes_updated)
+        self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, 
+                                            self._base_signals.conan_remotes_updated)
+        self._editable_controller = ConanEditableController(self._ui.editables_ref_view,
+                                                            )
         self._init_remotes_tab()
         self._init_profiles_tab()
 
@@ -121,14 +123,11 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
 
     def _load_editables_tab(self):
-        editables_model = EditableModel()
-        self._ui.editables_ref_view.setModel(editables_model)
-        self._ui.editables_ref_view.setItemsExpandable(False)
-        self._ui.editables_ref_view.setRootIsDecorated(False)
-        for i in reversed(range(editables_model.root_item.column_count() - 1)):
-            self._ui.editables_ref_view.resizeColumnToContents(i)
+        self._ui.editables_add_button.clicked.connect(self._editable_controller.add)
+        self._ui.editables_remove_button.clicked.connect(self._editable_controller.remove)
+        self._ui.editables_refresh_button.clicked.connect(self._editable_controller.update)
+        self._ui.editables_edit_button.clicked.connect(self._editable_controller.edit)
 
-        self._ui.editables_add_button.clicked.connect(self._remotes_controller.move_to_bottom)
         self.set_themed_icon(self._ui.editables_add_button, "icons/plus_rounded.svg")
         self.set_themed_icon(self._ui.editables_remove_button, "icons/delete.svg")
         self.set_themed_icon(self._ui.editables_refresh_button, "icons/refresh.svg")
