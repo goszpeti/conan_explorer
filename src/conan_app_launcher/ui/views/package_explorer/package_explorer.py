@@ -169,8 +169,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.select_cntx_menu.addAction(self.install_ref_action)
         self.install_ref_action.triggered.connect(self._pkg_sel_ctrl.on_install_ref_requested)
 
+        self.show_build_info_action = QAction("Show package build info", self)
         if not conan_version.startswith("2"): # Currently not doable
-            self.show_build_info_action = QAction("Show package build info", self)
             self.set_themed_icon(self.show_build_info_action, "icons/download.svg")
             self.select_cntx_menu.addAction(self.show_build_info_action)
             self.show_build_info_action.triggered.connect(self._pkg_sel_ctrl.on_show_build_info)
