@@ -193,8 +193,8 @@ class MainWindow(FluentWindow):
                 last_view = app.active_settings.get_string(LAST_VIEW)
                 page = self.page_widgets.get_page_by_name(last_view)
                 self.page_widgets.get_button_by_type(type(page)).click()
-            except Exception:
-                pass
+            except Exception as e:
+                Logger().debug("Can't switch to page for auto open: " + str(e))
         
         self.loaded = True
 
