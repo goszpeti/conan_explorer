@@ -234,6 +234,14 @@ class ConanUnifiedApiInterface():
         raise NotImplementedError
 
     @abstractmethod
+    def add_editable(self, conan_ref: str, path: Path, output_folder: Path):
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove_editable(self, conan_ref: str):
+        raise NotImplementedError
+
+    @abstractmethod
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str=""):
         """ Remove a conan reference and it's package if specified via id """
         raise NotImplementedError

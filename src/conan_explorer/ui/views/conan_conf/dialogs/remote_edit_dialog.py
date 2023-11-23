@@ -10,17 +10,16 @@ from PySide6.QtWidgets import QDialog, QWidget
 
 from conan_explorer.ui.common.theming import get_themed_asset_icon
 
-
-current_dir = Path(__file__).parent
-
-
 class RemoteEditDialog(QDialog):
 
-    def __init__(self, remote: Remote, new_remote=False, parent: Optional[QWidget] = None):
+    def __init__(self, remote: Optional[Remote], parent: Optional[QWidget] = None):
         super().__init__(parent=parent)
         from .remote_edit_dialog_ui import Ui_Dialog
+        self._new_remote = False
+        if remote is None:
+            remote = Remote("New", "", True, False)
+            self._new_remote = True
         self._remote = remote
-        self._new_remote = new_remote
 
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)

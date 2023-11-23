@@ -15,7 +15,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog
 
-from .dialogs import RemoteEditDialog, RemoteLoginDialog
+from .dialogs import RemoteEditDialog, RemoteLoginDialog, EditableEditDialog
 from .remotes_controller import ConanRemoteController
 from .editable_controller import ConanEditableController
 from .profiles_model import ProfilesModel
@@ -71,7 +71,7 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.python_exe_value_label.setText(sys.executable)
         self._ui.python_cur_version_value_label.setText(platform.python_version())
         self._ui.revision_enabled_checkbox.setChecked(
-            app.conan_api.get_revisions_enabled())
+                                            app.conan_api.get_revisions_enabled())
         self._ui.conan_usr_home_value_label.setText(
             str(app.conan_api.get_user_home_path()))
         if conan_version.startswith("2"):
@@ -90,14 +90,23 @@ class ConanConfigView(PluginInterfaceV1):
         except Exception:
             Logger().error("Cannot read settings.yaml file!")
 
-    def _load_config_file_tab(self):
-        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
-        try:
-            self._ui.config_file_text_browser.setText(
-                app.conan_api.get_config_file_path().read_text())
-            self._ui.config_file_save_button.clicked.connect(self.on_save_config_file)
-        except Exception:
-            Logger().error("Cannot read Conan config file!")
+    def resizeEvent(self, a0):  # override
+        """ Resize remote view columns automatically if window size changes """
+        super().resizeEvent(a0)
+        self._remotes_controller.resize_remote_columns()
+
+    def reload_themed_icons(self):
+        super().reload_themed_icons()
+        self._init_profile_context_menu()
+        self._init_remote_context_menu()
+        self._conan_config_highlighter = ConfigHighlighter(
+            self._ui.config_file_text_browser.document(), "ini")
+        self._profile_highlighter = ConfigHighlighter(
+            self._ui.profiles_text_browser.document(), "ini")
+        self._settings_highlighter = ConfigHighlighter(
+            self._ui.settings_file_text_browser.document(), "yaml")
+
+# Profile
 
     def _init_profiles_tab(self):
         self._ui.profiles_list_view.setContextMenuPolicy(
@@ -117,22 +126,6 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.svg")
         self.set_themed_icon(self._ui.profile_rename_button, "icons/rename.svg")
 
-    def _load_profiles_tab(self):
-        profiles_model = ProfilesModel()
-        self._ui.profiles_list_view.setModel(profiles_model)
-        self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
-
-    def _load_editables_tab(self):
-        self._ui.editables_add_button.clicked.connect(self._editable_controller.add)
-        self._ui.editables_remove_button.clicked.connect(self._editable_controller.remove)
-        self._ui.editables_refresh_button.clicked.connect(self._editable_controller.update)
-        self._ui.editables_edit_button.clicked.connect(self._editable_controller.edit)
-
-        self.set_themed_icon(self._ui.editables_add_button, "icons/plus_rounded.svg")
-        self.set_themed_icon(self._ui.editables_remove_button, "icons/delete.svg")
-        self.set_themed_icon(self._ui.editables_refresh_button, "icons/refresh.svg")
-        self.set_themed_icon(self._ui.editables_edit_button, "icons/edit.svg")
-
     def _init_profile_context_menu(self):
         self.profiles_cntx_menu = RoundedMenu()
         self._copy_profile_action = QAction("Copy profile name", self)
@@ -141,23 +134,10 @@ class ConanConfigView(PluginInterfaceV1):
         self.profiles_cntx_menu.addAction(self._copy_profile_action)
         self._copy_profile_action.triggered.connect(self.on_copy_profile_requested)
 
-    def resizeEvent(self, a0):  # override
-        """ Resize remote view columns automatically if window size changes """
-        super().resizeEvent(a0)
-        self._remotes_controller.resize_remote_columns()
-
-    def reload_themed_icons(self):
-        super().reload_themed_icons()
-        self._init_profile_context_menu()
-        self._init_remote_context_menu()
-        self._conan_config_highlighter = ConfigHighlighter(
-            self._ui.config_file_text_browser.document(), "ini")
-        self._profile_highlighter = ConfigHighlighter(
-            self._ui.profiles_text_browser.document(), "ini")
-        self._settings_highlighter = ConfigHighlighter(
-            self._ui.settings_file_text_browser.document(), "yaml")
-
-# Profile
+    def _load_profiles_tab(self):
+        profiles_model = ProfilesModel()
+        self._ui.profiles_list_view.setModel(profiles_model)
+        self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
 
     def on_copy_profile_requested(self):
         view_indexes = self._ui.profiles_list_view.selectedIndexes()
@@ -323,7 +303,7 @@ class ConanConfigView(PluginInterfaceV1):
         remote_item = self._remotes_controller.get_selected_remote()
         if not remote_item:
             return
-        self.remote_edit_dialog = RemoteEditDialog(remote_item.remote, False, self)
+        self.remote_edit_dialog = RemoteEditDialog(remote_item.remote, self)
         reply = self.remote_edit_dialog.exec()
         if reply == QDialog.DialogCode.Accepted:
             self._remotes_controller.update()
@@ -341,8 +321,7 @@ class ConanConfigView(PluginInterfaceV1):
             self._remotes_controller.update()
 
     def on_remote_add(self, model_index):
-        new_remote = Remote("New", "", True, False)
-        self.remote_edit_dialog = RemoteEditDialog(new_remote, True, self)
+        self.remote_edit_dialog = RemoteEditDialog(None, self)
         reply = self.remote_edit_dialog.exec()
         if reply == QDialog.DialogCode.Accepted:
             self._remotes_controller.update()
@@ -360,8 +339,7 @@ class ConanConfigView(PluginInterfaceV1):
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
-            app.conan_api.remove_remote(remote_item.remote.name)
-            self._remotes_controller.update()
+            self._remotes_controller.remove(remote_item.remote.name)
 
     def on_remote_disable(self, model_index):
         self._remotes_controller.remote_disable(model_index)
@@ -369,7 +347,60 @@ class ConanConfigView(PluginInterfaceV1):
     def on_copy_remote_name_requested(self):
         self._remotes_controller.copy_remote_name()
 
+# Editables tab
+
+    def _load_editables_tab(self):
+        self._ui.editables_add_button.clicked.connect(self.on_editable_add)
+        self._ui.editables_remove_button.clicked.connect(self.on_editable_remove)
+        self._ui.editables_refresh_button.clicked.connect(self._editable_controller.update)
+        self._ui.editables_edit_button.clicked.connect(self.on_editable_edit)
+        self._ui.editables_ref_view.doubleClicked.connect(self.on_editable_edit)
+
+        self.set_themed_icon(self._ui.editables_add_button, "icons/plus_rounded.svg")
+        self.set_themed_icon(self._ui.editables_remove_button, "icons/delete.svg")
+        self.set_themed_icon(self._ui.editables_refresh_button, "icons/refresh.svg")
+        self.set_themed_icon(self._ui.editables_edit_button, "icons/edit.svg")
+
+    def on_editable_add(self, model_index):
+        self.remote_edit_dialog = EditableEditDialog(None, self)
+        reply = self.remote_edit_dialog.exec()
+        if reply == QDialog.DialogCode.Accepted:
+            self._editable_controller.update()
+
+    def on_editable_edit(self, model_index):
+        editable_item = self._editable_controller.get_selected_editable()
+        if not editable_item:
+            return
+        self.remote_edit_dialog = EditableEditDialog(editable_item, self)
+        reply = self.remote_edit_dialog.exec()
+        if reply == QDialog.DialogCode.Accepted:
+            self._editable_controller.update()
+
+    def on_editable_remove(self, model_index):
+        editable_item = self._editable_controller.get_selected_editable()
+        if not editable_item:
+            return
+        message_box = QMessageBox(parent=self)
+        message_box.setWindowTitle("Remove editable")
+        message_box.setText("Are you sure, you want to delete the editable" +
+                             f"{editable_item.name}?")
+        message_box.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        message_box.setIcon(QMessageBox.Icon.Question)
+        reply = message_box.exec()
+        if reply == QMessageBox.StandardButton.Yes:
+            self._editable_controller.remove(editable_item.name)
+
 # Conan Config
+
+    def _load_config_file_tab(self):
+        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
+        try:
+            self._ui.config_file_text_browser.setText(
+                app.conan_api.get_config_file_path().read_text())
+            self._ui.config_file_save_button.clicked.connect(self.on_save_config_file)
+        except Exception:
+            Logger().error("Cannot read Conan config file!")
 
     def on_save_config_file(self):
         app.conan_api.get_config_file_path().write_text(
@@ -379,10 +410,3 @@ class ConanConfigView(PluginInterfaceV1):
         Logger().info("Applying Changes to Conan...")
         # re-init info tab to show the changes
         self._load_info_tab()
-
-# Editables tab
-
-    def on_save_editable_file(self):
-        pass
-        # app.conan_api.get_editables_file_path().write_text(
-        #     self._ui.editables_file_text_browser.toPlainText())

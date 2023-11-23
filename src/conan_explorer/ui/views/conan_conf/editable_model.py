@@ -11,6 +11,26 @@ class EditableModelItem(TreeModelItem):
     def __init__(self, name, path, output, parent=None, lazy_loading=False):
         super().__init__([name, path, output], parent, lazy_loading=lazy_loading)
 
+    @property
+    def name(self):
+        return self.item_data[0]
+    @name.setter
+    def name(self, value: str):
+        self.item_data[0] = value
+
+    @property
+    def path(self):
+        return self.item_data[1]
+    @path.setter
+    def path(self, value: str):
+        self.item_data[1] = value
+
+    @property
+    def output(self):
+        return self.item_data[2]
+    @output.setter
+    def output(self, value: str):
+        self.item_data[2] = value
 
 class EditableModel(TreeModel):
     def __init__(self):
@@ -42,20 +62,3 @@ class EditableModel(TreeModel):
 
     def rowCount(self, parent=None):
         return self.root_item.child_count()
-
-    # def data(self, index, role):
-    #     if role == Qt.ItemDataRole.DisplayRole:
-    #         text = self._profiles[index.column()]
-    #         return text
-    #     # platform logo
-    #     if role == Qt.ItemDataRole.DecorationRole:
-    #         text = self._profiles[index.column()]
-    #         return get_platform_icon(text)
-
-    # def get_index_from_profile(self, profile_name: str) -> Optional[QModelIndex]:
-    #     index = None
-    #     for i, profile in enumerate(self._profiles):
-    #         if profile == profile_name:
-    #             index = self.createIndex(i, 0)
-    #             break
-    #     return index

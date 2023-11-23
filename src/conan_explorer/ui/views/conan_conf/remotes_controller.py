@@ -74,6 +74,10 @@ class ConanRemoteController():
     def move_to_bottom(self):
         self._remote_reorder_controller.move_to_position(-1)
 
+    def remove(self, remote_name: str):
+        app.conan_api.remove_remote(remote_name)
+        self.update()
+
     def remote_disable(self, model_index):
         remote_item = self.get_selected_remote()
         if not remote_item:
@@ -82,6 +86,12 @@ class ConanRemoteController():
             remote_item.remote.name, not remote_item.remote.disabled)
         self.update()
 
+    def copy_remote_name(self):
+        remote_item = self.get_selected_remote()
+        if not remote_item:
+            return
+        QApplication.clipboard().setText(remote_item.remote.name)
+
     def get_selected_remote(self) -> Union[RemotesModelItem, None]:
         indexes = self._view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
@@ -89,9 +99,3 @@ class ConanRemoteController():
             return None
         remote: RemotesModelItem = indexes[0].internalPointer()  # type: ignore
         return remote
-
-    def copy_remote_name(self):
-        remote_item = self.get_selected_remote()
-        if not remote_item:
-            return
-        QApplication.clipboard().setText(remote_item.remote.name)
