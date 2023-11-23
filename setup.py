@@ -23,7 +23,7 @@ if conan_version_env: # eval as spec
 
 # Package meta-data.
 NAME = "conan-explorer"
-VERSION = "2.2.0a2"
+VERSION = "2.2.0a3"
 DESCRIPTION = "Package Explorer and App Launcher for Conan"
 URL = "https://github.com/goszpeti/conan_explorer"
 AUTHOR = "Péter Gosztolya and Contributors"
