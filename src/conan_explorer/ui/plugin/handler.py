@@ -73,10 +73,12 @@ class PluginHandler(QObject):
             self._unload_plugin(plugin)
 
     def reload_plugin(self, plugin_name: str):
-        plugin = self.get_plugin_descr_from_name(plugin_name)
-        assert plugin
-        self._unload_plugin(plugin)
-        self._load_plugin(plugin, reload=True)
+        plugin_descr = self.get_plugin_descr_from_name(plugin_name)
+        assert plugin_descr
+        self._unload_plugin(plugin_descr)
+        plugin = self._load_plugin(plugin_descr, reload=True)
+        self.load_plugin.emit(plugin)
+        plugin.load_signal.emit()
 
     def _load_plugins_from_file(self, plugin_path: str) -> List [PluginInterfaceV1]:
         file_plugin_descrs = PluginFile.read(plugin_path)
@@ -94,8 +96,9 @@ class PluginHandler(QObject):
                 sys.path.append(str(import_path.parent))
                 module_ = importlib.import_module(import_path.stem)
                 if reload:
+                    # get all modules to re-import
                     modules_to_del = [
-                        x for x in sys.modules if import_path.stem in x]
+                        module for module in sys.modules if import_path.stem in module]
                     # importlib reload does not work with relative imports
                     for module_to_del in modules_to_del:
                         del sys.modules[module_to_del]
@@ -123,7 +126,7 @@ class PluginHandler(QObject):
     def _unload_plugin(self, plugin: PluginDescription):
         plugin_widget = self.get_plugin_by_description(plugin)
         if not plugin_widget:
-            # Logger error # TODO
+            Logger().error(f"Cannot get plugin {plugin.name} for unload")
             return
         self._active_plugins.remove(plugin_widget)
         plugin_widget.close()
