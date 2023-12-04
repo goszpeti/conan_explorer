@@ -1,9 +1,7 @@
 
-from typing import List, Optional
 import conan_explorer.app as app
 from conan_explorer.conan_wrapper.types import ConanRef  # using global module pattern
-from conan_explorer.ui.common import (get_platform_icon)
-from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt
+from PySide6.QtCore import QModelIndex, Qt
 from conan_explorer.ui.common import TreeModel, TreeModelItem
 
 class EditableModelItem(TreeModelItem):

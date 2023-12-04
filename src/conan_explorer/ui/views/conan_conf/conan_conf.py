@@ -10,7 +10,6 @@ from conan_explorer.app.system import delete_path
 from conan_explorer.ui.common import get_themed_asset_icon, ConfigHighlighter
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_explorer.ui.widgets import RoundedMenu
-from conan_explorer.conan_wrapper.types import Remote
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog

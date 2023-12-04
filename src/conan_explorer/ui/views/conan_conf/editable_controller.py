@@ -1,13 +1,11 @@
-from typing import Optional, Union
+from typing import Union
 
 import conan_explorer.app as app
 from conan_explorer.app.logger import Logger
-from conan_explorer.ui.dialogs import ReorderController
-from PySide6.QtCore import QModelIndex, QItemSelectionModel, SignalInstance
-from PySide6.QtWidgets import QApplication, QTreeView
+from PySide6.QtCore import QModelIndex, QItemSelectionModel
+from PySide6.QtWidgets import QTreeView
 
 from .editable_model import EditableModel, EditableModelItem
-
 
 class ConanEditableController():
 
@@ -29,7 +27,6 @@ class ConanEditableController():
 
         if sel_edit:
             self._select_editable(sel_edit.name)
-
 
     def resize_remote_columns(self):
         for i in reversed(range(self._model.root_item.column_count() - 1)):
