@@ -317,6 +317,18 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         editables_dict = self._conan.local.editable_list()
         return list(map(str, editables_dict.keys()))
 
+    def add_editable(self, conan_ref: str, path: str, output_folder: str):
+        conan_ref_obj = ConanRef.loads(conan_ref)
+        self._conan.local.editable_add(path, conan_ref_obj.name, conan_ref_obj.version,
+                conan_ref_obj.user, conan_ref_obj.channel, output_folder=output_folder)
+
+    def remove_editable(self, conan_ref: str):
+        self._conan.local.editable_remove(None, [conan_ref])
+    
+    def set_editable(self, conan_ref: str, path: str, output_folder: str):
+        self.remove_editable(conan_ref)
+        self.add_editable(path, conan_ref, output_folder)
+
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str = ""):
         if pkg_id:
             conan_pkg_ref = ConanPkgRef.loads(str(conan_ref) + ":" + pkg_id)

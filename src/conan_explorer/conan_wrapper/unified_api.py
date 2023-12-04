@@ -233,14 +233,17 @@ class ConanUnifiedApiInterface():
 
     @abstractmethod
     def add_editable(self, conan_ref: str, path: str, output_folder: str):
+        """ Add an editable reference. """
         raise NotImplementedError
 
     @abstractmethod
     def remove_editable(self, conan_ref: str):
+        """ Remove an editable reference. """
         raise NotImplementedError
     
     @abstractmethod
     def set_editable(self, conan_ref: str, path: str, output_folder: str):
+        """ Edits an editable reference information , with all params changeable in place. """
         raise NotImplementedError
 
     @abstractmethod
