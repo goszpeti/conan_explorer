@@ -57,19 +57,19 @@ class EditableEditDialog(QDialog):
         return ""
 
     def save(self):
-        """ Save edited remote information by calling the appropriate conan methods. """
+        """ Save edited editable information by calling the appropriate conan methods. """
         new_name = self._ui.name_line_edit.text()
         new_path = self._ui.path_line_edit.text()
         new_output_folder = self._ui.output_folder_line_edit.text()
-        # try:
-        #     if self._new_editable:
-        #         app.conan_api.add_remote(new_name, new_path, new_output_folder)
-        #         self.accept()
-        #         return
-        #     if new_name != self._editable.name:
-        #         app.conan_api.rename_remote(self._editable.name, new_name)
-        #     if new_path != self._editable.url or new_output_folder != self._editable.verify_ssl:
-        #         app.conan_api.update_remote(new_name, new_path, new_output_folder, self._editable.disabled, None)
-        # except Exception as e:
-        #     Logger().error(str(e))
+        try:
+            if self._new_editable:
+                app.conan_api.add_editable(new_name, new_path, new_output_folder)
+                self.accept()
+                return
+            # if name changed -> remove the old one
+            app.conan_api.set_editable(new_name, new_path, new_output_folder)
+            if new_name != self._editable.name:
+                app.conan_api.remove_editable(self._editable.name)
+        except Exception as e:
+            Logger().error(str(e))
         self.accept()

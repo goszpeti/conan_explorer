@@ -51,7 +51,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="name_label">
        <property name="text">
-        <string>Name</string>
+        <string>Reference</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -100,7 +100,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="name_line_edit"/>
+      <widget class="ConanRefLineEdit" name="name_line_edit"/>
      </item>
      <item row="2" column="1">
       <widget class="QLineEdit" name="output_folder_line_edit"/>
@@ -138,6 +138,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ConanRefLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>conan_explorer.ui.widgets.conan_line_edit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

@@ -41,12 +41,10 @@ class ConanUnifiedApiInterface():
         """ Return a dict of settings for a profile """
         raise NotImplementedError
 
+    @abstractmethod
     def get_profiles_with_settings(self) -> Dict[str, ConanSettings]:
         """ Return a list of all profiles and the corresponding settings """
-        profiles_dict = {}
-        for profile in self.get_profiles():
-            profiles_dict[profile] = self.get_profile_settings(profile)
-        return profiles_dict
+        raise NotImplementedError
 
     @abstractmethod
     def get_default_settings(self) -> ConanSettings:
@@ -234,11 +232,15 @@ class ConanUnifiedApiInterface():
         raise NotImplementedError
 
     @abstractmethod
-    def add_editable(self, conan_ref: str, path: Path, output_folder: Path):
+    def add_editable(self, conan_ref: str, path: str, output_folder: str):
         raise NotImplementedError
 
     @abstractmethod
     def remove_editable(self, conan_ref: str):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def set_editable(self, conan_ref: str, path: str, output_folder: str):
         raise NotImplementedError
 
     @abstractmethod

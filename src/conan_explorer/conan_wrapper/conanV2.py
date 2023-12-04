@@ -1,7 +1,9 @@
+from contextlib import redirect_stderr, redirect_stdout
 import os
 from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from unittest.mock import patch
 
 try:
     from contextlib import chdir
@@ -233,13 +235,26 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                             profile_host, profile_host, None, remotes, update)
             print_graph_basic(deps_graph)
             deps_graph.report_graph_error()
-            self._conan.graph.analyze_binaries(deps_graph, build_mode=None, remotes=remotes, update=update,
-                                               lockfile=None)
+            self._conan.graph.analyze_binaries(deps_graph, build_mode=None, remotes=remotes, 
+                                               update=update, lockfile=None)
             print_graph_packages(deps_graph)
-            self._conan.install.install_binaries(deps_graph=deps_graph, remotes=remotes)
-            # Currently unused
-            self._conan.install.install_consumer(deps_graph=deps_graph, generators=generators, output_folder=None,
-                                            source_folder=gettempdir())
+
+            # Try to redirect custom streams in conanfile, to avoid missing flush method
+            devnull = open(os.devnull, 'w')
+            # also spoof os.terminal_size(
+            spoof_size = os.terminal_size([80,20])
+            patched_tersize = patch("os.get_terminal_size")
+            with redirect_stdout(devnull), redirect_stderr(devnull):
+                mock = patched_tersize.start()
+                mock.return_value = spoof_size
+
+                self._conan.install.install_binaries(deps_graph=deps_graph, remotes=remotes)
+                # Currently unused
+                self._conan.install.install_consumer(deps_graph=deps_graph, 
+                    generators=generators, output_folder=None, source_folder=gettempdir())
+
+                patched_tersize.stop()
+
             info = None
             for node in deps_graph.nodes:
                 if node.ref == conan_ref:

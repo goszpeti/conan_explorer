@@ -19,6 +19,8 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogBu
     QGridLayout, QLabel, QLayout, QLineEdit,
     QPushButton, QSizePolicy, QVBoxLayout, QWidget)
 
+from conan_explorer.ui.widgets.conan_line_edit import ConanRefLineEdit
+
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
@@ -76,7 +78,7 @@ class Ui_Dialog(object):
 
         self.edit_grid.addWidget(self.path_label, 1, 0, 1, 1)
 
-        self.name_line_edit = QLineEdit(Dialog)
+        self.name_line_edit = ConanRefLineEdit(Dialog)
         self.name_line_edit.setObjectName(u"name_line_edit")
 
         self.edit_grid.addWidget(self.name_line_edit, 0, 1, 1, 1)
@@ -119,7 +121,7 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Edit Remote", None))
         self.output_folder_label.setText(QCoreApplication.translate("Dialog", u"Output Folder", None))
         self.path_browse_button.setText(QCoreApplication.translate("Dialog", u"...", None))
-        self.name_label.setText(QCoreApplication.translate("Dialog", u"Name", None))
+        self.name_label.setText(QCoreApplication.translate("Dialog", u"Reference", None))
         self.path_label.setText(QCoreApplication.translate("Dialog", u"Path", None))
         self.output_folder_browse_button.setText(QCoreApplication.translate("Dialog", u"...", None))
     # retranslateUi

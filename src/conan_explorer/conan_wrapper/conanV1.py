@@ -172,15 +172,14 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         editable_dict = self._conan.editable_list().get(str(conan_ref), {})
         return editable_dict.get("output_folder", "None")
 
-    def add_editable(self, conan_ref: str, path: Path, output_folder: Path):
+    def add_editable(self, conan_ref: str, path: str, output_folder: str):
         self._conan.editable_add(str(path), conan_ref, None, output_folder, None)
 
     def remove_editable(self, conan_ref: str):
         self._conan.editable_remove(conan_ref)
 
-    def set_editable(self):
-        self._client_cache.editable_packages
-
+    def set_editable(self, conan_ref: str, path: str, output_folder: str):
+        self._conan.editable_add(str(path), conan_ref, None, output_folder, None)
 
     def get_short_path_root(self) -> Path:
         # only need to get once
