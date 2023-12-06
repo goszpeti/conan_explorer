@@ -61,7 +61,7 @@ class ConanUnifiedApiInterface():
         raise NotImplementedError
 
     @abstractmethod
-    def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]:
+    def get_remote_user_info(self, remote_name: str) -> Tuple[str, bool]: # username, is_authenticated
         """ Get username and authenticated info for a remote. """
         raise NotImplementedError
 
@@ -108,7 +108,7 @@ class ConanUnifiedApiInterface():
         raise NotImplementedError
 
     @abstractmethod
-    def get_package_folder(self, conan_ref:ConanRef, package_id:str) -> ConanPackagePath:
+    def get_package_folder(self, conan_ref: ConanRef, package_id: str) -> ConanPackagePath:
         " Get the fully resolved pkg path from the ref and the specific package (id) "
         raise NotImplementedError
 
@@ -232,19 +232,19 @@ class ConanUnifiedApiInterface():
         raise NotImplementedError
 
     @abstractmethod
-    def add_editable(self, conan_ref: str, path: str, output_folder: str):
+    def add_editable(self, conan_ref: str, path: str, output_folder: str) -> bool:
         """ Add an editable reference. """
         raise NotImplementedError
 
     @abstractmethod
-    def remove_editable(self, conan_ref: str):
+    def remove_editable(self, conan_ref: str) -> bool:
         """ Remove an editable reference. """
         raise NotImplementedError
     
-    @abstractmethod
-    def set_editable(self, conan_ref: str, path: str, output_folder: str):
-        """ Edits an editable reference information , with all params changeable in place. """
-        raise NotImplementedError
+    # @abstractmethod
+    # def set_editable(self, conan_ref: str, path: str, output_folder: str):
+    #     """ Edits an editable reference information , with all params changeable in place. """
+    #     raise NotImplementedError
 
     @abstractmethod
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str=""):
