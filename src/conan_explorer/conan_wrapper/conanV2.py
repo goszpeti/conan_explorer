@@ -308,29 +308,27 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         editables_dict = self._conan.local.editable_list()
         return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH)).parent
     
-    def get_editables_output_folder(self, conan_ref: ConanRef) -> str:
+    def get_editables_output_folder(self, conan_ref: ConanRef) -> Path:
         editables_dict = self._conan.local.editable_list()
-        return editables_dict.get(conan_ref, {}).get("output_folder", "None")
+        return Path(editables_dict.get(conan_ref, {}).get("output_folder", "None"))
 
-    def get_editable_references(self) -> List[str]:
+    def get_editable_references(self) -> List[ConanRef]:
         """ Get all local editable references. """
         editables_dict = self._conan.local.editable_list()
-        return list(map(str, editables_dict.keys()))
+        return list(map(ConanRef.loads, editables_dict.keys()))
 
-    def add_editable(self, conan_ref: str, path: str, output_folder: str) -> bool:
+    def add_editable(self, conan_ref: ConanRef, path: str, output_folder: str) -> bool:
         try:
-            conan_ref_obj = ConanRef.loads(conan_ref)
-            self._conan.local.editable_add(path, conan_ref_obj.name, conan_ref_obj.version,
-                conan_ref_obj.user, conan_ref_obj.channel, output_folder=output_folder)
+            self._conan.local.editable_add(path, conan_ref.name, conan_ref.version,
+                conan_ref.user, conan_ref.channel, output_folder=output_folder)
         except Exception as e:
             Logger().error("Error adding editable: " + str(e))
             return False
         return True
 
-
-    def remove_editable(self, conan_ref: str) -> bool:
+    def remove_editable(self, conan_ref: ConanRef) -> bool:
         try:
-            self._conan.local.editable_remove(None, [conan_ref])
+            self._conan.local.editable_remove(None, [str(conan_ref)])
         except Exception as e:
             Logger().error("Error removing editable: " + str(e))
             return False

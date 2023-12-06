@@ -222,22 +222,22 @@ class ConanUnifiedApiInterface():
         raise NotImplementedError
     
     @abstractmethod
-    def get_editables_output_folder(self, conan_ref: ConanRef) -> str:
+    def get_editables_output_folder(self, conan_ref: ConanRef) -> Path:
         """ Get output folder of an editable reference. """
         raise NotImplementedError
 
     @abstractmethod
-    def get_editable_references(self) -> List[str]:
+    def get_editable_references(self) -> List[ConanRef]:
         """ Get all local editable references. """
         raise NotImplementedError
 
     @abstractmethod
-    def add_editable(self, conan_ref: str, path: str, output_folder: str) -> bool:
+    def add_editable(self, conan_ref: ConanRef, path: str, output_folder: str) -> bool:
         """ Add an editable reference. """
         raise NotImplementedError
 
     @abstractmethod
-    def remove_editable(self, conan_ref: str) -> bool:
+    def remove_editable(self, conan_ref: ConanRef) -> bool:
         """ Remove an editable reference. """
         raise NotImplementedError
     

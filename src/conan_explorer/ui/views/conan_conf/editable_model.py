@@ -1,34 +1,41 @@
 
-import conan_explorer.app as app
-from conan_explorer.conan_wrapper.types import ConanRef  # using global module pattern
 from PySide6.QtCore import QModelIndex, Qt
+
+import conan_explorer.app as app
+from conan_explorer.conan_wrapper.types import \
+    ConanRef  # using global module pattern
 from conan_explorer.ui.common import TreeModel, TreeModelItem
+
 
 class EditableModelItem(TreeModelItem):
 
-    def __init__(self, name, path, output, parent=None, lazy_loading=False):
+    def __init__(self, name: str, path: str, output: str, parent=None, lazy_loading=False):
         super().__init__([name, path, output], parent, lazy_loading=lazy_loading)
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.item_data[0]
+
     @name.setter
     def name(self, value: str):
         self.item_data[0] = value
 
     @property
-    def path(self):
+    def path(self) -> str:
         return self.item_data[1]
+
     @path.setter
     def path(self, value: str):
         self.item_data[1] = value
 
     @property
-    def output(self):
+    def output(self) -> str:
         return self.item_data[2]
+
     @output.setter
     def output(self, value: str):
         self.item_data[2] = value
+
 
 class EditableModel(TreeModel):
     def __init__(self):
@@ -40,11 +47,10 @@ class EditableModel(TreeModel):
         editables = app.conan_api.get_editable_references()
         self.root_item.child_items = []
         for editable_ref in editables:
-            ref_obj = ConanRef.loads(editable_ref)
-            path = app.conan_api.get_editables_package_path(ref_obj)
-            output = app.conan_api.get_editables_output_folder(ref_obj)
+            path = app.conan_api.get_editables_package_path(editable_ref)
+            output = app.conan_api.get_editables_output_folder(editable_ref)
             remote_item = EditableModelItem(
-                editable_ref, str(path), output, self.root_item)
+                str(editable_ref), str(path), output, self.root_item)
             self.root_item.append_child(remote_item)
 
     def data(self, index: QModelIndex, role):  # override

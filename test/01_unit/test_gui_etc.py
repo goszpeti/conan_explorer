@@ -3,28 +3,34 @@ Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
 import os
-from pathlib import Path
 import platform
 import sys
 import traceback
+from pathlib import Path
+from test.conftest import TEST_REF, PathSetup, app_qt_fixture, conan_remove_ref
 from unittest.mock import Mock
-from conan_explorer.app import bug_dialog_exc_hook
-from conan_explorer.conan_wrapper.conanV1 import ConanApi
-from conan_explorer.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
-from conan_explorer.ui.common.theming import get_user_theme_color
-from conan_explorer.ui.views.conan_conf.dialogs.remote_login_dialog import RemoteLoginDialog
-from test.conftest import TEST_REF, app_qt_fixture, conan_remove_ref
+
+import pytest
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import conan_explorer  # for mocker
 import conan_explorer.app as app
-import pytest
+from conan_explorer.app import bug_dialog_exc_hook
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
-from conan_explorer.ui.views import AboutPage
-from conan_explorer.ui.dialogs import show_bug_reporting_dialog, FileEditorSelDialog
-from conan_explorer.ui.dialogs.conan_install import ConanInstallDialog
-from conan_explorer.ui.widgets.conan_line_edit import ConanRefLineEdit
+from conan_explorer.conan_wrapper.conanV1 import ConanApi
 from conan_explorer.conan_wrapper.types import ConanRef, Remote
-from PySide6 import QtCore, QtWidgets, QtGui
+from conan_explorer.settings import (DEFAULT_INSTALL_PROFILE,
+                                     FILE_EDITOR_EXECUTABLE)
+from conan_explorer.ui.common.theming import get_user_theme_color
+from conan_explorer.ui.dialogs import (FileEditorSelDialog,
+                                       show_bug_reporting_dialog)
+from conan_explorer.ui.dialogs.conan_install import ConanInstallDialog
+from conan_explorer.ui.views import AboutPage
+from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import \
+    EditableEditDialog
+from conan_explorer.ui.views.conan_conf.dialogs.remote_login_dialog import \
+    RemoteLoginDialog
+from conan_explorer.ui.widgets.conan_line_edit import ConanRefLineEdit
 
 Qt = QtCore.Qt
 
@@ -306,3 +312,33 @@ def test_multi_remote_login_dialog(app_qt_fixture, base_fixture, mocker):
     login_cmd.assert_has_calls(calls, any_order=True)
 
     dialog.close()
+
+def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
+    """ Test, that the editable dialog works adding and editing """
+    app.conan_api.init_api()
+    root_obj = QtWidgets.QWidget()
+    dialog = EditableEditDialog(None, root_obj)
+
+    new_ref = "example/9.9.9@editable/testing1"
+    new_ref_obj = ConanRef.loads(new_ref)
+    app.conan_api.remove_editable(new_ref_obj) # remove, if somehow already there
+
+    dialog._ui.name_line_edit.setText(new_ref)
+    # check browse buttons -> no entry -> home
+
+    dialog._ui.path_line_edit.setText(str(base_fixture.testdata_path / "conan"))
+    dialog._ui.output_folder_line_edit.setText(str(base_fixture.testdata_path / "conan" / "build"))
+
+    # check browse buttons -> entry -> that path
+
+    app_qt_fixture.addWidget(root_obj)
+    dialog.show()
+    app_qt_fixture.waitExposed(dialog)
+    dialog.save()
+
+    assert app.conan_api.get_editables_package_path(new_ref_obj) == base_fixture.testdata_path / "conan"
+    assert app.conan_api.get_editables_output_folder(new_ref_obj) == base_fixture.testdata_path / "conan" / "build"
+
+    # check on erronous input
+
+    # check changing an already existing editable

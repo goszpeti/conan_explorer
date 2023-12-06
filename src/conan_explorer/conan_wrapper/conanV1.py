@@ -153,9 +153,9 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         editable_file.touch()
         return editable_file
 
-    def get_editable_references(self) -> List[str]:
+    def get_editable_references(self) -> List[ConanRef]:
         try:
-            return list(self._conan.editable_list().keys())
+            return list(map(ConanRef.loads, self._conan.editable_list().keys()))
         except Exception:
             self._fix_editable_file() # to not crash conan without this
             return []
@@ -168,21 +168,21 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             return pkg_path.parent
         return pkg_path
     
-    def get_editables_output_folder(self, conan_ref: ConanRef) -> str:
+    def get_editables_output_folder(self, conan_ref: ConanRef) -> Path:
         editable_dict = self._conan.editable_list().get(str(conan_ref), {})
-        return editable_dict.get("output_folder", "None")
+        return Path(editable_dict.get("output_folder", "None"))
 
-    def add_editable(self, conan_ref: str, path: str, output_folder: str) -> bool:
+    def add_editable(self, conan_ref: ConanRef, path: str, output_folder: str) -> bool:
         try:
-            self._conan.editable_add(path, conan_ref, None, output_folder, None)
+            self._conan.editable_add(path, str(conan_ref), None, output_folder, None)
         except Exception as e:
             Logger().error("Error adding editable: " + str(e))
             return False
         return True
 
-    def remove_editable(self, conan_ref: str) -> bool:
+    def remove_editable(self, conan_ref: ConanRef) -> bool:
         try:
-            self._conan.editable_remove(conan_ref)
+            self._conan.editable_remove(str(conan_ref))
         except Exception as e:
             Logger().error("Error removing editable: " + str(e))
             return False
@@ -380,33 +380,33 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     # Remote References and Packages
 
     def search_recipes_in_remotes(self, query: str, remote_name="all") -> List[ConanRef]:
-        res_list = []
-        search_results = []
+        res_list: List[ConanRef] = []
+        remote_results = []
         try:
             # no query possible with pattern
-            search_results = self._conan.search_recipes(
+            remote_results = self._conan.search_recipes(
                 query, remote_name=remote_name, case_sensitive=False).get("results", None)
         except Exception as e:
             Logger().error(f"Error while searching for recipe: {str(e)}")
             return []
-        if not search_results:
+        if not remote_results:
             return res_list
 
-        for res in search_results:
-            for item in res.get("items", []):
-                res_list.append(ConanRef.loads(
-                    item.get("recipe", {}).get("id", "")))
+        for remote_search_res in remote_results:
+            res_list += (list(map(lambda item: 
+                                ConanRef.loads(item.get("recipe", {}).get("id", "")), 
+                                remote_search_res.get("items", []))))
         res_list = list(set(res_list))  # make unique
         res_list.sort()
         self.info_cache.update_remote_package_list(res_list)
         return res_list
 
     def search_recipe_all_versions_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
-        search_results = []
+        remote_results = []
         local_results = []
         try:
             # no query possible with pattern
-            search_results: List = self._conan.search_recipes(
+            remote_results: List = self._conan.search_recipes(
                 f"{conan_ref.name}/*@*/*", remote_name="all").get("results", None)
         except Exception as e:
             Logger().warning(str(e))
@@ -419,10 +419,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             return []
 
         res_list: List[ConanRef] = []
-        for res in search_results + local_results:
-            for item in res.get("items", []):
-                res_list.append(ConanRef.loads(
-                    item.get("recipe", {}).get("id", "")))
+        for remote_search_res in local_results + remote_results:
+            res_list += (list(map(lambda item: 
+                                ConanRef.loads(item.get("recipe", {}).get("id", "")), 
+                                remote_search_res.get("items", []))))
         res_list = list(set(res_list))  # make unique
         res_list.sort()
         # update cache
