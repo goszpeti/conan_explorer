@@ -323,22 +323,55 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     new_ref_obj = ConanRef.loads(new_ref)
     app.conan_api.remove_editable(new_ref_obj) # remove, if somehow already there
 
-    dialog._ui.name_line_edit.setText(new_ref)
-    # check browse buttons -> no entry -> home
-
-    dialog._ui.path_line_edit.setText(str(base_fixture.testdata_path / "conan"))
-    dialog._ui.output_folder_line_edit.setText(str(base_fixture.testdata_path / "conan" / "build"))
-
-    # check browse buttons -> entry -> that path
-
     app_qt_fixture.addWidget(root_obj)
     dialog.show()
     app_qt_fixture.waitExposed(dialog)
+
+    dialog._ui.name_line_edit.setText(new_ref)
+
+    new_editable_path = base_fixture.testdata_path / "conan"
+    new_output_folder_path = base_fixture.testdata_path / "conan" / "build"
+
+    # check browse buttons
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
+                        return_value=[str(new_output_folder_path)])
+    dialog._ui.output_folder_browse_button.click()
+    assert Path(dialog._ui.output_folder_line_edit.text()) == new_output_folder_path
+
+
+    mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
+                        return_value=[str(new_editable_path)])
+    dialog._ui.path_browse_button.click()
+    assert Path(dialog._ui.path_line_edit.text()) == new_editable_path
+
     dialog.save()
 
-    assert app.conan_api.get_editables_package_path(new_ref_obj) == base_fixture.testdata_path / "conan"
+    assert app.conan_api.get_editables_package_path(new_ref_obj) == new_editable_path
     assert app.conan_api.get_editables_output_folder(new_ref_obj) == base_fixture.testdata_path / "conan" / "build"
 
-    # check on erronous input
+    ### check on erronous input - values should remain the same
+    # check wrong ref -> old one should remain
+    dialog._ui.name_line_edit.setText("lalala")
+    dialog.save()
+    assert new_ref_obj in app.conan_api.get_editable_references()
+    dialog._ui.name_line_edit.setText(new_ref)
 
-    # check changing an already existing editable
+    # check wrong path
+    dialog._ui.path_line_edit.setText("INVALID")
+    dialog.save()
+    assert new_ref_obj in app.conan_api.get_editable_references()
+    assert new_editable_path == app.conan_api.get_editables_package_path(new_ref_obj)
+    dialog._ui.path_line_edit.setText(str(new_editable_path))
+
+    # check changing the output path of an already existing editable
+    dialog._ui.output_folder_line_edit.setText(str(base_fixture.testdata_path / "conan" / "build_new"))
+    dialog.save()
+    assert base_fixture.testdata_path / "conan" / "build_new" == app.conan_api.get_editables_output_folder(new_ref_obj)
+
+    # check changing the ref of an already existing editable
+    dialog._ui.name_line_edit.setText(new_ref + "new")
+    dialog.save()
+    assert ConanRef.loads(new_ref + "new") in app.conan_api.get_editable_references()
+

@@ -32,25 +32,24 @@ class EditableEditDialog(QDialog):
         self._ui.output_folder_line_edit.setText(editable.output)
 
     def on_path_browse_button_clicked(self):
-        default_path = self._editable.path if self._editable.path else str(Path.home())
+        current_path = self._ui.path_line_edit.text()
+        default_path = current_path if current_path else str(Path.home())
         path = self.select_folder_dialog(default_path)
         if not path:
             return
-        self._editable.path = path
         self._ui.path_line_edit.setText(path)
 
     def on_output_browse_button_clicked(self):
-        default_path = self._editable.output if self._editable.output else str(Path.home())
+        current_path = self._ui.output_folder_line_edit.text()
+        default_path = current_path if current_path else str(Path.home())
         path = self.select_folder_dialog(default_path)
         if not path:
             return
-        self._editable.output = path
         self._ui.output_folder_line_edit.setText(path)
 
     def select_folder_dialog(self, start_path: str) -> str:
         dialog = QFileDialog(parent=self, caption="Select path",
-                             directory=str(start_path),
-                             )
+                             directory=str(start_path),)
         dialog.setFileMode(QFileDialog.FileMode.Directory)
         dialog.setOption(QFileDialog.Option.ShowDirsOnly)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
