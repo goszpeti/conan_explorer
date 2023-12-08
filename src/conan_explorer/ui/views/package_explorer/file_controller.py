@@ -54,6 +54,8 @@ class PackageFileExplorerController(QObject):
         if type == PkgSelectionType.editable:
             pkg_path = app.conan_api.get_editables_package_path(
                 ConanRef.loads(conan_ref))
+            if pkg_path.is_file():
+                pkg_path = pkg_path.parent
         elif type == PkgSelectionType.export:
             pkg_path = app.conan_api.get_export_folder(ConanRef.loads(conan_ref))
         else:

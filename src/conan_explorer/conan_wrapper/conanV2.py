@@ -304,9 +304,9 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         raise NotImplementedError
     
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
-        """ Get package path of an editable reference. """
+        """ Get package path of an editable reference. Can be a folder or conanfile.py """
         editables_dict = self._conan.local.editable_list()
-        return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH)).parent
+        return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH))
     
     def get_editables_output_folder(self, conan_ref: ConanRef) ->  Optional[Path]:
         editables_dict = self._conan.local.editable_list()
@@ -318,7 +318,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def get_editable_references(self) -> List[ConanRef]:
         """ Get all local editable references. """
         editables_dict = self._conan.local.editable_list()
-        return list(map(ConanRef.loads, editables_dict.keys()))
+        return list(editables_dict.keys())
 
     def add_editable(self, conan_ref: ConanRef, path: str, output_folder: str) -> bool:
         try:

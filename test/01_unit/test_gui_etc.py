@@ -15,6 +15,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 import conan_explorer  # for mocker
 import conan_explorer.app as app
+from conan_explorer import conan_version
 from conan_explorer.app import bug_dialog_exc_hook
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_explorer.conan_wrapper.conanV1 import ConanApi
@@ -313,6 +314,7 @@ def test_multi_remote_login_dialog(app_qt_fixture, base_fixture, mocker):
 
     dialog.close()
 
+@pytest.mark.conanv2
 def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     """ Test, that the editable dialog works adding and editing """
     app.conan_api.init_api()
@@ -330,6 +332,8 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     dialog._ui.name_line_edit.setText(new_ref)
 
     new_editable_path = base_fixture.testdata_path / "conan"
+    if conan_version.startswith("2"):
+        new_editable_path /= "conanfileV2.py"
     new_output_folder_path = base_fixture.testdata_path / "conan" / "build"
 
     # check browse buttons
@@ -349,7 +353,8 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     dialog.save()
 
     assert app.conan_api.get_editables_package_path(new_ref_obj) == new_editable_path
-    assert app.conan_api.get_editables_output_folder(new_ref_obj) == base_fixture.testdata_path / "conan" / "build"
+    assert app.conan_api.get_editables_output_folder(
+        new_ref_obj) == new_output_folder_path
 
     ### check on erronous input - values should remain the same
     # check wrong ref -> old one should remain
