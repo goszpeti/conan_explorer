@@ -13,6 +13,7 @@ Palette:
  - dark: #5c5c5c
  - darker: #474747
  - darkest: #202020
+ - selection over darkest: 2d2d2d
 */
 
 * {
@@ -52,12 +53,12 @@ QPushButton#close_button {
 QPushButton:hover#minimize_button,
 QPushButton:hover#restore_max_button {
     border-style: solid;
-    background-color: #BCBCBC;
+    background-color: #808086;
 }
 
 QPushButton:pressed#minimize_button,
 QPushButton:pressed#restore_max_button {
-    background-color: #D3D3D3;
+    background-color: #A8A8A8;
     padding: 1px
 }
 
