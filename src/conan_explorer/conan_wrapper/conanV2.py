@@ -308,9 +308,12 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         editables_dict = self._conan.local.editable_list()
         return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH)).parent
     
-    def get_editables_output_folder(self, conan_ref: ConanRef) -> Path:
+    def get_editables_output_folder(self, conan_ref: ConanRef) ->  Optional[Path]:
         editables_dict = self._conan.local.editable_list()
-        return Path(editables_dict.get(conan_ref, {}).get("output_folder", "None"))
+        output_folder = editables_dict.get(conan_ref, {}).get("output_folder")
+        if not output_folder:
+            return None
+        return Path(str(output_folder))
 
     def get_editable_references(self) -> List[ConanRef]:
         """ Get all local editable references. """

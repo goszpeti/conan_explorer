@@ -222,7 +222,7 @@ class ConanUnifiedApiInterface():
         raise NotImplementedError
     
     @abstractmethod
-    def get_editables_output_folder(self, conan_ref: ConanRef) -> Path:
+    def get_editables_output_folder(self, conan_ref: ConanRef) -> Optional[Path]:
         """ Get output folder of an editable reference. """
         raise NotImplementedError
 

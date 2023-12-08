@@ -49,8 +49,9 @@ class EditableModel(TreeModel):
         for editable_ref in editables:
             path = app.conan_api.get_editables_package_path(editable_ref)
             output = app.conan_api.get_editables_output_folder(editable_ref)
+            output_str = str(output) if output else ""
             remote_item = EditableModelItem(
-                str(editable_ref), str(path), output, self.root_item)
+                str(editable_ref), str(path), output_str, self.root_item)
             self.root_item.append_child(remote_item)
 
     def data(self, index: QModelIndex, role):  # override
