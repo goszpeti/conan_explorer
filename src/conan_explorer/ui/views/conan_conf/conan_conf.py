@@ -67,20 +67,20 @@ class ConanConfigView(PluginInterfaceV1):
 
     def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(conan_version)
-        self._ui.python_exe_value_label.setText(sys.executable)
+        self._ui.python_exe_value_label.setText(str(Path(sys.executable).resolve()))
         self._ui.python_cur_version_value_label.setText(platform.python_version())
         self._ui.revision_enabled_checkbox.setChecked(
                                             app.conan_api.get_revisions_enabled())
         self._ui.conan_usr_home_value_label.setText(
-            str(app.conan_api.get_user_home_path()))
+            str(app.conan_api.get_user_home_path().resolve()))
         if conan_version.startswith("2"):
             self._ui.conan_usr_cache_value_label.setVisible(False)
             self._ui.conan_usr_cache_label.setVisible(False)
         else:
             self._ui.conan_usr_cache_value_label.setText(
-                str(app.conan_api.get_short_path_root()))
+                str(app.conan_api.get_short_path_root().resolve()))
         self._ui.conan_storage_path_value_label.setText(
-            str(app.conan_api.get_storage_path()))
+            str(app.conan_api.get_storage_path().resolve()))
 
     def _load_settings_yml_tab(self):
         try:
