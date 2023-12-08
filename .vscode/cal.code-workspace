@@ -43,32 +43,6 @@
         "python.analysis.inlayHints.pytestParameters": false,
         "python.analysis.inlayHints.variableTypes": false,
         "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
-        "colorInfo.languages": [
-            {
-                "selector": "css",
-                "colors": "css"
-            },
-            {
-                "selector": "sass",
-                "colors": "css"
-            },
-            {
-                "selector": "scss",
-                "colors": "css"
-            },
-            {
-                "selector": "less",
-                "colors": "css"
-            },
-            {
-                "selector": "html",
-                "colors": "css"
-            },
-            {
-                "selector": "python",
-                "colors": "css"
-            },
-        ],
         "python.analysis.downloadStubs": true,
         "python.analysis.autoFormatStrings": true,
         "[jsonc]": {

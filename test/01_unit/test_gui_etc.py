@@ -352,7 +352,11 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
 
     dialog.save()
 
-    assert app.conan_api.get_editables_package_path(new_ref_obj) == new_editable_path
+    if conan_version.startswith("1"):
+        assert app.conan_api.get_editables_package_path(new_ref_obj).parent == new_editable_path
+    if conan_version.startswith("2"):
+        assert app.conan_api.get_editables_package_path(new_ref_obj) == new_editable_path
+
     assert app.conan_api.get_editables_output_folder(
         new_ref_obj) == new_output_folder_path
 
@@ -367,7 +371,10 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     dialog._ui.path_line_edit.setText("INVALID")
     dialog.save()
     assert new_ref_obj in app.conan_api.get_editable_references()
-    assert new_editable_path == app.conan_api.get_editables_package_path(new_ref_obj)
+    if conan_version.startswith("1"):
+        assert app.conan_api.get_editables_package_path(new_ref_obj).parent == new_editable_path
+    if conan_version.startswith("2"):
+        assert app.conan_api.get_editables_package_path(new_ref_obj) == new_editable_path
     dialog._ui.path_line_edit.setText(str(new_editable_path))
 
     # check changing the output path of an already existing editable
