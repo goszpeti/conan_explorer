@@ -1,4 +1,4 @@
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Union
 from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
 from PySide6.QtWidgets import QFileSystemModel
 
@@ -86,8 +86,22 @@ class TreeModel(QAbstractItemModel):
         self.root_item = TreeModelItem([])
         self._checkable = checkable
 
-    def clear(self):
+    def clear_items(self):
+        self.beginResetModel()
         self.root_item.child_items.clear()
+        self.endResetModel()
+
+    def add_item(self, item: TreeModelItem):
+        # self.beginInsertRows()
+        self.root_item.append_child(item)
+        # self.insertRow()
+        # self.endInsertRows()
+
+    def remove_item(self, item: TreeModelItem):
+        pass
+
+    # def removeRow(self, row: int, parent: QModelIndex | QPersistentModelIndex = ...) -> bool:
+    #     return super().removeRow(row, parent)
 
     def columnCount(self, parent):  # override
         if parent.isValid():

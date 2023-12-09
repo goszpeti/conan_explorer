@@ -173,7 +173,8 @@ class PackageSelectionController(QObject):
         """
         if self._model and not force_update:  # loads only at first init
             return
-        self._model = PkgSelectModel()
+        if not self._model:
+           self._model = PkgSelectModel()
         self._loader.async_loading(
             self._view, self._model.setup_model_data, (),
             self.finish_select_model_init, "Reading Packages")
@@ -200,6 +201,8 @@ class PackageSelectionController(QObject):
             item = self._model.root_item.child_items[ref_row]
             if item.item_data[0] == conan_ref:
                 if pkg_id:
+                    if item.child_count() < 2: # try to fetch, pkd_id probably not loaded yet
+                        item.load_children()
                     for pkg_row in range(item.child_count()):
                         pkg_item = item.child_items[pkg_row]
                         if pkg_item.item_data[0].get("id") == pkg_id:
