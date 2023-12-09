@@ -113,11 +113,11 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.profiles_list_view.customContextMenuRequested.connect(
             self.on_profile_context_menu_requested)
         self._init_profile_context_menu()
-        self._ui.profile_save_button.clicked.connect(self.on_save_profile_file)
-        self._ui.profile_add_button.clicked.connect(self.on_add_profile)
-        self._ui.profile_remove_button.clicked.connect(self.on_remove_profile)
-        self._ui.profile_rename_button.clicked.connect(self.on_rename_profile)
-        self._ui.profile_refresh_button.clicked.connect(self.on_refresh_profiles)
+        self._ui.profile_save_button.clicked.connect(self.on_profile_save_file)
+        self._ui.profile_add_button.clicked.connect(self.on_profile_add)
+        self._ui.profile_remove_button.clicked.connect(self.on_profile_remove)
+        self._ui.profile_rename_button.clicked.connect(self.on_profile_rename)
+        self._ui.profile_refresh_button.clicked.connect(self.on_profiles_refresh)
 
         self.set_themed_icon(self._ui.profile_save_button, "icons/save.svg")
         self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.svg")
@@ -162,22 +162,22 @@ class ConanConfigView(PluginInterfaceV1):
     def on_profile_context_menu_requested(self, position):
         self.profiles_cntx_menu.exec(self._ui.profiles_list_view.mapToGlobal(position))
 
-    def on_save_profile_file(self):
+    def on_profile_save_file(self):
         if not self._edited_profile:
             return
         profile_name = self._edited_profile
         text = self._ui.profiles_text_browser.toPlainText()
         (self.profiles_path / profile_name).write_text(text)
 
-    def on_add_profile(self):
+    def on_profile_add(self):
         new_profile_dialog = QInputDialog(self)
         profile_name, accepted = new_profile_dialog.getText(
             self, "New profile", 'Enter name:', text="")
         if accepted and profile_name:
             (self.profiles_path / profile_name).touch()
-            self.on_refresh_profiles()
+            self.on_profiles_refresh()
 
-    def on_rename_profile(self):
+    def on_profile_rename(self):
         view_indexes = self._ui.profiles_list_view.selectedIndexes()
         if not view_indexes:
             return
@@ -191,9 +191,9 @@ class ConanConfigView(PluginInterfaceV1):
                                                 self.profiles_path / new_profile_name)
             except Exception as e:
                 Logger().error(f"Can't rename {profile_name}: {e}")
-            self.on_refresh_profiles()
+            self.on_profiles_refresh()
 
-    def on_remove_profile(self):
+    def on_profile_remove(self):
         view_indexes = self._ui.profiles_list_view.selectedIndexes()
         if not view_indexes:
             return
@@ -208,9 +208,9 @@ class ConanConfigView(PluginInterfaceV1):
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
             delete_path(self.profiles_path / profile_name)
-            self.on_refresh_profiles()
+            self.on_profiles_refresh()
 
-    def on_refresh_profiles(self):
+    def on_profiles_refresh(self):
         profile_model: ProfilesModel = self._ui.profiles_list_view.model() # type: ignore
         # clear selection, otherwise an old selection could remain active
         self._ui.profiles_list_view.selectionModel().clear()

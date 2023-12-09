@@ -7,7 +7,7 @@ import pytest
 import conan_explorer
 from conan_explorer.app.system import delete_path
 from conan_explorer.conan_wrapper import ConanApi
-from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, PathSetup, login_test_remote, logout_all_remotes
+from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, TEST_REF, PathSetup, login_test_remote, logout_all_remotes
 from conan_explorer import conan_version
 
 import conan_explorer.app as app  # using global module pattern
@@ -16,6 +16,20 @@ from PySide6 import QtCore, QtWidgets
 from conan_explorer.ui.views.conan_conf import ConanConfigView
 
 Qt = QtCore.Qt
+
+def start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot):
+    from pytestqt.plugin import _qapp_instance
+    main_gui = main_window.MainWindow(_qapp_instance)
+    main_gui.show()
+    main_gui.load(ui_no_refs_config_fixture)
+
+    qtbot.addWidget(main_gui)
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    app.conan_worker.finish_working()
+    conan_conf_view = main_gui.page_widgets.get_page_by_type(ConanConfigView)
+    main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
+    return conan_conf_view, main_gui
 
 @pytest.mark.conanv2
 def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_config_fixture, mocker):
@@ -49,16 +63,9 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
     os.system(f"conan remote remove New")
     os.system(f"conan remote remove Edited")
     sleep(1)
-    main_gui = main_window.MainWindow(_qapp_instance)
 
     try:
-        main_gui.show()
-        main_gui.load(ui_no_refs_config_fixture)
-        qtbot.addWidget(main_gui)
-        qtbot.waitExposed(main_gui, timeout=3000)
-
-        app.conan_worker.finish_working()
-        conan_conf_view = main_gui.page_widgets.get_page_by_type(ConanConfigView)
+        conan_conf_view, main_gui = start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot)
 
         # test revisions
         # Revisions are on via env-var
@@ -208,18 +215,9 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
 @pytest.mark.conanv2
 def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_fixture, mocker):
     """ Test login with the local remote """
-    from pytestqt.plugin import _qapp_instance
     login_test_remote(TEST_REMOTE_NAME)
+    conan_conf_view, main_gui = start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot)
 
-    main_gui = main_window.MainWindow(_qapp_instance)
-    main_gui.show()
-    main_gui.load(ui_no_refs_config_fixture)
-
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
-
-    app.conan_worker.finish_working()
-    conan_conf_view = main_gui.page_widgets.get_page_by_type(ConanConfigView)
     conan = ConanApi().init_api()
     conan_conf_view._remotes_controller.update()
 
@@ -275,16 +273,8 @@ def profile_fixture():
 @pytest.mark.conanv2
 def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixture, ui_no_refs_config_fixture, mocker):
     """ Test all profile related functions """
-    from pytestqt.plugin import _qapp_instance
-    main_gui = main_window.MainWindow(_qapp_instance)
-    main_gui.show()
-    main_gui.load(ui_no_refs_config_fixture)
+    conan_conf_view, main_gui = start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot)
 
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
-
-    app.conan_worker.finish_working()
-    conan_conf_view = main_gui.page_widgets.get_page_by_type(ConanConfigView)
     main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
 
     # check, that all conan profiles are displayed
@@ -352,5 +342,43 @@ def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixt
     assert "new_profile_test" in model._profiles
 
 @pytest.mark.conanv2
-def test_conan_config_view_editables(qtbot, base_fixture: PathSetup, profile_fixture, ui_no_refs_config_fixture, mocker):
-    pass
+def test_conan_config_view_editables(qtbot, base_fixture: PathSetup, profile_fixture, 
+                                     ui_no_refs_config_fixture, mocker):
+
+    conan_conf_view, main_gui = start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot)
+    model = conan_conf_view._ui.editables_ref_view.model()
+    sel_model = conan_conf_view._ui.editables_ref_view.selectionModel()
+    new_editable_path = base_fixture.testdata_path / "conan"
+
+    # add a new ref via dialog
+    conan_conf_view._ui.editables_add_button.click()
+    conan_conf_view.remote_edit_dialog._ui.name_line_edit.setText(TEST_REF + "INT")
+    conan_conf_view.remote_edit_dialog._ui.path_line_edit.setText(str(new_editable_path))
+
+
+    # edit the ref 
+    # select it
+    index = model.get_index_from_profile("new_profile_rename")
+    sel_model.select(index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    conan_conf_view.on_editable_edit
+
+    # delete it
+    conan_conf_view.on_editable_remove
+
+
+def test_conan_config_save_config(qtbot, base_fixture: PathSetup, profile_fixture,
+                                  ui_no_refs_config_fixture, mocker):
+
+    conan_conf_view, main_gui = start_main_and_switch_to_config_view(
+        ui_no_refs_config_fixture, qtbot)
+    config_text = conan_conf_view._ui.config_file_text_browser.toPlainText()
+    assert app.conan_api.get_config_file_path().read_text() == config_text
+
+    conan_conf_view._ui.config_file_text_browser.setText(config_text + "\n#TEST_STRING")
+    conan_conf_view.on_save_config_file()
+
+    config_text_changed = conan_conf_view._ui.config_file_text_browser.toPlainText()
+    # write back original text
+    app.conan_api.get_config_file_path().write_text(config_text)
+    assert "TEST_STRING" in config_text_changed
+
