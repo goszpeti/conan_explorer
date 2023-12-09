@@ -292,19 +292,22 @@ class MainWindow(FluentWindow):
         else:
             path_list = str(paths)
 
-        msg = WideMessageBox(parent=self)
-        sb = WideMessageBox.StandardButton
-        msg.setWindowTitle("Delete folders")
-        msg.setText("Are you sure, you want to delete the found folders?\t")
-        msg.setDetailedText(path_list)
-        msg.setStandardButtons(sb.Yes | sb.Cancel)  # type: ignore
-        msg.setIcon(WideMessageBox.Icon.Question)
-        msg.setWidth(800)
-        msg.setMaximumHeight(600)
-        reply = msg.exec()
-        if reply == sb.Yes:
-            for path in paths:
-                rmtree(str(path), ignore_errors=True)
+        msg_box = WideMessageBox(parent=self)
+        button = WideMessageBox.StandardButton
+        msg_box.setWindowTitle("Delete folders")
+        msg_box.setText("Are you sure, you want to delete the found folders?\t")
+        msg_box.setDetailedText(path_list)
+        msg_box.setStandardButtons(button.Yes | button.Cancel)  # type: ignore
+        msg_box.setIcon(WideMessageBox.Icon.Question)
+        msg_box.setWidth(800)
+        msg_box.setMaximumHeight(600)
+        reply = msg_box.exec()
+        if reply == button.Yes:
+            def delete_cache_paths(paths):
+                for path in paths:
+                    rmtree(str(path), ignore_errors=True)
+            loader.async_loading(self, delete_cache_paths, (paths,), 
+                                 loading_text="Deleting cache paths...")
 
     def open_file_editor_selection_dialog(self):
         dialog = FileEditorSelDialog(self)
