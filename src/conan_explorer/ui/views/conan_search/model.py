@@ -150,27 +150,6 @@ class PkgSearchModel(TreeModel):
                 return item
         return None
 
-    def get_index_from_item(self, item: SearchedPackageTreeItem) -> QtCore.QModelIndex:
-        # find the row with the matching reference
-        found_item = False
-        ref_row = 0
-        for ref_row in range(self.root_item.child_count()):
-            current_item = self.root_item.child_items[ref_row]
-            # always has one dummy child count
-            for child_row in range(len(current_item.child_items)):
-                current_child_item = current_item.child_items[child_row]
-                if current_child_item == item:
-                    found_item = True
-                    parent_index = self.index(ref_row, 0, QtCore.QModelIndex())
-                    return self.index(child_row, 0, parent_index)
-            if current_item == item:
-                found_item = True
-                return self.index(ref_row, 0, QtCore.QModelIndex())
-        if not found_item:
-            Logger().debug(f"Cannot find {str(item)} in search model")
-            return QtCore.QModelIndex()
-        return self.index(ref_row, 0, QtCore.QModelIndex())
-
     @Slot(str, str)
     def mark_pkg_as_installed(self, conan_ref: str, pkg_id: str):
         self._set_pkg_install_status(conan_ref, pkg_id, True)

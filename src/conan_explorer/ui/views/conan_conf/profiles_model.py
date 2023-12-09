@@ -4,7 +4,6 @@ import conan_explorer.app as app  # using global module pattern
 from conan_explorer.ui.common import (get_platform_icon)
 from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt
 
-
 class ProfilesModel(QAbstractListModel):
     def __init__(self):
         super().__init__()

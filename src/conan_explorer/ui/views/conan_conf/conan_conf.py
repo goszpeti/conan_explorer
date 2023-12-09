@@ -383,11 +383,11 @@ class ConanConfigView(PluginInterfaceV1):
         message_box.setWindowTitle("Remove editable")
         message_box.setText("Are you sure, you want to delete the editable" +
                              f"{editable_item.name}?")
-        message_box.setStandardButtons(
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        standard_button = QMessageBox.StandardButton
+        message_box.setStandardButtons(standard_button.Yes | standard_button.No)
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
-        if reply == QMessageBox.StandardButton.Yes:
+        if reply == standard_button.Yes:
             self._editable_controller.remove(editable_item.name)
 
 # Conan Config

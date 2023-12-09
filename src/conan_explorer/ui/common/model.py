@@ -2,6 +2,8 @@ from typing import Any, Callable, List
 from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
 from PySide6.QtWidgets import QFileSystemModel
 
+from conan_explorer.app.logger import Logger
+
 QAF = Qt.AlignmentFlag
 QORI = Qt.Orientation
 QIDR = Qt.ItemDataRole
@@ -145,7 +147,6 @@ class TreeModel(QAbstractItemModel):
     def headerData(self, section, orientation, role):  # override
         if orientation == Qt.Orientation.Horizontal and role == QIDR.DisplayRole:
             return self.root_item.data(section)
-
         return None
 
     def canFetchMore(self, index):
@@ -157,3 +158,24 @@ class TreeModel(QAbstractItemModel):
     def fetchMore(self, index):
         item = index.internalPointer()
         item.load_children()
+
+    def get_index_from_item(self, item: TreeModelItem) -> QModelIndex:
+        # find the row with the matching reference
+        found_item = False
+        ref_row = 0
+        for ref_row in range(self.root_item.child_count()):
+            current_item = self.root_item.child_items[ref_row]
+            # always has one dummy child count
+            for child_row in range(len(current_item.child_items)):
+                current_child_item = current_item.child_items[child_row]
+                if current_child_item == item:
+                    found_item = True
+                    parent_index = self.index(ref_row, 0, QModelIndex())
+                    return self.index(child_row, 0, parent_index)
+            if current_item == item:
+                found_item = True
+                return self.index(ref_row, 0, QModelIndex())
+        if not found_item:
+            Logger().debug(f"Cannot find {str(item)} in search model")
+            return QModelIndex()
+        return self.index(ref_row, 0, QModelIndex())

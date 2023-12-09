@@ -1,9 +1,9 @@
 
+from typing import Optional
 from PySide6.QtCore import QModelIndex, Qt
 
-import conan_explorer.app as app
-from conan_explorer.conan_wrapper.types import \
-    ConanRef  # using global module pattern
+import conan_explorer.app as app # using global module pattern
+from conan_explorer.conan_wrapper.types import ConanRef 
 from conan_explorer.ui.common import TreeModel, TreeModelItem
 
 
@@ -44,8 +44,9 @@ class EditableModel(TreeModel):
         self.setup_model_data()
 
     def setup_model_data(self):
+        self.beginResetModel()
         editables = app.conan_api.get_editable_references()
-        self.root_item.child_items = []
+        self.clear()
         for editable_ref in editables:
             path = app.conan_api.get_editables_package_path(editable_ref)
             output = app.conan_api.get_editables_output_folder(editable_ref)
@@ -53,6 +54,7 @@ class EditableModel(TreeModel):
             remote_item = EditableModelItem(
                 str(editable_ref), str(path), output_str, self.root_item)
             self.root_item.append_child(remote_item)
+        self.endResetModel()
 
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
@@ -67,3 +69,10 @@ class EditableModel(TreeModel):
 
     def rowCount(self, parent=None):
         return self.root_item.child_count()
+
+    def get_index_from_ref(self, conan_ref: str) -> Optional[QModelIndex]:
+        for ref in self.root_item.child_items:
+            ref: EditableModelItem
+            if ref.name == conan_ref:
+                return self.get_index_from_item(ref)
+        return None

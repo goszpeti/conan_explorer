@@ -5,6 +5,8 @@ from conan_explorer.app.logger import Logger
 from PySide6.QtCore import QModelIndex, QItemSelectionModel
 from PySide6.QtWidgets import QTreeView
 
+from conan_explorer.conan_wrapper.types import ConanRef
+
 from .editable_model import EditableModel, EditableModelItem
 
 class ConanEditableController():
@@ -12,16 +14,15 @@ class ConanEditableController():
     def __init__(self, view: QTreeView) -> None:
         self._view = view
         self._model = EditableModel()
+        self._view.setModel(self._model)
         self.update()
 
     def update(self):
-        self._model = EditableModel()
         # save selected remote, if triggering a re-init
         sel_edit = self.get_selected_editable()
         self._model.setup_model_data()
         self._view.setItemsExpandable(False)
         self._view.setRootIsDecorated(False)
-        self._view.setModel(self._model)
         self._view.expandAll()
         self.resize_remote_columns()
 
@@ -59,7 +60,7 @@ class ConanEditableController():
         editable_item = self.get_selected_editable()
         if not editable_item:
             return
-        app.conan_api.remove_editable(editable_item.name)
+        app.conan_api.remove_editable(ConanRef.loads(editable_item.name))
         self.update()
 
     def get_selected_editable(self) -> Union[EditableModelItem, None]:
