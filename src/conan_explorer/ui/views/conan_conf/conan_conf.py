@@ -361,19 +361,16 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.editables_edit_button, "icons/edit.svg")
 
     def on_editable_add(self, model_index):
-        self.remote_edit_dialog = EditableEditDialog(None, self)
-        reply = self.remote_edit_dialog.exec()
-        if reply == QDialog.DialogCode.Accepted:
-            self._editable_controller.update()
+        self.remote_edit_dialog = EditableEditDialog(None, self._editable_controller, self)
+        self.remote_edit_dialog.exec()
 
     def on_editable_edit(self, model_index):
         editable_item = self._editable_controller.get_selected_editable()
         if not editable_item:
             return
-        self.remote_edit_dialog = EditableEditDialog(editable_item, self)
-        reply = self.remote_edit_dialog.exec()
-        if reply == QDialog.DialogCode.Accepted:
-            self._editable_controller.update()
+        self.remote_edit_dialog = EditableEditDialog(
+            editable_item, self._editable_controller, self)
+        self.remote_edit_dialog.exec()
 
     def on_editable_remove(self, model_index):
         editable_item = self._editable_controller.get_selected_editable()
@@ -388,7 +385,7 @@ class ConanConfigView(PluginInterfaceV1):
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
         if reply == standard_button.Yes:
-            self._editable_controller.remove(editable_item.name)
+            self._editable_controller.remove(editable_item)
 
 # Conan Config
 

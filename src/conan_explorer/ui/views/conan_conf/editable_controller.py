@@ -56,19 +56,22 @@ class ConanEditableController():
             sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
         return True
 
-    def remove(self, name):
-        editable_item = self.get_selected_editable()
+    def add(self, editable_item: EditableModelItem):
         if not editable_item:
             return
-        app.conan_api.remove_editable(ConanRef.loads(editable_item.name))
-        self.update()
+        return self._model.add_item(editable_item)
+
+    def remove(self, editable_item: EditableModelItem):
+        if not editable_item:
+            return
+        return self._model.remove_item(editable_item)
 
     def get_selected_editable(self) -> Union[EditableModelItem, None]:
         indexes = self._view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug("No selected item for context action")
             return None
-        remote: EditableModelItem = indexes[0].internalPointer()  # type: ignore
-        return remote
+        item: EditableModelItem = indexes[0].internalPointer()  # type: ignore
+        return item
 
 

@@ -7,6 +7,7 @@ import platform
 import sys
 import traceback
 from pathlib import Path
+from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
 from test.conftest import TEST_REF, PathSetup, app_qt_fixture, conan_remove_ref
 from unittest.mock import Mock
 
@@ -319,11 +320,13 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     """ Test, that the editable dialog works adding and editing """
     app.conan_api.init_api()
     root_obj = QtWidgets.QWidget()
-    dialog = EditableEditDialog(None, root_obj)
+    editable_controller = ConanEditableController(QtWidgets.QTreeView())
+    dialog = EditableEditDialog(None, editable_controller, root_obj)
 
     new_ref = "example/9.9.9@editable/testing1"
     new_ref_obj = ConanRef.loads(new_ref)
     app.conan_api.remove_editable(new_ref_obj) # remove, if somehow already there
+    app.conan_api.remove_editable(ConanRef.loads(new_ref + "new"))
 
     app_qt_fixture.addWidget(root_obj)
     dialog.show()
@@ -383,7 +386,9 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     assert base_fixture.testdata_path / "conan" / "build_new" == app.conan_api.get_editables_output_folder(new_ref_obj)
 
     # check changing the ref of an already existing editable
+    editable_controller._select_editable(new_ref)
+    dialog._editable = editable_controller.get_selected_editable()
     dialog._ui.name_line_edit.setText(new_ref + "new")
     dialog.save()
     assert ConanRef.loads(new_ref + "new") in app.conan_api.get_editable_references()
-
+    assert new_ref_obj not in app.conan_api.get_editable_references()

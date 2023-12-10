@@ -8,6 +8,7 @@ import conan_explorer
 from conan_explorer.app.system import delete_path
 from conan_explorer.conan_wrapper import ConanApi
 from conan_explorer.conan_wrapper.types import ConanRef
+from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import EditableEditDialog
 from conan_explorer.ui.views.conan_conf.editable_model import EditableModel
 from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, TEST_REF, PathSetup, login_test_remote, logout_all_remotes
 from conan_explorer import conan_version
@@ -354,32 +355,39 @@ def test_conan_config_view_editables(qtbot, base_fixture: PathSetup, profile_fix
     conan_conf_view, main_gui = start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot)
     model: EditableModel = conan_conf_view._ui.editables_ref_view.model()
     new_editable_path = base_fixture.testdata_path / "conan"
+    if conan_version.startswith("2"):
+        new_editable_path /= "conanfileV2.py"
 
+    def editable_dialog_actions():
+        conan_conf_view.remote_edit_dialog._ui.name_line_edit.setText(TEST_REF + "int")
+        conan_conf_view.remote_edit_dialog._ui.path_line_edit.setText(str(new_editable_path))
+        conan_conf_view.remote_edit_dialog._ui.button_box.accepted.emit()
     # add a new ref via dialog
     mocker.patch.object(QtWidgets.QDialog, 'exec',
-                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted,
+                        side_effect=editable_dialog_actions)
     conan_conf_view._ui.editables_add_button.click()
-    conan_conf_view.remote_edit_dialog._ui.name_line_edit.setText(TEST_REF + "INT")
-    conan_conf_view.remote_edit_dialog._ui.path_line_edit.setText(str(new_editable_path))
-    # this is hacky, because controller.update is called from the dialog, but otherwise we don't have access to it
-    conan_conf_view.remote_edit_dialog.save()
-    conan_conf_view._editable_controller.update()
 
-    index = model.get_index_from_ref(TEST_REF + "INT")
+    index = model.get_index_from_ref(TEST_REF + "int")
     assert index.internalPointer() # index is existing
 
     # edit the ref 
     # select it
     sel_model = conan_conf_view._ui.editables_ref_view.selectionModel()
     sel_model.select(index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
-    conan_conf_view._ui.editables_edit_button.click()
-    conan_conf_view.remote_edit_dialog._ui.name_line_edit.setText(TEST_REF + "INT2")
-    conan_conf_view.remote_edit_dialog.save()
-    conan_conf_view._editable_controller.update()
 
-    index = model.get_index_from_ref(TEST_REF + "INT2")
+    def editable_dialog_actions():
+        conan_conf_view.remote_edit_dialog._ui.name_line_edit.setText(TEST_REF + "int2")
+        conan_conf_view.remote_edit_dialog._ui.button_box.accepted.emit()
+    # add a new ref via dialog
+    mocker.patch.object(QtWidgets.QDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted,
+                        side_effect=editable_dialog_actions)
+    conan_conf_view._ui.editables_edit_button.click()
+
+    index = model.get_index_from_ref(TEST_REF + "int2")
     assert index.internalPointer()  # index is existing
-    assert model.get_index_from_ref(TEST_REF + "INT") is None
+    assert model.get_index_from_ref(TEST_REF + "int") is None
 
     # delete it
     sel_model.select(index, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
@@ -388,7 +396,7 @@ def test_conan_config_view_editables(qtbot, base_fixture: PathSetup, profile_fix
     conan_conf_view._ui.editables_remove_button.click()
     model: EditableModel = conan_conf_view._ui.editables_ref_view.model()
 
-    assert model.get_index_from_ref(TEST_REF + "INT2") is None
+    assert model.get_index_from_ref(TEST_REF + "int2") is None
 
 
 def test_conan_config_save_config(qtbot, base_fixture: PathSetup, profile_fixture,

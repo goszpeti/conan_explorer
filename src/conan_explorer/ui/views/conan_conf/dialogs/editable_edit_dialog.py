@@ -1,24 +1,24 @@
 
+import copy
 from pathlib import Path
 from typing import Optional
 
 from PySide6.QtWidgets import QDialog, QFileDialog, QWidget
 
-import conan_explorer.app as app  # using global module pattern
-from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.ui.common.theming import get_themed_asset_icon
+from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
 from conan_explorer.ui.views.conan_conf.editable_model import EditableModelItem
 
 
 class EditableEditDialog(QDialog):
 
-    def __init__(self, editable: Optional[EditableModelItem], parent: Optional[QWidget]=None):
+    def __init__(self, editable: Optional[EditableModelItem], editable_controller: ConanEditableController, parent: Optional[QWidget] = None):
         super().__init__(parent=parent)
         from .editable_edit_dialog_ui import Ui_Dialog
         if editable is None:
             editable = EditableModelItem("", "", "")
         self._editable = editable
+        self._editable_controller = editable_controller
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
 
@@ -59,13 +59,12 @@ class EditableEditDialog(QDialog):
     def save(self):
         """ Save edited editable information by calling the appropriate conan methods. """
         new_name = self._ui.name_line_edit.text().strip()
-        new_path = self._ui.path_line_edit.text().strip()
-        new_output_folder = self._ui.output_folder_line_edit.text()
-        try:
-            # if name changed -> remove the old one
-            if app.conan_api.add_editable(ConanRef.loads(new_name), new_path, new_output_folder):
-                if self._editable.name and new_name != self._editable.name:
-                    app.conan_api.remove_editable(ConanRef.loads(self._editable.name))
-        except Exception as e:
-            Logger().error(str(e))
+        remove_after_add = False # if name changed -> remove the old one
+        if self._editable.name and self._editable.name != new_name:
+            remove_after_add = True
+
+        new_editable = EditableModelItem(new_name, self._ui.path_line_edit.text().strip(), self._ui.output_folder_line_edit.text())
+        if self._editable_controller.add(new_editable):
+            if remove_after_add:
+                self._editable_controller.remove(self._editable)
         self.accept()

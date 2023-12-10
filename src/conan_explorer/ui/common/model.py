@@ -48,6 +48,12 @@ class TreeModelItem(object):
 
     def append_child(self, item):
         self.child_items.append(item)
+    
+    def remove_child(self, item):
+        self.child_items.remove(item)
+
+    def get_child_item_row(self, item):
+        return self.child_items.index(item)
 
     def child(self, row):
         try:
@@ -91,17 +97,19 @@ class TreeModel(QAbstractItemModel):
         self.root_item.child_items.clear()
         self.endResetModel()
 
-    def add_item(self, item: TreeModelItem):
-        # self.beginInsertRows()
+    def add_item(self, item: TreeModelItem): # to root_item
+        # item_index = self.get_index_from_item(self.root_item)
+        child_count = self.root_item.child_count()
+        item.parent_item = self.root_item
+        self.beginInsertColumns(QModelIndex(), child_count, child_count)
         self.root_item.append_child(item)
-        # self.insertRow()
-        # self.endInsertRows()
+        self.endInsertRows()
 
-    def remove_item(self, item: TreeModelItem):
-        pass
-
-    # def removeRow(self, row: int, parent: QModelIndex | QPersistentModelIndex = ...) -> bool:
-    #     return super().removeRow(row, parent)
+    def remove_item(self, item: TreeModelItem): # from root_item
+        item_index = self.get_index_from_item(item)
+        self.beginRemoveRows(item_index.parent(), item_index.row(), item_index.row())
+        self.root_item.remove_child(item)
+        self.endResetModel()
 
     def columnCount(self, parent):  # override
         if parent.isValid():

@@ -2,7 +2,7 @@ from contextlib import redirect_stderr, redirect_stdout
 import os
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
 from unittest.mock import patch
 
 try:
@@ -320,8 +320,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         editables_dict = self._conan.local.editable_list()
         return list(editables_dict.keys())
 
-    def add_editable(self, conan_ref: ConanRef, path: str, output_folder: str) -> bool:
+    def add_editable(self, conan_ref: Union[ConanRef, str], path: str, output_folder: str) -> bool:
         try:
+            if isinstance(conan_ref, str):
+                conan_ref = ConanRef.loads(conan_ref)
             self._conan.local.editable_add(path, conan_ref.name, conan_ref.version,
                 conan_ref.user, conan_ref.channel, output_folder=output_folder)
         except Exception as e:
@@ -329,8 +331,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             return False
         return True
 
-    def remove_editable(self, conan_ref: ConanRef) -> bool:
+    def remove_editable(self, conan_ref: Union[ConanRef, str]) -> bool:
         try:
+            if isinstance(conan_ref, str):
+                conan_ref = ConanRef.loads(conan_ref)
             self._conan.local.editable_remove(None, [str(conan_ref)])
         except Exception as e:
             Logger().error("Error removing editable: " + str(e))

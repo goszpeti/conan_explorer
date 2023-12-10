@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from abc import abstractmethod
 from conan_explorer import INVALID_CONAN_REF, INVALID_PATH, conan_version
 from conan_explorer.app.logger import Logger
@@ -232,12 +232,12 @@ class ConanUnifiedApiInterface():
         raise NotImplementedError
 
     @abstractmethod
-    def add_editable(self, conan_ref: ConanRef, path: str, output_folder: str) -> bool:
+    def add_editable(self, conan_ref: Union[ConanRef, str], path: str, output_folder: str) -> bool:
         """ Add an editable reference. """
         raise NotImplementedError
 
     @abstractmethod
-    def remove_editable(self, conan_ref: ConanRef) -> bool:
+    def remove_editable(self, conan_ref: Union[ConanRef, str]) -> bool:
         """ Remove an editable reference. """
         raise NotImplementedError
     

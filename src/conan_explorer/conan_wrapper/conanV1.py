@@ -4,7 +4,7 @@ import platform
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
 from unittest.mock import patch
 from conan_explorer.app.system import delete_path
 from conan_explorer.app.typing import SignatureCheckMeta
@@ -173,7 +173,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             return None
         return Path(str(output_folder))
 
-    def add_editable(self, conan_ref: ConanRef, path: str, output_folder: str) -> bool:
+    def add_editable(self, conan_ref: Union[ConanRef, str], path: str, output_folder: str) -> bool:
         try:
             self._conan.editable_add(path, str(conan_ref), None, output_folder, None)
         except Exception as e:
@@ -181,7 +181,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             return False
         return True
 
-    def remove_editable(self, conan_ref: ConanRef) -> bool:
+    def remove_editable(self, conan_ref: Union[ConanRef, str]) -> bool:
         try:
             self._conan.editable_remove(str(conan_ref))
         except Exception as e:
