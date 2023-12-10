@@ -9,7 +9,7 @@ from conan_explorer.app.system import delete_path
 from conan_explorer.conan_wrapper import ConanApi
 from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import EditableEditDialog
-from conan_explorer.ui.views.conan_conf.editable_model import EditableModel
+from conan_explorer.ui.views.conan_conf.editable_model import EditableModel, EditableModelItem
 from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, TEST_REF, PathSetup, login_test_remote, logout_all_remotes
 from conan_explorer import conan_version
 
@@ -34,7 +34,6 @@ def start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot):
     main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
     return conan_conf_view, main_gui
 
-@pytest.mark.conanv2
 def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_config_fixture, mocker):
     """
     Test Local Pacakge Explorer functions.
@@ -81,8 +80,8 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         assert remotes_model
 
         #### 1. check, that the test remotes are in the list
-        assert len(remotes_model.root_item.child_items) >= 3
-        for remote_item in remotes_model.root_item.child_items:
+        assert len(remotes_model.items()) >= 3
+        for remote_item in remotes_model.items():
             if remote_item.item_data[0] == TEST_REMOTE_NAME:
                 assert remote_item.item_data[1] in TEST_REMOTE_URL
                 assert remote_item.item_data[2] == "False"
@@ -113,40 +112,40 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
                 assert not remote.disabled
 
         # 4. Move last remote up, check order
-        last_item = remotes_model.root_item.child_items[-1]
-        assert conan_conf_view._remotes_controller._select_remote(last_item.remote.name)
+        last_item = remotes_model.items()[-1]
+        assert conan_conf_view._remotes_controller._select_remote(last_item.name)
         
         conan_conf_view._ui.remote_move_up_button.click()
         sleep(1)
         remotes_model = conan_conf_view._remotes_controller._model
-        second_last_item = remotes_model.root_item.child_items[-2]
+        second_last_item = remotes_model.items()[-2]
 
-        assert second_last_item.remote.name == last_item.remote.name
+        assert second_last_item.name == last_item.name
 
         # 5. Move this remote down, check order
         conan_conf_view._ui.remote_move_down_button.click()
         sleep(1)
         remotes_model = conan_conf_view._remotes_controller._model
-        last_item = remotes_model.root_item.child_items[-1]
-        assert second_last_item.remote.name == last_item.remote.name
+        last_item = remotes_model.items()[-1]
+        assert second_last_item.name == last_item.name
 
         # 5a. Move last remote to top
-        last_item = remotes_model.root_item.child_items[-1]
-        assert conan_conf_view._remotes_controller._select_remote(last_item.remote.name)
+        last_item = remotes_model.items()[-1]
+        assert conan_conf_view._remotes_controller._select_remote(last_item.name)
         conan_conf_view._ui.remote_move_top_button.click()
         sleep(1)
         remotes_model = conan_conf_view._remotes_controller._model
-        first_item = remotes_model.root_item.child_items[0]
+        first_item = remotes_model.items()[0]
 
-        assert first_item.remote.name == last_item.remote.name
+        assert first_item.name == last_item.name
 
         # 5b. Move top remote to last
-        assert conan_conf_view._remotes_controller._select_remote(first_item.remote.name)
+        assert conan_conf_view._remotes_controller._select_remote(first_item.name)
         conan_conf_view._ui.remote_move_bottom_button.click()
         sleep(1)
         remotes_model = conan_conf_view._remotes_controller._model
-        last_item = remotes_model.root_item.child_items[-1]
-        assert first_item.remote.name == last_item.remote.name
+        last_item = remotes_model.items()[-1]
+        assert first_item.name == last_item.name
 
         # 6. Add a new remote via cli -> push refresh -> new remote should appear
         os.system(f"conan remote add local4 http://127.0.0.1:9303/ {ssl_disable_flag}")
@@ -160,7 +159,6 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                             return_value=QtWidgets.QMessageBox.StandardButton.Cancel)
         conan_conf_view._ui.remote_remove_button.click()
-        assert conan_conf_view._remotes_controller._select_remote("local4")
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
         mocker.patch.object(QtWidgets.QMessageBox, 'exec',
@@ -206,8 +204,8 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         assert conan_conf_view._remotes_controller._select_remote("Edited")
         edited_remote_item = conan_conf_view._remotes_controller.get_selected_remote()
         assert edited_remote_item
-        assert edited_remote_item.remote.url == "http://127.0.0.1:9305/"
-        assert edited_remote_item.remote.verify_ssl == False
+        assert edited_remote_item.url == "http://127.0.0.1:9305/"
+        assert edited_remote_item.verify_ssl == False
     finally:
         os.system(f"conan remote remove Edited")
         os.system(f"conan remote remove local2")
@@ -222,7 +220,6 @@ def test_conan_config_view_remote_login(qtbot, base_fixture, ui_no_refs_config_f
     conan_conf_view, main_gui = start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot)
 
     conan = ConanApi().init_api()
-    conan_conf_view._remotes_controller.update()
 
     # changes to conan conf page
     main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()

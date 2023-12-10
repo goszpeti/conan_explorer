@@ -15,7 +15,7 @@ from conan_explorer.app.logger import Logger
 from conan_explorer.app.typing import SignatureCheckMeta
 
 from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPackageId,
-    ConanPackagePath, ConanPkg, ConanPkgRef, ConanRef, ConanSettings, Remote,
+    ConanPackagePath, ConanPkg, ConanPkgRef, ConanRef, ConanSettings, EditablePkg, Remote,
     create_key_value_pair_list)
 from .unified_api import ConanCommonUnifiedApi
 
@@ -182,7 +182,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return remotes
 
     def add_remote(self, remote_name: str, url: str, verify_ssl: bool):
-        remote = Remote(remote_name, url, verify_ssl, False)
+        from conans.client.cache.remote_registry import Remote as ConanRemote
+        remote = ConanRemote(remote_name, url, verify_ssl, False)
         self._conan.remotes.add(remote)
 
     def rename_remote(self, remote_name: str, new_name: str):
@@ -199,8 +200,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def update_remote(self, remote_name: str, url: str, verify_ssl: bool, disabled: bool,
                       index: Optional[int]):
-        self._conan.remotes.update(
-            remote_name, url, verify_ssl, disabled, index)
+        self._conan.remotes.update(remote_name, url, verify_ssl, disabled, index)
 
     def login_remote(self, remote_name: str, user_name: str, password: str):
         self._conan.remotes.login(self._conan.remotes.get(
@@ -302,6 +302,14 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                             conan_options: Optional[ConanOptions]=None) -> str:
         """ TODO: Currently there is no equivalent to txt generator from ConanV1 """
         raise NotImplementedError
+    
+    def get_editable(self, conan_ref: Union[ConanRef, str]) -> EditablePkg:
+        editables_dict = self._conan.local.editable_list()
+        if isinstance(conan_ref, str):
+            conan_ref = ConanRef.loads(conan_ref)
+        editable_dict = editables_dict.get(conan_ref, {})
+        return EditablePkg(str(conan_ref), editable_dict.get("path", INVALID_PATH), 
+                           editable_dict.get("output_folder"))
     
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
         """ Get package path of an editable reference. Can be a folder or conanfile.py """

@@ -8,6 +8,7 @@ import sys
 import traceback
 from pathlib import Path
 from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
+from conan_explorer.ui.views.conan_conf.remotes_controller import ConanRemoteController
 from test.conftest import TEST_REF, PathSetup, app_qt_fixture, conan_remove_ref
 from unittest.mock import Mock
 
@@ -183,7 +184,8 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     new_profile_path = profiles_path / "new_profile"
     new_profile_path.touch()
     conan_install_dialog.load_profiles()
-    # default must be fisrt item and has a * after the name
+    # default must be first item and has a * after the name
+    # TODO: is abc ordered, so this does not work always...
     first_profile = conan_install_dialog._ui.profile_cbox.itemText(0)
     assert first_profile == "default *"
     new_profile_idx = -1
@@ -294,9 +296,9 @@ def test_multi_remote_login_dialog(app_qt_fixture, base_fixture, mocker):
     root_obj = QtWidgets.QWidget()
     mocker.patch.object(ConanApi, 'get_remotes', return_value=[remote1, remote2, remote3])
     login_cmd: Mock = mocker.patch.object(ConanApi, 'login_remote')
+    controller = ConanRemoteController(QtWidgets.QTreeView(), None)
 
-
-    dialog = RemoteLoginDialog([remote1, remote2, remote3], root_obj)
+    dialog = RemoteLoginDialog([remote1, remote2, remote3], controller, root_obj)
     username = "user"
     password = "pw"
     dialog._ui.name_line_edit.setText(username)

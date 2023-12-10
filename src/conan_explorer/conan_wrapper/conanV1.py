@@ -15,7 +15,7 @@ except ImportError:
     from contextlib_chdir import chdir
 
 from .types import (ConanAvailableOptions, ConanOptions, ConanPackageId, ConanPackagePath, 
-                    ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, 
+                    ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, EditablePkg, 
                     LoggerWriter, Remote, create_key_value_pair_list)
 from .unified_api import ConanCommonUnifiedApi
 
@@ -160,6 +160,14 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             self._fix_editable_file() # to not crash conan without this
             return []
 
+    def get_editable(self, conan_ref: Union[ConanRef, str]) -> EditablePkg:
+        pass
+        if isinstance(conan_ref, str):
+            conan_ref = ConanRef.loads(conan_ref)
+        editable_dict = self._conan.editable_list().get(str(conan_ref), {})
+        return EditablePkg(str(conan_ref), editable_dict.get("path", INVALID_PATH),
+                           editable_dict.get("output_folder"))
+
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
         pkg_path = Path(INVALID_PATH)
         editable_dict = self._conan.editable_list().get(str(conan_ref), {})
@@ -238,7 +246,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                 remotes = self._client_cache.registry.load_remotes().values()
         except Exception as e:
             Logger().error(f"Error while reading remotes file: {str(e)}")
-        return remotes
+        return remotes # type: ignore
 
     def add_remote(self, remote_name: str, url: str, verify_ssl: bool):
         self._conan.remote_add(remote_name, url, verify_ssl)

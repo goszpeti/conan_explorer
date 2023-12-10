@@ -2,16 +2,15 @@
 from pathlib import Path
 from typing import List, Optional
 
-import conan_explorer.app as app
-from conan_explorer.app import AsyncLoader  # using global module pattern
-from conan_explorer.app.logger import Logger
-from conans.client.cache.remote_registry import Remote
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QDialog, QWidget, QListWidgetItem, QCheckBox
+from PySide6.QtWidgets import QDialog, QListWidgetItem, QWidget
 
+import conan_explorer.app as app
+from conan_explorer.app import AsyncLoader
+from conan_explorer.conan_wrapper.types import Remote  # using global module pattern
 from conan_explorer.ui.common.theming import get_themed_asset_icon
-
+from conan_explorer.ui.views.conan_conf.remotes_controller import \
+    ConanRemoteController
 
 current_dir = Path(__file__).parent
 
@@ -24,9 +23,10 @@ class RemoteLoginDialog(QDialog):
     After the dialog is closed, it will be overwritten by a long string.
     """
 
-    def __init__(self, remotes: List[Remote], parent: Optional[QWidget]):
+    def __init__(self, remotes: List[Remote], remotes_controller: ConanRemoteController, parent: Optional[QWidget]):
         super().__init__(parent=parent)
         self._remotes = remotes
+        self._remotes_controller = remotes_controller
         from .remote_login_dialog_ui import Ui_Dialog
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
@@ -59,16 +59,8 @@ class RemoteLoginDialog(QDialog):
         for idx in range(self._ui.remote_list.count()):
             if self._ui.remote_list.item(idx).checkState() == Qt.CheckState.Checked:
                 selected_remotes.append(self._ui.remote_list.item(idx).data(0))
-        for remote in selected_remotes:
-            # will be canceled after the first error, so no lockout will occur, because of multiple incorrect logins
-            # error is printed on the console
-            try:
-                app.conan_api.login_remote(remote, self._ui.name_line_edit.text(),
-                                                self._ui.password_line_edit.text())
-            except Exception as e:
-                Logger().error(f"Can't sign in to {remote}: {str(e)}")
-                return
-            Logger().info(f"Successfully logged in to {remote}")
+        self._remotes_controller.login_remotes(selected_remotes, self._ui.name_line_edit.text(),
+                                               self._ui.password_line_edit.text())
         self.clear_password()
 
     def clear_password(self):

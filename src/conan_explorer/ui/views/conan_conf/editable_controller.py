@@ -5,7 +5,7 @@ from conan_explorer.app.logger import Logger
 from PySide6.QtCore import QModelIndex, QItemSelectionModel
 from PySide6.QtWidgets import QTreeView
 
-from conan_explorer.conan_wrapper.types import ConanRef
+from conan_explorer.conan_wrapper.types import EditablePkg
 
 from .editable_model import EditableModel, EditableModelItem
 
@@ -27,7 +27,7 @@ class ConanEditableController():
         self.resize_remote_columns()
 
         if sel_edit:
-            self._select_editable(sel_edit.name)
+            self._select_editable(sel_edit.conan_ref)
 
     def resize_remote_columns(self):
         for i in reversed(range(self._model.root_item.column_count() - 1)):
@@ -56,22 +56,22 @@ class ConanEditableController():
             sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
         return True
 
-    def add(self, editable_item: EditableModelItem):
-        if not editable_item:
+    def add(self, editable: EditablePkg):
+        if not editable:
             return
-        return self._model.add_item(editable_item)
+        return self._model.add(editable)
 
-    def remove(self, editable_item: EditableModelItem):
-        if not editable_item:
+    def remove(self, editable: EditablePkg):
+        if not editable:
             return
-        return self._model.remove_item(editable_item)
+        return self._model.remove(editable)
 
-    def get_selected_editable(self) -> Union[EditableModelItem, None]:
+    def get_selected_editable(self) -> Union[EditablePkg, None]:
         indexes = self._view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug("No selected item for context action")
             return None
         item: EditableModelItem = indexes[0].internalPointer()  # type: ignore
-        return item
+        return app.conan_api.get_editable(item.name)
 
 

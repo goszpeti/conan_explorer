@@ -95,6 +95,8 @@ class PkgSearchModel(TreeModel):
 
     def setup_model_data(self, search_query: str, remotes: List[str]):
         # needs to be ConanRef, so we can check with get_all_local_refs directly
+        self.clear_items()
+        self.beginResetModel()
         recipes_with_remotes: Dict[ConanRef, str] = {}
         for remote in remotes:
             recipe_list = (app.conan_api.search_recipes_in_remotes(
@@ -123,6 +125,7 @@ class PkgSearchModel(TreeModel):
                 [str(recipe), recipe_remotes, ""], self.root_item, None, REF_TYPE, 
                 lazy_loading=True, installed=installed)
             self.root_item.append_child(conan_item)
+        self.endResetModel()
 
     def data(self, index: QtCore.QModelIndex, role: Qt.ItemDataRole):  # override
         if not index.isValid():

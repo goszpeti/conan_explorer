@@ -42,8 +42,7 @@ class ConanConfigView(PluginInterfaceV1):
         assert self._base_signals
         self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, 
                                             self._base_signals.conan_remotes_updated)
-        self._editable_controller = ConanEditableController(self._ui.editables_ref_view,
-                                                            )
+        self._editable_controller = ConanEditableController(self._ui.editables_ref_view)
         self._init_remotes_tab()
         self._init_profiles_tab()
 
@@ -227,7 +226,8 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.remote_refresh_button, "icons/refresh.svg")
         self._ui.remote_login_button.clicked.connect(self.on_remotes_login)
         self.set_themed_icon(self._ui.remote_login_button, "icons/login.svg")
-        self._ui.remote_toggle_disabled_button.clicked.connect(self.on_remote_disable)
+        self._ui.remote_toggle_disabled_button.clicked.connect(
+            self._remotes_controller.remote_disable)
         self.set_themed_icon(self._ui.remote_toggle_disabled_button, "icons/hide.svg")
         self._ui.remote_add_button.clicked.connect(self.on_remote_add)
         self.set_themed_icon(self._ui.remote_add_button, "icons/plus_rounded.svg")
@@ -255,7 +255,6 @@ class ConanConfigView(PluginInterfaceV1):
             Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.remotes_tree_view.customContextMenuRequested.connect(
             self.on_remote_context_menu_requested)
-
         self._init_remote_context_menu()
 
     def on_remote_context_menu_requested(self, position):
@@ -267,7 +266,7 @@ class ConanConfigView(PluginInterfaceV1):
         self._copy_remote_action.setIcon(
             QIcon(get_themed_asset_icon("icons/copy_link.svg")))
         self._remotes_cntx_menu.addAction(self._copy_remote_action)
-        self._copy_remote_action.triggered.connect(self.on_copy_remote_name_requested)
+        self._copy_remote_action.triggered.connect(self._remotes_controller.copy_remote_name)
 
         self._edit_remote_action = QAction("Edit remote", self)
         self._edit_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
@@ -290,7 +289,8 @@ class ConanConfigView(PluginInterfaceV1):
         self._disable_profile_action.setIcon(
             QIcon(get_themed_asset_icon("icons/hide.svg")))
         self._remotes_cntx_menu.addAction(self._disable_profile_action)
-        self._disable_profile_action.triggered.connect(self.on_remote_disable)
+        self._disable_profile_action.triggered.connect(
+            self._remotes_controller.remote_disable)
 
         self._login_remotes_action = QAction("(Multi)Login to remote", self)
         self._login_remotes_action.setIcon(
@@ -302,28 +302,22 @@ class ConanConfigView(PluginInterfaceV1):
         remote_item = self._remotes_controller.get_selected_remote()
         if not remote_item:
             return
-        self.remote_edit_dialog = RemoteEditDialog(remote_item.remote, self)
-        reply = self.remote_edit_dialog.exec()
-        if reply == QDialog.DialogCode.Accepted:
-            self._remotes_controller.update()
+        self.remote_edit_dialog = RemoteEditDialog(remote_item, self._remotes_controller, self)
+        self.remote_edit_dialog.exec()
 
     def on_remotes_login(self):
         remote_item = self._remotes_controller.get_selected_remote()
         if not remote_item:
             return
-        remotes = app.conan_api.get_remotes_from_same_server(remote_item.remote)
+        remotes = app.conan_api.get_remotes_from_same_server(remote_item)
         if not remotes:
             return
-        self.remote_login_dialog = RemoteLoginDialog(remotes, self)
-        reply = self.remote_login_dialog.exec()
-        if reply == QDialog.DialogCode.Accepted:
-            self._remotes_controller.update()
+        self.remote_login_dialog = RemoteLoginDialog(remotes, self._remotes_controller, self)
+        self.remote_login_dialog.exec()
 
     def on_remote_add(self, model_index):
-        self.remote_edit_dialog = RemoteEditDialog(None, self)
-        reply = self.remote_edit_dialog.exec()
-        if reply == QDialog.DialogCode.Accepted:
-            self._remotes_controller.update()
+        self.remote_edit_dialog = RemoteEditDialog(None, self._remotes_controller, self)
+        self.remote_edit_dialog.exec()
 
     def on_remote_remove(self, model_index):
         remote_item = self._remotes_controller.get_selected_remote()
@@ -332,19 +326,13 @@ class ConanConfigView(PluginInterfaceV1):
         message_box = QMessageBox(parent=self)
         message_box.setWindowTitle("Remove remote")
         message_box.setText(
-            f"Are you sure, you want to delete the remote {remote_item.remote.name}?")
+            f"Are you sure, you want to delete the remote {remote_item.name}?")
         message_box.setStandardButtons(
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
-            self._remotes_controller.remove(remote_item.remote.name)
-
-    def on_remote_disable(self, model_index):
-        self._remotes_controller.remote_disable(model_index)
-
-    def on_copy_remote_name_requested(self):
-        self._remotes_controller.copy_remote_name()
+            self._remotes_controller.remove(remote_item)
 
 # Editables tab
 
@@ -365,11 +353,11 @@ class ConanConfigView(PluginInterfaceV1):
         self.remote_edit_dialog.exec()
 
     def on_editable_edit(self, model_index):
-        editable_item = self._editable_controller.get_selected_editable()
-        if not editable_item:
+        editable = self._editable_controller.get_selected_editable()
+        if not editable:
             return
         self.remote_edit_dialog = EditableEditDialog(
-            editable_item, self._editable_controller, self)
+            editable, self._editable_controller, self)
         self.remote_edit_dialog.exec()
 
     def on_editable_remove(self, model_index):
@@ -379,7 +367,7 @@ class ConanConfigView(PluginInterfaceV1):
         message_box = QMessageBox(parent=self)
         message_box.setWindowTitle("Remove editable")
         message_box.setText("Are you sure, you want to delete the editable" +
-                             f"{editable_item.name}?")
+                             f"{editable_item.conan_ref}?")
         standard_button = QMessageBox.StandardButton
         message_box.setStandardButtons(standard_button.Yes | standard_button.No)
         message_box.setIcon(QMessageBox.Icon.Question)

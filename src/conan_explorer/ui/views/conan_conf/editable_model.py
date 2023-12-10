@@ -2,7 +2,8 @@
 from typing import Optional
 from PySide6.QtCore import QModelIndex, Qt
 
-import conan_explorer.app as app # using global module pattern
+import conan_explorer.app as app
+from conan_explorer.conan_wrapper.types import EditablePkg # using global module pattern
 from conan_explorer.ui.common import TreeModel, TreeModelItem
 
 
@@ -55,14 +56,17 @@ class EditableModel(TreeModel):
             self.root_item.append_child(remote_item)
         self.endResetModel()
 
-    def add_item(self, item: EditableModelItem):
-        if app.conan_api.add_editable(item.name, item.path, item.output):
-            super().add_item(item)
+    def add(self, editable: EditablePkg):
+        args = (editable.conan_ref, editable.path, str(editable.output_folder))
+        if app.conan_api.add_editable(*args):
+            super().add_item(EditableModelItem(*args))
             return True
         return False
 
-    def remove_item(self, item: EditableModelItem):
-        if app.conan_api.remove_editable(item.name):
+    def remove(self, editable: EditablePkg):
+        if app.conan_api.remove_editable(editable.conan_ref):
+            index = self.get_index_from_ref(editable.conan_ref)
+            item: EditableModelItem = index.internalPointer()  # type: ignore
             super().remove_item(item)
             return True
         return False

@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Union
+from typing import Callable, List, Type, TypeVar
 from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
 from PySide6.QtWidgets import QFileSystemModel
 
@@ -7,6 +7,7 @@ from conan_explorer.app.logger import Logger
 QAF = Qt.AlignmentFlag
 QORI = Qt.Orientation
 QIDR = Qt.ItemDataRole
+
 
 def re_register_signal(signal: SignalInstance, slot: Callable):
     try:  # need to be removed, otherwise will be called multiple times
@@ -20,8 +21,8 @@ def re_register_signal(signal: SignalInstance, slot: Callable):
 class FileSystemModel(QFileSystemModel):
     """ This fixes an issue with the header not being centered vertically """
 
-    def __init__(self, h_align=QAF.AlignLeft | QAF.AlignVCenter, 
-                       v_align=QAF.AlignVCenter, parent=None):
+    def __init__(self, h_align=QAF.AlignLeft | QAF.AlignVCenter,
+                 v_align=QAF.AlignVCenter, parent=None):
         super().__init__(parent)
         self.alignments = {QORI.Horizontal: h_align, QORI.Vertical: v_align}
 
@@ -40,15 +41,15 @@ class TreeModelItem(object):
     Implemented like the default QT example.
     """
 
-    def __init__(self, data: List[Any], parent=None, lazy_loading=False):
+    def __init__(self, data: List[str],  parent=None, lazy_loading=False):
         self.parent_item = parent
         self.item_data = data
-        self.child_items = []
+        self.child_items: List[TreeModelItem] = []
         self.is_loaded = not lazy_loading
 
     def append_child(self, item):
         self.child_items.append(item)
-    
+
     def remove_child(self, item):
         self.child_items.remove(item)
 
@@ -97,7 +98,7 @@ class TreeModel(QAbstractItemModel):
         self.root_item.child_items.clear()
         self.endResetModel()
 
-    def add_item(self, item: TreeModelItem): # to root_item
+    def add_item(self, item: TreeModelItem):  # to root_item
         # item_index = self.get_index_from_item(self.root_item)
         child_count = self.root_item.child_count()
         item.parent_item = self.root_item
@@ -105,7 +106,7 @@ class TreeModel(QAbstractItemModel):
         self.root_item.append_child(item)
         self.endInsertRows()
 
-    def remove_item(self, item: TreeModelItem): # from root_item
+    def remove_item(self, item: TreeModelItem):  # from root_item
         item_index = self.get_index_from_item(item)
         self.beginRemoveRows(item_index.parent(), item_index.row(), item_index.row())
         self.root_item.remove_child(item)
@@ -144,7 +145,7 @@ class TreeModel(QAbstractItemModel):
         else:
             parent_item = parent.internalPointer()
 
-        return parent_item.child_count() # type: ignore
+        return parent_item.child_count()  # type: ignore
 
     def flags(self, index):  # override
         if not index.isValid():

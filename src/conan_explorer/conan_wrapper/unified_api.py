@@ -4,7 +4,7 @@ from abc import abstractmethod
 from conan_explorer import INVALID_CONAN_REF, INVALID_PATH, conan_version
 from conan_explorer.app.logger import Logger
 from .types import (ConanAvailableOptions,  ConanPkg, ConanRef, ConanPkgRef, 
-            ConanOptions, ConanPackageId, ConanPackagePath, ConanSettings, Remote)
+            ConanOptions, ConanPackageId, ConanPackagePath, ConanSettings, EditablePkg, Remote)
 
 if TYPE_CHECKING:
     from conan_explorer.conan_wrapper.conan_cache import ConanInfoCache
@@ -157,7 +157,11 @@ class ConanUnifiedApiInterface():
 
     @abstractmethod
     def login_remote(self, remote_name: str, user_name: str, password: str):
-        """ Login to a remote with credentials """
+        """ Login to a remote with credentials 
+        This method will throw if wrong credentials are entered, 
+        so we can catch the first error, when logging into multiple remotes
+        and do not retry, possibly locking the user.
+        """
         raise NotImplementedError
 
 ### Install related methods ###
@@ -215,7 +219,12 @@ class ConanUnifiedApiInterface():
                             conan_options: Optional[ConanOptions]=None) -> str:
         """ Read conan buildinfo and return as string """
         raise NotImplementedError
-    
+
+    @abstractmethod
+    def get_editable(self, conan_ref: Union[ConanRef, str]) -> EditablePkg:
+        """ Get an editable object from conan reference. """
+        raise NotImplementedError
+
     @abstractmethod
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
         """ Get package path of an editable reference. """
