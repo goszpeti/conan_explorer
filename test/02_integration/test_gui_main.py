@@ -110,8 +110,6 @@ def test_gui_mod_and_style(qtbot, base_fixture, ui_config_fixture):
     assert main_gui._style_chooser_radio_material.isChecked()
     main_gui._style_chooser_radio_fluent.click()
 
-    time.sleep(1)
-
     assert app.active_settings.get(GUI_STYLE) == GUI_STYLE_FLUENT
     main_gui.close()
 
