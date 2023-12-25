@@ -119,7 +119,7 @@ class ConanSearchController(QObject):
     def get_selected_source_item(self, view, idx=0) -> Optional[SearchedPackageTreeItem]:
         """ Gets the selected item from a view """
         indexes = view.selectedIndexes()
-        if not indexes:
+        if not indexes or len(indexes) < idx + 1:
             return None
         view_index = indexes[idx]
         source_item = view_index.model().mapToSource(view_index).internalPointer()

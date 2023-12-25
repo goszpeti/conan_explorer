@@ -66,7 +66,7 @@ class AsyncLoader(QObject):
     def async_loading(self, dialog_parent: Optional[QWidget], work_task: Callable, 
                       worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,
-                      loading_text: str = "Loading", cancel_button=True):
+                      loading_text: str = "Loading...", cancel_button=True):
         self.finished = False
         self.progress_dialog.setLabelText(loading_text)
 
