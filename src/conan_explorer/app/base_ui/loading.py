@@ -46,12 +46,10 @@ class AsyncLoader(QObject):
         if AsyncLoader.__progress_dialog is None: # implicit check for init
             wt = Qt.WindowType
             progress_dialog = QProgressDialog()
-            progress_dialog.setWindowFlags(wt.WindowStaysOnTopHint)
             progress_dialog.setAttribute(Qt.WidgetAttribute.WA_ShowModal)
             progress_dialog.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
-
             # Window flags to disable close button
-            progress_dialog.setWindowFlags(
+            progress_dialog.setWindowFlags(wt.FramelessWindowHint | wt.WindowStaysOnTopHint|
                 wt.Window | wt.WindowTitleHint | wt.CustomizeWindowHint)
             progress_dialog.setCancelButton(None)  # type: ignore
             progress_dialog.setModal(True)  # user could trigger it twice -> crash
@@ -59,7 +57,6 @@ class AsyncLoader(QObject):
             progress_dialog.setMinimumDuration(1000)
             progress_dialog.setMinimumWidth(500)
             progress_dialog.setMaximumWidth(600)
-            progress_dialog.setWindowIcon(QIcon(str(asset_path / "icons" / "icon.ico")))
             AsyncLoader.__progress_dialog = progress_dialog
         self.progress_dialog = AsyncLoader.__progress_dialog
         self.worker: Optional[Worker] = None
@@ -83,6 +80,8 @@ class AsyncLoader(QObject):
         qapp: QApplication = QApplication.instance()  # type: ignore
         rectangle = self.progress_dialog.frameGeometry()
         if dialog_parent:
+            pass
+            # TODO WHy?
             start_time = datetime.now()
             while not qapp.activeWindow():
                 QApplication.processEvents()
@@ -92,7 +91,11 @@ class AsyncLoader(QObject):
             if qapp.activeWindow():
                 rectangle.moveCenter(qapp.activeWindow().frameGeometry().center())
                 self.progress_dialog.move(rectangle.topLeft())
+        else:
+            rectangle.moveCenter(qapp.primaryScreen().geometry().center())
+            self.progress_dialog.move(rectangle.topLeft())
         self.progress_dialog.show()
+        self.progress_dialog.activateWindow()
 
         if str2bool(os.getenv("DISABLE_ASYNC_LOADER", "")):
             ret = work_task(*worker_args)

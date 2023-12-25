@@ -84,6 +84,8 @@ class PackageSelectionController(QObject):
 
     def on_show_build_info(self):
         conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
+        if not conan_ref or pkg_id:
+            return
         pkg_info = app.conan_api.get_local_pkg_from_id(
             ConanPkgRef.loads(conan_ref + ":" + pkg_id))
         loader = AsyncLoader(self)
@@ -125,7 +127,7 @@ class PackageSelectionController(QObject):
 
     def get_selected_ref_with_pkg_id(self) -> Tuple[str, str]:
         conan_refs = self.get_selected_conan_refs()
-        if len(conan_refs) > 1:
+        if len(conan_refs) != 1:
             return "", ""
         pkg_info = self.get_selected_conan_pkg_info()
         pkg_id = ""
