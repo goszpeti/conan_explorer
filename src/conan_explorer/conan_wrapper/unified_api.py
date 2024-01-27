@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from conan_explorer.conan_wrapper.conan_cache import ConanInfoCache
 
 #### Interface
-class ConanUnifiedApiInterface():
+class ConanUnifiedApi():
     """ 
     API abstraction to provide compatibility between ConanV1 and V2 APIs. 
     """
@@ -344,7 +344,7 @@ class ConanUnifiedApiInterface():
 
 ##### Common functions - these use either only the version specific base commands 
 # or do not depend on any version specifics at all
-class ConanCommonUnifiedApi(ConanUnifiedApiInterface):
+class ConanCommonUnifiedApi(ConanUnifiedApi):
     """ 
     High level functions, which use only other ConanUnifiedApi functions are 
     implemented here.
