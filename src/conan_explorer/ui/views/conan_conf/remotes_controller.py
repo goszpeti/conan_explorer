@@ -115,7 +115,8 @@ class ConanRemoteController():
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug("No selected item for context action")
             return None
-        remote: RemotesModelItem = indexes[0].internalPointer()  # type: ignore
-        app.conan_api.get_remotes(include_disabled=True)
-        return remote
+        remote_model: RemotesModelItem = indexes[0].internalPointer()  # type: ignore
+        for remote in app.conan_api.get_remotes(include_disabled=True):
+            if remote.name == remote_model.name:
+                return remote
     
