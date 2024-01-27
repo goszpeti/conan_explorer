@@ -320,6 +320,11 @@ QMenu::item:selected,RoundedMenu::item:selected{
     background-color: #A8A8A8;
 }
 
+QProgressDialog{
+    border: 2px solid grey;
+    border-radius: 3px;
+}
+
 QProgressBar::chunk {
     background-color: #6699CC;
     border-radius: 5px;

@@ -441,6 +441,11 @@ QScrollBar::sub-line:horizontal {
      subcontrol-origin: margin;
  }
 
+QProgressDialog{
+    border: 2px solid white;
+    border-radius: 3px;
+}
+
 QProgressBar::chunk {
     background-color: #6699CC;
     border-radius: 5px;
