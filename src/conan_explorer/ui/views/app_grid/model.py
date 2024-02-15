@@ -342,7 +342,7 @@ class UiAppLinkModel(UiAppLinkConfig):
     def resolve_executable_path(self, exe_rel_path: Path) -> Path:
         # adjust path on windows, if no file extension is given
         if platform.system() == "Windows":
-            possible_matches = self.package_folder.glob(str(exe_rel_path) + "*")
+            possible_matches = self.package_folder.glob(str(exe_rel_path.as_posix()) + "*")
             match_found = False
             match = Path(INVALID_PATH)
             try:
