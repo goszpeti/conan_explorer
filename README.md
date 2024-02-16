@@ -150,6 +150,7 @@ See https://sonarcloud.io/project/overview?id=goszpeti_conan_explorer for Static
 * PySide6 by Qt, [LGPL V3](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 * Conan by JFrog LTD under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 * jsonschema by Julian Berman under [MIT License](<http://opensource.org/licenses/mit-license.php>)
+* dictdiffer by Invenio Collaboration under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 * Using a modified version of Toggle Widget from QtWidgets (https://github.com/pythonguis/python-qtwidgets) under [MIT License](<http://opensource.org/licenses/mit-license.php>)
 
 ##### PyPi backports for older Python versions
