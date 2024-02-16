@@ -8,7 +8,7 @@
 ![Linux](
 https://img.shields.io/badge/Linux-purple?logo=linux&logoColor=white)
 ![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_explorer/21?logo=conan)
-![Python tests](https://github.com/goszpeti/conan_explorer/workflows/Python%20tests/badge.svg)
+[![Python Tests](https://github.com/goszpeti/conan_explorer/actions/workflows/test.yml/badge.svg)](https://github.com/goszpeti/conan_explorer/actions/workflows/test.yml)
 ![SonarStatus](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_explorer&metric=alert_status)
 ![Downloads](https://img.shields.io/pypi/dm/conan_explorer)
 
