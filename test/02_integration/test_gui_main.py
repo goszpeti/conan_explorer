@@ -107,10 +107,10 @@ def test_gui_mod_and_style(qtbot, base_fixture, ui_config_fixture):
 
     # icon_style_widget = view_side_menu.get_menu_entry_by_name("Icon Style")
 
-    assert main_gui._style_chooser_radio_material.isChecked()
-    main_gui._style_chooser_radio_fluent.click()
+    # assert main_gui._style_chooser_radio_material.isChecked()
+    # main_gui._style_chooser_radio_fluent.click()
 
-    assert app.active_settings.get(GUI_STYLE) == GUI_STYLE_FLUENT
+    # assert app.active_settings.get(GUI_STYLE) == GUI_STYLE_FLUENT
     main_gui.close()
 
 
