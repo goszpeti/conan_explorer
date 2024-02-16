@@ -142,8 +142,6 @@ setup(
     entry_points={
         "gui_scripts": [
             "conan_explorer=conan_explorer.__main__:run_conan_explorer",
-            # for legacy backwards compatibility
-            "conan_app_launcher=conan_explorer.__main__:run_conan_explorer",
         ]
     },
 )
