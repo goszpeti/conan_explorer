@@ -55,7 +55,7 @@ TEST_REQUIRES = [
     "pytest-mock==3.12.0",
     "pytest-qt==4.4.0",
     "psutil==5.9.6",
-    "pytest-check==2.2.2",
+    "pytest-check==2.3.1",
     "pywin32; sys_platform=='win32'",
 ]
 
