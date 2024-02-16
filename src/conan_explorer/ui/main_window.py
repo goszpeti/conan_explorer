@@ -1,6 +1,7 @@
 import datetime
 from dataclasses import dataclass
 from shutil import rmtree
+from time import sleep
 from typing import Optional
 
 from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
@@ -51,6 +52,7 @@ class MainWindow(FluentWindow):
     log_console_message: SignalInstance = Signal(str)  # type: ignore - message
 
     qt_logger_name = "qt_logger"
+    _can_close = True # wait for blocking operations
 
     def __init__(self, qt_app: QApplication):
         super().__init__(title_text=APP_NAME)
@@ -86,6 +88,11 @@ class MainWindow(FluentWindow):
 
         # size needs to be set as early as possible to correctly position loading windows
         self.restore_window_state()
+
+    def close(self): # override
+        while not self._can_close:
+            sleep(0.1)
+        return super().close()
 
     def on_docs_searched(self):
         extra_addr = ""
@@ -264,12 +271,15 @@ class MainWindow(FluentWindow):
         self.reload_theme()
 
     def reload_theme(self):
+        # This must run in the main thread!
+        self._can_close = False
         activate_theme(self._qt_app)
 
         # all icons must be reloaded
         self.apply_theme()
         for page in self.page_widgets.get_all_pages():
             page.reload_themed_icons()
+        self._can_close = True
 
     def on_auto_open_last_view_changed(self):
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
