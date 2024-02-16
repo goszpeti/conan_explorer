@@ -7,6 +7,7 @@ import platform
 import sys
 import traceback
 from pathlib import Path
+from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog
 from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
 from conan_explorer.ui.views.conan_conf.remotes_controller import ConanRemoteController
 from test.conftest import TEST_REF, PathSetup, app_qt_fixture, conan_remove_ref
@@ -394,3 +395,30 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     dialog.save()
     assert ConanRef.loads(new_ref + "new") in app.conan_api.get_editable_references()
     assert new_ref_obj not in app.conan_api.get_editable_references()
+
+
+def test_conan_diff_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
+    """ Test, that the diff dialog works """
+    root_obj = QtWidgets.QWidget()
+    a1 = {'id': '02356509d9a0879a1cecc67cf273cd8d7638a142', 'options': {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}, 'settings': {'arch': 'x86_64',
+        'build_type': 'Release', 'compiler': 'gcc', 'compiler.libcxx': 'libstdc++11', 'compiler.version': '9', 'os': 'Linux'}, 'requires': [], 'outdated': False}
+    a2 = {'id': '7836e0c4e7632db749e0dafcb4aed62ba225b99b', 'options': {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}, 'settings': {'arch': 'x86_64',
+        'build_type': 'Release', 'compiler': 'Visual Studio', 'compiler.runtime': 'MD', 'compiler.version': '16', 'os': 'Windows'}, 'requires': [], 'outdated': False}
+    available_refs = []
+    available_refs.append(a1)
+    available_refs.append(a2)
+
+    #conan.get_remote_pkgs_from_ref(ConanRef.loads(TEST_REF), None)
+    wanted_ref = {  # add default options
+        'id': '', 'options': {"shared": "False", "variant": "var1", "fPIC2": "True"},
+        'settings': {'arch_build': 'x86_64', 'os_build': 'Linux', "build_type": "Release"},
+        'requires': [], 'outdated': False}
+    dialog = PkgDiffDialog(root_obj)
+    dialog.set_left_content(wanted_ref)
+    dialog.set_right_content(available_refs[0])
+    dialog.update_diff()
+    dialog.show()
+    #from pytestqt.plugin import _qapp_instance
+    # while True:
+    #     _qapp_instance.processEvents()
+

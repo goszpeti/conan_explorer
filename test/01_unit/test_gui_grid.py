@@ -2,15 +2,12 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
-from email.generator import Generator
 import os
 import platform
 import shutil
 import sys
 from pathlib import Path
-from typing import Callable
 import pytest
-from pytest_mock import MockerFixture
 from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, GUI_STYLE_MATERIAL
 from conan_explorer.ui.views.app_grid.config import UiAppGridConfig, UiTabConfig
 from conan_explorer.ui.views.app_grid.config.model import UiApplicationModel

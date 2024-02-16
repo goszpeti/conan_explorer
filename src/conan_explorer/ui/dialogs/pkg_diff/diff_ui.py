@@ -23,7 +23,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(418, 384)
+        Dialog.resize(671, 512)
         Dialog.setSizeGripEnabled(True)
         self.horizontalLayout_2 = QHBoxLayout(Dialog)
         self.horizontalLayout_2.setSpacing(0)
@@ -31,6 +31,11 @@ class Ui_Dialog(object):
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.pkgs_list_widget = QListWidget(Dialog)
         self.pkgs_list_widget.setObjectName(u"pkgs_list_widget")
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pkgs_list_widget.sizePolicy().hasHeightForWidth())
+        self.pkgs_list_widget.setSizePolicy(sizePolicy)
 
         self.horizontalLayout_2.addWidget(self.pkgs_list_widget)
 
@@ -50,11 +55,6 @@ class Ui_Dialog(object):
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
-
-        self.diff_text_browser = QTextBrowser(Dialog)
-        self.diff_text_browser.setObjectName(u"diff_text_browser")
-
-        self.verticalLayout.addWidget(self.diff_text_browser)
 
         self.button_box = QDialogButtonBox(Dialog)
         self.button_box.setObjectName(u"button_box")
