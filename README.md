@@ -13,13 +13,13 @@ https://img.shields.io/badge/Linux-purple?logo=linux&logoColor=white)
 ![Downloads](https://img.shields.io/pypi/dm/conan_explorer)
 
 
-## ⚠ conan-app-launcher is now conan-explorer
+## ⚠ conan-app-launcher is now conan-explorer 🚀
 
 This package has been renamed from version 2.2.0 onwards. Use `pip install conan-explorer` instead.
 
 New package: https://pypi.org/project/conan-explorer/
 
-## Quick Overview
+## Quick Overview 🔍
 
 The goal of this project is to provide a standalone Graphical User Interface (GUI) to
 * Start executables contained in packages of the package manager [Conan](https://conan.io/)
@@ -131,7 +131,7 @@ An IDE configuration is available for VsCode.
 
 See https://sonarcloud.io/project/overview?id=goszpeti_conan_explorer for Static Code Analysis.
 
-## Licenses of used libraries and code
+## Licenses of used libraries and code 🗎
 
 > **Warning** - **Change of License to LGPL**
 > From version 2.0.0 the project will use the [LGPL 3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license to cleanly comply with PySide6.
