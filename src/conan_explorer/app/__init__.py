@@ -36,7 +36,8 @@ def run_application():
 
     # Loading dialog until Conan is available
     loader = AsyncLoader(None)
-    loader.async_loading(None, load_conan, (), cancel_button=False)
+    loader.async_loading(None, load_conan, (), cancel_button=False, 
+                            loading_text="Starting Conan Explorer")
     loader.wait_for_finished()
 
     # inline imports to optimize load times

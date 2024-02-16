@@ -1,15 +1,40 @@
 
-from typing import List, Optional
+from typing import Optional
+from PySide6.QtCore import QModelIndex, Qt
+
 import conan_explorer.app as app
-from conan_explorer.conan_wrapper.types import ConanRef  # using global module pattern
-from conan_explorer.ui.common import (get_platform_icon)
-from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt
+from conan_explorer.conan_wrapper.types import EditablePkg # using global module pattern
 from conan_explorer.ui.common import TreeModel, TreeModelItem
+
 
 class EditableModelItem(TreeModelItem):
 
-    def __init__(self, name, path, output, parent=None, lazy_loading=False):
+    def __init__(self, name: str, path: str, output: str, parent=None, lazy_loading=False):
         super().__init__([name, path, output], parent, lazy_loading=lazy_loading)
+
+    @property
+    def name(self) -> str:
+        return self.item_data[0]
+
+    @name.setter
+    def name(self, value: str):
+        self.item_data[0] = value
+
+    @property
+    def path(self) -> str:
+        return self.item_data[1]
+
+    @path.setter
+    def path(self, value: str):
+        self.item_data[1] = value
+
+    @property
+    def output(self) -> str:
+        return self.item_data[2]
+
+    @output.setter
+    def output(self, value: str):
+        self.item_data[2] = value
 
 
 class EditableModel(TreeModel):
@@ -20,14 +45,31 @@ class EditableModel(TreeModel):
 
     def setup_model_data(self):
         editables = app.conan_api.get_editable_references()
-        self.root_item.child_items = []
+        self.clear_items()
+        self.beginResetModel()
         for editable_ref in editables:
-            ref_obj = ConanRef.loads(editable_ref)
-            path = app.conan_api.get_editables_package_path(ref_obj)
-            output = app.conan_api.get_editables_output_folder(ref_obj)
+            path = app.conan_api.get_editables_package_path(editable_ref)
+            output = app.conan_api.get_editables_output_folder(editable_ref)
+            output_str = str(output) if output else ""
             remote_item = EditableModelItem(
-                editable_ref, str(path), output, self.root_item)
+                str(editable_ref), str(path), output_str, self.root_item)
             self.root_item.append_child(remote_item)
+        self.endResetModel()
+
+    def add(self, editable: EditablePkg):
+        args = (editable.conan_ref, editable.path, str(editable.output_folder))
+        if app.conan_api.add_editable(*args):
+            super().add_item(EditableModelItem(*args))
+            return True
+        return False
+
+    def remove(self, editable: EditablePkg):
+        if app.conan_api.remove_editable(editable.conan_ref):
+            index = self.get_index_from_ref(editable.conan_ref)
+            item: EditableModelItem = index.internalPointer()  # type: ignore
+            super().remove_item(item)
+            return True
+        return False
 
     def data(self, index: QModelIndex, role):  # override
         if not index.isValid():
@@ -43,19 +85,9 @@ class EditableModel(TreeModel):
     def rowCount(self, parent=None):
         return self.root_item.child_count()
 
-    # def data(self, index, role):
-    #     if role == Qt.ItemDataRole.DisplayRole:
-    #         text = self._profiles[index.column()]
-    #         return text
-    #     # platform logo
-    #     if role == Qt.ItemDataRole.DecorationRole:
-    #         text = self._profiles[index.column()]
-    #         return get_platform_icon(text)
-
-    # def get_index_from_profile(self, profile_name: str) -> Optional[QModelIndex]:
-    #     index = None
-    #     for i, profile in enumerate(self._profiles):
-    #         if profile == profile_name:
-    #             index = self.createIndex(i, 0)
-    #             break
-    #     return index
+    def get_index_from_ref(self, conan_ref: str) -> Optional[QModelIndex]:
+        for ref in self.root_item.child_items:
+            ref: EditableModelItem
+            if ref.name == conan_ref:
+                return self.get_index_from_item(ref)
+        return None

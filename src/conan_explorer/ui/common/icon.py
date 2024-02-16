@@ -54,8 +54,6 @@ def draw_svg_with_color(svg_path: Path, color="white", scale: float = 1.0) -> Pa
         new_svg.write(xml_text)
     return new_svg_path
 
-
-
 def extract_icon(file_path: Path) -> QIcon:
     """
     Extract icons from a file and save them to specified dir.

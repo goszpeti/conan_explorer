@@ -3,28 +3,37 @@ Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
 import os
-from pathlib import Path
 import platform
 import sys
 import traceback
+from pathlib import Path
+from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
+from conan_explorer.ui.views.conan_conf.remotes_controller import ConanRemoteController
+from test.conftest import TEST_REF, PathSetup, app_qt_fixture, conan_remove_ref
 from unittest.mock import Mock
-from conan_explorer.app import bug_dialog_exc_hook
-from conan_explorer.conan_wrapper.conanV1 import ConanApi
-from conan_explorer.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
-from conan_explorer.ui.common.theming import get_user_theme_color
-from conan_explorer.ui.views.conan_conf.dialogs.remote_login_dialog import RemoteLoginDialog
-from test.conftest import TEST_REF, app_qt_fixture, conan_remove_ref
+
+import pytest
+from PySide6 import QtCore, QtGui, QtWidgets
 
 import conan_explorer  # for mocker
 import conan_explorer.app as app
-import pytest
+from conan_explorer import conan_version
+from conan_explorer.app import bug_dialog_exc_hook
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
-from conan_explorer.ui.views import AboutPage
-from conan_explorer.ui.dialogs import show_bug_reporting_dialog, FileEditorSelDialog
-from conan_explorer.ui.dialogs.conan_install import ConanInstallDialog
-from conan_explorer.ui.widgets.conan_line_edit import ConanRefLineEdit
+from conan_explorer.conan_wrapper.conanV1 import ConanApi
 from conan_explorer.conan_wrapper.types import ConanRef, Remote
-from PySide6 import QtCore, QtWidgets, QtGui
+from conan_explorer.settings import (DEFAULT_INSTALL_PROFILE,
+                                     FILE_EDITOR_EXECUTABLE)
+from conan_explorer.ui.common.theming import get_user_theme_color
+from conan_explorer.ui.dialogs import (FileEditorSelDialog,
+                                       show_bug_reporting_dialog)
+from conan_explorer.ui.dialogs.conan_install import ConanInstallDialog
+from conan_explorer.ui.views import AboutPage
+from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import \
+    EditableEditDialog
+from conan_explorer.ui.views.conan_conf.dialogs.remote_login_dialog import \
+    RemoteLoginDialog
+from conan_explorer.ui.widgets.conan_line_edit import ConanRefLineEdit
 
 Qt = QtCore.Qt
 
@@ -175,7 +184,8 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     new_profile_path = profiles_path / "new_profile"
     new_profile_path.touch()
     conan_install_dialog.load_profiles()
-    # default must be fisrt item and has a * after the name
+    # default must be first item and has a * after the name
+    # TODO: is abc ordered, so this does not work always...
     first_profile = conan_install_dialog._ui.profile_cbox.itemText(0)
     assert first_profile == "default *"
     new_profile_idx = -1
@@ -286,9 +296,9 @@ def test_multi_remote_login_dialog(app_qt_fixture, base_fixture, mocker):
     root_obj = QtWidgets.QWidget()
     mocker.patch.object(ConanApi, 'get_remotes', return_value=[remote1, remote2, remote3])
     login_cmd: Mock = mocker.patch.object(ConanApi, 'login_remote')
+    controller = ConanRemoteController(QtWidgets.QTreeView(), None)
 
-
-    dialog = RemoteLoginDialog([remote1, remote2, remote3], root_obj)
+    dialog = RemoteLoginDialog([remote1, remote2, remote3], controller, root_obj)
     username = "user"
     password = "pw"
     dialog._ui.name_line_edit.setText(username)
@@ -306,3 +316,81 @@ def test_multi_remote_login_dialog(app_qt_fixture, base_fixture, mocker):
     login_cmd.assert_has_calls(calls, any_order=True)
 
     dialog.close()
+
+@pytest.mark.conanv2
+def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
+    """ Test, that the editable dialog works adding and editing """
+    app.conan_api.init_api()
+    root_obj = QtWidgets.QWidget()
+    editable_controller = ConanEditableController(QtWidgets.QTreeView())
+    dialog = EditableEditDialog(None, editable_controller, root_obj)
+
+    new_ref = "example/9.9.9@editable/testing1"
+    new_ref_obj = ConanRef.loads(new_ref)
+    app.conan_api.remove_editable(new_ref_obj) # remove, if somehow already there
+    app.conan_api.remove_editable(ConanRef.loads(new_ref + "new"))
+
+    app_qt_fixture.addWidget(root_obj)
+    dialog.show()
+    app_qt_fixture.waitExposed(dialog)
+
+    dialog._ui.name_line_edit.setText(new_ref)
+
+    new_editable_path = base_fixture.testdata_path / "conan"
+    if conan_version.startswith("2"):
+        new_editable_path /= "conanfileV2.py"
+    new_output_folder_path = base_fixture.testdata_path / "conan" / "build"
+
+    # check browse buttons
+    mocker.patch.object(QtWidgets.QFileDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
+    mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
+                        return_value=[str(new_output_folder_path)])
+    dialog._ui.output_folder_browse_button.click()
+    assert Path(dialog._ui.output_folder_line_edit.text()) == new_output_folder_path
+
+
+    mocker.patch.object(QtWidgets.QFileDialog, 'selectedFiles',
+                        return_value=[str(new_editable_path)])
+    dialog._ui.path_browse_button.click()
+    assert Path(dialog._ui.path_line_edit.text()) == new_editable_path
+
+    dialog.save()
+
+    if conan_version.startswith("1"):
+        assert app.conan_api.get_editables_package_path(new_ref_obj).parent == new_editable_path
+    if conan_version.startswith("2"):
+        assert app.conan_api.get_editables_package_path(new_ref_obj) == new_editable_path
+
+    assert app.conan_api.get_editables_output_folder(
+        new_ref_obj) == new_output_folder_path
+
+    ### check on erronous input - values should remain the same
+    # check wrong ref -> old one should remain
+    dialog._ui.name_line_edit.setText("lalala")
+    dialog.save()
+    assert new_ref_obj in app.conan_api.get_editable_references()
+    dialog._ui.name_line_edit.setText(new_ref)
+
+    # check wrong path
+    dialog._ui.path_line_edit.setText("INVALID")
+    dialog.save()
+    assert new_ref_obj in app.conan_api.get_editable_references()
+    if conan_version.startswith("1"):
+        assert app.conan_api.get_editables_package_path(new_ref_obj).parent == new_editable_path
+    if conan_version.startswith("2"):
+        assert app.conan_api.get_editables_package_path(new_ref_obj) == new_editable_path
+    dialog._ui.path_line_edit.setText(str(new_editable_path))
+
+    # check changing the output path of an already existing editable
+    dialog._ui.output_folder_line_edit.setText(str(base_fixture.testdata_path / "conan" / "build_new"))
+    dialog.save()
+    assert base_fixture.testdata_path / "conan" / "build_new" == app.conan_api.get_editables_output_folder(new_ref_obj)
+
+    # check changing the ref of an already existing editable
+    editable_controller._select_editable(new_ref)
+    dialog._editable = editable_controller.get_selected_editable()
+    dialog._ui.name_line_edit.setText(new_ref + "new")
+    dialog.save()
+    assert ConanRef.loads(new_ref + "new") in app.conan_api.get_editable_references()
+    assert new_ref_obj not in app.conan_api.get_editable_references()

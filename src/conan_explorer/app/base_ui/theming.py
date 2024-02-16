@@ -35,7 +35,7 @@ def activate_theme(qt_app: QApplication):
         window_border_radius = 7
 
     style_sheet = configure_theme(base_path / "ui" / style_file,
-                app.active_settings.get_int(FONT_SIZE), user_color, window_border_radius)
+            app.active_settings.get_int(FONT_SIZE), user_color, window_border_radius)
 
     qt_app.setStyleSheet(style_sheet)
 

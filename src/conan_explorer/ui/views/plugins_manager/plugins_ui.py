@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'plugins.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.3
+## Created by: Qt User Interface Compiler version 6.5.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -26,6 +26,7 @@ class Ui_Form(object):
         Form.resize(489, 333)
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(2, 1, 1, 1)
         self.buttons_frame = QFrame(Form)
         self.buttons_frame.setObjectName(u"buttons_frame")
         self.buttons_frame.setFrameShape(QFrame.StyledPanel)

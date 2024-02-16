@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_conf.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.6.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -27,7 +27,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(617, 464)
+        Form.resize(495, 464)
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(1, 2, 2, 2)
@@ -46,7 +46,7 @@ class Ui_Form(object):
         self.info_scroll_area.setWidgetResizable(True)
         self.info_contents = QWidget()
         self.info_contents.setObjectName(u"info_contents")
-        self.info_contents.setGeometry(QRect(0, 0, 608, 431))
+        self.info_contents.setGeometry(QRect(0, 0, 486, 431))
         self.verticalLayout_7 = QVBoxLayout(self.info_contents)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.versions_box = QGroupBox(self.info_contents)
@@ -183,6 +183,7 @@ class Ui_Form(object):
         self.remotes.setObjectName(u"remotes")
         self.verticalLayout_4 = QVBoxLayout(self.remotes)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.remotes_frame = QFrame(self.remotes)
         self.remotes_frame.setObjectName(u"remotes_frame")
         self.remotes_frame.setFrameShape(QFrame.StyledPanel)
@@ -273,6 +274,7 @@ class Ui_Form(object):
         self.profiles.setObjectName(u"profiles")
         self.verticalLayout_11 = QVBoxLayout(self.profiles)
         self.verticalLayout_11.setObjectName(u"verticalLayout_11")
+        self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
         self.profiles_grid_layout = QGridLayout()
         self.profiles_grid_layout.setObjectName(u"profiles_grid_layout")
         self.splitter = QSplitter(self.profiles)
@@ -350,6 +352,7 @@ class Ui_Form(object):
         self.editables.setObjectName(u"editables")
         self.verticalLayout_5 = QVBoxLayout(self.editables)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.editables_grid_layout = QGridLayout()
         self.editables_grid_layout.setObjectName(u"editables_grid_layout")
         self.editables_splitter = QSplitter(self.editables)
@@ -359,6 +362,7 @@ class Ui_Form(object):
         self.editables_splitter.setOrientation(Qt.Vertical)
         self.editables_ref_view = QTreeView(self.editables_splitter)
         self.editables_ref_view.setObjectName(u"editables_ref_view")
+        self.editables_ref_view.setFrameShape(QFrame.NoFrame)
         self.editables_splitter.addWidget(self.editables_ref_view)
 
         self.editables_grid_layout.addWidget(self.editables_splitter, 0, 0, 1, 1)
@@ -406,6 +410,7 @@ class Ui_Form(object):
         self.config.setObjectName(u"config")
         self.verticalLayout_3 = QVBoxLayout(self.config)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.config_file_text_browser = PlainTextPasteBrowser(self.config)
         self.config_file_text_browser.setObjectName(u"config_file_text_browser")
         self.config_file_text_browser.setTabChangesFocus(False)
@@ -439,6 +444,7 @@ class Ui_Form(object):
         self.settings_file.setObjectName(u"settings_file")
         self.verticalLayout_6 = QVBoxLayout(self.settings_file)
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
         self.settings_file_text_browser = PlainTextPasteBrowser(self.settings_file)
         self.settings_file_text_browser.setObjectName(u"settings_file_text_browser")
 
@@ -451,7 +457,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(1)
+        self.config_tab_widget.setCurrentIndex(5)
 
 
         QMetaObject.connectSlotsByName(Form)

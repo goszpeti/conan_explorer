@@ -7,10 +7,20 @@
 import os
 from glob import glob
 from os.path import basename, splitext
-
-# Force Conan version from envvar CONAN_VERSION
 from setuptools import find_packages, setup
 from pkg_resources import Requirement
+
+# Package meta-data.
+NAME = "conan-explorer"
+VERSION = "2.2.0a5"
+DESCRIPTION = "Package Explorer and App Launcher for Conan"
+URL = "https://github.com/goszpeti/conan_explorer"
+AUTHOR = "Péter Gosztolya and Contributors"
+PYTHON_REQUIRES = ">=3.8.0"
+
+
+# Force Conan version from envvar CONAN_VERSION
+
 conan_version_env = os.getenv("CONAN_VERSION", "").strip()
 conan_major_version = ""
 if conan_version_env: # eval as spec
@@ -20,14 +30,6 @@ if conan_version_env: # eval as spec
     else:
         conan_major_version = "1"
     print(f"Using Conan version {conan_major_version} from spec: {conan_version_env}")
-
-# Package meta-data.
-NAME = "conan-explorer"
-VERSION = "2.2.0a2"
-DESCRIPTION = "Package Explorer and App Launcher for Conan"
-URL = "https://github.com/goszpeti/conan_explorer"
-AUTHOR = "Péter Gosztolya and Contributors"
-PYTHON_REQUIRES = ">=3.8.0"
 
 # What packages are required for this module to be executed?
 conan_req_spec = "conan>=1.48, <2.1"
@@ -78,17 +80,21 @@ try:
     if os.getenv("GITHUB_REF"):
         print(f"GITHUB_REF: {str(os.getenv('GITHUB_REF'))}")
         branch = os.getenv("GITHUB_REF", "").split("refs/heads/")
-        if len(branch) == 1:
-            branch = os.getenv("GITHUB_REF", "").split("tags")
         if len(branch) > 1:
-            link = "conan_explorer" + branch[1].replace(" ", "")
-            master_link = "conan_explorer/master"
-            for line in long_description.splitlines():
-                if master_link in line:
-                    line = line.replace(master_link, link)
-                    print(f"replaced {master_link} with {link}")
-                temp.append(line)
-            long_description = "\n".join(temp)
+            # is feature branch - don't adjust for prerelease
+            pass
+        else:
+            if len(branch) == 1:
+                branch = os.getenv("GITHUB_REF", "").split("tags")
+            if len(branch) > 1:
+                link = "conan_explorer" + branch[1].replace(" ", "")
+                master_link = "conan_explorer/master"
+                for line in long_description.splitlines():
+                    if master_link in line:
+                        line = line.replace(master_link, link)
+                        print(f"replaced {master_link} with {link}")
+                    temp.append(line)
+                long_description = "\n".join(temp)
     else:
         print("No GITHUB_REF envvar found!")
 except FileNotFoundError:

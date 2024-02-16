@@ -1,4 +1,5 @@
 from __future__ import annotations
+from dataclasses import dataclass
 
 import os
 import pprint
@@ -64,7 +65,14 @@ elif conan_version.startswith("2"):
 else:
     raise RuntimeError("Can't recognize Conan version")
 
-from conans.client.cache.remote_registry import Remote
+
+@dataclass
+class Remote():
+    name: str
+    url: str
+    verify_ssl: bool
+    disabled: bool
+
 from conans.errors import ConanException
 
 ConanRef: TypeAlias = ConanFileReference
@@ -84,6 +92,13 @@ class ConanPkg(TypedDict, total=False):
     settings: ConanSettings
     requires: List[Any]
     outdated: bool
+
+
+@dataclass
+class EditablePkg():
+    conan_ref: str
+    path: str # path to conanfile or folder
+    output_folder: Optional[str]
 
 def pretty_print_pkg_info(pkg_info: ConanPkg) -> str:
     return pprint.pformat(pkg_info).translate(

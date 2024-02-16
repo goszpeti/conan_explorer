@@ -4,14 +4,18 @@
 
 ![https://pypi.org/project/conan-explorer/](https://img.shields.io/pypi/v/conan-explorer?logo=pypi)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-explorer?logo=python)
-![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_explorer/21)
+![Windows](https://img.shields.io/badge/Windows-blue?logo=windows10&logoColor=white)
+![Linux](
+https://img.shields.io/badge/Linux-purple?logo=linux&logoColor=white)
+![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_explorer/21?logo=conan)
 ![Python tests](https://github.com/goszpeti/conan_explorer/workflows/Python%20tests/badge.svg)
 ![SonarStatus](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_explorer&metric=alert_status)
 ![Downloads](https://img.shields.io/pypi/dm/conan_explorer)
 
+
 ## ⚠ conan-app-launcher is now conan-explorer
 
-This package has been renamed. Use `pip install conan-explorer` instead.
+This package has been renamed from version 2.2.0 onwards. Use `pip install conan-explorer` instead.
 
 New package: https://pypi.org/project/conan-explorer/
 
@@ -108,7 +112,7 @@ After checkout use the command:
 
 ## Running
 
-Execute `conan-explorer`, if the Python "scripts" or "bin" folder is on your system path, or look it up manually in the site-packages folder. 
+Execute `conan-explorer` if the Python "scripts" or "bin" folder is on your system path, or look it up manually in the site-packages folder. 
 You can also assign its icon to it from the site packages folder in **conan_explorer/assets/icons/icon.ico**.
 
 ### Main dependencies

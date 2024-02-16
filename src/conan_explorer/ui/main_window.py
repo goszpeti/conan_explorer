@@ -1,6 +1,7 @@
 import datetime
 from dataclasses import dataclass
 from shutil import rmtree
+from time import sleep
 from typing import Optional
 
 from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
@@ -51,6 +52,7 @@ class MainWindow(FluentWindow):
     log_console_message: SignalInstance = Signal(str)  # type: ignore - message
 
     qt_logger_name = "qt_logger"
+    _can_close = True # wait for blocking operations
 
     def __init__(self, qt_app: QApplication):
         super().__init__(title_text=APP_NAME)
@@ -86,6 +88,11 @@ class MainWindow(FluentWindow):
 
         # size needs to be set as early as possible to correctly position loading windows
         self.restore_window_state()
+
+    def close(self): # override
+        while not self._can_close:
+            sleep(0.1)
+        return super().close()
 
     def on_docs_searched(self):
         extra_addr = ""
@@ -193,8 +200,8 @@ class MainWindow(FluentWindow):
                 last_view = app.active_settings.get_string(LAST_VIEW)
                 page = self.page_widgets.get_page_by_name(last_view)
                 self.page_widgets.get_button_by_type(type(page)).click()
-            except Exception:
-                pass
+            except Exception as e:
+                Logger().debug("Can't switch to page for auto open: " + str(e))
         
         self.loaded = True
 
@@ -264,12 +271,15 @@ class MainWindow(FluentWindow):
         self.reload_theme()
 
     def reload_theme(self):
+        # This must run in the main thread!
+        self._can_close = False
         activate_theme(self._qt_app)
 
         # all icons must be reloaded
         self.apply_theme()
         for page in self.page_widgets.get_all_pages():
             page.reload_themed_icons()
+        self._can_close = True
 
     def on_auto_open_last_view_changed(self):
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
@@ -292,19 +302,22 @@ class MainWindow(FluentWindow):
         else:
             path_list = str(paths)
 
-        msg = WideMessageBox(parent=self)
-        sb = WideMessageBox.StandardButton
-        msg.setWindowTitle("Delete folders")
-        msg.setText("Are you sure, you want to delete the found folders?\t")
-        msg.setDetailedText(path_list)
-        msg.setStandardButtons(sb.Yes | sb.Cancel)  # type: ignore
-        msg.setIcon(WideMessageBox.Icon.Question)
-        msg.setWidth(800)
-        msg.setMaximumHeight(600)
-        reply = msg.exec()
-        if reply == sb.Yes:
-            for path in paths:
-                rmtree(str(path), ignore_errors=True)
+        msg_box = WideMessageBox(parent=self)
+        button = WideMessageBox.StandardButton
+        msg_box.setWindowTitle("Delete folders")
+        msg_box.setText("Are you sure, you want to delete the found folders?\t")
+        msg_box.setDetailedText(path_list)
+        msg_box.setStandardButtons(button.Yes | button.Cancel)  # type: ignore
+        msg_box.setIcon(WideMessageBox.Icon.Question)
+        msg_box.setWidth(800)
+        msg_box.setMaximumHeight(600)
+        reply = msg_box.exec()
+        if reply == button.Yes:
+            def delete_cache_paths(paths):
+                for path in paths:
+                    rmtree(str(path), ignore_errors=True)
+            loader.async_loading(self, delete_cache_paths, (paths,), 
+                                 loading_text="Deleting cache paths...")
 
     def open_file_editor_selection_dialog(self):
         dialog = FileEditorSelDialog(self)

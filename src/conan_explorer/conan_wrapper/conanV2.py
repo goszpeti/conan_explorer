@@ -1,7 +1,9 @@
+from contextlib import redirect_stderr, redirect_stdout
 import os
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
+from unittest.mock import patch
 
 try:
     from contextlib import chdir
@@ -13,7 +15,7 @@ from conan_explorer.app.logger import Logger
 from conan_explorer.app.typing import SignatureCheckMeta
 
 from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPackageId,
-    ConanPackagePath, ConanPkg, ConanPkgRef, ConanRef, ConanSettings, Remote,
+    ConanPackagePath, ConanPkg, ConanPkgRef, ConanRef, ConanSettings, EditablePkg, Remote,
     create_key_value_pair_list)
 from .unified_api import ConanCommonUnifiedApi
 
@@ -180,7 +182,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return remotes
 
     def add_remote(self, remote_name: str, url: str, verify_ssl: bool):
-        remote = Remote(remote_name, url, verify_ssl, False)
+        from conans.client.cache.remote_registry import Remote as ConanRemote
+        remote = ConanRemote(remote_name, url, verify_ssl, False)
         self._conan.remotes.add(remote)
 
     def rename_remote(self, remote_name: str, new_name: str):
@@ -197,8 +200,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def update_remote(self, remote_name: str, url: str, verify_ssl: bool, disabled: bool,
                       index: Optional[int]):
-        self._conan.remotes.update(
-            remote_name, url, verify_ssl, disabled, index)
+        self._conan.remotes.update(remote_name, url, verify_ssl, disabled, index)
 
     def login_remote(self, remote_name: str, user_name: str, password: str):
         self._conan.remotes.login(self._conan.remotes.get(
@@ -233,13 +235,26 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                             profile_host, profile_host, None, remotes, update)
             print_graph_basic(deps_graph)
             deps_graph.report_graph_error()
-            self._conan.graph.analyze_binaries(deps_graph, build_mode=None, remotes=remotes, update=update,
-                                               lockfile=None)
+            self._conan.graph.analyze_binaries(deps_graph, build_mode=None, remotes=remotes, 
+                                               update=update, lockfile=None)
             print_graph_packages(deps_graph)
-            self._conan.install.install_binaries(deps_graph=deps_graph, remotes=remotes)
-            # Currently unused
-            self._conan.install.install_consumer(deps_graph=deps_graph, generators=generators, output_folder=None,
-                                            source_folder=gettempdir())
+
+            # Try to redirect custom streams in conanfile, to avoid missing flush method
+            devnull = open(os.devnull, 'w')
+            # also spoof os.terminal_size(
+            spoof_size = os.terminal_size([80,20])
+            patched_tersize = patch("os.get_terminal_size")
+            with redirect_stdout(devnull), redirect_stderr(devnull):
+                mock = patched_tersize.start()
+                mock.return_value = spoof_size
+
+                self._conan.install.install_binaries(deps_graph=deps_graph, remotes=remotes)
+                # Currently unused
+                self._conan.install.install_consumer(deps_graph=deps_graph, 
+                    generators=generators, output_folder=None, source_folder=gettempdir())
+
+                patched_tersize.stop()
+
             info = None
             for node in deps_graph.nodes:
                 if node.ref == conan_ref:
@@ -288,19 +303,51 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         """ TODO: Currently there is no equivalent to txt generator from ConanV1 """
         raise NotImplementedError
     
-    def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
-        """ Get package path of an editable reference. """
+    def get_editable(self, conan_ref: Union[ConanRef, str]) -> EditablePkg:
         editables_dict = self._conan.local.editable_list()
-        return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH)).parent
+        if isinstance(conan_ref, str):
+            conan_ref = ConanRef.loads(conan_ref)
+        editable_dict = editables_dict.get(conan_ref, {})
+        return EditablePkg(str(conan_ref), editable_dict.get("path", INVALID_PATH), 
+                           editable_dict.get("output_folder"))
     
-    def get_editables_output_folder(self, conan_ref: ConanRef) -> str:
+    def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
+        """ Get package path of an editable reference. Can be a folder or conanfile.py """
         editables_dict = self._conan.local.editable_list()
-        return editables_dict.get(conan_ref, {}).get("output_folder", "None")
+        return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH))
+    
+    def get_editables_output_folder(self, conan_ref: ConanRef) ->  Optional[Path]:
+        editables_dict = self._conan.local.editable_list()
+        output_folder = editables_dict.get(conan_ref, {}).get("output_folder")
+        if not output_folder:
+            return None
+        return Path(str(output_folder))
 
-    def get_editable_references(self) -> List[str]:
+    def get_editable_references(self) -> List[ConanRef]:
         """ Get all local editable references. """
         editables_dict = self._conan.local.editable_list()
-        return list(map(str, editables_dict.keys()))
+        return list(editables_dict.keys())
+
+    def add_editable(self, conan_ref: Union[ConanRef, str], path: str, output_folder: str) -> bool:
+        try:
+            if isinstance(conan_ref, str):
+                conan_ref = ConanRef.loads(conan_ref)
+            self._conan.local.editable_add(path, conan_ref.name, conan_ref.version,
+                conan_ref.user, conan_ref.channel, output_folder=output_folder)
+        except Exception as e:
+            Logger().error("Error adding editable: " + str(e))
+            return False
+        return True
+
+    def remove_editable(self, conan_ref: Union[ConanRef, str]) -> bool:
+        try:
+            if isinstance(conan_ref, str):
+                conan_ref = ConanRef.loads(conan_ref)
+            self._conan.local.editable_remove(None, [str(conan_ref)])
+        except Exception as e:
+            Logger().error("Error removing editable: " + str(e))
+            return False
+        return True
 
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str = ""):
         if pkg_id:

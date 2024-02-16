@@ -4,3 +4,14 @@ target-version = "py38"
 
 [tool.autopep8]
 max_line_length = 88
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "test",
+]
+qt_api="pyside6"
+markers = [
+    "conanv1: mark as working with conan 1.x installed",
+    "conanv2: mark as working with conan 2.x installed"
+]

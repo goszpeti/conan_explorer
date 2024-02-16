@@ -83,7 +83,7 @@ class PluginsPage(PluginInterfaceV1):
             self._controller.update()
 
     def on_reload(self):
-        selected_item: PluginModelItem | None = self._controller.get_selected_source_item()
+        selected_item: Optional[PluginModelItem] = self._controller.get_selected_source_item()
         if not selected_item:
             return
         self._controller.reload_plugin(selected_item.data(0))

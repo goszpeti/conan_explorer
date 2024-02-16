@@ -123,7 +123,7 @@ class ConanSearchView(PluginInterfaceV1):
         self.select_cntx_menu.addAction(self.show_in_pkg_exp_action)
         self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 
-        self.diff_pkgs_action = QAction("Diff pkgs", self)
+        self.diff_pkgs_action = QAction("Compare packages", self)
         self.set_themed_icon(self.diff_pkgs_action, "icons/global/search_packages.svg")
         self.select_cntx_menu.addAction(self.diff_pkgs_action)
         self.diff_pkgs_action.triggered.connect(self.on_diff_requested)
@@ -136,6 +136,8 @@ class ConanSearchView(PluginInterfaceV1):
         dialog = PkgDiffDialog(self)
         item_left = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view)
         item_right = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view, idx=3)
+        if  not item_left or not item_right:
+            return
         dialog.set_left_content(item_left.pkg_data)
         dialog.set_right_content(item_right.pkg_data)
         dialog.update_diff()

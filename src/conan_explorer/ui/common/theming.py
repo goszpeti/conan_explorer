@@ -55,6 +55,8 @@ def get_asset_image_path(image_path: str) -> Path:
 
     if not asset_path.exists():
         Logger().warning(f"Can't find image: {str(asset_path)}")
+        # set to an existing placeholder image to avoid crashes
+        asset_path = app.asset_path / "icons/global/conan_logo.svg" 
     return asset_path
 
 

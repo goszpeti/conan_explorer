@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>617</width>
+    <width>495</width>
     <height>464</height>
    </rect>
   </property>
@@ -32,7 +32,7 @@
       <string notr="true">QPushButton {Text-align:left}</string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="info_widget">
       <property name="styleSheet">
@@ -67,7 +67,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>608</width>
+            <width>486</width>
             <height>431</height>
            </rect>
           </property>
@@ -276,6 +276,18 @@
        <string>Remotes</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QFrame" name="remotes_frame">
          <property name="frameShape">
@@ -424,6 +436,18 @@
        <string>Profiles</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_11">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <layout class="QGridLayout" name="profiles_grid_layout">
          <item row="0" column="0">
@@ -542,6 +566,18 @@
        <string>Editables</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <layout class="QGridLayout" name="editables_grid_layout">
          <item row="0" column="0">
@@ -555,7 +591,11 @@
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
-           <widget class="QTreeView" name="editables_ref_view"/>
+           <widget class="QTreeView" name="editables_ref_view">
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+           </widget>
           </widget>
          </item>
          <item row="0" column="1">
@@ -629,6 +669,18 @@
        <string>Config File</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="PlainTextPasteBrowser" name="config_file_text_browser">
          <property name="tabChangesFocus">
@@ -696,6 +748,18 @@
        <string>Settings YML File</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="PlainTextPasteBrowser" name="settings_file_text_browser"/>
        </item>

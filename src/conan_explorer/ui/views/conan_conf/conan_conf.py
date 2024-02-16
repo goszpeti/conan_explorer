@@ -10,12 +10,11 @@ from conan_explorer.app.system import delete_path
 from conan_explorer.ui.common import get_themed_asset_icon, ConfigHighlighter
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_explorer.ui.widgets import RoundedMenu
-from conan_explorer.conan_wrapper.types import Remote
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog
 
-from .dialogs import RemoteEditDialog, RemoteLoginDialog
+from .dialogs import RemoteEditDialog, RemoteLoginDialog, EditableEditDialog
 from .remotes_controller import ConanRemoteController
 from .editable_controller import ConanEditableController
 from .profiles_model import ProfilesModel
@@ -43,8 +42,7 @@ class ConanConfigView(PluginInterfaceV1):
         assert self._base_signals
         self._remotes_controller = ConanRemoteController(self._ui.remotes_tree_view, 
                                             self._base_signals.conan_remotes_updated)
-        self._editable_controller = ConanEditableController(self._ui.editables_ref_view,
-                                                            )
+        self._editable_controller = ConanEditableController(self._ui.editables_ref_view)
         self._init_remotes_tab()
         self._init_profiles_tab()
 
@@ -68,20 +66,20 @@ class ConanConfigView(PluginInterfaceV1):
 
     def _load_info_tab(self):
         self._ui.conan_cur_version_value_label.setText(conan_version)
-        self._ui.python_exe_value_label.setText(sys.executable)
+        self._ui.python_exe_value_label.setText(str(Path(sys.executable).resolve()))
         self._ui.python_cur_version_value_label.setText(platform.python_version())
         self._ui.revision_enabled_checkbox.setChecked(
-            app.conan_api.get_revisions_enabled())
+                                            app.conan_api.get_revisions_enabled())
         self._ui.conan_usr_home_value_label.setText(
-            str(app.conan_api.get_user_home_path()))
+            str(app.conan_api.get_user_home_path().resolve()))
         if conan_version.startswith("2"):
             self._ui.conan_usr_cache_value_label.setVisible(False)
             self._ui.conan_usr_cache_label.setVisible(False)
         else:
             self._ui.conan_usr_cache_value_label.setText(
-                str(app.conan_api.get_short_path_root()))
+                str(app.conan_api.get_short_path_root().resolve()))
         self._ui.conan_storage_path_value_label.setText(
-            str(app.conan_api.get_storage_path()))
+            str(app.conan_api.get_storage_path().resolve()))
 
     def _load_settings_yml_tab(self):
         try:
@@ -89,57 +87,6 @@ class ConanConfigView(PluginInterfaceV1):
                 app.conan_api.get_settings_file_path().read_text())
         except Exception:
             Logger().error("Cannot read settings.yaml file!")
-
-    def _load_config_file_tab(self):
-        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
-        try:
-            self._ui.config_file_text_browser.setText(
-                app.conan_api.get_config_file_path().read_text())
-            self._ui.config_file_save_button.clicked.connect(self.on_save_config_file)
-        except Exception:
-            Logger().error("Cannot read Conan config file!")
-
-    def _init_profiles_tab(self):
-        self._ui.profiles_list_view.setContextMenuPolicy(
-            Qt.ContextMenuPolicy.CustomContextMenu)
-        self._ui.profiles_list_view.customContextMenuRequested.connect(
-            self.on_profile_context_menu_requested)
-        self._init_profile_context_menu()
-        self._ui.profile_save_button.clicked.connect(self.on_save_profile_file)
-        self._ui.profile_add_button.clicked.connect(self.on_add_profile)
-        self._ui.profile_remove_button.clicked.connect(self.on_remove_profile)
-        self._ui.profile_rename_button.clicked.connect(self.on_rename_profile)
-        self._ui.profile_refresh_button.clicked.connect(self.on_refresh_profiles)
-
-        self.set_themed_icon(self._ui.profile_save_button, "icons/save.svg")
-        self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.svg")
-        self.set_themed_icon(self._ui.profile_remove_button, "icons/delete.svg")
-        self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.svg")
-        self.set_themed_icon(self._ui.profile_rename_button, "icons/rename.svg")
-
-    def _load_profiles_tab(self):
-        profiles_model = ProfilesModel()
-        self._ui.profiles_list_view.setModel(profiles_model)
-        self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
-
-    def _load_editables_tab(self):
-        self._ui.editables_add_button.clicked.connect(self._editable_controller.add)
-        self._ui.editables_remove_button.clicked.connect(self._editable_controller.remove)
-        self._ui.editables_refresh_button.clicked.connect(self._editable_controller.update)
-        self._ui.editables_edit_button.clicked.connect(self._editable_controller.edit)
-
-        self.set_themed_icon(self._ui.editables_add_button, "icons/plus_rounded.svg")
-        self.set_themed_icon(self._ui.editables_remove_button, "icons/delete.svg")
-        self.set_themed_icon(self._ui.editables_refresh_button, "icons/refresh.svg")
-        self.set_themed_icon(self._ui.editables_edit_button, "icons/edit.svg")
-
-    def _init_profile_context_menu(self):
-        self.profiles_cntx_menu = RoundedMenu()
-        self._copy_profile_action = QAction("Copy profile name", self)
-        self._copy_profile_action.setIcon(
-            QIcon(get_themed_asset_icon("icons/copy_link.svg")))
-        self.profiles_cntx_menu.addAction(self._copy_profile_action)
-        self._copy_profile_action.triggered.connect(self.on_copy_profile_requested)
 
     def resizeEvent(self, a0):  # override
         """ Resize remote view columns automatically if window size changes """
@@ -158,6 +105,37 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.settings_file_text_browser.document(), "yaml")
 
 # Profile
+
+    def _init_profiles_tab(self):
+        self._ui.profiles_list_view.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu)
+        self._ui.profiles_list_view.customContextMenuRequested.connect(
+            self.on_profile_context_menu_requested)
+        self._init_profile_context_menu()
+        self._ui.profile_save_button.clicked.connect(self.on_profile_save_file)
+        self._ui.profile_add_button.clicked.connect(self.on_profile_add)
+        self._ui.profile_remove_button.clicked.connect(self.on_profile_remove)
+        self._ui.profile_rename_button.clicked.connect(self.on_profile_rename)
+        self._ui.profile_refresh_button.clicked.connect(self.on_profiles_refresh)
+
+        self.set_themed_icon(self._ui.profile_save_button, "icons/save.svg")
+        self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.svg")
+        self.set_themed_icon(self._ui.profile_remove_button, "icons/delete.svg")
+        self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.svg")
+        self.set_themed_icon(self._ui.profile_rename_button, "icons/rename.svg")
+
+    def _init_profile_context_menu(self):
+        self.profiles_cntx_menu = RoundedMenu()
+        self._copy_profile_action = QAction("Copy profile name", self)
+        self._copy_profile_action.setIcon(
+            QIcon(get_themed_asset_icon("icons/copy_link.svg")))
+        self.profiles_cntx_menu.addAction(self._copy_profile_action)
+        self._copy_profile_action.triggered.connect(self.on_copy_profile_requested)
+
+    def _load_profiles_tab(self):
+        profiles_model = ProfilesModel()
+        self._ui.profiles_list_view.setModel(profiles_model)
+        self._ui.profiles_list_view.selectionModel().selectionChanged.connect(self.on_profile_selected)
 
     def on_copy_profile_requested(self):
         view_indexes = self._ui.profiles_list_view.selectedIndexes()
@@ -183,22 +161,22 @@ class ConanConfigView(PluginInterfaceV1):
     def on_profile_context_menu_requested(self, position):
         self.profiles_cntx_menu.exec(self._ui.profiles_list_view.mapToGlobal(position))
 
-    def on_save_profile_file(self):
+    def on_profile_save_file(self):
         if not self._edited_profile:
             return
         profile_name = self._edited_profile
         text = self._ui.profiles_text_browser.toPlainText()
         (self.profiles_path / profile_name).write_text(text)
 
-    def on_add_profile(self):
+    def on_profile_add(self):
         new_profile_dialog = QInputDialog(self)
         profile_name, accepted = new_profile_dialog.getText(
             self, "New profile", 'Enter name:', text="")
         if accepted and profile_name:
             (self.profiles_path / profile_name).touch()
-            self.on_refresh_profiles()
+            self.on_profiles_refresh()
 
-    def on_rename_profile(self):
+    def on_profile_rename(self):
         view_indexes = self._ui.profiles_list_view.selectedIndexes()
         if not view_indexes:
             return
@@ -212,9 +190,9 @@ class ConanConfigView(PluginInterfaceV1):
                                                 self.profiles_path / new_profile_name)
             except Exception as e:
                 Logger().error(f"Can't rename {profile_name}: {e}")
-            self.on_refresh_profiles()
+            self.on_profiles_refresh()
 
-    def on_remove_profile(self):
+    def on_profile_remove(self):
         view_indexes = self._ui.profiles_list_view.selectedIndexes()
         if not view_indexes:
             return
@@ -229,9 +207,9 @@ class ConanConfigView(PluginInterfaceV1):
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
             delete_path(self.profiles_path / profile_name)
-            self.on_refresh_profiles()
+            self.on_profiles_refresh()
 
-    def on_refresh_profiles(self):
+    def on_profiles_refresh(self):
         profile_model: ProfilesModel = self._ui.profiles_list_view.model() # type: ignore
         # clear selection, otherwise an old selection could remain active
         self._ui.profiles_list_view.selectionModel().clear()
@@ -248,7 +226,8 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.remote_refresh_button, "icons/refresh.svg")
         self._ui.remote_login_button.clicked.connect(self.on_remotes_login)
         self.set_themed_icon(self._ui.remote_login_button, "icons/login.svg")
-        self._ui.remote_toggle_disabled_button.clicked.connect(self.on_remote_disable)
+        self._ui.remote_toggle_disabled_button.clicked.connect(
+            self._remotes_controller.remote_disable)
         self.set_themed_icon(self._ui.remote_toggle_disabled_button, "icons/hide.svg")
         self._ui.remote_add_button.clicked.connect(self.on_remote_add)
         self.set_themed_icon(self._ui.remote_add_button, "icons/plus_rounded.svg")
@@ -276,7 +255,6 @@ class ConanConfigView(PluginInterfaceV1):
             Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.remotes_tree_view.customContextMenuRequested.connect(
             self.on_remote_context_menu_requested)
-
         self._init_remote_context_menu()
 
     def on_remote_context_menu_requested(self, position):
@@ -288,7 +266,7 @@ class ConanConfigView(PluginInterfaceV1):
         self._copy_remote_action.setIcon(
             QIcon(get_themed_asset_icon("icons/copy_link.svg")))
         self._remotes_cntx_menu.addAction(self._copy_remote_action)
-        self._copy_remote_action.triggered.connect(self.on_copy_remote_name_requested)
+        self._copy_remote_action.triggered.connect(self._remotes_controller.copy_remote_name)
 
         self._edit_remote_action = QAction("Edit remote", self)
         self._edit_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
@@ -311,7 +289,8 @@ class ConanConfigView(PluginInterfaceV1):
         self._disable_profile_action.setIcon(
             QIcon(get_themed_asset_icon("icons/hide.svg")))
         self._remotes_cntx_menu.addAction(self._disable_profile_action)
-        self._disable_profile_action.triggered.connect(self.on_remote_disable)
+        self._disable_profile_action.triggered.connect(
+            self._remotes_controller.remote_disable)
 
         self._login_remotes_action = QAction("(Multi)Login to remote", self)
         self._login_remotes_action.setIcon(
@@ -323,29 +302,22 @@ class ConanConfigView(PluginInterfaceV1):
         remote_item = self._remotes_controller.get_selected_remote()
         if not remote_item:
             return
-        self.remote_edit_dialog = RemoteEditDialog(remote_item.remote, False, self)
-        reply = self.remote_edit_dialog.exec()
-        if reply == QDialog.DialogCode.Accepted:
-            self._remotes_controller.update()
+        self.remote_edit_dialog = RemoteEditDialog(remote_item, self._remotes_controller, self)
+        self.remote_edit_dialog.exec()
 
     def on_remotes_login(self):
         remote_item = self._remotes_controller.get_selected_remote()
         if not remote_item:
             return
-        remotes = app.conan_api.get_remotes_from_same_server(remote_item.remote)
+        remotes = app.conan_api.get_remotes_from_same_server(remote_item)
         if not remotes:
             return
-        self.remote_login_dialog = RemoteLoginDialog(remotes, self)
-        reply = self.remote_login_dialog.exec()
-        if reply == QDialog.DialogCode.Accepted:
-            self._remotes_controller.update()
+        self.remote_login_dialog = RemoteLoginDialog(remotes, self._remotes_controller, self)
+        self.remote_login_dialog.exec()
 
     def on_remote_add(self, model_index):
-        new_remote = Remote("New", "", True, False)
-        self.remote_edit_dialog = RemoteEditDialog(new_remote, True, self)
-        reply = self.remote_edit_dialog.exec()
-        if reply == QDialog.DialogCode.Accepted:
-            self._remotes_controller.update()
+        self.remote_edit_dialog = RemoteEditDialog(None, self._remotes_controller, self)
+        self.remote_edit_dialog.exec()
 
     def on_remote_remove(self, model_index):
         remote_item = self._remotes_controller.get_selected_remote()
@@ -354,22 +326,65 @@ class ConanConfigView(PluginInterfaceV1):
         message_box = QMessageBox(parent=self)
         message_box.setWindowTitle("Remove remote")
         message_box.setText(
-            f"Are you sure, you want to delete the remote {remote_item.remote.name}?")
+            f"Are you sure, you want to delete the remote {remote_item.name}?")
         message_box.setStandardButtons(
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
         if reply == QMessageBox.StandardButton.Yes:
-            app.conan_api.remove_remote(remote_item.remote.name)
-            self._remotes_controller.update()
+            self._remotes_controller.remove(remote_item)
 
-    def on_remote_disable(self, model_index):
-        self._remotes_controller.remote_disable(model_index)
+# Editables tab
 
-    def on_copy_remote_name_requested(self):
-        self._remotes_controller.copy_remote_name()
+    def _load_editables_tab(self):
+        self._ui.editables_add_button.clicked.connect(self.on_editable_add)
+        self._ui.editables_remove_button.clicked.connect(self.on_editable_remove)
+        self._ui.editables_refresh_button.clicked.connect(self._editable_controller.update)
+        self._ui.editables_edit_button.clicked.connect(self.on_editable_edit)
+        self._ui.editables_ref_view.doubleClicked.connect(self.on_editable_edit)
+
+        self.set_themed_icon(self._ui.editables_add_button, "icons/plus_rounded.svg")
+        self.set_themed_icon(self._ui.editables_remove_button, "icons/delete.svg")
+        self.set_themed_icon(self._ui.editables_refresh_button, "icons/refresh.svg")
+        self.set_themed_icon(self._ui.editables_edit_button, "icons/edit.svg")
+
+    def on_editable_add(self, model_index):
+        self.remote_edit_dialog = EditableEditDialog(None, self._editable_controller, self)
+        self.remote_edit_dialog.exec()
+
+    def on_editable_edit(self, model_index):
+        editable = self._editable_controller.get_selected_editable()
+        if not editable:
+            return
+        self.remote_edit_dialog = EditableEditDialog(
+            editable, self._editable_controller, self)
+        self.remote_edit_dialog.exec()
+
+    def on_editable_remove(self, model_index):
+        editable_item = self._editable_controller.get_selected_editable()
+        if not editable_item:
+            return
+        message_box = QMessageBox(parent=self)
+        message_box.setWindowTitle("Remove editable")
+        message_box.setText("Are you sure, you want to delete the editable" +
+                             f"{editable_item.conan_ref}?")
+        standard_button = QMessageBox.StandardButton
+        message_box.setStandardButtons(standard_button.Yes | standard_button.No)
+        message_box.setIcon(QMessageBox.Icon.Question)
+        reply = message_box.exec()
+        if reply == standard_button.Yes:
+            self._editable_controller.remove(editable_item)
 
 # Conan Config
+
+    def _load_config_file_tab(self):
+        self.set_themed_icon(self._ui.config_file_save_button, "icons/save.svg")
+        try:
+            self._ui.config_file_text_browser.setText(
+                app.conan_api.get_config_file_path().read_text())
+            self._ui.config_file_save_button.clicked.connect(self.on_save_config_file)
+        except Exception:
+            Logger().error("Cannot read Conan config file!")
 
     def on_save_config_file(self):
         app.conan_api.get_config_file_path().write_text(
@@ -379,10 +394,3 @@ class ConanConfigView(PluginInterfaceV1):
         Logger().info("Applying Changes to Conan...")
         # re-init info tab to show the changes
         self._load_info_tab()
-
-# Editables tab
-
-    def on_save_editable_file(self):
-        pass
-        # app.conan_api.get_editables_file_path().write_text(
-        #     self._ui.editables_file_text_browser.toPlainText())
