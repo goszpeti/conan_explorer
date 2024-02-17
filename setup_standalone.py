@@ -17,7 +17,7 @@ if sys.platform == "win32":
     base = "Win32GUI"
 build_exe_options = {
     "includes": "conan_explorer",
-    "excludes": ["debugpy", "pywin32", "pywin32_system32"],
+    "excludes": ["debugpy", "pywin32", "pywin32_system32", "win32com"],
     "bin_excludes": ['Qt6dbus.dll', 'Qt6Network.dll', 'Qt6Qml.dll', "Qt6QmlModels.dll",
         'Qt6Quick.dll', 'Qt6WebSockets.dll',  "Qt6QuickTemplates2.dll", "Qt6QmlCompiler.dll",
          "Qt6QuickDialogs2QuickImpl.dll", "Qt6LanguageServer.dll", "d3dcompiler_47.dll", 
