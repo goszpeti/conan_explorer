@@ -80,40 +80,45 @@ class PkgDiffDialog(QDialog):
 
     def update_diff(self):
         # populate left diff item menu
-
-        # set left and right content with first two diff elements
-        from dictdiffer import diff
-        pkg_diffs = list(diff(self._left_content, self._right_content))
-        # filter other id 
-        pkg_diffs = list(filter(lambda diff: diff[1] != "id", pkg_diffs))
-        # pkg_diffs = list(map(lambda diff: diff[1:], pkg_diffs))
-        for pkg_diff in pkg_diffs:
-            diff_mode = pkg_diff[0]
-            if diff_mode == "change":
-                key = str(pkg_diff[1].split(".")[-1])
-                value_left = str(pkg_diff[2][0])
-                value_right = str(pkg_diff[2][1])
-            elif diff_mode == "add":
-                for detail_diff in pkg_diff[2]:
-                    key = str(detail_diff[0])
-                    value_right = str(detail_diff[1])
-                    value_left = "INVALID"
-                    self._left_highlighter.added_diffs.append(f"({key}: {value_left})")
-                    self._right_highlighter.added_diffs.append(
-                        f"({key}: {value_right})")
-            elif diff_mode == "remove":
-                for detail_diff in pkg_diff[2]:
-                    key = str(detail_diff[0])
-                    value_left = str(detail_diff[1])
-                    value_right = "INVALID"
-                    self._left_highlighter.removed_diffs.append(f"({key}: {value_left})")
-                    self._right_highlighter.removed_diffs.append(
-                        f"({key}: {value_right})")
-            self._left_highlighter.modified_diffs.append(f"({key}: {value_left})")
-            self._right_highlighter.modified_diffs.append(f"({key}: {value_right})")
-        # self._ui.diff_text_browser.setText(pformat(pkg_diffs).translate(
-        #     {ord("{"): None, ord("}"): None, ord("'"): None}))
-        self._left_highlighter.rehighlight()
-        self._right_highlighter.rehighlight()
-        # self._ui.left_text_browser.setText(self._ui.left_text_browser.textChanged())
-        # self._ui.right_text_browser.setText(pkg_info)
+        try:
+            # set left and right content with first two diff elements
+            from dictdiffer import diff
+            pkg_diffs = list(diff(self._left_content, self._right_content))
+            # filter other id 
+            pkg_diffs = list(filter(lambda diff: diff[1] != "id", pkg_diffs))
+            # pkg_diffs = list(map(lambda diff: diff[1:], pkg_diffs))
+            for pkg_diff in pkg_diffs:
+                diff_mode = pkg_diff[0]
+                if diff_mode == "change":
+                    if isinstance(pkg_diff[1], list):
+                        key = str(pkg_diff[-1][1].split(".")[-1])
+                    else:
+                        key = str(pkg_diff[1].split(".")[-1])
+                    value_left = str(pkg_diff[2][0])
+                    value_right = str(pkg_diff[2][1])
+                elif diff_mode == "add":
+                    for detail_diff in pkg_diff[2]:
+                        key = str(detail_diff[0])
+                        value_right = str(detail_diff[1])
+                        value_left = "INVALID"
+                        self._left_highlighter.added_diffs.append(f"({key}: {value_left})")
+                        self._right_highlighter.added_diffs.append(
+                            f"({key}: {value_right})")
+                elif diff_mode == "remove":
+                    for detail_diff in pkg_diff[2]:
+                        key = str(detail_diff[0])
+                        value_left = str(detail_diff[1])
+                        value_right = "INVALID"
+                        self._left_highlighter.removed_diffs.append(f"({key}: {value_left})")
+                        self._right_highlighter.removed_diffs.append(
+                            f"({key}: {value_right})")
+                self._left_highlighter.modified_diffs.append(f"({key}: {value_left})")
+                self._right_highlighter.modified_diffs.append(f"({key}: {value_right})")
+            # self._ui.diff_text_browser.setText(pformat(pkg_diffs).translate(
+            #     {ord("{"): None, ord("}"): None, ord("'"): None}))
+            self._left_highlighter.rehighlight()
+            self._right_highlighter.rehighlight()
+            # self._ui.left_text_browser.setText(self._ui.left_text_browser.textChanged())
+            # self._ui.right_text_browser.setText(pkg_info)
+        except Exception as e:
+            Logger().error("Diffing crashed: " + str(e))

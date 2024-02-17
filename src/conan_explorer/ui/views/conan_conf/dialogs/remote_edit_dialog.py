@@ -39,7 +39,8 @@ class RemoteEditDialog(QDialog):
         new_verify_ssl = self._ui.verify_ssl_checkbox.isChecked()
         try:
             if self._new_remote:
-                self._remotes_controller.add(Remote(new_name, new_url, new_verify_ssl, False))
+                self._remotes_controller.add(
+                    Remote(new_name, new_url, new_verify_ssl, False))
                 self.accept()
                 return
             if new_name != self._remote.name:
