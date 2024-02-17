@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'side_menu.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -24,7 +24,7 @@ class Ui_SideMenu(object):
         if not SideMenu.objectName():
             SideMenu.setObjectName(u"SideMenu")
         SideMenu.resize(179, 182)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(SideMenu.sizePolicy().hasHeightForWidth())
@@ -44,7 +44,7 @@ class Ui_SideMenu(object):
         self.title_layout.setContentsMargins(-1, 4, 0, 8)
         self.side_menu_title_button = QPushButton(self.side_menu_title_frame)
         self.side_menu_title_button.setObjectName(u"side_menu_title_button")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.side_menu_title_button.sizePolicy().hasHeightForWidth())
@@ -71,7 +71,7 @@ class Ui_SideMenu(object):
         self.content_frame_layout.setSpacing(4)
         self.content_frame_layout.setObjectName(u"content_frame_layout")
         self.content_frame_layout.setContentsMargins(0, 0, 9, 0)
-        self.side_menu_spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.side_menu_spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.content_frame_layout.addItem(self.side_menu_spacer)
 

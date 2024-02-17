@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'diff.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -31,7 +31,7 @@ class Ui_Dialog(object):
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.pkgs_list_widget = QListWidget(Dialog)
         self.pkgs_list_widget.setObjectName(u"pkgs_list_widget")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pkgs_list_widget.sizePolicy().hasHeightForWidth())

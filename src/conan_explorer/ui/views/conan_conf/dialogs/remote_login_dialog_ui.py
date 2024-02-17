@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'remote_login_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -27,7 +27,7 @@ class Ui_Dialog(object):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         Dialog.resize(429, 273)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
@@ -42,7 +42,7 @@ class Ui_Dialog(object):
         self.edit_grid.setContentsMargins(-1, -1, 4, -1)
         self.password_label = QLabel(Dialog)
         self.password_label.setObjectName(u"password_label")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.password_label.sizePolicy().hasHeightForWidth())
@@ -65,7 +65,7 @@ class Ui_Dialog(object):
 
         self.password_line_edit = PasswordLineEdit(Dialog)
         self.password_line_edit.setObjectName(u"password_line_edit")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.password_line_edit.sizePolicy().hasHeightForWidth())
@@ -79,7 +79,7 @@ class Ui_Dialog(object):
 
         self.remote_list = QListWidget(Dialog)
         self.remote_list.setObjectName(u"remote_list")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.MinimumExpanding)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.remote_list.sizePolicy().hasHeightForWidth())
@@ -108,7 +108,7 @@ class Ui_Dialog(object):
 
         self.button_box = QDialogButtonBox(Dialog)
         self.button_box.setObjectName(u"button_box")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy4.setHorizontalStretch(1)
         sizePolicy4.setVerticalStretch(1)
         sizePolicy4.setHeightForWidth(self.button_box.sizePolicy().hasHeightForWidth())

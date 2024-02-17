@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'fluent_window.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -27,7 +27,7 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(602, 475)
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
@@ -51,7 +51,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowIcon(icon)
         self.central_widget = QWidget(MainWindow)
         self.central_widget.setObjectName(u"central_widget")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy1.setHorizontalStretch(1)
         sizePolicy1.setVerticalStretch(1)
         sizePolicy1.setHeightForWidth(self.central_widget.sizePolicy().hasHeightForWidth())
@@ -87,7 +87,7 @@ class Ui_MainWindow(object):
         self.top_center_frame_layout.setContentsMargins(5, 1, 0, 2)
         self.page_title = QLabel(self.top_center_frame)
         self.page_title.setObjectName(u"page_title")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.page_title.sizePolicy().hasHeightForWidth())
@@ -104,7 +104,7 @@ class Ui_MainWindow(object):
 
         self.top_center_right_frame = QFrame(self.top_center_frame)
         self.top_center_right_frame.setObjectName(u"top_center_right_frame")
-        sizePolicy3 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.top_center_right_frame.sizePolicy().hasHeightForWidth())
@@ -147,7 +147,7 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.window_btns_frame, 0, 1, 1, 1)
 
-        self.top_center_vspacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.top_center_vspacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.gridLayout.addItem(self.top_center_vspacer, 1, 1, 1, 1)
 
@@ -201,7 +201,7 @@ class Ui_MainWindow(object):
         self.content_footer_splitter.setChildrenCollapsible(False)
         self.content_frame = QFrame(self.content_footer_splitter)
         self.content_frame.setObjectName(u"content_frame")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.content_frame.sizePolicy().hasHeightForWidth())
@@ -243,7 +243,7 @@ class Ui_MainWindow(object):
         self.content_footer_splitter.addWidget(self.content_frame)
         self.page_footer = QFrame(self.content_footer_splitter)
         self.page_footer.setObjectName(u"page_footer")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Ignored)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Ignored)
         sizePolicy5.setHorizontalStretch(0)
         sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.page_footer.sizePolicy().hasHeightForWidth())
@@ -259,7 +259,7 @@ class Ui_MainWindow(object):
         self.page_footer_layout.setContentsMargins(0, 0, 0, 1)
         self.console = QTextBrowser(self.page_footer)
         self.console.setObjectName(u"console")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy6.setHorizontalStretch(0)
         sizePolicy6.setVerticalStretch(0)
         sizePolicy6.setHeightForWidth(self.console.sizePolicy().hasHeightForWidth())
@@ -299,7 +299,7 @@ class Ui_MainWindow(object):
 
         self.right_menu_frame = QFrame(self.center_frame)
         self.right_menu_frame.setObjectName(u"right_menu_frame")
-        sizePolicy7 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        sizePolicy7 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy7.setHorizontalStretch(0)
         sizePolicy7.setVerticalStretch(0)
         sizePolicy7.setHeightForWidth(self.right_menu_frame.sizePolicy().hasHeightForWidth())
@@ -315,7 +315,7 @@ class Ui_MainWindow(object):
         self.right_menu_frame_layout.setContentsMargins(0, 0, 4, 5)
         self.right_menu_scroll_area = QScrollArea(self.right_menu_frame)
         self.right_menu_scroll_area.setObjectName(u"right_menu_scroll_area")
-        sizePolicy8 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.MinimumExpanding)
+        sizePolicy8 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy8.setHorizontalStretch(0)
         sizePolicy8.setVerticalStretch(0)
         sizePolicy8.setHeightForWidth(self.right_menu_scroll_area.sizePolicy().hasHeightForWidth())
@@ -336,7 +336,7 @@ class Ui_MainWindow(object):
         self.right_menu_scroll_area_widgets_layout.setContentsMargins(0, 2, 0, 0)
         self.right_menu_content_frame = QFrame(self.right_menu_scroll_area_widgets)
         self.right_menu_content_frame.setObjectName(u"right_menu_content_frame")
-        sizePolicy9 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy9.setHorizontalStretch(0)
         sizePolicy9.setVerticalStretch(0)
         sizePolicy9.setHeightForWidth(self.right_menu_content_frame.sizePolicy().hasHeightForWidth())
@@ -362,7 +362,7 @@ class Ui_MainWindow(object):
 
         self.dummy_layout2.addWidget(self.pushButton_6)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.dummy_layout2.addItem(self.verticalSpacer_2)
 
@@ -384,7 +384,7 @@ class Ui_MainWindow(object):
         self.dummy_layout.setObjectName(u"dummy_layout")
         self.pushButton = QPushButton(self.dummy_page_b)
         self.pushButton.setObjectName(u"pushButton")
-        sizePolicy10 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        sizePolicy10 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         sizePolicy10.setHorizontalStretch(0)
         sizePolicy10.setVerticalStretch(0)
         sizePolicy10.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
@@ -393,7 +393,7 @@ class Ui_MainWindow(object):
 
         self.dummy_layout.addWidget(self.pushButton)
 
-        self.verticalSpacer = QSpacerItem(20, 5, QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
+        self.verticalSpacer = QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.MinimumExpanding)
 
         self.dummy_layout.addItem(self.verticalSpacer)
 
@@ -441,7 +441,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setContentsMargins(4, 0, 0, 0)
         self.title_icon_label = QLabel(self.frame)
         self.title_icon_label.setObjectName(u"title_icon_label")
-        sizePolicy11 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy11 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy11.setHorizontalStretch(0)
         sizePolicy11.setVerticalStretch(0)
         sizePolicy11.setHeightForWidth(self.title_icon_label.sizePolicy().hasHeightForWidth())
@@ -509,7 +509,7 @@ class Ui_MainWindow(object):
         self.left_menu_bottom_subframe_layout.setSpacing(5)
         self.left_menu_bottom_subframe_layout.setObjectName(u"left_menu_bottom_subframe_layout")
         self.left_menu_bottom_subframe_layout.setContentsMargins(3, 0, 3, 10)
-        self.left_menu_bottom_vspacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.left_menu_bottom_vspacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.left_menu_bottom_subframe_layout.addItem(self.left_menu_bottom_vspacer)
 
