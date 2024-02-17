@@ -132,6 +132,8 @@ You can also assign its icon to it from the site packages folder in **conan_expl
 This project uses Python with Qt as a frontend using the PySide6 integration.
 An IDE configuration is available for VsCode.
 
+The .ui files are created with Qt Designer and automatically converted to .py code when starting the application. The Designer can be installed via the PySide6-Addons pip package.
+
 See https://sonarcloud.io/project/overview?id=goszpeti_conan_explorer for Static Code Analysis.
 
 ## Licenses of used libraries and code 📒
