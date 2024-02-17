@@ -11,7 +11,11 @@ current_dir = Path(__file__).parent
 # For standalone execution with no package installed (can be removed depending on workflow)
 sys.path.append(str(current_dir.parent))
 
-# Generates examplu_ui.py, so UI variables resolve in IDE
+### Generates example_ui.py, so UI variables resolve in IDE
+# NOTE: You can edit the .ui file in a GUI editor with the Qt Designer application!
+# You can install it via the PySide6-Addons pip package.
+# It will be beside the python entry point scripts called pyside6-designer
+# Then this will automatically recreate the .py representation of it, if the application is started.
 compile_ui_file_if_newer(current_dir / "example.ui")
 
 class SamplePluginView(PluginInterfaceV1):
