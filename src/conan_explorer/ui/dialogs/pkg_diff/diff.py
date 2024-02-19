@@ -2,9 +2,12 @@
 from pathlib import Path
 from pprint import pformat, pprint
 from typing import Any, Dict, Literal, Union
-from PySide6.QtWidgets import QDialog, QFileDialog
+from PySide6.QtWidgets import QDialog, QFileDialog, QListWidgetItem
+from PySide6.QtCore import Qt
+
 import conan_explorer.app as app
 from conan_explorer.app.logger import Logger
+from conan_explorer.conan_wrapper.types import ConanPkg
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui.common.syntax_highlighting import ConfigHighlighter
 
@@ -57,22 +60,30 @@ class PkgDiffDialog(QDialog):
         # self._diff_highlighter = ConfigHighlighter(
         #     self._ui.diff_text_browser.document(), "yaml")
         self._ui.button_box.accepted.connect(self.close)
+        self.setWindowFlag( Qt.WindowType.WindowMaximizeButtonHint)
 
         # set up changed left element connection
 
-    def add_diff_item(self):
+    def add_diff_item(self, content: ConanPkg):
         """" """
+        item_name = content.get("id", "Unknown")
+        if self._ui.pkgs_list_widget.count() == 0: # first item
+            item_name = "* " + item_name
+            self.set_left_content(content)
+        elif self._ui.pkgs_list_widget.count() == 1: # second item
+            self.set_right_content(content)
+        item = QListWidgetItem(item_name, self._ui.pkgs_list_widget)
+
         # add ref item tree (1 item)
         # add comparison items
 
-
-    def set_left_content(self, content: Dict[str, Any]):
+    def set_left_content(self, content: ConanPkg):
         self._left_content = content
         pkg_info = pformat(content).translate(
             {ord("{"): None, ord("}"): None, ord("'"): None})
         self._ui.left_text_browser.setText(pkg_info)
 
-    def set_right_content(self, content: Dict[str, Any]):
+    def set_right_content(self, content: ConanPkg):
         self._right_content = content
         pkg_info = pformat(content).translate(
             {ord("{"): None, ord("}"): None, ord("'"): None})
