@@ -20,11 +20,11 @@ class SearchedPackageTreeItem(TreeModelItem):
     1. ref/id 2. remote 3. quick profile
     """
 
-    def __init__(self, data: List[str], parent=None, pkg_data: Optional[ConanPkg] = None,
+    def __init__(self, data: List[str], parent=None, pkg_info: Optional[ConanPkg] = None,
                  item_type=REF_TYPE, lazy_loading=False, installed=False, empty=False):
         super().__init__(data, parent, lazy_loading=lazy_loading)
         self.type = item_type
-        self.pkg_data = pkg_data
+        self.pkg_info = pkg_info
         self.is_installed = installed
         self.empty = empty  # indicates a "no result" item, which must be handled separately
         self.child_items: List[SearchedPackageTreeItem] = []
@@ -169,9 +169,9 @@ class PkgSearchModel(TreeModel):
         item.is_installed = installed
         pkg_items = item.child_items
         for pkg_item in pkg_items:
-            if not pkg_item.pkg_data:
+            if not pkg_item.pkg_info:
                 return
-            if installed and pkg_item.pkg_data.get("id", "") == pkg_id:
+            if installed and pkg_item.pkg_info.get("id", "") == pkg_id:
                 Logger().debug(
                     f"Set {pkg_id} as install status to {installed}")
                 pkg_item.is_installed = installed
