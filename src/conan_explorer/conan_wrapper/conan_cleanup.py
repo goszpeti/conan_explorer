@@ -34,7 +34,8 @@ class ConanCleanup():
                 package_ids = ref_cache.package_ids()
             except Exception:
                 try:
-                    package_ids = ref_cache.packages_ids()  # type: ignore - old API of Conan
+                    # old API of Conan
+                    package_ids = ref_cache.packages_ids()  # type: ignore
                 except Exception as e:
                     Logger().debug("Cannot check pkg id for %s: %s", ref, str(e))
             for pkg_id in package_ids:

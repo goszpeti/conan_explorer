@@ -34,7 +34,7 @@ Add any other context about the problem here.
 """
 
 
-def show_bug_reporting_dialog(excvalue: BaseException, tb: TracebackType):
+def show_bug_reporting_dialog(excvalue: BaseException, tb: "TracebackType | None"):
     import urllib.parse  # late import hopefully we don't need this
     error_text = f"{excvalue}\n" + "\n".join(traceback.format_tb(tb, limit=None))
     title = urllib.parse.quote("Application Crash on <>")

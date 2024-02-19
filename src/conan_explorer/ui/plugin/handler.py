@@ -77,6 +77,8 @@ class PluginHandler(QObject):
         assert plugin_descr
         self._unload_plugin(plugin_descr)
         plugin = self._load_plugin(plugin_descr, reload=True)
+        if not plugin:
+            return
         self.load_plugin.emit(plugin)
         plugin.load_signal.emit()
 

@@ -111,7 +111,7 @@ class ListAppLink(QFrame):
         if ret == QDialog.DialogCode.Accepted:
             self._parent_tab.redraw(force=True)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event): # override
         if not self._parent_tab:
             return
         content_frame: QWidget = self._parent_tab.parent(
@@ -149,9 +149,6 @@ class ListAppLink(QFrame):
                                   max_sum_width - self._ui.arguments_name_label.width())
 
         super().resizeEvent(event)
-
-    def delete(self):  # TODO needed?
-        pass
 
     def split_into_lines(self, widget, model_value, max_width):
         """ Calculate, how text can be split into multiple lines, based on the current width"""

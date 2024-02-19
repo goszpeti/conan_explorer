@@ -2,7 +2,7 @@ import configparser
 from copy import deepcopy
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, KeysView, List, Optional, Tuple
 
 from conan_explorer import BUILT_IN_PLUGIN, PathLike, base_path
 from conan_explorer.app.logger import Logger
@@ -82,8 +82,8 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
     def set_auto_save(self, value):
         self._auto_save = value
 
-    def get_settings_from_node(self, node: str) -> Tuple[str]:
-        return tuple(self._values.get(node, {}).keys())
+    def get_settings_from_node(self, node: str) -> List[str]:
+        return list(self._values.get(node, {}).keys())
 
     def get(self, name: str) -> "str | int | float | bool":
         """ Get a specific setting """
@@ -217,11 +217,11 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
             section[name] = str(default_value)
             return True
 
-        value = None
+        value: "str | int | float | bool | None" = None
         if isinstance(default_value, bool):
             value = section.getboolean(name)
         elif isinstance(default_value, str):
-            value = section.get(name)
+            value = str(section.get(name))
         elif isinstance(default_value, float):
             value = float(section.get(name))
         elif isinstance(default_value, int):

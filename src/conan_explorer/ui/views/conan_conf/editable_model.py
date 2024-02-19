@@ -1,6 +1,6 @@
 
-from typing import Optional
-from PySide6.QtCore import QModelIndex, Qt
+from typing import Any, Optional, Union
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
 
 import conan_explorer.app as app
 from conan_explorer.conan_wrapper.types import EditablePkg # using global module pattern
@@ -71,7 +71,7 @@ class EditableModel(TreeModel):
             return True
         return False
 
-    def data(self, index: QModelIndex, role):  # override
+    def data(self, index: Union[QModelIndex, QPersistentModelIndex], role: int) -> Any:  # override
         if not index.isValid():
             return None
         item: EditableModelItem = index.internalPointer()  # type: ignore
@@ -86,7 +86,7 @@ class EditableModel(TreeModel):
         return self.root_item.child_count()
 
     def get_index_from_ref(self, conan_ref: str) -> Optional[QModelIndex]:
-        for ref in self.root_item.child_items:
+        for ref in self.root_item.child_items: # type: ignore
             ref: EditableModelItem
             if ref.name == conan_ref:
                 return self.get_index_from_item(ref)

@@ -27,6 +27,7 @@ class SearchedPackageTreeItem(TreeModelItem):
         self.pkg_data = pkg_data
         self.is_installed = installed
         self.empty = empty  # indicates a "no result" item, which must be handled separately
+        self.child_items: List[SearchedPackageTreeItem] = []
 
     def load_children(self):  # override
         # can't call super method: fetching would finish early
@@ -127,7 +128,7 @@ class PkgSearchModel(TreeModel):
             self.root_item.append_child(conan_item)
         self.endResetModel()
 
-    def data(self, index: QtCore.QModelIndex, role: Qt.ItemDataRole):  # override
+    def data(self, index: "QtCore.QModelIndex | QtCore.QPersistentModelIndex", role: int = 0):  # override
         if not index.isValid():
             return None
         item: SearchedPackageTreeItem = index.internalPointer()  # type: ignore
@@ -168,6 +169,8 @@ class PkgSearchModel(TreeModel):
         item.is_installed = installed
         pkg_items = item.child_items
         for pkg_item in pkg_items:
+            if not pkg_item.pkg_data:
+                return
             if installed and pkg_item.pkg_data.get("id", "") == pkg_id:
                 Logger().debug(
                     f"Set {pkg_id} as install status to {installed}")

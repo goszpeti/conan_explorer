@@ -1,7 +1,7 @@
 import platform
 
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Union
 
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer import (INVALID_CONAN_REF, INVALID_PATH, 
@@ -103,8 +103,11 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
         self.apps.pop(row)
         return super().removeRow(row, parent=parent)
 
-    def moveRow(self, source_parent: QModelIndex, source_row: int, 
-                destination_parent: QModelIndex, destination_child: int) -> bool:
+    def moveRows(self, source_parent: Union[QModelIndex, QPersistentModelIndex], 
+                 source_row: int, count: int, 
+                 destination_parent: Union[QModelIndex, QPersistentModelIndex], 
+                 destination_child: int) -> bool:
+
         app_to_move = self.apps[source_row]
         self.apps.insert(destination_child, app_to_move)
         if source_row < destination_child:

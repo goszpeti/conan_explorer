@@ -44,12 +44,13 @@ class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
 
     # signals for inter page communication
-    conan_pkg_installed: SignalInstance = Signal(str, str)  # type: ignore - conan_ref, pkg_id
-    conan_pkg_removed: SignalInstance = Signal(str, str)  # type: ignore - conan_ref, pkg_ids
+    # conan_ref, pkg_ids
+    conan_pkg_installed: SignalInstance = Signal(str, str)  # type: ignore
+    # conan_ref, pkg_ids
+    conan_pkg_removed: SignalInstance = Signal(str, str)  # type: ignore
     conan_remotes_updated: SignalInstance = Signal()  # type: ignore
     page_size_changed: SignalInstance = Signal(QWidget)  # type: ignore
-
-    log_console_message: SignalInstance = Signal(str)  # type: ignore - message
+    log_console_message: SignalInstance = Signal(str)  # type: ignore 
 
     qt_logger_name = "qt_logger"
     _can_close = True # wait for blocking operations

@@ -30,7 +30,7 @@ class PackageFileExplorerController(QObject):
                  conan_pkg_selected: SignalInstance, base_signals: "BaseSignals",
                  page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
-        self._model = None
+        self._model: Optional[CalFileSystemModel] = None
         self._page_widgets = page_widgets
         self._view = view
         self._pkg_path_label = pkg_path_label
@@ -281,7 +281,7 @@ class PackageFileExplorerController(QObject):
         return indexes
 
     def get_selected_pkg_paths(self) -> List[str]:
-        file_paths = []
+        file_paths: List[str] = []
         if not self._model:
             return file_paths
         file_view_indexes = self._get_pkg_file_source_items()

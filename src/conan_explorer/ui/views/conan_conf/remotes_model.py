@@ -4,7 +4,7 @@ import conan_explorer.app as app  # using global module pattern
 from conan_explorer.app.logger import Logger
 from conan_explorer.ui.common import TreeModel, TreeModelItem
 from conan_explorer.conan_wrapper.types import Remote, ConanException
-from PySide6.QtCore import QModelIndex, Qt
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
 from PySide6.QtGui import QFont
 
 class RemotesModelItem(TreeModelItem, Remote):
@@ -71,7 +71,7 @@ class RemotesTableModel(TreeModel):
             self.root_item.append_child(remote_item)
         self.endResetModel()
 
-    def data(self, index: QModelIndex, role):  # override
+    def data(self, index, role):  # override
         if not index.isValid():
             return None
         item: RemotesModelItem = index.internalPointer()  # type: ignore
@@ -137,7 +137,7 @@ class RemotesTableModel(TreeModel):
                 remote.name, remote.url, remote.verify_ssl, remote.disabled, i)
             i += 1
 
-    def moveRow(self, source_parent: QModelIndex, source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
+    def moveRow(self, source_parent: "QModelIndex | QPersistentModelIndex", source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
         item_to_move = self.items()[source_row]
         self.items().insert(destination_child, item_to_move)
         if source_row < destination_child:

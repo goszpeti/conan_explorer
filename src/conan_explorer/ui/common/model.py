@@ -133,7 +133,7 @@ class TreeModel(QAbstractItemModel):
         else:
             return QModelIndex()
 
-    def data(self, index: QModelIndex, role):  # override
+    def data(self, index, role):  # override
         raise NotImplementedError
 
     def rowCount(self, parent):  # override

@@ -30,7 +30,7 @@ class AnimatedToggle(QCheckBox):
         # Setup the rest of the widget.
 
         self.setContentsMargins(8, 0, 0, 0)
-        self._thumb_position = 0
+        self._thumb_position: float = 0
         self.setFixedWidth(self.FIXED_WIDTH)
         self.setFixedHeight(self.FIXED_HEIGHT)
 
@@ -58,7 +58,7 @@ class AnimatedToggle(QCheckBox):
         return self._thumb_position
 
     @thumb_position.setter
-    def thumb_position(self, pos):
+    def thumb_position(self, pos: float):
         self._thumb_position = pos
         self.update()
 

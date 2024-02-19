@@ -501,7 +501,7 @@ class ConanCommonUnifiedApi(ConanUnifiedApi):
         found_pkgs: List[ConanPkg] = []
         default_settings: ConanSettings = {}
         try:
-            # type: ignore - dynamic prop is ok in try-catch
+            # dynamic prop is ok in try-catch
             default_settings = self.get_default_settings()
             query = f"(arch=None OR arch={default_settings.get('arch')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"

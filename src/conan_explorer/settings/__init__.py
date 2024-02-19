@@ -2,7 +2,7 @@
 """ Use constants in class, so they don't need to be separately accessed """
 
 from abc import abstractmethod
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from conan_explorer import PathLike
 
@@ -70,7 +70,7 @@ class SettingsInterface():
         raise NotImplementedError
 
     @abstractmethod
-    def get_settings_from_node(self, node: str) -> Tuple[str]:
+    def get_settings_from_node(self, node: str) -> List[str]:
         """ Get all settings names from a hierachical node.
         If it is non-hierarchical, the name arg should be ignored and all settings returned.
         """

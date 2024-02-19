@@ -154,7 +154,7 @@ class PackageSelectionController(QObject):
         source_item = source_items[0]
         if source_item.type == PkgSelectionType.ref:
             return ConanPkg()
-        return source_item.item_data[0]
+        return source_item.pkg_info
 
     # Global pane and cross connection slots
 
