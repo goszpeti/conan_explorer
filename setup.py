@@ -12,7 +12,7 @@ from pkg_resources import Requirement
 
 # Package meta-data.
 NAME = "conan-explorer"
-VERSION = "2.2.0a6"
+VERSION = "2.2.0a7"
 DESCRIPTION = "Package Explorer and App Launcher for Conan"
 URL = "https://github.com/goszpeti/conan_explorer"
 AUTHOR = "Péter Gosztolya and Contributors"
