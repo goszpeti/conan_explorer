@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import TYPE_CHECKING, List, Tuple
 
 import conan_explorer.app as app
@@ -13,6 +14,8 @@ from PySide6.QtCore import (QItemSelectionModel, QModelIndex, QObject,
 from PySide6.QtWidgets import (QApplication, QTextBrowser,
                                QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout)
 from PySide6.QtGui import QIcon
+
+from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog
 from .sel_model import PkgSelectionType, PackageFilter, PackageTreeItem, PkgSelectModel
 
 if TYPE_CHECKING:
@@ -20,10 +23,19 @@ if TYPE_CHECKING:
     from conan_explorer.ui.main_window import BaseSignals
 
 
+class MultiPkgSelectionMode(Enum):
+    single_ref = 0
+    single_pkg_or_export = 1
+    multi_ref = 2
+    multi_pkg = 3
+    single_editable = 4
+    invalid = -1
+
+
 class PackageSelectionController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, package_filter_edit: QLineEdit, 
-                 conan_pkg_selected: SignalInstance, base_signals: "BaseSignals", 
+    def __init__(self, parent: QWidget, view: QTreeView, package_filter_edit: QLineEdit,
+                 conan_pkg_selected: SignalInstance, base_signals: "BaseSignals",
                  page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._base_signals = base_signals
@@ -98,7 +110,7 @@ class PackageSelectionController(QObject):
     def show_buildinfo_dialog(self, buildinfos: str):
         if not buildinfos:
             return
-        dialog = QDialog()
+        dialog = QDialog(self._view)
         dialog.setWindowIcon(QIcon(str(asset_path / "icons" / "icon.ico")))
         dialog.setWindowTitle("Build Info")
         dialog.resize(800, 500)
@@ -112,6 +124,16 @@ class PackageSelectionController(QObject):
             text_browser.document(), "ini")
         dialog.exec()
 
+    def on_diff_requested(self):
+        dialog = PkgDiffDialog(self._view)
+        items = self.get_selected_pkg_source_items()
+        if len(items) < 2:
+            return
+        for item in items:
+            dialog.add_diff_item(item.pkg_info)
+        dialog.update_diff()
+        dialog.show()
+
     # Model selection helpers
 
     def get_selected_pkg_source_items(self) -> List[PackageTreeItem]:
@@ -121,8 +143,7 @@ class PackageSelectionController(QObject):
         model: PackageFilter = indexes[0].model()  # type: ignore
         source_items: List[PackageTreeItem] = []
         for index in indexes:
-            source_items.append(model.mapToSource(
-                index).internalPointer())  # type: ignore
+            source_items.append(model.mapToSource(index).internalPointer())  # type: ignore
         return source_items
 
     def get_selected_ref_with_pkg_id(self) -> Tuple[str, str]:
@@ -134,6 +155,22 @@ class PackageSelectionController(QObject):
         if pkg_info:
             pkg_id = pkg_info.get("id", "")
         return conan_refs[0], pkg_id
+
+    def get_selection_mode(self, source_items: List[PackageTreeItem]) -> MultiPkgSelectionMode:
+        """" Determine which combination of multiselected items is active """
+        pkg_or_export = [PkgSelectionType.pkg, PkgSelectionType.export]
+        if len(source_items) == 1:
+            if source_items[0].type == PkgSelectionType.ref:
+                return MultiPkgSelectionMode.single_ref
+            elif source_items[0].type in pkg_or_export:
+                return MultiPkgSelectionMode.single_pkg_or_export
+            elif source_items[0].type == PkgSelectionType.editable:
+                return MultiPkgSelectionMode.single_editable
+        if all([item.type == PkgSelectionType.ref for item in source_items]):
+            return MultiPkgSelectionMode.multi_ref
+        elif all([item.type == PkgSelectionType.pkg for item in source_items]):
+            return MultiPkgSelectionMode.multi_pkg
+        return MultiPkgSelectionMode.invalid
 
     def get_selected_conan_refs(self) -> List[str]:
         # no need to map from postition, since rightclick selects a single item
@@ -176,7 +213,7 @@ class PackageSelectionController(QObject):
         if self._model and not force_update:  # loads only at first init
             return
         if not self._model:
-           self._model = PkgSelectModel()
+            self._model = PkgSelectModel()
         self._loader.async_loading(
             self._view, self._model.setup_model_data, (),
             self.finish_select_model_init, "Reading Packages")
@@ -203,7 +240,7 @@ class PackageSelectionController(QObject):
             item = self._model.root_item.child_items[ref_row]
             if item.item_data[0] == conan_ref:
                 if pkg_id:
-                    if item.child_count() < 2: # try to fetch, pkd_id probably not loaded yet
+                    if item.child_count() < 2:  # try to fetch, pkd_id probably not loaded yet
                         item.load_children()
                     for pkg_row in range(item.child_count()):
                         pkg_item = item.child_items[pkg_row]

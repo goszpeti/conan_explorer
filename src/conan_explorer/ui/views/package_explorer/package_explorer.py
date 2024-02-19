@@ -8,7 +8,7 @@ from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_explorer.ui.widgets import RoundedMenu
 
 from .file_controller import PackageFileExplorerController
-from .sel_controller import PackageSelectionController
+from .sel_controller import PackageSelectionController, MultiPkgSelectionMode
 from .sel_model import PkgSelectionType
 
 from PySide6.QtCore import Qt, Signal
@@ -178,6 +178,12 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self.select_cntx_menu.addAction(self.show_build_info_action)
             self.show_build_info_action.triggered.connect(self._pkg_sel_ctrl.on_show_build_info)
 
+        self.diff_pkg_action = QAction("Compare packages", self)
+        self.set_themed_icon(self.diff_pkg_action, "icons/difference.svg")
+        self.select_cntx_menu.addAction(self.diff_pkg_action)
+        self.diff_pkg_action.triggered.connect(
+            self._pkg_sel_ctrl.on_diff_requested)
+
         self.remove_ref_action = QAction("Remove package(s)", self)
         self.set_themed_icon(self.remove_ref_action, "icons/delete.svg")
         self.select_cntx_menu.addAction(self.remove_ref_action)
@@ -185,18 +191,39 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
     def on_selection_context_menu_requested(self, position):
         # no multiselect
-        if len(self._pkg_sel_ctrl.get_selected_conan_refs()) > 1:
+        sources = self._pkg_sel_ctrl.get_selected_pkg_source_items()
+        selection_mode = self._pkg_sel_ctrl.get_selection_mode(sources)
+        if selection_mode == MultiPkgSelectionMode.single_ref:
+            self._context_menu_set_all(True)
+            self.diff_pkg_action.setVisible(False)
             self.show_build_info_action.setVisible(False)
-            self.show_conanfile_action.setVisible(False)
-            self.install_ref_action.setVisible(False)
-            self.remove_ref_action.setVisible(False)
-        else:
-            self.show_build_info_action.setVisible(True)
-            self.show_conanfile_action.setVisible(True)
-            self.install_ref_action.setVisible(True)
+        elif selection_mode == MultiPkgSelectionMode.multi_ref:
+            self._context_menu_set_all(False)
+            self.copy_ref_action.setVisible(True)
+        elif selection_mode == MultiPkgSelectionMode.single_pkg_or_export:
+            self._context_menu_set_all(True)
+            self.diff_pkg_action.setVisible(False)
+        elif selection_mode == MultiPkgSelectionMode.multi_pkg:
+            self._context_menu_set_all(False)
+            self.diff_pkg_action.setVisible(True)
             self.remove_ref_action.setVisible(True)
+        elif selection_mode == MultiPkgSelectionMode.single_editable:
+            self._context_menu_set_all(False)
+            self.copy_ref_action.setVisible(True)
+            self.show_conanfile_action.setVisible(True)
+        else: # invalid
+            self._context_menu_set_all(False)
+            self.copy_ref_action.setVisible(True) # always works
 
         self.select_cntx_menu.exec(self._ui.package_select_view.mapToGlobal(position))
+
+    def _context_menu_set_all(self, enabled: bool):
+        self.copy_ref_action.setVisible(enabled)
+        self.show_build_info_action.setVisible(enabled)
+        self.show_conanfile_action.setVisible(enabled)
+        self.install_ref_action.setVisible(enabled)
+        self.remove_ref_action.setVisible(enabled)
+        self.diff_pkg_action.setVisible(enabled)
 
     # Package File Explorer context menu
 
