@@ -72,7 +72,6 @@ class TabList(QWidget):
             if force:
                 # TODO this a leak, currently it does not delete everything!
                 app_link.hide()
-                app_link.delete()
             else:
                 app_link.hide()
         if force:

@@ -103,8 +103,8 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
         self.apps.pop(row)
         return super().removeRow(row, parent=parent)
 
-    def moveRows(self, source_parent: Union[QModelIndex, QPersistentModelIndex], 
-                 source_row: int, count: int, 
+    def moveRow(self, source_parent: Union[QModelIndex, QPersistentModelIndex], 
+                 source_row: int,
                  destination_parent: Union[QModelIndex, QPersistentModelIndex], 
                  destination_child: int) -> bool:
 

@@ -151,8 +151,7 @@ class ConanSearchView(PluginInterfaceV1):
         self.select_cntx_menu.exec(self._ui.search_results_tree_view.mapToGlobal(position))
 
     def on_show_in_pkg_exp(self):
-        """ Switch to the main gui and select the item (ref or pkg) 
-        in the Local Package Explorer. 
+        """ Switch to the Package Explorer view and select the item (ref or pkg) 
         Needs other view as ref, so will not be moved to controller.
         """
         items = self._search_controller.get_selected_source_items()
@@ -166,9 +165,9 @@ class ConanSearchView(PluginInterfaceV1):
 
     def resizeEvent(self, a0) -> None:  # override QtGui.QResizeEvent
         super().resizeEvent(a0)
-        self._search_controller._resize_package_columns()
+        self._search_controller._resize_search_result_columns()
 
     def showEvent(self, a0) -> None:
-        # set cursor in search line, when switching to this tab
+        # set cursor in search line when switching to this tab
         self._ui.search_line.setFocus()
         return super().showEvent(a0)

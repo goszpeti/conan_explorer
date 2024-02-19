@@ -14,8 +14,9 @@ from .model import PROFILE_TYPE, PkgSearchModel, SearchedPackageTreeItem
 
 class ConanSearchController(QObject):
 
-    def __init__(self, view: QTreeView, search_line: ConanRefLineEdit, search_button: QPushButton, remote_list: QListWidget, 
-                 detail_view: QTextBrowser, conan_pkg_installed: Optional[SignalInstance], 
+    def __init__(self, view: QTreeView, search_line: ConanRefLineEdit, search_button: QPushButton, 
+                 remote_list: QListWidget, detail_view: QTextBrowser, 
+                 conan_pkg_installed: Optional[SignalInstance], 
                  conan_pkg_removed: Optional[SignalInstance]) -> None:
         super().__init__(view)
         self._view = view
@@ -49,13 +50,13 @@ class ConanSearchController(QObject):
     def _finish_load_search_model(self, ret=None):
         """ After conan search adjust the view """
         self._view.setModel(self._model.proxy_model)
-        self._resize_package_columns()
+        self._resize_search_result_columns()
         self._view.sortByColumn(1, Qt.SortOrder.AscendingOrder)  # sort by remote at default
         self._view.selectionModel().selectionChanged.connect(self.on_package_selected)
         self._search_line.load_completion_refs()
 
     def on_package_selected(self):
-        """ Display package info only for pkg ref"""
+        """ Display package info only for pkg type"""
         items = self.get_selected_source_items()
         if len(items) != 1:
             return
@@ -147,6 +148,6 @@ class ConanSearchController(QObject):
                 indexes.append(index)
         return indexes
 
-    def _resize_package_columns(self):
+    def _resize_search_result_columns(self):
         for i in reversed(range(self._model.root_item.column_count() - 1)):
             self._view.resizeColumnToContents(i)

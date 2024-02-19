@@ -243,8 +243,8 @@ class PackageSelectionController(QObject):
                     if item.child_count() < 2:  # try to fetch, pkd_id probably not loaded yet
                         item.load_children()
                     for pkg_row in range(item.child_count()):
-                        pkg_item = item.child_items[pkg_row]
-                        if pkg_item.item_data[0].get("id") == pkg_id:
+                        pkg_item: PackageTreeItem = item.child_items[pkg_row] # type: ignore
+                        if pkg_item.pkg_info.get("id") == pkg_id:
                             return ref_row
                     return -1
                 else:
@@ -297,8 +297,9 @@ class PackageSelectionController(QObject):
             item: PackageTreeItem = proxy_index.internalPointer()  # type: ignore
             i = 0
             for i, child_item in enumerate(item.child_items):
+                child_item: PackageTreeItem
                 if child_item.type == PkgSelectionType.pkg:
-                    if child_item.item_data[0].get("id", "") == pkg_id:
+                    if child_item.pkg_info.get("id", "") == pkg_id:
                         break
             internal_sel_index = self._model.index(i, 0, proxy_index)
         else:

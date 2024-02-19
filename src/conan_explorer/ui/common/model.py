@@ -1,4 +1,4 @@
-from typing import Callable, List, Type, TypeVar
+from typing import Callable, List, TYPE_CHECKING
 from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
 from PySide6.QtWidgets import QFileSystemModel
 
@@ -7,6 +7,9 @@ from conan_explorer.app.logger import Logger
 QAF = Qt.AlignmentFlag
 QORI = Qt.Orientation
 QIDR = Qt.ItemDataRole
+
+if TYPE_CHECKING:
+    from typing import Self
 
 
 def re_register_signal(signal: SignalInstance, slot: Callable):
@@ -44,7 +47,7 @@ class TreeModelItem(object):
     def __init__(self, data: List[str],  parent=None, lazy_loading=False):
         self.parent_item = parent
         self.item_data = data
-        self.child_items: List[TreeModelItem] = []
+        self.child_items: List["Self"] = []
         self.is_loaded = not lazy_loading
 
     def append_child(self, item):
