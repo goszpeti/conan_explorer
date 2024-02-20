@@ -1,19 +1,19 @@
 
-from pathlib import Path
-from pprint import pformat, pprint
-from typing import Any, Dict, Literal, Union
-from PySide6.QtWidgets import QDialog, QFileDialog, QListWidgetItem
+from pprint import pformat
+from typing import Literal
+from PySide6.QtWidgets import QDialog, QListWidgetItem
 from PySide6.QtCore import Qt
 
-import conan_explorer.app as app
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import ConanPkg
-from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui.common.syntax_highlighting import ConfigHighlighter
 
 
 from PySide6.QtCore import QRegularExpression
-from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QColor
+from PySide6.QtGui import QTextCharFormat, QColor, QAction
+from conan_explorer.ui.common.theming import ThemedWidget
+
+from conan_explorer.ui.widgets import RoundedMenu
 class ConfigDiffHighlighter(ConfigHighlighter):
     def __init__(self, parent, type: Literal['ini', 'yaml']) -> None:
         super().__init__(parent, type)
@@ -21,9 +21,19 @@ class ConfigDiffHighlighter(ConfigHighlighter):
         self.added_diffs = []
         self.removed_diffs = []
 
+    def reset_diff(self):
+        self.modified_diffs = []
+        self.added_diffs = []
+        self.removed_diffs = []
+
     def highlightBlock(self, text: str):
         super().highlightBlock(text)
         key_format = QTextCharFormat()
+        # clear all background color
+        key_format.clearBackground()
+        expression = QRegularExpression(".*")
+        match = expression.match(text)
+        self.setFormat(match.capturedStart(), match.capturedLength(), key_format)
 
         for diff_item in self.modified_diffs:
             key_format.setBackground(QColor("orange"))
@@ -40,17 +50,19 @@ class ConfigDiffHighlighter(ConfigHighlighter):
             expression = QRegularExpression(diff_item)
             match = expression.match(text)
             self.setFormat(match.capturedStart(), match.capturedLength(), key_format)
+        
 
-
-class PkgDiffDialog(QDialog):
+class PkgDiffDialog(QDialog, ThemedWidget):
 
     def __init__(self, parent) -> None:
-        super().__init__(parent=parent)
+        QDialog.__init__(self, parent)
+        ThemedWidget.__init__(self, None)
         from .diff_ui import Ui_Dialog
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
         self._left_content = {}
         self._right_content = {}
+        self._item_data = []
         self.setWindowTitle("Compare Packages")
         self._highlight_diff = {}
         self._left_highlighter = ConfigDiffHighlighter(
@@ -62,7 +74,25 @@ class PkgDiffDialog(QDialog):
         self._ui.button_box.accepted.connect(self.close)
         self.setWindowFlag( Qt.WindowType.WindowMaximizeButtonHint)
 
+        self._ui.pkgs_list_widget.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu)
+        self._ui.pkgs_list_widget.customContextMenuRequested.connect(
+            self.on_pkg_context_menu_requested)
+        self._init_pkg_context_menu()
+
         # set up changed left element connection
+        self._ui.pkgs_list_widget.currentItemChanged.connect(self.on_item_changed)
+
+    def on_item_changed(self, item):
+        sel_item_id = item.data(0)
+        if "*" in sel_item_id:
+            return
+        for item_data in self._item_data:
+            if sel_item_id == item_data.get("id", ""):
+                content = item_data
+                break
+        self.set_right_content(content)
+        self.update_diff()
 
     def add_diff_item(self, content: ConanPkg):
         """" """
@@ -73,9 +103,8 @@ class PkgDiffDialog(QDialog):
         elif self._ui.pkgs_list_widget.count() == 1: # second item
             self.set_right_content(content)
         item = QListWidgetItem(item_name, self._ui.pkgs_list_widget)
+        self._item_data.append(content)
 
-        # add ref item tree (1 item)
-        # add comparison items
 
     def set_left_content(self, content: ConanPkg):
         self._left_content = content
@@ -92,12 +121,15 @@ class PkgDiffDialog(QDialog):
     def update_diff(self):
         # populate left diff item menu
         try:
+            # reset diffs
+            self._left_highlighter.reset_diff()
+            self._right_highlighter.reset_diff()
+
             # set left and right content with first two diff elements
             from dictdiffer import diff
             pkg_diffs = list(diff(self._left_content, self._right_content))
             # filter other id 
             pkg_diffs = list(filter(lambda diff: diff[1] != "id", pkg_diffs))
-            # pkg_diffs = list(map(lambda diff: diff[1:], pkg_diffs))
             for pkg_diff in pkg_diffs:
                 diff_mode = pkg_diff[0]
                 if diff_mode == "change":
@@ -125,11 +157,39 @@ class PkgDiffDialog(QDialog):
                             f"({key}: {value_right})")
                 self._left_highlighter.modified_diffs.append(f"({key}: {value_left})")
                 self._right_highlighter.modified_diffs.append(f"({key}: {value_right})")
-            # self._ui.diff_text_browser.setText(pformat(pkg_diffs).translate(
-            #     {ord("{"): None, ord("}"): None, ord("'"): None}))
             self._left_highlighter.rehighlight()
             self._right_highlighter.rehighlight()
-            # self._ui.left_text_browser.setText(self._ui.left_text_browser.textChanged())
-            # self._ui.right_text_browser.setText(pkg_info)
         except Exception as e:
             Logger().error("Diffing crashed: " + str(e))
+
+    def _init_pkg_context_menu(self):
+        """ Initalize context menu with all actions """
+        self.select_cntx_menu = RoundedMenu()
+
+        self.set_ref_item = QAction("Set as reference", self)
+        self.set_themed_icon(self.set_ref_item, "icons/copy_link.svg")
+        self.select_cntx_menu.addAction(self.set_ref_item)
+        self.set_ref_item.triggered.connect(self._set_ref_item)
+
+    def _set_ref_item(self):
+        items = self._ui.pkgs_list_widget.selectedItems()
+        if not len(items) == 1:
+            return
+        self._clear_ref_item()
+        sel_item = items[0]
+        id = sel_item.data(0)
+        for item in self._item_data:
+            if item.get("id", "") == id:
+                item_name = "* " + id
+                sel_item.setData(0, item_name)
+                self.set_left_content(item)
+                self.update_diff()
+                return
+
+    def _clear_ref_item(self):
+        items = self._ui.pkgs_list_widget.findItems("* ", Qt.MatchFlag.MatchContains)
+        item = items[0]
+        item.setData(0, item.data(0).replace("* ", ""))
+
+    def on_pkg_context_menu_requested(self, position):
+        self.select_cntx_menu.exec(self._ui.pkgs_list_widget.mapToGlobal(position))
