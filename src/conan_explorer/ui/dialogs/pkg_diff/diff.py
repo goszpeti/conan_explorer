@@ -91,7 +91,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
             if sel_item_id == item_data.get("id", ""):
                 content = item_data
                 break
-        self.set_right_content(content)
+        self.set_right_content(self.filter_display_content(content))
         self.update_diff()
 
     def add_diff_item(self, content: ConanPkg):
@@ -99,20 +99,26 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         item_name = content.get("id", "Unknown")
         if self._ui.pkgs_list_widget.count() == 0: # first item
             item_name = "* " + item_name
-            self.set_left_content(content)
+            self.set_left_content(self.filter_display_content(content))
         elif self._ui.pkgs_list_widget.count() == 1: # second item
-            self.set_right_content(content)
+            self.set_right_content(self.filter_display_content(content))
         item = QListWidgetItem(item_name, self._ui.pkgs_list_widget)
         self._item_data.append(content)
 
+    def filter_display_content(self, content: ConanPkg):
+        new_content = {}
+        new_content["settings"] = content.get("settings")
+        new_content["options"] = content.get("options")
+        new_content["requires"] = content.get("requires")
+        return new_content
 
-    def set_left_content(self, content: ConanPkg):
+    def set_left_content(self, content):
         self._left_content = content
         pkg_info = pformat(content).translate(
             {ord("{"): None, ord("}"): None, ord("'"): None})
         self._ui.left_text_browser.setText(pkg_info)
 
-    def set_right_content(self, content: ConanPkg):
+    def set_right_content(self, content):
         self._right_content = content
         pkg_info = pformat(content).translate(
             {ord("{"): None, ord("}"): None, ord("'"): None})
@@ -182,7 +188,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
             if item.get("id", "") == id:
                 item_name = "* " + id
                 sel_item.setData(0, item_name)
-                self.set_left_content(item)
+                self.set_left_content(self.filter_display_content(item))
                 self.update_diff()
                 return
 

@@ -9,7 +9,7 @@ from conan_explorer.ui.common import get_themed_asset_icon
 from PySide6.QtCore import QSize, Qt, Signal, SignalInstance
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem, QComboBox
 
-from conan_explorer.conan_wrapper.types import ConanOptions, ConanRef
+from conan_explorer.conan_wrapper.types import ConanOptions, ConanPkg, ConanRef
 from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog
 
 
@@ -197,10 +197,18 @@ class ConanInstallDialog(QDialog):
     def show_package_diffs(self, conan_ref):
         # installation failed
         try:
-            dialog = PkgDiffDialog(self)
-            dialog.set_left_content(self._conan_selected_install)
-            available_refs = app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(conan_ref), None)
-            dialog.set_right_content(available_refs[0])
+            items = app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(conan_ref), "all")
+            if len(items) < 2:
+                return
+            dialog = PkgDiffDialog(self.parent())
+            installed_pkg_info: ConanPkg= {"id" : "None",
+                    "settings": app.conan_api.get_profile_settings(self._conan_selected_install["profile"]),
+                    "options": self._conan_selected_install.get("options", {}),
+                    "requires": [], "outdated": False
+                    }
+            dialog.add_diff_item(installed_pkg_info)
+            for item in items:
+                dialog.add_diff_item(item)
             dialog.update_diff()
             dialog.show()
         except Exception as e:
@@ -231,3 +239,4 @@ class ConanInstallDialog(QDialog):
 
     def get_selected_install_info(self):
         return self._conan_selected_install
+    
