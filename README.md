@@ -19,7 +19,7 @@ This package has been renamed from version 2.2.0 onwards. Use `pip install conan
 
 New package: https://pypi.org/project/conan-explorer/
 
-## Quick Overview 📋
+## 📋 Quick Overview
 
 The goal of this project is to provide a standalone Graphical User Interface (GUI) to
 * Start executables contained in packages of the package manager [Conan](https://conan.io/)
@@ -46,7 +46,7 @@ It is end-user oriented and focuses on using packages, rather then developing th
 - integrated console for information an packages and config file
 - installable with pip
 
-**Quicklaunch 📑**
+**📑 Quicklaunch**
 
 - configurable layout (tabs and applications) in the GUI
 - list and grid view
@@ -56,31 +56,31 @@ It is end-user oriented and focuses on using packages, rather then developing th
 - uses the default icons of files or can be configured to use custom ones
 - quick controls to switch between versions and channels
 
-**Local Package Explorer 📦**
+**📦 Local Package Explorer**
 
 - tabbed view for browsing through installed packages
 - understand package settings at a glance from a shortened representation, e.g. Linux_x64_ggc7
 - supports rename/copy/cut/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan workflow
 
-**Conan Search 🔍**
+**🔍 Conan Search**
 
 - search for references in selected remotes
 - show all existing packages for a reference and their infos
 - install package directly via right-click menu
 
-**Conan Config 📝**
+**📝 Conan Config**
 
 - view and edit your profiles
 - view and edit your remotes - with multi-login to the same artifactory server for multiple remotes
 - see the most important paths and config at one glance
 
-**Plugin Mechanism 🔌**
+**🔌 Plugin Mechanism**
 
 - All views are now plugins, which can be extended by the user
 
-## Installation 💻
+## 💻 Installation
 
-### Prerequisites on Linux 🐧
+### 🐧 Prerequisites on Linux
 
 Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04 and 22.04. If you want to run on Ubuntu 18 you can only use the 1.4.3 release, due to the Qt dependency.
 
@@ -113,7 +113,7 @@ After checkout use the command:
 
     pip install .
 
-## Running 🏃
+## 🏃 Running
 
 Execute `conan-explorer` if the Python "scripts" or "bin" folder is on your system path, or look it up manually in the site-packages folder. 
 You can also assign its icon to it from the site packages folder in **conan_explorer/assets/icons/icon.ico**.
@@ -127,7 +127,7 @@ You can also assign its icon to it from the site packages folder in **conan_expl
 > From version 2.0.0 Python 3.6 support will be dropped, having reached end-of-life.    
 > From version 2.2.0 Python 3.7 support will be dropped, having reached end-of-life.    
 
-## Toolchain 🛠
+## 🛠 Toolchain
 
 This project uses Python with Qt as a frontend using the PySide6 integration.
 An IDE configuration is available for VsCode.
@@ -136,7 +136,7 @@ The .ui files are created with Qt Designer and automatically converted to .py co
 
 See https://sonarcloud.io/project/overview?id=goszpeti_conan_explorer for Static Code Analysis.
 
-## Licenses of used libraries and code 📒
+## 📒 Licenses of used libraries and code
 
 > **Warning** - **Change of License to LGPL**
 > From version 2.0.0 the project will use the [LGPL 3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license to cleanly comply with PySide6.
