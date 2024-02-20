@@ -200,10 +200,13 @@ class ConanInstallDialog(QDialog):
             items = app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(conan_ref), "all")
             if len(items) < 2:
                 return
+            if not self._conan_selected_install:
+                return
             dialog = PkgDiffDialog(self.parent())
             installed_pkg_info: ConanPkg= {"id" : "None",
-                    "settings": app.conan_api.get_profile_settings(self._conan_selected_install["profile"]),
-                    "options": self._conan_selected_install.get("options", {}),
+                    "settings": app.conan_api.get_profile_settings(
+                        self._conan_selected_install["profile"]),
+                    "options": self._conan_selected_install["options"],
                     "requires": [], "outdated": False
                     }
             dialog.add_diff_item(installed_pkg_info)
@@ -230,6 +233,8 @@ class ConanInstallDialog(QDialog):
         self._ui.options_widget.updateEditorData()
         for i in range(0, self._ui.options_widget.topLevelItemCount()):
             item = self._ui.options_widget.topLevelItem(i)
+            if not item:
+                continue
             widget = self._ui.options_widget.itemWidget(item, 1)
             value = item.data(1, 0)
             if isinstance(widget, QComboBox):
