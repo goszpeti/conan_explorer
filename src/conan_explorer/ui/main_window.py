@@ -295,7 +295,7 @@ class MainWindow(FluentWindow):
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
-        cleaner = ConanCleanup(app.conan_api)
+        cleaner = ConanCleanup(app.conan_api) # type: ignore
         loader = AsyncLoader(self)
         loader.async_loading(self, cleaner.get_cleanup_cache_paths, )
         loader.wait_for_finished()

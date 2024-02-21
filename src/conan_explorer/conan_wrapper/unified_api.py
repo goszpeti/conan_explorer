@@ -17,6 +17,7 @@ class ConanUnifiedApi():
 
     @abstractmethod
     def __init__(self):
+        self.info_cache: "ConanInfoCache"
         ...
 
     @abstractmethod
@@ -353,7 +354,6 @@ class ConanCommonUnifiedApi(ConanUnifiedApi):
     def __init__(self):
         # no direct Conan API access!
         self.info_cache: "ConanInfoCache"
-        super().__init__()
 
 ### General commands ###
 

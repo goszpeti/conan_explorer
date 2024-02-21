@@ -5,11 +5,6 @@ from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
 from unittest.mock import patch
 
-try:
-    from contextlib import chdir
-except ImportError:
-    from contextlib_chdir import chdir # type: ignore
-
 from conan_explorer import INVALID_PATH, user_save_path
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.typing import SignatureCheckMeta
@@ -20,10 +15,10 @@ from .types import (ConanAvailableOptions, ConanException, ConanOptions, ConanPa
 from .unified_api import ConanCommonUnifiedApi
 
 if TYPE_CHECKING:
-    from conan.api.conan_api import ConanAPI
+    from conan.api.conan_api import ConanAPI # type: ignore
     from conans.client.cache.cache import ClientCache
     from .conan_cache import ConanInfoCache
-    from conan.internal.cache.home_paths import HomePaths
+    from conan.internal.cache.home_paths import HomePaths  # type: ignore
 
 class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     """ Wrapper around ConanAPIV2 """

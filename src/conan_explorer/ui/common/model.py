@@ -47,7 +47,7 @@ class TreeModelItem(object):
     Implemented like the default QT example.
     """
 
-    def __init__(self, data: List[str],  parent=None, lazy_loading=False):
+    def __init__(self, data: List[str], parent=None, lazy_loading=False):
         self.parent_item = parent
         self.item_data = data
         self.child_items: List["Self"] = []

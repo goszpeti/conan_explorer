@@ -7,7 +7,7 @@ from PySide6.QtGui import QFont, QIcon
 from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
-from conan_explorer.conan_wrapper import ConanApi
+from conan_explorer.conan_wrapper import ConanApiSingleton
 from conan_explorer.conan_wrapper.types import (ConanPkg, ConanRef,
                                                 pretty_print_pkg_info)
 from conan_explorer.ui.common import (TreeModel, TreeModelItem,
@@ -138,4 +138,4 @@ class PkgSelectModel(TreeModel):
         return None
 
     def get_quick_profile_name(self, item: PackageTreeItem) -> str:
-        return ConanApi.build_conan_profile_name_alias(item.pkg_info.get("settings", {}))
+        return ConanApiSingleton.build_conan_profile_name_alias(item.pkg_info.get("settings", {}))

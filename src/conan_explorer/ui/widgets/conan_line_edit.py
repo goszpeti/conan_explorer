@@ -45,9 +45,9 @@ class ConanRefLineEdit(QLineEdit):
     def setEnabled(self, enabled: bool):
         # apply grey color to text, when disabled manually
         if enabled:
-            self.setStyleSheet(f"") # remove grey color
+            self.setStyleSheet("") # remove grey color
         else:
-            self.setStyleSheet(f"color: grey;")
+            self.setStyleSheet("color: grey;")
         super().setEnabled(enabled)
 
     @override

@@ -5,7 +5,6 @@ import platform
 import shutil
 import subprocess
 import tempfile
-
 from pathlib import Path
 from typing import List
 
@@ -206,7 +205,7 @@ def copy_path_with_overwrite(src: Path, dst: Path):
     folder name, if you want that!
     Exceptions will be caught and message logged to stdout.
     """
-    from shutil import copytree, copy2
+    from shutil import copy2, copytree
     try:
         dst.parent.mkdir(parents=True, exist_ok=True)
         if src.is_file():

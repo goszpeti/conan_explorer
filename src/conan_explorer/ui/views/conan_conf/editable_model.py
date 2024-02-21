@@ -1,13 +1,18 @@
 
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
 from typing_extensions import override
 
-import conan_explorer.app as app
-from conan_explorer.conan_wrapper.types import \
-    EditablePkg  # using global module pattern
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer.conan_wrapper.types import EditablePkg
 from conan_explorer.ui.common import TreeModel, TreeModelItem
+
+
+class EditableModelItemRoot(TreeModelItem):
+    def __init__(self, data: List[str], parent=None, lazy_loading=False):
+        self.child_items: List[EditableModelItem] = []
+        super().__init__(data, parent, lazy_loading)
 
 
 class EditableModelItem(TreeModelItem):
@@ -43,7 +48,7 @@ class EditableModelItem(TreeModelItem):
 class EditableModel(TreeModel):
     def __init__(self):
         super(EditableModel, self).__init__(checkable=True)
-        self.root_item = TreeModelItem(["Name", "Path", "Output folder"])  # "Layout",
+        self.root_item = EditableModelItemRoot(["Name", "Path", "Output folder"])  # "Layout",
         self.setup_model_data()
 
     def setup_model_data(self):

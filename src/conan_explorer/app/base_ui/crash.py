@@ -5,6 +5,7 @@ from types import TracebackType
 
 from conan_explorer import user_save_path
 
+
 def bug_dialog_exc_hook(exctype: "type[BaseException]", excvalue: BaseException, 
                         tb: "TracebackType | None"):
     """ App crash handling:

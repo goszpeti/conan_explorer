@@ -2,18 +2,11 @@
 from queue import Queue
 from threading import Thread
 # this allows to use forward declarations to avoid circular imports
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
-
+from typing import TYPE_CHECKING, Any, List, Optional, Protocol, Tuple, TypedDict
 from conan_explorer.settings import SettingsInterface
 
 if TYPE_CHECKING:
-    from typing import TypedDict, Protocol
-    from ..conan_wrapper import ConanApi
-else:
-    try:
-        from typing import TypedDict, Protocol
-    except ImportError:
-        from typing_extensions import TypedDict, Protocol
+    from ..conan_wrapper import ConanCommonUnifiedApi
 
 from conan_explorer import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
 from conan_explorer.app.logger import Logger
@@ -36,7 +29,7 @@ class ConanWorkerResultCallback(Protocol):
 class ConanWorker():
     """ Sequential worker with a queue to execute conan install/version alternatives commands """
 
-    def __init__(self, conan_api: "ConanApi", settings: SettingsInterface):
+    def __init__(self, conan_api: "ConanCommonUnifiedApi", settings: SettingsInterface):
         self._conan_api = conan_api
         self._conan_install_queue: Queue[Tuple[ConanWorkerElement,
                                          Optional[ConanWorkerResultCallback]]] = Queue(maxsize=0)

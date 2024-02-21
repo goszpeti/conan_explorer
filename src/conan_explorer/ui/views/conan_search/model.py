@@ -7,7 +7,7 @@ from typing_extensions import override
 import conan_explorer.app as app
 from conan_explorer.app import AsyncLoader  # using global module pattern
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper import ConanApi
+from conan_explorer.conan_wrapper import ConanApiSingleton
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef
 from conan_explorer.ui.common import (TreeModel, TreeModelItem,
                                       get_platform_icon, get_themed_asset_icon)
@@ -54,7 +54,7 @@ class SearchedPackageTreeItem(TreeModelItem):
                 if pkg_id in installed_ids:
                     installed = True
                 pkgs_to_be_added[pkg_id] = SearchedPackageTreeItem(
-                    [pkg_id, remote,  ConanApi.build_conan_profile_name_alias(
+                    [pkg_id, remote,  ConanApiSingleton.build_conan_profile_name_alias(
                         pkg.get("settings", {}))],
                     self, pkg, PROFILE_TYPE, False, installed)
         for pkg in pkgs_to_be_added.values():

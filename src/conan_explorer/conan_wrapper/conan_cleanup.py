@@ -1,14 +1,15 @@
-from . import ConanApi
 from pathlib import Path
 import platform
-from typing import Set
+from typing import TYPE_CHECKING, Set
 
 from conan_explorer import conan_version
 from conan_explorer.app.logger import Logger
+if TYPE_CHECKING:
+    from .conanV1 import ConanApi
 
 class ConanCleanup():
 
-    def __init__(self, conan_api: ConanApi) -> None:
+    def __init__(self, conan_api: "ConanApi") -> None:
         self._conan_api = conan_api
         self.orphaned_references: Set[str] = set()
         self.orphaned_packages: Set[str] = set()
