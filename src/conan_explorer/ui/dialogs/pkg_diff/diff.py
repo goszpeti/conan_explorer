@@ -16,6 +16,8 @@ from conan_explorer.ui.widgets import RoundedMenu
 
 
 class ConfigDiffHighlighter(ConfigHighlighter):
+    """ Syntax highlighter to highlight the differences of a dict with different
+    background colors (modified, added, removed)"""
     def __init__(self, parent, type: Literal['ini', 'yaml']) -> None:
         super().__init__(parent, type)
         self._reset_diff()
@@ -111,7 +113,8 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         self._item_data.append(content)
 
     def update_diff(self):
-        # populate left diff item menu
+        """ Resets the syntax highlighting, adds the different category items
+        to the SyntaxHighlighter and then redraws them """
         try:
             # reset diffs
             self._left_highlighter._reset_diff()
@@ -158,6 +161,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
     # internals
 
     def _on_item_changed(self, item: QListWidgetItem):
+        """ Set right content, when selection changes """
         sel_item_id = item.data(0)
         if "*" in sel_item_id:
             return
@@ -188,15 +192,16 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         self._ui.right_text_browser.setText(pkg_info)
 
     def _set_ref_item(self):
+        """ Change the reference (*, left content) """
         items = self._ui.pkgs_list_widget.selectedItems()
-        if not len(items) == 1:
+        if len(items) != 1:
             return
         self._clear_ref_item()
         sel_item = items[0]
-        id = sel_item.data(0)
+        pkg_id = sel_item.data(0)
         for item in self._item_data:
-            if item.get("id", "") == id:
-                item_name = "* " + id
+            if item.get("id", "") == pkg_id:
+                item_name = "* " + pkg_id
                 sel_item.setData(0, item_name)
                 self._set_left_content(self._filter_display_content(item))
                 self.update_diff()
