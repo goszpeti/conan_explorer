@@ -60,7 +60,7 @@ class SettingsInterface():
     """
 
     @abstractmethod
-    def set_auto_save(self, value):
+    def set_auto_save(self, value: bool):
         """ Enable auto save feature, so every value change triggers a save. """
         raise NotImplementedError
 

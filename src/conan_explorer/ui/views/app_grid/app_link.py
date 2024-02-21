@@ -1,6 +1,7 @@
 
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
+from typing_extensions import override
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QAction
@@ -111,7 +112,8 @@ class ListAppLink(QFrame):
         if ret == QDialog.DialogCode.Accepted:
             self._parent_tab.redraw(force=True)
 
-    def resizeEvent(self, event): # override
+    @override
+    def resizeEvent(self, event):
         if not self._parent_tab:
             return
         content_frame: QWidget = self._parent_tab.parent(

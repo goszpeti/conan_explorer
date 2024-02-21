@@ -1,20 +1,23 @@
 import platform
-
 from pathlib import Path
 from typing import Callable, List, Optional, Union
 
-import conan_explorer.app as app  # using global module pattern
-from conan_explorer import (INVALID_CONAN_REF, INVALID_PATH, 
-    USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL, USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
-from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
-from conan_explorer.app.logger import Logger
-from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
-from conan_explorer.ui.common import extract_icon, get_icon_from_image_file, get_themed_asset_icon, get_asset_image_path
-from conan_explorer.conan_wrapper.types import ConanRef
-
-# from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QObject
+from PySide6.QtCore import (QAbstractListModel, QModelIndex, QObject,
+                            QPersistentModelIndex, Qt)
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import QAbstractListModel, QModelIndex, QPersistentModelIndex, Qt, QObject
+from typing_extensions import override
+
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer import (INVALID_CONAN_REF, INVALID_PATH,
+                            USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
+                            USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
+from conan_explorer.app.logger import Logger
+from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
+from conan_explorer.conan_wrapper.types import ConanRef
+from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
+from conan_explorer.ui.common import (extract_icon, get_asset_image_path,
+                                      get_icon_from_image_file,
+                                      get_themed_asset_icon)
 
 from .config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 
@@ -78,31 +81,37 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
         if self.parent:  # delegate to top
             self.parent.save()
 
-    # override QAbstractListModel methods - used for rearrange functions
+    @override
     def data(self, index, role):
         if role == Qt.ItemDataRole.DisplayRole:
             return self.apps[index.row()].name
         if role == Qt.ItemDataRole.UserRole:
             return self.apps[index.row()]
 
+    @override
     def setData(self, index, value, role):
         if role == Qt.ItemDataRole.UserRole:
             self.apps[index.row()] = value
 
+    @override
     def rowCount(self, parent=None) -> int:
         return len(self.apps)
 
+    @override
     def columnCount(self, parent: "QModelIndex | QPersistentModelIndex") -> int:
         return 1
 
+    @override
     def insertRow(self, row: int, parent=QModelIndex()) -> bool:
         self.apps.insert(row, UiAppLinkModel())
         return super().insertRow(row, parent=parent)
 
+    @override
     def removeRow(self, row: int, parent=QModelIndex()) -> bool:
         self.apps.pop(row)
         return super().removeRow(row, parent=parent)
 
+    @override
     def moveRow(self, source_parent: Union[QModelIndex, QPersistentModelIndex], 
                  source_row: int,
                  destination_parent: Union[QModelIndex, QPersistentModelIndex], 

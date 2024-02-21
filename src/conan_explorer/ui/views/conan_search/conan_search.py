@@ -1,16 +1,17 @@
 from typing import TYPE_CHECKING, Optional
 
+from PySide6.QtCore import QEasingCurve, QPoint, QPropertyAnimation, Qt, Slot
+from PySide6.QtGui import QAction, QShortcut
+from PySide6.QtWidgets import QListWidgetItem, QWidget
+from typing_extensions import override
+
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer.ui.common.syntax_highlighting import ConfigHighlighter
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_explorer.ui.views import LocalConanPackageExplorer
 from conan_explorer.ui.widgets import RoundedMenu
-from PySide6.QtCore import QPoint, Qt, Slot, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QAction, QShortcut
-from PySide6.QtWidgets import QListWidgetItem, QWidget
 
 from .controller import ConanSearchController
-
 
 if TYPE_CHECKING:
     from conan_explorer.ui.fluent_window import FluentWindow
@@ -163,10 +164,12 @@ class ConanSearchView(PluginInterfaceV1):
         self._page_widgets.get_page_by_type(LocalConanPackageExplorer).select_local_package_from_ref(
             item.get_conan_ref())
 
-    def resizeEvent(self, a0) -> None:  # override QtGui.QResizeEvent
+    @override
+    def resizeEvent(self, a0) -> None:
         super().resizeEvent(a0)
         self._search_controller._resize_search_result_columns()
 
+    @override
     def showEvent(self, a0) -> None:
         # set cursor in search line when switching to this tab
         self._ui.search_line.setFocus()

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from shutil import rmtree
 from time import sleep
 from typing import Optional
+from typing_extensions import override
 
 from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
 from PySide6.QtGui import QKeySequence, QDesktopServices, QShortcut
@@ -90,7 +91,8 @@ class MainWindow(FluentWindow):
         # size needs to be set as early as possible to correctly position loading windows
         self.restore_window_state()
 
-    def close(self): # override
+    @override
+    def close(self):
         while not self._can_close:
             sleep(0.1)
         return super().close()
@@ -164,7 +166,9 @@ class MainWindow(FluentWindow):
         self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.svg")
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.svg")
 
-    def closeEvent(self, event):  # override QMainWindow
+
+    @override
+    def closeEvent(self, event):
         """ Remove qt logger, so it doesn't log into a non existant object """
         self.app_grid.setEnabled(False)  # disable app_grid to signal shutdown
         try:
@@ -175,7 +179,8 @@ class MainWindow(FluentWindow):
         remove_qt_logger(Logger(), self.qt_logger_name)
         super().closeEvent(event)
 
-    def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent
+    @override
+    def resizeEvent(self, a0) -> None:
         super().resizeEvent(a0)
         try:
             if self.loaded:

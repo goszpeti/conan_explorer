@@ -1,8 +1,11 @@
 from datetime import datetime, timedelta
-from PySide6.QtCore import (QEasingCurve, QPoint, QPointF, QPropertyAnimation,
-                          QRectF, QSequentialAnimationGroup, Qt, Property, Slot) # type: ignore
+
+from PySide6.QtCore import (Property, QEasingCurve, QPoint,  # type: ignore
+                            QPointF, QPropertyAnimation, QRectF,
+                            QSequentialAnimationGroup, Qt, Slot)
 from PySide6.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen
-from PySide6.QtWidgets import QCheckBox, QApplication
+from PySide6.QtWidgets import QApplication, QCheckBox
+from typing_extensions import override
 
 
 class AnimatedToggle(QCheckBox):
@@ -50,6 +53,7 @@ class AnimatedToggle(QCheckBox):
         while datetime.now() - start <= timedelta(milliseconds=self.ANIM_DURATION_MS):
             QApplication.processEvents()
 
+    @override
     def hitButton(self, pos: QPoint):
         return self.contentsRect().contains(pos)
 
@@ -71,8 +75,8 @@ class AnimatedToggle(QCheckBox):
             self.thumb_anim.setEndValue(0)
         self.animations_group.start()
 
+    @override
     def paintEvent(self, e: QPaintEvent):
-
         cont_rect = self.contentsRect()
         thumb_radius = round(self.THUMB_REL_SIZE * cont_rect.height())
 

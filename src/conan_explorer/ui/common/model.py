@@ -1,5 +1,7 @@
-from typing import Callable, List, TYPE_CHECKING
-from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
+from typing import TYPE_CHECKING, Callable, List
+from typing_extensions import override
+
+from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, SignalInstance
 from PySide6.QtWidgets import QFileSystemModel
 
 from conan_explorer.app.logger import Logger
@@ -29,6 +31,7 @@ class FileSystemModel(QFileSystemModel):
         super().__init__(parent)
         self.alignments = {QORI.Horizontal: h_align, QORI.Vertical: v_align}
 
+    @override
     def headerData(self, section, orientation, role):
         if role == QIDR.TextAlignmentRole:
             return self.alignments[orientation]
@@ -115,13 +118,15 @@ class TreeModel(QAbstractItemModel):
         self.root_item.remove_child(item)
         self.endResetModel()
 
-    def columnCount(self, parent):  # override
+    @override
+    def columnCount(self, parent):
         if parent.isValid():
             return parent.internalPointer().column_count()  # type: ignore
         else:
             return self.root_item.column_count()
 
-    def index(self, row, column, parent):  # override
+    @override
+    def index(self, row, column, parent):
         if not self.hasIndex(row, column, parent):
             return QModelIndex()
 
@@ -136,10 +141,12 @@ class TreeModel(QAbstractItemModel):
         else:
             return QModelIndex()
 
-    def data(self, index, role):  # override
+    @override
+    def data(self, index, role):
         raise NotImplementedError
 
-    def rowCount(self, parent):  # override
+    @override
+    def rowCount(self, parent):
         if parent.column() > 0:
             return 0
 
@@ -150,7 +157,8 @@ class TreeModel(QAbstractItemModel):
 
         return parent_item.child_count()  # type: ignore
 
-    def flags(self, index):  # override
+    @override
+    def flags(self, index):
         if not index.isValid():
             return Qt.ItemFlag.NoItemFlags
         flags = Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
@@ -158,7 +166,8 @@ class TreeModel(QAbstractItemModel):
             flags = flags | Qt.ItemFlag.ItemIsUserCheckable
         return flags
 
-    def parent(self, index):  # override
+    @override
+    def parent(self, index):
         if not index.isValid():
             return QModelIndex()
 
@@ -170,17 +179,20 @@ class TreeModel(QAbstractItemModel):
 
         return self.createIndex(parent_item.row(), 0, parent_item)
 
-    def headerData(self, section, orientation, role):  # override
+    @override
+    def headerData(self, section, orientation, role):
         if orientation == Qt.Orientation.Horizontal and role == QIDR.DisplayRole:
             return self.root_item.data(section)
         return None
 
+    @override
     def canFetchMore(self, index):
         if not index.isValid():
             return False
         item = index.internalPointer()
         return not item.is_loaded  # enabled, if lazy loading is enabled
 
+    @override
     def fetchMore(self, index):
         item = index.internalPointer()
         item.load_children()

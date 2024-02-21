@@ -1,9 +1,12 @@
 
 from typing import Any, Optional, Union
+
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
+from typing_extensions import override
 
 import conan_explorer.app as app
-from conan_explorer.conan_wrapper.types import EditablePkg # using global module pattern
+from conan_explorer.conan_wrapper.types import \
+    EditablePkg  # using global module pattern
 from conan_explorer.ui.common import TreeModel, TreeModelItem
 
 
@@ -71,7 +74,8 @@ class EditableModel(TreeModel):
             return True
         return False
 
-    def data(self, index: Union[QModelIndex, QPersistentModelIndex], role: int) -> Any:  # override
+    @override
+    def data(self, index: Union[QModelIndex, QPersistentModelIndex], role: int) -> Any:
         if not index.isValid():
             return None
         item: EditableModelItem = index.internalPointer()  # type: ignore
@@ -82,6 +86,7 @@ class EditableModel(TreeModel):
                 return ""
         return None
 
+    @override
     def rowCount(self, parent=None):
         return self.root_item.child_count()
 

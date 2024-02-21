@@ -1,14 +1,18 @@
 from pathlib import Path
 from typing import List
 
-from conan_explorer.ui.common import FileSystemModel
-from PySide6.QtCore import Qt, QModelIndex
+from PySide6.QtCore import QModelIndex, Qt
 from PySide6.QtGui import QColor, QFont
+from typing_extensions import override
+
+from conan_explorer.ui.common import FileSystemModel
+
 
 class CalFileSystemModel(FileSystemModel):
     _disabled_rows: "set[int]" = set()
 
-    def data(self, index: QModelIndex, role: Qt.ItemDataRole):  # override
+    @override
+    def data(self, index: QModelIndex, role: Qt.ItemDataRole):
         if role == Qt.ItemDataRole.FontRole:
             if self._row_is_disabled(index):
                 font = QFont() 

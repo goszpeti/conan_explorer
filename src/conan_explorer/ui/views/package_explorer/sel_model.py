@@ -1,12 +1,17 @@
 from enum import Enum
 from typing import Any, List, Union
 
+from PySide6.QtCore import (QModelIndex, QPersistentModelIndex,
+                            QSortFilterProxyModel, Qt)
+from PySide6.QtGui import QFont, QIcon
+from typing_extensions import override
+
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer.conan_wrapper import ConanApi
-from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
-from conan_explorer.ui.common import get_platform_icon, get_themed_asset_icon, TreeModel, TreeModelItem
-from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex, QPersistentModelIndex
-from PySide6.QtGui import QIcon, QFont
+from conan_explorer.conan_wrapper.types import (ConanPkg, ConanRef,
+                                                pretty_print_pkg_info)
+from conan_explorer.ui.common import (TreeModel, TreeModelItem,
+                                      get_platform_icon, get_themed_asset_icon)
 
 
 class PkgSelectionType(Enum):
@@ -23,7 +28,8 @@ class PackageTreeItem(TreeModelItem):
         self.pkg_info: ConanPkg = pkg_info
         self.type = item_type
 
-    def load_children(self):  # override
+    @override
+    def load_children(self):
         # can't call super method: fetching would finish early
         self.child_items = []
         pkg_item = PackageTreeItem(
@@ -35,7 +41,8 @@ class PackageTreeItem(TreeModelItem):
             self.append_child(pkg_item)
         self.is_loaded = True
 
-    def child_count(self) -> int:  # override
+    @override
+    def child_count(self) -> int:
         if self.type == PkgSelectionType.ref:
             return len(self.child_items) if len(self.child_items) > 0 else 1
         return 0  # for safety
@@ -47,7 +54,8 @@ class PackageFilter(QSortFilterProxyModel):
         super().__init__()
         self.setFilterKeyColumn(0)
 
-    def filterAcceptsRow(self, row_num, source_parent) -> bool: # override
+    @override
+    def filterAcceptsRow(self, row_num, source_parent) -> bool:
         # Check if the current row matches
         if self.filter_accepts_row_itself(row_num, source_parent):
             return True
@@ -94,7 +102,8 @@ class PkgSelectModel(TreeModel):
             self.root_item.append_child(conan_item)
         self.endResetModel()
 
-    def data(self, index: Union[QModelIndex, QPersistentModelIndex], role: int = 0) -> Any:  # override
+    @override
+    def data(self, index: Union[QModelIndex, QPersistentModelIndex], role: int = 0) -> Any:
         if not index.isValid():
             return None
         item: PackageTreeItem = index.internalPointer()  # type: ignore

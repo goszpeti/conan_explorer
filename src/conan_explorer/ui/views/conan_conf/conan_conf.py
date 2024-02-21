@@ -1,27 +1,29 @@
 import platform
-from pathlib import Path
 import sys
-from typing import Optional, TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, Optional
 
-from conan_explorer import conan_version
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QAction, QIcon
+from PySide6.QtWidgets import QApplication, QInputDialog, QMessageBox, QWidget
+from typing_extensions import override
+
 import conan_explorer.app as app
+from conan_explorer import conan_version
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import delete_path
-from conan_explorer.ui.common import get_themed_asset_icon, ConfigHighlighter
+from conan_explorer.ui.common import ConfigHighlighter, get_themed_asset_icon
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_explorer.ui.widgets import RoundedMenu
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog
 
-from .dialogs import RemoteEditDialog, RemoteLoginDialog, EditableEditDialog
-from .remotes_controller import ConanRemoteController
+from .dialogs import EditableEditDialog, RemoteEditDialog, RemoteLoginDialog
 from .editable_controller import ConanEditableController
 from .profiles_model import ProfilesModel
+from .remotes_controller import ConanRemoteController
 
 if TYPE_CHECKING:
-    from conan_explorer.ui.main_window import BaseSignals
     from conan_explorer.ui.fluent_window.fluent_window import FluentWindow
+    from conan_explorer.ui.main_window import BaseSignals
 
 class ConanConfigView(PluginInterfaceV1):
 
@@ -88,7 +90,8 @@ class ConanConfigView(PluginInterfaceV1):
         except Exception:
             Logger().error("Cannot read settings.yaml file!")
 
-    def resizeEvent(self, a0):  # override
+    @override
+    def resizeEvent(self, a0):
         """ Resize remote view columns automatically if window size changes """
         super().resizeEvent(a0)
         self._remotes_controller.resize_remote_columns()
