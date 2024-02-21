@@ -131,7 +131,6 @@ class PackageSelectionController(QObject):
             return
         for item in items:
             dialog.add_diff_item(item.pkg_info)
-        dialog.update_diff()
         dialog.show()
 
     # Model selection helpers

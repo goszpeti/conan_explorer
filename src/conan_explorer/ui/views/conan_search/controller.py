@@ -97,7 +97,6 @@ class ConanSearchController(QObject):
             if not item.pkg_info:
                 continue
             dialog.add_diff_item(item.pkg_info)
-        dialog.update_diff()
         dialog.show()
 
     def install(self, ref):

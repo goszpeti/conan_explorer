@@ -1,10 +1,11 @@
 
 from pprint import pformat
 from typing import Literal
+from typing_extensions import override
 
 from dictdiffer import diff
 from PySide6.QtCore import QRegularExpression, Qt
-from PySide6.QtGui import QAction, QColor, QTextCharFormat
+from PySide6.QtGui import QAction, QColor, QShowEvent, QTextCharFormat
 from PySide6.QtWidgets import QDialog, QListWidgetItem
 
 from conan_explorer.app.logger import Logger
@@ -17,15 +18,14 @@ from conan_explorer.ui.widgets import RoundedMenu
 class ConfigDiffHighlighter(ConfigHighlighter):
     def __init__(self, parent, type: Literal['ini', 'yaml']) -> None:
         super().__init__(parent, type)
+        self._reset_diff()
+
+    def _reset_diff(self):
         self.modified_diffs = []
         self.added_diffs = []
         self.removed_diffs = []
 
-    def reset_diff(self):
-        self.modified_diffs = []
-        self.added_diffs = []
-        self.removed_diffs = []
-
+    @override
     def highlightBlock(self, text: str):
         super().highlightBlock(text)
         key_format = QTextCharFormat()
@@ -69,8 +69,6 @@ class PkgDiffDialog(QDialog, ThemedWidget):
             self._ui.left_text_browser.document(), "yaml")
         self._right_highlighter = ConfigDiffHighlighter(
             self._ui.right_text_browser.document(), "yaml")
-        # self._diff_highlighter = ConfigHighlighter(
-        #     self._ui.diff_text_browser.document(), "yaml")
         self._ui.button_box.accepted.connect(self.close)
         self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint)
 
@@ -95,6 +93,10 @@ class PkgDiffDialog(QDialog, ThemedWidget):
     def on_pkg_context_menu_requested(self, position):
         self.select_cntx_menu.exec(self._ui.pkgs_list_widget.mapToGlobal(position))
 
+    def showEvent(self, arg__1: QShowEvent) -> None:
+        self.update_diff()
+        return super().showEvent(arg__1)
+
     # public methods
 
     def add_diff_item(self, content: ConanPkg):
@@ -105,15 +107,15 @@ class PkgDiffDialog(QDialog, ThemedWidget):
             self._set_left_content(self._filter_display_content(content))
         elif self._ui.pkgs_list_widget.count() == 1:  # second item
             self._set_right_content(self._filter_display_content(content))
-        item = QListWidgetItem(item_name, self._ui.pkgs_list_widget)
+        QListWidgetItem(item_name, self._ui.pkgs_list_widget)
         self._item_data.append(content)
 
     def update_diff(self):
         # populate left diff item menu
         try:
             # reset diffs
-            self._left_highlighter.reset_diff()
-            self._right_highlighter.reset_diff()
+            self._left_highlighter._reset_diff()
+            self._right_highlighter._reset_diff()
 
             # set left and right content with first two diff elements
             pkg_diffs = list(diff(self._left_content, self._right_content))
@@ -155,7 +157,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
 
     # internals
 
-    def _on_item_changed(self, item):
+    def _on_item_changed(self, item: QListWidgetItem):
         sel_item_id = item.data(0)
         if "*" in sel_item_id:
             return

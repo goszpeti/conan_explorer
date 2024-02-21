@@ -22,7 +22,7 @@ from conan_explorer import conan_version
 from conan_explorer.app import bug_dialog_exc_hook
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_explorer.conan_wrapper.conanV1 import ConanApi
-from conan_explorer.conan_wrapper.types import ConanRef, Remote
+from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, Remote
 from conan_explorer.settings import (DEFAULT_INSTALL_PROFILE,
                                      FILE_EDITOR_EXECUTABLE)
 from conan_explorer.ui.common.theming import get_user_theme_color
@@ -409,14 +409,13 @@ def test_conan_diff_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     available_refs.append(a2)
 
     #conan.get_remote_pkgs_from_ref(ConanRef.loads(TEST_REF), None)
-    wanted_ref = {  # add default options
+    wanted_ref: ConanPkg = {  # add default options
         'id': '', 'options': {"shared": "False", "variant": "var1", "fPIC2": "True"},
         'settings': {'arch_build': 'x86_64', 'os_build': 'Linux', "build_type": "Release"},
         'requires': [], 'outdated': False}
     dialog = PkgDiffDialog(root_obj)
-    dialog.set_left_content(wanted_ref)
-    dialog.set_right_content(available_refs[0])
-    dialog.update_diff()
+    dialog.add_diff_item(wanted_ref)
+    dialog.add_diff_item(available_refs[0])
     dialog.show()
     #from pytestqt.plugin import _qapp_instance
     # while True:

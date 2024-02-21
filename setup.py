@@ -44,7 +44,7 @@ REQUIRES = [
     "dictdiffer==0.9.0",  # MIT License
     # compatibility
     'contextlib-chdir==1.0.2; python_version<"3.11"',  # BSD License (BSD-3-Clause)
-    'typing-extensions>=3.10.0.2, <5; python_version<="3.10"',  # Python Software Foundation License(PSF)
+    'typing-extensions>=3.10.0.2, <5',  # Python Software Foundation License(PSF)
     "packaging",  # use the built-in, or get latest if there is some issue with pip
     # transitive compatibility
     "Jinja2>=2.3, <4"  # BSD License (BSD-3-Clause) (restriction from conan 1.24, since it is included there)
