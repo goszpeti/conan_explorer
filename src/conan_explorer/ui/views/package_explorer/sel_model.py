@@ -138,4 +138,4 @@ class PkgSelectModel(TreeModel):
         return None
 
     def get_quick_profile_name(self, item: PackageTreeItem) -> str:
-        return ConanApiSingleton.build_conan_profile_name_alias(item.pkg_info.get("settings", {}))
+        return ConanApiSingleton().build_conan_profile_name_alias(item.pkg_info.get("settings", {}))

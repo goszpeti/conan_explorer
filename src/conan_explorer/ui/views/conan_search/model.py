@@ -54,7 +54,7 @@ class SearchedPackageTreeItem(TreeModelItem):
                 if pkg_id in installed_ids:
                     installed = True
                 pkgs_to_be_added[pkg_id] = SearchedPackageTreeItem(
-                    [pkg_id, remote,  ConanApiSingleton.build_conan_profile_name_alias(
+                    [pkg_id, remote,  ConanApiSingleton().build_conan_profile_name_alias(
                         pkg.get("settings", {}))],
                     self, pkg, PROFILE_TYPE, False, installed)
         for pkg in pkgs_to_be_added.values():
