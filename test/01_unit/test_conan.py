@@ -9,7 +9,7 @@ import pytest
 from test.conftest import TEST_REF, conan_install_ref, conan_remove_ref
 from typing import List
 
-from conan_explorer.conan_wrapper import ConanApi
+from conan_explorer.conan_wrapper import ConanApiSingleton as ConanApi
 from conan_explorer.conan_wrapper.types import ConanPkg, create_key_value_pair_list
 from conan_explorer.conan_wrapper.conan_worker import (ConanWorker,
                                                            ConanWorkerElement)
@@ -30,12 +30,13 @@ def test_conan_get_conan_buildinfo():
 def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
     # check empty - should return a default name
-    profile_name = ConanApi.build_conan_profile_name_alias({})
+    conan_api = ConanApi()
+    profile_name = conan_api.build_conan_profile_name_alias({})
     assert profile_name == "No Settings"
 
     # check a partial
     settings = {'os': 'Windows', 'arch': 'x86_64'}
-    profile_name = ConanApi.build_conan_profile_name_alias(settings)
+    profile_name = ConanApi().build_conan_profile_name_alias(settings)
     assert profile_name == "Windows_x64"
 
     # check windows
@@ -43,13 +44,13 @@ def test_conan_profile_name_alias_builder():
                              'arch_build': 'x86_64', 'compiler': 'Visual Studio', 
                              'compiler.version': '16', 'compiler.toolset': 'v142', 
                              'build_type': 'Release'}
-    profile_name = ConanApi.build_conan_profile_name_alias(WINDOWS_x64_VS16_SETTINGS)
+    profile_name = ConanApi().build_conan_profile_name_alias(WINDOWS_x64_VS16_SETTINGS)
     assert profile_name == "Windows_x64_vs16_v142_release"
 
     # check linux
     LINUX_X64_GCC7_SETTINGS = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 
                            'compiler.version': '7.4', 'build_type': 'Debug'}
-    profile_name = ConanApi.build_conan_profile_name_alias(LINUX_X64_GCC7_SETTINGS)
+    profile_name = ConanApi().build_conan_profile_name_alias(LINUX_X64_GCC7_SETTINGS)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
 def test_conan_short_path_root():
@@ -249,7 +250,8 @@ def test_conan_worker(base_fixture, mocker):
         "settings": {}, "update": False,  "auto_install": True, "profile": ""}
     ]
 
-    mock_func = mocker.patch('conan_explorer.conan_wrapper.ConanApi.get_path_or_auto_install')
+    mock_func = mocker.patch(
+        f'{type(ConanApi()).__module__}.{type(ConanApi()).__name__}.get_path_or_auto_install')
     import conan_explorer.app as app
 
     conan_worker = ConanWorker(ConanApi().init_api(), app.active_settings)

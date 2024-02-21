@@ -1,15 +1,8 @@
-from typing import TYPE_CHECKING, Union
+from typing import Union, Literal
 import conan_explorer.app as app
 from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QColor
 
-if TYPE_CHECKING:
-    from typing import Literal
-else:
-    try:
-        from typing import Literal
-    except ImportError:
-        from typing_extensions import Literal
 
 from conan_explorer.settings import GUI_MODE, GUI_MODE_DARK
 class ConfigHighlighter(QSyntaxHighlighter):

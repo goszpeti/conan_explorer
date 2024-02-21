@@ -95,6 +95,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
     def on_pkg_context_menu_requested(self, position):
         self.select_cntx_menu.exec(self._ui.pkgs_list_widget.mapToGlobal(position))
 
+    @override
     def showEvent(self, arg__1: QShowEvent) -> None:
         self.update_diff()
         return super().showEvent(arg__1)

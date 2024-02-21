@@ -5,21 +5,17 @@ Settings need to be already set up for usage.
 """
 
 from conan_explorer import conan_version
-
-# if hasattr(typing, "override"):
-#     override = typing.override
-# else:
-
 from .unified_api import ConanCommonUnifiedApi
-
+from .conan_cache import ConanInfoCache
+from .conan_worker import ConanWorker
 
 def ConanApiSingleton() -> ConanCommonUnifiedApi:
     if conan_version.startswith("1"):
-        from .conanV1 import ConanApi
+        from conan_explorer.conan_wrapper.conanV1 import ConanApi
+        return ConanApi()
     elif conan_version.startswith("2"):
         from .conanV2 import ConanApi
+        return ConanApi()
     else:
         raise RuntimeError("Can't recognize Conan version")
-    return ConanApi() # type: ignore
-from .conan_cache import ConanInfoCache
-from .conan_worker import ConanWorker
+

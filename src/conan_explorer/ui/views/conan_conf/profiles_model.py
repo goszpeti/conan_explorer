@@ -28,7 +28,7 @@ class ProfilesModel(QAbstractListModel):
             return get_platform_icon(text)
 
     @override
-    def rowCount(self, index):
+    def rowCount(self, parent):
         return len(self._profiles)
 
     def get_index_from_profile(self, profile_name: str) -> Optional[QModelIndex]:

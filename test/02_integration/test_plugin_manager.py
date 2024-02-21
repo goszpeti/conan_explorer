@@ -4,7 +4,6 @@ from conan_explorer.ui.views.plugins_manager.plugins import PluginsPage
 import conan_explorer  # for mocker
 import conan_explorer.app as app
 from conan_explorer.ui.main_window import MainWindow
-from conan_explorer.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtWidgets
 
 Qt = QtCore.Qt

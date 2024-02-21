@@ -8,7 +8,6 @@ from typing_extensions import override
 from conan_explorer import BUILT_IN_PLUGIN, PathLike, base_path
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import get_default_file_editor
-from conan_explorer.app.typing import SignatureCheckMeta
 
 from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, AUTO_OPEN_LAST_VIEW,
                CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE,
@@ -42,7 +41,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
     }
 
 
-class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
+class IniSettings(SettingsInterface):
     """
     Settings mechanism with an ini file to use as a storage.
     File and entries are automatically created from the default value of the class.

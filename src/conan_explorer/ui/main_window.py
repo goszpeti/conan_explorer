@@ -6,7 +6,7 @@ from typing import Optional
 from typing_extensions import override
 
 from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
-from PySide6.QtGui import QKeySequence, QDesktopServices, QShortcut
+from PySide6.QtGui import QKeySequence, QDesktopServices, QResizeEvent, QShortcut
 from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
     QVBoxLayout, QWidget)
 
@@ -180,8 +180,8 @@ class MainWindow(FluentWindow):
         super().closeEvent(event)
 
     @override
-    def resizeEvent(self, a0) -> None:
-        super().resizeEvent(a0)
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
         try:
             if self.loaded:
                 self.ui.page_stacked_widget.currentWidget().setMaximumWidth(self.ui.center_frame.width() - 4)
