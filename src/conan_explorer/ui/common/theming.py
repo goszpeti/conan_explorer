@@ -1,30 +1,21 @@
-import platform
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union
+from typing import (Dict, Optional, Protocol, Tuple, TypedDict, Union,
+                    runtime_checkable)
+
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon, QImage, QPixmap
+from PySide6.QtWidgets import QWidget
 
 import conan_explorer.app as app
-from conan_explorer import base_path
+ # reimport for usage in other files
 from conan_explorer.app.base_ui.theming import get_gui_dark_mode, get_user_theme_color
-from conan_explorer.app.system import is_windows_11
-from conan_explorer.settings import (FONT_SIZE, GUI_MODE, GUI_MODE_LIGHT, GUI_MODE_DARK,
-                                        GUI_STYLE, GUI_STYLE_FLUENT, GUI_STYLE_MATERIAL)
 from conan_explorer.app.logger import Logger
+from conan_explorer.settings import (GUI_STYLE, GUI_STYLE_FLUENT,
+                                     GUI_STYLE_MATERIAL)
+from conan_explorer.ui.common import (draw_svg_with_color,
+                                      get_icon_from_image_file,
+                                      get_inverted_asset_image)
 
-from jinja2 import Template
-from PySide6.QtWidgets import QApplication, QWidget
-from PySide6.QtGui import QIcon, QPixmap, QImage, QFont, QFontDatabase
-from PySide6.QtCore import QSize
-
-from conan_explorer.ui.common import (draw_svg_with_color, get_icon_from_image_file, 
-                                          get_inverted_asset_image)
-
-if TYPE_CHECKING:
-    from typing import TypedDict, Protocol, runtime_checkable
-else:
-    try:
-        from typing_extensions import Protocol, TypedDict, runtime_checkable
-    except ImportError:
-        from typing import Protocol, TypedDict, runtime_checkable
 
 @runtime_checkable
 class CanSetIconWidgetProtocol(Protocol):

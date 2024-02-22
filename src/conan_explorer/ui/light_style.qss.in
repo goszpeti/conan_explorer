@@ -272,11 +272,6 @@ QPushButton#side_menu_title_button {
 
 /* Generic widgets */
 
-QComboBox {
-    background-color: #F0F0F0;
-    border-radius: 0px;
-}
-
 QHeaderView {
     background-color: #D8D8D8;
     font-weight: 500;
