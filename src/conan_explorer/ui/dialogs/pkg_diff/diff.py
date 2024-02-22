@@ -66,7 +66,6 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         self._right_content = {}
         self._item_data = []
         self.setWindowTitle("Compare Packages")
-        self._highlight_diff = {}
         self._left_highlighter = ConfigDiffHighlighter(
             self._ui.left_text_browser.document(), "yaml")
         self._right_highlighter = ConfigDiffHighlighter(
@@ -96,22 +95,61 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         self.select_cntx_menu.exec(self._ui.pkgs_list_widget.mapToGlobal(position))
 
     @override
-    def showEvent(self, arg__1: QShowEvent) -> None:
+    def showEvent(self, event: QShowEvent) -> None:
+        self._fill_left_items()
         self.update_diff()
-        return super().showEvent(arg__1)
+        return super().showEvent(event)
 
     # public methods
 
     def add_diff_item(self, content: ConanPkg):
         """" """
-        item_name = content.get("id", "Unknown")
-        if self._ui.pkgs_list_widget.count() == 0:  # first item
-            item_name = "* " + item_name
-            self._set_left_content(self._filter_display_content(content))
-        elif self._ui.pkgs_list_widget.count() == 1:  # second item
-            self._set_right_content(self._filter_display_content(content))
-        QListWidgetItem(item_name, self._ui.pkgs_list_widget)
         self._item_data.append(content)
+
+    def _fill_left_items(self):
+        ref = self._item_data[0]
+        ref["prio"] = -1
+
+        item_data_len = len(self._item_data)
+        for i in range(1, item_data_len):
+            content = self._item_data[i]
+            pkg_diffs = list(diff(ref, content))
+            pkg_arch_diffs = list(
+                filter(lambda diff: diff[1] == "settings.arch", pkg_diffs))
+            content["prio"] = 5
+            if pkg_arch_diffs:
+                content["prio"] = 4
+                continue
+            pkg_os_diffs = list(
+                filter(lambda diff: diff[1] == "settings.os", pkg_diffs))
+            if pkg_os_diffs:
+                content["prio"] = 3
+                continue
+            pkg_compiler_diffs = list(
+                filter(lambda diff: diff[1] == "settings.compiler", pkg_diffs))
+            if pkg_compiler_diffs:
+                content["prio"] = 2
+                continue
+            pkg_compiler_version_diffs = list(
+                filter(lambda diff: diff[1] == ['settings', 'compiler.version'], pkg_diffs))
+            if pkg_compiler_version_diffs:
+                content["prio"] = 1
+                continue
+            if not pkg_compiler_version_diffs:
+                content["prio"] = 0
+                continue
+        
+        self._set_left_content(self._filter_display_content(ref))
+        QListWidgetItem("* " + ref.get("id", "Unknown"), self._ui.pkgs_list_widget)
+        for prio in range(0, 5):
+            for content in self._item_data:
+                if prio == content["prio"]:
+                    item_name = content.get("id", "Unknown")
+                    QListWidgetItem(item_name, self._ui.pkgs_list_widget)
+                    continue
+        
+        self._set_right_content(self._filter_display_content(self._item_data[1]))
+
 
     def update_diff(self):
         """ Resets the syntax highlighting, adds the different category items
@@ -163,6 +201,8 @@ class PkgDiffDialog(QDialog, ThemedWidget):
 
     def _on_item_changed(self, item: QListWidgetItem):
         """ Set right content, when selection changes """
+        if not item:
+            return
         sel_item_id = item.data(0)
         if "*" in sel_item_id:
             return
@@ -197,18 +237,15 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         items = self._ui.pkgs_list_widget.selectedItems()
         if len(items) != 1:
             return
-        self._clear_ref_item()
         sel_item = items[0]
         pkg_id = sel_item.data(0)
         for item in self._item_data:
             if item.get("id", "") == pkg_id:
-                item_name = "* " + pkg_id
-                sel_item.setData(0, item_name)
+                i = self._item_data.index(item)
+                self._item_data.pop(i)
+                self._item_data.insert(0, item)
                 self._set_left_content(self._filter_display_content(item))
-                self.update_diff()
-                return
-
-    def _clear_ref_item(self):
-        items = self._ui.pkgs_list_widget.findItems("* ", Qt.MatchFlag.MatchContains)
-        item = items[0]
-        item.setData(0, item.data(0).replace("* ", ""))
+                break
+        self._ui.pkgs_list_widget.clear()
+        self._fill_left_items()
+        self.update_diff()
