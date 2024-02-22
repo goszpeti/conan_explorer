@@ -64,8 +64,11 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.updateGeometry()
         self.resize_filter()
 
+    def tab_close_requested(self, pkg_ctrl_to_close):
+        self.on_close_tab(self._pkg_tabs_ctrl.index(pkg_ctrl_to_close))
+
+
     def on_close_tab(self, index: int):
-        # self._ui.package_tab_widget.tabBar().setTabVisible(index, False)
         self._ui.package_tab_widget.removeTab(index)
         self._pkg_tabs_ctrl.pop(index)
 
@@ -96,7 +99,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             file_explorer_view.setSortingEnabled(True)
             file_explorer_view.setAnimated(True)
             file_explorer_view.setSelectionMode(
-                                    QAbstractItemView.SelectionMode.ExtendedSelection)
+                QAbstractItemView.SelectionMode.ExtendedSelection)
 
             self._pkg_tabs_ctrl.append(PackageFileExplorerController(
                 self, file_explorer_view, self._ui.package_path_label,

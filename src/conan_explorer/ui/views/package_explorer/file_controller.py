@@ -16,17 +16,19 @@ from PySide6.QtCore import (QMimeData, QModelIndex, QObject,
 from PySide6.QtWidgets import (QApplication, QTextBrowser, QMessageBox,
                                QTreeView, QWidget)
 
+
 from .sel_model import PkgSelectionType
 from .file_model import CalFileSystemModel
 
 if TYPE_CHECKING:
     from conan_explorer.ui.fluent_window import FluentWindow
     from conan_explorer.ui.main_window import BaseSignals
+    from .package_explorer import LocalConanPackageExplorer
 
 
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QTextBrowser,
+    def __init__(self, parent: "LocalConanPackageExplorer", view: QTreeView, pkg_path_label: QTextBrowser,
                  conan_pkg_selected: SignalInstance, base_signals: "BaseSignals",
                  page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
@@ -34,9 +36,9 @@ class PackageFileExplorerController(QObject):
         self._page_widgets = page_widgets
         self._view = view
         self._pkg_path_label = pkg_path_label
-        self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
         self._type = PkgSelectionType.ref
+        base_signals.conan_pkg_removed.connect(self.on_conan_pkg_removed)
 
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
@@ -89,8 +91,12 @@ class PackageFileExplorerController(QObject):
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
         """ Slot for on_conan_pkg_removed signal. """
         # clear file view if this pkg is selected
-        if self._current_ref == conan_ref:
+        own_id = pkg_id
+        if self._current_pkg:
+            own_id = self._current_pkg.get("id", "")
+        if self._current_ref == conan_ref and pkg_id == own_id:
             self.close_files_view()
+            self.parent().tab_close_requested(self) # type: ignore
 
     def close_files_view(self):
         """ Reset and clear up file view """
