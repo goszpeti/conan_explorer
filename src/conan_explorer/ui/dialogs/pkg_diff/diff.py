@@ -62,22 +62,25 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         from .diff_ui import Ui_Dialog
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
+        self._init_pkg_context_menu()
+
+        self.setWindowTitle("Compare Packages")
+        self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint)
+
         self._left_content = {}
         self._right_content = {}
         self._item_data = []
-        self.setWindowTitle("Compare Packages")
+
         self._left_highlighter = ConfigDiffHighlighter(
             self._ui.left_text_browser.document(), "yaml")
         self._right_highlighter = ConfigDiffHighlighter(
             self._ui.right_text_browser.document(), "yaml")
         self._ui.button_box.accepted.connect(self.close)
-        self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint)
 
         self._ui.pkgs_list_widget.setContextMenuPolicy(
             Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.pkgs_list_widget.customContextMenuRequested.connect(
             self.on_pkg_context_menu_requested)
-        self._init_pkg_context_menu()
 
         # set up changed left element connection
         self._ui.pkgs_list_widget.currentItemChanged.connect(self._on_item_changed)
@@ -96,7 +99,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
 
     @override
     def showEvent(self, event: QShowEvent) -> None:
-        self._fill_left_items()
+        self._populate_left_items()
         self.update_diff()
         return super().showEvent(event)
 
@@ -105,50 +108,6 @@ class PkgDiffDialog(QDialog, ThemedWidget):
     def add_diff_item(self, content: ConanPkg):
         """" """
         self._item_data.append(content)
-
-    def _fill_left_items(self):
-        ref = self._item_data[0]
-        ref["prio"] = -1
-
-        item_data_len = len(self._item_data)
-        for i in range(1, item_data_len):
-            content = self._item_data[i]
-            pkg_diffs = list(diff(ref, content))
-            pkg_arch_diffs = list(
-                filter(lambda diff: diff[1] == "settings.arch", pkg_diffs))
-            content["prio"] = 5
-            if pkg_arch_diffs:
-                content["prio"] = 4
-                continue
-            pkg_os_diffs = list(
-                filter(lambda diff: diff[1] == "settings.os", pkg_diffs))
-            if pkg_os_diffs:
-                content["prio"] = 3
-                continue
-            pkg_compiler_diffs = list(
-                filter(lambda diff: diff[1] == "settings.compiler", pkg_diffs))
-            if pkg_compiler_diffs:
-                content["prio"] = 2
-                continue
-            pkg_compiler_version_diffs = list(
-                filter(lambda diff: diff[1] == ['settings', 'compiler.version'], pkg_diffs))
-            if pkg_compiler_version_diffs:
-                content["prio"] = 1
-                continue
-            if not pkg_compiler_version_diffs:
-                content["prio"] = 0
-                continue
-        
-        self._set_left_content(self._filter_display_content(ref))
-        QListWidgetItem("* " + ref.get("id", "Unknown"), self._ui.pkgs_list_widget)
-        for prio in range(0, 5):
-            for content in self._item_data:
-                if prio == content["prio"]:
-                    item_name = content.get("id", "Unknown")
-                    QListWidgetItem(item_name, self._ui.pkgs_list_widget)
-                    continue
-        
-        self._set_right_content(self._filter_display_content(self._item_data[1]))
 
 
     def update_diff(self):
@@ -209,11 +168,12 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         for item_data in self._item_data:
             if sel_item_id == item_data.get("id", ""):
                 content = item_data
-                break
-        self._set_right_content(self._filter_display_content(content))
-        self.update_diff()
+                self._set_right_content(self._filter_display_content(content))
+                self.update_diff()
+                return
 
     def _filter_display_content(self, content: ConanPkg):
+        """ Only allow the following keys in the view"""
         new_content = {}
         new_content["settings"] = content.get("settings")
         new_content["options"] = content.get("options")
@@ -247,5 +207,55 @@ class PkgDiffDialog(QDialog, ThemedWidget):
                 self._set_left_content(self._filter_display_content(item))
                 break
         self._ui.pkgs_list_widget.clear()
-        self._fill_left_items()
+        self._populate_left_items()
         self.update_diff()
+
+    def _populate_left_items(self):
+        ref = self._set_diff_list_prios()
+
+        self._set_left_content(self._filter_display_content(ref))
+        QListWidgetItem("* " + ref.get("id", "Unknown"), self._ui.pkgs_list_widget)
+        for prio in range(0, 5):
+            for content in self._item_data:
+                if prio == content["prio"]:
+                    item_name = content.get("id", "Unknown")
+                    QListWidgetItem(item_name, self._ui.pkgs_list_widget)
+
+        self._set_right_content(self._filter_display_content(self._item_data[1]))
+
+    def _set_diff_list_prios(self):
+        """ Prioritize the list elements depending on the similarity of the original package
+            Supports the most common settings.
+            No option support yet.
+        """
+        ref = self._item_data[0]
+        ref["prio"] = -1
+
+        item_data_len = len(self._item_data)
+        for i in range(1, item_data_len):
+            content = self._item_data[i]
+            pkg_diffs = list(diff(ref, content))
+            pkg_arch_diffs = list(
+                filter(lambda diff: diff[1] == "settings.arch", pkg_diffs))
+            content["prio"] = 5
+            if pkg_arch_diffs:
+                content["prio"] = 4
+                continue
+            pkg_os_diffs = list(
+                filter(lambda diff: diff[1] == "settings.os", pkg_diffs))
+            if pkg_os_diffs:
+                content["prio"] = 3
+                continue
+            pkg_compiler_diffs = list(
+                filter(lambda diff: diff[1] == "settings.compiler", pkg_diffs))
+            if pkg_compiler_diffs:
+                content["prio"] = 2
+                continue
+            pkg_compiler_version_diffs = list(
+                filter(lambda diff: diff[1] == ['settings', 'compiler.version'], pkg_diffs))
+            if pkg_compiler_version_diffs:
+                content["prio"] = 1
+                continue
+            if not pkg_compiler_version_diffs:
+                content["prio"] = 0
+        return ref
