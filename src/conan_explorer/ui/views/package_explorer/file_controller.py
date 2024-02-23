@@ -51,18 +51,23 @@ class PackageFileExplorerController(QObject):
 
     def on_pkg_selection_change(self, conan_ref: str, pkg_info: ConanPkg, type: PkgSelectionType):
         """ Change folder in file view """
+        # add try-except
         self._current_ref = conan_ref
         self._current_pkg = pkg_info
-        if type == PkgSelectionType.editable:
-            pkg_path = app.conan_api.get_editables_package_path(
-                ConanRef.loads(conan_ref))
-            if pkg_path.is_file():
-                pkg_path = pkg_path.parent
-        elif type == PkgSelectionType.export:
-            pkg_path = app.conan_api.get_export_folder(ConanRef.loads(conan_ref))
-        else:
-            pkg_path = app.conan_api.get_package_folder(
-                ConanRef.loads(conan_ref), pkg_info.get("id", ""))
+        try:
+            if type == PkgSelectionType.editable:
+                pkg_path = app.conan_api.get_editables_package_path(
+                    ConanRef.loads(conan_ref))
+                if pkg_path.is_file():
+                    pkg_path = pkg_path.parent
+            elif type == PkgSelectionType.export:
+                pkg_path = app.conan_api.get_export_folder(ConanRef.loads(conan_ref))
+            else:
+                pkg_path = app.conan_api.get_package_folder(
+                    ConanRef.loads(conan_ref), pkg_info.get("id", ""))
+        except Exception as e:
+            Logger().error("Cannot change to package: %s", str(e))
+            return
 
         if not pkg_path.exists():
             Logger().warning(
