@@ -32,11 +32,11 @@ if conan_version_env: # eval as spec
     print(f"Using Conan version {conan_major_version} from spec: {conan_version_env}")
 
 # What packages are required for this module to be executed?
-conan_req_spec = "conan>=1.48, <2.1"
+conan_req_spec = "conan>=1.48, <2.2"
 if conan_major_version == "1":
     conan_req_spec = "conan>=1.48, <2.0"
 if conan_major_version == "2":
-    conan_req_spec = "conan>=2.0, <2.1"
+    conan_req_spec = "conan>=2.0, <2.2"
 REQUIRES = [
     conan_req_spec,  # MIT License
     "PySide6-Essentials>=6.4.0", # LGPLv3
