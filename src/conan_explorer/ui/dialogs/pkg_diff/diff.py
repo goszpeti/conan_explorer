@@ -164,11 +164,13 @@ class PkgDiffDialog(QDialog, ThemedWidget):
             return
         sel_item_id = item.data(0)
         if "*" in sel_item_id:
+            self._set_right_content(self._left_content)
+            self.update_diff()
             return
         for item_data in self._item_data:
             if sel_item_id == item_data.get("id", ""):
                 content = item_data
-                self._set_right_content(self._filter_display_content(content))
+                self._set_right_content(content)
                 self.update_diff()
                 return
 
@@ -181,13 +183,13 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         return new_content
 
     def _set_left_content(self, content):
-        self._left_content = content
+        self._left_content = self._filter_display_content(content)
         pkg_info = pformat(content).translate(
             {ord("{"): None, ord("}"): None, ord("'"): None})
         self._ui.left_text_browser.setText(pkg_info)
 
     def _set_right_content(self, content):
-        self._right_content = content
+        self._right_content = self._filter_display_content(content)
         pkg_info = pformat(content).translate(
             {ord("{"): None, ord("}"): None, ord("'"): None})
         self._ui.right_text_browser.setText(pkg_info)
@@ -204,7 +206,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
                 i = self._item_data.index(item)
                 self._item_data.pop(i)
                 self._item_data.insert(0, item)
-                self._set_left_content(self._filter_display_content(item))
+                self._set_left_content(item)
                 break
         self._ui.pkgs_list_widget.clear()
         self._populate_left_items()
@@ -213,7 +215,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
     def _populate_left_items(self):
         ref = self._set_diff_list_prios()
 
-        self._set_left_content(self._filter_display_content(ref))
+        self._set_left_content(ref)
         QListWidgetItem("* " + ref.get("id", "Unknown"), self._ui.pkgs_list_widget)
         for prio in range(0, 5):
             for content in self._item_data:
@@ -221,7 +223,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
                     item_name = content.get("id", "Unknown")
                     QListWidgetItem(item_name, self._ui.pkgs_list_widget)
 
-        self._set_right_content(self._filter_display_content(self._item_data[1]))
+        self._set_right_content(self._item_data[1])
 
     def _set_diff_list_prios(self):
         """ Prioritize the list elements depending on the similarity of the original package
