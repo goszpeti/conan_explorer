@@ -34,7 +34,7 @@ build_exe_options = {
 }
 
 icon = "src/conan_explorer/assets/icons/icon.ico"
-app_name = "Conan Explorer"
+app_name = "conan_explorer"
 
 bdist_mac_options = {
     "bundle_name": app_name,
