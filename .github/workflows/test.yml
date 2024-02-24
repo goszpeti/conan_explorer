@@ -31,8 +31,9 @@ jobs:
             # conan minimum version with python minimum version
             "ubuntu20-conan1.48-py38",
             # conan 2 stuff with bleeding edge - use Python 3.12 (U22 needed)
-            "ubuntu22-conan2-py312",
-            "windows-conan2-py312",
+            "ubuntu22-conan2.0.13-py310",
+            "ubuntu22-conan2.0-latest-py312",
+            "windows-conan2-latest-py312",
           ]
         include:
           - name: "ubuntu20-py38"
