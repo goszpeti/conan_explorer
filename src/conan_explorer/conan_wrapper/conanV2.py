@@ -305,6 +305,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         raise NotImplementedError
     
     def get_editable(self, conan_ref: Union[ConanRef, str]) -> EditablePkg:
+        self.__reload_conan_api()
         editables_dict = self._conan.local.editable_list()
         if isinstance(conan_ref, str):
             conan_ref = ConanRef.loads(conan_ref)
@@ -314,10 +315,12 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
         """ Get package path of an editable reference. Can be a folder or conanfile.py """
+        self.__reload_conan_api()
         editables_dict = self._conan.local.editable_list()
         return Path(editables_dict.get(conan_ref, {}).get("path", INVALID_PATH))
     
     def get_editables_output_folder(self, conan_ref: ConanRef) ->  Optional[Path]:
+        self.__reload_conan_api()
         editables_dict = self._conan.local.editable_list()
         output_folder = editables_dict.get(conan_ref, {}).get("output_folder")
         if not output_folder:
@@ -326,8 +329,14 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def get_editable_references(self) -> List[ConanRef]:
         """ Get all local editable references. """
+        self.__reload_conan_api()
         editables_dict = self._conan.local.editable_list()
         return list(editables_dict.keys())
+    
+    def __reload_conan_api(self):
+        from conan.api.conan_api import ConanAPI
+        self._conan = ConanAPI()  # reload editables only possible like this
+
 
     def add_editable(self, conan_ref: Union[ConanRef, str], path: str, output_folder: str) -> bool:
         try:
