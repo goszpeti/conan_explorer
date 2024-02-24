@@ -6,7 +6,7 @@ from time import sleep
 import pytest
 import conan_explorer
 from conan_explorer.app.system import delete_path
-from conan_explorer.conan_wrapper import ConanApiSingleton as ConanApi
+from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import EditableEditDialog
 from conan_explorer.ui.views.conan_conf.editable_model import EditableModel, EditableModelItem

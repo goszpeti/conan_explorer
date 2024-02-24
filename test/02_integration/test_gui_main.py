@@ -17,7 +17,7 @@ from conan_explorer.ui.fluent_window.side_menu import SideSubMenu
 from conan_explorer.ui.plugin.handler import PluginFile
 from conan_explorer.ui.views.app_grid.tab import TabList
 from conan_explorer import DEFAULT_UI_CFG_FILE_NAME, user_save_path
-from conan_explorer.conan_wrapper import ConanApiSingleton as ConanApi
+from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_explorer.app.logger import Logger
 from conan_explorer.settings import *

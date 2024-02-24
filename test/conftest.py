@@ -20,7 +20,7 @@ import conan_explorer.app as app  # resolve circular dependencies
 from conan_explorer import SETTINGS_FILE_NAME, base_path, user_save_path
 from conan_explorer.app.system import str2bool
 from conan_explorer.conan_wrapper import ConanInfoCache, ConanWorker
-from conan_explorer.conan_wrapper import ConanApiSingleton as ConanApi
+from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 
 from conan_explorer.ui.common import remove_qt_logger
 from conan_explorer.ui.main_window import MainWindow

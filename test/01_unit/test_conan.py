@@ -8,7 +8,7 @@ import pytest
 from test.conftest import TEST_REF, conan_install_ref, conan_remove_ref
 from typing import List
 
-from conan_explorer.conan_wrapper import ConanApiSingleton as ConanApi
+from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.types import create_key_value_pair_list
 from conan_explorer.conan_wrapper.conan_worker import ConanWorker, ConanWorkerElement
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
