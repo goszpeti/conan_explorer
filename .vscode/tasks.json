@@ -20,6 +20,12 @@
                 ".[dev]"
             ],
             "problemMatcher": []
+        },
+        {
+            "label": "mypy",
+            "type": "shell",
+            "command": "mypy ./src/conan_explorer/ --allow-redefinition --ignore-missing-imports ",
+            "problemMatcher": []
         }
     ]
 }

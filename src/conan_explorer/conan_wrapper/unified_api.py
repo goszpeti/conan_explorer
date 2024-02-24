@@ -77,11 +77,6 @@ class ConanUnifiedApi():
         raise NotImplementedError
 
     @abstractmethod
-    def get_editables_file_path(self) -> Path:
-        """ Return editables raw (json) file """
-        raise NotImplementedError
-
-    @abstractmethod
     def get_config_entry(self, config_name: str, default_value: Any) -> Any:
         """ Return a conan config entry value (conan.conf). 
         Use default_value for non existing values. """
@@ -505,7 +500,7 @@ class ConanCommonUnifiedApi(ConanUnifiedApi):
             default_settings = self.get_default_settings()
             query = f"(arch=None OR arch={default_settings.get('arch')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"
-            if conan_version.startswith("1"):
+            if conan_version.major == 1:
                 query += f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
                          f" AND (os_build=None OR os_build={default_settings.get('os_build')})"
             found_pkgs = self.get_remote_pkgs_from_ref(conan_ref, remote_name, query)

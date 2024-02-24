@@ -5,7 +5,7 @@ from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
 from unittest.mock import patch
 
-from conan_explorer import INVALID_PATH, user_save_path
+from conan_explorer import INVALID_PATH, user_save_path, conan_version, Version
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.typing import SignatureCheckMeta
 
@@ -36,10 +36,9 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
         from .conan_cache import ConanInfoCache
         self._conan = ConanAPI()
-        # Workaround for 2.0.14 API changes
-        try:
+        if conan_version < Version("2.0.14"):
             self._client_cache = ClientCache(self._conan.cache_folder)
-        except Exception:
+        else:
             self._client_cache = ClientCache(self._conan.cache_folder, self._conan.config.global_conf)
             from conan.internal.cache.home_paths import HomePaths
             self._home_paths = HomePaths(self._conan.cache_folder)
@@ -89,7 +88,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                     if result:
                         latest_rev: ConanRef = self._conan.list.latest_recipe_revision(
                             conan_ref, remote)
-                        self._conan.download.recipe(latest_rev, remote)
+                        self._conan.download.recipe(latest_rev, remote) # type: ignore
                         break
             path = self._conan.local.get_conanfile_path(
                 self._conan.cache.export_path(conan_ref), os.getcwd(), py=True)
@@ -122,11 +121,9 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return str(info.get("user_name", "")), info.get("authenticated", False)
 
     def get_config_file_path(self) -> Path:
-        # Workaround for 2.0.14 API changes
-        cf_path = None
-        try:
+        if conan_version < Version("2.0.14"):
             cf_path = Path(self._client_cache.new_config_path)
-        except Exception:
+        else:
             cf_path = Path(self._home_paths.global_conf_path)
         return cf_path
 
@@ -138,22 +135,19 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def get_settings_file_path(self) -> Path:
         settings_path = None
-        try:
+        if conan_version < Version("2.0.14"):
             settings_path = Path(self._client_cache.settings_path)
-        except Exception:
+        else:
             settings_path = Path(self._home_paths.settings_path)
         return settings_path
 
     def get_profiles_path(self) -> Path:
         profiles_path = None
-        try:
+        if conan_version < Version("2.0.14"):
             profiles_path = Path(self._client_cache.profiles_path)
-        except Exception:
+        else:
             profiles_path = Path(self._home_paths.profiles_path)
         return profiles_path
-
-    def get_editables_file_path(self) -> Path:
-        return  Path(self._client_cache.editable_packages._edited_file)
 
     def get_user_home_path(self) -> Path:
         return Path(self._client_cache.cache_folder)
@@ -170,14 +164,16 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def get_remotes(self, include_disabled=False) -> List[Remote]:
         remotes = []
         try:
-            remotes = self._conan.remotes.list(
-                None, only_enabled=not include_disabled)
+            remotes = self._conan.remotes.list(None, only_enabled=not include_disabled)
         except Exception as e:
             Logger().error(f"Error while reading remotes: {str(e)}")
-        return remotes
+        return remotes # type: ignore
 
     def add_remote(self, remote_name: str, url: str, verify_ssl: bool):
-        from conans.client.cache.remote_registry import Remote as ConanRemote
+        if conan_version < Version("2.1"):
+            from conans.client.cache.remote_registry import Remote as ConanRemote
+        else:
+            from conan.api.model import Remote as ConanRemote
         remote = ConanRemote(remote_name, url, verify_ssl, False)
         self._conan.remotes.add(remote)
 
@@ -198,9 +194,12 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         self._conan.remotes.update(remote_name, url, verify_ssl, disabled, index)
 
     def login_remote(self, remote_name: str, user_name: str, password: str):
-        self._conan.remotes.login(self._conan.remotes.get(
-            remote_name), user_name, password)
-
+        if conan_version < Version("2.1"):
+            self._conan.remotes.login(self._conan.remotes.get(
+                remote_name), user_name, password)
+        else:
+            self._conan.remotes.user_login(self._conan.remotes.get(
+                remote_name), user_name, password)
     ### Install related methods ###
     def install_reference(self, conan_ref: ConanRef, conan_settings: Optional[ConanSettings]=None,
             conan_options: Optional[ConanOptions]=None, profile="", update=True, quiet=False,
@@ -226,6 +225,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             profile_host = self._conan.profiles.get_profile(profiles, 
                                         settings=settings_list, options=options_list)
             requires = [conan_ref]
+            if conan_version > Version("2.0"):
+                update = "*" if update else ""
             deps_graph = self._conan.graph.load_graph_requires(requires, None, 
                             profile_host, profile_host, None, remotes, update)
             print_graph_basic(deps_graph)
@@ -278,10 +279,13 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         try:
             path = self.get_conanfile_path(conan_ref)
             from conan.internal.conan_app import ConanApp
-            try:
+            if conan_version < Version("2.0.14"):
                 app = ConanApp(self._conan.cache_folder)
-            except Exception:
+            elif conan_version < Version("2.1"):
                 app = ConanApp(self._conan.cache_folder, self._conan.config.global_conf)
+            else:
+                app = ConanApp(self._conan)
+
             conanfile = app.loader.load_conanfile(path, conan_ref)
             default_options = conanfile.default_options
             available_options = conanfile.options

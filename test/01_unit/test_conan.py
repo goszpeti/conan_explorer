@@ -1,6 +1,5 @@
 import os
 import platform
-from pprint import pprint
 import tempfile
 import time
 from pathlib import Path
@@ -10,12 +9,12 @@ from test.conftest import TEST_REF, conan_install_ref, conan_remove_ref
 from typing import List
 
 from conan_explorer.conan_wrapper import ConanApiSingleton as ConanApi
-from conan_explorer.conan_wrapper.types import ConanPkg, create_key_value_pair_list
-from conan_explorer.conan_wrapper.conan_worker import (ConanWorker,
-                                                           ConanWorkerElement)
+from conan_explorer.conan_wrapper.types import create_key_value_pair_list
+from conan_explorer.conan_wrapper.conan_worker import ConanWorker, ConanWorkerElement
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_explorer.conan_wrapper.types import ConanRef
 
+@pytest.mark.conanv1
 def test_conan_get_conan_buildinfo():
     """
     Check, that get_conan_buildinfo actually retrieves as a string for the linux pkg 
@@ -53,6 +52,7 @@ def test_conan_profile_name_alias_builder():
     profile_name = ConanApi().build_conan_profile_name_alias(LINUX_X64_GCC7_SETTINGS)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
+@pytest.mark.conanv1
 def test_conan_short_path_root():
     """ Test, that short path root can be read. """
     new_short_home = Path(tempfile.gettempdir()) / "._myconan_short"
@@ -100,7 +100,7 @@ def test_conan_find_remote_pkg(base_fixture):
                 continue
             assert default_settings[setting] in pkg["settings"][setting]
 
-# @pytest.mark.conanv2
+@pytest.mark.conanv2
 def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     Test, if a wrong Option return causes an error.
@@ -229,7 +229,7 @@ def test_create_key_value_list(base_fixture):
     res = create_key_value_pair_list(inp)
     assert res == ["Key1=Value1"]
 
-#@pytest.mark.conanv2
+@pytest.mark.conanv2
 def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi().init_api()

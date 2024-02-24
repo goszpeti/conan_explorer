@@ -16,7 +16,7 @@ class ConanInfoCache():
     It also has an option to store the local package path.
     """
     CACHE_FILE_NAME = "cache.json"
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         CACHE_FILE_NAME = "cacheV2.json"
 
     def __init__(self, cache_dir: Path, local_refs: Optional[List[ConanRef]] = None):

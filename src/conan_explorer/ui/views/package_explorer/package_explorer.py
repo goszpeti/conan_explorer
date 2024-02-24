@@ -176,7 +176,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         # always have show_build_info_action so access to it is possible in ConanV2 
         # even if it does nothing
         self.show_build_info_action = QAction("Show package build info", self)
-        if not conan_version.startswith("2"): # Currently not doable
+        if not conan_version.major == 2: # Currently not doable
             self.set_themed_icon(self.show_build_info_action, "icons/download.svg")
             self.select_cntx_menu.addAction(self.show_build_info_action)
             self.show_build_info_action.triggered.connect(self._pkg_sel_ctrl.on_show_build_info)
@@ -203,6 +203,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         elif selection_mode == MultiPkgSelectionMode.multi_ref:
             self._context_menu_set_all(False)
             self.copy_ref_action.setVisible(True)
+            self.remove_ref_action.setVisible(True) # TODO test
         elif selection_mode == MultiPkgSelectionMode.single_pkg_or_export:
             self._context_menu_set_all(True)
             self.diff_pkg_action.setVisible(False)

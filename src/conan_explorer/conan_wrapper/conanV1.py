@@ -148,11 +148,6 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def get_storage_path(self) -> Path:
         return Path(str(self._client_cache.store))
 
-    def get_editables_file_path(self) -> Path:
-        editable_file = Path(self._client_cache.editable_packages._edited_file)
-        editable_file.touch()
-        return editable_file
-
     def get_editable_references(self) -> List[ConanRef]:
         try:
             return list(map(ConanRef.loads, self._conan.editable_list().keys()))

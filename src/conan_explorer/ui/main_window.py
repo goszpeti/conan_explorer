@@ -77,7 +77,7 @@ class MainWindow(FluentWindow):
         self._init_right_menu()
         self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", 
                                                     force_light_mode=True).pixmap(20,20))
-        self._conan_minor_version = ".".join(conan_version.split(".")[0:2]) # for docs
+        self._conan_minor_version = str(conan_version.minor)
         self.ui.search_bar_line_edit.setPlaceholderText(
                                     f"Search Conan {self._conan_minor_version} docs")
 
@@ -99,7 +99,7 @@ class MainWindow(FluentWindow):
 
     def on_docs_searched(self):
         extra_addr = ""
-        if conan_version.startswith("1"):
+        if conan_version.major == 1:
             extra_addr = "en/"
         search_url = (f"https://docs.conan.io/{extra_addr}{self._conan_minor_version}/search.html"
                       f"?q={self.ui.search_bar_line_edit.text()}&check_keywords=yes&area=default")
@@ -157,7 +157,7 @@ class MainWindow(FluentWindow):
 
         self.main_general_settings_menu.add_menu_line()
 
-        if conan_version.startswith("1"):
+        if conan_version.major == 1:
             self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
                                                                   self.on_conan_remove_locks, "icons/remove-lock.svg")
             self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",

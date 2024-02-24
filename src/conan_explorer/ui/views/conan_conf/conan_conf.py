@@ -67,14 +67,14 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.settings_file_text_browser.document(), "yaml")
 
     def _load_info_tab(self):
-        self._ui.conan_cur_version_value_label.setText(conan_version)
+        self._ui.conan_cur_version_value_label.setText(str(conan_version))
         self._ui.python_exe_value_label.setText(str(Path(sys.executable).resolve()))
         self._ui.python_cur_version_value_label.setText(platform.python_version())
         self._ui.revision_enabled_checkbox.setChecked(
                                             app.conan_api.get_revisions_enabled())
         self._ui.conan_usr_home_value_label.setText(
             str(app.conan_api.get_user_home_path().resolve()))
-        if conan_version.startswith("2"):
+        if conan_version.major == 2:
             self._ui.conan_usr_cache_value_label.setVisible(False)
             self._ui.conan_usr_cache_label.setVisible(False)
         else:

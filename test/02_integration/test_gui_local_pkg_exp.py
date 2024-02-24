@@ -148,7 +148,7 @@ def test_local_package_explorer_pkg_selection_editables(qtbot, mocker,
     """
     editable_ref = "example/9.9.9@editable/testing"
     base_path = base_fixture.testdata_path / "conan"
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         conan_add_editables(str(base_path / "conanfileV2.py"), ConanRef.loads(editable_ref))
     else:
         conan_add_editables(str(base_path), ConanRef.loads(editable_ref))
@@ -163,7 +163,7 @@ def test_local_package_explorer_pkg_selection_editables(qtbot, mocker,
     assert Path(lpe._pkg_tabs_ctrl[0]._model.rootPath()) == base_path
 
 
-
+@pytest.mark.conanv2
 def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, base_fixture,
         ui_no_refs_config_fixture, setup_local_package_explorer: LPESetupType):
     """
@@ -528,14 +528,14 @@ def test_local_package_explorer_file_functions(qtbot, mocker, base_fixture,
     assert Path(lpe._pkg_tabs_ctrl[0]._model.rootPath()) == another_pkg_path
 
 
-
+@pytest.mark.conanv2
 def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     """ Test, that the delete package dialog deletes a reference with id, 
     without id and cancel does nothing"""
     from pytestqt.plugin import _qapp_instance
 
     cfr = ConanRef.loads(TEST_REF_OFFICIAL)
-    os.system(f"conan install {TEST_REF_OFFICIAL}")
+    conan_install_ref(TEST_REF_OFFICIAL)
 
     # precheck, that the package is found
     found_pkg = app.conan_api.get_local_pkgs_from_ref(cfr)
@@ -569,7 +569,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     assert not found_pkg.get("id", "")
 
     # check with pkg id
-    os.system(f"conan install {TEST_REF_OFFICIAL}")
+    conan_install_ref(TEST_REF_OFFICIAL)
     dialog = ConanRemoveDialog(None, TEST_REF_OFFICIAL, found_pkg.get("id", ""), None)
     dialog.show()
     dialog.button(dialog.StandardButton.Yes).clicked.emit()

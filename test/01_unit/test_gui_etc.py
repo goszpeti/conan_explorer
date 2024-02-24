@@ -10,7 +10,7 @@ from pathlib import Path
 from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog
 from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
 from conan_explorer.ui.views.conan_conf.remotes_controller import ConanRemoteController
-from test.conftest import TEST_REF, PathSetup, app_qt_fixture, conan_remove_ref
+from test.conftest import TEST_REF, PathSetup, conan_remove_ref
 from unittest.mock import Mock
 
 import pytest
@@ -23,11 +23,9 @@ from conan_explorer.app import bug_dialog_exc_hook
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_explorer.conan_wrapper.conanV1 import ConanApi
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, Remote
-from conan_explorer.settings import (DEFAULT_INSTALL_PROFILE,
-                                     FILE_EDITOR_EXECUTABLE)
+from conan_explorer.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui.common.theming import get_user_theme_color
-from conan_explorer.ui.dialogs import (FileEditorSelDialog,
-                                       show_bug_reporting_dialog)
+from conan_explorer.ui.dialogs import FileEditorSelDialog, show_bug_reporting_dialog
 from conan_explorer.ui.dialogs.conan_install import ConanInstallDialog
 from conan_explorer.ui.views import AboutPage
 from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import \
@@ -279,11 +277,16 @@ def test_remote_url_groups(base_fixture, mocker):
                     "http://mydomain.com/artifactory/api/conan/conan1", False, False)
     remote2 = Remote("test_arti2", 
                     "http://mydomain.com/artifactory/api/conan/conan2", False, False)
-    mocker.patch.object(ConanApi, 'get_remotes', return_value=[remote, remote2])
+    ConanApiActual = ConanApi
+    if conan_version.major == 2:
+        from conan_explorer.conan_wrapper.conanV2 import ConanApi as ConanApiV2
+        ConanApiActual = ConanApiV2
+    mocker.patch.object(ConanApiActual, 'get_remotes', return_value=[remote, remote2])
     remotes = app.conan_api.get_remotes_from_same_server(remote)
     assert remote2 in remotes 
     assert remote in remotes 
 
+@pytest.mark.conanv2
 def test_multi_remote_login_dialog(app_qt_fixture, base_fixture, mocker):
     """ Test, that on remote login dialog selecting and deselecting remotes work """
     app.conan_api.init_api()
@@ -295,10 +298,14 @@ def test_multi_remote_login_dialog(app_qt_fixture, base_fixture, mocker):
     remote3 = Remote("test_arti3", 
                     "http://mydomain.com/artifactory/api/conan/conan3", False, False)
     root_obj = QtWidgets.QWidget()
-    mocker.patch.object(ConanApi, 'get_remotes', return_value=[remote1, remote2, remote3])
-    login_cmd: Mock = mocker.patch.object(ConanApi, 'login_remote')
+    ConanApiActual = ConanApi
+    if conan_version.major == 2:
+        from conan_explorer.conan_wrapper.conanV2 import ConanApi as ConanApiV2
+        ConanApiActual = ConanApiV2
+    mocker.patch.object(ConanApiActual, 'get_remotes',
+                        return_value=[remote1, remote2, remote3])
+    login_cmd: Mock = mocker.patch.object(ConanApiActual, 'login_remote')
     controller = ConanRemoteController(QtWidgets.QTreeView(), None)
-
     dialog = RemoteLoginDialog([remote1, remote2, remote3], controller, root_obj)
     username = "user"
     password = "pw"
@@ -338,7 +345,7 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     dialog._ui.name_line_edit.setText(new_ref)
 
     new_editable_path = base_fixture.testdata_path / "conan"
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         new_editable_path /= "conanfileV2.py"
     new_output_folder_path = base_fixture.testdata_path / "conan" / "build"
 
@@ -358,9 +365,9 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
 
     dialog.save()
 
-    if conan_version.startswith("1"):
+    if conan_version.major == 1:
         assert app.conan_api.get_editables_package_path(new_ref_obj).parent == new_editable_path
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         assert app.conan_api.get_editables_package_path(new_ref_obj) == new_editable_path
 
     assert app.conan_api.get_editables_output_folder(
@@ -377,9 +384,9 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     dialog._ui.path_line_edit.setText("INVALID")
     dialog.save()
     assert new_ref_obj in app.conan_api.get_editable_references()
-    if conan_version.startswith("1"):
+    if conan_version.major == 1:
         assert app.conan_api.get_editables_package_path(new_ref_obj).parent == new_editable_path
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         assert app.conan_api.get_editables_package_path(new_ref_obj) == new_editable_path
     dialog._ui.path_line_edit.setText(str(new_editable_path))
 
@@ -397,6 +404,7 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     assert new_ref_obj not in app.conan_api.get_editable_references()
 
 
+@pytest.mark.conanv2
 def test_conan_diff_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     """ Test, that the diff dialog works """
     root_obj = QtWidgets.QWidget()

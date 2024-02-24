@@ -2,11 +2,10 @@
 import os
 import tempfile
 from pathlib import Path
-import pytest
 from conan_explorer.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
 from conan_explorer.ui.views.app_grid.config import UiAppLinkConfig
 from conan_explorer.ui.views.app_grid.config.json_file import JsonUiConfig
-from test.conftest import TEST_REF, app_qt_fixture
+from test.conftest import TEST_REF, conan_install_ref
 
 import conan_explorer.app as app
 from conan_explorer.settings import *
@@ -310,7 +309,7 @@ def test_multiple_apps_ungreying(app_qt_fixture, base_fixture):
     Set greyed attribute of the underlying app button expected.
     """
     from pytestqt.plugin import _qapp_instance
-    os.system(f"conan install {TEST_REF} -u")
+    conan_install_ref(TEST_REF, "-u")
 
     temp_dir = tempfile.gettempdir()
     temp_ini_path = os.path.join(temp_dir, "config.ini")

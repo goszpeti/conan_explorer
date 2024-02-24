@@ -1,6 +1,7 @@
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
+from typing_extensions import override
 
 from PySide6.QtCore import Signal, SignalInstance, Qt
 from PySide6.QtWidgets import QWidget, QSizePolicy
@@ -48,6 +49,7 @@ class PluginInterfaceV1(ThemedWidget):
         self.setSizePolicy(size_policy)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
+    @override
     def resizeEvent(self, a0) -> None:
         # handles maximum size on resize
         if not self._base_signals:

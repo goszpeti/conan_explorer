@@ -13,7 +13,7 @@ from conan_explorer import conan_version
 from conans.errors import ConanException
 
 
-if conan_version.startswith("1"):
+if conan_version.major == 1:
     from conans.model.ref import ConanFileReference, PackageReference # type: ignore
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
     if platform.system() == "Windows":

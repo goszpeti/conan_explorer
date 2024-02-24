@@ -184,13 +184,13 @@ class PkgDiffDialog(QDialog, ThemedWidget):
 
     def _set_left_content(self, content):
         self._left_content = self._filter_display_content(content)
-        pkg_info = pformat(content).translate(
+        pkg_info = pformat(self._left_content).translate(
             {ord("{"): None, ord("}"): None, ord("'"): None})
         self._ui.left_text_browser.setText(pkg_info)
 
     def _set_right_content(self, content):
         self._right_content = self._filter_display_content(content)
-        pkg_info = pformat(content).translate(
+        pkg_info = pformat(self._right_content).translate(
             {ord("{"): None, ord("}"): None, ord("'"): None})
         self._ui.right_text_browser.setText(pkg_info)
 

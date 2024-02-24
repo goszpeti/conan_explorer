@@ -129,9 +129,9 @@ def test_plugin_handler_conan_version():
     plugin = PluginDescription("", "1.58.0", "", "", "", "", "", False, "<2")
     from conan_explorer import conan_version
 
-    if conan_version.startswith("1"):
+    if conan_version.major == 1:
         assert PluginHandler.is_plugin_enabled(plugin)
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         assert not PluginHandler.is_plugin_enabled(plugin)
 
 

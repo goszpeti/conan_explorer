@@ -17,7 +17,7 @@ class ConanCleanup():
     def get_cleanup_cache_paths(self) -> Set[str]:
         """ Get a list of orphaned short path and cache folders """
         # Blessed are the users Microsoft products!
-        if platform.system() != "Windows" or conan_version.startswith("2"):
+        if platform.system() != "Windows" or conan_version.major == 2:
             return set()
         self.find_orphaned_references()
         self.find_orphaned_packages()

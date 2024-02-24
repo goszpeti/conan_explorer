@@ -22,3 +22,6 @@ class Example(ConanFile):
         renamed_executable = Path(gettempdir()) / ("python" + python_path.suffix)
         copyfile(str(python_path), str(renamed_executable))
         copy(self, renamed_executable.name, src=str(renamed_executable.parent), dst=self.package_folder + "/bin")
+
+    def package_info(self) -> None:
+        pass
