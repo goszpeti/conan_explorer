@@ -68,8 +68,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             return Path(INVALID_PATH)
         try:
             latest_rev_ref = self._conan.list.latest_recipe_revision(conan_ref)
-            latest_rev_pkg = self._conan.list.latest_package_revision(
-                ConanPkgRef(latest_rev_ref, package_id))
+            latest_rev_pkg = self._conan.list.latest_package_revision(ConanPkgRef(latest_rev_ref, package_id))
             assert latest_rev_pkg
             layout = self._client_cache.pkg_layout(latest_rev_pkg)
             return Path(layout.package())
@@ -83,11 +82,9 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         try:
             if conan_ref not in self.get_all_local_refs():
                 for remote in self.get_remotes():
-                    result = self.search_recipes_in_remotes(
-                        str(conan_ref), remote_name=remote.name)
+                    result = self.search_recipes_in_remotes(str(conan_ref), remote_name=remote.name)
                     if result:
-                        latest_rev: ConanRef = self._conan.list.latest_recipe_revision(
-                            conan_ref, remote)
+                        latest_rev: ConanRef = self._conan.list.latest_recipe_revision(conan_ref, remote)
                         self._conan.download.recipe(latest_rev, remote) # type: ignore
                         break
             path = self._conan.local.get_conanfile_path(
@@ -131,7 +128,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return self._conan.config.get(config_name, default_value)
 
     def get_revisions_enabled(self) -> bool:
-        return True
+        return True # always on in 2
 
     def get_settings_file_path(self) -> Path:
         settings_path = None
@@ -351,13 +348,14 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str = ""):
         if pkg_id:
             conan_pkg_ref = ConanPkgRef.loads(str(conan_ref) + ":" + pkg_id)
-            self._conan.remove.package(
-                conan_pkg_ref, remote=None)  # type: ignore
+            latest_rev = self._conan.list.latest_package_revision(conan_pkg_ref)
+            self._conan.remove.package(latest_rev, remote=None)  # type: ignore
         else:
-            self._conan.remove.recipe(conan_ref, remote=None)  # type: ignore
+            latest_rev = self._conan.list.latest_recipe_revision(conan_ref)
+            self._conan.remove.recipe(latest_rev, remote=None)  # type: ignore
 
     def get_all_local_refs(self) -> List[ConanRef]:
-        return self._client_cache.all_refs()  # type: ignore
+        return self._client_cache.all_refs()
 
     def get_local_pkg_from_path(self, conan_ref: ConanRef, path: Path):
         found_package = None
@@ -375,8 +373,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             conan_ref.channel = None
         if not conan_ref.revision:
             try:
-                conan_ref_latest: ConanRef = self._conan.list.latest_recipe_revision(
-                    conan_ref)  # type: ignore
+                conan_ref_latest: ConanRef = self._conan.list.latest_recipe_revision(conan_ref)
             except Exception as e:
                 Logger().error(
                     f"Error while getting latest recipe for {str(conan_ref)}: {str(e)}")
@@ -448,8 +445,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             search_results = self._conan.list.select(pattern, remote=remote_obj, 
                                                      package_query=query)
             if search_results:
-                latest_rev = self._conan.list.latest_recipe_revision(
-                    conan_ref, remote_obj)
+                latest_rev = self._conan.list.latest_recipe_revision(conan_ref, remote_obj)
                 if latest_rev:
                     found_pkgs_dict = search_results.recipes.get(str(conan_ref), {}).get(
                         "revisions", {}).get(latest_rev.revision, {}).get("packages", {})

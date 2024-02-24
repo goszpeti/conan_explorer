@@ -59,6 +59,7 @@ class Remote():
     url: str
     verify_ssl: bool
     disabled: bool
+    allowed_packages: Optional[List[str]] = None
 
 from conans.errors import ConanException
 

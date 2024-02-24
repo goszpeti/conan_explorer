@@ -534,12 +534,16 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     without id and cancel does nothing"""
     from pytestqt.plugin import _qapp_instance
 
-    cfr = ConanRef.loads(TEST_REF_OFFICIAL)
-    conan_install_ref(TEST_REF_OFFICIAL)
+    cfr = ConanRef.loads(TEST_REF)
+    conan_install_ref(TEST_REF)
 
     # precheck, that the package is found
     found_pkg = app.conan_api.get_local_pkgs_from_ref(cfr)
     assert found_pkg
+
+    pkg_id_to_remove = ""
+    if conan_version.minor == 2: # 2 works only with id, 1 can work without
+        pkg_id_to_remove = found_pkg.get("id", "")
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.load()
@@ -553,7 +557,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     app.conan_worker.finish_working()
 
     # check cancel does nothing
-    dialog = ConanRemoveDialog(None, TEST_REF_OFFICIAL, "", None)
+    dialog = ConanRemoveDialog(None, TEST_REF, pkg_id_to_remove, None)
     dialog.show()
     dialog.button(dialog.StandardButton.Cancel).clicked.emit()
 
@@ -569,8 +573,8 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     assert not found_pkg.get("id", "")
 
     # check with pkg id
-    conan_install_ref(TEST_REF_OFFICIAL)
-    dialog = ConanRemoveDialog(None, TEST_REF_OFFICIAL, found_pkg.get("id", ""), None)
+    conan_install_ref(TEST_REF)
+    dialog = ConanRemoveDialog(None, TEST_REF, found_pkg.get("id", ""), None)
     dialog.show()
     dialog.button(dialog.StandardButton.Yes).clicked.emit()
 
