@@ -67,20 +67,23 @@ def open_in_file_manager(file_path: Path):
         Logger().error(f"Can't show path in file-manager: {str(e)}")
 
 
-def open_cmd_in_path(file_path: Path) -> int:
+def open_cmd_in_path(directory_path: Path) -> int:
     """ Open a terminal in the selected folder. """
     try:
+        if not directory_path.is_dir():
+            Logger().error(f"Invalid directory: {str(directory_path)}")
+            return -1
         if platform.system() == "Linux":
             return execute_cmd(["x-terminal-emulator", "-e", '"', 
-                                "cd", f"{str(file_path)}", "&&", "bash", '"'], True)
+                                "cd", f"{str(directory_path)}", "&&", "bash", '"'], True)
         elif platform.system() == "Windows":
             cmd_path = shutil.which("cmd")
             if cmd_path:
-                return execute_app(Path(cmd_path), True, f"/k cd {str(file_path)}")
-        return 0
+                return execute_app(Path(cmd_path), True, f"/k cd {str(directory_path)}")
+        return -2
     except Exception as e:
         Logger().error(f"Can't open cmd in path: {str(e)}")
-        return 0
+        return -3
 
 
 def is_file_executable(file_path: Path) -> bool:

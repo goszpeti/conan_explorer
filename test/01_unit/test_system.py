@@ -8,6 +8,8 @@ import time
 from shutil import rmtree
 from pathlib import Path
 from subprocess import check_output
+
+import pytest
 from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 
 import conan_explorer  # for mocker
@@ -15,7 +17,7 @@ import psutil
 from conan_explorer import INVALID_PATH, PKG_NAME
 from conan_explorer.app.system import (calc_paste_same_dir_name,
                                            copy_path_with_overwrite,
-                                           delete_path, execute_app, find_program_in_windows,
+                                           delete_path, execute_app, find_program_in_windows, open_cmd_in_path,
                                            open_file, open_in_file_manager,
                                            run_file)
 
@@ -331,3 +333,24 @@ def test_find_program_in_registry():
         assert not found_path
     else:
         assert os.path.exists(found_path)
+
+def test_open_cmd_in_path():
+    """ Test, thet cmdline opens in folder"""
+
+    # test error, when invalid path is passed
+    assert -1 == open_cmd_in_path(Path(INVALID_PATH))
+
+    pid = open_cmd_in_path(Path.home())
+    if platform.system() == "Linux":
+        time.sleep(5)  # wait for terminal to spawn
+        # check pid of created process
+        proc = psutil.Process(pid)
+        assert proc.name() == "x-terminal-emulator"
+        assert PKG_NAME in proc.cmdline()[2]
+        os.system("pkill --newest terminal")
+    elif platform.system() == "Windows":
+        assert pid > 0
+        time.sleep(1)
+        ret = check_output(f'tasklist /fi "PID eq {str(pid)}"')
+        assert "cmd.exe" in ret.decode("utf-8")
+        os.system("taskkill /PID " + str(pid))
