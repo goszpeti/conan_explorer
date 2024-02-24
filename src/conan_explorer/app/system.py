@@ -75,7 +75,8 @@ def open_cmd_in_path(directory_path: Path) -> int:
             return -1
         if platform.system() == "Linux":
             return execute_cmd(["x-terminal-emulator", "-e", '"',
-                                "cd", f"{str(directory_path)}", "&&", "bash", '"'], False)
+                                "cd", f"{str(directory_path)}", "&&", "bash", '"'],
+                               is_console_app=False, shell_linux=True)
         elif platform.system() == "Windows":
             cmd_path = shutil.which("cmd")
             if cmd_path:
@@ -116,7 +117,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     return 0
 
 
-def execute_cmd(cmd: List[str], is_console_app: bool) -> int:  # pid
+def execute_cmd(cmd: List[str], is_console_app: bool, shell_linux=False) -> int:  # pid
     """ Generic process execute method. Returns pid. """
     command_path = Path(cmd[0]).parent
     try:
@@ -131,14 +132,12 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:  # pid
                 cmd, creationflags=creationflags, cwd=str(command_path))
             return proc.pid
         elif platform.system() == "Linux":
-            shell = True
             if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal
                 # emulators available. Use the default distro emulator through x-terminal-emulator
                 # This works only on debian distros.
                 cmd = ["x-terminal-emulator", "-e"] + [generate_launch_script(cmd)]
-                shell = False
-            proc = subprocess.Popen(cmd, cwd=str(command_path), shell=shell)
+            proc = subprocess.Popen(cmd, cwd=str(command_path), shell=shell_linux)
             return proc.pid
         return 0
     except Exception as e:

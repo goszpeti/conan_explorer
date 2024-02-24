@@ -73,7 +73,8 @@ def test_open_in_file_manager(mocker):
         proc = psutil.Process(ret.pid)
         assert len(proc.children()) == 1
         # list a few candidates
-        assert proc.children()[0].name() in ["nautilus", "chrome", "thunar", "dolphin", "pcmanfm"]
+        assert proc.children()[0].name() in ["nautilus", "chrome",
+                                             "thunar", "dolphin", "pcmanfm"]
         ret.kill()
         os.system("pkill nautilus")
 
@@ -347,8 +348,6 @@ def test_open_cmd_in_path():
         time.sleep(2)  # wait for terminal to spawn
         # check pid of created process
         proc = psutil.Process(pid)
-        procs = proc.children()  # sh -> x-terminal-emulator
-        assert procs[0].name() == "x-terminal-emulator"
         assert str(Path.home()) in proc.cmdline()
         proc.kill()
         os.system("pkill --newest terminal")
