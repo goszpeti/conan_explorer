@@ -77,7 +77,7 @@ class MainWindow(FluentWindow):
         self._init_right_menu()
         self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", 
                                                     force_light_mode=True).pixmap(20,20))
-        self._conan_minor_version = str(conan_version.minor)
+        self._conan_minor_version = str(conan_version.major) + "." + str(conan_version.minor)
         self.ui.search_bar_line_edit.setPlaceholderText(
                                     f"Search Conan {self._conan_minor_version} docs")
 
@@ -101,6 +101,7 @@ class MainWindow(FluentWindow):
         extra_addr = ""
         if conan_version.major == 1:
             extra_addr = "en/"
+        # https://docs.conan.io/en/1.62/search.html?q=abc&check_keywords=yes&area=default
         search_url = (f"https://docs.conan.io/{extra_addr}{self._conan_minor_version}/search.html"
                       f"?q={self.ui.search_bar_line_edit.text()}&check_keywords=yes&area=default")
         QDesktopServices.openUrl(search_url)
