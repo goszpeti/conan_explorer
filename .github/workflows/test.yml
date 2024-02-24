@@ -31,9 +31,9 @@ jobs:
             # conan minimum version with python minimum version
             "ubuntu20-conan1.48-py38",
             # conan 2 stuff with bleeding edge - use Python 3.12 (U22 needed)
-            "ubuntu22-conan2.0.13-py310",
-            "ubuntu22-conan2.0-latest-py312",
-            "windows-conan2-latest-py312",
+            "ubuntu22-conan2.0.13-py310", # pre 2.0.14 API changes
+            "ubuntu22-conan2.0-latest-py312", # post 2.0.14 API changes
+            "windows-conan2-latest-py312", # latest everything
           ]
         include:
           - name: "ubuntu20-py38"
@@ -64,12 +64,12 @@ jobs:
           - name: "ubuntu22-conan2.0.13-py310"
             python: "3.10"
             os: ubuntu-22.04
-            conan: "==2.0.13" # pre 2.0.14 API changes
+            conan: "==2.0.13"
             pytest_args: "-m conanv2"
           - name: "ubuntu22-conan2.0-latest-py312"
             python: "3.12"
             os: ubuntu-22.04
-            conan: "<2.1" # post 2.0.14 API changes
+            conan: "<2.1"
             pytest_args: "-m conanv2"
           - name:  "windows-conan2-latest-py312"
             python: "3.12"

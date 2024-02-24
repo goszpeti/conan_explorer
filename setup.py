@@ -61,7 +61,8 @@ TEST_REQUIRES = [
 ]
 
 if conan_major_version.startswith("2"):
-    TEST_REQUIRES.append("conan-server")
+    # use same minor version as the installed conan version, otherwise there can be incompatibilities
+    TEST_REQUIRES.append(f"conan-server{conan_version_env}")
 
 DEV_REQUIRES = [
     "autopep8", # formatter
