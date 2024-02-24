@@ -9,7 +9,8 @@ from .unified_api import ConanCommonUnifiedApi
 from .conan_cache import ConanInfoCache
 from .conan_worker import ConanWorker
 
-def ConanApiSingleton() -> ConanCommonUnifiedApi:
+def ConanApiFactory() -> ConanCommonUnifiedApi:
+    """ Isntantiate ConanApi in the correct version """
     if conan_version.major == 1:
         from conan_explorer.conan_wrapper.conanV1 import ConanApi
         return ConanApi()

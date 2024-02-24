@@ -69,8 +69,8 @@ def init_platform():
 
 def load_conan():
     global conan_api, conan_worker
-    from conan_explorer.conan_wrapper import ConanApiSingleton, ConanWorker
-    conan_api = ConanApiSingleton()
+    from conan_explorer.conan_wrapper import ConanApiFactory, ConanWorker
+    conan_api = ConanApiFactory()
     conan_worker = ConanWorker(conan_api, active_settings)
     conan_api.init_api()
 
