@@ -74,8 +74,8 @@ def open_cmd_in_path(directory_path: Path) -> int:
             Logger().error(f"Invalid directory: {str(directory_path)}")
             return -1
         if platform.system() == "Linux":
-            return execute_cmd(["x-terminal-emulator", "-e", '"', 
-                                "cd", f"{str(directory_path)}", "&&", "bash", '"'], True)
+            return execute_cmd(["x-terminal-emulator", "-e", '"',
+                                "cd", f"{str(directory_path)}", "&&", "bash", '"'], False)
         elif platform.system() == "Windows":
             cmd_path = shutil.which("cmd")
             if cmd_path:
@@ -131,12 +131,14 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:  # pid
                 cmd, creationflags=creationflags, cwd=str(command_path))
             return proc.pid
         elif platform.system() == "Linux":
+            shell = True
             if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal
                 # emulators available. Use the default distro emulator through x-terminal-emulator
                 # This works only on debian distros.
                 cmd = ["x-terminal-emulator", "-e"] + [generate_launch_script(cmd)]
-            proc = subprocess.Popen(cmd, cwd=str(command_path))
+                shell = False
+            proc = subprocess.Popen(cmd, cwd=str(command_path), shell=shell)
             return proc.pid
         return 0
     except Exception as e:
@@ -249,8 +251,8 @@ def get_default_file_editor():
         return "gedit"  # distro dependent, but make something
 
 
-def find_program_in_windows(app_name: str, partial_match=False, 
-                                                key_to_find="InstallLocation") -> str:
+def find_program_in_windows(app_name: str, partial_match=False,
+                            key_to_find="InstallLocation") -> str:
     if platform.system() != "Windows":
         return ""
 
@@ -258,8 +260,8 @@ def find_program_in_windows(app_name: str, partial_match=False,
     arch_keys = {winreg.KEY_WOW64_32KEY, winreg.KEY_WOW64_64KEY}
     for arch_key in arch_keys:
         key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-            r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", 
-            0, winreg.KEY_READ | arch_key)
+                             r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+                             0, winreg.KEY_READ | arch_key)
         for i in range(0, winreg.QueryInfoKey(key)[0]):
             sub_key_name = winreg.EnumKey(key, i)
             sub_key = winreg.OpenKey(key, sub_key_name)
