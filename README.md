@@ -99,7 +99,7 @@ pip install conan_explorer
 3. To open files with its associated program xdg-open is used: `sudo apt install xdg-utils`
 
 4. Not all Qt6 versions support the Wayland lib of the operating system.
-  * For Ubuntu 20.04 please execute "pip install PySide6-Essentials==6.4.3" to get the correct Qt6 version
+  * For Ubuntu 20.04 please execute "pip install PySide6-Essentials==6.4.3" to get the correct Qt6 version and update pip to latest version!
   * For Ubuntu 22.04 please ensure that the system Qt6 packages are available. Simply execute `sudo apt-get install qt6-wayland` on a wayland system, or `sudo apt-get install qt6-base-dev` for an X11 based system.
 
 
