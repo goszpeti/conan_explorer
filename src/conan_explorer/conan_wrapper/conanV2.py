@@ -57,7 +57,12 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def get_profile_settings(self, profile_name: str) -> ConanSettings:
         from conans.client.profile_loader import ProfileLoader
         try:
-            profile = ProfileLoader(self._client_cache).load_profile(profile_name)
+            if conan_version < Version("2.0.14"):
+                profile = ProfileLoader(self._client_cache).load_profile(profile_name)
+            else:
+                profile = ProfileLoader(
+                    self._client_cache.cache_folder).load_profile(profile_name)
+
             return profile.settings
         except Exception as e:
             Logger().error(f"Can't get profile {profile_name} settings: {str(e)}")
@@ -98,12 +103,12 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def get_default_settings(self) -> ConanSettings:
         from conans.client.profile_loader import ProfileLoader
-        try:
+        if conan_version < Version("2.0.14"):
             profile = ProfileLoader(self._client_cache).load_profile(
-            Path(self._conan.profiles.get_default_host()).name)
-        except Exception: # 2.0.14
+                    Path(self._conan.profiles.get_default_host()).name)
+        else:
             profile = ProfileLoader(self._client_cache.cache_folder).load_profile(
-            Path(self._conan.profiles.get_default_host()).name)
+                    Path(self._conan.profiles.get_default_host()).name)
         return dict(profile.settings)
 
     # user_name, authenticated

@@ -4,7 +4,7 @@ import platform
 from pathlib import Path
 from conan_explorer.app.system import delete_path
 from test.conftest import (TEST_REF, TEST_REF_OFFICIAL, PathSetup,
-                           conan_add_editables, conan_install_ref)
+                           conan_add_editables, conan_install_ref, get_current_profile)
 from time import sleep
 from typing import Generator, Tuple
 
@@ -230,12 +230,10 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     mocker.patch.object(QtWidgets.QDialog, 'exec',
                         return_value=QtWidgets.QDialog.DialogCode.Accepted)
     lpe._pkg_sel_ctrl.on_show_build_info()
-    if platform.system() == "Linux":
-        settings = {'arch': 'x86_64', 'build_type': 'Release', 'compiler': 'gcc', 
-                    'compiler.libcxx': 'libstdc++11', 'compiler.version': '9', 'os': 'Linux'}
-    else:
-        settings = {'arch': 'x86_64', 'build_type': 'Release', 'compiler': 'Visual Studio', 
-                'compiler.runtime': 'MD', 'compiler.version': '16', 'os': 'Windows'}
+
+    profile_name = get_current_profile()
+    settings = app.conan_api.get_profile_settings(
+                str(base_fixture.testdata_path / f"conan/profile/{profile_name}"))
     options = {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}
     mock_b.assert_called_with(ConanRef.loads(TEST_REF), settings, options)
 

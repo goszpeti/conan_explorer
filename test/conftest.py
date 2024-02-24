@@ -189,6 +189,18 @@ def clean_remotes_on_ci():
     elif conan_version.major == 2:
         os.system("conan remote remove conancenter")
 
+def get_profiles():
+    profiles = ["windows", "linux"]
+    if conan_version.major == 2:
+        profiles = ["windowsV2", "linuxV2"]
+    return profiles
+
+def get_current_profile():
+    profiles = get_profiles()
+    for profile in profiles:
+        if platform.system().lower() in profile:
+            return profile
+
 
 def run_conan_server():
     os.system("conan_server")
@@ -246,11 +258,8 @@ def start_conan_server():
     if SKIP_CREATE_CONAN_TEST_DATA:
         return
     print("CREATING TESTDATA FOR LOCAL CONAN SERVER")
-    profiles = ["windows", "linux"]
-    if conan_version.major == 2:
-        profiles = ["windowsV2", "linuxV2"]
 
-    for profile in profiles:
+    for profile in get_profiles():
         profile_path = profiles_path / profile
         create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
                          f"-o shared=False -pr {str(profile_path)}"], update=True)
