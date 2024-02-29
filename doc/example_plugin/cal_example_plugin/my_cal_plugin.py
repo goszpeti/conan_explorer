@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import Optional
 import sys
 
+import conan_explorer.app as app
+from conan_explorer.app.logger import Logger # fot global singletons
 from conan_explorer.ui import (BaseSignals, PluginInterfaceV1, FluentWindow, 
                                    PluginDescription, compile_ui_file_if_newer)
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
@@ -63,7 +65,7 @@ class SamplePluginView(PluginInterfaceV1):
 
     def on_option_button(self):
         """ Callback of side menu option button"""
-        pass
+        Logger().info(str(app.conan_api.get_all_local_refs()))
 
     def on_option_toggled(self):
         """ Callback of side menu toggle button"""
@@ -77,10 +79,10 @@ class SamplePluginView(PluginInterfaceV1):
 
 if __name__ == "__main__":
     # Standalone execution
-    app = QApplication([])
+    qapp = QApplication([])
     window = QMainWindow()
     pl = SamplePluginView(window, {})
     window.setGeometry(pl.geometry())
     pl.load_signal.emit()
     window.show()
-    app.exec()
+    qapp.exec()
