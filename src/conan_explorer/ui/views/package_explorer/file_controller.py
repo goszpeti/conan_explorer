@@ -77,11 +77,13 @@ class PackageFileExplorerController(QObject):
         if self._model:
             if pkg_path == Path(self._model.rootPath()):
                 return
-        self._model = CalFileSystemModel()
+        else: # initialize once - otherwise this causes performance issues
+            self._model = CalFileSystemModel()
+            self._view.setModel(self._model)
+
         self._model.setRootPath(str(pkg_path))
         self._model.sort(0, Qt.SortOrder.AscendingOrder)
         self._model.setReadOnly(False)
-        self._view.setModel(self._model)
         self._view.setRootIndex(self._model.index(str(pkg_path)))
         self._view.setColumnHidden(2, True)  # file type
         self._model.layoutChanged.connect(self.resize_file_columns)
