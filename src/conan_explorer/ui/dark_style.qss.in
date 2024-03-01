@@ -359,8 +359,10 @@ QMainWindow{
 
 QMenu,RoundedMenu{
     background-color: #202020;
-    padding-top: 10px;
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
+}
+RoundedMenu{
+    padding-top: 10px;
 }
 QMenu::item:selected,RoundedMenu::item:selected{
     background-color: #5c5c5c; 

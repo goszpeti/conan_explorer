@@ -6,13 +6,12 @@ from typing_extensions import override
 from dictdiffer import diff
 from PySide6.QtCore import QRegularExpression, Qt
 from PySide6.QtGui import QAction, QColor, QShowEvent, QTextCharFormat
-from PySide6.QtWidgets import QDialog, QListWidgetItem
+from PySide6.QtWidgets import QDialog, QListWidgetItem, QMenu
 
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import ConanPkg
 from conan_explorer.ui.common.syntax_highlighting import ConfigHighlighter
 from conan_explorer.ui.common.theming import ThemedWidget
-from conan_explorer.ui.widgets import RoundedMenu
 
 
 class ConfigDiffHighlighter(ConfigHighlighter):
@@ -87,7 +86,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
 
     def _init_pkg_context_menu(self):
         """ Initalize context menu with all actions """
-        self.select_cntx_menu = RoundedMenu()
+        self.select_cntx_menu = QMenu()
 
         self.set_ref_item = QAction("Set as reference", self)
         self.set_themed_icon(self.set_ref_item, "icons/copy_link.svg")

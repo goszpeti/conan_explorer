@@ -10,7 +10,7 @@ class RoundedMenu(QMenu):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowFlags(self.windowFlags() | Qt.WindowType.NoDropShadowWindowHint |
-                            Qt.WindowType.FramelessWindowHint)
+                           Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
 

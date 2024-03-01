@@ -6,20 +6,22 @@ from conan_explorer import AUTHOR, BUILT_IN_PLUGIN, user_save_path
 from conan_explorer.app.logger import Logger
 # using global module pattern
 from conan_explorer.ui.common import get_themed_asset_icon
-from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE  # using global module pattern
+# using global module pattern
+from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE
 from conan_explorer.ui.fluent_window import FluentWindow
 from conan_explorer.ui.plugin import PluginInterfaceV1
 from conan_explorer.ui.plugin.types import PluginDescription
-from conan_explorer.ui.widgets import RoundedMenu, AnimatedToggle
+from conan_explorer.ui.widgets import AnimatedToggle
 from conan_explorer.conan_wrapper.types import ConanRef, ConanPkgRef
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import (QInputDialog, QMessageBox, QTabWidget, QFileDialog, QVBoxLayout)
+from PySide6.QtWidgets import (QInputDialog, QMessageBox,
+                               QTabWidget, QFileDialog, QMenu, QVBoxLayout)
 
 from .model import UiAppLinkModel, UiTabModel
 from .config import UiAppLinkConfig, UiTabConfig
-from .tab import TabList, TabList  # TabGrid
+from .tab import TabList
 
 if TYPE_CHECKING:
     from conan_explorer.ui.views.app_grid.model import UiAppGridModel
@@ -27,11 +29,12 @@ if TYPE_CHECKING:
 
 
 class AppGridView(PluginInterfaceV1):
-    load_signal = Signal() # type: ignore
+    load_signal = Signal()  # type: ignore
 
     def __init__(self, parent, model: "UiAppGridModel", base_signals: "BaseSignals", page_widgets: FluentWindow.PageStore):
-        plugin_descr = PluginDescription("Conan Quicklaunch", BUILT_IN_PLUGIN, AUTHOR, "", "", "", " ", False, "")
-        super().__init__(parent, plugin_descr, base_signals, page_widgets) # TODO
+        plugin_descr = PluginDescription(
+            "Conan Quicklaunch", BUILT_IN_PLUGIN, AUTHOR, "", "", "", " ", False, "")
+        super().__init__(parent, plugin_descr, base_signals, page_widgets)  # TODO
 
         self.tab_widget = QTabWidget(self)
         self.tab_widget.setContentsMargins(0, 0, 0, 0)
@@ -46,7 +49,8 @@ class AppGridView(PluginInterfaceV1):
 
         self.tab_widget.tabBar().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tab_widget.tabBar().setContentsMargins(0, 0, 0, 0)
-        self.tab_widget.tabBar().customContextMenuRequested.connect(self.on_tab_context_menu_requested)
+        self.tab_widget.tabBar().customContextMenuRequested.connect(
+            self.on_tab_context_menu_requested)
 
         self.tab_widget.setMovable(True)
         self.tab_widget.tabBar().tabMoved.connect(self.on_tab_move)
@@ -87,6 +91,7 @@ class AppGridView(PluginInterfaceV1):
         self.re_init(self.model)
 
     T = TypeVar('T')
+
     def findChildren(self, type: Type[T]) -> List[T]:
         return super().findChildren(type)  # type: ignore
 
@@ -105,21 +110,22 @@ class AppGridView(PluginInterfaceV1):
 
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add
-        current_tab: TabList = self.tab_widget.widget(self.tab_widget.currentIndex())  # type: ignore
+        current_tab: TabList = self.tab_widget.widget(
+            self.tab_widget.currentIndex())  # type: ignore
         current_tab.open_app_link_add_dialog()
 
     def on_tab_move(self):
         """ Refresh backend info when tabs are reordered"""
         reordered_tabs = []
         for i in range(self.tab_widget.count()):
-            tab: TabList = self.tab_widget.widget(i) # type: ignore
+            tab: TabList = self.tab_widget.widget(i)  # type: ignore
             reordered_tabs.append(tab.model)
         self.model.tabs = reordered_tabs
         self.model.save()
 
     def on_tab_context_menu_requested(self, position):
         index = self.tab_widget.tabBar().tabAt(position)
-        menu = RoundedMenu()
+        menu = QMenu()
         self.menu = menu
 
         rename_action = QAction("Rename", self)
@@ -149,7 +155,8 @@ class AppGridView(PluginInterfaceV1):
             if not text:
                 return
             # update model
-            tab_model = UiTabModel().load(UiTabConfig(text, apps=[UiAppLinkConfig()]), self.model)
+            tab_model = UiTabModel().load(UiTabConfig(
+                text, apps=[UiAppLinkConfig()]), self.model)
             self.model.tabs.append(tab_model)
             self.model.save()
             # add tab in ui
@@ -158,10 +165,11 @@ class AppGridView(PluginInterfaceV1):
             self.tab_widget.addTab(tab, text)
 
     def on_tab_rename(self, index):
-        tab: TabList = self.tab_widget.widget(index) # type: ignore
+        tab: TabList = self.tab_widget.widget(index)  # type: ignore
 
         rename_tab_dialog = QInputDialog(self)
-        text, accepted = rename_tab_dialog.getText(self, 'Rename tab', 'Enter new name:', text=tab.model.name)
+        text, accepted = rename_tab_dialog.getText(
+            self, 'Rename tab', 'Enter new name:', text=tab.model.name)
         if accepted:
             tab.model.name = text
             self.tab_widget.setTabText(index, text)
@@ -174,7 +182,8 @@ class AppGridView(PluginInterfaceV1):
         msg = QMessageBox(parent=self)
         msg.setWindowTitle("Delete tab")
         msg.setText("Are you sure, you want to delete this tab?\t")
-        msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
+        msg.setStandardButtons(QMessageBox.StandardButton.Yes |
+                               QMessageBox.StandardButton.Cancel)
         msg.setIcon(QMessageBox.Icon.Question)
         reply = msg.exec()
         if reply == QMessageBox.StandardButton.Yes:
@@ -249,7 +258,8 @@ class AppGridView(PluginInterfaceV1):
 
                     if app_link.model.conan_ref == conan_ref:
                         # reverse lookup - don't update an icon with other options
-                        pkg_info = app.conan_api.get_local_pkg_from_id(ConanPkgRef.loads(conan_ref + ":" + pkg_id))
+                        pkg_info = app.conan_api.get_local_pkg_from_id(
+                            ConanPkgRef.loads(conan_ref + ":" + pkg_id))
                         if app_link.model.conan_options:  # only compare options, if user explicitly set them
                             # user options should be a subset of full pkg options
                             if not app_link.model.conan_options.items() <= pkg_info.get("options", {}).items():
@@ -263,4 +273,3 @@ class AppGridView(PluginInterfaceV1):
 
         except Exception as e:
             Logger().error(f"Can't update AppGrid with conan info {str(e)}")
-

@@ -306,10 +306,12 @@ QMainWindow {
     background-color: transparent;
 }
 
-QMenu,RoundedMenu {
+QMenu, RoundedMenu{
     background-color: #D3D3D3;
-    padding-top: 10px;
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
+}
+RoundedMenu{
+    padding-top: 10px;
 }
 QMenu::item:selected,RoundedMenu::item:selected{
     background-color: #A8A8A8;

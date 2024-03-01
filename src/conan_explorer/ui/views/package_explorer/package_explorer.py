@@ -5,7 +5,6 @@ from conan_explorer import conan_version
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from conan_explorer.ui.common.model import re_register_signal
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
-from conan_explorer.ui.widgets import RoundedMenu
 
 from .file_controller import PackageFileExplorerController
 from .sel_controller import PackageSelectionController, MultiPkgSelectionMode
@@ -13,7 +12,7 @@ from .sel_model import PkgSelectionType
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QKeySequence, QResizeEvent, QAction, QShowEvent
-from PySide6.QtWidgets import (QWidget, QTabBar, QTreeView, QHBoxLayout, QFrame, 
+from PySide6.QtWidgets import (QWidget, QTabBar, QTreeView, QHBoxLayout, QFrame, QMenu,
                                QAbstractItemView, QAbstractScrollArea)
 
 
@@ -156,7 +155,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
     # Selection view context menu
 
     def _init_selection_context_menu(self):
-        self.select_cntx_menu = RoundedMenu()
+        self.select_cntx_menu = QMenu()
 
         self.copy_ref_action = QAction("Copy reference", self)
         self.set_themed_icon(self.copy_ref_action, "icons/copy_link.svg")
@@ -265,7 +264,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         if self.file_cntx_menu:
             return
         # for pkg_file_exp_ctrl in self._pkg_tabs_ctrl:
-        self.file_cntx_menu = RoundedMenu()
+        self.file_cntx_menu = QMenu()
         self._open_fm_action = QAction("Show in File Manager", self)
         self.set_themed_icon(self._open_fm_action, "icons/file_explorer.svg")
         self.file_cntx_menu.addAction(self._open_fm_action)

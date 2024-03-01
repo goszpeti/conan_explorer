@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Optional
 
 from PySide6.QtCore import QEasingCurve, QPoint, QPropertyAnimation, Qt, Slot
 from PySide6.QtGui import QAction, QShortcut
-from PySide6.QtWidgets import QListWidgetItem, QWidget
+from PySide6.QtWidgets import QListWidgetItem, QWidget, QGraphicsDropShadowEffect
 from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
@@ -102,7 +102,6 @@ class ConanSearchView(PluginInterfaceV1):
     def _init_pkg_context_menu(self):
         """ Initalize context menu with all actions """
         self.select_cntx_menu = RoundedMenu()
-
         self.copy_ref_action = QAction("Copy reference", self)
         self.set_themed_icon(self.copy_ref_action, "icons/copy_link.svg")
         self.select_cntx_menu.addAction(self.copy_ref_action)
@@ -126,8 +125,7 @@ class ConanSearchView(PluginInterfaceV1):
         self.diff_pkgs_action = QAction("Compare packages", self)
         self.set_themed_icon(self.diff_pkgs_action, "icons/difference.svg")
         self.select_cntx_menu.addAction(self.diff_pkgs_action)
-        self.diff_pkgs_action.triggered.connect(
-            self._search_controller.on_diff_requested)
+        self.diff_pkgs_action.triggered.connect(self._search_controller.on_diff_requested)
 
     def reload_themed_icons(self):
         self._conan_config_highlighter = ConfigHighlighter(self._ui.package_info_text.document(), "yaml")
@@ -142,6 +140,11 @@ class ConanSearchView(PluginInterfaceV1):
         items = self._search_controller.get_selected_source_items()
         if len(items) < 1:
             return
+        elif len(items) < 2:
+            self.diff_pkgs_action.setEnabled(False)
+        else:
+            self.diff_pkgs_action.setEnabled(True)
+
         item = items[0]
         if item.empty:
             return

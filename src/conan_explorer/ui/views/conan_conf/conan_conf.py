@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QApplication, QInputDialog, QMessageBox, QWidget
+from PySide6.QtWidgets import QApplication, QInputDialog, QMessageBox, QWidget, QMenu
 from typing_extensions import override
 
 import conan_explorer.app as app
@@ -14,7 +14,6 @@ from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import delete_path
 from conan_explorer.ui.common import ConfigHighlighter, get_themed_asset_icon
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
-from conan_explorer.ui.widgets import RoundedMenu
 
 from .dialogs import EditableEditDialog, RemoteEditDialog, RemoteLoginDialog
 from .editable_controller import ConanEditableController
@@ -128,7 +127,7 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.profile_rename_button, "icons/rename.svg")
 
     def _init_profile_context_menu(self):
-        self.profiles_cntx_menu = RoundedMenu()
+        self.profiles_cntx_menu = QMenu()
         self._copy_profile_action = QAction("Copy profile name", self)
         self._copy_profile_action.setIcon(
             QIcon(get_themed_asset_icon("icons/copy_link.svg")))
@@ -264,7 +263,7 @@ class ConanConfigView(PluginInterfaceV1):
         self._remotes_cntx_menu.exec(self._ui.remotes_tree_view.mapToGlobal(position))
 
     def _init_remote_context_menu(self):
-        self._remotes_cntx_menu = RoundedMenu()
+        self._remotes_cntx_menu = QMenu()
         self._copy_remote_action = QAction("Copy remote name", self)
         self._copy_remote_action.setIcon(
             QIcon(get_themed_asset_icon("icons/copy_link.svg")))
