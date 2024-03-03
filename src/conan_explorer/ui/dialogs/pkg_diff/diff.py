@@ -17,6 +17,10 @@ from conan_explorer.ui.common.theming import ThemedWidget
 class ConfigDiffHighlighter(ConfigHighlighter):
     """ Syntax highlighter to highlight the differences of a dict with different
     background colors (modified, added, removed)"""
+    DIFF_NEW_COLOR = QColor("green")
+    DIFF_REMOVED_COLOR = QColor("red")
+    DIFF_MODIFIED_COLOR = QColor("orange")
+
     def __init__(self, parent, type: Literal['ini', 'yaml']) -> None:
         super().__init__(parent, type)
         self._reset_diff()
@@ -37,17 +41,17 @@ class ConfigDiffHighlighter(ConfigHighlighter):
         self.setFormat(match.capturedStart(), match.capturedLength(), key_format)
 
         for diff_item in self.modified_diffs:
-            key_format.setBackground(QColor("orange"))
+            key_format.setBackground(self.DIFF_MODIFIED_COLOR)
             expression = QRegularExpression(diff_item)
             match = expression.match(text)
             self.setFormat(match.capturedStart(), match.capturedLength(), key_format)
         for diff_item in self.added_diffs:
-            key_format.setBackground(QColor("green"))
+            key_format.setBackground(self.DIFF_NEW_COLOR)
             expression = QRegularExpression(diff_item)
             match = expression.match(text)
             self.setFormat(match.capturedStart(), match.capturedLength(), key_format)
         for diff_item in self.removed_diffs:
-            key_format.setBackground(QColor("red"))
+            key_format.setBackground(self.DIFF_REMOVED_COLOR)
             expression = QRegularExpression(diff_item)
             match = expression.match(text)
             self.setFormat(match.capturedStart(), match.capturedLength(), key_format)
@@ -61,6 +65,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         from .diff_ui import Ui_Dialog
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
+        # TODO test out dialog._ui.left_text_browser.AutoFormattingFlag
         self._init_pkg_context_menu()
 
         self.setWindowTitle("Compare Packages")
@@ -107,7 +112,6 @@ class PkgDiffDialog(QDialog, ThemedWidget):
     def add_diff_item(self, content: ConanPkg):
         """" """
         self._item_data.append(content)
-
 
     def update_diff(self):
         """ Resets the syntax highlighting, adds the different category items
@@ -202,8 +206,8 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         pkg_id = sel_item.data(0)
         for item in self._item_data:
             if item.get("id", "") == pkg_id:
-                i = self._item_data.index(item)
-                self._item_data.pop(i)
+                idx = self._item_data.index(item)
+                self._item_data.pop(idx)
                 self._item_data.insert(0, item)
                 self._set_left_content(item)
                 break
@@ -223,6 +227,9 @@ class PkgDiffDialog(QDialog, ThemedWidget):
                     QListWidgetItem(item_name, self._ui.pkgs_list_widget)
 
         self._set_right_content(self._item_data[1])
+        # select 2nd item so we see a diff per default
+        self._ui.pkgs_list_widget.setCurrentRow(1)
+
 
     def _set_diff_list_prios(self):
         """ Prioritize the list elements depending on the similarity of the original package

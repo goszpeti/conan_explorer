@@ -43,11 +43,6 @@ class ConanUnifiedApi():
         raise NotImplementedError
 
     @abstractmethod
-    def get_profiles_with_settings(self) -> Dict[str, ConanSettings]:
-        """ Return a list of all profiles and the corresponding settings """
-        raise NotImplementedError
-
-    @abstractmethod
     def get_default_settings(self) -> ConanSettings:
         """
         Return the settings of the conan default profile. 
@@ -350,15 +345,6 @@ class ConanCommonUnifiedApi(ConanUnifiedApi):
         # no direct Conan API access!
         self.info_cache: "ConanInfoCache"
 
-### General commands ###
-
-    def get_profiles_with_settings(self) -> Dict[str, ConanSettings]:
-        """ Return a list of all profiles and the corresponding settings """
-        profiles_dict = {}
-        for profile in self.get_profiles():
-            profiles_dict[profile] = self.get_profile_settings(profile)
-        return profiles_dict
-    
 ### Install related methods ###
 
     def install_package(self, conan_ref: ConanRef, package: ConanPkg, 

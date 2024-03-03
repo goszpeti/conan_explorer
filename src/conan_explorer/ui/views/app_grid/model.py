@@ -2,7 +2,7 @@ import platform
 from pathlib import Path
 from typing import Callable, List, Optional, Union
 
-from PySide6.QtCore import (QAbstractListModel, QModelIndex, QObject,
+from PySide6.QtCore import (QAbstractListModel, QModelIndex, QObject, 
                             QPersistentModelIndex, Qt)
 from PySide6.QtGui import QIcon
 from typing_extensions import override
@@ -15,9 +15,8 @@ from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
-from conan_explorer.ui.common import (extract_icon, get_asset_image_path,
-                                      get_icon_from_image_file,
-                                      get_themed_asset_icon)
+from conan_explorer.ui.common import (extract_icon, get_asset_image_path, 
+                                      get_icon_from_image_file, get_themed_asset_icon)
 
 from .config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 
@@ -47,10 +46,10 @@ class UiAppGridModel(UiAppGridConfig, QObject):
         """ Helper function to generate a unique list of all ConanWorkerElements """
         conan_refs: List[ConanWorkerElement] = []
         for tab in self.tabs:
-            for app in tab.apps:
+            for app_model in tab.apps:
                 conan_worker_element: ConanWorkerElement = \
-                    {"ref_pkg_id": app.conan_ref, "settings": {},
-                     "options": app.conan_options, "update": False,
+                    {"ref_pkg_id": app_model.conan_ref, "settings": {},
+                     "options": app_model.conan_options, "update": False,
                      "profile": "", "auto_install": True}
                 if conan_worker_element not in conan_refs:
                     conan_refs.append(conan_worker_element)

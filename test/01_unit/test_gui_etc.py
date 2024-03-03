@@ -7,13 +7,14 @@ import platform
 import sys
 import traceback
 from pathlib import Path
-from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog
+from conan_explorer.ui.dialogs.pkg_diff.diff import ConfigDiffHighlighter, PkgDiffDialog
 from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
 from conan_explorer.ui.views.conan_conf.remotes_controller import ConanRemoteController
 from test.conftest import TEST_REF, PathSetup, conan_remove_ref
 from unittest.mock import Mock
 
 import pytest
+from pytest_check import check
 from PySide6 import QtCore, QtGui, QtWidgets
 
 import conan_explorer  # for mocker
@@ -403,29 +404,105 @@ def test_editable_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     assert ConanRef.loads(new_ref + "new") in app.conan_api.get_editable_references()
     assert new_ref_obj not in app.conan_api.get_editable_references()
 
+def check_dict_value_in_text(text, dict_to_check):
+    for key, value in dict_to_check.items():
+        assert f"{key}: {value}" in text
+
+def check_color_in_document(doc, word_to_check, color):
+    idx = doc.toPlainText().find(word_to_check)
+    format_ranges = doc.findBlock(idx).layout().formats()
+    for format_range in format_ranges:
+        with check:
+            assert format_range.format.background().color() == color
 
 @pytest.mark.conanv2
 def test_conan_diff_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     """ Test, that the diff dialog works """
     root_obj = QtWidgets.QWidget()
-    a1 = {'id': '02356509d9a0879a1cecc67cf273cd8d7638a142', 'options': {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}, 'settings': {'arch': 'x86_64',
-        'build_type': 'Release', 'compiler': 'gcc', 'compiler.libcxx': 'libstdc++11', 'compiler.version': '9', 'os': 'Linux'}, 'requires': [], 'outdated': False}
-    a2 = {'id': '7836e0c4e7632db749e0dafcb4aed62ba225b99b', 'options': {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}, 'settings': {'arch': 'x86_64',
-        'build_type': 'Release', 'compiler': 'Visual Studio', 'compiler.runtime': 'MD', 'compiler.version': '16', 'os': 'Windows'}, 'requires': [], 'outdated': False}
-    available_refs = []
-    available_refs.append(a1)
-    available_refs.append(a2)
+    server_ref_1: ConanPkg = {'id': '02356509d9a0879a1cecc67cf273cd8d7638a142', 
+        'options': {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}, 
+        'settings': {'arch': 'x86_64',
+        'build_type': 'Release', 'compiler': 'gcc', 'compiler.libcxx': 'libstdc++11', 
+        'compiler.version': '9', 'os': 'Linux'}, 'requires': [], 'outdated': False}
+    server_ref_2: ConanPkg = {'id': '7836e0c4e7632db749e0dafcb4aed62ba225b99b', 
+        'options': {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}, 
+        'settings': {'arch': 'x86_64',
+        'build_type': 'Release', 'compiler': 'Visual Studio', 'compiler.runtime': 'MD', 
+        'compiler.version': '16', 'os': 'Windows'}, 'requires': [], 'outdated': False}
 
     #conan.get_remote_pkgs_from_ref(ConanRef.loads(TEST_REF), None)
     wanted_ref: ConanPkg = {  # add default options
-        'id': '', 'options': {"shared": "False", "variant": "var1", "fPIC2": "True"},
+        'id': 'MyId', 'options': {"shared": "False", "variant": "var1", "fPIC2": "True"},
         'settings': {'arch_build': 'x86_64', 'os_build': 'Linux', "build_type": "Release"},
         'requires': [], 'outdated': False}
     dialog = PkgDiffDialog(root_obj)
     dialog.add_diff_item(wanted_ref)
-    dialog.add_diff_item(available_refs[0])
+    dialog.add_diff_item(server_ref_1)
+    dialog.add_diff_item(server_ref_2)
     dialog.show()
-    #from pytestqt.plugin import _qapp_instance
+    app_qt_fixture.waitExposed(dialog)
+
+    # check wanted ref item is first and has * in name
+    assert "* MyId" == dialog._ui.pkgs_list_widget.item(0).data(0)
+
+    # check that it is displayed in the left window
+    left_content = dialog._ui.left_text_browser.toPlainText()
+    assert "id:" not in left_content # hide id
+    check_dict_value_in_text(left_content, wanted_ref["options"])
+    check_dict_value_in_text(left_content, wanted_ref["settings"])
+
+    # check that 2nd item is selected per default and is dispalyed in right window
+    assert dialog._ui.pkgs_list_widget.currentRow() == 1
+    right_content = dialog._ui.right_text_browser.toPlainText()
+
+    check_dict_value_in_text(right_content, server_ref_1["options"])
+    check_dict_value_in_text(right_content, server_ref_1["settings"])
+
+    ### check the diff colors ###
+    # use colors from the class
+    rem_color = ConfigDiffHighlighter.DIFF_REMOVED_COLOR
+    mod_color = ConfigDiffHighlighter.DIFF_MODIFIED_COLOR
+    new_color = ConfigDiffHighlighter.DIFF_NEW_COLOR
+
+    # check that shared is orange in both
+    check_color_in_document(dialog._ui.left_text_browser.document(), "shared", mod_color)
+    check_color_in_document(
+        dialog._ui.right_text_browser.document(), "shared", mod_color)
+
+    # check that arch_build and os_build is red in left
+    check_color_in_document(
+        dialog._ui.left_text_browser.document(), "arch_build", rem_color)
+    check_color_in_document(
+        dialog._ui.left_text_browser.document(), "os_build", rem_color)
+
+    # check that arch, compiler, c.version and os is green in right
+    check_color_in_document(
+        dialog._ui.right_text_browser.document(), "arch", new_color)
+    check_color_in_document(
+        dialog._ui.right_text_browser.document(), "compiler", new_color)
+    check_color_in_document(
+        dialog._ui.right_text_browser.document(), "compiler.version", new_color)
+    check_color_in_document(
+        dialog._ui.right_text_browser.document(), "os", new_color)
+
+    # check selecting the 3rd ref changes and redraws right window
+    dialog._ui.pkgs_list_widget.setCurrentRow(2)
+    assert "Windows" in dialog._ui.right_text_browser.toPlainText()
+    check_color_in_document(
+        dialog._ui.right_text_browser.document(), "compiler.runtime", new_color)
+
+    # check that select ref sets the * and changes the left window
+    dialog._set_ref_item()
+    assert "* " + server_ref_2["id"] == dialog._ui.pkgs_list_widget.item(0).data(0)
+
+    # check that there are no diffs marked, when comparing against themselves
+    dialog._ui.pkgs_list_widget.setCurrentRow(0)
+    check_color_in_document(
+        dialog._ui.right_text_browser.document(), "shared", QtGui.QColor("black"))
+    check_color_in_document(
+        dialog._ui.right_text_browser.document(), "os", QtGui.QColor("black"))
+    
+    # from pytestqt.plugin import _qapp_instance
     # while True:
     #     _qapp_instance.processEvents()
 

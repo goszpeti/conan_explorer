@@ -3,7 +3,7 @@ from typing import Optional
 import sys
 
 import conan_explorer.app as app
-from conan_explorer.app.logger import Logger # fot global singletons
+from conan_explorer.app.logger import Logger # for global singletons
 from conan_explorer.ui import (BaseSignals, PluginInterfaceV1, FluentWindow, 
                                    PluginDescription, compile_ui_file_if_newer)
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
