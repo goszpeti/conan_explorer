@@ -558,10 +558,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     # precheck, that the package is found
     found_pkg = app.conan_api.get_local_pkgs_from_ref(cfr)
     assert found_pkg
-
     pkg_id_to_remove = ""
-    if conan_version >= conan_explorer.Version("2.1.0"): # 2 works only with id, 1 can work without
-        pkg_id_to_remove = found_pkg.get("id", "")
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.load()
@@ -601,6 +598,6 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     found_pkg = app.conan_api.find_best_matching_local_package(cfr)
     assert not found_pkg.get("id", "")
 
-# TODO
-# def test_multiselect():
+# TODO:
+# def test_multiselect()test_delete_package_dialog :
 #     pass
