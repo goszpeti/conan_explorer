@@ -152,7 +152,7 @@ jobs:
           pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml
           --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_explorer --cov-branch --cov-append ${{matrix.pytest_args}}
       - name: Upload Test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3 # TODO: v4 does not support overwrite anymore
         with:
           name: Test results
           path: |
@@ -170,7 +170,7 @@ jobs:
           # Disabling shallow clone is recommended for improving relevancy of reporting,
           # cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
           fetch-depth: 0
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v3
         with:
           name: Test results
           path: ./
