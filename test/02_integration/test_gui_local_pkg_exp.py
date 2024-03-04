@@ -602,5 +602,5 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     assert not found_pkg.get("id", "")
 
 # TODO
-def test_multiselect(self):
-    pass
+# def test_multiselect():
+#     pass
