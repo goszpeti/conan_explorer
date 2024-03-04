@@ -152,7 +152,7 @@ jobs:
           pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml
           --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_explorer --cov-branch --cov-append ${{matrix.pytest_args}}
       - name: Upload Test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: Test results
           path: |
