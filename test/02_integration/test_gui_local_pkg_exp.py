@@ -560,7 +560,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     assert found_pkg
 
     pkg_id_to_remove = ""
-    if conan_version.major == 1: # 2 works only with id, 1 can work without
+    if conan_version >= conan_explorer.Version("2.1.0"): # 2 works only with id, 1 can work without
         pkg_id_to_remove = found_pkg.get("id", "")
 
     main_gui = main_window.MainWindow(_qapp_instance)
