@@ -53,13 +53,6 @@ class PackageSelectionController(QObject):
     def on_pkg_refresh_clicked(self):
         self.refresh_pkg_selection_view()
 
-    def on_open_export_folder_requested(self):
-        conan_refs = self.get_selected_conan_refs()
-        if len(conan_refs) != 1:
-            return
-        conanfile = app.conan_api.get_conanfile_path(ConanRef.loads(conan_refs[0]))
-        open_in_file_manager(conanfile)
-
     def on_show_conanfile_requested(self):
         conan_refs = self.get_selected_conan_refs()
         if len(conan_refs) != 1:
@@ -250,8 +243,11 @@ class PackageSelectionController(QObject):
                     return ref_row
         return -1
 
-    def select_local_package_from_ref(self, conan_ref: str, export=False) -> bool:
-        """ Selects a reference:id pkg in the left pane and opens the file view """
+    def select_local_package_from_ref(self, conan_ref: str, export=False, 
+        select_mode=QItemSelectionModel.SelectionFlag.ClearAndSelect) -> bool:
+        """ Selects a reference:id pkg in the left pane and opens the file view 
+        param export: teels to select the export folder
+        """
         # change to this page and loads
         self._page_widgets.get_button_by_type(type(self.parent())).click()
         self._loader.wait_for_finished()
@@ -315,7 +311,7 @@ class PackageSelectionController(QObject):
         # Scroll to item and select
         view_index = view_model.mapFromSource(internal_sel_index)
         self._view.scrollTo(view_index)
-        sel_model.select(view_index, QItemSelectionModel.SelectionFlag.ClearAndSelect)
+        sel_model.select(view_index, select_mode)
         sel_model.currentRowChanged.emit(proxy_index, internal_sel_index)
         Logger().debug(f"Selecting {view_index.data()} in Local Package Explorer")
 

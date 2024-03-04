@@ -178,6 +178,7 @@ jobs:
         working-directory: ./cov
         run: |
           sed -i 's@/home/runner/work/conan_explorer/conan_explorer@.@g' cov-*.xml
+          sed -i 's@D:/a/conan_explorer/conan_explorer@.@g' cov-*.xml
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
