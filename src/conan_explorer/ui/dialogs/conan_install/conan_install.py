@@ -192,10 +192,11 @@ class ConanInstallDialog(QDialog):
                                                       self.emit_conan_pkg_signal_callback)
 
     def emit_conan_pkg_signal_callback(self, conan_ref: str, pkg_id: str):
-        if not self.pkg_installed_signal:
-            return
         if not pkg_id:
             self.installation_failed.emit(conan_ref)
+            return
+        if not self.pkg_installed_signal:
+            return
         self.pkg_installed_signal.emit(conan_ref, pkg_id)
 
     def on_installation_failed(self, conan_ref: str):
@@ -207,11 +208,10 @@ class ConanInstallDialog(QDialog):
         sb = QMessageBox.StandardButton
         message_box.setIcon(QMessageBox.Icon.Question)
         message_box.setStandardButtons(sb.Yes | sb.Cancel)
-        message_box.setIcon(QMessageBox.Icon.Question)
         reply = message_box.exec()
-        message_box.close()
         if reply == sb.Yes:
             self.show_package_diffs(conan_ref)
+        message_box.close()
 
     def show_package_diffs(self, conan_ref: str):
         try:

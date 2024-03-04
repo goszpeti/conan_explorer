@@ -41,6 +41,10 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     qtbot.waitExposed(main_window)
     search_dialog = main_window.page_widgets.get_page_by_type(ConanSearchView)
 
+    # expand and collapse remotes list, simply to see if it does not crash
+    search_dialog._ui.remote_toggle_button.click()
+    search_dialog._ui.remote_toggle_button.click() # collapse again
+
     # enter short search term -> search button disabled
     search_dialog._ui.search_line.setText("ex")
     assert not search_dialog._ui.search_button.isEnabled()
@@ -118,6 +122,10 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     lpe = main_window.page_widgets.get_page_by_type(LocalConanPackageExplorer)
 
     assert id == lpe._pkg_sel_ctrl.get_selected_conan_pkg_info().get("id", "")
+
+    # TODO: select 3 packages and compare them
+
+    # TODO: check greyyed out context menu elements
 
     search_dialog.hide()
     main_window.close()

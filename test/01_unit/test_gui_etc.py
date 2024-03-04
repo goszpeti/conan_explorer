@@ -2,6 +2,7 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
+from datetime import datetime, timedelta
 import os
 import platform
 import sys
@@ -207,6 +208,47 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     assert conan_install_dialog._ui.profile_cbox.itemText(0) == "default"
 
     conan_install_dialog.close()
+
+def test_install_dialog_diff_open_on_failure_to_install(app_qt_fixture, base_fixture, mocker):
+    """ 
+    Tests, that the Conan Install dialog spawns a Pkg diff dialog with the 
+    all the refs loaded from the server.
+    """
+    app.conan_api.init_api()
+    app.active_settings.set(DEFAULT_INSTALL_PROFILE, "default")
+
+    root_obj = QtWidgets.QWidget()
+    
+    conan_install_dialog = ConanInstallDialog(root_obj, TEST_REF)
+
+    variant_option = conan_install_dialog._ui.options_widget.topLevelItem(0)
+    variant_option.setData(1, 0, "MyVariant")
+
+    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
+                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
+    conan_install_dialog._ui.button_box.accepted.emit()
+
+    # wait for dialog to pop up
+    from pytestqt.plugin import _qapp_instance
+    start_time = datetime.now() 
+    while (len(root_obj.children()) < 2 and
+        datetime.now() - start_time < timedelta(seconds=20)):
+         _qapp_instance.processEvents()
+
+    # pkg diff dialog is now child of root object
+    pkg_diff_dlg: PkgDiffDialog = root_obj.children()[1]
+    assert pkg_diff_dlg.isVisible()
+
+    # check wanted ref item is first and has * in name
+    assert "* User input" == pkg_diff_dlg._ui.pkgs_list_widget.item(0).data(0)
+    assert 5 == pkg_diff_dlg._ui.pkgs_list_widget.count()
+    # check that it is displayed in the left window
+    left_content = pkg_diff_dlg._ui.left_text_browser.toPlainText()
+    check_dict_value_in_text(
+        left_content, conan_install_dialog._conan_selected_install['options'])
+
+    pkg_diff_dlg.close()
+
 
 def test_about_dialog(app_qt_fixture, base_fixture):
     """
