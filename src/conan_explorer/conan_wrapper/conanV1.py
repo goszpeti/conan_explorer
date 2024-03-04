@@ -156,7 +156,6 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             return []
 
     def get_editable(self, conan_ref: Union[ConanRef, str]) -> EditablePkg:
-        pass
         if isinstance(conan_ref, str):
             conan_ref = ConanRef.loads(conan_ref)
         editable_dict = self._conan.editable_list().get(str(conan_ref), {})
@@ -164,7 +163,6 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                            editable_dict.get("output_folder"))
 
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
-        pkg_path = Path(INVALID_PATH)
         editable_dict = self._conan.editable_list().get(str(conan_ref), {})
         pkg_path = Path(str(editable_dict.get("path", INVALID_PATH)))
         return pkg_path

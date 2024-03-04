@@ -25,12 +25,11 @@ def get_icon_from_image_file(image_path: Path) -> QIcon:
     return QIcon(str(image_path))
 
 
-def draw_svg_with_color(svg_path: Path, color="white", scale: float = 1.0) -> Path:
+def draw_svg_with_color(svg_path: Path, color="white") -> Path:
     """
     Sets an svg in the desired color for a QtWidget.
     :param color: the disired color as a string in html compatible name
     :param shadow: draws a drop shadow
-    :param scale: multiplicator for scaling the image
     """
     if not svg_path or not svg_path.exists():
         Logger().error("Cannot draw invalid SVG file: %s", repr(svg_path))

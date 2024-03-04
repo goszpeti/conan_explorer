@@ -340,8 +340,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             self.ui.right_menu_top_content_sw.show()
             self.ui.right_menu_top_content_sw.setCurrentWidget(side_menu)
-        if AUTOCLOSE_SIDE_MENU:
-            if self.ui.settings_button.isChecked():
+        if AUTOCLOSE_SIDE_MENU and self.ui.settings_button.isChecked():
                 self.toggle_right_menu()
 
     def toggle_left_menu(self):

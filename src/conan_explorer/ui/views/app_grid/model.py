@@ -439,8 +439,7 @@ class UiAppLinkModel(UiAppLinkConfig):
                     self._conan_file_reference, package_folder)
         self.package_folder = package_folder
 
-        if not quiet:
-            if not package_folder.exists():
+        if not quiet and not package_folder.exists():
                 Logger().info(f"Can't find a package for <b>{str(self.conan_ref)}" + 
                             f"</b> and options {repr(self.conan_options)} <b>locally</b>")
 

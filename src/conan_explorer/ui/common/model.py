@@ -105,7 +105,6 @@ class TreeModel(QAbstractItemModel):
         self.endResetModel()
 
     def add_item(self, item: TreeModelItem):  # to root_item
-        # item_index = self.get_index_from_item(self.root_item)
         child_count = self.root_item.child_count()
         item.parent_item = self.root_item
         self.beginInsertColumns(QModelIndex(), child_count, child_count)

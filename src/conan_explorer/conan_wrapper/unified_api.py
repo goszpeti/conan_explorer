@@ -240,11 +240,6 @@ class ConanUnifiedApi():
     def remove_editable(self, conan_ref: Union[ConanRef, str]) -> bool:
         """ Remove an editable reference. """
         raise NotImplementedError
-    
-    # @abstractmethod
-    # def set_editable(self, conan_ref: str, path: str, output_folder: str):
-    #     """ Edits an editable reference information , with all params changeable in place. """
-    #     raise NotImplementedError
 
     @abstractmethod
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str=""):

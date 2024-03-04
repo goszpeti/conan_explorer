@@ -79,15 +79,14 @@ class AsyncLoader(QObject):
         qapp: QApplication = QApplication.instance()  # type: ignore
         rectangle = self.progress_dialog.frameGeometry()
         if dialog_parent:
-            pass
-            # TODO WHy?
+            # wait for active window to center
             start_time = datetime.now()
             while not qapp.activeWindow():
                 QApplication.processEvents()
                 time_delta = datetime.now() - start_time
                 if time_delta.total_seconds() >= 2:
                     break
-            if qapp.activeWindow():
+            if qapp.activeWindow(): 
                 rectangle.moveCenter(qapp.activeWindow().frameGeometry().center())
                 self.progress_dialog.move(rectangle.topLeft())
         else:

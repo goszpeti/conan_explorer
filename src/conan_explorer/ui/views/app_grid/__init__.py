@@ -34,7 +34,7 @@ class AppGridView(PluginInterfaceV1):
     def __init__(self, parent, model: "UiAppGridModel", base_signals: "BaseSignals", page_widgets: FluentWindow.PageStore):
         plugin_descr = PluginDescription(
             "Conan Quicklaunch", BUILT_IN_PLUGIN, AUTHOR, "", "", "", " ", False, "")
-        super().__init__(parent, plugin_descr, base_signals, page_widgets)  # TODO
+        super().__init__(parent, plugin_descr, base_signals, page_widgets)
 
         self.tab_widget = QTabWidget(self)
         self.tab_widget.setContentsMargins(0, 0, 0, 0)

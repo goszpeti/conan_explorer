@@ -50,9 +50,8 @@ class IniSettings(SettingsInterface):
     """
 
     def __init__(self, ini_file_path: Optional[PathLike], auto_save=True,
-                 default_values: Dict[str, Dict[str, Any]
-                                      ] = application_settings_spec(),
-                 custom_key_enabled_sections=[PLUGINS_SECTION_NAME]):
+                 default_values: Dict[str, Dict[str, Any]] = application_settings_spec(),
+                 custom_key_enabled_sections: List[str]=[PLUGINS_SECTION_NAME]):
         """
         Read config.ini file to load settings.
         Create, if not existing, but the directory must already exist!

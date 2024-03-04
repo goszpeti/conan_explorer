@@ -35,7 +35,7 @@ class FileEditorSelDialog(QDialog):
                 self._ui.file_edit.setText(str(selected_path))
             except Exception as e:
                 # errors, if it does not resolve
-                Logger().debug("Can}'t set selected path: {e}.")
+                Logger().debug(f"Can't set selected path: {str(e)}.")
 
     def on_save(self):
         app.active_settings.set(FILE_EDITOR_EXECUTABLE, self._ui.file_edit.text())

@@ -267,8 +267,7 @@ def find_program_in_windows(app_name: str, partial_match=False,
             try:
                 current_app_name = winreg.QueryValueEx(
                     sub_key, "DisplayName")[0]
-                if partial_match:
-                    if app_name in current_app_name:
+                if partial_match and app_name in current_app_name:
                         location = winreg.QueryValueEx(sub_key, key_to_find)[0]
                         return location
                 if app_name == current_app_name:

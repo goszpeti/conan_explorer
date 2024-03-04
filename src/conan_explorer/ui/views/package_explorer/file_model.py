@@ -30,7 +30,6 @@ class CalFileSystemModel(FileSystemModel):
         return index.row() in self._disabled_rows
 
     def add_disabled_items(self, item_paths: List[str]):
-        # parent_item = self.index(self.rootPath(), 0)
         for item_path in item_paths:
              self._disabled_rows.add(self.index(Path(item_path).as_posix(), 0).row())
 
