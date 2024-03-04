@@ -84,9 +84,9 @@ jobs:
       # QT_LOGGING_RULES=: "*.debug=true"
       # QT_DEBUG_PLUGINS: 1
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
           cache: 'pip' # caching pip dependencies
@@ -152,7 +152,7 @@ jobs:
           pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml
           --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_explorer --cov-branch --cov-append ${{matrix.pytest_args}}
       - name: Upload Test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Test results
           path: |
@@ -165,12 +165,12 @@ jobs:
       - test
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting,
           # cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
           fetch-depth: 0
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: Test results
           path: ./
@@ -178,7 +178,7 @@ jobs:
         working-directory: ./cov
         run: |
           sed -i 's@/home/runner/work/conan_explorer/conan_explorer@.@g' cov-*.xml
-          sed -i 's@D:/a/conan_explorer/conan_explorer@.@g' cov-*.xml
+          sed -i 's@D:\a\conan_explorer\conan_explorer@.@g' cov-*.xml
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
