@@ -125,7 +125,7 @@ def test_conan_install_dialog(app_qt_fixture, base_fixture, mocker):
     new_profile_path.touch()
     conan_install_dialog.load_profiles()
     # default must be first item and has a * after the name
-    # TODO: is abc ordered, so this does not work always...
+    # is abc ordered, so this does not work always...
     first_profile = conan_install_dialog._ui.profile_cbox.itemText(0)
     assert first_profile == "default *"
     new_profile_idx = -1

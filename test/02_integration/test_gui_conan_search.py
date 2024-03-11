@@ -123,9 +123,33 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
 
     assert id == lpe._pkg_sel_ctrl.get_selected_conan_pkg_info().get("id", "")
 
-    # TODO: select 3 packages and compare them
+    # select 3 packages and compare them
+    index = model.get_index_from_item(ref_item.child_items[0])
+    ref_view_index_ch1 = proxy_view_model.mapFromSource(index)
+    sel_model.select(
+        ref_view_index_ch1, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    index = model.get_index_from_item(ref_item.child_items[1])
+    ref_view_index_ch2 = proxy_view_model.mapFromSource(index)
+    sel_model.select(
+        ref_view_index_ch2, QtCore.QItemSelectionModel.SelectionFlag.Select)
+    index = model.get_index_from_item(ref_item.child_items[2])
+    ref_view_index_ch3 = proxy_view_model.mapFromSource(index)
+    sel_model.select(
+        ref_view_index_ch3, QtCore.QItemSelectionModel.SelectionFlag.Select)
+    
+    mock_diff_dialog = mocker.patch("conan_search.controller.PkgDiffDialog")
+    search_dialog.diff_pkgs_action.trigger()
+    mock_diff_dialog.assert_called_once()
+    assert mock_diff_dialog.mock_calls[1][0] == "().add_diff_item"
+    assert mock_diff_dialog.mock_calls[2][0] == "().add_diff_item"
+    assert mock_diff_dialog.mock_calls[3][0] == "().add_diff_item"
+    assert mock_diff_dialog.mock_calls[4][0] == "().show"
 
-    # TODO: check greyyed out context menu elements
+    # check greyyed out context menu elements
+    elem_pos = search_dialog._ui.search_results_tree_view.visualRect(ref_view_index_ch2)
+    search_dialog.on_pkg_context_menu_requested(elem_pos.center())
+    assert search_dialog.diff_pkgs_action.isEnabled()
+    assert search_dialog.show_in_pkg_exp_action.isEnabled()
 
     search_dialog.hide()
     main_window.close()
