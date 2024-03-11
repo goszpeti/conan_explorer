@@ -51,7 +51,7 @@ REQUIRES = [
 ]
 
 TEST_REQUIRES = [
-    "pytest==8.0.1",
+    "pytest==8.1.1",
     "pytest-cov==4.1.0",
     "pytest-mock==3.12.0",
     "pytest-qt==4.4.0",
