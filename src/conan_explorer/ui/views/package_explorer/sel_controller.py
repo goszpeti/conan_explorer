@@ -6,11 +6,9 @@ from conan_explorer import asset_path
 from conan_explorer.app import AsyncLoader  # using global module pattern
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanPkgRef, ConanRef
-from conan_explorer.app.system import (open_in_file_manager)
 from conan_explorer.ui.common import show_conanfile, ConfigHighlighter
 from conan_explorer.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
-from PySide6.QtCore import (QItemSelectionModel, QModelIndex, QObject,
-                            SignalInstance)
+from PySide6.QtCore import QItemSelectionModel, QModelIndex, QObject, SignalInstance
 from PySide6.QtWidgets import (QApplication, QTextBrowser,
                                QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout)
 from PySide6.QtGui import QIcon

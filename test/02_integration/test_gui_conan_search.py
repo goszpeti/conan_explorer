@@ -7,7 +7,7 @@ import conan_explorer  # for mocker
 import conan_explorer.app as app
 from conan_explorer.ui.main_window import MainWindow
 from conan_explorer.conan_wrapper.types import ConanRef
-from PySide6 import QtCore
+from PySide6 import QtCore, QtWidgets
 from conan_explorer.ui.views import ConanSearchView
 from conan_explorer.ui.views import LocalConanPackageExplorer
 
@@ -40,6 +40,7 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     main_window.show()
     qtbot.waitExposed(main_window)
     search_dialog = main_window.page_widgets.get_page_by_type(ConanSearchView)
+    main_window.page_widgets.get_button_by_type(ConanSearchView).click()
 
     # expand and collapse remotes list, simply to see if it does not crash
     search_dialog._ui.remote_toggle_button.click()
@@ -124,6 +125,7 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     assert id == lpe._pkg_sel_ctrl.get_selected_conan_pkg_info().get("id", "")
 
     # select 3 packages and compare them
+    main_window.page_widgets.get_button_by_type(ConanSearchView).click()
     index = model.get_index_from_item(ref_item.child_items[0])
     ref_view_index_ch1 = proxy_view_model.mapFromSource(index)
     sel_model.select(
@@ -147,6 +149,7 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
 
     # check greyyed out context menu elements
     elem_pos = search_dialog._ui.search_results_tree_view.visualRect(ref_view_index_ch2)
+    mocker.patch.object(search_dialog.select_cntx_menu, 'exec')
     search_dialog.on_pkg_context_menu_requested(elem_pos.center())
     assert search_dialog.diff_pkgs_action.isEnabled()
     assert search_dialog.show_in_pkg_exp_action.isEnabled()

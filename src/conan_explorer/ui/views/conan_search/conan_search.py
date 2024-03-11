@@ -2,14 +2,13 @@ from typing import TYPE_CHECKING, Optional
 
 from PySide6.QtCore import QEasingCurve, QPoint, QPropertyAnimation, Qt, Slot
 from PySide6.QtGui import QAction, QShortcut
-from PySide6.QtWidgets import QListWidgetItem, QWidget, QGraphicsDropShadowEffect
+from PySide6.QtWidgets import QListWidgetItem, QWidget, QMenu
 from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer.ui.common.syntax_highlighting import ConfigHighlighter
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_explorer.ui.views import LocalConanPackageExplorer
-from conan_explorer.ui.widgets import RoundedMenu
 
 from .controller import ConanSearchController
 
@@ -101,7 +100,7 @@ class ConanSearchView(PluginInterfaceV1):
 
     def _init_pkg_context_menu(self):
         """ Initalize context menu with all actions """
-        self.select_cntx_menu = RoundedMenu()
+        self.select_cntx_menu = QMenu()
         self.copy_ref_action = QAction("Copy reference", self)
         self.set_themed_icon(self.copy_ref_action, "icons/copy_link.svg")
         self.select_cntx_menu.addAction(self.copy_ref_action)
