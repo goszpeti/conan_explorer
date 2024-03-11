@@ -148,11 +148,12 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     assert mock_diff_dialog.mock_calls[4][0] == "().show"
 
     # check greyyed out context menu elements
-    elem_pos = search_dialog._ui.search_results_tree_view.visualRect(ref_view_index_ch2)
+    elem_pos = search_dialog._ui.search_results_tree_view.visualRect(ref_view_index_ch3)
     mocker.patch.object(search_dialog.select_cntx_menu, 'exec')
     search_dialog.on_pkg_context_menu_requested(elem_pos.center())
     assert search_dialog.diff_pkgs_action.isEnabled()
-    assert search_dialog.show_in_pkg_exp_action.isEnabled()
+    ip = index.internalPointer()
+    assert search_dialog.show_in_pkg_exp_action.isEnabled() == ip.is_installed
 
     search_dialog.hide()
     main_window.close()
