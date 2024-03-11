@@ -41,7 +41,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._pkg_tabs_ctrl = [PackageFileExplorerController(
             self, self._ui.package_file_view, self._ui.package_path_label,
             self.conan_pkg_selected, self._base_signals, self._page_widgets)]
-        self.file_cntx_menu = None
+        self._file_cntx_menu = None
         self.set_themed_icon(self._ui.refresh_button, "icons/refresh.svg")
 
         # connect pkg selection controller
@@ -261,37 +261,37 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_add_app_link_from_file()
 
     def _init_pkg_file_context_menu(self):
-        if self.file_cntx_menu:
+        if self._file_cntx_menu:
             return
         # for pkg_file_exp_ctrl in self._pkg_tabs_ctrl:
-        self.file_cntx_menu = QMenu()
+        self._file_cntx_menu = QMenu()
         self._open_fm_action = QAction("Show in File Manager", self)
         self.set_themed_icon(self._open_fm_action, "icons/file_explorer.svg")
-        self.file_cntx_menu.addAction(self._open_fm_action)
+        self._file_cntx_menu.addAction(self._open_fm_action)
         self._open_fm_action.triggered.connect(self.on_open_file_in_file_manager)
 
         self._copy_as_path_action = QAction("Copy as Path", self)
         self.set_themed_icon(self._copy_as_path_action, "icons/copy_to_clipboard.svg")
-        self.file_cntx_menu.addAction(self._copy_as_path_action)
+        self._file_cntx_menu.addAction(self._copy_as_path_action)
         self._copy_as_path_action.triggered.connect(self.on_copy_file_as_path)
 
         self._edit_file_action = QAction("Edit file", self)
         self.set_themed_icon(self._edit_file_action, "icons/edit_file.svg")
-        self.file_cntx_menu.addAction(self._edit_file_action)
+        self._file_cntx_menu.addAction(self._edit_file_action)
         self._edit_file_action.triggered.connect(self.on_edit_file)
 
         self._open_terminal_action = QAction("Open terminal here", self)
         self.set_themed_icon(self._open_terminal_action, "icons/cmd.svg")
-        self.file_cntx_menu.addAction(self._open_terminal_action)
+        self._file_cntx_menu.addAction(self._open_terminal_action)
         self._open_terminal_action.triggered.connect(self.on_open_terminal_in_dir)
 
-        self.file_cntx_menu.addSeparator()
+        self._file_cntx_menu.addSeparator()
 
         self._rename_action = QAction("Rename", self)
         self.set_themed_icon(self._rename_action, "icons/rename.svg")
         self._rename_action.setShortcut(QKeySequence("F2"))
         self._rename_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self.file_cntx_menu.addAction(self._rename_action)
+        self._file_cntx_menu.addAction(self._rename_action)
         # for the shortcut to work, the action has to be added to a higher level widget
         self.addAction(self._rename_action)
         self._rename_action.triggered.connect(self.on_file_rename)
@@ -300,7 +300,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.set_themed_icon(self._copy_action, "icons/copy.svg")
         self._copy_action.setShortcut(QKeySequence("Ctrl+c"))
         self._copy_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self.file_cntx_menu.addAction(self._copy_action)
+        self._file_cntx_menu.addAction(self._copy_action)
         # for the shortcut to work, the action has to be added to a higher level widget
         self.addAction(self._copy_action)
         self._copy_action.triggered.connect(self.on_file_copy)
@@ -309,7 +309,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.set_themed_icon(self._cut_action, "icons/cut.svg")
         self._cut_action.setShortcut(QKeySequence("Ctrl+x"))
         self._cut_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self.file_cntx_menu.addAction(self._cut_action)
+        self._file_cntx_menu.addAction(self._cut_action)
         # for the shortcut to work, the action has to be added to a higher level widget
         self.addAction(self._cut_action)
         self._cut_action.triggered.connect(self.on_file_cut)
@@ -319,27 +319,27 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._paste_action.setShortcut(QKeySequence("Ctrl+v"))  # Qt.CTRL + Qt.Key_V))
         self._paste_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self.addAction(self._paste_action)
-        self.file_cntx_menu.addAction(self._paste_action)
+        self._file_cntx_menu.addAction(self._paste_action)
         self._paste_action.triggered.connect(self.on_file_paste)
 
         self._delete_action = QAction("Delete", self)
         self.set_themed_icon(self._delete_action, "icons/delete.svg")
         self._delete_action.setShortcut(QKeySequence(Qt.Key.Key_Delete))
-        self.file_cntx_menu.addAction(self._delete_action)
+        self._file_cntx_menu.addAction(self._delete_action)
         self._delete_action.setShortcutContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         self.addAction(self._delete_action)
         self._delete_action.triggered.connect(self.on_file_delete)
 
-        self.file_cntx_menu.addSeparator()
+        self._file_cntx_menu.addSeparator()
 
         self._add_link_action = QAction("Add link to App Grid", self)
         self.set_themed_icon(self._add_link_action, "icons/add_link.svg")
-        self.file_cntx_menu.addAction(self._add_link_action)
+        self._file_cntx_menu.addAction(self._add_link_action)
         self._add_link_action.triggered.connect(self.on_add_app_link_from_file)
 
     def on_file_context_menu_requested(self, position):
         """ Disable some context menu items depending on context """
-        if not self.file_cntx_menu:
+        if not self._file_cntx_menu:
             return
         self._add_link_action.setVisible(True)
         self._edit_file_action.setVisible(True)
@@ -370,7 +370,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self._copy_as_path_action.setVisible(True)
             self._open_terminal_action.setVisible(True)
 
-        self.file_cntx_menu.exec(self._ui.package_file_view.mapToGlobal(position))
+        self._file_cntx_menu.exec(self._ui.package_file_view.mapToGlobal(position))
 
     def select_local_package_from_ref(self, conan_ref: str):
         return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref)

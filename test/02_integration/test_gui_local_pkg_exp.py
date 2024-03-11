@@ -262,6 +262,8 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
 
     # check that on multiple selection diff pkg action is enabled
     lpe.on_selection_context_menu_requested(elem_pos.center())
+    # TODO create more tests
+
     assert lpe.diff_pkg_action.isEnabled()
     assert lpe.remove_ref_action.isEnabled()
 
@@ -447,6 +449,14 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     sel_idx = lpe._pkg_tabs_ctrl[0]._model.index(str(selected_pkg_file), 0)
     lpe._ui.package_file_view.selectionModel().select(sel_idx, SelFlags.ClearAndSelect)
 
+    # 2.0 execuite context menu
+    elem_pos = lpe._pkg_tabs_ctrl[0]._view.visualRect(sel_idx)
+    mocker.patch.object(lpe._file_cntx_menu, 'exec')
+
+    # check that on multiple selection diff pkg action is enabled
+    lpe.on_file_context_menu_requested(elem_pos.center())
+    # TODO create more tests
+
     # 2.1 check copy
     mime_files = lpe.on_file_copy(None)
     mime_file_text = mime_files[0].toString()
@@ -492,7 +502,7 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
 
     # 2.5 check rename
     mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, 'edit')
-    lpe._pkg_tabs_ctrl[0].on_file_rename()
+    lpe.on_file_rename(None)
 
     mock_rename_cmd.assert_called_once()
 
