@@ -357,17 +357,14 @@ QMainWindow{
     background-color: transparent;
 }
 
-QMenu,RoundedMenu{
+QMenu{
     background-color: #202020;
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
-RoundedMenu{
-    padding-top: 10px;
-}
-QMenu::item:selected,RoundedMenu::item:selected{
+QMenu::item:selected{
     background-color: #5c5c5c; 
 }
-QMenu::item:disabled,RoundedMenu::item:disabled{
+QMenu::item:disabled{
     color: #A8A8A8;
 }
 
