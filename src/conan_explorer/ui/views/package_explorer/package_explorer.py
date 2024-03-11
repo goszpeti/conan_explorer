@@ -202,7 +202,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         elif selection_mode == MultiPkgSelectionMode.multi_ref:
             self._context_menu_set_all(False)
             self.copy_ref_action.setVisible(True)
-            self.remove_ref_action.setVisible(True) # TODO test
+            self.remove_ref_action.setVisible(True)
         elif selection_mode == MultiPkgSelectionMode.single_pkg_or_export:
             self._context_menu_set_all(True)
             self.diff_pkg_action.setVisible(False)

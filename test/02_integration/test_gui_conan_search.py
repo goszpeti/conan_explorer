@@ -148,10 +148,18 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     assert mock_diff_dialog.mock_calls[4][0] == "().show"
 
     # check greyyed out context menu elements
+
     elem_pos = search_dialog._ui.search_results_tree_view.visualRect(ref_view_index_ch3)
     mocker.patch.object(search_dialog.select_cntx_menu, 'exec')
+
+    # check that on multiple selection diff pkg action is enabled
     search_dialog.on_pkg_context_menu_requested(elem_pos.center())
     assert search_dialog.diff_pkgs_action.isEnabled()
+
+    # check, that a specific item hast shows in pkg exp enabled bbased on installed status
+    sel_model.select(
+        ref_view_index_ch3, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    search_dialog.on_pkg_context_menu_requested(elem_pos.center())
     ip = index.internalPointer()
     assert search_dialog.show_in_pkg_exp_action.isEnabled() == ip.is_installed
 
