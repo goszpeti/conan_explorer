@@ -231,34 +231,34 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
     # Package File Explorer context menu
 
     def on_open_file_in_file_manager(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_file_in_file_manager(model_index)
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_file_in_file_manager(model_index)
 
     def on_copy_file_as_path(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_copy_file_as_path()
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_copy_file_as_path()
 
     def on_edit_file(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_edit_file()
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_edit_file()
 
     def on_open_terminal_in_dir(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_terminal_in_dir()
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_terminal_in_dir()
 
     def on_file_rename(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_rename()
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_rename()
 
     def on_file_copy(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_copy()
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_copy()
 
     def on_file_cut(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_cut()
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_cut()
 
     def on_file_paste(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_paste()
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_paste()
 
     def on_file_delete(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_delete()
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_delete()
 
     def on_add_app_link_from_file(self, model_index):
-        self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_add_app_link_from_file()
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_add_app_link_from_file()
 
     def _init_pkg_file_context_menu(self):
         if self.file_cntx_menu:

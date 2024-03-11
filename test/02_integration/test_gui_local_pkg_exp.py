@@ -365,19 +365,19 @@ def test_local_package_explorer_file_generic_functions(qtbot, mocker, base_fixtu
     lpe._ui.package_file_view.selectionModel().select(sel_idx, SelFlags.ClearAndSelect)
 
     # 2.1 check copy as path - don't check the clipboard, it has issues in windows with qtbot
-    cp_text = lpe._pkg_tabs_ctrl[0].on_copy_file_as_path()
+    cp_text = lpe.on_copy_file_as_path(None)
     assert Path(cp_text) == selected_pkg_file
 
     # 2.2 check open terminal
     Logger().debug("open terminal")
     open_cmd_in_path_mock = mocker.patch("package_explorer.file_controller.open_cmd_in_path")
-    lpe._pkg_tabs_ctrl[0].on_open_terminal_in_dir()
+    lpe.on_open_terminal_in_dir(None)
     open_cmd_in_path_mock.assert_called_with(pkg_root_path)
 
     # 2.3 check "open in file manager"
     Logger().debug("open in file manager")
     oifm_mock = mocker.patch("package_explorer.file_controller.open_in_file_manager")
-    lpe._pkg_tabs_ctrl[0].on_open_file_in_file_manager(None)
+    lpe.on_open_file_in_file_manager(None)
     oifm_mock.assert_called_with(Path(cp_text))
 
     # 2.4 check "Add AppLink to AppGrid"
@@ -386,7 +386,7 @@ def test_local_package_explorer_file_generic_functions(qtbot, mocker, base_fixtu
     mocker.patch.object(QtWidgets.QInputDialog, 'textValue', return_value="Basics")
     mocker.patch.object(AppEditDialog, 'exec', return_value=QtWidgets.QDialog.DialogCode.Accepted)
 
-    lpe._pkg_tabs_ctrl[0].on_add_app_link_from_file()
+    lpe.on_add_app_link_from_file(None)
     # assert that the link has been created
     last_app_link = main_gui.app_grid.model.tabs[0].apps[-1]
     assert last_app_link.executable == "conaninfo.txt"
@@ -398,7 +398,7 @@ def test_local_package_explorer_file_generic_functions(qtbot, mocker, base_fixtu
     mock_execute_cmd = mocker.patch("package_explorer.file_controller.execute_cmd")
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, str(selected_pkg_file))
 
-    lpe._pkg_tabs_ctrl[0].on_edit_file()
+    lpe.on_edit_file(None)
     mock_execute_cmd.assert_called_with([str(selected_pkg_file), selected_pkg_file.as_posix()], False)
 
 def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixture, 
@@ -441,9 +441,9 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     lpe._ui.package_file_view.selectionModel().select(sel_idx, SelFlags.ClearAndSelect)
 
     # 2.1 check copy
-    mime_files = lpe._pkg_tabs_ctrl[0].on_files_copy()
+    mime_files = lpe.on_file_copy(None)
     mime_file_text = mime_files[0].toString()
-    cp_text = lpe._pkg_tabs_ctrl[0].on_copy_file_as_path()
+    cp_text = lpe.on_copy_file_as_path(None)
     assert "file://" in mime_file_text and cp_text in mime_file_text
 
     # 2.2 check paste
@@ -455,7 +455,7 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     _qapp_instance.clipboard().setMimeData(data)
     
     delete_path((pkg_root_path / config_path.name)) # delete file is there
-    lpe._pkg_tabs_ctrl[0].on_files_paste()
+    lpe.on_file_paste(None)
     # check new file
     check.is_true((pkg_root_path / config_path.name).exists())
 
@@ -466,7 +466,7 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     sel_idx = lpe._pkg_tabs_ctrl[0]._model.index(str(pkg_root_path / config_path.name), 0)
     lpe._ui.package_file_view.selectionModel().select(sel_idx, SelFlags.ClearAndSelect)
 
-    mime_files = lpe._pkg_tabs_ctrl[0].on_files_cut()
+    mime_files = lpe.on_file_cut(None)
     file_row = lpe._pkg_tabs_ctrl[0]._model.index((pkg_root_path / config_path.name).as_posix(), 0).row()
     check.is_true(file_row in lpe._pkg_tabs_ctrl[0]._model._disabled_rows)
 
@@ -480,7 +480,7 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     # select dir
     sel_idx = lpe._pkg_tabs_ctrl[0]._model.index(str(pkg_root_path / "newdir"), 0)
     lpe._ui.package_file_view.selectionModel().select(sel_idx, SelFlags.ClearAndSelect)
-    lpe._pkg_tabs_ctrl[0].on_files_paste()
+    lpe.on_file_paste(None)
     check.is_true((pkg_root_path / "newdir" / config_path.name).exists())
 
     # 2.5 check rename
@@ -530,7 +530,7 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
 
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
-    lpe._pkg_tabs_ctrl[0].on_file_delete()  # check new file?
+    lpe.on_file_delete(None)  # check new file?
     check.is_false((pkg_root_path / config_path.name).exists())
 
     pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
