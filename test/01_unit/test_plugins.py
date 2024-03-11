@@ -99,7 +99,8 @@ def test_plugin_file_write():
 def test_plugin_file_register_unregister(base_fixture):
     """ Check, that registering a description file generates a uuid - path entry in settings, and the same plugin cannit be registered twice """
     plugin_groups = app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME)
-    assert plugin_groups == (BUILT_IN_PLUGIN,)
+    assert plugin_groups == [BUILT_IN_PLUGIN]
+
     plugin_file_path = base_fixture.testdata_path / "plugin" / "plugins_minimal_valid.ini"
 
     PluginFile.register(plugin_file_path)
@@ -128,9 +129,9 @@ def test_plugin_handler_conan_version():
     plugin = PluginDescription("", "1.58.0", "", "", "", "", "", False, "<2")
     from conan_explorer import conan_version
 
-    if conan_version.startswith("1"):
+    if conan_version.major == 1:
         assert PluginHandler.is_plugin_enabled(plugin)
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         assert not PluginHandler.is_plugin_enabled(plugin)
 
 

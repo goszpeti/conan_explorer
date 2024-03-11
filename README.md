@@ -13,13 +13,13 @@ https://img.shields.io/badge/Linux-purple?logo=linux&logoColor=white)
 ![Downloads](https://img.shields.io/pypi/dm/conan_explorer)
 
 
-## ⚠ conan-app-launcher is now conan-explorer
+## 🛈 conan-app-launcher is now conan-explorer 🚀
 
 This package has been renamed from version 2.2.0 onwards. Use `pip install conan-explorer` instead.
 
 New package: https://pypi.org/project/conan-explorer/
 
-## Quick Overview
+## 📋 Quick Overview
 
 The goal of this project is to provide a standalone Graphical User Interface (GUI) to
 * Start executables contained in packages of the package manager [Conan](https://conan.io/)
@@ -46,7 +46,8 @@ It is end-user oriented and focuses on using packages, rather then developing th
 - integrated console for information an packages and config file
 - installable with pip
 
-Quicklaunch
+**📑 Quicklaunch**
+
 - configurable layout (tabs and applications) in the GUI
 - list and grid view
 - can also open files with their associated default program
@@ -55,49 +56,51 @@ Quicklaunch
 - uses the default icons of files or can be configured to use custom ones
 - quick controls to switch between versions and channels
 
-Local Package Explorer
+**📦 Local Package Explorer**
+
 - tabbed view for browsing through installed packages
 - understand package settings at a glance from a shortened representation, e.g. Linux_x64_ggc7
 - supports rename/copy/cut/paste on file, open in file explorer, copy reference, etc. functions which are often needed in daily Conan workflow
 
-Conan Search
+**🔍 Conan Search**
+
 - search for references in selected remotes
 - show all existing packages for a reference and their infos
 - install package directly via right-click menu
 
-Conan Config
+**📝 Conan Config**
+
 - view and edit your profiles
 - view and edit your remotes - with multi-login to the same artifactory server for multiple remotes
 - see the most important paths and config at one glance
 
-Plugin Mechanism
+**🔌 Plugin Mechanism**
+
 - All views are now plugins, which can be extended by the user
 
-## How to install?
+## 💻 Installation
 
-### Prerequisites on Linux
+### 🐧 Prerequisites on Linux
 
-Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04 and 22.04.
+Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04 and 22.04. If you want to run on Ubuntu 18 you can only use the 1.4.3 release, due to the Qt dependency.
 
 1. Pip must be updated to at least pip 20.3, so using a venv like this is recommended:
 
 ```bash
-sudo apt install python3-venv
+sudo apt-get install python3-venv
 python3 -m venv .venv 
 source .venv/bin/activate
 python3 -m pip install --upgrade pip
 pip install conan_explorer
 ```
 
-2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type "x-terminal-emulator" to get a list of available terminals.
+2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type `x-terminal-emulator` to get a list of available terminals.
 
-3. To open files with its associated program xdg-open is used:
+3. To open files with its associated program xdg-open is used: `sudo apt install xdg-utils`
 
-    sudo apt install xdg-utils
-
-4. Not all Qt6 versions support the Wayland lib of the base system.
-  * For Ubuntu 20.04 please execute "pip install PySide6-Essentials==6.4.3" to get the correct Qt6 version
-  * For Ubuntu 22.04 please ensure that the system Qt6 packages are available. Simply execute "sudo apt-get install qt6-wayland" on a wayland system, or "sudo apt-get install qt6-base-dev" for an X based system.
+4. Not all Qt6 versions support the Wayland lib of the operating system.
+  * For Ubuntu 20.04 please execute "pip install PySide6-Essentials==6.4.3" to get the correct Qt6 version and update pip to latest version!
+  * For Ubuntu 22.04 please ensure that the system Qt6 packages are available. Simply execute `sudo apt-get install qt6-wayland` on a wayland system, or `sudo apt-get install qt6-base-dev` for an X11 based system.
 
 
 ### With pip from PyPi
@@ -110,7 +113,7 @@ After checkout use the command:
 
     pip install .
 
-## Running
+## 🏃 Running
 
 Execute `conan-explorer` if the Python "scripts" or "bin" folder is on your system path, or look it up manually in the site-packages folder. 
 You can also assign its icon to it from the site packages folder in **conan_explorer/assets/icons/icon.ico**.
@@ -120,18 +123,20 @@ You can also assign its icon to it from the site packages folder in **conan_expl
 * Pyside6 >= 6.4.0
 * 1.48.0 <= conan < 2.1
 
-> **Warning** - **Deprecation of Python 3.X**  
+> ⚠ **Warning** - **Deprecation of Python 3.X**  
 > From version 2.0.0 Python 3.6 support will be dropped, having reached end-of-life.    
 > From version 2.2.0 Python 3.7 support will be dropped, having reached end-of-life.    
 
-## Toolchain
+## 🛠 Toolchain
 
 This project uses Python with Qt as a frontend using the PySide6 integration.
 An IDE configuration is available for VsCode.
 
+The .ui files are created with Qt Designer and automatically converted to .py code when starting the application. The Designer can be installed via the PySide6-Addons pip package.
+
 See https://sonarcloud.io/project/overview?id=goszpeti_conan_explorer for Static Code Analysis.
 
-## Licenses of used libraries and code
+## 📒 Licenses of used libraries and code
 
 > **Warning** - **Change of License to LGPL**
 > From version 2.0.0 the project will use the [LGPL 3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html) license to cleanly comply with PySide6.

@@ -9,15 +9,15 @@ if platform.system() == "Windows":
     from ctypes.wintypes import MSG
 
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Type, TypeVar
-
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing_extensions import override
 
 # uses Logger, settings and theming related functions
 from conan_explorer import AUTOCLOSE_SIDE_MENU
 from conan_explorer.app.system import is_windows_11
 
-from PySide6.QtCore import (QEasingCurve, QEvent, QObject, QPoint, QPropertyAnimation, 
-                            QRect, QSize, Qt)
+from PySide6.QtCore import (QByteArray, QEasingCurve, QEvent, QObject, QPoint,
+                            QPropertyAnimation, QRect, QSize, Qt)
 from PySide6.QtGui import QHoverEvent, QMouseEvent
 from PySide6.QtWidgets import (QMainWindow, QPushButton, QSizePolicy, QWidget)
 
@@ -71,13 +71,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         def get_side_menu_by_type(self, type_name: Type) -> "Optional[SideSubMenu]":
             for _, (_, page, menu, _) in self._page_widgets.items():
-                if isinstance(page, type_name):
+                if page.__class__.__name__ == type_name.__name__:
                     return menu
             raise WidgetNotFoundException(f"{type_name} not in page_widgets!")
 
         def get_button_by_type(self, type_name: Type) -> QPushButton:
             for _, (button, page, _, _) in self._page_widgets.items():
-                if isinstance(page, type_name):
+                if page.__class__.__name__ == type_name.__name__:
                     return button
             raise WidgetNotFoundException(f"{type_name} not in page_widgets!")
 
@@ -206,7 +206,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.enable_windows_native_animations()
         self.installEventFilter(self)  # used for resizing
 
-    def nativeEvent(self, eventType, message):  # override
+    @override
+    def nativeEvent(self, eventType: Union[QByteArray, bytes], message: int) -> object:
         """ Platform native events """
         retval = QMainWindow.nativeEvent(self, eventType, message)
         if str(eventType) == "b'windows_generic_MSG'":
@@ -217,7 +218,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 return True, 0
         return retval, 0
 
-    def mousePressEvent(self, event: QMouseEvent):  # override
+    @override
+    def mousePressEvent(self, event: QMouseEvent):
         """ Helper for moving window to know mouse position (Non Windows) """
         self.drag_position = event.globalPosition().toPoint()
 
@@ -338,8 +340,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             self.ui.right_menu_top_content_sw.show()
             self.ui.right_menu_top_content_sw.setCurrentWidget(side_menu)
-        if AUTOCLOSE_SIDE_MENU:
-            if self.ui.settings_button.isChecked():
+        if AUTOCLOSE_SIDE_MENU and self.ui.settings_button.isChecked():
                 self.toggle_right_menu()
 
     def toggle_left_menu(self):
@@ -401,11 +402,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.right_anim.setEasingCurve(QEasingCurve.Type.Linear)
         self.right_anim.start()
 
-    def eventFilter(self, source: QObject, event: QEvent):  # override
+    @override
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
         """ Implements window resizing """
         self.set_restore_max_button_state()
         if self.isMaximized():  # no resize when maximized
-            return super().eventFilter(source, event)
+            return super().eventFilter(watched, event)
         # Use isinstance instead of type because of typehinting
         if isinstance(event, QHoverEvent):
             if event.type() == event.Type.HoverMove:
@@ -414,7 +416,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         elif isinstance(event, QMouseEvent):
             if event.type() == event.Type.MouseButtonPress:
                 if event.button() != Qt.MouseButton.LeftButton:
-                    return super().eventFilter(source, event)
+                    return super().eventFilter(watched, event)
                 self._resize_press = 1
                 # save the starting point of resize
                 self._resize_point = self.mapToGlobal(event.pos())
@@ -422,7 +424,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 self.resizing(event)
                 self._resize_press = 0
 
-        return super().eventFilter(source, event)
+        return super().eventFilter(watched, event)
 
     def handle_resize_cursor(self, event: QHoverEvent, x_offset=10, y_offset=8):
         # using relative position, since the event can only be fired inside of the Window

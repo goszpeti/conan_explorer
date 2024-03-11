@@ -12,7 +12,7 @@ from pkg_resources import Requirement
 
 # Package meta-data.
 NAME = "conan-explorer"
-VERSION = "2.2.0a6"
+VERSION = "2.2.0b2"
 DESCRIPTION = "Package Explorer and App Launcher for Conan"
 URL = "https://github.com/goszpeti/conan_explorer"
 AUTHOR = "Péter Gosztolya and Contributors"
@@ -36,7 +36,7 @@ conan_req_spec = "conan>=1.48, <2.2"
 if conan_major_version == "1":
     conan_req_spec = "conan>=1.48, <2.0"
 if conan_major_version == "2":
-    conan_req_spec = "conan>=2.0, <2.1"
+    conan_req_spec = "conan>=2.0, <2.2"
 REQUIRES = [
     conan_req_spec,  # MIT License
     "PySide6-Essentials>=6.4.0", # LGPLv3
@@ -44,24 +44,25 @@ REQUIRES = [
     "dictdiffer==0.9.0",  # MIT License
     # compatibility
     'contextlib-chdir==1.0.2; python_version<"3.11"',  # BSD License (BSD-3-Clause)
-    'typing-extensions>=3.10.0.2, <5; python_version<="3.10"',  # Python Software Foundation License(PSF)
+    'typing-extensions>=3.10.0.2, <5',  # Python Software Foundation License(PSF)
     "packaging",  # use the built-in, or get latest if there is some issue with pip
     # transitive compatibility
     "Jinja2>=2.3, <4"  # BSD License (BSD-3-Clause) (restriction from conan 1.24, since it is included there)
 ]
 
 TEST_REQUIRES = [
-    "pytest==8.0.1",
+    "pytest==8.1.1",
     "pytest-cov==4.1.0",
     "pytest-mock==3.12.0",
     "pytest-qt==4.4.0",
-    "psutil==5.9.6",
-    "pytest-check==2.2.2",
+    "psutil==5.9.8",
+    "pytest-check==2.3.1",
     "pywin32; sys_platform=='win32'",
 ]
 
 if conan_major_version.startswith("2"):
-    TEST_REQUIRES.append("conan-server")
+    # use same minor version as the installed conan version, otherwise there can be incompatibilities
+    TEST_REQUIRES.append(f"conan-server{conan_version_env}")
 
 DEV_REQUIRES = [
     "autopep8", # formatter

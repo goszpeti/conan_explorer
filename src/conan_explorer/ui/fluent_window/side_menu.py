@@ -80,7 +80,7 @@ class SideSubMenu(ThemedWidget):
         line.setMidLineWidth(3)
         line.setFrameShape(QFrame.Shape.HLine)
         line.setFrameShadow(QFrame.Shadow.Sunken)
-        self.add_custom_menu_entry(line, "line")  # TODO give them an index?
+        self.add_custom_menu_entry(line, "line")
 
     def add_named_custom_entry(self, name: str, widget: QWidget, asset_icon: str = "", force_v_layout=False):
         """ Creates a Frame with a text label and a custom widget under it and adds it to the menu """
@@ -158,7 +158,7 @@ class SideSubMenu(ThemedWidget):
         if asset_icon:
             self.set_themed_icon(button, asset_icon)
         button.setText(name)
-        button.setStyleSheet(f"text-align:left")
+        button.setStyleSheet("text-align:left")
         # insert before spacer
         self.add_custom_menu_entry(button, name)
 

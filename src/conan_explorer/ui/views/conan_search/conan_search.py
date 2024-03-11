@@ -1,17 +1,16 @@
 from typing import TYPE_CHECKING, Optional
 
+from PySide6.QtCore import QEasingCurve, QPoint, QPropertyAnimation, Qt, Slot
+from PySide6.QtGui import QAction, QShortcut
+from PySide6.QtWidgets import QListWidgetItem, QWidget, QMenu
+from typing_extensions import override
+
 import conan_explorer.app as app  # using global module pattern
-from conan_explorer.ui.dialogs.pkg_diff import PkgDiffDialog
 from conan_explorer.ui.common.syntax_highlighting import ConfigHighlighter
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 from conan_explorer.ui.views import LocalConanPackageExplorer
-from conan_explorer.ui.widgets import RoundedMenu
-from PySide6.QtCore import QPoint, Qt, Slot, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QAction, QShortcut
-from PySide6.QtWidgets import QListWidgetItem, QWidget
 
 from .controller import ConanSearchController
-
 
 if TYPE_CHECKING:
     from conan_explorer.ui.fluent_window import FluentWindow
@@ -101,8 +100,7 @@ class ConanSearchView(PluginInterfaceV1):
 
     def _init_pkg_context_menu(self):
         """ Initalize context menu with all actions """
-        self.select_cntx_menu = RoundedMenu()
-
+        self.select_cntx_menu = QMenu()
         self.copy_ref_action = QAction("Copy reference", self)
         self.set_themed_icon(self.copy_ref_action, "icons/copy_link.svg")
         self.select_cntx_menu.addAction(self.copy_ref_action)
@@ -124,25 +122,13 @@ class ConanSearchView(PluginInterfaceV1):
         self.show_in_pkg_exp_action.triggered.connect(self.on_show_in_pkg_exp)
 
         self.diff_pkgs_action = QAction("Compare packages", self)
-        self.set_themed_icon(self.diff_pkgs_action, "icons/global/search_packages.svg")
+        self.set_themed_icon(self.diff_pkgs_action, "icons/difference.svg")
         self.select_cntx_menu.addAction(self.diff_pkgs_action)
-        self.diff_pkgs_action.triggered.connect(self.on_diff_requested)
+        self.diff_pkgs_action.triggered.connect(self._search_controller.on_diff_requested)
 
     def reload_themed_icons(self):
         self._conan_config_highlighter = ConfigHighlighter(self._ui.package_info_text.document(), "yaml")
         super().reload_themed_icons()
-
-    def on_diff_requested(self):
-        dialog = PkgDiffDialog(self)
-        item_left = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view)
-        item_right = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view, idx=3)
-        if  not item_left or not item_right:
-            return
-        dialog.set_left_content(item_left.pkg_data)
-        dialog.set_right_content(item_right.pkg_data)
-        dialog.update_diff()
-        dialog.show()
-
 
     @Slot(QPoint)
     def on_pkg_context_menu_requested(self, position: QPoint):
@@ -150,9 +136,15 @@ class ConanSearchView(PluginInterfaceV1):
         Executes, when context menu is requested. 
         This is done to dynamically grey out some options depending on the item type.
         """
-        item = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view)
-        if not item:
+        items = self._search_controller.get_selected_source_items()
+        if len(items) < 1:
             return
+        elif len(items) < 2:
+            self.diff_pkgs_action.setEnabled(False)
+        else:
+            self.diff_pkgs_action.setEnabled(True)
+
+        item = items[0]
         if item.empty:
             return
         if item.is_installed:
@@ -162,15 +154,25 @@ class ConanSearchView(PluginInterfaceV1):
         self.select_cntx_menu.exec(self._ui.search_results_tree_view.mapToGlobal(position))
 
     def on_show_in_pkg_exp(self):
-        """ Switch to the main gui and select the item (ref or pkg) in the Local Package Explorer. """
-        item = self._search_controller.get_selected_source_item(self._ui.search_results_tree_view)
-        if not item:
+        """ Switch to the Package Explorer view and select the item (ref or pkg) 
+        Needs other view as ref, so will not be moved to controller.
+        """
+        items = self._search_controller.get_selected_source_items()
+        if len(items) != 1:
             return
+        item = items[0]
         if not self._page_widgets:
             return
         self._page_widgets.get_page_by_type(LocalConanPackageExplorer).select_local_package_from_ref(
             item.get_conan_ref())
 
-    def resizeEvent(self, a0) -> None:  # override QtGui.QResizeEvent
+    @override
+    def resizeEvent(self, a0) -> None:
         super().resizeEvent(a0)
-        self._search_controller._resize_package_columns()
+        self._search_controller._resize_search_result_columns()
+
+    @override
+    def showEvent(self, a0) -> None:
+        # set cursor in search line when switching to this tab
+        self._ui.search_line.setFocus()
+        return super().showEvent(a0)

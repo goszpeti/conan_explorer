@@ -6,12 +6,11 @@ from datetime import datetime
 from time import sleep
 from typing import Any, Callable, Optional, Tuple
 
-from conan_explorer import DEBUG_LEVEL, asset_path
+from conan_explorer import DEBUG_LEVEL
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import str2bool
 
 from PySide6.QtCore import Qt, QObject, QThread, Signal, SignalInstance
-from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QProgressDialog, QPushButton, QWidget
 
 
@@ -80,15 +79,14 @@ class AsyncLoader(QObject):
         qapp: QApplication = QApplication.instance()  # type: ignore
         rectangle = self.progress_dialog.frameGeometry()
         if dialog_parent:
-            pass
-            # TODO WHy?
+            # wait for active window to center
             start_time = datetime.now()
             while not qapp.activeWindow():
                 QApplication.processEvents()
                 time_delta = datetime.now() - start_time
                 if time_delta.total_seconds() >= 2:
                     break
-            if qapp.activeWindow():
+            if qapp.activeWindow(): 
                 rectangle.moveCenter(qapp.activeWindow().frameGeometry().center())
                 self.progress_dialog.move(rectangle.topLeft())
         else:

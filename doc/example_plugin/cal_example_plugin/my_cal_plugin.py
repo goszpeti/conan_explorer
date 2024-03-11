@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import Optional
 import sys
 
+import conan_explorer.app as app
+from conan_explorer.app.logger import Logger # for global singletons
 from conan_explorer.ui import (BaseSignals, PluginInterfaceV1, FluentWindow, 
                                    PluginDescription, compile_ui_file_if_newer)
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget
@@ -11,7 +13,11 @@ current_dir = Path(__file__).parent
 # For standalone execution with no package installed (can be removed depending on workflow)
 sys.path.append(str(current_dir.parent))
 
-# Generates examplu_ui.py, so UI variables resolve in IDE
+### Generates example_ui.py, so UI variables resolve in IDE
+# NOTE: You can edit the .ui file in a GUI editor with the Qt Designer application!
+# You can install it via the PySide6-Addons pip package.
+# It will be beside the python entry point scripts called pyside6-designer
+# Then this will automatically recreate the .py representation of it, if the application is started.
 compile_ui_file_if_newer(current_dir / "example.ui")
 
 class SamplePluginView(PluginInterfaceV1):
@@ -59,7 +65,7 @@ class SamplePluginView(PluginInterfaceV1):
 
     def on_option_button(self):
         """ Callback of side menu option button"""
-        pass
+        Logger().info(str(app.conan_api.get_all_local_refs()))
 
     def on_option_toggled(self):
         """ Callback of side menu toggle button"""
@@ -73,10 +79,10 @@ class SamplePluginView(PluginInterfaceV1):
 
 if __name__ == "__main__":
     # Standalone execution
-    app = QApplication([])
+    qapp = QApplication([])
     window = QMainWindow()
     pl = SamplePluginView(window, {})
     window.setGeometry(pl.geometry())
     pl.load_signal.emit()
     window.show()
-    app.exec()
+    qapp.exec()

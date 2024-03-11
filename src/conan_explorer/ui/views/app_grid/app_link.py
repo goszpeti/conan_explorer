@@ -1,23 +1,23 @@
 
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
+from typing_extensions import override
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import (QDialog, QFrame, QMessageBox, QWidget)
+from PySide6.QtWidgets import QDialog, QFrame, QMessageBox, QWidget, QMenu
 
 from conan_explorer import ICON_SIZE, INVALID_PATH
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import open_in_file_manager, run_file
 from conan_explorer.ui.common import get_themed_asset_icon, measure_font_width
 from conan_explorer.ui.dialogs.reorder_dialog import ReorderDialog
-from conan_explorer.ui.widgets import RoundedMenu
 
 from .dialogs import AppEditDialog
 from .model import UiAppLinkModel
 
 if TYPE_CHECKING:
-    from .tab import TabList, TabList  # TabGrid
+    from .tab import TabList
 
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"
@@ -65,7 +65,7 @@ class ListAppLink(QFrame):
 
     def _init_context_menu(self):
         """ Setup context menu. """
-        self.menu = RoundedMenu()
+        self.menu = QMenu()
         self.open_fm_action = QAction("Show in File Manager", self)
         self.open_fm_action.setIcon(
             QIcon(get_themed_asset_icon("icons/file_explorer.svg")))
@@ -111,6 +111,7 @@ class ListAppLink(QFrame):
         if ret == QDialog.DialogCode.Accepted:
             self._parent_tab.redraw(force=True)
 
+    @override
     def resizeEvent(self, event):
         if not self._parent_tab:
             return
@@ -149,9 +150,6 @@ class ListAppLink(QFrame):
                                   max_sum_width - self._ui.arguments_name_label.width())
 
         super().resizeEvent(event)
-
-    def delete(self):  # TODO needed?
-        pass
 
     def split_into_lines(self, widget, model_value, max_width):
         """ Calculate, how text can be split into multiple lines, based on the current width"""

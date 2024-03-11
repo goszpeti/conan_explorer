@@ -1,6 +1,6 @@
 import importlib
 import sys
-from packaging import specifiers, version
+from packaging import specifiers
 
 from pathlib import Path
 from typing import List, Optional
@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QWidget
 
 
 import conan_explorer.app as app
-from conan_explorer import BUILT_IN_PLUGIN, base_path, conan_version
+from conan_explorer import BUILT_IN_PLUGIN, base_path, conan_version, Version
 from conan_explorer.app.logger import Logger
 from conan_explorer.settings import PLUGINS_SECTION_NAME
 
@@ -77,6 +77,8 @@ class PluginHandler(QObject):
         assert plugin_descr
         self._unload_plugin(plugin_descr)
         plugin = self._load_plugin(plugin_descr, reload=True)
+        if not plugin:
+            return
         self.load_plugin.emit(plugin)
         plugin.load_signal.emit()
 
@@ -145,11 +147,11 @@ class PluginHandler(QObject):
                         f"Can't retrive plugin information: {str(e)}")
 
     @staticmethod
-    def eval_conan_version_spec(spec: str, conan_version: str = conan_version) -> bool:
+    def eval_conan_version_spec(spec: str, conan_version: Version=conan_version) -> bool:
         if not spec:
             return True
         specs = specifiers.Specifier(spec)
-        return specs.contains(version.parse(conan_version))
+        return specs.contains(conan_version)
 
     @staticmethod
     def is_plugin_enabled(plugin: PluginDescription):

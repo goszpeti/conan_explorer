@@ -8,16 +8,18 @@ import time
 from shutil import rmtree
 from pathlib import Path
 from subprocess import check_output
+
+import pytest
 from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 
 import conan_explorer  # for mocker
 import psutil
 from conan_explorer import INVALID_PATH, PKG_NAME
 from conan_explorer.app.system import (calc_paste_same_dir_name,
-                                           copy_path_with_overwrite,
-                                           delete_path, execute_app, find_program_in_windows,
-                                           open_file, open_in_file_manager,
-                                           run_file)
+                                       copy_path_with_overwrite,
+                                       delete_path, execute_app, find_program_in_windows, open_cmd_in_path,
+                                       open_file, open_in_file_manager,
+                                       run_file)
 
 
 def test_choose_run_file(tmp_path, mocker):
@@ -71,7 +73,8 @@ def test_open_in_file_manager(mocker):
         proc = psutil.Process(ret.pid)
         assert len(proc.children()) == 1
         # list a few candidates
-        assert proc.children()[0].name() in ["nautilus", "chrome", "thunar", "dolphin", "pcmanfm"]
+        assert proc.children()[0].name() in ["nautilus", "chrome",
+                                             "thunar", "dolphin", "pcmanfm"]
         ret.kill()
         os.system("pkill nautilus")
 
@@ -138,11 +141,12 @@ def test_start_cli_option_app():
     pid = execute_app(executable, is_console_app, args)
 
     if platform.system() == "Linux":
-        time.sleep(5)  # wait for terminal to spawn
+        time.sleep(2)  # wait for terminal to spawn
         # check pid of created process
         proc = psutil.Process(pid)
         assert proc.name() == "x-terminal-emulator"
-        assert PKG_NAME in proc.cmdline()[2]
+        if not is_ci_job():  # is zombie proc on U20 on github... works locally
+            assert PKG_NAME in proc.cmdline()[2]
         os.system("pkill --newest terminal")
     elif platform.system() == "Windows":
         assert pid > 0
@@ -216,7 +220,8 @@ def test_open_file():
 
     if platform.system() == "Linux":
         # set default app for textfile
-        check_output(["xdg-mime", "default", "mousepad.desktop", "text/plain"]).decode("utf-8")
+        check_output(["xdg-mime", "default", "mousepad.desktop",
+                     "text/plain"]).decode("utf-8")
         time.sleep(1)
 
     open_file(test_file)
@@ -331,3 +336,25 @@ def test_find_program_in_registry():
         assert not found_path
     else:
         assert os.path.exists(found_path)
+
+
+def test_open_cmd_in_path():
+    """ Test, that cmdline opens in folder"""
+
+    # test error, when invalid path is passed
+    assert -1 == open_cmd_in_path(Path(INVALID_PATH))
+
+    pid = open_cmd_in_path(Path.home())
+    if platform.system() == "Linux":
+        time.sleep(2)  # wait for terminal to spawn
+        # check pid of created process
+        proc = psutil.Process(pid)
+        if not is_ci_job(): # is zombie proc on U20 on github... works locally
+            assert str(Path.home()) in proc.cmdline()
+        os.system("pkill --newest terminal")
+    elif platform.system() == "Windows":
+        assert pid > 0
+        time.sleep(1)
+        ret = check_output(f'tasklist /fi "PID eq {str(pid)}"')
+        assert "cmd.exe" in ret.decode("utf-8")
+        os.system("taskkill /PID " + str(pid))

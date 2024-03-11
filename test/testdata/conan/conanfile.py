@@ -14,8 +14,8 @@ class Example(ConanFile):
     default_options = {"shared": True, "fPIC2": True, "variant": "var1"}
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    short_paths = True#
-    generators = "txt",
+    short_paths = True
+    generators = "txt", "cmake"
 
     def package(self):
         # repackage some executable

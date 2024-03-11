@@ -1,12 +1,17 @@
 from enum import Enum
-from typing import List, Union
+from typing import Any, List, Union
+
+from PySide6.QtCore import (QModelIndex, QPersistentModelIndex,
+                            QSortFilterProxyModel, Qt)
+from PySide6.QtGui import QFont, QIcon
+from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
-from conan_explorer.conan_wrapper import ConanApi
-from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
-from conan_explorer.ui.common import get_platform_icon, get_themed_asset_icon, TreeModel, TreeModelItem
-from PySide6.QtCore import QSortFilterProxyModel, Qt, QModelIndex
-from PySide6.QtGui import QIcon, QFont
+from conan_explorer.conan_wrapper import ConanApiFactory
+from conan_explorer.conan_wrapper.types import (ConanPkg, ConanRef,
+                                                pretty_print_pkg_info)
+from conan_explorer.ui.common import (TreeModel, TreeModelItem,
+                                      get_platform_icon, get_themed_asset_icon)
 
 
 class PkgSelectionType(Enum):
@@ -18,23 +23,26 @@ class PkgSelectionType(Enum):
 class PackageTreeItem(TreeModelItem):
     """ Represents a tree item of a Conan pkg. To be used for the parent (ref) and the child (Profile)"""
 
-    def __init__(self, data: List[Union[str, ConanPkg]], parent=None, item_type=PkgSelectionType.ref):
+    def __init__(self, data: List[str], parent=None, item_type=PkgSelectionType.ref, pkg_info={}):
         super().__init__(data, parent, lazy_loading=True)
+        self.pkg_info: ConanPkg = pkg_info
         self.type = item_type
 
-    def load_children(self):  # override
+    @override
+    def load_children(self):
         # can't call super method: fetching would finish early
         self.child_items = []
         pkg_item = PackageTreeItem(
-            [ConanPkg()], self, PkgSelectionType.export)
+            [], self, PkgSelectionType.export, ConanPkg())
         self.append_child(pkg_item)
         infos = app.conan_api.get_local_pkgs_from_ref(ConanRef.loads(self.data(0)))
         for info in infos:
-            pkg_item = PackageTreeItem([info], self, PkgSelectionType.pkg)
+            pkg_item = PackageTreeItem([], self, PkgSelectionType.pkg, info)
             self.append_child(pkg_item)
         self.is_loaded = True
 
-    def child_count(self) -> int:  # override
+    @override
+    def child_count(self) -> int:
         if self.type == PkgSelectionType.ref:
             return len(self.child_items) if len(self.child_items) > 0 else 1
         return 0  # for safety
@@ -46,7 +54,8 @@ class PackageFilter(QSortFilterProxyModel):
         super().__init__()
         self.setFilterKeyColumn(0)
 
-    def filterAcceptsRow(self, row_num, source_parent) -> bool: # override
+    @override
+    def filterAcceptsRow(self, row_num, source_parent) -> bool:
         # Check if the current row matches
         if self.filter_accepts_row_itself(row_num, source_parent):
             return True
@@ -93,15 +102,15 @@ class PkgSelectModel(TreeModel):
             self.root_item.append_child(conan_item)
         self.endResetModel()
 
-    def data(self, index: QModelIndex, role: Qt.ItemDataRole):  # override
+    @override
+    def data(self, index: Union[QModelIndex, QPersistentModelIndex], role: int = 0) -> Any:
         if not index.isValid():
             return None
         item: PackageTreeItem = index.internalPointer()  # type: ignore
         if role == Qt.ItemDataRole.ToolTipRole:
             if item.type == PkgSelectionType.pkg:
-                data = item.data(0)
                 # remove dict style print characters
-                return pretty_print_pkg_info(data)
+                return pretty_print_pkg_info(item.pkg_info)
         if role == Qt.ItemDataRole.DecorationRole:
             if item.type == PkgSelectionType.ref:
                 return QIcon(get_themed_asset_icon("icons/package.svg"))
@@ -128,5 +137,5 @@ class PkgSelectModel(TreeModel):
                 return font
         return None
 
-    def get_quick_profile_name(self, item) -> str:
-        return ConanApi.build_conan_profile_name_alias(item.data(0).get("settings", {}))
+    def get_quick_profile_name(self, item: PackageTreeItem) -> str:
+        return ConanApiFactory().build_conan_profile_name_alias(item.pkg_info.get("settings", {}))

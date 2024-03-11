@@ -1,14 +1,15 @@
-from . import ConanApi
 from pathlib import Path
 import platform
-from typing import Set
+from typing import TYPE_CHECKING, Set
 
 from conan_explorer import conan_version
 from conan_explorer.app.logger import Logger
+if TYPE_CHECKING:
+    from .conanV1 import ConanApi
 
 class ConanCleanup():
 
-    def __init__(self, conan_api: ConanApi) -> None:
+    def __init__(self, conan_api: "ConanApi") -> None:
         self._conan_api = conan_api
         self.orphaned_references: Set[str] = set()
         self.orphaned_packages: Set[str] = set()
@@ -16,7 +17,7 @@ class ConanCleanup():
     def get_cleanup_cache_paths(self) -> Set[str]:
         """ Get a list of orphaned short path and cache folders """
         # Blessed are the users Microsoft products!
-        if platform.system() != "Windows" or conan_version.startswith("2"):
+        if platform.system() != "Windows" or conan_version.major == 2:
             return set()
         self.find_orphaned_references()
         self.find_orphaned_packages()
@@ -34,7 +35,8 @@ class ConanCleanup():
                 package_ids = ref_cache.package_ids()
             except Exception:
                 try:
-                    package_ids = ref_cache.packages_ids()  # type: ignore - old API of Conan
+                    # old API of Conan
+                    package_ids = ref_cache.packages_ids()  # type: ignore
                 except Exception as e:
                     Logger().debug("Cannot check pkg id for %s: %s", ref, str(e))
             for pkg_id in package_ids:

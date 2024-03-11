@@ -83,7 +83,7 @@ def test_update_cache(base_fixture: PathSetup):
     assert cache.get_local_package_path(pkg) == path
 
     # test official - does not work in Conan 2
-    if conan_version.startswith("1"):
+    if conan_version.major == 1:
         pkg = CFR.loads("official_pkg/1.0.0@_/_")
         path = Path(r"C:\temp")
         cache.update_local_package_path(pkg, path)

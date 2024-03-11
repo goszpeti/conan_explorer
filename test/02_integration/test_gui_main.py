@@ -5,7 +5,7 @@ so the qtbot is usable to inspect gui objects.
 
 import os
 import platform
-from subprocess import PIPE, STDOUT, check_output, run
+from subprocess import PIPE, STDOUT, run
 import sys
 import time
 from pathlib import Path
@@ -17,7 +17,7 @@ from conan_explorer.ui.fluent_window.side_menu import SideSubMenu
 from conan_explorer.ui.plugin.handler import PluginFile
 from conan_explorer.ui.views.app_grid.tab import TabList
 from conan_explorer import DEFAULT_UI_CFG_FILE_NAME, user_save_path
-from conan_explorer.conan_wrapper import ConanApi
+from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_explorer.app.logger import Logger
 from conan_explorer.settings import *
@@ -28,7 +28,7 @@ import conan_explorer.app as app  # using global module pattern
 from conan_explorer.conan_wrapper.types import ConanRef
 from PySide6 import QtCore, QtWidgets
 
-from test.conftest import PathSetup, conan_remove_ref
+from test.conftest import PathSetup, conan_remove_ref, conan_create_and_upload
 
 Qt = QtCore.Qt
 
@@ -164,6 +164,7 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
     main_gui.close()
 
 
+@pytest.mark.conanv1
 def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker):
     """
     Test, that clicking on on open config file and selecting a file writes it back to settings.

@@ -1,5 +1,7 @@
-from typing import Callable, List, Type, TypeVar
-from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, SignalInstance
+from typing import TYPE_CHECKING, Callable, List
+from typing_extensions import override
+
+from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, SignalInstance
 from PySide6.QtWidgets import QFileSystemModel
 
 from conan_explorer.app.logger import Logger
@@ -7,6 +9,9 @@ from conan_explorer.app.logger import Logger
 QAF = Qt.AlignmentFlag
 QORI = Qt.Orientation
 QIDR = Qt.ItemDataRole
+
+if TYPE_CHECKING:
+    from typing import Self
 
 
 def re_register_signal(signal: SignalInstance, slot: Callable):
@@ -26,6 +31,7 @@ class FileSystemModel(QFileSystemModel):
         super().__init__(parent)
         self.alignments = {QORI.Horizontal: h_align, QORI.Vertical: v_align}
 
+    @override
     def headerData(self, section, orientation, role):
         if role == QIDR.TextAlignmentRole:
             return self.alignments[orientation]
@@ -41,10 +47,10 @@ class TreeModelItem(object):
     Implemented like the default QT example.
     """
 
-    def __init__(self, data: List[str],  parent=None, lazy_loading=False):
+    def __init__(self, data: List[str], parent=None, lazy_loading=False):
         self.parent_item = parent
         self.item_data = data
-        self.child_items: List[TreeModelItem] = []
+        self.child_items: List["Self"] = []
         self.is_loaded = not lazy_loading
 
     def append_child(self, item):
@@ -99,7 +105,6 @@ class TreeModel(QAbstractItemModel):
         self.endResetModel()
 
     def add_item(self, item: TreeModelItem):  # to root_item
-        # item_index = self.get_index_from_item(self.root_item)
         child_count = self.root_item.child_count()
         item.parent_item = self.root_item
         self.beginInsertColumns(QModelIndex(), child_count, child_count)
@@ -112,13 +117,15 @@ class TreeModel(QAbstractItemModel):
         self.root_item.remove_child(item)
         self.endResetModel()
 
-    def columnCount(self, parent):  # override
+    @override
+    def columnCount(self, parent):
         if parent.isValid():
             return parent.internalPointer().column_count()  # type: ignore
         else:
             return self.root_item.column_count()
 
-    def index(self, row, column, parent):  # override
+    @override
+    def index(self, row, column, parent):
         if not self.hasIndex(row, column, parent):
             return QModelIndex()
 
@@ -133,10 +140,12 @@ class TreeModel(QAbstractItemModel):
         else:
             return QModelIndex()
 
-    def data(self, index: QModelIndex, role):  # override
+    @override
+    def data(self, index, role):
         raise NotImplementedError
 
-    def rowCount(self, parent):  # override
+    @override
+    def rowCount(self, parent):
         if parent.column() > 0:
             return 0
 
@@ -147,7 +156,8 @@ class TreeModel(QAbstractItemModel):
 
         return parent_item.child_count()  # type: ignore
 
-    def flags(self, index):  # override
+    @override
+    def flags(self, index):
         if not index.isValid():
             return Qt.ItemFlag.NoItemFlags
         flags = Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
@@ -155,7 +165,8 @@ class TreeModel(QAbstractItemModel):
             flags = flags | Qt.ItemFlag.ItemIsUserCheckable
         return flags
 
-    def parent(self, index):  # override
+    @override
+    def parent(self, index):
         if not index.isValid():
             return QModelIndex()
 
@@ -167,17 +178,20 @@ class TreeModel(QAbstractItemModel):
 
         return self.createIndex(parent_item.row(), 0, parent_item)
 
-    def headerData(self, section, orientation, role):  # override
+    @override
+    def headerData(self, section, orientation, role):
         if orientation == Qt.Orientation.Horizontal and role == QIDR.DisplayRole:
             return self.root_item.data(section)
         return None
 
+    @override
     def canFetchMore(self, index):
         if not index.isValid():
             return False
         item = index.internalPointer()
         return not item.is_loaded  # enabled, if lazy loading is enabled
 
+    @override
     def fetchMore(self, index):
         item = index.internalPointer()
         item.load_children()

@@ -1,6 +1,5 @@
 import os
 import platform
-from pprint import pprint
 import tempfile
 import time
 from pathlib import Path
@@ -9,13 +8,13 @@ import pytest
 from test.conftest import TEST_REF, conan_install_ref, conan_remove_ref
 from typing import List
 
-from conan_explorer.conan_wrapper import ConanApi
-from conan_explorer.conan_wrapper.types import ConanPkg, create_key_value_pair_list
-from conan_explorer.conan_wrapper.conan_worker import (ConanWorker,
-                                                           ConanWorkerElement)
+from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
+from conan_explorer.conan_wrapper.types import create_key_value_pair_list
+from conan_explorer.conan_wrapper.conan_worker import ConanWorker, ConanWorkerElement
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_explorer.conan_wrapper.types import ConanRef
 
+@pytest.mark.conanv1
 def test_conan_get_conan_buildinfo():
     """
     Check, that get_conan_buildinfo actually retrieves as a string for the linux pkg 
@@ -30,12 +29,13 @@ def test_conan_get_conan_buildinfo():
 def test_conan_profile_name_alias_builder():
     """ Test, that the build_conan_profile_name_alias returns human readable strings. """
     # check empty - should return a default name
-    profile_name = ConanApi.build_conan_profile_name_alias({})
+    conan_api = ConanApi()
+    profile_name = conan_api.build_conan_profile_name_alias({})
     assert profile_name == "No Settings"
 
     # check a partial
     settings = {'os': 'Windows', 'arch': 'x86_64'}
-    profile_name = ConanApi.build_conan_profile_name_alias(settings)
+    profile_name = ConanApi().build_conan_profile_name_alias(settings)
     assert profile_name == "Windows_x64"
 
     # check windows
@@ -43,15 +43,16 @@ def test_conan_profile_name_alias_builder():
                              'arch_build': 'x86_64', 'compiler': 'Visual Studio', 
                              'compiler.version': '16', 'compiler.toolset': 'v142', 
                              'build_type': 'Release'}
-    profile_name = ConanApi.build_conan_profile_name_alias(WINDOWS_x64_VS16_SETTINGS)
+    profile_name = ConanApi().build_conan_profile_name_alias(WINDOWS_x64_VS16_SETTINGS)
     assert profile_name == "Windows_x64_vs16_v142_release"
 
     # check linux
     LINUX_X64_GCC7_SETTINGS = {'os': 'Linux', 'arch': 'x86_64', 'compiler': 'gcc', 
                            'compiler.version': '7.4', 'build_type': 'Debug'}
-    profile_name = ConanApi.build_conan_profile_name_alias(LINUX_X64_GCC7_SETTINGS)
+    profile_name = ConanApi().build_conan_profile_name_alias(LINUX_X64_GCC7_SETTINGS)
     assert profile_name == "Linux_x64_gcc7.4_debug"
 
+@pytest.mark.conanv1
 def test_conan_short_path_root():
     """ Test, that short path root can be read. """
     new_short_home = Path(tempfile.gettempdir()) / "._myconan_short"
@@ -99,7 +100,7 @@ def test_conan_find_remote_pkg(base_fixture):
                 continue
             assert default_settings[setting] in pkg["settings"][setting]
 
-# @pytest.mark.conanv2
+@pytest.mark.conanv2
 def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     Test, if a wrong Option return causes an error.
@@ -228,7 +229,7 @@ def test_create_key_value_list(base_fixture):
     res = create_key_value_pair_list(inp)
     assert res == ["Key1=Value1"]
 
-#@pytest.mark.conanv2
+@pytest.mark.conanv2
 def test_search_for_all_packages(base_fixture):
     """ Test, that an existing ref will be found in the remotes. """
     conan = ConanApi().init_api()
@@ -249,7 +250,8 @@ def test_conan_worker(base_fixture, mocker):
         "settings": {}, "update": False,  "auto_install": True, "profile": ""}
     ]
 
-    mock_func = mocker.patch('conan_explorer.conan_wrapper.ConanApi.get_path_or_auto_install')
+    mock_func = mocker.patch(
+        f'{type(ConanApi()).__module__}.{type(ConanApi()).__name__}.get_path_or_auto_install')
     import conan_explorer.app as app
 
     conan_worker = ConanWorker(ConanApi().init_api(), app.active_settings)

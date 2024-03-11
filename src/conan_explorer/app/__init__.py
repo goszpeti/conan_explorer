@@ -4,24 +4,25 @@ import sys
 from tempfile import gettempdir
 from typing import TYPE_CHECKING
 
-from conan_explorer.settings import (SETTINGS_INI_TYPE, SettingsInterface, 
-                                         settings_factory)
-from conan_explorer import (APP_NAME, SETTINGS_FILE_NAME, __version__, asset_path,
-                                user_save_path)
+from conan_explorer import (APP_NAME, SETTINGS_FILE_NAME, __version__,
+                            asset_path, user_save_path)
+from conan_explorer.settings import (SETTINGS_INI_TYPE, SettingsInterface,
+                                     settings_factory)
+
+from .base_ui.crash import bug_dialog_exc_hook
+from .base_ui.loading import AsyncLoader
+from .base_ui.theming import activate_theme
 from .logger import Logger
 from .system import check_for_wayland
-from .base_ui.loading import AsyncLoader
-from .base_ui.crash import bug_dialog_exc_hook
-from .base_ui.theming import activate_theme
 
 if TYPE_CHECKING:
-    from conan_explorer.conan_wrapper import ConanApi, ConanWorker
+    from conan_explorer.conan_wrapper import ConanCommonUnifiedApi, ConanWorker
 
 ### Global variables ###
 
 active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE,
                                         user_save_path / (SETTINGS_FILE_NAME + ".ini"))
-conan_api: "ConanApi"  # initialized by load_conan
+conan_api: "ConanCommonUnifiedApi"  # initialized by load_conan
 conan_worker: "ConanWorker"  # initialized by load_conan
 
 
@@ -68,8 +69,8 @@ def init_platform():
 
 def load_conan():
     global conan_api, conan_worker
-    from conan_explorer.conan_wrapper import ConanApi, ConanWorker
-    conan_api = ConanApi()
+    from conan_explorer.conan_wrapper import ConanApiFactory, ConanWorker
+    conan_api = ConanApiFactory()
     conan_worker = ConanWorker(conan_api, active_settings)
     conan_api.init_api()
 

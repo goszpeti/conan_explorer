@@ -19,7 +19,9 @@ import pytest
 import conan_explorer.app as app  # resolve circular dependencies
 from conan_explorer import SETTINGS_FILE_NAME, base_path, user_save_path
 from conan_explorer.app.system import str2bool
-from conan_explorer.conan_wrapper import ConanApi, ConanInfoCache, ConanWorker
+from conan_explorer.conan_wrapper import ConanInfoCache, ConanWorker
+from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
+
 from conan_explorer.ui.common import remove_qt_logger
 from conan_explorer.ui.main_window import MainWindow
 from conan_explorer.settings import *
@@ -98,7 +100,7 @@ def conan_install_ref(ref, args="", profile=None):
     paths = PathSetup()
     profiles_path = paths.testdata_path / "conan" / "profile"
     extra_cmd = ""
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         extra_cmd = "--requires"
         if not profile:
             profile = platform.system().lower()
@@ -108,23 +110,23 @@ def conan_install_ref(ref, args="", profile=None):
     assert os.system(f"conan install {extra_cmd} {ref} {args}") == 0
 
 def conan_remove_ref(ref):
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         os.system(f"conan remove {ref} -c")
     else:
         os.system(f"conan remove {ref} -f")
 
 def conan_add_editables(conanfile_path: str, reference: ConanRef): # , path: str
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         os.system(f"conan editable add --version {reference.version} "
                   f"--channel {reference.channel} --user {reference.user}  {conanfile_path}")
     else:
         os.system(f"conan editable add {conanfile_path} {str(reference)}")
 
 def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
-    if conan_version.startswith("1"):
+    if conan_version.major == 1:
         os.system(f"conan create {conanfile} {ref} {create_params}")
         os.system(f"conan upload {ref} -r {TEST_REMOTE_NAME} --force --all")
-    elif conan_version.startswith("2"):
+    elif conan_version.major == 2:
         ref = ref.replace("@_/_", "") # does not work anymore...
         cfr = ConanRef.loads(ref)
         extra_args = ""
@@ -138,7 +140,7 @@ def conan_create_and_upload(conanfile: str, ref: str, create_params=""):
 
 
 def create_test_ref(ref, paths, create_params=[""], update=False):
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         ref = ref.replace("@_/_", "") # does not work anymore...
     native_ref = str(ConanRef.loads(ref))
     conan = ConanApi()
@@ -151,24 +153,53 @@ def create_test_ref(ref, paths, create_params=[""], update=False):
             if str(pkg) == native_ref:
                 return
     conanfile = str(paths.testdata_path / "conan" / "conanfile.py")
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         conanfile = str(paths.testdata_path / "conan" / "conanfileV2.py")
 
     for param in create_params:
         conan_create_and_upload(conanfile, ref, param)
 
+def add_remote(remote_name, url):
+    if conan_version.major == 1:
+        os.system(f"conan remote add {remote_name} {url} false")
+    elif conan_version.major == 2:
+        os.system(f"conan remote add {remote_name} {url} --insecure")
+
+def remove_remote(remote_name):
+    os.system(f"conan remote remove {remote_name}")
+
 def login_test_remote(remote_name):
-    if conan_version.startswith("1"):
+    if conan_version.major == 1:
         os.system(f"conan user demo -r {remote_name} -p demo")
 
-    elif conan_version.startswith("2"):
+    elif conan_version.major == 2:
         os.system(f"conan remote login {remote_name} demo -p demo")
 
 def logout_all_remotes():
-    if conan_version.startswith("1"):
+    if conan_version.major == 1:
         os.system("conan user --clean")
-    elif conan_version.startswith("2"):
+    elif conan_version.major == 2:
         os.system('conan remote logout "*"') # need " for linux
+
+def clean_remotes_on_ci():
+    if not is_ci_job():
+        return
+    if conan_version.major == 1:
+        os.system("conan remote clean")
+    elif conan_version.major == 2:
+        os.system("conan remote remove conancenter")
+
+def get_profiles():
+    profiles = ["windows", "linux"]
+    if conan_version.major == 2:
+        profiles = ["windowsV2", "linuxV2"]
+    return profiles
+
+def get_current_profile():
+    profiles = get_profiles()
+    for profile in profiles:
+        if platform.system().lower() in profile:
+            return profile
 
 
 def run_conan_server():
@@ -193,12 +224,12 @@ def start_conan_server():
     # Setup default profile
     paths = PathSetup()
     profiles_path = paths.testdata_path / "conan" / "profile"
-    if conan_version.startswith("1"):
+    if conan_version.major == 1:
         conan = ConanApi()
         conan.init_api()
         os.makedirs(conan._client_cache.profiles_path, exist_ok=True)
         shutil.copy(str(profiles_path / platform.system().lower()),  conan._client_cache.default_profile_path)
-    elif conan_version.startswith("2"):
+    elif conan_version.major == 2:
         os.system("conan profile detect")
 
     # Add to firewall
@@ -219,31 +250,21 @@ def start_conan_server():
         conan_server_thread.start()
         time.sleep(3)
     print("ADDING CONAN REMOTE")
-    if conan_version.startswith("1"):
-        if is_ci_job():
-            os.system("conan remote clean")
-        os.system(f"conan remote add {TEST_REMOTE_NAME} {TEST_REMOTE_URL} false")
-    elif conan_version.startswith("2"):
-        if is_ci_job():
-            os.system("conan remote remove conancenter")
-        os.system(f"conan remote add {TEST_REMOTE_NAME} {TEST_REMOTE_URL} --insecure")
-        os.system(f"conan remote login {TEST_REMOTE_NAME} demo -p demo")  # todo autogenerate and config
+    clean_remotes_on_ci()
+    add_remote(TEST_REMOTE_NAME, TEST_REMOTE_URL)
     login_test_remote(TEST_REMOTE_NAME)
     os.system(f"conan remote enable {TEST_REMOTE_NAME}")
     # Create test data
     if SKIP_CREATE_CONAN_TEST_DATA:
         return
     print("CREATING TESTDATA FOR LOCAL CONAN SERVER")
-    profiles = ["windows", "linux"]
-    if conan_version.startswith("2"):
-        profiles = ["windowsV2", "linuxV2"]
 
-    for profile in profiles:
+    for profile in get_profiles():
         profile_path = profiles_path / profile
         create_test_ref(TEST_REF, paths, [f"-pr {str(profile_path)}",
                          f"-o shared=False -pr {str(profile_path)}"], update=True)
         create_test_ref(TEST_REF_OFFICIAL, paths, [f"-pr {str(profile_path)}"], update=True)
-        if not conan_version.startswith("2"):
+        if not conan_version.major == 2:
             paths = PathSetup()
             conanfile = str(paths.testdata_path / "conan" / "conanfile_no_settings.py")
             conan_create_and_upload(conanfile,  "nocompsettings/1.0.0@local/no_sets")

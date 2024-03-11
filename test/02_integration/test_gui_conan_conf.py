@@ -6,11 +6,12 @@ from time import sleep
 import pytest
 import conan_explorer
 from conan_explorer.app.system import delete_path
-from conan_explorer.conan_wrapper import ConanApi
+from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import EditableEditDialog
 from conan_explorer.ui.views.conan_conf.editable_model import EditableModel, EditableModelItem
-from test.conftest import TEST_REMOTE_NAME, TEST_REMOTE_URL, TEST_REF, PathSetup, login_test_remote, logout_all_remotes
+from test.conftest import (TEST_REMOTE_NAME, TEST_REMOTE_URL, TEST_REF, PathSetup, 
+                    login_test_remote, logout_all_remotes, add_remote, remove_remote)
 from conan_explorer import conan_version
 
 import conan_explorer.app as app  # using global module pattern
@@ -34,6 +35,8 @@ def start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot):
     main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
     return conan_conf_view, main_gui
 
+
+@pytest.mark.conanv2
 def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_config_fixture, mocker):
     """
     Test Local Pacakge Explorer functions.
@@ -53,17 +56,14 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
     """
     from pytestqt.plugin import _qapp_instance
     # add 2 more remotes
-    ssl_disable_flag = ""
-    if conan_version.startswith("1"):
-        ssl_disable_flag = "false"
-    elif conan_version.startswith("2"):
-        ssl_disable_flag = "--insecure"
-    os.system(f"conan remote add local2 http://127.0.0.1:9301/ {ssl_disable_flag}")
-    os.system(f"conan remote add local3 http://127.0.0.1:9302/ {ssl_disable_flag}")
+    add_remote("local2", "http://127.0.0.1:9301/")
+    add_remote("local3", "http://127.0.0.1:9302/")
+
     # remove potentially created remotes from this testcase
-    os.system(f"conan remote remove local4")
-    os.system(f"conan remote remove New")
-    os.system(f"conan remote remove Edited")
+    remove_remote("local4")
+    remove_remote("New")
+    remove_remote("Edited")
+
     sleep(1)
 
     try:
@@ -148,7 +148,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         assert first_item.name == last_item.name
 
         # 6. Add a new remote via cli -> push refresh -> new remote should appear
-        os.system(f"conan remote add local4 http://127.0.0.1:9303/ {ssl_disable_flag}")
+        add_remote("local4", "http://127.0.0.1:9303/ ")
         conan_conf_view._ui.remote_refresh_button.click()
         assert conan_conf_view._remotes_controller._select_remote("local4")
 
@@ -207,10 +207,10 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         assert edited_remote_item.url == "http://127.0.0.1:9305/"
         assert edited_remote_item.verify_ssl == False
     finally:
-        os.system(f"conan remote remove Edited")
-        os.system(f"conan remote remove local2")
-        os.system(f"conan remote remove local3")
-        os.system(f"conan remote remove local4")
+        remove_remote("Edited")
+        remove_remote("local2")
+        remove_remote("local3")
+        remove_remote("local4")
         main_gui.close()
 
 @pytest.mark.conanv2
@@ -352,7 +352,7 @@ def test_conan_config_view_editables(qtbot, base_fixture: PathSetup, profile_fix
     conan_conf_view, main_gui = start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot)
     model: EditableModel = conan_conf_view._ui.editables_ref_view.model()
     new_editable_path = base_fixture.testdata_path / "conan"
-    if conan_version.startswith("2"):
+    if conan_version.major == 2:
         new_editable_path /= "conanfileV2.py"
 
     def editable_dialog_actions():
@@ -395,7 +395,7 @@ def test_conan_config_view_editables(qtbot, base_fixture: PathSetup, profile_fix
 
     assert model.get_index_from_ref(TEST_REF + "int2") is None
 
-
+@pytest.mark.conanv2
 def test_conan_config_save_config(qtbot, base_fixture: PathSetup, profile_fixture,
                                   ui_no_refs_config_fixture, mocker):
 

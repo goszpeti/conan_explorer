@@ -1,27 +1,28 @@
 import platform
-from pathlib import Path
 import sys
-from typing import Optional, TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, Optional
 
-from conan_explorer import conan_version
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QAction, QIcon
+from PySide6.QtWidgets import QApplication, QInputDialog, QMessageBox, QWidget, QMenu
+from typing_extensions import override
+
 import conan_explorer.app as app
+from conan_explorer import conan_version
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import delete_path
-from conan_explorer.ui.common import get_themed_asset_icon, ConfigHighlighter
+from conan_explorer.ui.common import ConfigHighlighter, get_themed_asset_icon
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
-from conan_explorer.ui.widgets import RoundedMenu
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon, QAction
-from PySide6.QtWidgets import QApplication, QDialog, QWidget, QMessageBox, QInputDialog
 
-from .dialogs import RemoteEditDialog, RemoteLoginDialog, EditableEditDialog
-from .remotes_controller import ConanRemoteController
+from .dialogs import EditableEditDialog, RemoteEditDialog, RemoteLoginDialog
 from .editable_controller import ConanEditableController
 from .profiles_model import ProfilesModel
+from .remotes_controller import ConanRemoteController
 
 if TYPE_CHECKING:
-    from conan_explorer.ui.main_window import BaseSignals
     from conan_explorer.ui.fluent_window.fluent_window import FluentWindow
+    from conan_explorer.ui.main_window import BaseSignals
 
 class ConanConfigView(PluginInterfaceV1):
 
@@ -65,14 +66,14 @@ class ConanConfigView(PluginInterfaceV1):
             self._ui.settings_file_text_browser.document(), "yaml")
 
     def _load_info_tab(self):
-        self._ui.conan_cur_version_value_label.setText(conan_version)
+        self._ui.conan_cur_version_value_label.setText(str(conan_version))
         self._ui.python_exe_value_label.setText(str(Path(sys.executable).resolve()))
         self._ui.python_cur_version_value_label.setText(platform.python_version())
         self._ui.revision_enabled_checkbox.setChecked(
                                             app.conan_api.get_revisions_enabled())
         self._ui.conan_usr_home_value_label.setText(
             str(app.conan_api.get_user_home_path().resolve()))
-        if conan_version.startswith("2"):
+        if conan_version.major == 2:
             self._ui.conan_usr_cache_value_label.setVisible(False)
             self._ui.conan_usr_cache_label.setVisible(False)
         else:
@@ -88,7 +89,8 @@ class ConanConfigView(PluginInterfaceV1):
         except Exception:
             Logger().error("Cannot read settings.yaml file!")
 
-    def resizeEvent(self, a0):  # override
+    @override
+    def resizeEvent(self, a0):
         """ Resize remote view columns automatically if window size changes """
         super().resizeEvent(a0)
         self._remotes_controller.resize_remote_columns()
@@ -125,7 +127,7 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.profile_rename_button, "icons/rename.svg")
 
     def _init_profile_context_menu(self):
-        self.profiles_cntx_menu = RoundedMenu()
+        self.profiles_cntx_menu = QMenu()
         self._copy_profile_action = QAction("Copy profile name", self)
         self._copy_profile_action.setIcon(
             QIcon(get_themed_asset_icon("icons/copy_link.svg")))
@@ -261,7 +263,7 @@ class ConanConfigView(PluginInterfaceV1):
         self._remotes_cntx_menu.exec(self._ui.remotes_tree_view.mapToGlobal(position))
 
     def _init_remote_context_menu(self):
-        self._remotes_cntx_menu = RoundedMenu()
+        self._remotes_cntx_menu = QMenu()
         self._copy_remote_action = QAction("Copy remote name", self)
         self._copy_remote_action.setIcon(
             QIcon(get_themed_asset_icon("icons/copy_link.svg")))

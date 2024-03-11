@@ -1,14 +1,16 @@
 from typing import Dict, List, Optional
 
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import Qt, SignalInstance, Slot
+from typing_extensions import override
+
 import conan_explorer.app as app
 from conan_explorer.app import AsyncLoader  # using global module pattern
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper import ConanApi
-from conan_explorer.conan_wrapper.types import ConanPkg
-from conan_explorer.ui.common import TreeModel, TreeModelItem, get_platform_icon, get_themed_asset_icon
-from conan_explorer.conan_wrapper.types import ConanRef
-from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtCore import Qt, Slot, SignalInstance
+from conan_explorer.conan_wrapper import ConanApiFactory
+from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef
+from conan_explorer.ui.common import (TreeModel, TreeModelItem,
+                                      get_platform_icon, get_themed_asset_icon)
 
 REF_TYPE = 0
 PROFILE_TYPE = 1
@@ -20,15 +22,17 @@ class SearchedPackageTreeItem(TreeModelItem):
     1. ref/id 2. remote 3. quick profile
     """
 
-    def __init__(self, data: List[str], parent=None, pkg_data: Optional[ConanPkg] = None,
+    def __init__(self, data: List[str], parent=None, pkg_info: Optional[ConanPkg] = None,
                  item_type=REF_TYPE, lazy_loading=False, installed=False, empty=False):
         super().__init__(data, parent, lazy_loading=lazy_loading)
         self.type = item_type
-        self.pkg_data = pkg_data
+        self.pkg_info = pkg_info
         self.is_installed = installed
         self.empty = empty  # indicates a "no result" item, which must be handled separately
+        self.child_items: List[SearchedPackageTreeItem] = []
 
-    def load_children(self):  # override
+    @override
+    def load_children(self):
         # can't call super method: fetching would finish early
         self.child_items = []
 
@@ -50,7 +54,7 @@ class SearchedPackageTreeItem(TreeModelItem):
                 if pkg_id in installed_ids:
                     installed = True
                 pkgs_to_be_added[pkg_id] = SearchedPackageTreeItem(
-                    [pkg_id, remote,  ConanApi.build_conan_profile_name_alias(
+                    [pkg_id, remote,  ConanApiFactory().build_conan_profile_name_alias(
                         pkg.get("settings", {}))],
                     self, pkg, PROFILE_TYPE, False, installed)
         for pkg in pkgs_to_be_added.values():
@@ -60,7 +64,8 @@ class SearchedPackageTreeItem(TreeModelItem):
                 ["No package found", "",  ""], self, {}, PROFILE_TYPE, empty=True))
         self.is_loaded = True
 
-    def child_count(self) -> int:  # override
+    @override
+    def child_count(self) -> int:
         if self.type == REF_TYPE:
             return len(self.child_items) if len(self.child_items) > 0 else 1
         elif self.type == PROFILE_TYPE:
@@ -127,7 +132,8 @@ class PkgSearchModel(TreeModel):
             self.root_item.append_child(conan_item)
         self.endResetModel()
 
-    def data(self, index: QtCore.QModelIndex, role: Qt.ItemDataRole):  # override
+    @override
+    def data(self, index: "QtCore.QModelIndex | QtCore.QPersistentModelIndex", role: int = 0):
         if not index.isValid():
             return None
         item: SearchedPackageTreeItem = index.internalPointer()  # type: ignore
@@ -168,7 +174,9 @@ class PkgSearchModel(TreeModel):
         item.is_installed = installed
         pkg_items = item.child_items
         for pkg_item in pkg_items:
-            if installed and pkg_item.pkg_data.get("id", "") == pkg_id:
+            if not pkg_item.pkg_info:
+                return
+            if installed and pkg_item.pkg_info.get("id", "") == pkg_id:
                 Logger().debug(
                     f"Set {pkg_id} as install status to {installed}")
                 pkg_item.is_installed = installed
@@ -176,7 +184,8 @@ class PkgSearchModel(TreeModel):
             if not pkg_id and not installed:  # if ref was removed, all pkgs are deleted too
                 pkg_item.is_installed = installed
 
-    def fetchMore(self, index):  # override
+    @override
+    def fetchMore(self, index):
         item = index.internalPointer()
         loader = AsyncLoader(self)
         self._loader_widget_parent = QtWidgets.QWidget()

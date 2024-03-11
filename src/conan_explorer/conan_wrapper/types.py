@@ -1,32 +1,24 @@
 from __future__ import annotations
-from dataclasses import dataclass
-
-import os
-import pprint
-
 from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+import os
+import platform
+import pprint
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
+from typing_extensions import TypeAlias
 
 from conan_explorer import conan_version
 
-if TYPE_CHECKING:
-    from typing import TypedDict, TypeAlias, Literal
-else:
-    try:
-        from typing import Literal, TypedDict, Protocol, TypeAlias
-    except ImportError:
-        from typing_extensions import Literal, TypedDict, Protocol, TypeAlias
+from conans.errors import ConanException
 
 
-if conan_version.startswith("1"):
+if conan_version.major == 1:
     from conans.model.ref import ConanFileReference, PackageReference # type: ignore
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
-    try:
+    if platform.system() == "Windows":
         from conans.util.windows import CONAN_REAL_PATH
-    except Exception:
-        pass
-elif conan_version.startswith("2"):
+else:
     from conans.model.recipe_ref import RecipeReference as ConanFileRef  # type: ignore
     from conans.model.package_ref import PkgReference  # type: ignore
     class PackageReference(PkgReference): # type: ignore
@@ -60,11 +52,6 @@ elif conan_version.startswith("2"):
                     with redirect_stderr(devnull):
                         ref.validate_ref(allow_uppercase=True)
             return ref
-        
-
-else:
-    raise RuntimeError("Can't recognize Conan version")
-
 
 @dataclass
 class Remote():
@@ -72,6 +59,7 @@ class Remote():
     url: str
     verify_ssl: bool
     disabled: bool
+    allowed_packages: Optional[List[str]] = None
 
 from conans.errors import ConanException
 

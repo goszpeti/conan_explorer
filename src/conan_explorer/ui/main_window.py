@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from shutil import rmtree
 from time import sleep
 from typing import Optional
+from typing_extensions import override
 
 from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
-from PySide6.QtGui import QKeySequence, QDesktopServices, QShortcut
+from PySide6.QtGui import QKeySequence, QDesktopServices, QResizeEvent, QShortcut
 from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
     QVBoxLayout, QWidget)
 
@@ -44,12 +45,13 @@ class MainWindow(FluentWindow):
     """ Instantiates MainWindow and holds all UI objects """
 
     # signals for inter page communication
-    conan_pkg_installed: SignalInstance = Signal(str, str)  # type: ignore - conan_ref, pkg_id
-    conan_pkg_removed: SignalInstance = Signal(str, str)  # type: ignore - conan_ref, pkg_ids
+    # conan_ref, pkg_ids
+    conan_pkg_installed: SignalInstance = Signal(str, str)  # type: ignore
+    # conan_ref, pkg_ids
+    conan_pkg_removed: SignalInstance = Signal(str, str)  # type: ignore
     conan_remotes_updated: SignalInstance = Signal()  # type: ignore
     page_size_changed: SignalInstance = Signal(QWidget)  # type: ignore
-
-    log_console_message: SignalInstance = Signal(str)  # type: ignore - message
+    log_console_message: SignalInstance = Signal(str)  # type: ignore 
 
     qt_logger_name = "qt_logger"
     _can_close = True # wait for blocking operations
@@ -75,7 +77,7 @@ class MainWindow(FluentWindow):
         self._init_right_menu()
         self.ui.title_icon_label.setPixmap(get_themed_asset_icon("icons/icon.ico", 
                                                     force_light_mode=True).pixmap(20,20))
-        self._conan_minor_version = ".".join(conan_version.split(".")[0:2]) # for docs
+        self._conan_minor_version = str(conan_version.major) + "." + str(conan_version.minor)
         self.ui.search_bar_line_edit.setPlaceholderText(
                                     f"Search Conan {self._conan_minor_version} docs")
 
@@ -89,15 +91,17 @@ class MainWindow(FluentWindow):
         # size needs to be set as early as possible to correctly position loading windows
         self.restore_window_state()
 
-    def close(self): # override
+    @override
+    def close(self):
         while not self._can_close:
             sleep(0.1)
         return super().close()
 
     def on_docs_searched(self):
         extra_addr = ""
-        if conan_version.startswith("1"):
+        if conan_version.major == 1:
             extra_addr = "en/"
+        # https://docs.conan.io/en/1.62/search.html?q=abc&check_keywords=yes&area=default
         search_url = (f"https://docs.conan.io/{extra_addr}{self._conan_minor_version}/search.html"
                       f"?q={self.ui.search_bar_line_edit.text()}&check_keywords=yes&area=default")
         QDesktopServices.openUrl(search_url)
@@ -154,7 +158,7 @@ class MainWindow(FluentWindow):
 
         self.main_general_settings_menu.add_menu_line()
 
-        if conan_version.startswith("1"):
+        if conan_version.major == 1:
             self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
                                                                   self.on_conan_remove_locks, "icons/remove-lock.svg")
             self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",
@@ -163,7 +167,9 @@ class MainWindow(FluentWindow):
         self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.svg")
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.svg")
 
-    def closeEvent(self, event):  # override QMainWindow
+
+    @override
+    def closeEvent(self, event):
         """ Remove qt logger, so it doesn't log into a non existant object """
         self.app_grid.setEnabled(False)  # disable app_grid to signal shutdown
         try:
@@ -174,8 +180,9 @@ class MainWindow(FluentWindow):
         remove_qt_logger(Logger(), self.qt_logger_name)
         super().closeEvent(event)
 
-    def resizeEvent(self, a0) -> None:  # QtGui.QResizeEvent
-        super().resizeEvent(a0)
+    @override
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
         try:
             if self.loaded:
                 self.ui.page_stacked_widget.currentWidget().setMaximumWidth(self.ui.center_frame.width() - 4)
@@ -289,7 +296,7 @@ class MainWindow(FluentWindow):
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
-        cleaner = ConanCleanup(app.conan_api)
+        cleaner = ConanCleanup(app.conan_api) # type: ignore
         loader = AsyncLoader(self)
         loader.async_loading(self, cleaner.get_cleanup_cache_paths, )
         loader.wait_for_finished()

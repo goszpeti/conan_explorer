@@ -1,10 +1,18 @@
 
-from typing import Optional
-from PySide6.QtCore import QModelIndex, Qt
+from typing import Any, List, Optional, Union
 
-import conan_explorer.app as app
-from conan_explorer.conan_wrapper.types import EditablePkg # using global module pattern
+from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
+from typing_extensions import override
+
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer.conan_wrapper.types import EditablePkg
 from conan_explorer.ui.common import TreeModel, TreeModelItem
+
+
+class EditableModelItemRoot(TreeModelItem):
+    def __init__(self, data: List[str], parent=None, lazy_loading=False):
+        self.child_items: List[EditableModelItem] = []
+        super().__init__(data, parent, lazy_loading)
 
 
 class EditableModelItem(TreeModelItem):
@@ -40,7 +48,7 @@ class EditableModelItem(TreeModelItem):
 class EditableModel(TreeModel):
     def __init__(self):
         super(EditableModel, self).__init__(checkable=True)
-        self.root_item = TreeModelItem(["Name", "Path", "Output folder"])  # "Layout",
+        self.root_item = EditableModelItemRoot(["Name", "Path", "Output folder"])  # "Layout",
         self.setup_model_data()
 
     def setup_model_data(self):
@@ -71,7 +79,8 @@ class EditableModel(TreeModel):
             return True
         return False
 
-    def data(self, index: QModelIndex, role):  # override
+    @override
+    def data(self, index: Union[QModelIndex, QPersistentModelIndex], role: int) -> Any:
         if not index.isValid():
             return None
         item: EditableModelItem = index.internalPointer()  # type: ignore
@@ -82,11 +91,12 @@ class EditableModel(TreeModel):
                 return ""
         return None
 
+    @override
     def rowCount(self, parent=None):
         return self.root_item.child_count()
 
     def get_index_from_ref(self, conan_ref: str) -> Optional[QModelIndex]:
-        for ref in self.root_item.child_items:
+        for ref in self.root_item.child_items: # type: ignore
             ref: EditableModelItem
             if ref.name == conan_ref:
                 return self.get_index_from_item(ref)

@@ -7,7 +7,7 @@ import conan_explorer  # for mocker
 import conan_explorer.app as app
 from conan_explorer.ui.main_window import MainWindow
 from conan_explorer.conan_wrapper.types import ConanRef
-from PySide6 import QtCore
+from PySide6 import QtCore, QtWidgets
 from conan_explorer.ui.views import ConanSearchView
 from conan_explorer.ui.views import LocalConanPackageExplorer
 
@@ -40,6 +40,11 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     main_window.show()
     qtbot.waitExposed(main_window)
     search_dialog = main_window.page_widgets.get_page_by_type(ConanSearchView)
+    main_window.page_widgets.get_button_by_type(ConanSearchView).click()
+
+    # expand and collapse remotes list, simply to see if it does not crash
+    search_dialog._ui.remote_toggle_button.click()
+    search_dialog._ui.remote_toggle_button.click() # collapse again
 
     # enter short search term -> search button disabled
     search_dialog._ui.search_line.setText("ex")
@@ -118,6 +123,45 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     lpe = main_window.page_widgets.get_page_by_type(LocalConanPackageExplorer)
 
     assert id == lpe._pkg_sel_ctrl.get_selected_conan_pkg_info().get("id", "")
+
+    # select 3 packages and compare them
+    main_window.page_widgets.get_button_by_type(ConanSearchView).click()
+    index = model.get_index_from_item(ref_item.child_items[0])
+    ref_view_index_ch1 = proxy_view_model.mapFromSource(index)
+    sel_model.select(
+        ref_view_index_ch1, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    index = model.get_index_from_item(ref_item.child_items[1])
+    ref_view_index_ch2 = proxy_view_model.mapFromSource(index)
+    sel_model.select(
+        ref_view_index_ch2, QtCore.QItemSelectionModel.SelectionFlag.Select)
+    index = model.get_index_from_item(ref_item.child_items[2])
+    ref_view_index_ch3 = proxy_view_model.mapFromSource(index)
+    sel_model.select(
+        ref_view_index_ch3, QtCore.QItemSelectionModel.SelectionFlag.Select)
+    
+    mock_diff_dialog = mocker.patch("conan_search.controller.PkgDiffDialog")
+    search_dialog.diff_pkgs_action.trigger()
+    mock_diff_dialog.assert_called_once()
+    assert mock_diff_dialog.mock_calls[1][0] == "().add_diff_item"
+    assert mock_diff_dialog.mock_calls[2][0] == "().add_diff_item"
+    assert mock_diff_dialog.mock_calls[3][0] == "().add_diff_item"
+    assert mock_diff_dialog.mock_calls[4][0] == "().show"
+
+    # check greyyed out context menu elements
+
+    elem_pos = search_dialog._ui.search_results_tree_view.visualRect(ref_view_index_ch3)
+    mocker.patch.object(search_dialog.select_cntx_menu, 'exec')
+
+    # check that on multiple selection diff pkg action is enabled
+    search_dialog.on_pkg_context_menu_requested(elem_pos.center())
+    assert search_dialog.diff_pkgs_action.isEnabled()
+
+    # check, that a specific item hast shows in pkg exp enabled bbased on installed status
+    sel_model.select(
+        ref_view_index_ch3, QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
+    search_dialog.on_pkg_context_menu_requested(elem_pos.center())
+    ip = index.internalPointer()
+    assert search_dialog.show_in_pkg_exp_action.isEnabled() == ip.is_installed
 
     search_dialog.hide()
     main_window.close()

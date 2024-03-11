@@ -5,7 +5,6 @@ import platform
 import shutil
 import subprocess
 import tempfile
-
 from pathlib import Path
 from typing import List
 
@@ -68,20 +67,24 @@ def open_in_file_manager(file_path: Path):
         Logger().error(f"Can't show path in file-manager: {str(e)}")
 
 
-def open_cmd_in_path(file_path: Path) -> int:
+def open_cmd_in_path(directory_path: Path) -> int:
     """ Open a terminal in the selected folder. """
     try:
+        if not directory_path.is_dir():
+            Logger().error(f"Invalid directory: {str(directory_path)}")
+            return -1
         if platform.system() == "Linux":
-            return execute_cmd(["x-terminal-emulator", "-e", '"', 
-                                "cd", f"{str(file_path)}", "&&", "bash", '"'], True)
+            return execute_cmd(["x-terminal-emulator", "-e", '"',
+                                "cd", f"{str(directory_path)}", "&&", "bash", '"'],
+                               is_console_app=False, shell_linux=True)
         elif platform.system() == "Windows":
             cmd_path = shutil.which("cmd")
             if cmd_path:
-                return execute_app(Path(cmd_path), True, f"/k cd {str(file_path)}")
-        return 0
+                return execute_app(Path(cmd_path), True, f"/k cd {str(directory_path)}")
+        return -2
     except Exception as e:
         Logger().error(f"Can't open cmd in path: {str(e)}")
-        return 0
+        return -3
 
 
 def is_file_executable(file_path: Path) -> bool:
@@ -114,7 +117,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
     return 0
 
 
-def execute_cmd(cmd: List[str], is_console_app: bool) -> int:  # pid
+def execute_cmd(cmd: List[str], is_console_app: bool, shell_linux=False) -> int:  # pid
     """ Generic process execute method. Returns pid. """
     command_path = Path(cmd[0]).parent
     try:
@@ -134,7 +137,7 @@ def execute_cmd(cmd: List[str], is_console_app: bool) -> int:  # pid
                 # emulators available. Use the default distro emulator through x-terminal-emulator
                 # This works only on debian distros.
                 cmd = ["x-terminal-emulator", "-e"] + [generate_launch_script(cmd)]
-            proc = subprocess.Popen(cmd, cwd=str(command_path))
+            proc = subprocess.Popen(cmd, cwd=str(command_path), shell=shell_linux)
             return proc.pid
         return 0
     except Exception as e:
@@ -206,7 +209,7 @@ def copy_path_with_overwrite(src: Path, dst: Path):
     folder name, if you want that!
     Exceptions will be caught and message logged to stdout.
     """
-    from shutil import copytree, copy2
+    from shutil import copy2, copytree
     try:
         dst.parent.mkdir(parents=True, exist_ok=True)
         if src.is_file():
@@ -247,8 +250,8 @@ def get_default_file_editor():
         return "gedit"  # distro dependent, but make something
 
 
-def find_program_in_windows(app_name: str, partial_match=False, 
-                                                key_to_find="InstallLocation") -> str:
+def find_program_in_windows(app_name: str, partial_match=False,
+                            key_to_find="InstallLocation") -> str:
     if platform.system() != "Windows":
         return ""
 
@@ -256,16 +259,15 @@ def find_program_in_windows(app_name: str, partial_match=False,
     arch_keys = {winreg.KEY_WOW64_32KEY, winreg.KEY_WOW64_64KEY}
     for arch_key in arch_keys:
         key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-            r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", 
-            0, winreg.KEY_READ | arch_key)
+                             r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+                             0, winreg.KEY_READ | arch_key)
         for i in range(0, winreg.QueryInfoKey(key)[0]):
             sub_key_name = winreg.EnumKey(key, i)
             sub_key = winreg.OpenKey(key, sub_key_name)
             try:
                 current_app_name = winreg.QueryValueEx(
                     sub_key, "DisplayName")[0]
-                if partial_match:
-                    if app_name in current_app_name:
+                if partial_match and app_name in current_app_name:
                         location = winreg.QueryValueEx(sub_key, key_to_find)[0]
                         return location
                 if app_name == current_app_name:

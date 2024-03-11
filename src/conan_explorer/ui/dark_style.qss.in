@@ -294,8 +294,14 @@ QPushButton#side_menu_title_button {
 /* Generic widgets */
 
 QComboBox {
-    color: #f8f8ff;	
+    color: #f8f8ff;
     background: #202020;
+}
+QComboBox QAbstractItemView {
+    color: #f8f8ff;
+    background: #202020;
+    selection-color: #f8f8ff;
+    selection-background-color: #202020;
 }
 QComboBox:disabled {
     color: #5c5c5c;
@@ -305,15 +311,17 @@ QComboBox:editable {
     background: #202020;
     selection-background-color: #202020;
 }
-QComboBox QAbstractItemView {
-    color: #f8f8ff;	
-    background: #202020;
-    selection-color: #f8f8ff;
-    selection-background-color: #202020;
-}
 QComboBox:!editable:on, QComboBox::drop-down:editable:on {
-    color: #f8f8ff;	
+    color: #f8f8ff;
     background: #202020;
+}
+QComboBox::down-arrow {
+    image: url(icons:material/expand_w.svg);
+    width: 30px;
+}
+QComboBox::drop-down {
+    width: 40px;
+    border-color: white;
 }
 
 QHeaderView {
@@ -349,15 +357,14 @@ QMainWindow{
     background-color: transparent;
 }
 
-QMenu,RoundedMenu{
+QMenu{
     background-color: #202020;
-    padding-top: 10px;
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
-QMenu::item:selected,RoundedMenu::item:selected{
+QMenu::item:selected{
     background-color: #5c5c5c; 
 }
-QMenu::item:disabled,RoundedMenu::item:disabled{
+QMenu::item:disabled{
     color: #A8A8A8;
 }
 

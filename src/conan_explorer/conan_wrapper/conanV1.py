@@ -4,7 +4,7 @@ import platform
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from unittest.mock import patch
 from conan_explorer.app.system import delete_path
 from conan_explorer.app.typing import SignatureCheckMeta
@@ -12,7 +12,7 @@ from conan_explorer.app.typing import SignatureCheckMeta
 try:
     from contextlib import chdir
 except ImportError:
-    from contextlib_chdir import chdir
+    from contextlib_chdir import chdir # type: ignore
 
 from .types import (ConanAvailableOptions, ConanOptions, ConanPackageId, ConanPackagePath, 
                     ConanPkg, ConanRef, ConanPkgRef, ConanException, ConanSettings, EditablePkg, 
@@ -148,11 +148,6 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def get_storage_path(self) -> Path:
         return Path(str(self._client_cache.store))
 
-    def get_editables_file_path(self) -> Path:
-        editable_file = Path(self._client_cache.editable_packages._edited_file)
-        editable_file.touch()
-        return editable_file
-
     def get_editable_references(self) -> List[ConanRef]:
         try:
             return list(map(ConanRef.loads, self._conan.editable_list().keys()))
@@ -161,7 +156,6 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             return []
 
     def get_editable(self, conan_ref: Union[ConanRef, str]) -> EditablePkg:
-        pass
         if isinstance(conan_ref, str):
             conan_ref = ConanRef.loads(conan_ref)
         editable_dict = self._conan.editable_list().get(str(conan_ref), {})
@@ -169,7 +163,6 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                            editable_dict.get("output_folder"))
 
     def get_editables_package_path(self, conan_ref: ConanRef) -> Path:
-        pkg_path = Path(INVALID_PATH)
         editable_dict = self._conan.editable_list().get(str(conan_ref), {})
         pkg_path = Path(str(editable_dict.get("path", INVALID_PATH)))
         return pkg_path
@@ -411,17 +404,17 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return res_list
 
     def search_recipe_all_versions_in_remotes(self, conan_ref: ConanRef) -> List[ConanRef]:
-        remote_results = []
-        local_results = []
+        remote_results: List[Dict[str, Any]] = []
+        local_results: List[Dict[str, Any]] = []
         try:
             # no query possible with pattern
-            remote_results: List = self._conan.search_recipes(
+            remote_results = self._conan.search_recipes(
                 f"{conan_ref.name}/*@*/*", remote_name="all").get("results", None)
         except Exception as e:
             Logger().warning(str(e))
         try:
             if SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
-                local_results: List = self._conan.search_recipes(
+                local_results = self._conan.search_recipes(
                     f"{conan_ref.name}/*@*/*", remote_name=None).get("results", None)
         except Exception as e:
             Logger().warning(str(e))

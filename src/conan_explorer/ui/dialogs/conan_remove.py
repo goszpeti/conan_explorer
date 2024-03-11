@@ -12,7 +12,7 @@ from conan_explorer.conan_wrapper.types import ConanRef
 
 class ConanRemoveDialog(QMessageBox):
 
-    def __init__(self, parent: Optional[QWidget],  conan_ref: str, pkg_id: str,
+    def __init__(self, parent: Optional[QWidget], conan_ref: str, pkg_id: str,
                  conan_pkg_removed: Optional[SignalInstance] = None):
         super().__init__(parent)
         self._conan_ref = conan_ref

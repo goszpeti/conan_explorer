@@ -93,7 +93,6 @@ class AppEditDialog(QDialog):
                              directory=str(temp_package_path))
         # filter="Images (*.ico *.svg *.jpg)")
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        # TODO restrict to the package directory, or emit Error dialog and call anew
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             exe_path = Path(dialog.selectedFiles()[0])
             try:
@@ -150,7 +149,7 @@ class AppEditDialog(QDialog):
         if not self._ui.conan_ref_line_edit.is_valid:
             msg = QMessageBox(parent=self)
             msg.setWindowTitle("Invalid Conan Reference")
-            msg.setText(f"The entered Conan reference has an invalid format!")
+            msg.setText("The entered Conan reference has an invalid format!")
             msg.setStandardButtons(QMessageBox.StandardButton.Ok)
             msg.setIcon(QMessageBox.Icon.Critical)
             msg.exec()

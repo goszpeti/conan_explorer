@@ -69,12 +69,8 @@ class TabList(QWidget):
         # self.tab_layout.removeItem(self._h_spacer)
         for app_link in self.app_links:
             self.tab_layout.removeWidget(app_link)
-            if force:
-                # TODO this a leak, currently it does not delete everything!
-                app_link.hide()
-                app_link.delete()
-            else:
-                app_link.hide()
+            # TODO this a leak, currently it does not delete everything!
+            app_link.hide()
         if force:
             self.app_links = []
 

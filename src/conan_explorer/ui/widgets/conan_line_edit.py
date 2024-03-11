@@ -3,11 +3,13 @@ from typing import Callable, List
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit, QListView
+from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import ConanRef, ConanPkgRef
+from conan_explorer.conan_wrapper.types import ConanPkgRef, ConanRef
 from conan_explorer.ui.common.theming import get_gui_dark_mode
+
 
 class ConanRefLineEdit(QLineEdit):
     """ Adds completions for Conan references and a validator. """
@@ -39,14 +41,16 @@ class ConanRefLineEdit(QLineEdit):
         self.completion_finished.connect(self.completer().complete)
         self.textChanged.connect(self.on_text_changed)
 
-    def setEnabled(self, enabled: bool): # override:
+    @override
+    def setEnabled(self, enabled: bool):
         # apply grey color to text, when disabled manually
         if enabled:
-            self.setStyleSheet(f"") # remove grey color
+            self.setStyleSheet("") # remove grey color
         else:
-            self.setStyleSheet(f"color: grey;")
+            self.setStyleSheet("color: grey;")
         super().setEnabled(enabled)
 
+    @override
     def showEvent(self, event):
         self.load_completion_refs()
         if self._first_show:

@@ -1,8 +1,12 @@
 
 from typing import List, Optional
-import conan_explorer.app as app  # using global module pattern
-from conan_explorer.ui.common import (get_platform_icon)
+
 from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt
+from typing_extensions import override
+
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer.ui.common import get_platform_icon
+
 
 class ProfilesModel(QAbstractListModel):
     def __init__(self):
@@ -13,7 +17,8 @@ class ProfilesModel(QAbstractListModel):
     def setup_model_data(self):
         self._profiles = app.conan_api.get_profiles()
 
-    def data(self, index, role): # override
+    @override
+    def data(self, index, role):
         if role == Qt.ItemDataRole.DisplayRole:
             text = self._profiles[index.row()]
             return text
@@ -22,7 +27,8 @@ class ProfilesModel(QAbstractListModel):
             text = self._profiles[index.row()]
             return get_platform_icon(text)
 
-    def rowCount(self, index): # override
+    @override
+    def rowCount(self, parent):
         return len(self._profiles)
 
     def get_index_from_profile(self, profile_name: str) -> Optional[QModelIndex]:

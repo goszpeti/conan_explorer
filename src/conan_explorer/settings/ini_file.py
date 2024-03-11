@@ -1,18 +1,19 @@
 import configparser
-from copy import deepcopy
 import os
+from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional
+from typing_extensions import override
 
 from conan_explorer import BUILT_IN_PLUGIN, PathLike, base_path
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import get_default_file_editor
-from conan_explorer.app.typing import SignatureCheckMeta
 
-from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, 
-               DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE, FONT_SIZE, 
-               GENERAL_SECTION_NAME, GUI_STYLE, GUI_STYLE_MATERIAL, GUI_MODE_LIGHT, 
-               GUI_MODE, LAST_CONFIG_FILE, LAST_VIEW, PLUGINS_SECTION_NAME,
+from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, AUTO_OPEN_LAST_VIEW,
+               CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE,
+               FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME,
+               GUI_MODE, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_MATERIAL,
+               LAST_CONFIG_FILE, LAST_VIEW, PLUGINS_SECTION_NAME,
                VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
 
 
@@ -40,7 +41,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
     }
 
 
-class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
+class IniSettings(SettingsInterface):
     """
     Settings mechanism with an ini file to use as a storage.
     File and entries are automatically created from the default value of the class.
@@ -49,9 +50,8 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
     """
 
     def __init__(self, ini_file_path: Optional[PathLike], auto_save=True,
-                 default_values: Dict[str, Dict[str, Any]
-                                      ] = application_settings_spec(),
-                 custom_key_enabled_sections=[PLUGINS_SECTION_NAME]):
+                 default_values: Dict[str, Dict[str, Any]] = application_settings_spec(),
+                 custom_key_enabled_sections: List[str]=[PLUGINS_SECTION_NAME]):
         """
         Read config.ini file to load settings.
         Create, if not existing, but the directory must already exist!
@@ -79,12 +79,15 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
 
         self._read_ini()
 
-    def set_auto_save(self, value):
+    @override
+    def set_auto_save(self, value: bool):
         self._auto_save = value
 
-    def get_settings_from_node(self, node: str) -> Tuple[str]:
-        return tuple(self._values.get(node, {}).keys())
+    @override
+    def get_settings_from_node(self, node: str) -> List[str]:
+        return list(self._values.get(node, {}).keys())
 
+    @override
     def get(self, name: str) -> "str | int | float | bool":
         """ Get a specific setting """
         value = None
@@ -96,18 +99,23 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
             raise LookupError
         return value
 
+    @override
     def get_string(self, name: str) -> str:
         return str(self.get(name))
 
+    @override
     def get_int(self, name: str) -> int:
         return int(self.get(name))
 
+    @override
     def get_float(self, name: str) -> float:
         return float(self.get(name))
 
+    @override
     def get_bool(self, name: str) -> bool:
         return bool(self.get(name))
 
+    @override
     def set(self, name: str, value: "str|int|float|bool"):
         """ Set the value of a specific setting. 
         Does not write to file, if value is already set. """
@@ -125,6 +133,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
         if self._auto_save:
             self.save()
 
+    @override
     def add(self, name: str, value: "str|int|float|bool", node: Optional[str]=None):
         if node is None:
             node = GENERAL_SECTION_NAME
@@ -133,6 +142,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
         self._values[node][name] = value
         self.save()
 
+    @override
     def remove(self, name: str):
         for node_name, node in self._values.items():
             if name in node:
@@ -141,6 +151,7 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
                 break
         self.save()
 
+    @override
     def save(self):
         """ Save all user modifiable settings to file. """
         # save all default values
@@ -217,11 +228,11 @@ class IniSettings(SettingsInterface, metaclass=SignatureCheckMeta):
             section[name] = str(default_value)
             return True
 
-        value = None
+        value: "str | int | float | bool | None" = None
         if isinstance(default_value, bool):
             value = section.getboolean(name)
         elif isinstance(default_value, str):
-            value = section.get(name)
+            value = str(section.get(name))
         elif isinstance(default_value, float):
             value = float(section.get(name))
         elif isinstance(default_value, int):

@@ -96,7 +96,7 @@ class ConanRemoteController():
     def remove(self, remote: Remote):
         self._model.remove(remote)
 
-    def remote_disable(self, model_index):
+    def remote_disable(self):
         remote_item = self.get_selected_remote()
         if not remote_item:
             return

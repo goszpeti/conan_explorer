@@ -17,6 +17,7 @@ class ConanUnifiedApi():
 
     @abstractmethod
     def __init__(self):
+        self.info_cache: "ConanInfoCache"
         ...
 
     @abstractmethod
@@ -39,11 +40,6 @@ class ConanUnifiedApi():
     @abstractmethod
     def get_profile_settings(self, profile_name: str) -> ConanSettings:
         """ Return a dict of settings for a profile """
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_profiles_with_settings(self) -> Dict[str, ConanSettings]:
-        """ Return a list of all profiles and the corresponding settings """
         raise NotImplementedError
 
     @abstractmethod
@@ -73,11 +69,6 @@ class ConanUnifiedApi():
     @abstractmethod
     def get_config_file_path(self) -> Path:
         """ Return conan config file path (conan.conf) """
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_editables_file_path(self) -> Path:
-        """ Return editables raw (json) file """
         raise NotImplementedError
 
     @abstractmethod
@@ -249,11 +240,6 @@ class ConanUnifiedApi():
     def remove_editable(self, conan_ref: Union[ConanRef, str]) -> bool:
         """ Remove an editable reference. """
         raise NotImplementedError
-    
-    # @abstractmethod
-    # def set_editable(self, conan_ref: str, path: str, output_folder: str):
-    #     """ Edits an editable reference information , with all params changeable in place. """
-    #     raise NotImplementedError
 
     @abstractmethod
     def remove_reference(self, conan_ref: ConanRef, pkg_id: str=""):
@@ -353,17 +339,7 @@ class ConanCommonUnifiedApi(ConanUnifiedApi):
     def __init__(self):
         # no direct Conan API access!
         self.info_cache: "ConanInfoCache"
-        super().__init__()
 
-### General commands ###
-
-    def get_profiles_with_settings(self) -> Dict[str, ConanSettings]:
-        """ Return a list of all profiles and the corresponding settings """
-        profiles_dict = {}
-        for profile in self.get_profiles():
-            profiles_dict[profile] = self.get_profile_settings(profile)
-        return profiles_dict
-    
 ### Install related methods ###
 
     def install_package(self, conan_ref: ConanRef, package: ConanPkg, 
@@ -501,11 +477,11 @@ class ConanCommonUnifiedApi(ConanUnifiedApi):
         found_pkgs: List[ConanPkg] = []
         default_settings: ConanSettings = {}
         try:
-            # type: ignore - dynamic prop is ok in try-catch
+            # dynamic prop is ok in try-catch
             default_settings = self.get_default_settings()
             query = f"(arch=None OR arch={default_settings.get('arch')})" \
                     f" AND (os=None OR os={default_settings.get('os')})"
-            if conan_version.startswith("1"):
+            if conan_version.major == 1:
                 query += f" AND (arch_build=None OR arch_build={default_settings.get('arch_build')})" \
                          f" AND (os_build=None OR os_build={default_settings.get('os_build')})"
             found_pkgs = self.get_remote_pkgs_from_ref(conan_ref, remote_name, query)

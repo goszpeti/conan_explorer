@@ -23,7 +23,7 @@ PYTHON_REQUIRES = ">=3.8.0"
 
 # What packages are required for this module to be executed?
 REQUIRES = [
-    "conan_explorer>=2.0.0-alpha"
+    "conan_explorer>=2.2.0"
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))

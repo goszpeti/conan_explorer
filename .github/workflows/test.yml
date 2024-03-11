@@ -31,8 +31,9 @@ jobs:
             # conan minimum version with python minimum version
             "ubuntu20-conan1.48-py38",
             # conan 2 stuff with bleeding edge - use Python 3.12 (U22 needed)
-            "ubuntu22-conan2-py312",
-            "windows-conan2-py312",
+            "ubuntu22-conan2.0.13-py310", # pre 2.0.14 API changes
+            "ubuntu22-conan2.0-latest-py312", # post 2.0.14 API changes
+            "windows-conan2-latest-py312", # latest everything
           ]
         include:
           - name: "ubuntu20-py38"
@@ -60,15 +61,20 @@ jobs:
             os: ubuntu-20.04
             conan: "==1.48.0"
             pytest_args: ""
-          - name: "ubuntu22-conan2-py312"
+          - name: "ubuntu22-conan2.0.13-py310"
+            python: "3.10"
+            os: ubuntu-22.04
+            conan: "==2.0.13"
+            pytest_args: "-m conanv2"
+          - name: "ubuntu22-conan2.0-latest-py312"
             python: "3.12"
             os: ubuntu-22.04
-            conan: "==2.0.13" # pre 2.0.14 API changes
+            conan: "<2.1"
             pytest_args: "-m conanv2"
-          - name:  "windows-conan2-py312"
+          - name:  "windows-conan2-latest-py312"
             python: "3.12"
             os: windows-latest
-            conan: "<3" # post 2.0.14 API changes
+            conan: "<3"
             pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
@@ -78,16 +84,16 @@ jobs:
       # QT_LOGGING_RULES=: "*.debug=true"
       # QT_DEBUG_PLUGINS: 1
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
           cache: 'pip' # caching pip dependencies
           cache-dependency-path: setup.py
       ######### Ubuntu 20.04 #########
       - name: Set up a virtual display for GUI on Ubuntu 20
-        if: matrix.os == 'ubuntu-20.04' # libfontconfig1 
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt update
           sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \
@@ -146,7 +152,7 @@ jobs:
           pytest -v test/03_system --junit-xml=./results/result-system-${{matrix.name}}.xml
           --cov-report xml:cov/cov-${{matrix.name}}.xml --cov=conan_explorer --cov-branch --cov-append ${{matrix.pytest_args}}
       - name: Upload Test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3 # TODO: v4 does not support overwrite anymore
         with:
           name: Test results
           path: |
@@ -159,7 +165,7 @@ jobs:
       - test
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Disabling shallow clone is recommended for improving relevancy of reporting,
           # cf https://sonarcloud.io/project/configuration?analysisMode=GitHubActions
@@ -172,6 +178,7 @@ jobs:
         working-directory: ./cov
         run: |
           sed -i 's@/home/runner/work/conan_explorer/conan_explorer@.@g' cov-*.xml
+          sed -i 's@D:\a\conan_explorer\conan_explorer@.@g' cov-*.xml
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'example.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -30,7 +30,7 @@ class Ui_Dialog(object):
         __qtreewidgetitem = QTreeWidgetItem(self.tree_widget)
         QTreeWidgetItem(__qtreewidgetitem)
         self.tree_widget.setObjectName(u"tree_widget")
-        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tree_widget.sizePolicy().hasHeightForWidth())

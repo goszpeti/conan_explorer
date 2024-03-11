@@ -272,11 +272,6 @@ QPushButton#side_menu_title_button {
 
 /* Generic widgets */
 
-QComboBox {
-    background-color: #F0F0F0;
-    border-radius: 0px;
-}
-
 QHeaderView {
     background-color: #D8D8D8;
     font-weight: 500;
@@ -311,12 +306,11 @@ QMainWindow {
     background-color: transparent;
 }
 
-QMenu,RoundedMenu {
+QMenu{
     background-color: #D3D3D3;
-    padding-top: 10px;
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
-QMenu::item:selected,RoundedMenu::item:selected{
+QMenu::item:selected{
     background-color: #A8A8A8;
 }
 

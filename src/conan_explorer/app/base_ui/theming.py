@@ -1,6 +1,5 @@
 import platform
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union
 
 import conan_explorer.app as app
 from conan_explorer import base_path
@@ -11,15 +10,6 @@ from conan_explorer.app.logger import Logger
 from jinja2 import Template
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont, QFontDatabase
-
-if TYPE_CHECKING:
-    from typing import TypedDict, Protocol, runtime_checkable
-else:
-    try:
-        from typing_extensions import Protocol, TypedDict, runtime_checkable
-    except ImportError:
-        from typing import Protocol, TypedDict, runtime_checkable
-
 
 def activate_theme(qt_app: QApplication):
     """ Apply the theme from the current settings and apply all related view options """

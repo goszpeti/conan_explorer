@@ -1,10 +1,11 @@
 from pathlib import Path
-from conan_explorer import (APP_NAME, AUTHOR, BUILT_IN_PLUGIN, REPO_URL, 
-                                __version__, asset_path)
-from PySide6.QtGui import QIcon
-from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 
 from jinja2 import Template
+from PySide6.QtGui import QIcon
+
+from conan_explorer import (APP_NAME, AUTHOR, BUILT_IN_PLUGIN, REPO_URL,
+                            __version__, asset_path)
+from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 
 
 class AboutPage(PluginInterfaceV1):

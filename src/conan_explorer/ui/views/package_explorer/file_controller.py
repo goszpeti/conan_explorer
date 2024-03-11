@@ -16,27 +16,29 @@ from PySide6.QtCore import (QMimeData, QModelIndex, QObject,
 from PySide6.QtWidgets import (QApplication, QTextBrowser, QMessageBox,
                                QTreeView, QWidget)
 
+
 from .sel_model import PkgSelectionType
 from .file_model import CalFileSystemModel
 
 if TYPE_CHECKING:
     from conan_explorer.ui.fluent_window import FluentWindow
     from conan_explorer.ui.main_window import BaseSignals
+    from .package_explorer import LocalConanPackageExplorer
 
 
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: QWidget, view: QTreeView, pkg_path_label: QTextBrowser,
+    def __init__(self, parent: "LocalConanPackageExplorer", view: QTreeView, pkg_path_label: QTextBrowser,
                  conan_pkg_selected: SignalInstance, base_signals: "BaseSignals",
                  page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
-        self._model = None
+        self._model: Optional[CalFileSystemModel] = None
         self._page_widgets = page_widgets
         self._view = view
         self._pkg_path_label = pkg_path_label
-        self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
         self._type = PkgSelectionType.ref
+        base_signals.conan_pkg_removed.connect(self.on_conan_pkg_removed)
 
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
@@ -49,18 +51,23 @@ class PackageFileExplorerController(QObject):
 
     def on_pkg_selection_change(self, conan_ref: str, pkg_info: ConanPkg, type: PkgSelectionType):
         """ Change folder in file view """
+        # add try-except
         self._current_ref = conan_ref
         self._current_pkg = pkg_info
-        if type == PkgSelectionType.editable:
-            pkg_path = app.conan_api.get_editables_package_path(
-                ConanRef.loads(conan_ref))
-            if pkg_path.is_file():
-                pkg_path = pkg_path.parent
-        elif type == PkgSelectionType.export:
-            pkg_path = app.conan_api.get_export_folder(ConanRef.loads(conan_ref))
-        else:
-            pkg_path = app.conan_api.get_package_folder(
-                ConanRef.loads(conan_ref), pkg_info.get("id", ""))
+        try:
+            if type == PkgSelectionType.editable:
+                pkg_path = app.conan_api.get_editables_package_path(
+                    ConanRef.loads(conan_ref))
+                if pkg_path.is_file():
+                    pkg_path = pkg_path.parent
+            elif type == PkgSelectionType.export:
+                pkg_path = app.conan_api.get_export_folder(ConanRef.loads(conan_ref))
+            else:
+                pkg_path = app.conan_api.get_package_folder(
+                    ConanRef.loads(conan_ref), pkg_info.get("id", ""))
+        except Exception as e:
+            Logger().error("Cannot change to package: %s", str(e))
+            return
 
         if not pkg_path.exists():
             Logger().warning(
@@ -70,11 +77,13 @@ class PackageFileExplorerController(QObject):
         if self._model:
             if pkg_path == Path(self._model.rootPath()):
                 return
-        self._model = CalFileSystemModel()
+        else: # initialize once - otherwise this causes performance issues
+            self._model = CalFileSystemModel()
+            self._view.setModel(self._model)
+
         self._model.setRootPath(str(pkg_path))
         self._model.sort(0, Qt.SortOrder.AscendingOrder)
         self._model.setReadOnly(False)
-        self._view.setModel(self._model)
         self._view.setRootIndex(self._model.index(str(pkg_path)))
         self._view.setColumnHidden(2, True)  # file type
         self._model.layoutChanged.connect(self.resize_file_columns)
@@ -89,8 +98,12 @@ class PackageFileExplorerController(QObject):
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
         """ Slot for on_conan_pkg_removed signal. """
         # clear file view if this pkg is selected
-        if self._current_ref == conan_ref:
+        own_id = pkg_id
+        if self._current_pkg:
+            own_id = self._current_pkg.get("id", "")
+        if self._current_ref == conan_ref and pkg_id == own_id:
             self.close_files_view()
+            self.parent().tab_close_requested(self) # type: ignore
 
     def close_files_view(self):
         """ Reset and clear up file view """
@@ -281,7 +294,7 @@ class PackageFileExplorerController(QObject):
         return indexes
 
     def get_selected_pkg_paths(self) -> List[str]:
-        file_paths = []
+        file_paths: List[str] = []
         if not self._model:
             return file_paths
         file_view_indexes = self._get_pkg_file_source_items()
