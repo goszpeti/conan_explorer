@@ -71,13 +71,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         def get_side_menu_by_type(self, type_name: Type) -> "Optional[SideSubMenu]":
             for _, (_, page, menu, _) in self._page_widgets.items():
-                if isinstance(page, type_name):
+                if page.__class__.__name__ == type_name.__name__:
                     return menu
             raise WidgetNotFoundException(f"{type_name} not in page_widgets!")
 
         def get_button_by_type(self, type_name: Type) -> QPushButton:
             for _, (button, page, _, _) in self._page_widgets.items():
-                if isinstance(page, type_name):
+                if page.__class__.__name__ == type_name.__name__:
                     return button
             raise WidgetNotFoundException(f"{type_name} not in page_widgets!")
 
