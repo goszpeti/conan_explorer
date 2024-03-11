@@ -247,7 +247,7 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
             another_id = pkg.get("id")
             break
     assert another_id
-    assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + str(another_id),
+    sel_index = lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + str(another_id),
         select_mode=QtCore.QItemSelectionModel.SelectionFlag.Select)
     
     mock_diff_dialog = mocker.patch("package_explorer.sel_controller.PkgDiffDialog")
@@ -257,6 +257,13 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     assert mock_diff_dialog.mock_calls[2][0] == "().add_diff_item"
     assert mock_diff_dialog.mock_calls[3][0] == "().show"
 
+    elem_pos = lpe._pkg_sel_ctrl._view.visualRect(sel_index)
+    mocker.patch.object(lpe.select_cntx_menu, 'exec')
+
+    # check that on multiple selection diff pkg action is enabled
+    lpe.on_selection_context_menu_requested(elem_pos.center())
+    assert lpe.diff_pkg_action.isEnabled()
+    assert lpe.remove_ref_action.isEnabled()
 
 @pytest.mark.conanv2
 def test_local_package_explorer_tabs(qtbot, mocker, base_fixture, ui_no_refs_config_fixture,
@@ -597,7 +604,3 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
 
     found_pkg = app.conan_api.find_best_matching_local_package(cfr)
     assert not found_pkg.get("id", "")
-
-# TODO:
-# def test_multiselect()test_delete_package_dialog :
-#     pass

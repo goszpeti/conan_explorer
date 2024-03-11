@@ -372,5 +372,5 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
         self.file_cntx_menu.exec(self._ui.package_file_view.mapToGlobal(position))
 
-    def select_local_package_from_ref(self, conan_ref: str) -> bool:
+    def select_local_package_from_ref(self, conan_ref: str):
         return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref)

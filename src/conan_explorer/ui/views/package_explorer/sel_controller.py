@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import conan_explorer.app as app
 from conan_explorer import asset_path
@@ -242,7 +242,7 @@ class PackageSelectionController(QObject):
         return -1
 
     def select_local_package_from_ref(self, conan_ref: str, export=False, 
-        select_mode=QItemSelectionModel.SelectionFlag.ClearAndSelect) -> bool:
+        select_mode=QItemSelectionModel.SelectionFlag.ClearAndSelect) -> Optional[QModelIndex]:
         """ Selects a reference:id pkg in the left pane and opens the file view 
         param export: teels to select the export folder
         """
@@ -250,7 +250,7 @@ class PackageSelectionController(QObject):
         self._page_widgets.get_button_by_type(type(self.parent())).click()
         self._loader.wait_for_finished()
         if not self._model:
-            return False
+            return None
 
         # Reset filter, otherwise the element to be shown could be hidden
         self._package_filter_edit.setText("*")
@@ -263,7 +263,7 @@ class PackageSelectionController(QObject):
             if export:
                 Logger().debug("Cannot use pkg id and export arg at the same time" +
                                error_message_suffix)
-                return False
+                return None
             conan_ref = split_ref[0]
             pkg_id = split_ref[1]
 
@@ -313,4 +313,4 @@ class PackageSelectionController(QObject):
         sel_model.currentRowChanged.emit(proxy_index, internal_sel_index)
         Logger().debug(f"Selecting {view_index.data()} in Local Package Explorer")
 
-        return True
+        return view_index
