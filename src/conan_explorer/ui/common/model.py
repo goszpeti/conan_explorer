@@ -114,7 +114,7 @@ class TreeModel(QAbstractItemModel):
         item_index = self.get_index_from_item(item)
         self.beginRemoveRows(item_index.parent(), item_index.row(), item_index.row())
         self.root_item.remove_child(item)
-        self.endResetModel()
+        self.endRemoveRows()
 
     @override
     def columnCount(self, parent):
