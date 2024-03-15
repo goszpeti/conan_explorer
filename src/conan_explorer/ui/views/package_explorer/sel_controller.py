@@ -83,7 +83,12 @@ class PackageSelectionController(QObject):
         dialog.show()
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
-        self.refresh_pkg_selection_view()
+        if not self._model:
+            return
+        ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
+        proxy_index = self._model.index(ref_row, 0, QModelIndex())
+        item: PackageTreeItem = proxy_index.internalPointer() # type: ignore
+        self._model.remove_item(item)
 
     def on_show_build_info(self):
         conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
@@ -226,7 +231,6 @@ class PackageSelectionController(QObject):
             self._loader.async_loading(self._view, self._view.expandAll, (), 
                 self.expand_and_sort_for_sizes,
                 "Calculating Sizes. This can take a while...")
-
         else:
             self._model.show_sizes = False
             self._view.collapseAll()
