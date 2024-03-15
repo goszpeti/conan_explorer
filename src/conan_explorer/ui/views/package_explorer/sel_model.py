@@ -27,6 +27,8 @@ class PackageTreeItem(TreeModelItem):
         super().__init__(data, parent, lazy_loading=True)
         self.pkg_info: ConanPkg = pkg_info
         self.type = item_type
+        if item_type == PkgSelectionType.pkg:
+            self.item_data[0] = self.get_quick_profile_name()
 
     @override
     def load_children(self):
@@ -49,6 +51,9 @@ class PackageTreeItem(TreeModelItem):
         if self.type == PkgSelectionType.ref:
             return len(self.child_items) if len(self.child_items) > 0 else 1
         return 0  # for safety
+
+    def get_quick_profile_name(self) -> str:
+        return ConanApiFactory().build_conan_profile_name_alias(self.pkg_info.get("settings", {}))
 
 class PackageFilter(QSortFilterProxyModel):
     """ Filter packages but always showing the parent (ref) of the packages """
@@ -94,8 +99,8 @@ class PackageFilter(QSortFilterProxyModel):
         try:
             leftData = float(leftData)
             rightData = float(rightData)
-        except:
-            pass
+        except Exception:
+            return super().lessThan(source_left, source_right)
         if type(leftData) != type(rightData): 
             # don't want to sort at all in these cases, False is just a copout ...
             # should warn user
@@ -159,24 +164,21 @@ class PkgSelectModel(TreeModel):
                 # remove dict style print characters
                 return pretty_print_pkg_info(item.pkg_info)
         if role == Qt.ItemDataRole.DecorationRole:
+            if index.column() != 0:
+                return None
             if item.type == PkgSelectionType.ref:
                 return QIcon(get_themed_asset_icon("icons/package.svg"))
             elif item.type == PkgSelectionType.editable:
                 return QIcon(get_themed_asset_icon("icons/edit.svg"))
             elif item.type == PkgSelectionType.pkg:
-                profile_name = self.get_quick_profile_name(item)
-                return get_platform_icon(profile_name)
+                return get_platform_icon(item.data(index.column()))
             elif item.type == PkgSelectionType.export:
                 return QIcon(get_themed_asset_icon("icons/export_notes.svg"))
         if role == Qt.ItemDataRole.DisplayRole:
-            if item.type == PkgSelectionType.ref:
-                return item.data(index.column())
-            elif item.type == PkgSelectionType.editable:
+            if item.type == PkgSelectionType.editable:
                 return item.data(index.column()) + " (editable)"
-            elif item.type == PkgSelectionType.pkg:
+            else:
                 # return self.get_quick_profile_name(item)
-                return item.data(index.column())
-            elif item.type == PkgSelectionType.export:
                 return item.data(index.column())
         if role == Qt.ItemDataRole.FontRole:
             if item.type == PkgSelectionType.editable:
@@ -184,7 +186,3 @@ class PkgSelectModel(TreeModel):
                 font.setItalic(True)
                 return font
         return None
-
-    def get_quick_profile_name(self, item: PackageTreeItem) -> str:
-        return ConanApiFactory().build_conan_profile_name_alias(item.pkg_info.get("settings", {}))
-

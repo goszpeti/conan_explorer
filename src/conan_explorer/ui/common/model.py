@@ -89,7 +89,6 @@ class TreeModelItem(object):
         self.child_items = []
         self.is_loaded = True
 
-
 class TreeModel(QAbstractItemModel):
     """ Qt tree model to be used with TreeModelItem.
     Supports lazy loading, if TreeModelItem enables it."""
