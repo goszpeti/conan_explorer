@@ -5,8 +5,8 @@ from PySide6.QtCore import (QModelIndex, QPersistentModelIndex,
                             QSortFilterProxyModel, Qt)
 from PySide6.QtGui import QFont, QIcon
 from typing_extensions import override
-
 import conan_explorer.app as app  # using global module pattern
+from conan_explorer.app.system import get_folder_size
 from conan_explorer.conan_wrapper import ConanApiFactory
 from conan_explorer.conan_wrapper.types import (ConanPkg, ConanRef,
                                                 pretty_print_pkg_info)
@@ -33,11 +33,14 @@ class PackageTreeItem(TreeModelItem):
         # can't call super method: fetching would finish early
         self.child_items = []
         pkg_item = PackageTreeItem(
-            [], self, PkgSelectionType.export, ConanPkg())
+            ["export", "0"], self, PkgSelectionType.export, ConanPkg())
+        pkg_item.is_loaded = True
         self.append_child(pkg_item)
         infos = app.conan_api.get_local_pkgs_from_ref(ConanRef.loads(self.data(0)))
         for info in infos:
-            pkg_item = PackageTreeItem([], self, PkgSelectionType.pkg, info)
+            pkg_item = PackageTreeItem(["package", "0"], self, PkgSelectionType.pkg, info)
+            pkg_item.is_loaded = True
+
             self.append_child(pkg_item)
         self.is_loaded = True
 
@@ -78,35 +81,79 @@ class PackageFilter(QSortFilterProxyModel):
                 return True
             parent = parent.parent()
         return False
+    
+    def lessThan(self, source_left: QModelIndex | QPersistentModelIndex, 
+                 source_right: QModelIndex | QPersistentModelIndex) -> bool:
+        role = Qt.ItemDataRole.DisplayRole
+        leftData = self.sourceModel().data(source_left, role)
+        rightData = self.sourceModel().data(source_right, role)
+        if leftData is None:
+            return True
+        elif rightData is None:
+            return False
+        try:
+            leftData = float(leftData)
+            rightData = float(rightData)
+        except:
+            pass
+        if type(leftData) != type(rightData): 
+            # don't want to sort at all in these cases, False is just a copout ...
+            # should warn user
+            return False
 
+        return leftData < rightData
 class PkgSelectModel(TreeModel):
 
     def __init__(self, *args, **kwargs):
         super(PkgSelectModel, self).__init__(*args, **kwargs)
-        self.root_item = PackageTreeItem(["Packages"])
+        # header
+        self.root_item = PackageTreeItem(["Packages", "Size (Mb)"])
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.proxy_model.setSortCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.show_sizes = False
 
     def setup_model_data(self):
         self.clear_items()
         self.beginResetModel()
         for conan_ref in app.conan_api.get_all_local_refs():
-            conan_item = PackageTreeItem([str(conan_ref)], self.root_item)
+            conan_item = PackageTreeItem([str(conan_ref), "0"], self.root_item)
             self.root_item.append_child(conan_item)
         for conan_ref in app.conan_api.get_editable_references():
             conan_item = PackageTreeItem(
-                [str(conan_ref)], self.root_item, PkgSelectionType.editable)
+                [str(conan_ref), "0"], self.root_item, PkgSelectionType.editable)
             self.root_item.append_child(conan_item)
         self.endResetModel()
+
+    def get_size(self, item: PackageTreeItem):
+        if item.parent_item is None:
+            return
+        if item.type not in [PkgSelectionType.pkg, PkgSelectionType.export]:
+            return
+        if not item.item_data:
+            return
+        if item.item_data[1] != "0":
+            return
+
+        conan_ref = ConanRef.loads(item.parent_item.data(0))
+        if item.type == PkgSelectionType.export:
+            pkg_path = app.conan_api.get_export_folder(conan_ref)
+        else:
+            pkg_path = app.conan_api.get_package_folder(conan_ref, item.pkg_info.get("id", ""))
+        size = get_folder_size(pkg_path)
+        item.item_data[1] = f"{size:.3f}"
+        acc_size = float(item.parent_item.item_data[1]) + size
+        item.parent_item.item_data[1] =  f"{acc_size:.3f}"
 
     @override
     def data(self, index: Union[QModelIndex, QPersistentModelIndex], role: int = 0) -> Any:
         if not index.isValid():
             return None
         item: PackageTreeItem = index.internalPointer()  # type: ignore
+        if self.show_sizes:
+            self.get_size(item)
         if role == Qt.ItemDataRole.ToolTipRole:
             if item.type == PkgSelectionType.pkg:
                 # remove dict style print characters
@@ -127,9 +174,10 @@ class PkgSelectModel(TreeModel):
             elif item.type == PkgSelectionType.editable:
                 return item.data(index.column()) + " (editable)"
             elif item.type == PkgSelectionType.pkg:
-                return self.get_quick_profile_name(item)
+                # return self.get_quick_profile_name(item)
+                return item.data(index.column())
             elif item.type == PkgSelectionType.export:
-                return "export"
+                return item.data(index.column())
         if role == Qt.ItemDataRole.FontRole:
             if item.type == PkgSelectionType.editable:
                 font = QFont()
@@ -139,3 +187,4 @@ class PkgSelectModel(TreeModel):
 
     def get_quick_profile_name(self, item: PackageTreeItem) -> str:
         return ConanApiFactory().build_conan_profile_name_alias(item.pkg_info.get("settings", {}))
+

@@ -8,7 +8,7 @@ from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanPkgRef, ConanRef
 from conan_explorer.ui.common import show_conanfile, ConfigHighlighter
 from conan_explorer.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
-from PySide6.QtCore import QItemSelectionModel, QModelIndex, QObject, SignalInstance
+from PySide6.QtCore import QItemSelectionModel, QModelIndex, QObject, SignalInstance, Qt
 from PySide6.QtWidgets import (QApplication, QTextBrowser,
                                QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout)
 from PySide6.QtGui import QIcon
@@ -134,7 +134,7 @@ class PackageSelectionController(QObject):
         source_items: List[PackageTreeItem] = []
         for index in indexes:
             source_items.append(model.mapToSource(index).internalPointer())  # type: ignore
-        return source_items
+        return list(set(source_items))
 
     def get_selected_ref_with_pkg_id(self) -> Tuple[str, str]:
         conan_refs = self.get_selected_conan_refs()
@@ -213,8 +213,28 @@ class PackageSelectionController(QObject):
             self._view.setModel(self._model.proxy_model)
             self._view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
             self.set_filter_wildcard()  # re-apply package filter query
+            self._view.hideColumn(1)  # don't show size on opening view
         else:
             Logger().error("Can't load local packages!")
+
+    def show_sizes(self):
+        if not self._model:
+            return
+        if not self._model.show_sizes:
+            self._model.show_sizes = True
+            self._view.showColumn(1)
+            self._loader.async_loading(self._view, self._view.expandAll, (), 
+                self.expand_and_sort_for_sizes,
+                "Calculating Sizes. This can take a while...")
+
+        else:
+            self._model.show_sizes = False
+            self._view.collapseAll()
+            self._view.hideColumn(1)
+
+    def expand_and_sort_for_sizes(self):
+        self._view.sortByColumn(1, Qt.SortOrder.DescendingOrder)
+        self._view.resizeColumnToContents(1)
 
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace

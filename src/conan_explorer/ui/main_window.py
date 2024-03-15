@@ -1,6 +1,6 @@
 import datetime
 from dataclasses import dataclass
-from shutil import rmtree
+from pathlib import Path
 from time import sleep
 from typing import Optional
 from typing_extensions import override
@@ -15,6 +15,7 @@ from conan_explorer import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
     MIN_FONT_SIZE, PathLike, conan_version)
 from conan_explorer.app import AsyncLoader
 from conan_explorer.app import Logger, activate_theme
+from conan_explorer.app.system import delete_path
 from conan_explorer.settings import (AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
     FONT_SIZE, GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
     GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
@@ -312,7 +313,8 @@ class MainWindow(FluentWindow):
         msg_box = WideMessageBox(parent=self)
         button = WideMessageBox.StandardButton
         msg_box.setWindowTitle("Delete folders")
-        msg_box.setText("Are you sure, you want to delete the found folders?\t")
+        size = cleaner.get_cumulated_cleanup_size()
+        msg_box.setText(f"Found {size:.2f} MB to clean up. Are you sure, you want to delete the found folders?\t")
         msg_box.setDetailedText(path_list)
         msg_box.setStandardButtons(button.Yes | button.Cancel)  # type: ignore
         msg_box.setIcon(WideMessageBox.Icon.Question)
@@ -322,7 +324,7 @@ class MainWindow(FluentWindow):
         if reply == button.Yes:
             def delete_cache_paths(paths):
                 for path in paths:
-                    rmtree(str(path), ignore_errors=True)
+                    delete_path(Path(path))
             loader.async_loading(self, delete_cache_paths, (paths,), 
                                  loading_text="Deleting cache paths...")
 

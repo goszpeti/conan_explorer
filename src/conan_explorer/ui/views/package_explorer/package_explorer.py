@@ -43,6 +43,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self.conan_pkg_selected, self._base_signals, self._page_widgets)]
         self._file_cntx_menu = None
         self.set_themed_icon(self._ui.refresh_button, "icons/refresh.svg")
+        self.set_themed_icon(self._ui.show_sizes_button, "icons/bar_chart.svg")
 
         # connect pkg selection controller
         self._ui.package_select_view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
@@ -51,6 +52,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self.on_selection_context_menu_requested)
         self._init_selection_context_menu()
         self._ui.refresh_button.clicked.connect(self._pkg_sel_ctrl.on_pkg_refresh_clicked)
+        self._ui.show_sizes_button.clicked.connect(self._pkg_sel_ctrl.show_sizes)
         self._ui.package_filter_edit.textChanged.connect(self._pkg_sel_ctrl.set_filter_wildcard)
         self.conan_pkg_selected.connect(self.on_pkg_selection_change)
         self._ui.package_path_label.setText("<Package path>")
@@ -65,7 +67,6 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
     def tab_close_requested(self, pkg_ctrl_to_close):
         self.on_close_tab(self._pkg_tabs_ctrl.index(pkg_ctrl_to_close))
-
 
     def on_close_tab(self, index: int):
         self._ui.package_tab_widget.removeTab(index)

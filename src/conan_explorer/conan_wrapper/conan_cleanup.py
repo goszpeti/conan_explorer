@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Set
 
 from conan_explorer import conan_version
 from conan_explorer.app.logger import Logger
+from conan_explorer.app.system import get_folder_size
 if TYPE_CHECKING:
     from .conanV1 import ConanApi
 
@@ -22,9 +23,15 @@ class ConanCleanup():
         self.find_orphaned_references()
         self.find_orphaned_packages()
         return self.orphaned_references.union(self.orphaned_packages)
+    
+    def get_cumulated_cleanup_size(self):
+        size_mbytes = 0
+        for ref in self.orphaned_references:
+            size_mbytes += get_folder_size(Path(ref))
+        return size_mbytes
 
     def find_orphaned_references(self):
-        from .types import PackageEditableLayout
+        from .types import PackageEditableLayout, CONAN_LINK
         del_list = []
         for ref in self._conan_api.get_all_local_refs():
             # This will not updated to the unified API - only V1 relevant
@@ -50,6 +57,13 @@ class ConanCleanup():
                     Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}")
                     if pkg_id_dir:
                         del_list.append(str(pkg_id_dir))
+            if Path(ref_cache.source()).exists():
+                # check for .conan_link
+                CONAN_LINK
+                del_list.append(ref_cache.source())
+            if not isinstance(ref_cache, PackageEditableLayout):
+                if Path(ref_cache.builds()).exists():
+                    del_list.append(ref_cache.builds())
         self.orphaned_references = set(del_list)
 
     def find_orphaned_packages(self):
