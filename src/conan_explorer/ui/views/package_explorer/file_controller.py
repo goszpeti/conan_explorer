@@ -101,7 +101,14 @@ class PackageFileExplorerController(QObject):
         own_id = pkg_id
         if self._current_pkg:
             own_id = self._current_pkg.get("id", "")
-        if self._current_ref == conan_ref and pkg_id == own_id:
+        if self._current_ref == conan_ref:
+            delete = False
+            if not pkg_id:
+                delete = True
+            elif pkg_id and pkg_id == own_id:
+                delete = True
+            if not delete:
+                return
             self.close_files_view()
             self.parent().tab_close_requested(self) # type: ignore
 
