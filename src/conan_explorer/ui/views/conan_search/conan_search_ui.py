@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_search.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.6.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -37,7 +37,7 @@ class Ui_Form(object):
         self.search_text_button_layout.setSizeConstraint(QLayout.SetDefaultConstraint)
         self.search_line = ConanRefLineEdit(Form)
         self.search_line.setObjectName(u"search_line")
-        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.search_line.sizePolicy().hasHeightForWidth())
@@ -53,7 +53,7 @@ class Ui_Form(object):
 
         self.search_button = QPushButton(Form)
         self.search_button.setObjectName(u"search_button")
-        sizePolicy1 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.search_button.sizePolicy().hasHeightForWidth())
@@ -97,7 +97,7 @@ class Ui_Form(object):
 
         self.remote_hline = QFrame(Form)
         self.remote_hline.setObjectName(u"remote_hline")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Maximum)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.remote_hline.sizePolicy().hasHeightForWidth())
@@ -145,7 +145,7 @@ class Ui_Form(object):
         self.results_layout.setContentsMargins(2, 0, 0, 0)
         self.results_label = QLabel(self.layoutWidget_2)
         self.results_label.setObjectName(u"results_label")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.results_label.sizePolicy().hasHeightForWidth())
@@ -158,7 +158,7 @@ class Ui_Form(object):
 
         self.search_results_tree_view = QTreeView(self.layoutWidget_2)
         self.search_results_tree_view.setObjectName(u"search_results_tree_view")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.search_results_tree_view.sizePolicy().hasHeightForWidth())
@@ -202,6 +202,12 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.splitter)
 
+        QWidget.setTabOrder(self.search_line, self.search_button)
+        QWidget.setTabOrder(self.search_button, self.install_button)
+        QWidget.setTabOrder(self.install_button, self.remote_toggle_button)
+        QWidget.setTabOrder(self.remote_toggle_button, self.remote_list)
+        QWidget.setTabOrder(self.remote_list, self.search_results_tree_view)
+        QWidget.setTabOrder(self.search_results_tree_view, self.package_info_text)
 
         self.retranslateUi(Form)
 

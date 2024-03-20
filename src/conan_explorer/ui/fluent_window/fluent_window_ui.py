@@ -541,6 +541,16 @@ class Ui_MainWindow(object):
         self.central_widget_layout.addWidget(self.main_frame)
 
         MainWindow.setCentralWidget(self.central_widget)
+        QWidget.setTabOrder(self.toggle_left_menu_button, self.settings_button)
+        QWidget.setTabOrder(self.settings_button, self.listView_2)
+        QWidget.setTabOrder(self.listView_2, self.search_bar_line_edit)
+        QWidget.setTabOrder(self.search_bar_line_edit, self.minimize_button)
+        QWidget.setTabOrder(self.minimize_button, self.restore_max_button)
+        QWidget.setTabOrder(self.restore_max_button, self.close_button)
+        QWidget.setTabOrder(self.close_button, self.right_menu_scroll_area)
+        QWidget.setTabOrder(self.right_menu_scroll_area, self.pushButton_6)
+        QWidget.setTabOrder(self.pushButton_6, self.pushButton)
+        QWidget.setTabOrder(self.pushButton, self.console)
 
         self.retranslateUi(MainWindow)
 

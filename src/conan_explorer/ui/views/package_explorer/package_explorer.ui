@@ -400,6 +400,15 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>package_select_view</tabstop>
+  <tabstop>package_tab_widget</tabstop>
+  <tabstop>package_file_view</tabstop>
+  <tabstop>refresh_button</tabstop>
+  <tabstop>show_sizes_button</tabstop>
+  <tabstop>package_filter_edit</tabstop>
+  <tabstop>package_path_label</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

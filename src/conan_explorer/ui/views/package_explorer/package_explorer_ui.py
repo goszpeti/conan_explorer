@@ -198,6 +198,12 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.splitter)
 
+        QWidget.setTabOrder(self.package_select_view, self.package_tab_widget)
+        QWidget.setTabOrder(self.package_tab_widget, self.package_file_view)
+        QWidget.setTabOrder(self.package_file_view, self.refresh_button)
+        QWidget.setTabOrder(self.refresh_button, self.show_sizes_button)
+        QWidget.setTabOrder(self.show_sizes_button, self.package_filter_edit)
+        QWidget.setTabOrder(self.package_filter_edit, self.package_path_label)
 
         self.retranslateUi(Form)
 

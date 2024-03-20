@@ -1236,6 +1236,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>toggle_left_menu_button</tabstop>
+  <tabstop>settings_button</tabstop>
+  <tabstop>listView_2</tabstop>
+  <tabstop>search_bar_line_edit</tabstop>
+  <tabstop>minimize_button</tabstop>
+  <tabstop>restore_max_button</tabstop>
+  <tabstop>close_button</tabstop>
+  <tabstop>right_menu_scroll_area</tabstop>
+  <tabstop>pushButton_6</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>console</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

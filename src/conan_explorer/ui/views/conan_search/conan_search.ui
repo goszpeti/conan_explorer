@@ -380,6 +380,15 @@
    <header>conan_explorer.ui.widgets.conan_line_edit.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>search_line</tabstop>
+  <tabstop>search_button</tabstop>
+  <tabstop>install_button</tabstop>
+  <tabstop>remote_toggle_button</tabstop>
+  <tabstop>remote_list</tabstop>
+  <tabstop>search_results_tree_view</tabstop>
+  <tabstop>package_info_text</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
