@@ -38,6 +38,7 @@ class AsyncLoader(QObject):
     # Reuse the same progress_dialog instance for every loading dialog - 
     # there can only be one at a time
     __progress_dialog: Optional[QProgressDialog] = None
+    loading_string_signal: SignalInstance = Signal(str)  # type: ignore
 
     def __init__(self, parent: Optional[QObject]):
         super().__init__(parent)
@@ -58,6 +59,7 @@ class AsyncLoader(QObject):
             progress_dialog.setMaximumWidth(600)
             AsyncLoader.__progress_dialog = progress_dialog
         self.progress_dialog = AsyncLoader.__progress_dialog
+        self.loading_string_signal.connect(self.progress_dialog.setLabelText)
         self.worker: Optional[Worker] = None
         self.load_thread: Optional[QThread] = None
         self.finished = True

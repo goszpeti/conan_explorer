@@ -325,6 +325,7 @@ class MainWindow(FluentWindow):
             def delete_cache_paths(paths):
                 for path in paths:
                     delete_path(Path(path))
+                    loader.loading_string_signal.emit("Deleting " + str(path))
             loader.async_loading(self, delete_cache_paths, (paths,), 
                                  loading_text="Deleting cache paths...")
 

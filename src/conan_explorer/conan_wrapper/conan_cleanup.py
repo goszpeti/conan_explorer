@@ -57,18 +57,20 @@ class ConanCleanup():
                     Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}")
                     if pkg_id_dir:
                         del_list.append(str(pkg_id_dir))
-            source_path = Path(ref_cache.source())
-            if source_path.exists():
-                # check for .conan_link
-                if (source_path / CONAN_LINK).is_file():
-                    path = (source_path / CONAN_LINK).read_text()
-                    del_list.append(path.strip())
-                else:
-                    del_list.append(ref_cache.source())
-            
+           
             if not isinstance(ref_cache, PackageEditableLayout):
+                source_path = Path(ref_cache.source())
+                if source_path.exists():
+                    # check for .conan_link
+                    if (source_path / CONAN_LINK).is_file():
+                        path = (source_path / CONAN_LINK).read_text()
+                        del_list.append(path.strip())
+                    else:
+                        del_list.append(ref_cache.source())
+
                 if Path(ref_cache.builds()).exists():
                     del_list.append(ref_cache.builds())
+
                 scm_source_path = Path(ref_cache.scm_sources())
                 if scm_source_path.exists():
                     # check for .conan_link

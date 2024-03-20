@@ -208,7 +208,7 @@ class PackageSelectionController(QObject):
         if self._model and not force_update:  # loads only at first init
             return
         if not self._model:
-            self._model = PkgSelectModel()
+            self._model = PkgSelectModel(self._loader.loading_string_signal)
         self._loader.async_loading(
             self._view, self._model.setup_model_data, (),
             self.finish_select_model_init, "Reading Packages")
@@ -300,7 +300,7 @@ class PackageSelectionController(QObject):
         ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
         if ref_row == -1:
             Logger().debug(f"Cannot find {conan_ref}" + error_message_suffix)
-            return False
+            return None
         Logger().debug(f"Found {conan_ref}@{str(ref_row)}" + error_message_suffix)
 
         # map to package view model

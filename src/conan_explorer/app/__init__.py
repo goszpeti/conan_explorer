@@ -37,7 +37,7 @@ def run_application():
 
     # Loading dialog until Conan is available
     loader = AsyncLoader(None)
-    loader.async_loading(None, load_conan, (), cancel_button=False, 
+    loader.async_loading(None, load_conan, (loader, ), cancel_button=False,
                             loading_text="Starting Conan Explorer")
     loader.wait_for_finished()
 
@@ -67,11 +67,13 @@ def init_platform():
         print("Mac OS is currently not supported.")
         sys.exit(1)
 
-def load_conan():
+
+def load_conan(loader: AsyncLoader):
     global conan_api, conan_worker
     from conan_explorer.conan_wrapper import ConanApiFactory, ConanWorker
     conan_api = ConanApiFactory()
     conan_worker = ConanWorker(conan_api, active_settings)
+    loader.loading_string_signal.emit("Initializing Conan")
     conan_api.init_api()
 
 def load_qapp():

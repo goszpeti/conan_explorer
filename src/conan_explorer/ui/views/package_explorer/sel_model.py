@@ -109,10 +109,12 @@ class PackageFilter(QSortFilterProxyModel):
         return leftData < rightData
 class PkgSelectModel(TreeModel):
 
-    def __init__(self, *args, **kwargs):
-        super(PkgSelectModel, self).__init__(*args, **kwargs)
+    def __init__(self, loader_signal):
+        super(PkgSelectModel, self).__init__()
         # header
-        self.root_item = PackageTreeItem(["Packages", "Size (Mb)"])
+        self._loader_signal = loader_signal
+        self._acc_size = 0
+        self.root_item = PackageTreeItem(["Packages", "Size (MB)"])
         self.proxy_model = PackageFilter()
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
@@ -144,12 +146,15 @@ class PkgSelectModel(TreeModel):
 
         conan_ref = ConanRef.loads(item.parent_item.data(0))
         if item.type == PkgSelectionType.export:
-            pkg_path = app.conan_api.get_export_folder(conan_ref)
+            pkg_path = app.conan_api.get_export_folder(conan_ref) # TODO can crash
         else:
             pkg_path = app.conan_api.get_package_folder(conan_ref, item.pkg_info.get("id", ""))
+        self._loader_signal.emit(
+            f"Calculating size for {str(conan_ref)}\n{self._acc_size:.1f} MB read.")
         size = get_folder_size(pkg_path)
         item.item_data[1] = f"{size:.3f}"
         acc_size = float(item.parent_item.item_data[1]) + size
+        self._acc_size += acc_size
         item.parent_item.item_data[1] =  f"{acc_size:.3f}"
 
     @override

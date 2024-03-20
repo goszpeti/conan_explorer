@@ -45,7 +45,8 @@ class ConanSearchController(QObject):
 
     def _load_search_model(self):
         """ Initialize tree view model by searching in conan """
-        self._model.setup_model_data(self._search_line.text(), self.get_selected_remotes())
+        self._model.setup_model_data(self._search_line.text(), self.get_selected_remotes(), 
+                                     self._loader.loading_string_signal)
 
     def _finish_load_search_model(self, ret=None):
         """ After conan search adjust the view """

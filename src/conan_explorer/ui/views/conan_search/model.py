@@ -31,17 +31,17 @@ class SearchedPackageTreeItem(TreeModelItem):
         self.empty = empty  # indicates a "no result" item, which must be handled separately
         self.child_items: List[SearchedPackageTreeItem] = []
 
-    @override
-    def load_children(self):
+    # @override
+    def load_children(self, update_sig):
         # can't call super method: fetching would finish early
         self.child_items = []
 
         pkgs_to_be_added: Dict[str, SearchedPackageTreeItem] = {}
         for remote in self.data(1).split(","):
+            update_sig.emit("Loading from " + str(remote))
             recipe_ref = self.data(0)
             # cross reference with installed packages
-            infos = app.conan_api.get_local_pkgs_from_ref(
-                ConanRef.loads(recipe_ref))
+            infos = app.conan_api.get_local_pkgs_from_ref(ConanRef.loads(recipe_ref))
             installed_ids = [info.get("id") for info in infos]
             packages = app.conan_api.get_remote_pkgs_from_ref(
                 ConanRef.loads(recipe_ref), remote)
@@ -98,12 +98,13 @@ class PkgSearchModel(TreeModel):
         if conan_pkg_removed:
             conan_pkg_removed.connect(self.mark_pkg_as_not_installed)
 
-    def setup_model_data(self, search_query: str, remotes: List[str]):
+    def setup_model_data(self, search_query: str, remotes: List[str], update_sig):
         # needs to be ConanRef, so we can check with get_all_local_refs directly
         self.clear_items()
         self.beginResetModel()
         recipes_with_remotes: Dict[ConanRef, str] = {}
         for remote in remotes:
+            update_sig.emit("Searching in " + str(remote))
             recipe_list = (app.conan_api.search_recipes_in_remotes(
                 f"{search_query}*", remote_name=remote))
             for recipe in recipe_list:
@@ -190,5 +191,6 @@ class PkgSearchModel(TreeModel):
         loader = AsyncLoader(self)
         self._loader_widget_parent = QtWidgets.QWidget()
         loader.async_loading(self._loader_widget_parent,
-                             item.load_children, loading_text="Loading Packages...")
+                             item.load_children, (loader.loading_string_signal,), 
+                             loading_text="Loading Packages...")
         loader.wait_for_finished()
