@@ -243,7 +243,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </property>
      <widget class="QTreeView" name="package_select_view">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
         <horstretch>1</horstretch>
         <verstretch>1</verstretch>
        </sizepolicy>
@@ -256,6 +256,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -273,6 +276,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <bool>true</bool>
       </property>
       <property name="animated">
+       <bool>true</bool>
+      </property>
+      <property name="wordWrap">
        <bool>true</bool>
       </property>
       <property name="headerHidden">
@@ -340,7 +346,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <widget class="QTreeView" name="package_file_view">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>2</horstretch>
+            <horstretch>3</horstretch>
             <verstretch>1</verstretch>
            </sizepolicy>
           </property>

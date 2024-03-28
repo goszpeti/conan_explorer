@@ -10,7 +10,7 @@ from conan_explorer.ui.common import show_conanfile, ConfigHighlighter
 from conan_explorer.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from PySide6.QtCore import QItemSelectionModel, QModelIndex, QObject, SignalInstance, Qt
 from PySide6.QtWidgets import (QApplication, QTextBrowser,
-                               QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout)
+                               QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout, QSizePolicy)
 from PySide6.QtGui import QIcon
 
 from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog
@@ -238,7 +238,7 @@ class PackageSelectionController(QObject):
 
     def expand_and_sort_for_sizes(self):
         self._view.sortByColumn(1, Qt.SortOrder.DescendingOrder)
-        self._view.resizeColumnToContents(1)
+        self._view.header().resizeSections(self._view.header().ResizeMode.Stretch)
 
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace

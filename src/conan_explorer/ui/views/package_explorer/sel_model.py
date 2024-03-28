@@ -154,7 +154,7 @@ class PkgSelectModel(TreeModel):
         size = get_folder_size(pkg_path)
         item.item_data[1] = f"{size:.3f}"
         acc_size = float(item.parent_item.item_data[1]) + size
-        self._acc_size += acc_size
+        self._acc_size += size
         item.parent_item.item_data[1] =  f"{acc_size:.3f}"
 
     @override
