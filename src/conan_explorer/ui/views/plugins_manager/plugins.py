@@ -3,6 +3,7 @@ from conan_explorer import AUTHOR, BUILT_IN_PLUGIN, DEBUG_LEVEL
 from conan_explorer import base_path
 
 from PySide6.QtWidgets import QWidget, QFileDialog, QMessageBox
+from PySide6.QtGui import QShowEvent
 from conan_explorer.ui.plugin import PluginDescription, PluginHandler, PluginInterfaceV1
 from conan_explorer.ui.views.plugins_manager.model import PluginModelItem
 
@@ -39,6 +40,16 @@ class PluginsPage(PluginInterfaceV1):
 
         if DEBUG_LEVEL < 1: # only in dev mode
             self._ui.reload_plugin_button.hide()
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        self.resize_file_columns()
+        return super().showEvent(a0)
+
+    def resize_file_columns(self):
+        if not self._ui.plugins_tree_view:
+            return
+        for i in reversed(range(5 - 1)):
+            self._ui.plugins_tree_view.resizeColumnToContents(i)
 
     def on_plugin_selected(self):
         """ Show path of plugin and disable remove for builtins """
