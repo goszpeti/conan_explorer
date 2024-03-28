@@ -34,6 +34,9 @@
    </property>
    <item>
     <widget class="QScrollArea" name="about_scroll_area">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
      <property name="verticalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOn</enum>
      </property>
@@ -51,8 +54,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>644</width>
-        <height>454</height>
+        <width>646</width>
+        <height>456</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1">
