@@ -11,7 +11,7 @@ from conan_explorer.app.system import delete_path
 class NotifierService(QObject):
     conan_pkg_available: SignalInstance = Signal(str, str)  # type: ignore
 
-    queries = ["*stable", "*integration"]
+    queries = ["*/stable", "*/integration"]
     UPDATE_TIME_s = 3 * 60
     def __init__(self, parent) -> None:
         super().__init__(parent)
@@ -36,6 +36,8 @@ class NotifierService(QObject):
                 if len(content) > 0:
                     json_data = json.loads(content)
                 else:
+                    # for remote in app.conan_api.get_remotes():
+                    #     app.conan_api.search_recipes_in_remotes("*", remote_name=remote.name)
                     json_data["refs"] = app.conan_api.info_cache.get_all_remote_refs()
                     self._save(notifier_journal, json_data)
         except Exception:  # possibly corrupt, delete cache file
@@ -43,21 +45,28 @@ class NotifierService(QObject):
             delete_path(notifier_journal)
             # create file anew
             notifier_journal.touch()
+        # search on startup
+        self.search(json_data, notifier_journal)
         while not self._ticker_event.wait(self.UPDATE_TIME_s):
             if self._ticker_event.is_set():
                 self._ticker_event.clear()
                 return
-            for remote in app.conan_api.get_remotes():
-                for query in self.queries:
-                    stables = app.conan_api.search_recipes_in_remotes(
-                        query, remote_name=remote.name)
-                    for ref in  stables:
-                        if ref not in json_data.get("refs", []):
-                            json_data.get("refs", []).append(ref)
-                            self.conan_pkg_available.emit(str(ref), remote.name)
-                            self._save(notifier_journal, json_data)
-            #integrations = app.conan_api.search_recipes_in_remotes("*integration", remote_name="all")
-            # get new ones
+            self.search(json_data, notifier_journal)
+
+    def search(self, json_data, notifier_journal):
+        for remote in app.conan_api.get_remotes():
+            queries = self.queries
+            # if "center.conan.io" in remote.url:
+            #     queries = ["*"]
+            for query in queries:
+                Logger().debug("Searching for updates")
+                refs = app.conan_api.search_recipes_in_remotes(
+                    query, remote_name=remote.name)
+                for ref in refs:
+                    if str(ref) not in json_data.get("refs", []):
+                        json_data.get("refs", []).append(str(ref))
+                        self.conan_pkg_available.emit(str(ref), remote.name)
+                        self._save(notifier_journal, json_data)
 
     def _save(self, notifier_journal, json_data):
         try:
