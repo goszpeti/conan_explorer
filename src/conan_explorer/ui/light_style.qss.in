@@ -497,3 +497,7 @@ QTreeView::branch:hover:closed:has-children {
 QTreeView::branch:hover:open:has-children:hover {
     image: url(icons:material/expand_b.svg);
 }
+
+Toast .QLabel{
+    font-size: 10pt;
+}

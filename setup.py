@@ -12,7 +12,7 @@ from pkg_resources import Requirement
 
 # Package meta-data.
 NAME = "conan-explorer"
-VERSION = "2.3.0a2"
+VERSION = "2.3.0a3"
 DESCRIPTION = "Package Explorer and App Launcher for Conan"
 URL = "https://github.com/goszpeti/conan_explorer"
 AUTHOR = "Péter Gosztolya and Contributors"
@@ -39,7 +39,8 @@ if conan_major_version == "2":
     conan_req_spec = "conan>=2.0, <2.2"
 REQUIRES = [
     conan_req_spec,  # MIT License
-    "PySide6-Essentials>=6.4.0", # LGPLv3
+    "PySide6-Essentials>=6.4.0", # LGPLv3,
+    "pyqt-toast-notification 1.1.0", # MIT License, not finalized yet
     "jsonschema>=3.2.0, <5", # MIT License
     "dictdiffer==0.9.0",  # MIT License
     # compatibility

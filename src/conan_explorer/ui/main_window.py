@@ -22,6 +22,7 @@ from conan_explorer.settings import (AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, F
 from conan_explorer.ui.common.theming import (get_gui_dark_mode, get_gui_style, 
                                                   get_themed_asset_icon)
 from conan_explorer.ui.dialogs import FileEditorSelDialog
+from conan_explorer.ui.notifier_service import NotifierService
 from conan_explorer.ui.plugin import PluginHandler
 from conan_explorer.ui.widgets import AnimatedToggle, WideMessageBox
 
@@ -210,7 +211,7 @@ class MainWindow(FluentWindow):
                 self.page_widgets.get_button_by_type(type(page)).click()
             except Exception as e:
                 Logger().debug("Can't switch to page for auto open: " + str(e))
-        
+        self.notifier = NotifierService(self)
         self.loaded = True
 
     def _load_plugins(self):
