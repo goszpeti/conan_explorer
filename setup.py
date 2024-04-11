@@ -40,7 +40,7 @@ if conan_major_version == "2":
 REQUIRES = [
     conan_req_spec,  # MIT License
     "PySide6-Essentials>=6.4.0", # LGPLv3,
-    "pyqt-toast-notification 1.1.0", # MIT License, not finalized yet
+    "pyqt-toast-notification==1.1.0", # MIT License, not finalized yet
     "jsonschema>=3.2.0, <5", # MIT License
     "dictdiffer==0.9.0",  # MIT License
     # compatibility
