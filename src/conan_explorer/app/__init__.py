@@ -34,7 +34,6 @@ def run_application():
     os.chdir(gettempdir())
 
     qt_app = load_qapp()
-
     # Loading dialog until Conan is available
     loader = AsyncLoader(None)
     loader.async_loading(None, load_conan, (loader, ), cancel_button=False,
@@ -95,6 +94,10 @@ def load_qapp():
 
     # to use icons in qss file
     QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
+
+    # disable reacting on light and dark themed mode automatically, otherwise
+    # we can get get dark mode window bar in light mode
+    QtWidgets.QApplication.setDesktopSettingsAware(False)
 
     qt_app = QtWidgets.QApplication([])
     qt_app.setApplicationName(APP_NAME)
