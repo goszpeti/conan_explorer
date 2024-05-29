@@ -9,6 +9,7 @@ from pathlib import Path
 from conan_explorer.ui.dialogs.pkg_diff.diff import ConfigDiffHighlighter, PkgDiffDialog
 from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
 from conan_explorer.ui.views.conan_conf.remotes_controller import ConanRemoteController
+from conan_explorer.ui.widgets.toast import Toast
 from test.conftest import PathSetup
 from unittest.mock import Mock
 
@@ -32,6 +33,23 @@ from conan_explorer.ui.views.conan_conf.dialogs.remote_login_dialog import \
     RemoteLoginDialog
 
 Qt = QtCore.Qt
+
+
+def test_toast(app_qt_fixture, mocker):
+    
+    root_obj = QtWidgets.QWidget()
+    dialog = Toast(root_obj)
+    root_obj.show()
+    dialog.show()
+    app_qt_fixture.addWidget(root_obj)
+    app_qt_fixture.waitExposed(dialog)
+    from pytestqt.plugin import _qapp_instance
+    while True:
+        _qapp_instance.processEvents()
+
+def test_notifier(app_qt_fixture, base_fixture, mocker):
+    # NotifierService()
+    pass
 
 def test_select_file_editor(app_qt_fixture, base_fixture, mocker):
     """ Test, that the select file editor displays the setting and saves it, if it is valid. """
@@ -82,7 +100,7 @@ def test_about_dialog(app_qt_fixture, base_fixture):
     root_obj = QtWidgets.QWidget()
     widget = AboutPage(root_obj, None)
     app_qt_fixture.addWidget(root_obj)
-    widget.show()
+    root_obj.show()
     app_qt_fixture.waitExposed(widget)
 
     assert conan_explorer.APP_NAME in widget._ui.about_label.text()
@@ -367,8 +385,4 @@ def test_conan_diff_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
         dialog._ui.right_text_browser.document(), "shared", QtGui.QColor("black"))
     check_color_in_document(
         dialog._ui.right_text_browser.document(), "os", QtGui.QColor("black"))
-    
-    # from pytestqt.plugin import _qapp_instance
-    # while True:
-    #     _qapp_instance.processEvents()
 
