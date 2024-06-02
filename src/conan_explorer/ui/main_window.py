@@ -5,8 +5,8 @@ from time import sleep
 from typing import Optional
 from typing_extensions import override
 
-from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
-from PySide6.QtGui import QKeySequence, QDesktopServices, QResizeEvent, QShortcut
+from PySide6.QtCore import QRect, Signal, SignalInstance, Qt, QUrl
+from PySide6.QtGui import QKeySequence, QResizeEvent, QShortcut
 from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
     QVBoxLayout, QWidget)
 
@@ -58,9 +58,9 @@ class MainWindow(FluentWindow):
     qt_logger_name = "qt_logger"
     _can_close = True # wait for blocking operations
 
-    def __init__(self, qt_app: QApplication):
+    def __init__(self):#, qt_app: QApplication):
         super().__init__(title_text=APP_NAME)
-        self._qt_app = qt_app
+        # self._qt_app = qt_app
         self.loaded = False
         self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed,
                                         self.conan_remotes_updated, self.page_size_changed)
@@ -106,7 +106,13 @@ class MainWindow(FluentWindow):
         # https://docs.conan.io/en/1.62/search.html?q=abc&check_keywords=yes&area=default
         search_url = (f"https://docs.conan.io/{extra_addr}{self._conan_minor_version}/search.html"
                       f"?q={self.ui.search_bar_line_edit.text()}&check_keywords=yes&area=default")
-        QDesktopServices.openUrl(search_url)
+        #QDesktopServices.openUrl(search_url)
+        from PySide6.QtWebEngineWidgets import QWebEngineView
+
+        self.browser = QWebEngineView()
+        self.browser.setUrl(QUrl(search_url))
+        self.ui.page_stacked_widget.addWidget(self.browser)
+        self.ui.page_stacked_widget.setCurrentWidget(self.browser)
 
     def _init_left_menu(self):
         self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.svg", is_upper_menu=True, page_widget=self.app_grid,

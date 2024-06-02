@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="fluent">
+    <file>icons/maximize.png</file>
+    <file>icons/minus.png</file>
+    <file>icons/menu_stripes.png</file>
+    <file>icons/menu_stripes_inv.png</file>
+    <file>icons/settings.png</file>
+    <file>icons/settings_inv.png</file>
+    <file>icons/restore.png</file>
+    <file>icons/close.png</file>
+  </qresource>
+</RCC>
