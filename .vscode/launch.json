@@ -2,6 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/RelWithDebInfo/ConanExplorer.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "console": "externalTerminal"
+        },
+        {
             "name": "Main",
             "type": "python",
             "request": "launch",
@@ -19,10 +30,11 @@
         },
         {
             "name": "Python: Attach using Process Id",
-            "type": "python",
+            "type": "debugpy",
             "request": "attach",
+            "subProcess": true,
             "processId": "${command:pickProcess}",
-            "justMyCode": false
+            "justMyCode": false,
         },
         {
             "name": "Python: Current File",
@@ -45,5 +57,6 @@
                 "SKIP_CREATE_CONAN_TEST_DATA": "False",
             },
         },
+
     ]
 }

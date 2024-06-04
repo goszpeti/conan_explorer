@@ -24,12 +24,13 @@ class Worker(QObject):
         self.args = args
 
     def work(self):
-        if DEBUG_LEVEL > 1:  # pragma: no cover
+        Logger().info("Debug cmd" + str(self.func))
+        if DEBUG_LEVEL > -1:  # pragma: no cover
             try:
                 import debugpy  # - debug with this the Qt Thread
                 debugpy.debug_this_thread()
             except Exception:
-                Logger().debug("Debugger not loaded!")
+                Logger().error("Debugger not loaded!")
         ret = self.func(*self.args)
         self.finished.emit(ret)
 

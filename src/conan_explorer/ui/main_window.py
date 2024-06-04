@@ -58,9 +58,9 @@ class MainWindow(FluentWindow):
     qt_logger_name = "qt_logger"
     _can_close = True # wait for blocking operations
 
-    def __init__(self):#, qt_app: QApplication):
+    def __init__(self, qt_app: QApplication):
         super().__init__(title_text=APP_NAME)
-        # self._qt_app = qt_app
+        self._qt_app = qt_app
         self.loaded = False
         self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed,
                                         self.conan_remotes_updated, self.page_size_changed)

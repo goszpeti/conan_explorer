@@ -98,10 +98,8 @@ def load_qapp():
     QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
     qt_app = QtWidgets.QApplication.instance()  # type: ignore
 
-    # qt_app = QtWidgets.QApplication([])
     # qt_app.setApplicationName(APP_NAME)
     # qt_app.setApplicationDisplayName(APP_NAME + " " + __version__)
-
     # Overwrite the excepthook with our own -
     # this will provide a method to report bugs for the user
     sys.excepthook = bug_dialog_exc_hook  # dialog needs qt_app
