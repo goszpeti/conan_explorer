@@ -9,7 +9,6 @@ from pathlib import Path
 from conan_explorer.ui.dialogs.pkg_diff.diff import ConfigDiffHighlighter, PkgDiffDialog
 from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
 from conan_explorer.ui.views.conan_conf.remotes_controller import ConanRemoteController
-from conan_explorer.ui.widgets.toast import Toast
 from test.conftest import PathSetup
 from unittest.mock import Mock
 
@@ -33,19 +32,6 @@ from conan_explorer.ui.views.conan_conf.dialogs.remote_login_dialog import \
     RemoteLoginDialog
 
 Qt = QtCore.Qt
-
-
-def test_toast(app_qt_fixture, mocker):
-    
-    root_obj = QtWidgets.QWidget()
-    dialog = Toast(root_obj)
-    root_obj.show()
-    dialog.show()
-    app_qt_fixture.addWidget(root_obj)
-    app_qt_fixture.waitExposed(dialog)
-    from pytestqt.plugin import _qapp_instance
-    while True:
-        _qapp_instance.processEvents()
 
 def test_notifier(app_qt_fixture, base_fixture, mocker):
     # NotifierService()
