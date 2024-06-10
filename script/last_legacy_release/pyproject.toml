@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "conan-app_launcher"
+authors = [{name = "Péter Gosztolya and Contributors"}]
+version = "2.2.0"
+requires-python = ">=3.8"
+description = "GUI for Conan users providing an easy way to install and manage local packages and launch application from them."
+readme = "README.md"
+keywords = ["conan", "gui"]
+license = {'text'="LGPL-3.0-only"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Environment :: X11 Applications :: Qt",
+    "Environment :: Win32 (MS Windows)"
+]
+dependencies = [
+    "conan_explorer==2.2.0",
+]
+
+[project.urls]
+repository = "https://github.com/goszpeti/conan_explorer"
