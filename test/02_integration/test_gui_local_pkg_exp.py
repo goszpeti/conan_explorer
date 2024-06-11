@@ -97,7 +97,7 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
 
     pkg_sel_model = lpe._pkg_sel_ctrl._model
     assert pkg_sel_model
-    assert lpe._ui.package_select_view.model().columnCount() == 1
+    assert lpe._ui.package_select_view.model().columnCount() == 2
 
     # check, that the ref + pkg is in the list
     found_tst_pkg = False
