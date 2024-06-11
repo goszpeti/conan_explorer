@@ -53,7 +53,7 @@ readme =  {file = ["README.txt"]}
 "conan_explorer" = ["**/*.pyi", "**/*.ui", "**/*.html", "**/*.ini", "assets/**/*.*"]
 
 [project.gui-scripts]
-conan-explorer = "conan_explorer.__main__:run_conan_explorer"
+conan_explorer = "conan_explorer.__main__:run_conan_explorer"
 
 # Test dependencies and configs
 

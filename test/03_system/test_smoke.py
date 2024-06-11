@@ -62,7 +62,7 @@ def test_main_loop(base_fixture):
         proc_name = Path(sys.executable).name
     else:
         script = []
-        proc_name = "conan_app_launc" # cuts off
+        proc_name = "conan_explorer"  # cuts off
     with check:
         check_if_process_running(proc_name, script, kill=True)
     # delete config file
