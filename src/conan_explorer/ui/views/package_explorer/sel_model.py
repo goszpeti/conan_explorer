@@ -87,8 +87,8 @@ class PackageFilter(QSortFilterProxyModel):
             parent = parent.parent()
         return False
     
-    def lessThan(self, source_left: QModelIndex | QPersistentModelIndex, 
-                 source_right: QModelIndex | QPersistentModelIndex) -> bool:
+    def lessThan(self, source_left: Union[QModelIndex, QPersistentModelIndex], 
+                 source_right: Union[QModelIndex, QPersistentModelIndex]) -> bool:
         role = Qt.ItemDataRole.DisplayRole
         leftData = self.sourceModel().data(source_left, role)
         rightData = self.sourceModel().data(source_right, role)

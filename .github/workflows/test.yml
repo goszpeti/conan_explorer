@@ -64,12 +64,12 @@ jobs:
           - name: "ubuntu22-conan2.3-py310"
             python: "3.10"
             os: ubuntu-22.04
-            conan: "<2.4, conan-server<2.4"
+            conan: "<2.4 conan-server<2.4"
             pytest_args: "-m conanv2"
           - name: "ubuntu22-conan2.0-latest-py312"
             python: "3.12"
             os: ubuntu-22.04
-            conan: "<2.5, conan-server<2.5"
+            conan: "<2.5 conan-server<2.5"
             pytest_args: "-m conanv2"
           - name:  "windows-conan2-latest-py312"
             python: "3.12"
