@@ -20,7 +20,7 @@ classifiers = [
     "Environment :: Win32 (MS Windows)"
 ]
 dependencies = [
-    """>=1.48,<2.5,!=2.0.*""",  # MIT License
+    "conan>=1.48, <2.5, !=2.0.*",  # MIT License
     "PySide6-Essentials>=6.4.0", # LGPLv3,
     "jsonschema>=3.2.0, <5", # MIT License
     "dictdiffer==0.9.0",  # MIT License
