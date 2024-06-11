@@ -52,7 +52,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self.on_selection_context_menu_requested)
         self._init_selection_context_menu()
         self._ui.refresh_button.clicked.connect(self._pkg_sel_ctrl.on_pkg_refresh_clicked)
-        self._ui.show_sizes_button.clicked.connect(self._pkg_sel_ctrl.show_sizes)
+        self._ui.show_sizes_button.clicked.connect(self.on_show_sizes)
         self._ui.package_filter_edit.textChanged.connect(self._pkg_sel_ctrl.set_filter_wildcard)
         self.conan_pkg_selected.connect(self.on_pkg_selection_change)
         self._ui.package_path_label.setText("<Package path>")
@@ -64,6 +64,25 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.package_tab_widget.tabBar().setSelectionBehaviorOnRemove(QTabBar.SelectionBehavior.SelectLeftTab)
         self.updateGeometry()
         self.resize_filter()
+
+    # Display Events
+
+    def reload_themed_icons(self):
+        super().reload_themed_icons()
+        self._init_selection_context_menu()
+        self._init_pkg_file_context_menu()
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        self._pkg_sel_ctrl.refresh_pkg_selection_view(
+            force_update=False)  # only update the first time
+        return super().showEvent(a0)
+
+    def resizeEvent(self, a0: QResizeEvent) -> None:
+        for pkg_file_exp_ctrl in self._pkg_tabs_ctrl:
+            pkg_file_exp_ctrl.resize_file_columns()
+        super().resizeEvent(a0)
+
+    # Tab control
 
     def tab_close_requested(self, pkg_ctrl_to_close):
         self.on_close_tab(self._pkg_tabs_ctrl.index(pkg_ctrl_to_close))
@@ -132,14 +151,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         if ctrl._model:
             self._ui.package_path_label.setText(ctrl._model.rootPath())
 
-    def showEvent(self, a0: QShowEvent) -> None:
-        self._pkg_sel_ctrl.refresh_pkg_selection_view(force_update=False)  # only update the first time
-        return super().showEvent(a0)
 
-    def resizeEvent(self, a0: QResizeEvent) -> None:
-        for pkg_file_exp_ctrl in self._pkg_tabs_ctrl:
-            pkg_file_exp_ctrl.resize_file_columns()
-        super().resizeEvent(a0)
+    # Selection view general buttons and functions
 
     def resize_filter(self):
         # resize filter splitter to roughly match file view splitter
@@ -148,10 +161,14 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.splitter_filter.setSizes(
             [sizes[0] - offset - 5, sizes[1] + 5])
 
-    def reload_themed_icons(self):
-        super().reload_themed_icons()
-        self._init_selection_context_menu()
-        self._init_pkg_file_context_menu()
+    def resize_for_show_sizes(self):
+        sizes = self._ui.splitter.sizes()
+        sizes_sum = sum(sizes)
+        self._ui.splitter.setSizes([int(sizes_sum/2), int(sizes_sum/2)])
+
+    def on_show_sizes(self):
+        self._pkg_sel_ctrl.on_show_sizes()
+        self.resize_for_show_sizes()
 
     # Selection view context menu
 

@@ -222,10 +222,11 @@ class PackageSelectionController(QObject):
         else:
             Logger().error("Can't load local packages!")
 
-    def show_sizes(self):
+    def on_show_sizes(self):
         if not self._model:
             return
         if not self._model.show_sizes:
+            self.expand_and_sort_for_sizes()
             self._model.show_sizes = True
             self._view.showColumn(1)
             self._loader.async_loading(self._view, self._view.expandAll, (), 

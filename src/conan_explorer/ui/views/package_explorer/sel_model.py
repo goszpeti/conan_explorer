@@ -150,7 +150,7 @@ class PkgSelectModel(TreeModel):
         else:
             pkg_path = app.conan_api.get_package_folder(conan_ref, item.pkg_info.get("id", ""))
         self._loader_signal.emit(
-            f"Calculating size for {str(conan_ref)}\n{self._acc_size:.1f} MB read.")
+            f"Calculating size for\n {str(conan_ref)}\n{self._acc_size:.1f} MB read.")
         size = get_folder_size(pkg_path)
         item.item_data[1] = f"{size:.3f}"
         acc_size = float(item.parent_item.item_data[1]) + size
