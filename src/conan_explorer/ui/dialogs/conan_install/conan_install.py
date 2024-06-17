@@ -37,7 +37,7 @@ class ConanInstallDialog(QDialog):
         self.setWindowIcon(icon)
 
         # init search bar
-        self._ui.conan_ref_line_edit.validator_enabled = False
+        self._ui.conan_ref_line_edit.validator_enabled = True
         self._ui.conan_ref_line_edit.setText(conan_full_ref)
         if lock_reference:
             self._ui.conan_ref_line_edit.setEnabled(False)
