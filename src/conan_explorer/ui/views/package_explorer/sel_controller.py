@@ -10,7 +10,7 @@ from conan_explorer.ui.common import show_conanfile, ConfigHighlighter
 from conan_explorer.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
 from PySide6.QtCore import QItemSelectionModel, QModelIndex, QObject, SignalInstance, Qt
 from PySide6.QtWidgets import (QApplication, QTextBrowser,
-                               QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout, QSizePolicy)
+                               QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout)
 from PySide6.QtGui import QIcon
 
 from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog

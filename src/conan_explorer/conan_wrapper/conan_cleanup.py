@@ -1,6 +1,6 @@
 from pathlib import Path
 import platform
-from typing import TYPE_CHECKING, Set
+from typing import TYPE_CHECKING, List, Set
 
 from conan_explorer import conan_version
 from conan_explorer.app.logger import Logger
@@ -14,6 +14,36 @@ class ConanCleanup():
         self._conan_api = conan_api
         self.orphaned_references: Set[str] = set()
         self.orphaned_packages: Set[str] = set()
+        self.invalid_metadata_refs: Set[str] = set()
+
+    def gather_invalid_remote_metadata(self) -> List[str]:
+        """ Gather all references with invalid remotes """
+        invalid_refs = []
+        remotes = self._conan_api.get_remotes(include_disabled=True)
+        remote_names = [r.name for r in remotes]
+        for ref in self._conan_api.get_all_local_refs():
+            # This will not updated to the unified API - only V1 relevant
+            ref_cache = self._conan_api._client_cache.package_layout(ref)
+            ref_remote = ""
+            try:
+                ref_remote = ref_cache.load_metadata().recipe.remote
+            except Exception:
+                Logger().debug(f"Can't load metadata for {str(ref)}")
+                continue
+            if ref_remote not in remote_names:
+                invalid_refs.append(str(ref))
+        self.invalid_metadata_refs = set(invalid_refs)
+        return invalid_refs
+    
+    def repair_invalid_remote_metadata(self, invalid_ref):
+        """ Repair all references with invalid remotes """
+        # calling inspect with a correct remote repiars the metadata    
+        for remote in self._conan_api.get_remotes():
+            try:
+                self._conan_api._conan.inspect(invalid_ref, None, remote.name)
+                break
+            except Exception:
+                continue
 
     def get_cleanup_cache_paths(self) -> Set[str]:
         """ Get a list of orphaned short path and cache folders """

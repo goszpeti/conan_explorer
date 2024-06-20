@@ -4,7 +4,7 @@ import platform
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Self, Tuple, Union
 from unittest.mock import patch
 from conan_explorer.app.system import delete_path
 from conan_explorer.app.typing import SignatureCheckMeta
@@ -37,7 +37,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         self._client_cache: "ClientCache"
         self._short_path_root = Path("Unknown")
 
-    def init_api(self):
+    def init_api(self) -> Self:
         """ Instantiate the internal Conan api. """
         from conans.client.conan_api import (ConanAPIV1, UserIO)
         from conans.client.output import ConanOutput
