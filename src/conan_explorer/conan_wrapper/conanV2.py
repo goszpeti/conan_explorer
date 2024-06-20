@@ -2,7 +2,8 @@ from contextlib import redirect_stderr, redirect_stdout
 import os
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, List, Optional, Self, Tuple, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
+from typing_extensions import Self
 from unittest.mock import patch
 
 from conan_explorer import INVALID_PATH, user_save_path, conan_version, Version

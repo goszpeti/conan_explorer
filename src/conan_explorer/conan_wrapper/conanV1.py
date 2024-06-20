@@ -4,7 +4,8 @@ import platform
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Self, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing_extensions import Self
 from unittest.mock import patch
 from conan_explorer.app.system import delete_path
 from conan_explorer.app.typing import SignatureCheckMeta
