@@ -119,12 +119,15 @@ class ConanConfigView(PluginInterfaceV1):
         self._ui.profile_remove_button.clicked.connect(self.on_profile_remove)
         self._ui.profile_rename_button.clicked.connect(self.on_profile_rename)
         self._ui.profile_refresh_button.clicked.connect(self.on_profiles_refresh)
+        self._ui.profiles_copy_name_button.clicked.connect(self.on_copy_profile_requested)
 
         self.set_themed_icon(self._ui.profile_save_button, "icons/save.svg")
         self.set_themed_icon(self._ui.profile_add_button, "icons/plus_rounded.svg")
         self.set_themed_icon(self._ui.profile_remove_button, "icons/delete.svg")
         self.set_themed_icon(self._ui.profile_refresh_button, "icons/refresh.svg")
         self.set_themed_icon(self._ui.profile_rename_button, "icons/rename.svg")
+        self.set_themed_icon(self._ui.profiles_copy_name_button,
+                             "icons/copy_to_clipboard.svg")
 
     def _init_profile_context_menu(self):
         self.profiles_cntx_menu = QMenu()
