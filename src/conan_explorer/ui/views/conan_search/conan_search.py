@@ -54,6 +54,8 @@ class ConanSearchView(PluginInterfaceV1):
         self._init_remotes()
         if self._base_signals:
             self._base_signals.conan_remotes_updated.connect(self._init_remotes)
+        self._ui.select_all_widget.itemChanged.connect(self.on_toggled_remotes_selection)
+
         self._ui.search_results_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.search_results_tree_view.customContextMenuRequested.connect(self.on_pkg_context_menu_requested)
         self._init_pkg_context_menu()
@@ -61,14 +63,14 @@ class ConanSearchView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.search_button, "icons/search.svg", size=(20, 20), force_light_mode=True)
         self.set_themed_icon(self._ui.install_button, "icons/download_pkg.svg", size=(20, 20))
         self._conan_config_highlighter = ConfigHighlighter(self._ui.package_info_text.document(), "yaml")
-        self._ui.remote_list.setMinimumHeight(0)
-        self._ui.remote_list.setMaximumHeight(0)
-        self.remote_toggle_animation = QPropertyAnimation(self._ui.remote_list, b"maximumHeight")
+        self._ui.frame.setMinimumHeight(0)
+        self._ui.frame.setMaximumHeight(0)
+        self.remote_toggle_animation = QPropertyAnimation(self._ui.frame, b"maximumHeight")
 
         # animation for expanding/collapsing remote list
         def start_animation(checked):
             arrow_type = Qt.ArrowType.DownArrow if checked else Qt.ArrowType.RightArrow
-            max_height = self._ui.remote_list.sizeHint().height()
+            max_height = self._ui.frame.sizeHint().height()
             start_height = 0 if checked else max_height
             end_height = max_height if checked else 0
             self._ui.remote_toggle_button.setArrowType(arrow_type)
@@ -88,6 +90,11 @@ class ConanSearchView(PluginInterfaceV1):
             item = QListWidgetItem(remote.name, self._ui.remote_list)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             item.setCheckState(Qt.CheckState.Checked)
+
+    def on_toggled_remotes_selection(self):
+        for i in range(self._ui.remote_list.count()):
+            item = self._ui.remote_list.item(i)
+            item.setCheckState(self._ui.select_all_widget.item(0).checkState())
 
     def _enable_search_button(self):
         """ Enable search button from minimum 3 characters onwards"""
