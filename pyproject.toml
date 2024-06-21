@@ -1,7 +1,7 @@
 [project]
 name = "conan-explorer"
 authors = [{name = "Péter Gosztolya and Contributors"}]
-version = "2.3.0a4"
+version = "2.3.0a5"
 requires-python = ">=3.8"
 description = "Package Explorer and App Launcher for Conan"
 keywords = ["conan", "gui"]
@@ -50,7 +50,7 @@ namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 readme =  {file = ["README.txt"]}
 
 [tool.setuptools.package-data]
-"conan_explorer" = ["**/*.pyi", "**/*.ui", "**/*.html", "**/*.ini", "assets/**/*.*"]
+"conan_explorer" = ["**/*.pyi", "**/*.html", "**/*.ini", "**assets/**/*.*", "**/*.in"]
 
 [project.gui-scripts]
 conan_explorer = "conan_explorer.__main__:run_conan_explorer"
