@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt, SignalInstance, Slot
 from typing_extensions import override
 
 import conan_explorer.app as app
-from conan_explorer.app import AsyncLoader  # using global module pattern
+from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper import ConanApiFactory
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef
@@ -188,9 +188,9 @@ class PkgSearchModel(TreeModel):
     @override
     def fetchMore(self, index):
         item = index.internalPointer()
-        loader = AsyncLoader(self)
+        loader = LoaderGui(self)
         self._loader_widget_parent = QtWidgets.QWidget()
-        loader.async_loading(self._loader_widget_parent,
+        loader.loading_for_blocking(self._loader_widget_parent,
                              item.load_children, (loader.loading_string_signal,), 
                              loading_text="Loading Packages...")
         loader.wait_for_finished()

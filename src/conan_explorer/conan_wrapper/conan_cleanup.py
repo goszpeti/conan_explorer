@@ -26,7 +26,7 @@ class ConanCleanup():
             ref_cache = self._conan_api._client_cache.package_layout(ref)
             ref_remote = ""
             try:
-                ref_remote = ref_cache.load_metadata().recipe.remote
+                ref_remote = ref_cache.load_metadata().recipe.remote # type: ignore
             except Exception:
                 Logger().debug(f"Can't load metadata for {str(ref)}")
                 continue

@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 
 import conan_explorer.app as app
-from conan_explorer.app import AsyncLoader  # using global module pattern
+from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.app.logger import Logger
 
 from PySide6.QtCore import SignalInstance
@@ -22,7 +22,10 @@ class ConanRemoveDialog(QMessageBox):
         pkgs_to_delete = []
         for conan_ref, pkg_ids in conan_refs_with_pkg_ids.items():
             for pkg_id in pkg_ids:
-                pkgs_to_delete.append(f"{conan_ref}:{pkg_id}")
+                if not pkg_id:
+                    pkgs_to_delete.append(conan_ref + " (all packages)")
+                else:
+                    pkgs_to_delete.append(f"{conan_ref}:{pkg_id}")
         pkgs_to_delete_str = ',\n'.join(pkgs_to_delete)
         self.setText(f"Are you sure, you want to remove: {pkgs_to_delete_str}?")
         self.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
@@ -34,8 +37,8 @@ class ConanRemoveDialog(QMessageBox):
 
     def on_remove(self):
         """ Remove conan ref/pkg and emit a signal, if registered """
-        self.loader = AsyncLoader(self)
-        self.loader.async_loading(self, self.remove, cancel_button=False, loading_text="Removing packages")
+        self.loader = LoaderGui(self)
+        self.loader.loading_for_blocking(self, self.remove, cancel_button=False, loading_text="Removing packages")
         self.loader.wait_for_finished()
 
     def remove(self):

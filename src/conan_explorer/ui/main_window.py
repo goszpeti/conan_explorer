@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
     MIN_FONT_SIZE, PathLike, conan_version)
-from conan_explorer.app import AsyncLoader
+from conan_explorer.app import LoaderGui
 from conan_explorer.app import Logger, activate_theme
 from conan_explorer.app.system import delete_path
 from conan_explorer.settings import (AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
@@ -201,8 +201,8 @@ class MainWindow(FluentWindow):
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
         self._load_plugins()  # creates the objects - must be in this thread
 
-        loader = AsyncLoader(self)
-        loader.async_loading(self, self._load_job, (config_source_str,))
+        loader = LoaderGui(self)
+        loader.loading_for_blocking(self, self._load_job, (config_source_str,), loading_text="Loading Plugins")
         loader.wait_for_finished()
         # Restore last view
         if app.active_settings.get_bool(AUTO_OPEN_LAST_VIEW):
@@ -300,7 +300,7 @@ class MainWindow(FluentWindow):
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
         cleaner = ConanCleanup(app.conan_api) # type: ignore
 
-        loader = AsyncLoader(self)
+        loader = LoaderGui(self)
         loader.async_loading(self, cleaner.gather_invalid_remote_metadata, )
         loader.wait_for_finished()
         invalid_refs = cleaner.invalid_metadata_refs
@@ -331,7 +331,7 @@ class MainWindow(FluentWindow):
         """ Open the message box to confirm deletion of invalid cache folders """
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
         cleaner = ConanCleanup(app.conan_api) # type: ignore
-        loader = AsyncLoader(self)
+        loader = LoaderGui(self)
         loader.async_loading(self, cleaner.get_cleanup_cache_paths, )
         loader.wait_for_finished()
         paths = cleaner.orphaned_packages.union(cleaner.orphaned_references)

@@ -4,14 +4,16 @@ it is needed to boostrap the loading of all uis. """
 import os
 from datetime import datetime
 from time import sleep
+import time
 from typing import Any, Callable, Optional, Tuple
 
-from conan_explorer import DEBUG_LEVEL
+from conan_explorer import DEBUG_LEVEL, asset_path
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import str2bool
 
 from PySide6.QtCore import Qt, QObject, QThread, Signal, SignalInstance
 from PySide6.QtWidgets import QApplication, QProgressDialog, QPushButton, QWidget
+from PySide6 import QtGui
 
 
 class Worker(QObject):
@@ -30,20 +32,25 @@ class Worker(QObject):
                 debugpy.debug_this_thread()
             except Exception:
                 Logger().debug("Debugger not loaded!")
+        start = time.time()
         ret = self.func(*self.args)
+        end = time.time()
+        Logger().debug("Waited: " + str(end - start) + " s")
         self.finished.emit(ret)
 
 
-class AsyncLoader(QObject):
+class LoaderGui(QObject):
     # Reuse the same progress_dialog instance for every loading dialog - 
     # there can only be one at a time
     __progress_dialog: Optional[QProgressDialog] = None
     loading_string_signal: SignalInstance = Signal(str)  # type: ignore
+    loading_gui_signal: SignalInstance = Signal(SignalInstance)  # type: ignore
+    loading_finished_signal: SignalInstance = Signal()  # type: ignore
 
     def __init__(self, parent: Optional[QObject]):
         super().__init__(parent)
         # initial setup
-        if AsyncLoader.__progress_dialog is None: # implicit check for init
+        if LoaderGui.__progress_dialog is None: # implicit check for init
             wt = Qt.WindowType
             progress_dialog = QProgressDialog()
             progress_dialog.setAttribute(Qt.WidgetAttribute.WA_ShowModal)
@@ -57,12 +64,29 @@ class AsyncLoader(QObject):
             progress_dialog.setMinimumDuration(1000)
             progress_dialog.setMinimumWidth(500)
             progress_dialog.setMaximumWidth(600)
-            AsyncLoader.__progress_dialog = progress_dialog
-        self.progress_dialog = AsyncLoader.__progress_dialog
+            progress_dialog.setWindowIcon(QtGui.QIcon(str(asset_path / "icons" / "icon.ico")))
+
+            LoaderGui.__progress_dialog = progress_dialog
+        self.progress_dialog = LoaderGui.__progress_dialog
         self.loading_string_signal.connect(self.progress_dialog.setLabelText)
+        self.loading_finished_signal.connect(self.thread_finished)
         self.worker: Optional[Worker] = None
         self.load_thread: Optional[QThread] = None
         self.finished = True
+
+    def loading_with_finish_hook(self, dialog_parent: Optional[QWidget], work_task: Callable,
+                                 worker_args: Tuple[Any, ...] = (),
+                                 finish_task: Optional[Callable] = None,
+                                 loading_text: str = "Loading...", cancel_button=True):
+        self.async_loading(dialog_parent, work_task, 
+                           worker_args, finish_task, loading_text, cancel_button)
+
+    def loading_for_blocking(self, dialog_parent: Optional[QWidget], work_task: Callable,
+                             worker_args: Tuple[Any, ...] = (),
+                             loading_text: str = "Loading...", cancel_button=True):
+        self.async_loading(dialog_parent, work_task, worker_args,
+                           loading_text=loading_text, cancel_button=cancel_button)
+
 
     def async_loading(self, dialog_parent: Optional[QWidget], work_task: Callable, 
                       worker_args: Tuple[Any, ...] = (),

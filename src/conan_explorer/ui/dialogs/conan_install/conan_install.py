@@ -1,7 +1,7 @@
 from typing import Optional
 
 import conan_explorer.app as app
-from conan_explorer.app import AsyncLoader
+from conan_explorer.app import LoaderGui
 from conan_explorer.app.logger import Logger  # using global module pattern
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_explorer.settings import DEFAULT_INSTALL_PROFILE
@@ -110,7 +110,7 @@ class ConanInstallDialog(QDialog):
             ConanRef.loads(conan_ref)
         except Exception:
             return
-        loader = AsyncLoader(self)
+        loader = LoaderGui(self)
         loader.async_loading(self, self.on_options_query, (conan_ref, ),
                              loading_text="Loading options...")
         loader.wait_for_finished()

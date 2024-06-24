@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import conan_explorer.app as app
 from conan_explorer import asset_path
-from conan_explorer.app import AsyncLoader  # using global module pattern
+from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanPkgRef, ConanRef
 from conan_explorer.ui.common import show_conanfile, ConfigHighlighter
@@ -39,7 +39,7 @@ class PackageSelectionController(QObject):
         self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
         self._model = None
-        self._loader = AsyncLoader(self)
+        self._loader = LoaderGui(self)
         self._page_widgets = page_widgets
         self._view = view
         self._package_filter_edit = package_filter_edit
@@ -55,7 +55,7 @@ class PackageSelectionController(QObject):
         conan_refs = self.get_selected_conan_refs()
         if len(conan_refs) != 1:
             return
-        loader = AsyncLoader(self)
+        loader = LoaderGui(self)
         loader.async_loading(self._view, show_conanfile, (conan_refs[0],),
                              loading_text="Opening Conanfile...")
         loader.wait_for_finished()
@@ -96,7 +96,7 @@ class PackageSelectionController(QObject):
             return
         pkg_info = app.conan_api.get_local_pkg_from_id(
             ConanPkgRef.loads(conan_ref + ":" + pkg_id))
-        loader = AsyncLoader(self)
+        loader = LoaderGui(self)
         loader.async_loading(self._view, app.conan_api.get_conan_buildinfo,
                              (ConanRef.loads(conan_ref), pkg_info.get("settings", ""),
                               pkg_info.get("options", {})), self.show_buildinfo_dialog,

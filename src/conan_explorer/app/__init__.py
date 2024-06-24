@@ -10,7 +10,7 @@ from conan_explorer.settings import (SETTINGS_INI_TYPE, SettingsInterface,
                                      settings_factory)
 
 from .base_ui.crash import bug_dialog_exc_hook
-from .base_ui.loading import AsyncLoader
+from .base_ui.loading import LoaderGui
 from .base_ui.theming import activate_theme
 from .logger import Logger
 from .system import check_for_wayland
@@ -35,15 +35,15 @@ def run_application():
 
     qt_app = load_qapp()
     # Loading dialog until Conan is available
-    loader = AsyncLoader(None)
-    loader.async_loading(None, load_conan, (loader, ), cancel_button=False,
+    loader = LoaderGui(None)
+    loader.loading_for_blocking(None, load_conan, (loader, ), cancel_button=False,
                             loading_text="Starting Conan Explorer")
     loader.wait_for_finished()
 
-    # inline imports to optimize load times
     from conan_explorer.ui.main_window import MainWindow
+    from PySide6 import QtGui
+    # inline imports to optimize load times
     main_window = MainWindow(qt_app)
-    from PySide6 import QtGui 
     main_window.setWindowIcon(QtGui.QIcon(str(asset_path / "icons" / "icon.ico")))
     main_window.show()  # show first, then load appsgrid with progress bar
     main_window.load()
@@ -67,7 +67,7 @@ def init_platform():
         sys.exit(1)
 
 
-def load_conan(loader: AsyncLoader):
+def load_conan(loader: LoaderGui):
     global conan_api, conan_worker
     from conan_explorer.conan_wrapper import ConanApiFactory, ConanWorker
     conan_api = ConanApiFactory()
@@ -102,6 +102,8 @@ def load_qapp():
     qt_app = QtWidgets.QApplication([])
     qt_app.setApplicationName(APP_NAME)
     qt_app.setApplicationDisplayName(APP_NAME + " " + __version__)
+    # qt_app.setStyle(QtWidgets.QStyleFactory.create(
+    #    "WindowsVista"))  # windows11 WindowsVista Fusion
 
     # Overwrite the excepthook with our own -
     # this will provide a method to report bugs for the user
