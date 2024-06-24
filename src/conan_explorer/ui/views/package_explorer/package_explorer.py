@@ -235,6 +235,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         else: # invalid
             self._context_menu_set_all(False)
             self.copy_ref_action.setVisible(True) # always works
+            self.remove_ref_action.setVisible(True) # TODO
 
         self.select_cntx_menu.exec(self._ui.package_select_view.mapToGlobal(position))
 

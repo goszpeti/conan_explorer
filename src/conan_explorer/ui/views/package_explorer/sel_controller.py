@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import conan_explorer.app as app
 from conan_explorer import asset_path
@@ -75,11 +75,11 @@ class PackageSelectionController(QObject):
         dialog.show()
 
     def on_remove_ref_requested(self):
-        conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
-        if not conan_ref:
+        conan_refs_with_pkg_ids= self.get_selected_refs_with_pkg_ids()
+        if not conan_refs_with_pkg_ids:
             return
-        dialog = ConanRemoveDialog(self._view, conan_ref,
-                                   pkg_id, self._base_signals.conan_pkg_removed)
+        dialog = ConanRemoveDialog(self._view, conan_refs_with_pkg_ids,
+                                   self._base_signals.conan_pkg_removed)
         dialog.show()
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
@@ -150,6 +150,32 @@ class PackageSelectionController(QObject):
         if pkg_info:
             pkg_id = pkg_info.get("id", "")
         return conan_refs[0], pkg_id
+    
+    def get_selected_refs_with_pkg_ids(self) -> Dict[str, List[str]]:
+        conan_refs = self.get_selected_conan_refs()
+        refs_with_pkg_ids = {}
+        conan_pkgs = []
+        source_items = self.get_selected_pkg_source_items()
+        for source_item in source_items:
+            conan_ref_item = source_item
+            if source_item.type in [PkgSelectionType.export, PkgSelectionType.editable]:
+                continue
+            if source_item.type == PkgSelectionType.pkg:
+                conan_ref_item: PackageTreeItem = source_item.parent()  # type: ignore
+            conan_ref: str = conan_ref_item.item_data[0]
+            pkg_id = ""
+            if pkg_info:= source_item.pkg_info:
+                pkg_id = pkg_info.get("id", "")
+            if not conan_ref in refs_with_pkg_ids:
+                refs_with_pkg_ids[conan_ref] = [pkg_id]
+            else:
+                refs_with_pkg_ids[conan_ref].append(pkg_id)
+
+        # clean up dict -> empty str means the ref was selected -> delete all other ids
+        for ref, pkg_ids in refs_with_pkg_ids.items():
+            if "" in pkg_ids:
+                refs_with_pkg_ids[ref] = [""] 
+        return refs_with_pkg_ids
 
     def get_selection_mode(self, source_items: List[PackageTreeItem]) -> MultiPkgSelectionMode:
         """" Determine which combination of multiselected items is active """
@@ -187,6 +213,7 @@ class PackageSelectionController(QObject):
         if source_item.type == PkgSelectionType.ref:
             return ConanPkg()
         return source_item.pkg_info
+    
 
     # Global pane and cross connection slots
 

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, List, Optional
 
 import conan_explorer.app as app
 from conan_explorer.app import AsyncLoader  # using global module pattern
@@ -12,15 +12,19 @@ from conan_explorer.conan_wrapper.types import ConanRef
 
 class ConanRemoveDialog(QMessageBox):
 
-    def __init__(self, parent: Optional[QWidget], conan_ref: str, pkg_id: str,
+    def __init__(self, parent: Optional[QWidget], conan_refs_with_pkg_ids: Dict[str, List[str]],
                  conan_pkg_removed: Optional[SignalInstance] = None):
         super().__init__(parent)
-        self._conan_ref = conan_ref
-        self._pkg_id = pkg_id
+        self._conan_refs_with_pkg_ids = conan_refs_with_pkg_ids
         self._conan_pkg_removed_sig = conan_pkg_removed
 
         self.setWindowTitle("Remove package")
-        self.setText(f"Are you sure, you want to remove {conan_ref} {pkg_id}?")
+        pkgs_to_delete = []
+        for conan_ref, pkg_ids in conan_refs_with_pkg_ids.items():
+            for pkg_id in pkg_ids:
+                pkgs_to_delete.append(f"{conan_ref}:{pkg_id}")
+        pkgs_to_delete_str = ',\n'.join(pkgs_to_delete)
+        self.setText(f"Are you sure, you want to remove: {pkgs_to_delete_str}?")
         self.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
         self.setIcon(QMessageBox.Icon.Question)
 
@@ -30,16 +34,21 @@ class ConanRemoveDialog(QMessageBox):
 
     def on_remove(self):
         """ Remove conan ref/pkg and emit a signal, if registered """
-        loader = AsyncLoader(self)
-        loader.async_loading(self, self.remove, cancel_button=False)
-        loader.wait_for_finished()
+        self.loader = AsyncLoader(self)
+        self.loader.async_loading(self, self.remove, cancel_button=False, loading_text="Removing packages")
+        self.loader.wait_for_finished()
 
     def remove(self):
-        try:
-            Logger().info(f"Deleting {self._conan_ref} {self._pkg_id}")
-            app.conan_api.remove_reference(ConanRef.loads(self._conan_ref), self._pkg_id)
-        except Exception as e:
-            Logger().error(f"Error while removing package {self._conan_ref}: {str(e)}")
-        if not self._conan_pkg_removed_sig:
-            return
-        self._conan_pkg_removed_sig.emit(self._conan_ref, self._pkg_id)
+        for conan_ref, pkg_ids in self._conan_refs_with_pkg_ids.items():
+            for pkg_id in pkg_ids:
+                try:
+                    self.loader.loading_string_signal.emit(
+                        f"Removing {conan_ref} {pkg_id}")
+                    # can handle multiple pkgs at once, but then we can't log info for the 
+                    # progress bar
+                    app.conan_api.remove_reference(ConanRef.loads(conan_ref), pkg_id)
+                except Exception as e:
+                    Logger().error(f"Error while removing package {conan_ref}: {str(e)}")
+                    continue
+                if self._conan_pkg_removed_sig:
+                    self._conan_pkg_removed_sig.emit(conan_ref, pkg_id)
