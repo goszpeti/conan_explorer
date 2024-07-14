@@ -1,10 +1,11 @@
+import argparse
 import os
 import platform
 import sys
 from tempfile import gettempdir
 from typing import TYPE_CHECKING
 
-from conan_explorer import (APP_NAME, SETTINGS_FILE_NAME, __version__,
+from conan_explorer import (APP_NAME, PKG_NAME, SETTINGS_FILE_NAME, __version__,
                             asset_path, user_save_path)
 from conan_explorer.settings import (SETTINGS_INI_TYPE, SettingsInterface,
                                      settings_factory)
@@ -24,10 +25,11 @@ active_settings: SettingsInterface = settings_factory(SETTINGS_INI_TYPE,
                                         user_save_path / (SETTINGS_FILE_NAME + ".ini"))
 conan_api: "ConanCommonUnifiedApi"  # initialized by load_conan
 conan_worker: "ConanWorker"  # initialized by load_conan
-
+qt_platform = ""
 
 def run_application():
     """ Start the Qt application and load the main window """
+    parse_cmd_args()
     init_platform()
     # Change cwd to temp, so temporary files become writable, 
     # even if the current folder is not - Fixes #168
@@ -37,7 +39,7 @@ def run_application():
     # Loading dialog until Conan is available
     loader = LoaderGui(None)
     loader.loading_for_blocking(None, load_conan, (loader, ), cancel_button=False,
-                            loading_text="Starting Conan Explorer")
+                                loading_text="Starting " + APP_NAME + " " + __version__)
     loader.wait_for_finished()
 
     from conan_explorer.ui.main_window import MainWindow
@@ -54,6 +56,21 @@ def run_application():
     # cancel conan worker tasks on exit
     if conan_worker:
         conan_worker.finish_working(10)
+
+
+def parse_cmd_args():
+    """
+    All CLI related functions.
+    """
+    parser = argparse.ArgumentParser(
+        prog=PKG_NAME, description=f"{PKG_NAME} command line interface")
+    parser.add_argument("-v", "--version", action="version",
+                        version=__version__)
+    parser.add_argument("-p", "--platform", type=str)
+
+    args = parser.parse_args()
+    global qt_platform
+    qt_platform = args.platform
 
 def init_platform():
     if platform.system() == "Windows":
@@ -89,8 +106,11 @@ def load_qapp():
     except Exception:
         Logger().debug("Can't set DPI Rounding")
 
-    if check_for_wayland(): # enable native Wayland support
-        os.environ["QT_QPA_PLATFORM"] = "wayland"
+    if qt_platform:
+        os.environ["QT_QPA_PLATFORM"] = qt_platform
+    else:
+        if check_for_wayland(): # enable native Wayland support
+            os.environ["QT_QPA_PLATFORM"] = "wayland"
 
     # to use icons in qss file
     QtCore.QDir.addSearchPath('icons', os.path.join(asset_path, 'icons'))
@@ -99,9 +119,9 @@ def load_qapp():
     # we can get get dark mode window bar in light mode
     QtWidgets.QApplication.setDesktopSettingsAware(False)
 
-    qt_app = QtWidgets.QApplication([])
+    qt_app = QtWidgets.QApplication(sys.argv)
     qt_app.setApplicationName(APP_NAME)
-    qt_app.setApplicationDisplayName(APP_NAME + " " + __version__)
+    qt_app.setApplicationDisplayName(APP_NAME)
     # qt_app.setStyle(QtWidgets.QStyleFactory.create(
     #    "WindowsVista"))  # windows11 WindowsVista Fusion
 

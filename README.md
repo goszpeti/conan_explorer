@@ -82,7 +82,7 @@ It is end-user oriented and focuses on using packages, rather then developing th
 
 ### 🐧 Prerequisites on Linux
 
-Currently testing and compatibility is only endured for Debian based distros, specifically Ubuntu 20.04 and 22.04. If you want to run on Ubuntu 18 you can only use the 1.4.3 release, due to the Qt dependency.
+Currently testing and compatibility is only ensured for Debian based distros, see the section distros, although if Qt6 is working for the plaftorm there should be no problems.
 
 1. Pip must be updated to at least pip 20.3, so using a venv like this is recommended:
 
@@ -91,27 +91,40 @@ sudo apt-get install python3-venv
 python3 -m venv .venv 
 source .venv/bin/activate
 python3 -m pip install --upgrade pip
-pip install conan_explorer
+pip3 install conan_explorer --use-pep517
 ```
 
 2. An x-terminal emulator must be available for "Open Files in cmd" and console based programs for the App Grid. Type `x-terminal-emulator` to get a list of available terminals.
 
-3. To open files with its associated program xdg-open is used: `sudo apt install xdg-utils`
+3. To open files with its associated program xdg-open is used: `sudo apt install xdg-utils` or `sudo dnf install xdg-utils`
 
-4. Not all Qt6 versions support the Wayland lib of the operating system.
-  * For Ubuntu 20.04 please execute "pip install PySide6-Essentials==6.4.3" to get the correct Qt6 version and update pip to latest version!
-  * For Ubuntu 22.04 please ensure that the system Qt6 packages are available. Simply execute `sudo apt-get install qt6-wayland` on a wayland system, or `sudo apt-get install qt6-base-dev` for an X11 based system.
+#### Distros
 
+Not all Qt6 versions support the Wayland lib of the operating system.
+Generally the solution is to match the qt6 platform packages to the ones deployed with Pyside6. Minor version match is enough, because patch versions are ABI compatible.
+
+  * **Ubuntu 18** was last supported in the 1.4.3 release, due to the Qt dependency.
+  Recompiling Qt6 would be necessary.
+  * For **Ubuntu 20.04** please execute `pip install PySide6-Essentials==6.4.3` to get the correct Qt6 version and update pip to latest version!
+  * For **Ubuntu 22.04** please ensure that the system Qt6 packages are available. Simply execute `sudo apt-get install qt6-wayland` on a wayland system, or `sudo apt-get install qt6-base-dev` for an X11 based system.
+  * For **Ubuntu 24.04** the wayland platform is currently unknown how to get work with PySide6. To force X11 mode on wayland start it with `--platform=xbc` and make sure  "libxcb-cursor0" is installed.
+  * **Fedora 28** (basis for RedHat 8.4) - No information
+  * **Fedora 34** (basis for RedHat 9.4) - No information
+  * **Fedora 40** runs natively without problems with a desktop environment. 
+
+#### Scaling on X11
+
+If the window displays with very small scaling you can increase it by setting the environment variable QT_SCALE_FACTOR to a higher value, e.g. `QT_SCALE_FACTOR=2 conan_explorer`
 
 ### With pip from PyPi
 
-    pip install conan-explorer
+    pip install conan-explorer --use-pep517
 
 ### From source
 
 After checkout use the command:
 
-    pip install .
+    pip install . --use-pep517
 
 ## 🏃 Running
 
@@ -121,7 +134,7 @@ You can also assign its icon to it from the site packages folder in **conan_expl
 ### Main dependencies
 
 * Pyside6 >= 6.4.0
-* 1.48.0 <= conan < 2.1
+* 1.48.0 <= conan < 2.5
 
 > ⚠ **Warning** - **Deprecation of Python 3.X**  
 > From version 2.0.0 Python 3.6 support will be dropped, having reached end-of-life.    
