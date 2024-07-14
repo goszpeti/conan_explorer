@@ -288,6 +288,10 @@ class PackageFileExplorerController(QObject):
             conan_options=pkg_info.get("options", {}))
         self._page_widgets.get_page_by_type(
             AppGridView).open_new_app_dialog_from_extern(app_config)
+        
+    def on_new_folder(self, model_index):
+        file_path = Path(self.get_selected_pkg_paths()[-1])
+        (file_path.parent / "New folder").mkdir()
 
     def on_open_file_in_file_manager(self, model_index):
         file_path = Path(self.get_selected_pkg_paths()[-1])

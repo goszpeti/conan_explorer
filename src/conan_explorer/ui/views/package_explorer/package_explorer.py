@@ -249,36 +249,6 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
     # Package File Explorer context menu
 
-    def on_open_file_in_file_manager(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_file_in_file_manager(model_index)
-
-    def on_copy_file_as_path(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_copy_file_as_path()
-
-    def on_edit_file(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_edit_file()
-
-    def on_open_terminal_in_dir(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_terminal_in_dir()
-
-    def on_file_rename(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_rename()
-
-    def on_file_copy(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_copy()
-
-    def on_file_cut(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_cut()
-
-    def on_file_paste(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_paste()
-
-    def on_file_delete(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_delete()
-
-    def on_add_app_link_from_file(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_add_app_link_from_file()
-
     def _init_pkg_file_context_menu(self):
         if self._file_cntx_menu:
             return
@@ -341,6 +311,12 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._file_cntx_menu.addAction(self._paste_action)
         self._paste_action.triggered.connect(self.on_file_paste)
 
+        self._new_folder_action = QAction("New folder", self)
+        self.set_themed_icon(self._new_folder_action, "icons/opened_folder.svg")
+        self.addAction(self._new_folder_action)
+        self._file_cntx_menu.addAction(self._new_folder_action)
+        self._new_folder_action.triggered.connect(self.on_new_folder)
+
         self._delete_action = QAction("Delete", self)
         self.set_themed_icon(self._delete_action, "icons/delete.svg")
         self._delete_action.setShortcut(QKeySequence(Qt.Key.Key_Delete))
@@ -393,3 +369,36 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
     def select_local_package_from_ref(self, conan_ref: str):
         return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref)
+    
+    def on_new_folder(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_new_folder(model_index)
+
+    def on_open_file_in_file_manager(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_file_in_file_manager(model_index)
+
+    def on_copy_file_as_path(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_copy_file_as_path()
+
+    def on_edit_file(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_edit_file()
+
+    def on_open_terminal_in_dir(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_terminal_in_dir()
+
+    def on_file_rename(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_rename()
+
+    def on_file_copy(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_copy()
+
+    def on_file_cut(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_cut()
+
+    def on_file_paste(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_paste()
+
+    def on_file_delete(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_delete()
+
+    def on_add_app_link_from_file(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_add_app_link_from_file()
