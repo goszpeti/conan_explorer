@@ -116,7 +116,7 @@ class IniSettings(SettingsInterface):
         return bool(self.get(name))
 
     @override
-    def set(self, name: str, value: "str|int|float|bool"):
+    def set(self, name: str, value: "str|int|float|bool|dict"):
         """ Set the value of a specific setting. 
         Does not write to file, if value is already set. """
         if name in self._values.keys() and isinstance(value, dict):  # dict type setting

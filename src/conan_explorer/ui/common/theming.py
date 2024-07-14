@@ -24,8 +24,7 @@ class CanSetIconWidgetProtocol(Protocol):
 
 @runtime_checkable
 class CanSetPixmapWidgetProtocol(Protocol):
-    def setPixmap(self, arg__1: Union[QPixmap, QImage, str]) -> None: ...
-
+    def setPixmap(self, arg__1: Union[QPixmap, QImage]) -> None: ...
 
 def get_gui_style():
     gui_style = app.active_settings.get_string(GUI_STYLE).lower()
