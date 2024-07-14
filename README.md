@@ -105,12 +105,11 @@ Generally the solution is to match the qt6 platform packages to the ones deploye
 
   * **Ubuntu 18** was last supported in the 1.4.3 release, due to the Qt dependency.
   Recompiling Qt6 would be necessary.
-  * For **Ubuntu 20.04** please execute `pip install PySide6-Essentials==6.4.3` to get the correct Qt6 version and update pip to latest version!
+  * For **Ubuntu 20.04** please execute `pip install PySide6-Essentials==6.4.3` in the same environment as conan_explorer and update pip to latest version!
   * For **Ubuntu 22.04** please ensure that the system Qt6 packages are available. Simply execute `sudo apt-get install qt6-wayland` on a wayland system, or `sudo apt-get install qt6-base-dev` for an X11 based system.
   * For **Ubuntu 24.04** the wayland platform is currently unknown how to get work with PySide6. To force X11 mode on wayland start it with `--platform=xbc` and make sure  "libxcb-cursor0" is installed.
-  * **Fedora 28** (basis for RedHat 8.4) - No information
-  * **Fedora 34** (basis for RedHat 9.4) - No information
-  * **Fedora 40** runs natively without problems with a desktop environment. 
+  * **Fedora 28** (base for RedHat 8.4) - No information
+  * **Fedora 34** (base for RedHat 9.4) and **Fedora 40** - runs natively on X11 and wayland without problems with a desktop environment. 
 
 #### Scaling on X11
 
