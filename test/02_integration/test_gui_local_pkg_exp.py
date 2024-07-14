@@ -589,7 +589,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     app.conan_worker.finish_working()
 
     # check cancel does nothing
-    dialog = ConanRemoveDialog(None, TEST_REF, pkg_id_to_remove, None)
+    dialog = ConanRemoveDialog(None, {TEST_REF: [pkg_id_to_remove]}, None)
     dialog.show()
     dialog.button(dialog.StandardButton.Cancel).clicked.emit()
 
@@ -606,7 +606,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
 
     # check with pkg id
     conan_install_ref(TEST_REF)
-    dialog = ConanRemoveDialog(None, TEST_REF, found_pkg.get("id", ""), None)
+    dialog = ConanRemoveDialog(None, {TEST_REF: [found_pkg.get("id", "")]}, None)
     dialog.show()
     dialog.button(dialog.StandardButton.Yes).clicked.emit()
 
