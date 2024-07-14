@@ -423,6 +423,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 self._last_geometry = self.geometry()
                 self.resizing(event)
                 self._resize_press = 0
+            else: # Hacky fix for when the cursor is not reset after resizing
+                self.setCursor(Qt.CursorShape.ArrowCursor)
 
         return super().eventFilter(watched, event)
 

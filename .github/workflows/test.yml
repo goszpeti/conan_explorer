@@ -24,57 +24,65 @@ jobs:
         name:
           [
             # latest conan 1.X on U20 and Windows
-            "ubuntu20-py38",
-            "ubuntu20-py39",
-            "ubuntu20-py310",
-            "windows-py311",
+            "ubuntu20-py38-conan1-latest",
+            "ubuntu20-py39-conan1-latest",
+            "ubuntu20-py310-conan1-latest",
+            "windows-py311-conan1-latest",
             # conan minimum version with python minimum version
-            "ubuntu20-conan1.48-py38",
+            "ubuntu20-py38-conan1.48",
             # conan 2 stuff with bleeding edge - use Python 3.12 (U22 needed)
-            "ubuntu22-conan2.0.13-py310", # pre 2.0.14 API changes
-            "ubuntu22-conan2.0-latest-py312", # post 2.0.14 API changes
-            "windows-conan2-latest-py312", # latest everything
+            "ubuntu22-py310-conan2.3", #   2.3 API changes
+            "ubuntu22-py312-conan2-latest", # post 2.3 API changes
+            "windows-py312-conan2-latest", # latest everything
           ]
         include:
-          - name: "ubuntu20-py38"
+          - name: "ubuntu20-py38-conan1-latest"
             python: "3.8"
             os: ubuntu-20.04
             conan: "<2"
+            conan_server: "<2"
             pytest_args: ""
-          - name: "ubuntu20-py39"
+          - name: "ubuntu20-py39-conan1-latest"
             python: "3.9"
             conan: "<2"
+            conan_server: "<2"
             os: ubuntu-20.04
             pytest_args: ""
-          - name: "ubuntu20-py310"
+          - name: "ubuntu20-py310-conan1-latest"
             python: "3.10"
             conan: "<2"
+            conan_server: "<2"
             os: ubuntu-20.04
             pytest_args: ""
-          - name: "windows-py311"
+          - name: "windows-py311-conan1-latest"
             python: "3.11"
             os: windows-latest
             conan: "<2"
+            conan_server: "<2"
             pytest_args: ""
-          - name: "ubuntu20-conan1.48-py38"
+          - name: "ubuntu20-py38-conan1.48"
             python: "3.8"
             os: ubuntu-20.04
             conan: "==1.48.0"
+            conan_server: "==1.48.0"
             pytest_args: ""
-          - name: "ubuntu22-conan2.0.13-py310"
+          - name: "ubuntu22-py310-conan2.3"
             python: "3.10"
             os: ubuntu-22.04
-            conan: "==2.0.13"
+            conan: <2.4
+            conan_server: "-server <2.4"
             pytest_args: "-m conanv2"
-          - name: "ubuntu22-conan2.0-latest-py312"
+          - name: "ubuntu22-py312-conan2-latest"
             python: "3.12"
             os: ubuntu-22.04
-            conan: "<2.1"
+            conan: <2.5
+            conan_server: "-server <2.5"
             pytest_args: "-m conanv2"
-          - name:  "windows-conan2-latest-py312"
+          - name:  windows-py312-conan2-latest
             python: "3.12"
             os: windows-latest
-            conan: "<3"
+            conan: <2.5 # latest conan 2
+            conan_server: "-server <2.5"
             pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
@@ -90,7 +98,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: 'pip' # caching pip dependencies
-          cache-dependency-path: setup.py
+          cache-dependency-path: pyproject.toml
       ######### Ubuntu 20.04 #########
       - name: Set up a virtual display for GUI on Ubuntu 20
         if: matrix.os == 'ubuntu-20.04'
@@ -129,12 +137,11 @@ jobs:
         run: | # markupsafe is a workaround fix for broken conan dependencies
           pip install markupsafe==2.0.1 --use-pep517
           pip install "conan${{ matrix.conan }}" --use-pep517
+          pip install "conan${{ matrix.conan_server }}" --use-pep517
       - name: Install own package and test dependencies
         # need -e because of coverage paths.
         run: |
           pip install -e .[test]
-        env:
-          CONAN_VERSION: ${{ matrix.conan}}
       - name: Execute unitests with pytest
         run: >-
           pytest -v test/01_unit --junit-xml=./results/result-unit-${{matrix.name}}.xml

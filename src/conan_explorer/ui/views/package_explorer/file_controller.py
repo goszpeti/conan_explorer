@@ -101,7 +101,14 @@ class PackageFileExplorerController(QObject):
         own_id = pkg_id
         if self._current_pkg:
             own_id = self._current_pkg.get("id", "")
-        if self._current_ref == conan_ref and pkg_id == own_id:
+        if self._current_ref == conan_ref:
+            delete = False
+            if not pkg_id:
+                delete = True
+            elif pkg_id and pkg_id == own_id:
+                delete = True
+            if not delete:
+                return
             self.close_files_view()
             self.parent().tab_close_requested(self) # type: ignore
 
@@ -281,6 +288,10 @@ class PackageFileExplorerController(QObject):
             conan_options=pkg_info.get("options", {}))
         self._page_widgets.get_page_by_type(
             AppGridView).open_new_app_dialog_from_extern(app_config)
+        
+    def on_new_folder(self, model_index):
+        file_path = Path(self.get_selected_pkg_paths()[-1])
+        (file_path.parent / "New folder").mkdir()
 
     def on_open_file_in_file_manager(self, model_index):
         file_path = Path(self.get_selected_pkg_paths()[-1])

@@ -1,3 +1,0 @@
-include LICENSE
-recursive-include src/conan_explorer/assets/** *.*
-global-include *.ui *in *.html *.ini

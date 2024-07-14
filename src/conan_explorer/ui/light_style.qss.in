@@ -24,14 +24,6 @@ Palette:
 
 /* Setup for specific widgets */
 
-QWidget#central_widget {
-    border-style: solid;
-    border-width: 2px;
-    background-color: #F0F0F0;
-    border-color: {{USER_COLOR}};
-    border-radius: {{WINDOW_BORDER_RADIUS}}px;
-}
-
 /* Top Frame Subwidgets */
 
 QLabel#page_title {
@@ -71,7 +63,15 @@ QPushButton:pressed#close_button {
     background-color: #C1655D;
 }
 
-/* Center Frame Subwidgets */
+/* Center Frame and Subwidgets */
+
+QWidget#central_widget {
+    border-style: solid;
+    border-width: 2px;
+    background-color: #F0F0F0;
+    border-color: {{USER_COLOR}};
+    border-radius: {{WINDOW_BORDER_RADIUS}}px;
+}
 
 QFrame#content_frame {
     background-color: #F0F0F0;
@@ -116,6 +116,7 @@ QToolButton:checked {
 /* Dialog styling */
 
 QDialog {
+    background-color: #F0F0F0;
     border: 1px solid #D3D3D3;
 }
 
@@ -270,6 +271,10 @@ QPushButton#side_menu_title_button {
     border: none;
 }
 
+QWidget#info_contents {
+    background-color: #F0F0F0;
+}
+
 /* Generic widgets */
 
 QHeaderView {
@@ -297,9 +302,9 @@ QLineEdit {
     border-color: rgb(58, 58, 58);
     border-style: none;
     padding: 0 8px;
-    /* background-color: #F0F0F0;
+    background-color: white;
     selection-background-color:#808086;
-    selection-color: #f8f8ff; */
+    selection-color: #f8f8ff;
 }
 
 QMainWindow {

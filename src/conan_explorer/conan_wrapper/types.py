@@ -17,7 +17,7 @@ if conan_version.major == 1:
     from conans.model.ref import ConanFileReference, PackageReference # type: ignore
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
     if platform.system() == "Windows":
-        from conans.util.windows import CONAN_REAL_PATH
+        from conans.util.windows import CONAN_REAL_PATH, CONAN_LINK
 else:
     from conans.model.recipe_ref import RecipeReference as ConanFileRef  # type: ignore
     from conans.model.package_ref import PkgReference  # type: ignore

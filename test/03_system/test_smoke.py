@@ -29,6 +29,7 @@ def test_main_loop_mock(base_fixture, mocker):
     os.environ["DISABLE_ASYNC_LOADER"] = "False"  # for code coverage of async loader
 
     main_ui_mock = mocker.patch("conan_explorer.ui.main_window.MainWindow")
+    parse_args_mock = mocker.patch("conan_explorer.app.parse_cmd_args")
     qapp_mock = mocker.patch.object(QtWidgets.QApplication, "exec")
     # delayed import necessary, so the mocker can patch the object before
     from conan_explorer import __main__
@@ -36,6 +37,7 @@ def test_main_loop_mock(base_fixture, mocker):
     __main__.run_conan_explorer()
     time.sleep(2)
 
+    parse_args_mock.assert_called_once()
     main_ui_mock.assert_called_once()
     qapp_mock.assert_called_once()
 
@@ -62,7 +64,7 @@ def test_main_loop(base_fixture):
         proc_name = Path(sys.executable).name
     else:
         script = []
-        proc_name = "conan_app_launc" # cuts off
+        proc_name = "conan_explorer"  # cuts off
     with check:
         check_if_process_running(proc_name, script, kill=True)
     # delete config file

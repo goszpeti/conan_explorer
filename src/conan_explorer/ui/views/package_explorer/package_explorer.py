@@ -43,6 +43,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self.conan_pkg_selected, self._base_signals, self._page_widgets)]
         self._file_cntx_menu = None
         self.set_themed_icon(self._ui.refresh_button, "icons/refresh.svg")
+        self.set_themed_icon(self._ui.show_sizes_button, "icons/bar_chart.svg")
 
         # connect pkg selection controller
         self._ui.package_select_view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
@@ -51,6 +52,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self.on_selection_context_menu_requested)
         self._init_selection_context_menu()
         self._ui.refresh_button.clicked.connect(self._pkg_sel_ctrl.on_pkg_refresh_clicked)
+        self._ui.show_sizes_button.clicked.connect(self.on_show_sizes)
         self._ui.package_filter_edit.textChanged.connect(self._pkg_sel_ctrl.set_filter_wildcard)
         self.conan_pkg_selected.connect(self.on_pkg_selection_change)
         self._ui.package_path_label.setText("<Package path>")
@@ -63,9 +65,27 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.updateGeometry()
         self.resize_filter()
 
+    # Display Events
+
+    def reload_themed_icons(self):
+        super().reload_themed_icons()
+        self._init_selection_context_menu()
+        self._init_pkg_file_context_menu()
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        self._pkg_sel_ctrl.refresh_pkg_selection_view(
+            force_update=False)  # only update the first time
+        return super().showEvent(a0)
+
+    def resizeEvent(self, a0: QResizeEvent) -> None:
+        for pkg_file_exp_ctrl in self._pkg_tabs_ctrl:
+            pkg_file_exp_ctrl.resize_file_columns()
+        super().resizeEvent(a0)
+
+    # Tab control
+
     def tab_close_requested(self, pkg_ctrl_to_close):
         self.on_close_tab(self._pkg_tabs_ctrl.index(pkg_ctrl_to_close))
-
 
     def on_close_tab(self, index: int):
         self._ui.package_tab_widget.removeTab(index)
@@ -131,14 +151,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         if ctrl._model:
             self._ui.package_path_label.setText(ctrl._model.rootPath())
 
-    def showEvent(self, a0: QShowEvent) -> None:
-        self._pkg_sel_ctrl.refresh_pkg_selection_view(force_update=False)  # only update the first time
-        return super().showEvent(a0)
 
-    def resizeEvent(self, a0: QResizeEvent) -> None:
-        for pkg_file_exp_ctrl in self._pkg_tabs_ctrl:
-            pkg_file_exp_ctrl.resize_file_columns()
-        super().resizeEvent(a0)
+    # Selection view general buttons and functions
 
     def resize_filter(self):
         # resize filter splitter to roughly match file view splitter
@@ -147,10 +161,14 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.splitter_filter.setSizes(
             [sizes[0] - offset - 5, sizes[1] + 5])
 
-    def reload_themed_icons(self):
-        super().reload_themed_icons()
-        self._init_selection_context_menu()
-        self._init_pkg_file_context_menu()
+    def resize_for_show_sizes(self):
+        sizes = self._ui.splitter.sizes()
+        sizes_sum = sum(sizes)
+        self._ui.splitter.setSizes([int(sizes_sum/2), int(sizes_sum/2)])
+
+    def on_show_sizes(self):
+        self._pkg_sel_ctrl.on_show_sizes()
+        self.resize_for_show_sizes()
 
     # Selection view context menu
 
@@ -217,6 +235,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         else: # invalid
             self._context_menu_set_all(False)
             self.copy_ref_action.setVisible(True) # always works
+            self.remove_ref_action.setVisible(True) # TODO
 
         self.select_cntx_menu.exec(self._ui.package_select_view.mapToGlobal(position))
 
@@ -229,36 +248,6 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.diff_pkg_action.setVisible(enabled)
 
     # Package File Explorer context menu
-
-    def on_open_file_in_file_manager(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_file_in_file_manager(model_index)
-
-    def on_copy_file_as_path(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_copy_file_as_path()
-
-    def on_edit_file(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_edit_file()
-
-    def on_open_terminal_in_dir(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_terminal_in_dir()
-
-    def on_file_rename(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_rename()
-
-    def on_file_copy(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_copy()
-
-    def on_file_cut(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_cut()
-
-    def on_file_paste(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_paste()
-
-    def on_file_delete(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_delete()
-
-    def on_add_app_link_from_file(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_add_app_link_from_file()
 
     def _init_pkg_file_context_menu(self):
         if self._file_cntx_menu:
@@ -322,6 +311,12 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._file_cntx_menu.addAction(self._paste_action)
         self._paste_action.triggered.connect(self.on_file_paste)
 
+        self._new_folder_action = QAction("New folder", self)
+        self.set_themed_icon(self._new_folder_action, "icons/opened_folder.svg")
+        self.addAction(self._new_folder_action)
+        self._file_cntx_menu.addAction(self._new_folder_action)
+        self._new_folder_action.triggered.connect(self.on_new_folder)
+
         self._delete_action = QAction("Delete", self)
         self.set_themed_icon(self._delete_action, "icons/delete.svg")
         self._delete_action.setShortcut(QKeySequence(Qt.Key.Key_Delete))
@@ -374,3 +369,36 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
     def select_local_package_from_ref(self, conan_ref: str):
         return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref)
+    
+    def on_new_folder(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_new_folder(model_index)
+
+    def on_open_file_in_file_manager(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_file_in_file_manager(model_index)
+
+    def on_copy_file_as_path(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_copy_file_as_path()
+
+    def on_edit_file(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_edit_file()
+
+    def on_open_terminal_in_dir(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_terminal_in_dir()
+
+    def on_file_rename(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_rename()
+
+    def on_file_copy(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_copy()
+
+    def on_file_cut(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_cut()
+
+    def on_file_paste(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_paste()
+
+    def on_file_delete(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_delete()
+
+    def on_add_app_link_from_file(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_add_app_link_from_file()

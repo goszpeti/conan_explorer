@@ -97,7 +97,7 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
 
     pkg_sel_model = lpe._pkg_sel_ctrl._model
     assert pkg_sel_model
-    assert lpe._ui.package_select_view.model().columnCount() == 1
+    assert lpe._ui.package_select_view.model().columnCount() == 2
 
     # check, that the ref + pkg is in the list
     found_tst_pkg = False
@@ -589,7 +589,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     app.conan_worker.finish_working()
 
     # check cancel does nothing
-    dialog = ConanRemoveDialog(None, TEST_REF, pkg_id_to_remove, None)
+    dialog = ConanRemoveDialog(None, {TEST_REF: [pkg_id_to_remove]}, None)
     dialog.show()
     dialog.button(dialog.StandardButton.Cancel).clicked.emit()
 
@@ -606,7 +606,7 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
 
     # check with pkg id
     conan_install_ref(TEST_REF)
-    dialog = ConanRemoveDialog(None, TEST_REF, found_pkg.get("id", ""), None)
+    dialog = ConanRemoveDialog(None, {TEST_REF: [found_pkg.get("id", "")]}, None)
     dialog.show()
     dialog.button(dialog.StandardButton.Yes).clicked.emit()
 

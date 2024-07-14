@@ -15,8 +15,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QLabel, QScrollArea,
-    QSizePolicy, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QFrame, QLabel,
+    QScrollArea, QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -30,13 +30,14 @@ class Ui_Form(object):
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.about_scroll_area = QScrollArea(Form)
         self.about_scroll_area.setObjectName(u"about_scroll_area")
+        self.about_scroll_area.setFrameShape(QFrame.NoFrame)
         self.about_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.about_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.about_scroll_area.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContentsOnFirstShow)
         self.about_scroll_area.setWidgetResizable(True)
         self.about_contents = QWidget()
         self.about_contents.setObjectName(u"about_contents")
-        self.about_contents.setGeometry(QRect(0, 0, 644, 454))
+        self.about_contents.setGeometry(QRect(0, 0, 646, 456))
         self.verticalLayout = QVBoxLayout(self.about_contents)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")

@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QListWidgetItem, QWidget
 
 import conan_explorer.app as app
-from conan_explorer.app import AsyncLoader
+from conan_explorer.app import LoaderGui
 from conan_explorer.conan_wrapper.types import Remote  # using global module pattern
 from conan_explorer.ui.common.theming import get_themed_asset_icon
 from conan_explorer.ui.views.conan_conf.remotes_controller import \
@@ -48,10 +48,9 @@ class RemoteLoginDialog(QDialog):
 
     def on_ok(self):
         """ Is triggered on OK and tries to login while showing a loading dialog """
-        loader = AsyncLoader(self)
-        loader.async_loading(self, self.login, loading_text="Logging you in...")
-        loader.wait_for_finished()
-        self.accept()
+        loader = LoaderGui(self)
+        loader.load_with_finish_hook(
+            self, self.login, loading_text="Logging you in...", finish_task=self.accept)
 
     def login(self):
         """ Try to login to all selected remotes """
