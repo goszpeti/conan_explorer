@@ -190,7 +190,7 @@ class PkgSearchModel(TreeModel):
         item = index.internalPointer()
         loader = LoaderGui(self)
         self._loader_widget_parent = QtWidgets.QWidget()
-        loader.loading_for_blocking(self._loader_widget_parent,
+        loader.load_for_blocking(self._loader_widget_parent,
                              item.load_children, (loader.loading_string_signal,), 
                              loading_text="Loading Packages...")
         loader.wait_for_finished()

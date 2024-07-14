@@ -38,7 +38,7 @@ def run_application():
     qt_app = load_qapp()
     # Loading dialog until Conan is available
     loader = LoaderGui(None)
-    loader.loading_for_blocking(None, load_conan, (loader, ), cancel_button=False,
+    loader.load_for_blocking(None, load_conan, (loader, ), cancel_button=False,
                                 loading_text="Starting " + APP_NAME + " " + __version__)
     loader.wait_for_finished()
 

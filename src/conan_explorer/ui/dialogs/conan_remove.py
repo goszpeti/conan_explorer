@@ -38,7 +38,7 @@ class ConanRemoveDialog(QMessageBox):
     def on_remove(self):
         """ Remove conan ref/pkg and emit a signal, if registered """
         self.loader = LoaderGui(self)
-        self.loader.loading_for_blocking(self, self.remove, cancel_button=False, loading_text="Removing packages")
+        self.loader.load_for_blocking(self, self.remove, cancel_button=False, loading_text="Removing packages")
         self.loader.wait_for_finished()
 
     def remove(self):

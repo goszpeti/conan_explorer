@@ -74,21 +74,21 @@ class LoaderGui(QObject):
         self.load_thread: Optional[QThread] = None
         self.finished = True
 
-    def loading_with_finish_hook(self, dialog_parent: Optional[QWidget], work_task: Callable,
+    def load_with_finish_hook(self, dialog_parent: Optional[QWidget], work_task: Callable,
                                  worker_args: Tuple[Any, ...] = (),
                                  finish_task: Optional[Callable] = None,
                                  loading_text: str = "Loading...", cancel_button=True):
-        self.async_loading(dialog_parent, work_task, 
+        self.load(dialog_parent, work_task, 
                            worker_args, finish_task, loading_text, cancel_button)
 
-    def loading_for_blocking(self, dialog_parent: Optional[QWidget], work_task: Callable,
+    def load_for_blocking(self, dialog_parent: Optional[QWidget], work_task: Callable,
                              worker_args: Tuple[Any, ...] = (),
                              loading_text: str = "Loading...", cancel_button=True):
-        self.async_loading(dialog_parent, work_task, worker_args,
+        self.load(dialog_parent, work_task, worker_args,
                            loading_text=loading_text, cancel_button=cancel_button)
 
 
-    def async_loading(self, dialog_parent: Optional[QWidget], work_task: Callable, 
+    def load(self, dialog_parent: Optional[QWidget], work_task: Callable, 
                       worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,
                       loading_text: str = "Loading...", cancel_button=True):

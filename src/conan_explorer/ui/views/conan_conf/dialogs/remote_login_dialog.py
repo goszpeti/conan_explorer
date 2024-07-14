@@ -49,7 +49,7 @@ class RemoteLoginDialog(QDialog):
     def on_ok(self):
         """ Is triggered on OK and tries to login while showing a loading dialog """
         loader = LoaderGui(self)
-        loader.loading_with_finish_hook(
+        loader.load_with_finish_hook(
             self, self.login, loading_text="Logging you in...", finish_task=self.accept)
 
     def login(self):

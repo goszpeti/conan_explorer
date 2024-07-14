@@ -56,7 +56,7 @@ class PackageSelectionController(QObject):
         if len(conan_refs) != 1:
             return
         loader = LoaderGui(self)
-        loader.async_loading(self._view, show_conanfile, (conan_refs[0],),
+        loader.load(self._view, show_conanfile, (conan_refs[0],),
                              loading_text="Opening Conanfile...")
         loader.wait_for_finished()
 
@@ -97,7 +97,7 @@ class PackageSelectionController(QObject):
         pkg_info = app.conan_api.get_local_pkg_from_id(
             ConanPkgRef.loads(conan_ref + ":" + pkg_id))
         loader = LoaderGui(self)
-        loader.async_loading(self._view, app.conan_api.get_conan_buildinfo,
+        loader.load(self._view, app.conan_api.get_conan_buildinfo,
                              (ConanRef.loads(conan_ref), pkg_info.get("settings", ""),
                               pkg_info.get("options", {})), self.show_buildinfo_dialog,
                              loading_text="Loading build info...")
@@ -236,7 +236,7 @@ class PackageSelectionController(QObject):
             return
         if not self._model:
             self._model = PkgSelectModel(self._loader.loading_string_signal)
-        self._loader.async_loading(
+        self._loader.load(
             self._view, self._model.setup_model_data, (),
             self.finish_select_model_init, "Reading Packages")
 
@@ -256,7 +256,7 @@ class PackageSelectionController(QObject):
             self.expand_and_sort_for_sizes()
             self._model.show_sizes = True
             self._view.showColumn(1)
-            self._loader.async_loading(self._view, self._view.expandAll, (), 
+            self._loader.load(self._view, self._view.expandAll, (), 
                 self.expand_and_sort_for_sizes,
                 "Calculating Sizes. This can take a while...")
         else:

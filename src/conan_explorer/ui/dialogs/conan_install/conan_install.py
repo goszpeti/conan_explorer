@@ -111,7 +111,7 @@ class ConanInstallDialog(QDialog):
         except Exception:
             return
         loader = LoaderGui(self)
-        loader.async_loading(self, self.on_options_query, (conan_ref, ),
+        loader.load(self, self.on_options_query, (conan_ref, ),
                              loading_text="Loading options...")
         loader.wait_for_finished()
         default_options = self._default_options

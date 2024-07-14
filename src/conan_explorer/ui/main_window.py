@@ -202,7 +202,7 @@ class MainWindow(FluentWindow):
         self._load_plugins()  # creates the objects - must be in this thread
 
         loader = LoaderGui(self)
-        loader.loading_for_blocking(self, self._load_job, (config_source_str,), loading_text="Loading Plugins")
+        loader.load_for_blocking(self, self._load_job, (config_source_str,), loading_text="Loading Plugins")
         loader.wait_for_finished()
         # Restore last view
         if app.active_settings.get_bool(AUTO_OPEN_LAST_VIEW):
@@ -301,7 +301,7 @@ class MainWindow(FluentWindow):
         cleaner = ConanCleanup(app.conan_api) # type: ignore
 
         loader = LoaderGui(self)
-        loader.async_loading(self, cleaner.gather_invalid_remote_metadata, )
+        loader.load(self, cleaner.gather_invalid_remote_metadata, )
         loader.wait_for_finished()
         invalid_refs = cleaner.invalid_metadata_refs
         
@@ -324,7 +324,7 @@ class MainWindow(FluentWindow):
                 for ref in refs:
                     cleaner.repair_invalid_remote_metadata(ref)
                     loader.loading_string_signal.emit("Trying to repair\n" + ref)
-            loader.async_loading(self, repair_refs, (invalid_refs,), 
+            loader.load(self, repair_refs, (invalid_refs,), 
                                  loading_text="Repairing metadata...")
 
     def open_cleanup_cache_dialog(self):
@@ -332,7 +332,7 @@ class MainWindow(FluentWindow):
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
         cleaner = ConanCleanup(app.conan_api) # type: ignore
         loader = LoaderGui(self)
-        loader.async_loading(self, cleaner.get_cleanup_cache_paths, )
+        loader.load(self, cleaner.get_cleanup_cache_paths, )
         loader.wait_for_finished()
         paths = cleaner.orphaned_packages.union(cleaner.orphaned_references)
         if not paths:
@@ -359,7 +359,7 @@ class MainWindow(FluentWindow):
                 for path in paths:
                     delete_path(Path(path))
                     loader.loading_string_signal.emit("Deleting\n" + str(path))
-            loader.async_loading(self, delete_cache_paths, (paths,), 
+            loader.load(self, delete_cache_paths, (paths,), 
                                  loading_text="Deleting cache paths...")
 
     def open_file_editor_selection_dialog(self):

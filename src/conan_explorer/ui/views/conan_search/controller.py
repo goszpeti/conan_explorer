@@ -36,7 +36,7 @@ class ConanSearchController(QObject):
         if not self._search_button.isEnabled():
             return
         self._model = PkgSearchModel(self.conan_pkg_installed, self.conan_pkg_removed)
-        self._loader.async_loading(
+        self._loader.load(
             self._view, self._load_search_model, (), self._finish_load_search_model, 
             "Searching for packages...")
 
@@ -78,7 +78,7 @@ class ConanSearchController(QObject):
         combined_ref = self.get_selected_combined_ref()
         conan_ref = combined_ref.split(":")[0]
         loader = LoaderGui(self)
-        loader.async_loading(self._view, show_conanfile, (conan_ref,), loading_text="Opening Conanfile...")
+        loader.load(self._view, show_conanfile, (conan_ref,), loading_text="Opening Conanfile...")
         loader.wait_for_finished()
 
     def on_install_pkg_requested(self):
