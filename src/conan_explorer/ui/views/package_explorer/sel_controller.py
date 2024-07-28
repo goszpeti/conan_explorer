@@ -279,7 +279,10 @@ class PackageSelectionController(QObject):
         if not self._model:
             return False
         for ref_row in range(self._model.root_item.child_count()):
-            item = self._model.root_item.child_items[ref_row]
+            try:  # try for empty model
+                item = self._model.root_item.child_items[ref_row]
+            except Exception:
+                return -1
             if item.item_data[0] == conan_ref:
                 if pkg_id:
                     if item.child_count() < 2:  # try to fetch, pkd_id probably not loaded yet
@@ -296,7 +299,7 @@ class PackageSelectionController(QObject):
     def select_local_package_from_ref(self, conan_ref: str, export=False, 
         select_mode=QItemSelectionModel.SelectionFlag.ClearAndSelect) -> Optional[QModelIndex]:
         """ Selects a reference:id pkg in the left pane and opens the file view 
-        param export: teels to select the export folder
+        param export: tells to select the export folder
         """
         # change to this page and loads
         self._page_widgets.get_button_by_type(type(self.parent())).click()
