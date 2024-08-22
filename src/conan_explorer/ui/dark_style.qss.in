@@ -32,6 +32,10 @@ QWidget#central_widget{
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
 
+QFrame#edit_frame{
+    background-color: #808086;
+}
+
 /* Top Frame Subwidgets */
 
 QLabel#page_title {
