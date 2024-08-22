@@ -127,7 +127,7 @@ After checkout use the command:
 
 ## 🏃 Running
 
-Execute `conan-explorer` if the Python "scripts" or "bin" folder is on your system path, or look it up manually in the site-packages folder. 
+Execute `conan_explorer` if the Python "scripts" or "bin" folder is on your system path, or look it up manually in the site-packages folder. 
 You can also assign its icon to it from the site packages folder in **conan_explorer/assets/icons/icon.ico**.
 
 ### Main dependencies
