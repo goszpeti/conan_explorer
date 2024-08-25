@@ -32,6 +32,7 @@ class ConanInstallDialog(QDialog):
         self.pkg_installed_signal = pkg_installed_signal
         self._capture_install_info = capture_install_info
         self._conan_selected_install: Optional[ConanWorkerElement] = None
+        self._pkg_diff_items = []
         # style
         icon = get_themed_asset_icon("icons/download_pkg.svg", True)
         self.setWindowIcon(icon)
@@ -213,10 +214,17 @@ class ConanInstallDialog(QDialog):
             self.show_package_diffs(conan_ref)
         message_box.close()
 
+    def get_all_pkgs(self, conan_ref: str):
+        self._pkg_diff_items = app.conan_api.get_remote_pkgs_from_ref(
+            ConanRef.loads(conan_ref), "all")
+
     def show_package_diffs(self, conan_ref: str):
         try:
-            items = app.conan_api.get_remote_pkgs_from_ref(
-                ConanRef.loads(conan_ref), "all")
+            loader = LoaderGui(self)
+            loader.load(self, self.get_all_pkgs, (conan_ref, ),
+                        loading_text="Getting all packages...")
+            loader.wait_for_finished()
+            items = self._pkg_diff_items
             if len(items) < 2:
                 return
             if not self._conan_selected_install:

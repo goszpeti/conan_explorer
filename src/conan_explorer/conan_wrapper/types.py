@@ -43,7 +43,12 @@ else:
 
         @staticmethod
         def loads(text: str, validate=True) -> ConanRef:
+            # add back support for @_/_ canonical refs to handle this uniformly
+            # Simply remove it before passing it to ConanFileRef
+            if text.endswith("@_/_"):
+                text = text.replace("@_/_", "")
             ref: ConanRef = ConanFileRef().loads(text) # type: ignore
+            
             if validate:
                 # validate_ref creates an own output stream which can't log to console
                 # if it is running as a gui application
