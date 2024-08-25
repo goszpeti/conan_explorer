@@ -77,7 +77,8 @@ class SideSubMenu(ThemedWidget):
 
     def add_menu_line(self):
         line = QFrame(self)
-        line.setMidLineWidth(3)
+        line.setLineWidth(2)
+        line.setMidLineWidth(0)
         line.setFrameShape(QFrame.Shape.HLine)
         line.setFrameShadow(QFrame.Shadow.Sunken)
         self.add_custom_menu_entry(line, "line")

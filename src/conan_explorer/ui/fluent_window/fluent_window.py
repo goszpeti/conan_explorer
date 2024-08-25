@@ -147,8 +147,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         if is_windows_11() or platform.system() == "Linux":  # To hide black edges around the border rounding
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
-        self._use_native_windows_fcns = True if platform.system(
-        ) == "Windows" and native_windows_fcns else False
+        self._use_native_windows_fcns = True if platform.system() == "Windows" and native_windows_fcns else False
         # all buttons and widgets to be able to shown on the main page (from settings and left menu)
         self.page_widgets = FluentWindow.PageStore()
 
@@ -173,12 +172,16 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.settings_button.setFixedWidth(
             LEFT_MENU_MIN_WIDTH - button_offset)
 
-        self.set_themed_icon(self.ui.toggle_left_menu_button,
-                             "icons/menu_stripes.svg")
+        # set all built-in styled icons
+        self.set_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.svg")
         self.set_themed_icon(self.ui.settings_button, "icons/settings.svg")
-
         self.set_themed_icon(self.ui.minimize_button, "icons/minus.svg")
         self.set_themed_icon(self.ui.close_button, "icons/close.svg")
+        qss_icons = ["icons/check_box_empty.svg", "icons/check_box_checked.svg", 
+                     "icons/forward.svg", "icons/expand.svg"]
+        for icon in qss_icons:
+            get_themed_asset_icon(icon, force_dark_mode=True)
+
         from ..common.theming import get_gui_style
         style = get_gui_style()
         if style == GUI_STYLE_FLUENT:

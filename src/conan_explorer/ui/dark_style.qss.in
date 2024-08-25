@@ -286,6 +286,10 @@ QFrame#right_menu_frame QPushButton:checked{
     background-color: #808086;
 }
 
+QFrame#right_menu_frame .QFrame[frameShape="4"] {
+    background: white;
+}
+
 QLabel#side_menu_title_label {
     font: bold;
     font-size: {{MAIN_FONT_SIZE + 1}}pt;
@@ -320,7 +324,7 @@ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
     background: #202020;
 }
 QComboBox::down-arrow {
-    image: url(icons:material/expand_w.svg);
+    image: url(icons:material/expand_white.svg);
     width: 30px;
 }
 QComboBox::drop-down {
@@ -549,14 +553,21 @@ QListView::item:selected:active,QTreeView::item:selected:active{
 QListView::item:selected:!active,QTreeView::item:selected:!active {
     background-color: #6699CC;
 }
+QListView::indicator:unchecked,QListWidget::indicator:unchecked {
+    image: url(icons:material/check_box_empty_white.svg);
+}
+QListView::indicator:checked,QListWidget::indicator:checked {
+    image: url(icons:material/check_box_checked_white.svg);
+}
+
 QTreeView::branch {
     background: #474747;
 }
 QTreeView::branch:closed:has-children {
-    image: url(icons:material/forward_w.svg);
+    image: url(icons:material/forward_white.svg);
 }
 QTreeView::branch:open:has-children {
-    image: url(icons:material/expand_w.svg);
+    image: url(icons:material/expand_white.svg);
 }
 QTreeView::branch:hover:closed:has-children {
     image: url(icons:material/forward_b.svg);

@@ -474,17 +474,23 @@ QListView,QTreeView,QListWidget {
     alternate-background-color: white;
 }
 
-QListView::item:hover,QTreeView::item:hover {
+QListView::item:hover,QTreeView::item:hover,QListWidget::item:hover {
     background: #7fbfff;
 }
-QListView::item:selected,
-QTreeView::item:selected {
+QListView::item:selected,QTreeView::item:selected,QListWidget::item:selected {
 }
-QListView::item:selected:active,QTreeView::item:selected:active {
+QListView::item:selected:active,QTreeView::item:selected:active,QListWidget::item:selected:active {
     background: #6699CC;
 }
-QListView::item:selected:!active,QTreeView::item:selected:!active {
+QListView::item:selected:!active,QTreeView::item:selected:!active,QListWidget::item:selected:!active {
     background: #4c7399;
+}
+
+QListView::indicator:unchecked,QListWidget::indicator:unchecked {
+    image: url(icons:material/check_box_empty.svg);
+}
+QListView::indicator:checked,QListWidget::indicator:checked {
+    image: url(icons:material/check_box_checked.svg);
 }
 
 QTreeView::branch {
