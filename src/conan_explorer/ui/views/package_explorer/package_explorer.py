@@ -20,11 +20,10 @@ if TYPE_CHECKING:
     from conan_explorer.ui.fluent_window import FluentWindow
     from conan_explorer.ui.main_window import BaseSignals
 
-
 class LocalConanPackageExplorer(PluginInterfaceV1):
     conan_pkg_selected = Signal(str, ConanPkg, PkgSelectionType)
     # cut works globally
-    cut_files_reset = Signal() # for when e.g. a copy is requested or a new cut 
+    cut_files_reset = Signal() # for when e.g. a copy is requested or a new cut
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
                  base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
@@ -285,7 +284,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._file_cntx_menu.addAction(self._rename_action)
         # for the shortcut to work, the action has to be added to a higher level widget
         self.addAction(self._rename_action)
-        self._rename_action.triggered.connect(self.on_file_rename)
+        self._rename_action.triggered.connect(self.on_item_rename)
 
         self._copy_action = QAction("Copy", self)
         self.set_themed_icon(self._copy_action, "icons/copy.svg")
@@ -387,8 +386,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
     def on_open_terminal_in_dir(self, model_index):
         return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_terminal_in_dir()
 
-    def on_file_rename(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_rename()
+    def on_item_rename(self, model_index):
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_item_rename()
 
     def on_file_copy(self, model_index):
         return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_files_copy()

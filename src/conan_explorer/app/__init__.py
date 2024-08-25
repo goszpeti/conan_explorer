@@ -104,7 +104,7 @@ def load_qapp():
         QtWidgets.QApplication.setHighDpiScaleFactorRoundingPolicy(
             QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
     except Exception:
-        Logger().debug("Can't set DPI Rounding")
+        Logger().debug("Can't set DPI Rounding", exc_info=True)
 
     if qt_platform:
         os.environ["QT_QPA_PLATFORM"] = qt_platform

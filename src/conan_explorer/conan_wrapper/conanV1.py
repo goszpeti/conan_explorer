@@ -64,7 +64,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         try:  # use try-except because of Conan 1.24 envvar errors in tests
             self.remove_locks()
         except Exception as e:
-            Logger().debug(str(e))
+            Logger().debug(str(e), exc_info=True)
         from .conan_cache import ConanInfoCache
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
         Logger().debug("Initialized Conan V1 API wrapper")
@@ -368,8 +368,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         try:
             response = self.search_packages(
                 self._conan, self.generate_canonical_ref(conan_ref))
-        except Exception as error:
-            Logger().debug(f"{str(error)}")
+        except Exception:
+            Logger().debug("", exc_info=True)
             return result
         if not response.get("error", True):
             try:

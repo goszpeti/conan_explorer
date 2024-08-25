@@ -286,7 +286,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             default_options = self._resolve_default_options(default_options)
         except Exception as e:  # silent error - if we have no options don't spam the user
             Logger().debug(
-                f"Error while getting default options for {str(conan_ref)}: {str(e)}")
+                f"Error while getting default options for {str(conan_ref)}: {str(e)}", exc_info=True)
         return available_options, default_options
 
     ### Local References and Packages ###

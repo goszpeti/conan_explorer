@@ -6,10 +6,11 @@ import platform
 import sys
 import traceback
 from pathlib import Path
+from conan_explorer.ui.dialogs.conan_remove import ConanRemoveDialog
 from conan_explorer.ui.dialogs.pkg_diff.diff import ConfigDiffHighlighter, PkgDiffDialog
 from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
 from conan_explorer.ui.views.conan_conf.remotes_controller import ConanRemoteController
-from test.conftest import PathSetup
+from test.conftest import PathSetup, TEST_REF, conan_install_ref
 from unittest.mock import Mock
 
 import pytest
@@ -372,3 +373,40 @@ def test_conan_diff_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
     check_color_in_document(
         dialog._ui.right_text_browser.document(), "os", QtGui.QColor("black"))
 
+
+@pytest.mark.conanv2
+def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
+    """ Test, that the delete package dialog deletes a reference with id, 
+    without id and cancel does nothing"""
+    cfr = ConanRef.loads(TEST_REF)
+    conan_install_ref(TEST_REF)
+
+    # precheck, that the package is found
+    found_pkg = app.conan_api.get_local_pkgs_from_ref(cfr)
+    assert found_pkg
+    pkg_id_to_remove = ""
+
+    # check cancel does nothing
+    dialog = ConanRemoveDialog(None, {TEST_REF: [pkg_id_to_remove]}, None)
+    dialog.show()
+    dialog.button(dialog.StandardButton.Cancel).clicked.emit()
+
+    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
+    assert found_pkg.get("id", "")
+
+    # check without pkg id
+    dialog.button(dialog.StandardButton.Yes).clicked.emit()
+
+    # check, that the package is deleted
+    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
+    assert not found_pkg.get("id", "")
+
+    # check with pkg id
+    conan_install_ref(TEST_REF)
+    dialog = ConanRemoveDialog(None, {TEST_REF: [found_pkg.get("id", "")]}, None)
+    dialog.show()
+    dialog.button(dialog.StandardButton.Yes).clicked.emit()
+
+
+    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
+    assert not found_pkg.get("id", "")

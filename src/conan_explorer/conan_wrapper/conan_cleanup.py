@@ -28,7 +28,7 @@ class ConanCleanup():
             try:
                 ref_remote = ref_cache.load_metadata().recipe.remote # type: ignore
             except Exception:
-                Logger().debug(f"Can't load metadata for {str(ref)}")
+                Logger().debug(f"Can't load metadata for {str(ref)}", exc_info=True)
                 continue
             if ref_remote not in remote_names:
                 invalid_refs.append(str(ref))
@@ -75,7 +75,7 @@ class ConanCleanup():
                     # old API of Conan
                     package_ids = ref_cache.packages_ids()  # type: ignore
                 except Exception as e:
-                    Logger().debug("Cannot check pkg id for %s: %s", ref, str(e))
+                    Logger().debug("Cannot check pkg id for %s: %s", ref, str(e), exc_info=True)
             for pkg_id in package_ids:
                 short_path_dir = self._conan_api.get_package_folder(ref, pkg_id)
                 pkg_id_dir = None
@@ -84,7 +84,7 @@ class ConanCleanup():
                 if not isinstance(ref_cache, PackageEditableLayout):
                     pkg_id_dir = Path(ref_cache.packages()) / pkg_id
                 if not short_path_dir.exists():
-                    Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}")
+                    Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}", exc_info=True)
                     if pkg_id_dir:
                         del_list.append(str(pkg_id_dir))
            
@@ -127,7 +127,7 @@ class ConanCleanup():
                 real_path = rp_file.read_text()
                 try:
                     if not Path(real_path).is_dir():
-                        Logger().debug(f"Can't find {real_path} for {str(short_path)}")
+                        Logger().debug(f"Can't find {real_path} for {str(short_path)}", exc_info=True)
                         del_list.append(str(short_path))
                 except Exception:
                     Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")

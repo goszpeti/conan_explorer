@@ -5,6 +5,7 @@ with prefilled text and stacktrace.
 import platform
 import traceback
 from types import TracebackType
+from typing import Optional
 
 from conan_explorer import REPO_URL, __version__
 from PySide6.QtWidgets import QStyle
@@ -34,9 +35,9 @@ Add any other context about the problem here.
 """
 
 
-def show_bug_reporting_dialog(excvalue: BaseException, tb: "TracebackType | None"):
+def show_bug_reporting_dialog(excvalue: Optional[BaseException], tb: "TracebackType | None"):
     import urllib.parse  # late import hopefully we don't need this
-    error_text = f"{excvalue}\n" + "\n".join(traceback.format_tb(tb, limit=None))
+    error_text = f"{str(excvalue)}\n" + "\n".join(traceback.format_tb(tb, limit=None))
     title = urllib.parse.quote("Application Crash on <>")
     body = urllib.parse.quote(f"{bug_dialog_text}\n**Stacktrace**:\n" + error_text)
     new_issue_with_info_text = f"{REPO_URL}/issues/new?title={title}&body={body}&labels=bug"

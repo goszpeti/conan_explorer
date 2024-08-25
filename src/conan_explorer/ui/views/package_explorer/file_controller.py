@@ -11,10 +11,9 @@ from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui.common import re_register_signal
 from conan_explorer.ui.views.app_grid import UiAppLinkConfig
 from conan_explorer.ui.views import AppGridView
-from PySide6.QtCore import (QMimeData, QModelIndex, QObject,
-                            Qt, QUrl, SignalInstance)
-from PySide6.QtWidgets import (QApplication, QTextBrowser, QMessageBox,
-                               QTreeView, QWidget)
+from PySide6.QtCore import (QMimeData, QModelIndex, QObject, QItemSelectionModel,
+                            Qt,  QUrl, SignalInstance)
+from PySide6.QtWidgets import QApplication, QTextBrowser, QMessageBox, QTreeView
 
 
 from .sel_model import PkgSelectionType
@@ -25,6 +24,7 @@ if TYPE_CHECKING:
     from conan_explorer.ui.main_window import BaseSignals
     from .package_explorer import LocalConanPackageExplorer
 
+NEW_FOLDER_NAME = "New folder"
 
 class PackageFileExplorerController(QObject):
 
@@ -206,7 +206,7 @@ class PackageFileExplorerController(QObject):
         QApplication.clipboard().setMimeData(data)
         return urls
 
-    def on_file_rename(self):
+    def on_item_rename(self):
         file_view_indexes = self._get_pkg_file_source_items()
         if not file_view_indexes:
             return None
@@ -303,8 +303,16 @@ class PackageFileExplorerController(QObject):
             AppGridView).open_new_app_dialog_from_extern(app_config)
         
     def on_new_folder(self, model_index):
-        file_path = Path(self.get_selected_pkg_paths()[-1])
-        (file_path.parent / "New folder").mkdir()
+        request_file_path = Path(self.get_selected_pkg_paths()[-1])
+        target_file_path = request_file_path
+        if request_file_path.is_file():
+            target_file_path = request_file_path.parent
+
+        target_folder = (target_file_path / NEW_FOLDER_NAME)
+        target_folder.mkdir(exist_ok=True)
+        # it does not seem to be necessary to wait for creation
+        if self.select_file_item(str(target_folder)).isValid():
+            self.on_item_rename()
 
     def on_open_file_in_file_manager(self, model_index):
         file_path = Path(self.get_selected_pkg_paths()[-1])
@@ -316,6 +324,18 @@ class PackageFileExplorerController(QObject):
             if index.column() == 0:  # we only need a row once
                 indexes.append(index)
         return indexes
+    
+    def select_file_item(self, file_to_select: str) -> QModelIndex:
+        if not self._model:
+            return QModelIndex()
+        try:
+            sel_idx = self._model.index(file_to_select, 0)
+            self._view.selectionModel().select(sel_idx,
+                                        QItemSelectionModel.SelectionFlag.ClearAndSelect)
+        except Exception:
+            Logger().debug(f"Can't select file {file_to_select}", exc_info=True)
+            return QModelIndex()
+        return sel_idx
 
     def get_selected_pkg_paths(self) -> List[str]:
         file_paths: List[str] = []
