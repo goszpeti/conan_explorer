@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QWidget
 
 import conan_explorer.app as app
  # reimport for usage in other files
-from conan_explorer.app.base_ui.theming import get_gui_dark_mode, get_user_theme_color
+from conan_explorer.app.base_ui.theming import get_gui_dark_mode
 from conan_explorer.app.logger import Logger
 from conan_explorer.settings import (GUI_STYLE, GUI_STYLE_FLUENT,
                                      GUI_STYLE_MATERIAL)

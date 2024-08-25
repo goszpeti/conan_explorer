@@ -122,8 +122,6 @@ def load_qapp():
     qt_app = QtWidgets.QApplication(sys.argv)
     qt_app.setApplicationName(APP_NAME)
     qt_app.setApplicationDisplayName(APP_NAME)
-    # qt_app.setStyle(QtWidgets.QStyleFactory.create(
-    #    "WindowsVista"))  # windows11 WindowsVista Fusion
 
     # Overwrite the excepthook with our own -
     # this will provide a method to report bugs for the user

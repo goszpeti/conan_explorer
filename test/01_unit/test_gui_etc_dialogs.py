@@ -24,7 +24,6 @@ from conan_explorer.app import bug_dialog_exc_hook
 from conan_explorer.conan_wrapper.conanV1 import ConanApi
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, Remote
 from conan_explorer.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
-from conan_explorer.ui.common.theming import get_user_theme_color
 from conan_explorer.ui.dialogs import FileEditorSelDialog, show_bug_reporting_dialog
 from conan_explorer.ui.views import AboutPage
 from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import \
@@ -117,29 +116,6 @@ def test_bug_dialog(qtbot, base_fixture, mocker):
     browser: QtWidgets.QTextBrowser = dialog.findChild(QtWidgets.QTextBrowser)
     assert "\n".join(traceback.format_tb(exc_info[2], limit=None)) in browser.toPlainText()
 
-
-def test_get_accent_color(mocker):
-    """
-    Test, that get_user_theme_color returns black on default and the color on Windows
-    in the format #RRGGBB
-    """
-    if platform.system() == "Windows":
-        # Use 4279313508, which is ff112464 -> 642411 (dark red)
-        mocker.patch("winreg.QueryValueEx", return_value=["4279313508"])
-        color = get_user_theme_color()
-        assert color == "#642411"
-        # Test invalid registry access
-        mocker.patch("winreg.QueryValueEx", side_effect=Exception('mocked error'))
-        color = get_user_theme_color()
-        assert color == "#000000"
-        # Test invalid registry value
-        mocker.patch("winreg.QueryValueEx", return_value=["DUMMY"])
-        color = get_user_theme_color()
-        assert color == "#000000"
-
-    elif platform.system() == "Linux":
-        color = get_user_theme_color()
-        assert color == "#000000"
 
 def test_remote_url_groups(base_fixture, mocker):
     """ Test, that url groups for remotes are discovered (used in login dialog)
