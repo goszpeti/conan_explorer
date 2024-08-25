@@ -256,7 +256,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def update_remote(self, remote_name: str, url: str, verify_ssl: bool, disabled: bool,
                       index: Optional[int]):
-        self.disable_remote(remote_name, disabled)
+        # self.disable_remote(remote_name, disabled)
         self._conan.remote_update(remote_name, url, verify_ssl, index)
 
     def login_remote(self, remote_name: str, user_name: str, password: str):

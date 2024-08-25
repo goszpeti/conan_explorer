@@ -28,17 +28,18 @@ if TYPE_CHECKING:
 
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: "LocalConanPackageExplorer", view: QTreeView, pkg_path_label: QTextBrowser,
-                 conan_pkg_selected: SignalInstance, base_signals: "BaseSignals",
-                 page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: "LocalConanPackageExplorer", view: QTreeView, 
+                 pkg_path_label: QTextBrowser, cut_files_reset: SignalInstance, 
+                 base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._model: Optional[CalFileSystemModel] = None
         self._page_widgets = page_widgets
         self._view = view
         self._pkg_path_label = pkg_path_label
-        self._conan_pkg_selected = conan_pkg_selected
+        self.cut_files_reset = cut_files_reset
         self._type = PkgSelectionType.ref
         base_signals.conan_pkg_removed.connect(self.on_conan_pkg_removed)
+        self.cut_files_reset.connect(self._disable_cut_selection)
 
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
@@ -177,8 +178,8 @@ class PackageFileExplorerController(QObject):
         urls = []
         for file in files:
             urls.append(QUrl.fromLocalFile(file))
-            self._model.clear_disabled_item(file)
-            self._view.repaint()
+        self.cut_files_reset.emit()
+        self._view.repaint()
         data.setUrls(urls)
 
         QApplication.clipboard().setMimeData(data)
@@ -197,6 +198,8 @@ class PackageFileExplorerController(QObject):
         data.setUrls(urls)
         data.setProperty("action", "cut")
         self._model.clear_all_disabled_items()  # type: ignore
+        self.cut_files_reset.emit()
+
         self._model.add_disabled_items(files)  # type: ignore
         self._view.repaint()
 
@@ -230,17 +233,25 @@ class PackageFileExplorerController(QObject):
         elif not self._is_selected_file_item_expanded():
             dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
 
+        cut = False
         for url in urls:
             # try to copy
             if not url.isLocalFile():
                 continue
             source_path = Path(url.toLocalFile())
             new_path_str = os.path.join(dst_dir_path, url.fileName())
-            cut = True if data.property("action") == "cut" else False
+            cut = True if data.property("action") == "cut" else False # all of them should be true
             self.paste_path(source_path, Path(new_path_str), cut)
-            if cut:  # restore disabled items
-                self._model.clear_all_disabled_items()  # type: ignore
-                self._view.repaint()
+        self.cut_files_reset.emit()
+        self._disable_cut_selection()
+        # if cut:  # restore disabled items
+        #     _disable_cut_selection
+
+    def _disable_cut_selection(self):
+        if self.sender() == self:
+            return
+        self._model.clear_all_disabled_items()  # type: ignore
+        self._view.repaint()
 
     def paste_path(self, src: Path, dst: Path, cut=False):
         if src == dst and cut:
@@ -259,6 +270,8 @@ class PackageFileExplorerController(QObject):
                 reply = msg.exec()
                 if reply == QMessageBox.StandardButton.Yes:
                     copy_path_with_overwrite(src, dst)
+                else:
+                    return # early return to not delete path on cut and cancel
             else:
                 copy_path_with_overwrite(src, dst)
             if cut:

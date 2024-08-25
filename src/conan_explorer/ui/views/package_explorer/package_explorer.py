@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 
 class LocalConanPackageExplorer(PluginInterfaceV1):
     conan_pkg_selected = Signal(str, ConanPkg, PkgSelectionType)
+    # cut works globally
+    cut_files_reset = Signal() # for when e.g. a copy is requested or a new cut 
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
                  base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
@@ -40,7 +42,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self.conan_pkg_selected, self._base_signals, self._page_widgets)
         self._pkg_tabs_ctrl = [PackageFileExplorerController(
             self, self._ui.package_file_view, self._ui.package_path_label,
-            self.conan_pkg_selected, self._base_signals, self._page_widgets)]
+            self.cut_files_reset, self._base_signals, self._page_widgets)]
         self._file_cntx_menu = None
         self.set_themed_icon(self._ui.refresh_button, "icons/refresh.svg")
         self.set_themed_icon(self._ui.show_sizes_button, "icons/bar_chart.svg")
@@ -121,8 +123,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
                 QAbstractItemView.SelectionMode.ExtendedSelection)
 
             self._pkg_tabs_ctrl.append(PackageFileExplorerController(
-                self, file_explorer_view, self._ui.package_path_label,
-                self.conan_pkg_selected, self._base_signals, self._page_widgets))
+                self, file_explorer_view, self._ui.package_path_label, self.cut_files_reset,
+                self._base_signals, self._page_widgets))
 
             self._ui.package_tab_widget.insertTab(index, tab, "New tab")
             self._ui.package_tab_widget.setCurrentIndex(index)

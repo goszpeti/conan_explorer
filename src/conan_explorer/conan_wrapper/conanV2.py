@@ -56,6 +56,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     ### General commands ###
 
+
     def remove_locks(self):
         pass  # command does not exist
 
@@ -185,7 +186,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def update_remote(self, remote_name: str, url: str, verify_ssl: bool, disabled: bool,
                       index: Optional[int]):
-        self._conan.remotes.update(remote_name, url, verify_ssl, disabled, index)
+        self._conan.remotes.update(remote_name, url, verify_ssl,
+                                   self._conan.remotes.get(remote_name).disabled, index)
 
     def login_remote(self, remote_name: str, user_name: str, password: str):
         if conan_version < Version("2.1"):
