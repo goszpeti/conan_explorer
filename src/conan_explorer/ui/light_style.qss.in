@@ -474,16 +474,21 @@ QListView,QTreeView,QListWidget {
     alternate-background-color: white;
 }
 
+/* border-radius causes grahical glitches */
 QListView::item:hover,QTreeView::item:hover,QListWidget::item:hover {
     background: #7fbfff;
+    /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
 QListView::item:selected,QTreeView::item:selected,QListWidget::item:selected {
+    /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
 QListView::item:selected:active,QTreeView::item:selected:active,QListWidget::item:selected:active {
     background: #6699CC;
+    /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
 QListView::item:selected:!active,QTreeView::item:selected:!active,QListWidget::item:selected:!active {
     background: #4c7399;
+    /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
 
 QListView::indicator:unchecked,QListWidget::indicator:unchecked {
