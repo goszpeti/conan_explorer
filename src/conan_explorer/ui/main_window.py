@@ -330,30 +330,33 @@ class MainWindow(FluentWindow):
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
         cleaner = ConanCleanup(app.conan_api) # type: ignore
         loader = LoaderGui(self)
-        loader.load(self, cleaner.get_cleanup_cache_paths, 
-                    loading_text="Gathering obsolete directories...")
+        loader.load(self, cleaner.find_refs_cache_info, 
+                    loading_text="Gathering obsolete directories...", cancel_button=False)
         loader.wait_for_finished()
-        paths = loader.return_value
-
-        def get_cumulated_cleanup_size(paths):
-            size_mbytes = 0
-            for path in paths:
-                size_mbytes += get_folder_size_mb(Path(path))
-                loader.loading_string_signal.emit((
-                    f"Calculating size of found directory:\n{path}\n"
-                    "Found {size_mbytes:.1f}MB to clean up"))
-            return size_mbytes
-        loader.load(self, get_cumulated_cleanup_size, (paths, ))
-        loader.wait_for_finished()
-        size = loader.return_value
-        if not paths:
+        cleanup_info = loader.return_value
+        if not cleanup_info:
             self.write_log("INFO: Nothing found in cache to clean up.")
             return
-        if len(paths) > 1:
-            path_list = "\n".join(paths)
-        else:
-            path_list = str(paths)
 
+        def get_cumulated_cleanup_size(cleanup_info):
+            size_mbytes = 0
+            for ref, paths in cleanup_info.items():
+                for type, path in paths.items():
+                    loader.loading_string_signal.emit((
+                        f"Calculating size of {ref} {type} folder:\n{path}\n"
+                        f"Found {size_mbytes:.1f}MB to clean up"))
+                    size_mbytes += get_folder_size_mb(Path(path))
+            return size_mbytes
+        loader.load(self, get_cumulated_cleanup_size, (cleanup_info, ))
+        loader.wait_for_finished()
+        size = loader.return_value
+
+        # if len(paths) > 1:
+        #     path_list = "\n".join(paths)
+        # else:
+        path_list = str(cleanup_info)
+        if size is None:
+            size = 0
         msg_box = WideMessageBox(parent=self)
         button = WideMessageBox.StandardButton
         msg_box.setWindowTitle("Delete folders")
@@ -365,12 +368,14 @@ class MainWindow(FluentWindow):
         msg_box.setMaximumHeight(600)
         reply = msg_box.exec()
         if reply == button.Yes:
-            def delete_cache_paths(paths):
-                for path in paths:
-                    delete_path(Path(path))
-                    loader.loading_string_signal.emit("Deleting\n" + str(path))
-            loader.load(self, delete_cache_paths, (paths,), 
-                                 loading_text="Deleting cache paths...")
+            def delete_cache_paths(cleanup_info):
+                for ref, paths in cleanup_info.items():
+                    for type, path in paths.items(): 
+                        loader.loading_string_signal.emit("Deleting\n" + str(path))
+                        delete_path(Path(path))
+            loader.load(self, delete_cache_paths, (cleanup_info,),
+                                 loading_text="Deleting cache paths...",
+                                 cancel_button=False)
 
     def open_file_editor_selection_dialog(self):
         dialog = FileEditorSelDialog(self)

@@ -268,18 +268,21 @@ def start_conan_server():
             paths = PathSetup()
             conanfile = str(paths.testdata_path / "conan" / "conanfile_no_settings.py")
             conan_create_and_upload(conanfile,  "nocompsettings/1.0.0@local/no_sets")
+    # create many packages
+    #if not conan_version.major == 2:
+    #     for i in range(9,100):
+    #         print(f"Copying index {i}")
+    #         os.system(f"conan alias example/9.9.{i}@local/alias {TEST_REF}")
 
 
 @pytest.fixture(scope="session", autouse=True)
 def ConanServer():
     os.environ["CONAN_NON_INTERACTIVE"] = "True"  # don't hang is smth. goes wrong
-    started = False
     if not check_if_process_running("conan_server", timeout_s=0):
-        started = True
         print("STARTING CONAN SERVER")
         start_conan_server()
     yield
-    if started:
+    if conan_server_thread:
         print("\nKILLING CONAN SERVER\n ")
         check_if_process_running("conan_server", timeout_s=0, kill=True)
         conan_server_thread.join()

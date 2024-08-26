@@ -1,10 +1,11 @@
 from pathlib import Path
 import platform
-from typing import TYPE_CHECKING, List, Set
+from typing import TYPE_CHECKING, Dict, List, Set
 
 from conan_explorer import conan_version
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import get_folder_size_mb
+from conan_explorer.conan_wrapper.types import ConanRef
 if TYPE_CHECKING:
     from .conanV1 import ConanApi
 
@@ -12,8 +13,7 @@ class ConanCleanup():
 
     def __init__(self, conan_api: "ConanApi") -> None:
         self._conan_api = conan_api
-        self.orphaned_references: Set[str] = set()
-        self.orphaned_packages: Set[str] = set()
+        self.cleanup_refs_info: Dict[str, Dict[str, str]] = {}
         self.invalid_metadata_refs: Set[str] = set()
 
     def gather_invalid_remote_metadata(self) -> List[str]:
@@ -45,22 +45,19 @@ class ConanCleanup():
             except Exception:
                 continue
 
-    def get_cleanup_cache_paths(self) -> Set[str]:
+    def find_refs_cache_info(self) -> Dict[str, Dict[str, str]]:
         """ Get a list of orphaned short path and cache folders """
-        # Blessed are the users Microsoft products!
         if platform.system() != "Windows" or conan_version.major == 2:
-            return set()
-        self.find_orphaned_references()
-        self.find_orphaned_packages()
-        return self.orphaned_references.union(self.orphaned_packages)
-
-    def find_orphaned_references(self):
+            return {} # TODO: Fix for linux
         from .types import PackageEditableLayout, CONAN_LINK
-        del_list = []
+        del_list = {}
         for ref in self._conan_api.get_all_local_refs():
             # This will not updated to the unified API - only V1 relevant
             ref_cache = self._conan_api._client_cache.package_layout(ref)
-            # get_local_pkgs_from_ref will not find orphaned packages...
+            ref_str = str(ref)
+            current_ref_info = {}
+
+            # Get orphaned refs
             package_ids = []
             try:
                 package_ids = ref_cache.package_ids()
@@ -78,51 +75,68 @@ class ConanCleanup():
                 if not isinstance(ref_cache, PackageEditableLayout):
                     pkg_id_dir = Path(ref_cache.packages()) / pkg_id
                 if not short_path_dir.exists():
-                    Logger().debug(f"Can't find {str(short_path_dir)} for {str(ref)}", exc_info=True)
                     if pkg_id_dir:
-                        del_list.append(str(pkg_id_dir))
+                        current_ref_info[str(pkg_id)] = str(pkg_id_dir)
            
+
+            # get temporary dirs
             if not isinstance(ref_cache, PackageEditableLayout):
                 source_path = Path(ref_cache.source())
                 if source_path.exists():
                     # check for .conan_link
                     if (source_path / CONAN_LINK).is_file():
                         path = (source_path / CONAN_LINK).read_text()
-                        del_list.append(path.strip())
+                        current_ref_info["source"] = path.strip()
                     else:
-                        del_list.append(ref_cache.source())
+                        current_ref_info["source"] = ref_cache.source()
 
                 if Path(ref_cache.builds()).exists():
-                    del_list.append(ref_cache.builds())
+                    current_ref_info["build"] = ref_cache.builds()
 
                 scm_source_path = Path(ref_cache.scm_sources())
                 if scm_source_path.exists():
                     # check for .conan_link
                     if (scm_source_path / CONAN_LINK).is_file():
                         path = (scm_source_path / CONAN_LINK).read_text()
-                        del_list.append(path.strip())
+                        current_ref_info["scm_source"] = path.strip()
                     else:
-                        del_list.append(ref_cache.scm_sources())
+                        current_ref_info["scm_source"] = ref_cache.scm_sources()
                 download_folder = Path(ref_cache.base_folder()) / "dl"
                 if download_folder.exists():
-                    del_list.append(str(download_folder))
-        self.orphaned_references = set(del_list)
+                    current_ref_info["download"] = str(download_folder)
+                if current_ref_info:
+                    del_list[ref_str] = current_ref_info
+        self.cleanup_refs_info.update(del_list)
+
+        self.find_orphaned_packages()
+        self.cleanup_refs_info = dict(sorted(self.cleanup_refs_info.items()))
+        return self.cleanup_refs_info
 
     def find_orphaned_packages(self):
         """ Reverse search for orphaned packages on windows short paths """
+        if platform.system() != "Windows" or conan_version.major == 2:
+            return {}
         from .types import CONAN_REAL_PATH
 
-        del_list = []
+        del_list = {}
         short_path_folders = [f for f in self._conan_api.get_short_path_root().iterdir()
                               if f.is_dir()]
         for short_path in short_path_folders:
             rp_file = short_path / CONAN_REAL_PATH
             if rp_file.is_file():
                 real_path = rp_file.read_text()
-                try:
-                    if not Path(real_path).is_dir():
-                        Logger().debug(f"Can't find {real_path} for {str(short_path)}", exc_info=True)
-                        del_list.append(str(short_path))
-                except Exception:
-                    Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")
-        self.orphaned_packages = set(del_list)
+                if not Path(real_path).is_dir():
+                    conan_ref = "Unknown"
+                    type = "Unknown"
+                    try:
+                        # try to reconstruct conan ref from real_path
+                        rel_path = Path(real_path).relative_to(self._conan_api.get_storage_path())
+                        type = rel_path.parts[4]
+                        conan_ref = str(ConanRef(rel_path.parts[0],
+                                 rel_path.parts[1], rel_path.parts[2], rel_path.parts[3]))
+                        
+                    except Exception:
+                        Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")
+                    if not self.cleanup_refs_info.get(conan_ref):
+                        self.cleanup_refs_info[conan_ref] = {}
+                    self.cleanup_refs_info[conan_ref][type] = str(short_path)
