@@ -134,6 +134,7 @@ class LoaderGui(QObject):
                     finish_task(ret)
                 except Exception:
                     finish_task()
+            self.on_finished(ret)
             return
 
         self.worker = Worker(work_task, worker_args)

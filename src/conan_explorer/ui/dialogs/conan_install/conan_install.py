@@ -149,7 +149,7 @@ class ConanInstallDialog(QDialog):
         try:
             return app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))
         except Exception:
-            return
+            return {}, {}
 
     def on_auto_install_check(self):
         enabled = True
