@@ -1,7 +1,7 @@
 [project]
 name = "conan-explorer"
 authors = [{name = "Péter Gosztolya and Contributors"}]
-version = "2.3.0a7"
+version = "2.3.0b1"
 requires-python = ">=3.8"
 description = "Package Explorer and App Launcher for Conan"
 keywords = ["conan", "gui"]
