@@ -330,7 +330,7 @@ class MainWindow(FluentWindow):
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
         cleaner = ConanCleanup(app.conan_api) # type: ignore
         loader = LoaderGui(self)
-        loader.load(self, cleaner.find_refs_cache_info, 
+        loader.load(self, cleaner.get_cleanup_cache_info, 
                     loading_text="Gathering obsolete directories...", cancel_button=False)
         loader.wait_for_finished()
         cleanup_info = loader.return_value

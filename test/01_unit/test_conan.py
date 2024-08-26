@@ -72,7 +72,7 @@ def test_empty_cleanup_cache(base_fixture):
     """
     os.environ["CONAN_USER_HOME"] = str(Path(tempfile.gettempdir()) / "._myconan_home")
     os.environ["CONAN_USER_HOME_SHORT"] = str(Path(tempfile.gettempdir()) / "._myconan_short")
-    paths = ConanCleanup(ConanApi().init_api()).get_cleanup_cache_paths()
+    paths = ConanCleanup(ConanApi().init_api()).get_cleanup_cache_info()
     assert not paths
     os.environ.pop("CONAN_USER_HOME")
     os.environ.pop("CONAN_USER_HOME_SHORT")

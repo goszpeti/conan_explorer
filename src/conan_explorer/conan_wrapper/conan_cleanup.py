@@ -45,7 +45,7 @@ class ConanCleanup():
             except Exception:
                 continue
 
-    def find_refs_cache_info(self) -> Dict[str, Dict[str, str]]:
+    def get_cleanup_cache_info(self) -> Dict[str, Dict[str, str]]:
         """ Get a list of orphaned short path and cache folders """
         if platform.system() != "Windows" or conan_version.major == 2:
             return {} # TODO: Fix for linux
