@@ -206,7 +206,7 @@ def delete_path(dst: Path):
     except Exception as e:
         Logger().warning(f"Can't delete {str(dst)}: {str(e)}")
 
-def get_folder_size(folder_path: Path):
+def get_folder_size_mb(folder_path: Path):
     return sum(file.stat().st_size for file in folder_path.rglob('*')) / pow(1024, 2)
 
 def copy_path_with_overwrite(src: Path, dst: Path):

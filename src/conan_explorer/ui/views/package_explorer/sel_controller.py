@@ -58,7 +58,6 @@ class PackageSelectionController(QObject):
         loader = LoaderGui(self)
         loader.load(self._view, show_conanfile, (conan_refs[0],),
                              loading_text="Opening Conanfile...")
-        loader.wait_for_finished()
 
     def on_copy_ref_requested(self):
         conan_refs = self.get_selected_conan_refs()
@@ -101,7 +100,6 @@ class PackageSelectionController(QObject):
                              (ConanRef.loads(conan_ref), pkg_info.get("settings", ""),
                               pkg_info.get("options", {})), self.show_buildinfo_dialog,
                              loading_text="Loading build info...")
-        loader.wait_for_finished()
 
     def show_buildinfo_dialog(self, buildinfos: str):
         if not buildinfos:

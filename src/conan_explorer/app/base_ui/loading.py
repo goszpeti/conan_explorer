@@ -73,6 +73,7 @@ class LoaderGui(QObject):
         self.worker: Optional[Worker] = None
         self.load_thread: Optional[QThread] = None
         self.finished = True
+        self.return_value = None
 
     def load_with_finish_hook(self, dialog_parent: Optional[QWidget], work_task: Callable,
                                  worker_args: Tuple[Any, ...] = (),
@@ -121,6 +122,7 @@ class LoaderGui(QObject):
         self.progress_dialog.show()
         self.progress_dialog.activateWindow()
 
+        # for debug purposes only
         if str2bool(os.getenv("DISABLE_ASYNC_LOADER", "")):
             ret = work_task(*worker_args)
             self.thread_finished()
@@ -144,6 +146,7 @@ class LoaderGui(QObject):
 
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.finished.connect(self.load_thread.quit)
+        self.worker.finished.connect(self.on_finished)
 
         self.load_thread.finished.connect(self.load_thread.deleteLater)
         self.load_thread.finished.connect(self.progress_dialog.hide)
@@ -162,3 +165,7 @@ class LoaderGui(QObject):
         while not self.finished:
             sleep(0.01)
             QApplication.processEvents()
+
+    def on_finished(self, return_value):
+        # save return value to get after wait_for_finished
+        self.return_value = return_value

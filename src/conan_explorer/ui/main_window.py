@@ -15,7 +15,7 @@ from conan_explorer import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
     MIN_FONT_SIZE, PathLike, conan_version)
 from conan_explorer.app import LoaderGui
 from conan_explorer.app import Logger, activate_theme
-from conan_explorer.app.system import delete_path
+from conan_explorer.app.system import delete_path, get_folder_size_mb
 from conan_explorer.settings import (AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
     FONT_SIZE, GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
     GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
@@ -330,9 +330,22 @@ class MainWindow(FluentWindow):
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
         cleaner = ConanCleanup(app.conan_api) # type: ignore
         loader = LoaderGui(self)
-        loader.load(self, cleaner.get_cleanup_cache_paths, )
+        loader.load(self, cleaner.get_cleanup_cache_paths, 
+                    loading_text="Gathering obsolete directories...")
         loader.wait_for_finished()
-        paths = cleaner.orphaned_packages.union(cleaner.orphaned_references)
+        paths = loader.return_value
+
+        def get_cumulated_cleanup_size(paths):
+            size_mbytes = 0
+            for path in paths:
+                size_mbytes += get_folder_size_mb(Path(path))
+                loader.loading_string_signal.emit((
+                    f"Calculating size of found directory:\n{path}\n"
+                    "Found {size_mbytes:.1f}MB to clean up"))
+            return size_mbytes
+        loader.load(self, get_cumulated_cleanup_size, (paths, ))
+        loader.wait_for_finished()
+        size = loader.return_value
         if not paths:
             self.write_log("INFO: Nothing found in cache to clean up.")
             return
@@ -344,7 +357,6 @@ class MainWindow(FluentWindow):
         msg_box = WideMessageBox(parent=self)
         button = WideMessageBox.StandardButton
         msg_box.setWindowTitle("Delete folders")
-        size = cleaner.get_cumulated_cleanup_size()
         msg_box.setText(f"Found {size:.2f} MB to clean up. Are you sure, you want to delete the found folders?\t")
         msg_box.setDetailedText(path_list)
         msg_box.setStandardButtons(button.Yes | button.Cancel)  # type: ignore

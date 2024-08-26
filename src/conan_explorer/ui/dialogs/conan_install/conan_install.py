@@ -115,7 +115,11 @@ class ConanInstallDialog(QDialog):
         loader.load(self, self.on_options_query, (conan_ref, ),
                              loading_text="Loading options...")
         loader.wait_for_finished()
-        default_options = self._default_options
+        options = loader.return_value
+        if options is None:
+            return
+        available_options, default_options = options
+
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
         for name, value in default_options.items():
             item = QTreeWidgetItem(self._ui.options_widget)
@@ -124,7 +128,7 @@ class ConanInstallDialog(QDialog):
             item.setFlags(Qt.ItemFlag.ItemIsEnabled)  # Qt.ItemFlag.ItemIsEditable |
             self._ui.options_widget.addTopLevelItem(item)
             try:
-                values = self._available_options[name]
+                values = available_options[name]
                 if isinstance(values, list) and values != ["ANY"]:
                     cb = QComboBox()
                     values_str = [str(x) for x in values]
@@ -143,8 +147,7 @@ class ConanInstallDialog(QDialog):
 
     def on_options_query(self, conan_ref: str):
         try:
-            self._available_options, self._default_options = \
-                app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))
+            return app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))
         except Exception:
             return
 
@@ -215,8 +218,7 @@ class ConanInstallDialog(QDialog):
         message_box.close()
 
     def get_all_pkgs(self, conan_ref: str):
-        self._pkg_diff_items = app.conan_api.get_remote_pkgs_from_ref(
-            ConanRef.loads(conan_ref), "all")
+        return app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(conan_ref), "all")
 
     def show_package_diffs(self, conan_ref: str):
         try:
@@ -224,7 +226,9 @@ class ConanInstallDialog(QDialog):
             loader.load(self, self.get_all_pkgs, (conan_ref, ),
                         loading_text="Getting all packages...")
             loader.wait_for_finished()
-            items = self._pkg_diff_items
+            items = loader.return_value
+            if not items:
+                return
             if len(items) < 2:
                 return
             if not self._conan_selected_install:

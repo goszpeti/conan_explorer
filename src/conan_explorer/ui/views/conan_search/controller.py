@@ -79,7 +79,6 @@ class ConanSearchController(QObject):
         conan_ref = combined_ref.split(":")[0]
         loader = LoaderGui(self)
         loader.load(self._view, show_conanfile, (conan_ref,), loading_text="Opening Conanfile...")
-        loader.wait_for_finished()
 
     def on_install_pkg_requested(self):
         """ Spawn the Conan install dialog """

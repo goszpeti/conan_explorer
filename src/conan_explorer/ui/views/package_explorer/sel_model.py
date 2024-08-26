@@ -7,7 +7,7 @@ from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer import conan_version
-from conan_explorer.app.system import get_folder_size
+from conan_explorer.app.system import get_folder_size_mb
 from conan_explorer.conan_wrapper import ConanApiFactory
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
@@ -163,7 +163,7 @@ class PkgSelectModel(TreeModel):
             pkg_path = app.conan_api.get_package_folder(conan_ref, item.pkg_info.get("id", ""))
         self._loader_signal.emit(
             f"Calculating size for\n {str(conan_ref)}\n{self._acc_size:.1f} MB read.")
-        size = get_folder_size(pkg_path)
+        size = get_folder_size_mb(pkg_path)
         item.item_data[1] = f"{size:.3f}"
         acc_size = float(item.parent_item.item_data[1]) + size
         self._acc_size += size
