@@ -39,7 +39,6 @@ class BaseSignals():
     conan_pkg_installed: SignalInstance  # conan_ref, pkg_id
     conan_pkg_removed: SignalInstance  # conan_ref, pkg_ids
     conan_remotes_updated: SignalInstance
-    page_size_changed: SignalInstance
 
 
 class MainWindow(FluentWindow):
@@ -51,7 +50,6 @@ class MainWindow(FluentWindow):
     # conan_ref, pkg_ids
     conan_pkg_removed: SignalInstance = Signal(str, str)  # type: ignore
     conan_remotes_updated: SignalInstance = Signal()  # type: ignore
-    page_size_changed: SignalInstance = Signal(QWidget)  # type: ignore
     log_console_message: SignalInstance = Signal(str)  # type: ignore 
 
     qt_logger_name = "qt_logger"
@@ -62,7 +60,7 @@ class MainWindow(FluentWindow):
         self._qt_app = qt_app
         self.loaded = False
         self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed,
-                                        self.conan_remotes_updated, self.page_size_changed)
+                                        self.conan_remotes_updated)
         self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
         self._plugin_handler = PluginHandler(self, self.base_signals, self.page_widgets)
         self.setWindowTitle("") # app display name is already there

@@ -49,12 +49,4 @@ class PluginInterfaceV1(ThemedWidget):
         self.setSizePolicy(size_policy)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
-    @override
-    def resizeEvent(self, a0) -> None:
-        # handles maximum size on resize
-        if not self._base_signals:
-            super().resizeEvent(a0)
-            return
-        self._base_signals.page_size_changed.emit(self)
-        super().resizeEvent(a0)
 

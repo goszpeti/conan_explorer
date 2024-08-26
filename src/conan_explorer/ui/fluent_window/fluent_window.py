@@ -152,12 +152,11 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.page_widgets = FluentWindow.PageStore()
 
         # resize related variables
-        self._resize_press = 0
         self._resize_direction = ResizeDirection.default
         self._resize_point = QPoint()
         self._last_geometry = QRect()
         self.title_text = title_text
-        self.drag_position: Optional[QPoint] = None
+        self._drag_position: Optional[QPoint] = None
 
         self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
         self.ui.left_menu_frame.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
@@ -224,7 +223,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     @override
     def mousePressEvent(self, event: QMouseEvent):
         """ Helper for moving window to know mouse position (Non Windows) """
-        self.drag_position = event.globalPosition().toPoint()
+        self._drag_position = event.globalPosition().toPoint()
 
     def apply_theme(self):
         """ This function must be able to reload all icons from the left and right menu bar. """
@@ -238,7 +237,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def move_window(self, event: QMouseEvent):
         # do nothing if the resize function is active
         if self.cursor().shape() != Qt.CursorShape.ArrowCursor:
-            self.eventFilter(self, event)  # call this to be able to resize
             return
         if self._use_native_windows_fcns:
             # enables Windows snap functions
@@ -253,11 +251,11 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 self.maximize_restore(None)
             # qt move
             if event.buttons() == Qt.MouseButton.LeftButton:
-                if self.drag_position is None:
+                if self._drag_position is None:
                     return
                 self.move(self.pos() + event.globalPosition().toPoint() -
-                          self.drag_position)  # type: ignore
-                self.drag_position = event.globalPosition().toPoint()
+                          self._drag_position)  # type: ignore
+                self._drag_position = event.globalPosition().toPoint()
                 event.accept()
 
     def enable_windows_native_animations(self):
@@ -410,6 +408,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """ Implements window resizing """
         self.set_restore_max_button_state()
         if self.isMaximized():  # no resize when maximized
+            # forced reset of cursor
+            if self.cursor().shape() != Qt.CursorShape.ArrowCursor:
+                self.setCursor(Qt.CursorShape.ArrowCursor)
             return super().eventFilter(watched, event)
         # Use isinstance instead of type because of typehinting
         if isinstance(event, QHoverEvent):
@@ -420,12 +421,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if event.type() == event.Type.MouseButtonPress:
                 if event.button() != Qt.MouseButton.LeftButton:
                     return super().eventFilter(watched, event)
-                self._resize_press = 1
-                # save the starting point of resize
-                self._resize_point = self.mapToGlobal(event.pos())
-                self._last_geometry = self.geometry()
-                self.resizing(event)
-                self._resize_press = 0
+                # resizing 
+                if self.cursor().shape() != Qt.CursorShape.ArrowCursor:
+                    # save the starting point of resize
+                    self._resize_point = self.mapToGlobal(event.pos())
+                    self._last_geometry = self.geometry()
+                    self.resizing(event)
             else: # Hacky fix for when the cursor is not reset after resizing
                 self.setCursor(Qt.CursorShape.ArrowCursor)
 
@@ -446,30 +447,38 @@ class FluentWindow(QMainWindow, ThemedWidget):
                  width - 2*x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top
             self.setCursor(cs.SizeVerCursor)
+            return
         elif QRect(bottom_left.x() + x_offset, bottom_left.y(), 
                    width - 2*x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom
             self.setCursor(cs.SizeVerCursor)
+            return
         elif QRect(top_right.x() - x_offset, top_right.y() + y_offset, 
                    x_offset, height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.right
             self.setCursor(cs.SizeHorCursor)
+            return
         elif QRect(top_left.x() + x_offset, top_left.y() + y_offset, -x_offset, 
                    height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.left
             self.setCursor(cs.SizeHorCursor)
+            return
         elif QRect(top_right.x(), top_right.y(), -x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_right
             self.setCursor(cs.SizeBDiagCursor)
+            return
         elif QRect(bottom_left.x(), bottom_left.y(), x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_left
             self.setCursor(cs.SizeBDiagCursor)
+            return
         elif QRect(top_left.x(), top_left.y(), x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_left
             self.setCursor(cs.SizeFDiagCursor)
+            return
         elif QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_right
             self.setCursor(cs.SizeFDiagCursor)
+            return
         else:  # no resize
             self._resize_direction = ResizeDirection.default
             self.setCursor(cs.ArrowCursor)
