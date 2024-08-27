@@ -43,8 +43,6 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return self
 
     def init_client_cache(self):
-        # if conan_version < Version("2.3.0"):
-        #     from conans.client.cache import ClientCache
         if conan_version < Version("2.4.0"):
             from conans.client.cache.cache import ClientCache
         else:

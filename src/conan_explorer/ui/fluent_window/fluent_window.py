@@ -446,38 +446,30 @@ class FluentWindow(QMainWindow, ThemedWidget):
                  width - 2*x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top
             self.setCursor(cs.SizeVerCursor)
-            return
         elif QRect(bottom_left.x() + x_offset, bottom_left.y(), 
                    width - 2*x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom
             self.setCursor(cs.SizeVerCursor)
-            return
         elif QRect(top_right.x() - x_offset, top_right.y() + y_offset, 
                    x_offset, height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.right
             self.setCursor(cs.SizeHorCursor)
-            return
         elif QRect(top_left.x() + x_offset, top_left.y() + y_offset, -x_offset, 
                    height - 2*y_offset).contains(position):
             self._resize_direction = ResizeDirection.left
             self.setCursor(cs.SizeHorCursor)
-            return
         elif QRect(top_right.x(), top_right.y(), -x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_right
             self.setCursor(cs.SizeBDiagCursor)
-            return
         elif QRect(bottom_left.x(), bottom_left.y(), x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_left
             self.setCursor(cs.SizeBDiagCursor)
-            return
         elif QRect(top_left.x(), top_left.y(), x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_left
             self.setCursor(cs.SizeFDiagCursor)
-            return
         elif QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_right
             self.setCursor(cs.SizeFDiagCursor)
-            return
         else:  # no resize
             self._resize_direction = ResizeDirection.default
             self.setCursor(cs.ArrowCursor)

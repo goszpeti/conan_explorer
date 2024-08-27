@@ -96,23 +96,23 @@ class PackageFilter(QSortFilterProxyModel):
     def lessThan(self, source_left: Union[QModelIndex, QPersistentModelIndex], 
                  source_right: Union[QModelIndex, QPersistentModelIndex]) -> bool:
         role = Qt.ItemDataRole.DisplayRole
-        leftData = self.sourceModel().data(source_left, role)
-        rightData = self.sourceModel().data(source_right, role)
-        if leftData is None:
+        left_data = self.sourceModel().data(source_left, role)
+        right_data = self.sourceModel().data(source_right, role)
+        if left_data is None:
             return True
-        elif rightData is None:
+        elif right_data is None:
             return False
         try:
-            leftData = float(leftData)
-            rightData = float(rightData)
+            left_data = float(left_data)
+            right_data = float(right_data)
         except Exception:
             return super().lessThan(source_left, source_right)
-        if type(leftData) != type(rightData): 
+        if type(left_data) != type(right_data): 
             # don't want to sort at all in these cases, False is just a copout ...
             # should warn user
             return False
 
-        return leftData < rightData
+        return left_data < right_data
 class PkgSelectModel(TreeModel):
 
     def __init__(self, loader_signal):

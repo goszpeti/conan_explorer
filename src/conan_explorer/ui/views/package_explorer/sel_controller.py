@@ -155,9 +155,7 @@ class PackageSelectionController(QObject):
         return conan_refs[0], pkg_id
     
     def get_selected_refs_with_pkg_ids(self) -> Dict[str, List[str]]:
-        conan_refs = self.get_selected_conan_refs()
         refs_with_pkg_ids = {}
-        conan_pkgs = []
         source_items = self.get_selected_pkg_source_items()
         for source_item in source_items:
             conan_ref_item = source_item
@@ -169,7 +167,7 @@ class PackageSelectionController(QObject):
             pkg_id = ""
             if pkg_info:= source_item.pkg_info:
                 pkg_id = pkg_info.get("id", "")
-            if not conan_ref in refs_with_pkg_ids:
+            if conan_ref not in refs_with_pkg_ids:
                 refs_with_pkg_ids[conan_ref] = [pkg_id]
             else:
                 refs_with_pkg_ids[conan_ref].append(pkg_id)

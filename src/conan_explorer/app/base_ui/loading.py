@@ -46,6 +46,7 @@ class LoaderGui(QObject):
     loading_string_signal: SignalInstance = Signal(str)  # type: ignore
     loading_gui_signal: SignalInstance = Signal(SignalInstance)  # type: ignore
     loading_finished_signal: SignalInstance = Signal()  # type: ignore
+    default_loading_text = "Loading..."
 
     def __init__(self, parent: Optional[QObject]):
         super().__init__(parent)
@@ -78,13 +79,13 @@ class LoaderGui(QObject):
     def load_with_finish_hook(self, dialog_parent: Optional[QWidget], work_task: Callable,
                                  worker_args: Tuple[Any, ...] = (),
                                  finish_task: Optional[Callable] = None,
-                                 loading_text: str = "Loading...", cancel_button=True):
+                                 loading_text: str = "", cancel_button=True):
         self.load(dialog_parent, work_task, 
                            worker_args, finish_task, loading_text, cancel_button)
 
     def load_for_blocking(self, dialog_parent: Optional[QWidget], work_task: Callable,
                              worker_args: Tuple[Any, ...] = (),
-                             loading_text: str = "Loading...", cancel_button=True):
+                             loading_text: str = "", cancel_button=True):
         self.load(dialog_parent, work_task, worker_args,
                            loading_text=loading_text, cancel_button=cancel_button)
 
@@ -92,9 +93,11 @@ class LoaderGui(QObject):
     def load(self, dialog_parent: Optional[QWidget], work_task: Callable, 
                       worker_args: Tuple[Any, ...] = (),
                       finish_task: Optional[Callable] = None,
-                      loading_text: str = "Loading...", cancel_button=True):
+                      loading_text: str = "", cancel_button=True):
         self.finished = False
         self.return_value = None
+        if not loading_text:
+            loading_text = self.default_loading_text
         self.progress_dialog.setLabelText(loading_text)
 
         if cancel_button:

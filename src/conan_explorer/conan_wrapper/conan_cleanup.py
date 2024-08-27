@@ -124,11 +124,11 @@ class ConanCleanup():
             if Path(real_path).is_dir():
                 continue
             conan_ref = "Unknown"
-            type = "Unknown"
+            info_type = "Unknown"
             try:
                 # try to reconstruct conan ref from real_path
                 rel_path = Path(real_path).relative_to(app.conan_api.get_storage_path())
-                type = rel_path.parts[4]
+                info_type = rel_path.parts[4]
                 conan_ref = str(ConanRef(rel_path.parts[0],
                             rel_path.parts[1], rel_path.parts[2], rel_path.parts[3]))
                 
@@ -136,4 +136,4 @@ class ConanCleanup():
                 Logger().error(f"Can't read {CONAN_REAL_PATH} in {str(short_path)}")
             if not self.cleanup_refs_info.get(conan_ref):
                 self.cleanup_refs_info[conan_ref] = {}
-            self.cleanup_refs_info[conan_ref][type] = str(short_path)
+            self.cleanup_refs_info[conan_ref][info_type] = str(short_path)
