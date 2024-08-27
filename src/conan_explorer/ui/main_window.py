@@ -61,7 +61,7 @@ class MainWindow(FluentWindow):
         self.loaded = False
         self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed,
                                         self.conan_remotes_updated)
-        self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
+        self.model = UiApplicationModel(self.conan_pkg_installed)
         self._plugin_handler = PluginHandler(self, self.base_signals, self.page_widgets)
         self.setWindowTitle("") # app display name is already there
         # connect logger to console widget to log possible errors at init
@@ -327,6 +327,7 @@ class MainWindow(FluentWindow):
 
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
+        # TODO: Move to extra dialog
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
         cleaner = ConanCleanup(app.conan_api) # type: ignore
         loader = LoaderGui(self)

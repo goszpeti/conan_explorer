@@ -16,13 +16,12 @@ from ..model import UiAppGridModel
 class UiApplicationModel(UiConfig):
     CONFIG_TYPE = UI_CONFIG_JSON_TYPE
 
-    def __init__(self, conan_pkg_installed=None, conan_pkg_removed=None, *args, **kwargs):
+    def __init__(self, conan_pkg_installed=None, *args, **kwargs):
         """ Create an empty AppModel on init, so we can load it later"""
         UiConfig.__init__(self, *args, **kwargs)
         self.app_grid: UiAppGridModel
         self._ui_config_data: Optional[UiConfigInterface] = None
         self.conan_pkg_installed = conan_pkg_installed
-        self.conan_pkg_removed = conan_pkg_removed
 
     def save(self):
         """ Save configuration """

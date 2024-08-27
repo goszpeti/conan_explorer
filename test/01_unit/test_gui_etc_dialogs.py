@@ -2,7 +2,6 @@
 Test the self written qt gui base, which can be instantiated without
 using the whole application (standalone).
 """
-import platform
 import sys
 import traceback
 from pathlib import Path
@@ -363,15 +362,24 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     pkg_id_to_remove = ""
 
     # check cancel does nothing
+    SB = QtWidgets.QDialogButtonBox.StandardButton
     dialog = ConanRemoveDialog(None, {TEST_REF: [pkg_id_to_remove]}, None)
     dialog.show()
-    dialog.button(dialog.StandardButton.Cancel).clicked.emit()
+    dialog._ui.button_box.button(SB.Cancel).clicked.emit()
 
     found_pkg = app.conan_api.find_best_matching_local_package(cfr)
     assert found_pkg.get("id", "")
 
+    # check unselect reference does not install
+    dialog._ui.package_list_widget.item(0).setCheckState(QtCore.Qt.CheckState.Unchecked)
+    dialog._ui.button_box.button(SB.Yes).clicked.emit()
+
+    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
+    assert found_pkg.get("id", "")
+    dialog._ui.package_list_widget.item(0).setCheckState(QtCore.Qt.CheckState.Checked)
+
     # check without pkg id
-    dialog.button(dialog.StandardButton.Yes).clicked.emit()
+    dialog._ui.button_box.button(SB.Yes).clicked.emit()
 
     # check, that the package is deleted
     found_pkg = app.conan_api.find_best_matching_local_package(cfr)
@@ -381,8 +389,9 @@ def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     conan_install_ref(TEST_REF)
     dialog = ConanRemoveDialog(None, {TEST_REF: [found_pkg.get("id", "")]}, None)
     dialog.show()
-    dialog.button(dialog.StandardButton.Yes).clicked.emit()
-
+    dialog._ui.button_box.button(SB.Yes).clicked.emit()
 
     found_pkg = app.conan_api.find_best_matching_local_package(cfr)
     assert not found_pkg.get("id", "")
+
+    

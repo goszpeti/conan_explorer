@@ -82,9 +82,12 @@ class PackageSelectionController(QObject):
         dialog.show()
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
-        if not self._model:
+        """ Remove conan reference if in model """
+        if not self._model: # for None usage 
             return
         ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
+        if not ref_row:
+            return
         proxy_index = self._model.index(ref_row, 0, QModelIndex())
         item: Optional[PackageTreeItem] = proxy_index.internalPointer() # type: ignore
         if not item:

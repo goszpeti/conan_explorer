@@ -167,8 +167,7 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
 @pytest.mark.conanv1
 def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker):
     """
-    Test, that clicking on on open config file and selecting a file writes it back to settings.
-    Same file as selected expected in settings.
+    Test, that conan cache cleanup for orphaned references and packages
     """
 
     if not platform.system() == "Windows":  # Feature only "available" on Windows
@@ -178,19 +177,20 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
 
     # Set up broken packages to have something to cleanup
     # in short path - edit .real_path
-    ref = "example/1.0.0@user/testing"
-    conan_remove_ref(ref)  # clean up for multiple runs
+    orphaned_ref_pkg = "example/1.0.0@user/testing"
+    conan_remove_ref(orphaned_ref_pkg)  # clean up for multiple runs
     # shortpaths is enabled in conanfile
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
-    ret = os.system(f"conan create {conanfile} {ref}")
+    ret = os.system(f"conan create {conanfile} {orphaned_ref_pkg}")
     assert ret == 0
 
-    pkg = conan.find_best_matching_local_package(ConanRef.loads(ref))
+    pkg = conan.find_best_matching_local_package(ConanRef.loads(orphaned_ref_pkg))
     remotes = conan.get_remotes()
     Logger().debug("Remotes:" + repr(remotes))
     time.sleep(1)
     assert pkg["id"], f"Package: {pkg}"
-    pkg_dir_to_delete = conan.get_package_folder(ConanRef.loads(ref), pkg["id"])
+    pkg_dir_to_delete = conan.get_package_folder(
+        ConanRef.loads(orphaned_ref_pkg), pkg["id"])
 
     real_path_file = pkg_dir_to_delete / ".." / CONAN_REAL_PATH
     with open(str(real_path_file), "r+") as fp:
@@ -200,25 +200,35 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
         fp.write(line)
 
     # in cache - delete Short path, so that cache folder is orphaned
-    ref = "example/1.0.0@user/orphan"
-    conan_remove_ref(ref)
-    ret = run(f"conan create {conanfile} {ref}", stdout=PIPE, stderr=STDOUT, shell=True)
+    orphaned_ref = "example/1.0.0@user/orphan"
+    conan_remove_ref(orphaned_ref)
+    ret = run(f"conan create {conanfile} {orphaned_ref}", stdout=PIPE, stderr=STDOUT, shell=True)
     output = ""
     if ret.stderr:
         output += ret.stderr.decode("utf-8")
     if ret.stdout:
         output += ret.stdout.decode("utf-8")
     assert ret.returncode == 0, output
-    exp_folder = conan.get_export_folder(ConanRef.loads(ref))
-    pkg = conan.find_best_matching_local_package(ConanRef.loads(ref))
+    exp_folder = conan.get_export_folder(ConanRef.loads(orphaned_ref))
+    pkg = conan.find_best_matching_local_package(ConanRef.loads(orphaned_ref))
     pkg_cache_folder = os.path.abspath(os.path.join(exp_folder, "..", "package", pkg["id"]))
-    pkg_dir = conan.get_package_folder(ConanRef.loads(ref), pkg["id"])
+    pkg_dir = conan.get_package_folder(ConanRef.loads(orphaned_ref), pkg["id"])
     rmtree(pkg_dir)
 
-    paths_to_delete = ConanCleanup(conan).get_cleanup_cache_paths()
-    assert pkg_cache_folder in paths_to_delete
-    assert str(pkg_dir_to_delete.parent) in paths_to_delete
+    # execute
+    cleanup_infos = ConanCleanup().get_cleanup_cache_info()
 
+    # check, that the correct paths were found
+    orphaned_ref_info = orphaned_ref_pkg_info = {}
+    for ref, info in cleanup_infos.items():
+        if ref == orphaned_ref:
+            orphaned_ref_info = info
+        if ref == orphaned_ref_pkg:
+            orphaned_ref_pkg_info = info
+    assert orphaned_ref_info.get(pkg["id"]) == pkg_cache_folder
+    assert orphaned_ref_pkg_info.get("package") == str(pkg_dir_to_delete.parent)
+
+    # now execute by really pressing the button
     from pytestqt.plugin import _qapp_instance
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
