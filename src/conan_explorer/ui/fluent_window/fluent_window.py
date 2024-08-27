@@ -425,7 +425,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
                     # save the starting point of resize
                     self._resize_point = self.mapToGlobal(event.pos())
                     self._last_geometry = self.geometry()
-                    self.resize()
+                    self.resizing()
             else: # Hacky fix for when the cursor is not reset after resizing
                 self.setCursor(Qt.CursorShape.ArrowCursor)
 
@@ -482,7 +482,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self._resize_direction = ResizeDirection.default
             self.setCursor(cs.ArrowCursor)
 
-    def resize(self):
+    def resizing(self):
         ed = Qt.Edge
         window = self.window().windowHandle()
         if self._resize_direction == ResizeDirection.top:
