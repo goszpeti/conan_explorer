@@ -134,7 +134,7 @@ class PkgSelectModel(TreeModel):
         # get invalid remotes refs
         invalid_refs = []
         if conan_version.major == 1:
-            invalid_refs = ConanCleanup(app.conan_api).gather_invalid_remote_metadata() # type: ignore
+            invalid_refs = ConanCleanup().gather_invalid_remote_metadata() # type: ignore
         for conan_ref in app.conan_api.get_all_local_refs():
             invalid = str(conan_ref) in invalid_refs
             conan_item = PackageTreeItem(
