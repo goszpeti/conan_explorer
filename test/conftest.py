@@ -184,6 +184,7 @@ def logout_all_remotes():
 def clean_remotes_on_ci():
     if not is_ci_job():
         return
+    print("DELETE ALL CONAN REMOTES")
     if conan_version.major == 1:
         os.system("conan remote clean")
     elif conan_version.major == 2:

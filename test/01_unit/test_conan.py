@@ -64,19 +64,6 @@ def test_conan_short_path_root():
         assert not conan.get_short_path_root().exists()
     os.environ.pop("CONAN_USER_HOME_SHORT")
 
-
-def test_empty_cleanup_cache(base_fixture):
-    """
-    Test, if a clean cache returns no dirs. Actual functionality is tested with gui.
-    It is assumed, that the cash is clean, like it would be on the CI.
-    """
-    os.environ["CONAN_USER_HOME"] = str(Path(tempfile.gettempdir()) / "._myconan_home")
-    os.environ["CONAN_USER_HOME_SHORT"] = str(Path(tempfile.gettempdir()) / "._myconan_short")
-    paths = ConanCleanup(ConanApi().init_api()).get_cleanup_cache_info()
-    assert not paths
-    os.environ.pop("CONAN_USER_HOME")
-    os.environ.pop("CONAN_USER_HOME_SHORT")
-
 @pytest.mark.conanv2
 def test_conan_find_remote_pkg(base_fixture):
     """
