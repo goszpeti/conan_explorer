@@ -74,8 +74,6 @@ class LoaderGui(QObject):
         self.load_thread: Optional[QThread] = None
         self.finished = True
         self.return_value = None
-        self.cancel_button = QPushButton("Cancel")
-        self.cancel_button.clicked.connect(self.on_cancel)
 
     def load_with_finish_hook(self, dialog_parent: Optional[QWidget], work_task: Callable,
                                  worker_args: Tuple[Any, ...] = (),
@@ -100,7 +98,9 @@ class LoaderGui(QObject):
         self.progress_dialog.setLabelText(loading_text)
 
         if cancel_button:
+            self.cancel_button = QPushButton("Cancel")
             self.progress_dialog.setCancelButton(self.cancel_button)
+            self.cancel_button.clicked.connect(self.on_cancel)
         else:
             self.progress_dialog.setCancelButton(None) # type: ignore
 

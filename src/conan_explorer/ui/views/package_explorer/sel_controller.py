@@ -86,7 +86,9 @@ class PackageSelectionController(QObject):
             return
         ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
         proxy_index = self._model.index(ref_row, 0, QModelIndex())
-        item: PackageTreeItem = proxy_index.internalPointer() # type: ignore
+        item: Optional[PackageTreeItem] = proxy_index.internalPointer() # type: ignore
+        if not item:
+            return
         self._model.remove_item(item)
 
     def on_show_build_info(self):
@@ -251,9 +253,8 @@ class PackageSelectionController(QObject):
         if not self._model:
             return
         if not self._model.show_sizes:
-            self.expand_and_sort_for_sizes()
+            # self.expand_and_sort_for_sizes()
             self._model.show_sizes = True
-            self._view.showColumn(1)
             self._loader.load(self._view, self._view.expandAll, (), 
                 self.expand_and_sort_for_sizes,
                 "Calculating Sizes. This can take a while...")
@@ -263,6 +264,7 @@ class PackageSelectionController(QObject):
             self._view.hideColumn(1)
 
     def expand_and_sort_for_sizes(self):
+        self._view.showColumn(1)
         self._view.sortByColumn(1, Qt.SortOrder.DescendingOrder)
         self._view.header().resizeSections(self._view.header().ResizeMode.Stretch)
 

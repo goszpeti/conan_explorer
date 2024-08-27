@@ -187,19 +187,18 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.ui.close_button.setIconSize(QSize(16, 16))
 
         # window buttons
-        self.ui.restore_max_button.clicked.connect(self.maximize_restore)
-        self.ui.minimize_button.clicked.connect(self.showMinimized)
+        self.ui.restore_max_button.clicked.connect(self.on_maximize_restore)
+        self.ui.minimize_button.clicked.connect(self.on_minimize)
         self.ui.close_button.clicked.connect(self.close)
 
         self.ui.left_menu_top_subframe.mouseMoveEvent = self.move_window
         self.ui.top_frame.mouseMoveEvent = self.move_window
-        self.ui.top_frame.mouseDoubleClickEvent = self.maximize_restore
+        self.ui.top_frame.mouseDoubleClickEvent = self.on_maximize_restore
 
         self.ui.toggle_left_menu_button.clicked.connect(self.toggle_left_menu)
         self.ui.settings_button.clicked.connect(self.toggle_right_menu)
 
         # clear default strings
-        # self.ui.page_info_label.setText("")
         self.ui.title_label.setText("")
         self.ui.title_icon_label.hide()
 
@@ -248,7 +247,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             # if maximized, return to normal be able to move
             if self.isMaximized():
-                self.maximize_restore(None)
+                self.on_maximize_restore(None)
             # qt move
             if event.buttons() == Qt.MouseButton.LeftButton:
                 if self._drag_position is None:
@@ -426,7 +425,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
                     # save the starting point of resize
                     self._resize_point = self.mapToGlobal(event.pos())
                     self._last_geometry = self.geometry()
-                    self.resizing(event)
+                    self.resize()
             else: # Hacky fix for when the cursor is not reset after resizing
                 self.setCursor(Qt.CursorShape.ArrowCursor)
 
@@ -483,7 +482,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self._resize_direction = ResizeDirection.default
             self.setCursor(cs.ArrowCursor)
 
-    def resizing(self, event):
+    def resize(self):
         ed = Qt.Edge
         window = self.window().windowHandle()
         if self._resize_direction == ResizeDirection.top:
@@ -503,13 +502,20 @@ class FluentWindow(QMainWindow, ThemedWidget):
         elif self._resize_direction == ResizeDirection.top_left:
             window.startSystemResize(ed.TopEdge | ed.LeftEdge)
 
-    def maximize_restore(self, event=None):  # dummy arg to be used as an event slot
+    def on_maximize_restore(self, event=None):  # dummy arg to be used as an event slot
         if self.isMaximized():
+            self.setWindowState(Qt.WindowState.WindowNoState)
             self.showNormal()
         else:
+            self.setWindowState(Qt.WindowState.WindowMaximized)
             self.showMaximized()
 
+    def on_minimize(self, event=None):
+        self.setWindowState(Qt.WindowState.WindowMinimized)
+        self.showMinimized()
+
     def set_restore_max_button_state(self, force=False):
+        """ This toggles the restore/maximize button in the top right button cluster """
         if self.isMaximized():
             if self.ui.restore_max_button.icon().themeName() == "restore" and not force:
                 return
