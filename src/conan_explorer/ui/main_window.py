@@ -296,7 +296,7 @@ class MainWindow(FluentWindow):
     def open_repair_pkg_metadata_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
-        cleaner = ConanCleanup(app.conan_api) # type: ignore
+        cleaner = ConanCleanup()
 
         loader = LoaderGui(self)
         loader.load(self, cleaner.gather_invalid_remote_metadata, )
@@ -329,7 +329,7 @@ class MainWindow(FluentWindow):
         """ Open the message box to confirm deletion of invalid cache folders """
         # TODO: Move to extra dialog
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
-        cleaner = ConanCleanup(app.conan_api) # type: ignore
+        cleaner = ConanCleanup()
         loader = LoaderGui(self)
         loader.load(self, cleaner.get_cleanup_cache_info, 
                     loading_text="Gathering obsolete directories...", cancel_button=False)
