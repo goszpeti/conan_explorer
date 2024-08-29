@@ -111,7 +111,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string extracomment="Expand all/Collapse all"/>
+        <string>Expand all/Collapse all</string>
        </property>
        <property name="text">
         <string/>
