@@ -254,9 +254,9 @@ class PackageSelectionController(QObject):
         if not self._model:
             return
         if not self._model.show_sizes:
-            # self.expand_and_sort_for_sizes()
             self._model.show_sizes = True
-            self._loader.load(self._view, self._view.expandAll, (), 
+            self._view.showColumn(1)
+            self._loader.load(self._view, self._model.get_all_sizes, (), 
                 self.expand_and_sort_for_sizes,
                 "Calculating Sizes. This can take a while...")
         else:
@@ -265,7 +265,7 @@ class PackageSelectionController(QObject):
             self._view.hideColumn(1)
 
     def expand_and_sort_for_sizes(self):
-        self._view.showColumn(1)
+        self._view.expandAll()
         self._view.sortByColumn(1, Qt.SortOrder.DescendingOrder)
         self._view.header().resizeSections(self._view.header().ResizeMode.Stretch)
 

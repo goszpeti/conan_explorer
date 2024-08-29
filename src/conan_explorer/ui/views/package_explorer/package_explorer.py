@@ -1,5 +1,7 @@
 import os
 from typing import TYPE_CHECKING
+from typing_extensions import override
+
 from conan_explorer import conan_version
 
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
@@ -32,6 +34,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)
+        self._is_expanded = False
 
     def load(self):
         assert self._base_signals
@@ -45,6 +48,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._file_cntx_menu = None
         self.set_themed_icon(self._ui.refresh_button, "icons/refresh.svg")
         self.set_themed_icon(self._ui.show_sizes_button, "icons/bar_chart.svg")
+        self.set_themed_icon(self._ui.expand_all_button, "icons/expand_all.svg")
 
         # connect pkg selection controller
         self._ui.package_select_view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
@@ -55,6 +59,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.refresh_button.clicked.connect(self._pkg_sel_ctrl.on_pkg_refresh_clicked)
         self._ui.show_sizes_button.clicked.connect(self.on_show_sizes)
         self._ui.package_filter_edit.textChanged.connect(self._pkg_sel_ctrl.set_filter_wildcard)
+        self._ui.expand_all_button.clicked.connect(self.on_expand_all)
+
         self.conan_pkg_selected.connect(self.on_pkg_selection_change)
         self._ui.package_path_label.setText("<Package path>")
         self._ui.package_path_label.setAlignment(Qt.AlignmentFlag.AlignRight)  # must be called after every text set
@@ -73,11 +79,13 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._init_selection_context_menu()
         self._init_pkg_file_context_menu()
 
+    @override
     def showEvent(self, a0: QShowEvent) -> None:
-        self._pkg_sel_ctrl.refresh_pkg_selection_view(
-            force_update=False)  # only update the first time
+        # only update the first time
+        self._pkg_sel_ctrl.refresh_pkg_selection_view(force_update=False) 
         return super().showEvent(a0)
 
+    @override
     def resizeEvent(self, a0: QResizeEvent) -> None:
         for pkg_file_exp_ctrl in self._pkg_tabs_ctrl:
             pkg_file_exp_ctrl.resize_file_columns()
@@ -170,6 +178,16 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
     def on_show_sizes(self):
         self._pkg_sel_ctrl.on_show_sizes()
         self.resize_for_show_sizes()
+
+    def on_expand_all(self):
+        if self._is_expanded:
+            self._ui.package_select_view.collapseAll()
+            self.set_themed_icon(self._ui.expand_all_button, "icons/expand_all.svg")
+            self._is_expanded = False
+            return
+        self._ui.package_select_view.expandAll()
+        self.set_themed_icon(self._ui.expand_all_button, "icons/collapse_all.svg")
+        self._is_expanded = True
 
     # Selection view context menu
 

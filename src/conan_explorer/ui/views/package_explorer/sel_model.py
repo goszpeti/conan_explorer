@@ -66,7 +66,7 @@ class PackageFilter(QSortFilterProxyModel):
 
     def __init__(self):
         super().__init__()
-        self.setFilterKeyColumn(0)
+        self.setFilterKeyColumn(-1)
 
     @override
     def filterAcceptsRow(self, row_num, source_parent) -> bool:
@@ -77,7 +77,9 @@ class PackageFilter(QSortFilterProxyModel):
         # Traverse up all the way to root and check if any of them match
         if self.filter_accepts_any_parent(source_parent):
             return True
-        return False
+    
+        # Finally, check if any of the children match
+        return self.has_accepted_children(row_num, source_parent)
 
     def filter_accepts_row_itself(self, row_num, parent):
         return super().filterAcceptsRow(row_num, parent)
@@ -91,6 +93,20 @@ class PackageFilter(QSortFilterProxyModel):
             if self.filter_accepts_row_itself(parent.row(), parent.parent()):
                 return True
             parent = parent.parent()
+        return False
+    
+    def has_accepted_children(self, row_num, parent):
+        '''
+        Starting from the current node as root, traverse all
+        the descendants and test if any of the children match
+        '''
+        model = self.sourceModel()
+        source_index = model.index(row_num, 0, parent)
+
+        children_count = model.rowCount(source_index)
+        for i in range(children_count):
+            if self.filterAcceptsRow(i, source_index):
+                return True
         return False
     
     def lessThan(self, source_left: Union[QModelIndex, QPersistentModelIndex], 
@@ -146,6 +162,15 @@ class PkgSelectModel(TreeModel):
             self.root_item.append_child(conan_item)
         self.endResetModel()
 
+    def get_all_sizes(self):
+        self.beginResetModel()
+        for row in range(self.rowCount(QModelIndex())):
+            item: PackageTreeItem = (self.index(row, 0, QModelIndex())).internalPointer()
+            item.load_children() # load without expanding
+            for child_item in item.child_items:
+                self.get_size(child_item)
+        self.endResetModel()
+
     def get_size(self, item: PackageTreeItem):
         if item.parent_item is None:
             return
@@ -162,7 +187,7 @@ class PkgSelectModel(TreeModel):
         else:
             pkg_path = app.conan_api.get_package_folder(conan_ref, item.pkg_info.get("id", ""))
         self._loader_signal.emit(
-            f"Calculating size for\n {str(conan_ref)}\n{self._acc_size:.1f} MB read.")
+            f"Calculating size for\n {str(conan_ref)}\n{self._acc_size:.1f} MB read")
         size = get_folder_size_mb(pkg_path)
         item.item_data[1] = f"{size:.3f}"
         acc_size = float(item.parent_item.item_data[1]) + size
@@ -174,8 +199,6 @@ class PkgSelectModel(TreeModel):
         if not index.isValid():
             return None
         item: PackageTreeItem = index.internalPointer()  # type: ignore
-        if self.show_sizes:
-            self.get_size(item)
         if role == Qt.ItemDataRole.ToolTipRole:
             if item.invalid:
                 return "Invalid package metadata"

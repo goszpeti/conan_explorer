@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_search.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -61,7 +61,7 @@ class Ui_Form(object):
         self.search_button.setMinimumSize(QSize(150, 0))
         self.search_button.setMaximumSize(QSize(150, 16777215))
         icon = QIcon()
-        icon.addFile(u"../../../assets/icons/search_packages.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u"../../../assets/icons/search_packages.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.search_button.setIcon(icon)
 
         self.search_text_button_layout.addWidget(self.search_button)
@@ -73,7 +73,7 @@ class Ui_Form(object):
         self.install_button.setMinimumSize(QSize(150, 0))
         self.install_button.setMaximumSize(QSize(150, 16777215))
         icon1 = QIcon()
-        icon1.addFile(u"../../../assets/icons/download_pkg.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u"../../../assets/icons/download_pkg.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.install_button.setIcon(icon1)
 
         self.search_text_button_layout.addWidget(self.install_button)
