@@ -491,10 +491,12 @@ QListView::item:selected:!active,QTreeView::item:selected:!active,QListWidget::i
     /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
 
-QListView::indicator:unchecked,QListWidget::indicator:unchecked {
+QListView::indicator:unchecked,QListWidget::indicator:unchecked,QTreeView::indicator:unchecked,
+QTreeWidget::indicator:unchecked {
     image: url(icons:material/check_box_empty.svg);
 }
-QListView::indicator:checked,QListWidget::indicator:checked {
+QListView::indicator:checked,QListWidget::indicator:checked,QTreeView::indicator:checked,
+QTreeWidget::indicator:checked {
     image: url(icons:material/check_box_checked.svg);
 }
 

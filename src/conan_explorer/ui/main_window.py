@@ -310,7 +310,7 @@ class MainWindow(FluentWindow):
             "Found the following packages with invalid package metadata. " 
             "Attempt to repair? This can take a while, if you have many remotes. "
             "You can speed this up by disabling the remotes where you don't expect to find the missing references"
-                         ))
+            ))
         msg_box.setDetailedText(str(invalid_refs))
         msg_box.setStandardButtons(button.Yes | button.Cancel)  # type: ignore
         msg_box.setIcon(WideMessageBox.Icon.Question)
@@ -327,57 +327,9 @@ class MainWindow(FluentWindow):
 
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
-        # TODO: Move to extra dialog
-        from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
-        cleaner = ConanCleanup()
-        loader = LoaderGui(self)
-        loader.load(self, cleaner.get_cleanup_cache_info, 
-                    loading_text="Gathering obsolete directories...", cancel_button=False)
-        loader.wait_for_finished()
-        cleanup_info = loader.return_value
-        if not cleanup_info:
-            self.write_log("INFO: Nothing found in cache to clean up.")
-            return
-
-        def get_cumulated_cleanup_size(cleanup_info):
-            size_mbytes = 0
-            for ref, paths in cleanup_info.items():
-                for type, path in paths.items():
-                    loader.loading_string_signal.emit((
-                        f"Calculating size of {ref} {type} folder:\n{path}\n"
-                        f"Found {size_mbytes:.1f}MB to clean up"))
-                    size_mbytes += get_folder_size_mb(Path(path))
-            return size_mbytes
-        loader.load(self, get_cumulated_cleanup_size, (cleanup_info, ))
-        loader.wait_for_finished()
-        size = loader.return_value
-
-        # if len(paths) > 1:
-        #     path_list = "\n".join(paths)
-        # else:
-        path_list = str(cleanup_info)
-        if size is None:
-            size = 0
-        msg_box = WideMessageBox(parent=self)
-        button = WideMessageBox.StandardButton
-        msg_box.setWindowTitle("Delete folders")
-        msg_box.setText(f"Found {size:.2f} MB to clean up. Are you sure, you want to delete the found folders?\t")
-        msg_box.setDetailedText(path_list)
-        msg_box.setStandardButtons(button.Yes | button.Cancel)  # type: ignore
-        msg_box.setIcon(WideMessageBox.Icon.Question)
-        msg_box.setWidth(800)
-        msg_box.setMaximumHeight(600)
-        reply = msg_box.exec()
-        if reply == button.Yes:
-            def delete_cache_paths(cleanup_info):
-                for ref, paths in cleanup_info.items():
-                    for type, path in paths.items(): 
-                        loader.loading_string_signal.emit("Deleting\n" + str(path))
-                        delete_path(Path(path))
-            loader.load(self, delete_cache_paths, (cleanup_info,),
-                                 loading_text="Deleting cache paths...",
-                                 cancel_button=False)
-
+        from .dialogs import ConanCacheCleanupDialog
+        ConanCacheCleanupDialog(self)
+       
     def open_file_editor_selection_dialog(self):
         dialog = FileEditorSelDialog(self)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:

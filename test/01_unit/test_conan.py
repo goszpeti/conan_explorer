@@ -11,7 +11,6 @@ from typing import List
 from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.types import create_key_value_pair_list
 from conan_explorer.conan_wrapper.conan_worker import ConanWorker, ConanWorkerElement
-from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_explorer.conan_wrapper.types import ConanRef
 
 @pytest.mark.conanv1

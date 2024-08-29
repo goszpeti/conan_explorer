@@ -16,46 +16,64 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
-    QHeaderView, QLabel, QSizePolicy, QTreeWidget,
-    QTreeWidgetItem, QVBoxLayout, QWidget)
+    QFrame, QHBoxLayout, QHeaderView, QLabel,
+    QSizePolicy, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
+    QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(400, 300)
+        Dialog.resize(524, 307)
+        Dialog.setSizeGripEnabled(True)
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.label = QLabel(Dialog)
-        self.label.setObjectName(u"label")
+        self.frame = QFrame(Dialog)
+        self.frame.setObjectName(u"frame")
+        self.frame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout = QHBoxLayout(self.frame)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.question_label = QLabel(self.frame)
+        self.question_label.setObjectName(u"question_label")
 
-        self.verticalLayout.addWidget(self.label)
+        self.horizontalLayout.addWidget(self.question_label)
 
-        self.treeWidget = QTreeWidget(Dialog)
-        __qtreewidgetitem = QTreeWidgetItem()
-        __qtreewidgetitem.setText(0, u"1");
-        self.treeWidget.setHeaderItem(__qtreewidgetitem)
-        self.treeWidget.setObjectName(u"treeWidget")
+        self.icon = QLabel(self.frame)
+        self.icon.setObjectName(u"icon")
 
-        self.verticalLayout.addWidget(self.treeWidget)
+        self.horizontalLayout.addWidget(self.icon)
 
-        self.buttonBox = QDialogButtonBox(Dialog)
-        self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
+        self.horizontalLayout.setStretch(0, 1)
 
-        self.verticalLayout.addWidget(self.buttonBox)
+        self.verticalLayout.addWidget(self.frame)
+
+        self.cleanup_tree_widget = QTreeWidget(Dialog)
+        self.cleanup_tree_widget.setObjectName(u"cleanup_tree_widget")
+
+        self.verticalLayout.addWidget(self.cleanup_tree_widget)
+
+        self.button_box = QDialogButtonBox(Dialog)
+        self.button_box.setObjectName(u"button_box")
+        self.button_box.setOrientation(Qt.Orientation.Horizontal)
+        self.button_box.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
+
+        self.verticalLayout.addWidget(self.button_box)
 
 
         self.retranslateUi(Dialog)
-        self.buttonBox.accepted.connect(Dialog.accept)
-        self.buttonBox.rejected.connect(Dialog.reject)
+        self.button_box.accepted.connect(Dialog.accept)
+        self.button_box.rejected.connect(Dialog.reject)
 
         QMetaObject.connectSlotsByName(Dialog)
     # setupUi
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
-        self.label.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Delete folders", None))
+        self.question_label.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.icon.setText("")
+        ___qtreewidgetitem = self.cleanup_tree_widget.headerItem()
+        ___qtreewidgetitem.setText(1, QCoreApplication.translate("Dialog", u"Size", None));
+        ___qtreewidgetitem.setText(0, QCoreApplication.translate("Dialog", u"Conan Reference", None));
     # retranslateUi
 
