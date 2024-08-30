@@ -13,6 +13,7 @@ from shutil import rmtree
 
 import pytest
 import requests
+from conan_explorer.app.base_ui.loading import LoaderGui
 from conan_explorer.ui.fluent_window.side_menu import SideSubMenu
 from conan_explorer.ui.plugin.handler import PluginFile
 from conan_explorer.ui.views.app_grid.tab import TabList
@@ -234,13 +235,9 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
 
-    button: QtWidgets.QPushButton = main_gui.main_general_settings_menu.get_menu_entry_by_name("Clean Conan Cache")
-    button.click()
-    time.sleep(3)
-
+    dialog = main_gui.open_cleanup_cache_dialog()
+    dialog.accept()
     assert not os.path.exists(pkg_cache_folder)
     assert not pkg_dir_to_delete.parent.exists()
     main_gui.close()

@@ -16,23 +16,39 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QDialog,
-    QDialogButtonBox, QLabel, QListWidget, QListWidgetItem,
-    QSizePolicy, QVBoxLayout, QWidget)
+    QDialogButtonBox, QFrame, QHBoxLayout, QLabel,
+    QListWidget, QListWidgetItem, QSizePolicy, QVBoxLayout,
+    QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(469, 166)
+        Dialog.resize(530, 264)
         Dialog.setSizeGripEnabled(True)
         Dialog.setModal(True)
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(6, 6, 6, 6)
-        self.question_label = QLabel(Dialog)
+        self.frame = QFrame(Dialog)
+        self.frame.setObjectName(u"frame")
+        self.frame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout = QHBoxLayout(self.frame)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.question_label = QLabel(self.frame)
         self.question_label.setObjectName(u"question_label")
 
-        self.verticalLayout.addWidget(self.question_label)
+        self.horizontalLayout.addWidget(self.question_label)
+
+        self.icon = QLabel(self.frame)
+        self.icon.setObjectName(u"icon")
+
+        self.horizontalLayout.addWidget(self.icon)
+
+        self.horizontalLayout.setStretch(0, 1)
+
+        self.verticalLayout.addWidget(self.frame)
 
         self.package_list_widget = QListWidget(Dialog)
         self.package_list_widget.setObjectName(u"package_list_widget")
@@ -58,6 +74,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Remove package(s)", None))
-        self.question_label.setText(QCoreApplication.translate("Dialog", u"Are you sure, you want to remove these packages:", None))
+        self.question_label.setText(QCoreApplication.translate("Dialog", u"Are you sure, you want to remove these packages?", None))
+        self.icon.setText("")
     # retranslateUi
 

@@ -1,6 +1,5 @@
 import datetime
 from dataclasses import dataclass
-from pathlib import Path
 from time import sleep
 from typing import Optional
 from typing_extensions import override
@@ -8,7 +7,7 @@ from typing_extensions import override
 from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
 from PySide6.QtGui import QKeySequence, QDesktopServices, QResizeEvent, QShortcut
 from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
-    QVBoxLayout, QWidget)
+    QVBoxLayout)
 
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
@@ -328,7 +327,7 @@ class MainWindow(FluentWindow):
     def open_cleanup_cache_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         from .dialogs import ConanCacheCleanupDialog
-        ConanCacheCleanupDialog(self)
+        return ConanCacheCleanupDialog(self)
        
     def open_file_editor_selection_dialog(self):
         dialog = FileEditorSelDialog(self)

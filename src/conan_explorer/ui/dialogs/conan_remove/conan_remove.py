@@ -5,7 +5,7 @@ from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.app.logger import Logger
 
 from PySide6.QtCore import SignalInstance, Qt
-from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QListWidgetItem
+from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QListWidgetItem, QStyle
 
 from conan_explorer.conan_wrapper.types import ConanRef
 
@@ -19,6 +19,10 @@ class ConanRemoveDialog(QDialog):
         from .conan_remove_ui import Ui_Dialog
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
+        pixmapi = getattr(QStyle, "SP_MessageBoxQuestion")
+        if pixmapi:
+            icon = self.style().standardIcon(pixmapi)
+            self._ui.icon.setPixmap(icon.pixmap(40,40))
 
         for conan_ref, pkg_ids in conan_refs_with_pkg_ids.items():
             for pkg_id in pkg_ids:

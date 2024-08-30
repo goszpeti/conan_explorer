@@ -36,6 +36,7 @@ class Ui_Dialog(object):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.question_label = QLabel(self.frame)
         self.question_label.setObjectName(u"question_label")
+        self.question_label.setLineWidth(0)
 
         self.horizontalLayout.addWidget(self.question_label)
 

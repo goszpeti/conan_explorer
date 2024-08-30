@@ -7,7 +7,6 @@ from conan_explorer.app.system import delete_path, get_folder_size_mb
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 
 from PySide6.QtWidgets import QDialog, QWidget, QTreeWidgetItem, QStyle
-from PySide6.QtCore import Qt
 
 
 class ConanCacheCleanupDialog(QDialog):
@@ -59,7 +58,8 @@ class ConanCacheCleanupDialog(QDialog):
             size = 0
 
         self._ui.cleanup_tree_widget.addTopLevelItems(ref_items)
-        self._ui.question_label.setText(f"Found {size:.2f} MB to clean up. Are you sure, you want to delete the found folders?\t")
+        self._ui.question_label.setText(f"Found {size:.2f} MB to clean up.\n"
+                                        "Are you sure you want to delete the found folders?\t")
         pixmapi = getattr(QStyle, "SP_MessageBoxQuestion")
         if pixmapi:
             icon = self.style().standardIcon(pixmapi)

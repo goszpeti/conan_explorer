@@ -28,6 +28,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
       <item>
        <widget class="QLabel" name="question_label">
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
         <property name="text">
          <string>TextLabel</string>
         </property>
