@@ -62,7 +62,11 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return self._conan.profiles.list()
 
     def get_profile_settings(self, profile_name: str) -> ConanSettings:
-        from conans.client.profile_loader import ProfileLoader
+        try:
+            from conans.client.profile_loader import ProfileLoader
+        except:
+            from conan.internal.api.profile.profile_loader import ProfileLoader
+
         try:
             profile = ProfileLoader(self._conan.cache_folder).load_profile(profile_name)
             return profile.settings
@@ -104,7 +108,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         return Path(INVALID_PATH)
 
     def get_default_settings(self) -> ConanSettings:
-        from conans.client.profile_loader import ProfileLoader
+        try:
+            from conans.client.profile_loader import ProfileLoader
+        except:
+            from conan.internal.api.profile.profile_loader import ProfileLoader
         profile = ProfileLoader(self._conan.cache_folder).load_profile(
                 Path(self._conan.profiles.get_default_host()).name)
         
