@@ -359,7 +359,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             self._conan.remove.recipe(latest_rev, remote=None)  # type: ignore
 
     def get_all_local_refs(self) -> List[ConanRef]:
-        return self._client_cache.all_refs()
+        # Sadly not exposed anymore?!
+        if conan_version < Version("2.6"):
+            return self._client_cache.all_refs()
+        return self._client_cache._db.list_references()
 
     def get_local_pkg_from_path(self, conan_ref: ConanRef, path: Path):
         found_package = None
