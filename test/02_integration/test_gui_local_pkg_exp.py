@@ -67,7 +67,7 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
     1. Change to Page, check if the installed package is in the list.
     2. Select a ref, nothing should change.
     3. Expand ref and select the pkg, fileview should open.
-    4. Select another profile of the seame package
+    4. Select another profile of the same package
     5. Select export folder
     """
     from conan_explorer.app.logger import Logger
@@ -178,6 +178,7 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
         5. Install reference
         6. Show buildinfo
         7. Show diff for 2 pkgs
+        8. Show remove dialog for 2 packages
     """
     # disable editor to force open file
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, "UNKNOWN")
@@ -263,10 +264,19 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
 
     # check that on multiple selection diff pkg action is enabled
     lpe.on_selection_context_menu_requested(elem_pos.center())
-    # TODO create more tests
-
     assert lpe.diff_pkg_action.isEnabled()
+
+    # try to trigger remove
     assert lpe.remove_ref_action.isEnabled()
+
+    mock_remove_dialog = mocker.patch("package_explorer.sel_controller.ConanRemoveDialog")
+    lpe.remove_ref_action.trigger()
+    mock_remove_dialog.assert_called_once()
+    dict_param = mock_remove_dialog.mock_calls[0][1][1]
+    assert TEST_REF in dict_param.keys()
+    assert id in dict_param[TEST_REF]
+    assert another_id in dict_param[TEST_REF]
+
 
 @pytest.mark.conanv2
 def test_local_package_explorer_tabs(qtbot, mocker, base_fixture, ui_no_refs_config_fixture,
