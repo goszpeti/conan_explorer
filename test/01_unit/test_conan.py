@@ -1,3 +1,4 @@
+import json
 import os
 import platform
 import tempfile
@@ -5,6 +6,7 @@ import time
 from pathlib import Path
 
 import pytest
+from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from test.conftest import TEST_REF, conan_install_ref, conan_remove_ref
 from typing import List
 
@@ -249,3 +251,20 @@ def test_conan_worker(base_fixture, mocker):
 
     assert conan_worker._conan_install_queue.qsize() == 0
 
+
+@pytest.mark.conanv1
+def test_repair_metadata(base_fixture):
+    conan_install_ref(TEST_REF)
+    conan = ConanApi().init_api()
+    
+    export_path = conan.get_export_folder(ConanRef.loads(TEST_REF))
+    metadata_file = export_path.parent / "metadata.json"
+    metadata = json.loads(metadata_file.read_text())
+    metadata["recipe"]["remote"] = "invalid"
+    with metadata_file.open("r+") as fd:
+        json.dump(metadata, fd)
+
+    ConanCleanup().repair_invalid_remote_metadata(TEST_REF)
+
+    metadata = json.loads(metadata_file.read_text())
+    assert metadata["recipe"]["remote"] == "local"

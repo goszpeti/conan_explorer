@@ -36,7 +36,7 @@ class ConanCleanup():
     
     def repair_invalid_remote_metadata(self, invalid_ref):
         """ Repair all references with invalid remotes """
-        # calling inspect with a correct remote repiars the metadata    
+        # calling inspect with a correct remote repairs the metadata    
         for remote in app.conan_api.get_remotes():
             try:
                 app.conan_api._conan.inspect(invalid_ref, None, remote.name)

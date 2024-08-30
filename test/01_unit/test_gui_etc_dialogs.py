@@ -350,7 +350,7 @@ def test_conan_diff_dialog(app_qt_fixture, base_fixture: PathSetup, mocker):
 
 
 @pytest.mark.conanv2
-def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
+def test_conan_remove_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     """ Test, that the delete package dialog deletes a reference with id, 
     without id and cancel does nothing"""
     cfr = ConanRef.loads(TEST_REF)

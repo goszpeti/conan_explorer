@@ -24,7 +24,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(530, 264)
+        Dialog.resize(523, 264)
         Dialog.setSizeGripEnabled(True)
         Dialog.setModal(True)
         self.verticalLayout = QVBoxLayout(Dialog)
@@ -74,7 +74,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Remove package(s)", None))
-        self.question_label.setText(QCoreApplication.translate("Dialog", u"Are you sure, you want to remove these packages?", None))
+        self.question_label.setText(QCoreApplication.translate("Dialog", u"Are you sure you want to remove these packages?", None))
         self.icon.setText("")
     # retranslateUi
 
