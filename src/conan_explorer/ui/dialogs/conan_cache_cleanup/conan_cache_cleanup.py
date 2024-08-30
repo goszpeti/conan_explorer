@@ -43,7 +43,7 @@ class ConanCacheCleanupDialog(QDialog):
                         f"Calculating size of {ref} {path_type}\n"
                         f"Found {size_mbytes:.1f}MB to clean up"))
                     size_mbytes_item = get_folder_size_mb(Path(path))
-                    child = QTreeWidgetItem([path_type, str(size_mbytes_item)])
+                    child = QTreeWidgetItem([path_type, f"{size_mbytes_item:.2f}"])
                     # child.setCheckState(0, Qt.CheckState.Checked)
                     size_mbytes += size_mbytes_item
                     ref_item.addChild(child)
