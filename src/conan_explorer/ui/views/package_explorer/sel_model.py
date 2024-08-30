@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, List, Union
+from typing import Any, List, Optional, Union
 
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QColor, QFont, QIcon
@@ -66,7 +66,7 @@ class PackageFilter(QSortFilterProxyModel):
 
     def __init__(self):
         super().__init__()
-        self.setFilterKeyColumn(-1)
+        self.setFilterKeyColumn(0)
 
     @override
     def filterAcceptsRow(self, row_num, source_parent) -> bool:
@@ -82,7 +82,7 @@ class PackageFilter(QSortFilterProxyModel):
         return self.has_accepted_children(row_num, source_parent)
 
     def filter_accepts_row_itself(self, row_num, parent):
-        return super().filterAcceptsRow(row_num, parent)
+        return super(PackageFilter, self).filterAcceptsRow(row_num, parent)
 
     def filter_accepts_any_parent(self, parent):
         '''
@@ -102,8 +102,10 @@ class PackageFilter(QSortFilterProxyModel):
         '''
         model = self.sourceModel()
         source_index = model.index(row_num, 0, parent)
-
-        children_count = model.rowCount(source_index)
+        source_item: Optional[PackageTreeItem] = source_index.internalPointer()
+        if source_item is None:
+            return False
+        children_count = len(source_item.child_items)
         for i in range(children_count):
             if self.filterAcceptsRow(i, source_index):
                 return True
@@ -166,6 +168,8 @@ class PkgSelectModel(TreeModel):
         self.beginResetModel()
         for row in range(self.rowCount(QModelIndex())):
             item: PackageTreeItem = (self.index(row, 0, QModelIndex())).internalPointer()
+            if item.type == PkgSelectionType.editable:
+                continue
             item.load_children() # load without expanding
             for child_item in item.child_items:
                 self.get_size(child_item)

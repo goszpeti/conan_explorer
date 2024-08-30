@@ -106,7 +106,7 @@ class ConanUnifiedApi():
 
     @abstractmethod
     def get_export_folder(self, conan_ref: ConanRef) -> Path:
-        """ Get the export folder form a reference """
+        """ Get the export folder from a reference. Will throw for editables. """
         raise NotImplementedError
 
     @abstractmethod
