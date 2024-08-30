@@ -4,7 +4,7 @@
 
 ![https://pypi.org/project/conan-explorer/](https://img.shields.io/pypi/v/conan-explorer?logo=pypi)
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/conan-explorer?logo=python)
-![Windows](https://img.shields.io/badge/Windows-blue?logo=windows10&logoColor=white)
+![Windows](https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white)
 ![Linux](
 https://img.shields.io/badge/Linux-purple?logo=linux&logoColor=white)
 ![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_explorer/24?logo=conan)
@@ -100,6 +100,10 @@ pip3 install conan_explorer --use-pep517
 
 #### Distros
 
+[![Debian](https://img.shields.io/badge/Debian-A81D33?logo=debian&logoColor=fff)](#)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?logo=ubuntu&logoColor=white)](#)
+[![Fedora](https://img.shields.io/badge/Fedora-51A2DA?logo=fedora&logoColor=fff)](#)
+
 Not all Qt6 versions support the Wayland lib of the operating system.
 Generally the solution is to match the qt6 platform packages to the ones deployed with Pyside6. Minor version match is enough, because patch versions are ABI compatible.
 
@@ -140,6 +144,8 @@ You can also assign its icon to it from the site packages folder in **conan_expl
 > From version 2.2.0 Python 3.7 support will be dropped, having reached end-of-life.    
 
 ## 🛠 Toolchain
+
+[![Visual Studio Code](https://custom-icon-badges.demolab.com/badge/Visual%20Studio%20Code-0078d7.svg?logo=vsc&logoColor=white)](#)
 
 This project uses Python with Qt as a frontend using the PySide6 integration.
 An IDE configuration is available for VsCode.
