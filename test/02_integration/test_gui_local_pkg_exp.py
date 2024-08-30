@@ -21,7 +21,6 @@ from conan_explorer import conan_version
 from conan_explorer.conan_wrapper.types import ConanPkgRef, ConanRef
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui import main_window
-from conan_explorer.ui.dialogs.conan_remove import ConanRemoveDialog
 from conan_explorer.ui.views import LocalConanPackageExplorer
 from conan_explorer.ui.views.app_grid.tab import AppEditDialog
 from conan_explorer.ui.views.package_explorer.sel_model import PkgSelectionType
@@ -276,6 +275,27 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     assert TEST_REF in dict_param.keys()
     assert id in dict_param[TEST_REF]
     assert another_id in dict_param[TEST_REF]
+
+    ## test filter
+    idx = lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + id)
+    assert not lpe._pkg_sel_ctrl._view.isIndexHidden(idx)
+    lpe._ui.package_filter_edit.setText("linux")
+    sleep(1)
+    lpe._ui.package_filter_edit.setText("example")
+    sleep(1)
+    # TODO: I don't know how to check this lpe._pkg_sel_ctrl._view.isIndexHidden(idx) returns wrong value
+
+
+def test_sizes_calculation(qtbot, mocker: MockerFixture, base_fixture,
+                           ui_no_refs_config_fixture, setup_local_package_explorer: LPESetupType):
+    
+    _qapp_instance, lpe, main_gui = setup_local_package_explorer
+    conan_install_ref(TEST_REF, profile="windows")
+    lpe.on_show_sizes()
+    assert not lpe._pkg_sel_ctrl._view.isColumnHidden(1)
+    row = lpe._pkg_sel_ctrl.find_item_in_pkg_sel_model(TEST_REF)
+    size = lpe._pkg_sel_ctrl._model.index(row, 1, QtCore.QModelIndex()).data(0)
+    assert float(size) > 0.05
 
 
 @pytest.mark.conanv2
