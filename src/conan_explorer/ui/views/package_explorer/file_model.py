@@ -6,10 +6,14 @@ from PySide6.QtGui import QColor, QFont
 from typing_extensions import override
 
 from conan_explorer.ui.common import FileSystemModel
+from conan_explorer.ui.common.model import QAF
 
 
 class CalFileSystemModel(FileSystemModel):
-    _disabled_rows: "set[int]" = set()
+
+    def __init__(self, h_align=QAF.AlignLeft | QAF.AlignVCenter, v_align=QAF.AlignVCenter, parent=None):
+        super().__init__(h_align, v_align, parent)
+        self._disabled_rows: "set[int]" = set()
 
     @override
     def data(self, index: QModelIndex, role: Qt.ItemDataRole):

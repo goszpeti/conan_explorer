@@ -147,18 +147,16 @@ class FluentWindow(QMainWindow, ThemedWidget):
         if is_windows_11() or platform.system() == "Linux":  # To hide black edges around the border rounding
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
-        self._use_native_windows_fcns = True if platform.system(
-        ) == "Windows" and native_windows_fcns else False
+        self._use_native_windows_fcns = True if platform.system() == "Windows" and native_windows_fcns else False
         # all buttons and widgets to be able to shown on the main page (from settings and left menu)
         self.page_widgets = FluentWindow.PageStore()
 
         # resize related variables
-        self._resize_press = 0
         self._resize_direction = ResizeDirection.default
         self._resize_point = QPoint()
         self._last_geometry = QRect()
         self.title_text = title_text
-        self.drag_position: Optional[QPoint] = None
+        self._drag_position: Optional[QPoint] = None
 
         self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
         self.ui.left_menu_frame.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
@@ -173,31 +171,34 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.settings_button.setFixedWidth(
             LEFT_MENU_MIN_WIDTH - button_offset)
 
-        self.set_themed_icon(self.ui.toggle_left_menu_button,
-                             "icons/menu_stripes.svg")
+        # set all built-in styled icons
+        self.set_themed_icon(self.ui.toggle_left_menu_button, "icons/menu_stripes.svg")
         self.set_themed_icon(self.ui.settings_button, "icons/settings.svg")
-
         self.set_themed_icon(self.ui.minimize_button, "icons/minus.svg")
         self.set_themed_icon(self.ui.close_button, "icons/close.svg")
+        qss_icons = ["icons/check_box_empty.svg", "icons/check_box_checked.svg", 
+                     "icons/forward.svg", "icons/expand.svg"]
+        for icon in qss_icons:
+            get_themed_asset_icon(icon, force_dark_mode=True)
+
         from ..common.theming import get_gui_style
         style = get_gui_style()
         if style == GUI_STYLE_FLUENT:
             self.ui.close_button.setIconSize(QSize(16, 16))
 
         # window buttons
-        self.ui.restore_max_button.clicked.connect(self.maximize_restore)
-        self.ui.minimize_button.clicked.connect(self.showMinimized)
+        self.ui.restore_max_button.clicked.connect(self.on_maximize_restore)
+        self.ui.minimize_button.clicked.connect(self.on_minimize)
         self.ui.close_button.clicked.connect(self.close)
 
         self.ui.left_menu_top_subframe.mouseMoveEvent = self.move_window
         self.ui.top_frame.mouseMoveEvent = self.move_window
-        self.ui.top_frame.mouseDoubleClickEvent = self.maximize_restore
+        self.ui.top_frame.mouseDoubleClickEvent = self.on_maximize_restore
 
         self.ui.toggle_left_menu_button.clicked.connect(self.toggle_left_menu)
         self.ui.settings_button.clicked.connect(self.toggle_right_menu)
 
         # clear default strings
-        # self.ui.page_info_label.setText("")
         self.ui.title_label.setText("")
         self.ui.title_icon_label.hide()
 
@@ -221,7 +222,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     @override
     def mousePressEvent(self, event: QMouseEvent):
         """ Helper for moving window to know mouse position (Non Windows) """
-        self.drag_position = event.globalPosition().toPoint()
+        self._drag_position = event.globalPosition().toPoint()
 
     def apply_theme(self):
         """ This function must be able to reload all icons from the left and right menu bar. """
@@ -235,7 +236,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def move_window(self, event: QMouseEvent):
         # do nothing if the resize function is active
         if self.cursor().shape() != Qt.CursorShape.ArrowCursor:
-            self.eventFilter(self, event)  # call this to be able to resize
             return
         if self._use_native_windows_fcns:
             # enables Windows snap functions
@@ -247,14 +247,14 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             # if maximized, return to normal be able to move
             if self.isMaximized():
-                self.maximize_restore(None)
+                self.on_maximize_restore(None)
             # qt move
             if event.buttons() == Qt.MouseButton.LeftButton:
-                if self.drag_position is None:
+                if self._drag_position is None:
                     return
                 self.move(self.pos() + event.globalPosition().toPoint() -
-                          self.drag_position)  # type: ignore
-                self.drag_position = event.globalPosition().toPoint()
+                          self._drag_position)  # type: ignore
+                self._drag_position = event.globalPosition().toPoint()
                 event.accept()
 
     def enable_windows_native_animations(self):
@@ -407,6 +407,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """ Implements window resizing """
         self.set_restore_max_button_state()
         if self.isMaximized():  # no resize when maximized
+            # forced reset of cursor
+            if self.cursor().shape() != Qt.CursorShape.ArrowCursor:
+                self.setCursor(Qt.CursorShape.ArrowCursor)
             return super().eventFilter(watched, event)
         # Use isinstance instead of type because of typehinting
         if isinstance(event, QHoverEvent):
@@ -417,12 +420,14 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if event.type() == event.Type.MouseButtonPress:
                 if event.button() != Qt.MouseButton.LeftButton:
                     return super().eventFilter(watched, event)
-                self._resize_press = 1
-                # save the starting point of resize
-                self._resize_point = self.mapToGlobal(event.pos())
-                self._last_geometry = self.geometry()
-                self.resizing(event)
-                self._resize_press = 0
+                # resizing 
+                if self.cursor().shape() != Qt.CursorShape.ArrowCursor:
+                    # save the starting point of resize
+                    self._resize_point = self.mapToGlobal(event.pos())
+                    self._last_geometry = self.geometry()
+                    self.resizing()
+            else: # Hacky fix for when the cursor is not reset after resizing
+                self.setCursor(Qt.CursorShape.ArrowCursor)
 
         return super().eventFilter(watched, event)
 
@@ -469,7 +474,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self._resize_direction = ResizeDirection.default
             self.setCursor(cs.ArrowCursor)
 
-    def resizing(self, event):
+    def resizing(self):
         ed = Qt.Edge
         window = self.window().windowHandle()
         if self._resize_direction == ResizeDirection.top:
@@ -489,13 +494,20 @@ class FluentWindow(QMainWindow, ThemedWidget):
         elif self._resize_direction == ResizeDirection.top_left:
             window.startSystemResize(ed.TopEdge | ed.LeftEdge)
 
-    def maximize_restore(self, event=None):  # dummy arg to be used as an event slot
+    def on_maximize_restore(self, event=None):  # dummy arg to be used as an event slot
         if self.isMaximized():
+            self.setWindowState(Qt.WindowState.WindowNoState)
             self.showNormal()
         else:
+            self.setWindowState(Qt.WindowState.WindowMaximized)
             self.showMaximized()
 
+    def on_minimize(self, event=None):
+        self.setWindowState(Qt.WindowState.WindowMinimized)
+        self.showMinimized()
+
     def set_restore_max_button_state(self, force=False):
+        """ This toggles the restore/maximize button in the top right button cluster """
         if self.isMaximized():
             if self.ui.restore_max_button.icon().themeName() == "restore" and not force:
                 return

@@ -45,6 +45,19 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
     # expand and collapse remotes list, simply to see if it does not crash
     search_dialog._ui.remote_toggle_button.click()
     search_dialog._ui.remote_toggle_button.click() # collapse again
+        
+    # test deselect all
+    select_all_item = search_dialog._ui.select_all_widget.item(0)
+    select_all_item.setCheckState(Qt.CheckState.Unchecked)
+    for row in range(0, search_dialog._ui.remote_list.count()):
+        assert search_dialog._ui.remote_list.item(
+            row).checkState() == Qt.CheckState.Unchecked
+
+    # test check all
+    select_all_item.setCheckState(Qt.CheckState.Checked)
+    for row in range(0, search_dialog._ui.remote_list.count()):
+        assert search_dialog._ui.remote_list.item(
+            row).checkState() == Qt.CheckState.Checked
 
     # enter short search term -> search button disabled
     search_dialog._ui.search_line.setText("ex")

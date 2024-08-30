@@ -203,7 +203,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             self._conan_file_reference = ConanRef.loads(new_value)
         except Exception:  # invalid ref
-            # Logger().debug(f"Invalid ref: {new_value}")
+            Logger().debug(f"Invalid ref: {new_value}")
             return
         # add conan ref to worker
         if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF

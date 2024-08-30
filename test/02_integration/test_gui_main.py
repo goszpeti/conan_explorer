@@ -13,6 +13,7 @@ from shutil import rmtree
 
 import pytest
 import requests
+from conan_explorer.app.base_ui.loading import LoaderGui
 from conan_explorer.ui.fluent_window.side_menu import SideSubMenu
 from conan_explorer.ui.plugin.handler import PluginFile
 from conan_explorer.ui.views.app_grid.tab import TabList
@@ -75,44 +76,6 @@ def test_startup_no_config(qtbot, base_fixture, ui_config_fixture, mocker):
     main_gui.save_window_state()
     main_gui.close()
 
-def test_gui_mod_and_style(qtbot, base_fixture, ui_config_fixture):
-    """ Test, that
-    1. gui mode /dark light
-    2. gui icon style
-    3. auto open view
-    functions do not crash and set the app settings.
-    TODO: check, if icons have been reloaded
-    """
-    from pytestqt.plugin import _qapp_instance
-    main_window.ENABLE_GUI_STYLES = True
-    app.active_settings.set(GUI_MODE, GUI_MODE_LIGHT)
-    app.active_settings.set(GUI_STYLE, GUI_STYLE_MATERIAL)
-    app.active_settings.set(AUTO_OPEN_LAST_VIEW, True)
-    app.active_settings.set(LAST_VIEW, "Manage Plugins")
-
-    main_gui = main_window.MainWindow(_qapp_instance)
-    qtbot.addWidget(main_gui)
-    main_gui.load()
-    main_gui.show()
-    qtbot.waitExposed(main_gui, timeout=3000)
-
-    # check auto open feature
-    assert main_gui.plugins_page.isVisible()
-
-    view_side_menu: SideSubMenu = main_gui.ui.right_menu_bottom_content_sw.findChild(QtWidgets.QWidget, "view_widget")
-
-    dark_mode_toggle = view_side_menu.get_menu_entry_by_name("dark_mode_widget")
-    dark_mode_toggle.toggle()
-    assert app.active_settings.get(GUI_MODE) == GUI_MODE_DARK
-
-    # icon_style_widget = view_side_menu.get_menu_entry_by_name("Icon Style")
-
-    # assert main_gui._style_chooser_radio_material.isChecked()
-    # main_gui._style_chooser_radio_fluent.click()
-
-    # assert app.active_settings.get(GUI_STYLE) == GUI_STYLE_FLUENT
-    main_gui.close()
-
 
 @pytest.mark.conanv2
 def test_startup_with_existing_config_and_open_menu(qtbot, base_fixture, ui_config_fixture):
@@ -167,8 +130,7 @@ def test_select_config_file_dialog(base_fixture, ui_config_fixture, qtbot, mocke
 @pytest.mark.conanv1
 def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker):
     """
-    Test, that clicking on on open config file and selecting a file writes it back to settings.
-    Same file as selected expected in settings.
+    Test, that conan cache cleanup for orphaned references and packages
     """
 
     if not platform.system() == "Windows":  # Feature only "available" on Windows
@@ -178,19 +140,20 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
 
     # Set up broken packages to have something to cleanup
     # in short path - edit .real_path
-    ref = "example/1.0.0@user/testing"
-    conan_remove_ref(ref)  # clean up for multiple runs
+    orphaned_ref_pkg = "example/1.0.0@user/testing"
+    conan_remove_ref(orphaned_ref_pkg)  # clean up for multiple runs
     # shortpaths is enabled in conanfile
     conanfile = str(base_fixture.testdata_path / "conan" / "conanfile.py")
-    ret = os.system(f"conan create {conanfile} {ref}")
+    ret = os.system(f"conan create {conanfile} {orphaned_ref_pkg}")
     assert ret == 0
 
-    pkg = conan.find_best_matching_local_package(ConanRef.loads(ref))
+    pkg = conan.find_best_matching_local_package(ConanRef.loads(orphaned_ref_pkg))
     remotes = conan.get_remotes()
     Logger().debug("Remotes:" + repr(remotes))
     time.sleep(1)
     assert pkg["id"], f"Package: {pkg}"
-    pkg_dir_to_delete = conan.get_package_folder(ConanRef.loads(ref), pkg["id"])
+    pkg_dir_to_delete = conan.get_package_folder(
+        ConanRef.loads(orphaned_ref_pkg), pkg["id"])
 
     real_path_file = pkg_dir_to_delete / ".." / CONAN_REAL_PATH
     with open(str(real_path_file), "r+") as fp:
@@ -200,37 +163,43 @@ def test_conan_cache_with_dialog(qtbot, base_fixture, ui_config_fixture, mocker)
         fp.write(line)
 
     # in cache - delete Short path, so that cache folder is orphaned
-    ref = "example/1.0.0@user/orphan"
-    conan_remove_ref(ref)
-    ret = run(f"conan create {conanfile} {ref}", stdout=PIPE, stderr=STDOUT, shell=True)
+    orphaned_ref = "example/1.0.0@user/orphan"
+    conan_remove_ref(orphaned_ref)
+    ret = run(f"conan create {conanfile} {orphaned_ref}", stdout=PIPE, stderr=STDOUT, shell=True)
     output = ""
     if ret.stderr:
         output += ret.stderr.decode("utf-8")
     if ret.stdout:
         output += ret.stdout.decode("utf-8")
     assert ret.returncode == 0, output
-    exp_folder = conan.get_export_folder(ConanRef.loads(ref))
-    pkg = conan.find_best_matching_local_package(ConanRef.loads(ref))
+    exp_folder = conan.get_export_folder(ConanRef.loads(orphaned_ref))
+    pkg = conan.find_best_matching_local_package(ConanRef.loads(orphaned_ref))
     pkg_cache_folder = os.path.abspath(os.path.join(exp_folder, "..", "package", pkg["id"]))
-    pkg_dir = conan.get_package_folder(ConanRef.loads(ref), pkg["id"])
+    pkg_dir = conan.get_package_folder(ConanRef.loads(orphaned_ref), pkg["id"])
     rmtree(pkg_dir)
 
-    paths_to_delete = ConanCleanup(conan).get_cleanup_cache_paths()
-    assert pkg_cache_folder in paths_to_delete
-    assert str(pkg_dir_to_delete.parent) in paths_to_delete
+    # execute
+    cleanup_infos = ConanCleanup().get_cleanup_cache_info()
 
+    # check, that the correct paths were found
+    orphaned_ref_info = orphaned_ref_pkg_info = {}
+    for ref, info in cleanup_infos.items():
+        if ref == orphaned_ref:
+            orphaned_ref_info = info
+        if ref == orphaned_ref_pkg:
+            orphaned_ref_pkg_info = info
+    assert orphaned_ref_info.get(pkg["id"]) == pkg_cache_folder
+    assert orphaned_ref_pkg_info.get("package") == str(pkg_dir_to_delete.parent)
+
+    # now execute by really pressing the button
     from pytestqt.plugin import _qapp_instance
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
     qtbot.addWidget(main_gui)
     qtbot.waitExposed(main_gui, timeout=3000)
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
 
-    button: QtWidgets.QPushButton = main_gui.main_general_settings_menu.get_menu_entry_by_name("Clean Conan Cache")
-    button.click()
-    time.sleep(3)
-
+    dialog = main_gui.open_cleanup_cache_dialog()
+    dialog.accept()
     assert not os.path.exists(pkg_cache_folder)
     assert not pkg_dir_to_delete.parent.exists()
     main_gui.close()
@@ -289,3 +258,44 @@ def test_example_plugin(app_qt_fixture, base_fixture: PathSetup):
 
     main_gui.close()
     PluginFile.unregister(plugin_file_path)
+
+
+def test_gui_mod_and_style(qtbot, base_fixture, ui_config_fixture):
+    """ Test, that
+    1. gui mode /dark light
+    2. gui icon style
+    3. auto open view
+    functions do not crash and set the app settings.
+    TODO: check, if icons have been reloaded
+    """
+    from pytestqt.plugin import _qapp_instance
+    main_window.ENABLE_GUI_STYLES = True
+    app.active_settings.set(GUI_MODE, GUI_MODE_LIGHT)
+    app.active_settings.set(GUI_STYLE, GUI_STYLE_MATERIAL)
+    app.active_settings.set(AUTO_OPEN_LAST_VIEW, True)
+    app.active_settings.set(LAST_VIEW, "Manage Plugins")
+
+    main_gui = main_window.MainWindow(_qapp_instance)
+    qtbot.addWidget(main_gui)
+    main_gui.load()
+    main_gui.show()
+    qtbot.waitExposed(main_gui, timeout=3000)
+
+    # check auto open feature
+    assert main_gui.plugins_page.isVisible()
+    time.sleep(1)
+
+    view_side_menu: SideSubMenu = main_gui.ui.right_menu_bottom_content_sw.findChild(
+        QtWidgets.QWidget, "view_widget")
+
+    dark_mode_toggle = view_side_menu.get_menu_entry_by_name("dark_mode_widget")
+    dark_mode_toggle.toggle()
+    assert app.active_settings.get(GUI_MODE) == GUI_MODE_DARK
+
+    # icon_style_widget = view_side_menu.get_menu_entry_by_name("Icon Style")
+
+    # assert main_gui._style_chooser_radio_material.isChecked()
+    # main_gui._style_chooser_radio_fluent.click()
+
+    # assert app.active_settings.get(GUI_STYLE) == GUI_STYLE_FLUENT
+    time.sleep(1)

@@ -1,14 +1,14 @@
 from enum import Enum
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import conan_explorer.app as app
 from conan_explorer import asset_path
-from conan_explorer.app import AsyncLoader  # using global module pattern
+from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanPkgRef, ConanRef
 from conan_explorer.ui.common import show_conanfile, ConfigHighlighter
 from conan_explorer.ui.dialogs import ConanRemoveDialog, ConanInstallDialog
-from PySide6.QtCore import QItemSelectionModel, QModelIndex, QObject, SignalInstance
+from PySide6.QtCore import QItemSelectionModel, QModelIndex, QObject, SignalInstance, Qt
 from PySide6.QtWidgets import (QApplication, QTextBrowser,
                                QLineEdit, QTreeView, QWidget, QDialog, QVBoxLayout)
 from PySide6.QtGui import QIcon
@@ -39,7 +39,7 @@ class PackageSelectionController(QObject):
         self._base_signals = base_signals
         self._conan_pkg_selected = conan_pkg_selected
         self._model = None
-        self._loader = AsyncLoader(self)
+        self._loader = LoaderGui(self)
         self._page_widgets = page_widgets
         self._view = view
         self._package_filter_edit = package_filter_edit
@@ -55,10 +55,9 @@ class PackageSelectionController(QObject):
         conan_refs = self.get_selected_conan_refs()
         if len(conan_refs) != 1:
             return
-        loader = AsyncLoader(self)
-        loader.async_loading(self._view, show_conanfile, (conan_refs[0],),
+        loader = LoaderGui(self)
+        loader.load(self._view, show_conanfile, (conan_refs[0],),
                              loading_text="Opening Conanfile...")
-        loader.wait_for_finished()
 
     def on_copy_ref_requested(self):
         conan_refs = self.get_selected_conan_refs()
@@ -75,15 +74,25 @@ class PackageSelectionController(QObject):
         dialog.show()
 
     def on_remove_ref_requested(self):
-        conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
-        if not conan_ref:
+        conan_refs_with_pkg_ids= self.get_selected_refs_with_pkg_ids()
+        if not conan_refs_with_pkg_ids:
             return
-        dialog = ConanRemoveDialog(self._view, conan_ref,
-                                   pkg_id, self._base_signals.conan_pkg_removed)
+        dialog = ConanRemoveDialog(self._view, conan_refs_with_pkg_ids,
+                                   self._base_signals.conan_pkg_removed)
         dialog.show()
 
     def on_conan_pkg_removed(self, conan_ref: str, pkg_id: str):
-        self.refresh_pkg_selection_view()
+        """ Remove conan reference if in model """
+        if not self._model: # for None usage 
+            return
+        ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
+        if not ref_row:
+            return
+        proxy_index = self._model.index(ref_row, 0, QModelIndex())
+        item: Optional[PackageTreeItem] = proxy_index.internalPointer() # type: ignore
+        if not item:
+            return
+        self._model.remove_item(item)
 
     def on_show_build_info(self):
         conan_ref, pkg_id = self.get_selected_ref_with_pkg_id()
@@ -91,12 +100,11 @@ class PackageSelectionController(QObject):
             return
         pkg_info = app.conan_api.get_local_pkg_from_id(
             ConanPkgRef.loads(conan_ref + ":" + pkg_id))
-        loader = AsyncLoader(self)
-        loader.async_loading(self._view, app.conan_api.get_conan_buildinfo,
+        loader = LoaderGui(self)
+        loader.load(self._view, app.conan_api.get_conan_buildinfo,
                              (ConanRef.loads(conan_ref), pkg_info.get("settings", ""),
                               pkg_info.get("options", {})), self.show_buildinfo_dialog,
                              loading_text="Loading build info...")
-        loader.wait_for_finished()
 
     def show_buildinfo_dialog(self, buildinfos: str):
         if not buildinfos:
@@ -134,7 +142,7 @@ class PackageSelectionController(QObject):
         source_items: List[PackageTreeItem] = []
         for index in indexes:
             source_items.append(model.mapToSource(index).internalPointer())  # type: ignore
-        return source_items
+        return list(set(source_items))
 
     def get_selected_ref_with_pkg_id(self) -> Tuple[str, str]:
         conan_refs = self.get_selected_conan_refs()
@@ -145,6 +153,30 @@ class PackageSelectionController(QObject):
         if pkg_info:
             pkg_id = pkg_info.get("id", "")
         return conan_refs[0], pkg_id
+    
+    def get_selected_refs_with_pkg_ids(self) -> Dict[str, List[str]]:
+        refs_with_pkg_ids = {}
+        source_items = self.get_selected_pkg_source_items()
+        for source_item in source_items:
+            conan_ref_item = source_item
+            if source_item.type in [PkgSelectionType.export, PkgSelectionType.editable]:
+                continue
+            if source_item.type == PkgSelectionType.pkg:
+                conan_ref_item: PackageTreeItem = source_item.parent()  # type: ignore
+            conan_ref: str = conan_ref_item.item_data[0]
+            pkg_id = ""
+            if pkg_info:= source_item.pkg_info:
+                pkg_id = pkg_info.get("id", "")
+            if conan_ref not in refs_with_pkg_ids:
+                refs_with_pkg_ids[conan_ref] = [pkg_id]
+            else:
+                refs_with_pkg_ids[conan_ref].append(pkg_id)
+
+        # clean up dict -> empty str means the ref was selected -> delete all other ids
+        for ref, pkg_ids in refs_with_pkg_ids.items():
+            if "" in pkg_ids:
+                refs_with_pkg_ids[ref] = [""] 
+        return refs_with_pkg_ids
 
     def get_selection_mode(self, source_items: List[PackageTreeItem]) -> MultiPkgSelectionMode:
         """" Determine which combination of multiselected items is active """
@@ -182,6 +214,7 @@ class PackageSelectionController(QObject):
         if source_item.type == PkgSelectionType.ref:
             return ConanPkg()
         return source_item.pkg_info
+    
 
     # Global pane and cross connection slots
 
@@ -203,8 +236,8 @@ class PackageSelectionController(QObject):
         if self._model and not force_update:  # loads only at first init
             return
         if not self._model:
-            self._model = PkgSelectModel()
-        self._loader.async_loading(
+            self._model = PkgSelectModel(self._loader.loading_string_signal)
+        self._loader.load(
             self._view, self._model.setup_model_data, (),
             self.finish_select_model_init, "Reading Packages")
 
@@ -213,8 +246,28 @@ class PackageSelectionController(QObject):
             self._view.setModel(self._model.proxy_model)
             self._view.selectionModel().selectionChanged.connect(self.on_pkg_selection_change)
             self.set_filter_wildcard()  # re-apply package filter query
+            self._view.hideColumn(1)  # don't show size on opening view
         else:
             Logger().error("Can't load local packages!")
+
+    def on_show_sizes(self):
+        if not self._model:
+            return
+        if not self._model.show_sizes:
+            self._model.show_sizes = True
+            self._view.showColumn(1)
+            self._loader.load(self._view, self._model.get_all_sizes, (), 
+                self.expand_and_sort_for_sizes,
+                "Calculating Sizes. This can take a while...")
+        else:
+            self._model.show_sizes = False
+            self._view.collapseAll()
+            self._view.hideColumn(1)
+
+    def expand_and_sort_for_sizes(self):
+        self._view.expandAll()
+        self._view.sortByColumn(1, Qt.SortOrder.DescendingOrder)
+        self._view.header().resizeSections(self._view.header().ResizeMode.Stretch)
 
     def set_filter_wildcard(self):
         # use strip to remove unnecessary whitespace
@@ -227,7 +280,10 @@ class PackageSelectionController(QObject):
         if not self._model:
             return False
         for ref_row in range(self._model.root_item.child_count()):
-            item = self._model.root_item.child_items[ref_row]
+            try:  # try for empty model
+                item = self._model.root_item.child_items[ref_row]
+            except Exception:
+                return -1
             if item.item_data[0] == conan_ref:
                 if pkg_id:
                     if item.child_count() < 2:  # try to fetch, pkd_id probably not loaded yet
@@ -244,7 +300,7 @@ class PackageSelectionController(QObject):
     def select_local_package_from_ref(self, conan_ref: str, export=False, 
         select_mode=QItemSelectionModel.SelectionFlag.ClearAndSelect) -> Optional[QModelIndex]:
         """ Selects a reference:id pkg in the left pane and opens the file view 
-        param export: teels to select the export folder
+        param export: tells to select the export folder
         """
         # change to this page and loads
         self._page_widgets.get_button_by_type(type(self.parent())).click()
@@ -276,7 +332,7 @@ class PackageSelectionController(QObject):
         ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
         if ref_row == -1:
             Logger().debug(f"Cannot find {conan_ref}" + error_message_suffix)
-            return False
+            return None
         Logger().debug(f"Found {conan_ref}@{str(ref_row)}" + error_message_suffix)
 
         # map to package view model

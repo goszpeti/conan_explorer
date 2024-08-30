@@ -1,6 +1,5 @@
 import datetime
 from dataclasses import dataclass
-from shutil import rmtree
 from time import sleep
 from typing import Optional
 from typing_extensions import override
@@ -8,13 +7,14 @@ from typing_extensions import override
 from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
 from PySide6.QtGui import QKeySequence, QDesktopServices, QResizeEvent, QShortcut
 from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
-    QVBoxLayout, QWidget)
+    QVBoxLayout)
 
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
     MIN_FONT_SIZE, PathLike, conan_version)
-from conan_explorer.app import AsyncLoader
+from conan_explorer.app import LoaderGui
 from conan_explorer.app import Logger, activate_theme
+from conan_explorer.app.system import delete_path, get_folder_size_mb
 from conan_explorer.settings import (AUTO_OPEN_LAST_VIEW, CONSOLE_SPLIT_SIZES, FILE_EDITOR_EXECUTABLE,
     FONT_SIZE, GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_FLUENT,
     GUI_STYLE_MATERIAL, LAST_CONFIG_FILE, LAST_VIEW, WINDOW_SIZE)
@@ -38,7 +38,6 @@ class BaseSignals():
     conan_pkg_installed: SignalInstance  # conan_ref, pkg_id
     conan_pkg_removed: SignalInstance  # conan_ref, pkg_ids
     conan_remotes_updated: SignalInstance
-    page_size_changed: SignalInstance
 
 
 class MainWindow(FluentWindow):
@@ -50,7 +49,6 @@ class MainWindow(FluentWindow):
     # conan_ref, pkg_ids
     conan_pkg_removed: SignalInstance = Signal(str, str)  # type: ignore
     conan_remotes_updated: SignalInstance = Signal()  # type: ignore
-    page_size_changed: SignalInstance = Signal(QWidget)  # type: ignore
     log_console_message: SignalInstance = Signal(str)  # type: ignore 
 
     qt_logger_name = "qt_logger"
@@ -61,8 +59,8 @@ class MainWindow(FluentWindow):
         self._qt_app = qt_app
         self.loaded = False
         self.base_signals = BaseSignals(self.conan_pkg_installed, self.conan_pkg_removed,
-                                        self.conan_remotes_updated, self.page_size_changed)
-        self.model = UiApplicationModel(self.conan_pkg_installed, self.conan_pkg_removed)
+                                        self.conan_remotes_updated)
+        self.model = UiApplicationModel(self.conan_pkg_installed)
         self._plugin_handler = PluginHandler(self, self.base_signals, self.page_widgets)
         self.setWindowTitle("") # app display name is already there
         # connect logger to console widget to log possible errors at init
@@ -160,9 +158,11 @@ class MainWindow(FluentWindow):
 
         if conan_version.major == 1:
             self.main_general_settings_menu.add_button_menu_entry("Remove Locks",
-                                                                  self.on_conan_remove_locks, "icons/remove-lock.svg")
+                                    self.on_conan_remove_locks, "icons/remove-lock.svg")
             self.main_general_settings_menu.add_button_menu_entry("Clean Conan Cache",
-                                                                  self.open_cleanup_cache_dialog, "icons/cleanup.svg")
+                                    self.open_cleanup_cache_dialog, "icons/cleanup.svg")
+            self.main_general_settings_menu.add_button_menu_entry("Repair Package Metadata",
+                                self.open_repair_pkg_metadata_dialog, "icons/home_repair.svg")
             self.main_general_settings_menu.add_menu_line()
         self.add_right_bottom_menu_main_page_entry("Manage Plugins", self.plugins_page, "icons/plugin.svg")
         self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.svg")
@@ -198,8 +198,8 @@ class MainWindow(FluentWindow):
             config_source_str = app.active_settings.get_string(LAST_CONFIG_FILE)
         self._load_plugins()  # creates the objects - must be in this thread
 
-        loader = AsyncLoader(self)
-        loader.async_loading(self, self._load_job, (config_source_str,))
+        loader = LoaderGui(self)
+        loader.load_for_blocking(self, self._load_job, (config_source_str,), loading_text="Loading Plugins")
         loader.wait_for_finished()
         # Restore last view
         if app.active_settings.get_bool(AUTO_OPEN_LAST_VIEW):
@@ -209,7 +209,6 @@ class MainWindow(FluentWindow):
                 self.page_widgets.get_button_by_type(type(page)).click()
             except Exception as e:
                 Logger().debug("Can't switch to page for auto open: " + str(e))
-        
         self.loaded = True
 
     def _load_plugins(self):
@@ -293,39 +292,43 @@ class MainWindow(FluentWindow):
         sender_toggle.wait_for_anim_finish()
         app.active_settings.set(AUTO_OPEN_LAST_VIEW, sender_toggle.isChecked())
 
-    def open_cleanup_cache_dialog(self):
+    def open_repair_pkg_metadata_dialog(self):
         """ Open the message box to confirm deletion of invalid cache folders """
         from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
-        cleaner = ConanCleanup(app.conan_api) # type: ignore
-        loader = AsyncLoader(self)
-        loader.async_loading(self, cleaner.get_cleanup_cache_paths, )
-        loader.wait_for_finished()
-        paths = cleaner.orphaned_packages.union(cleaner.orphaned_references)
-        if not paths:
-            self.write_log("INFO: Nothing found in cache to clean up.")
-            return
-        if len(paths) > 1:
-            path_list = "\n".join(paths)
-        else:
-            path_list = str(paths)
+        cleaner = ConanCleanup()
 
+        loader = LoaderGui(self)
+        loader.load(self, cleaner.gather_invalid_remote_metadata, )
+        loader.wait_for_finished()
+        invalid_refs = cleaner.invalid_metadata_refs
+        
         msg_box = WideMessageBox(parent=self)
         button = WideMessageBox.StandardButton
         msg_box.setWindowTitle("Delete folders")
-        msg_box.setText("Are you sure, you want to delete the found folders?\t")
-        msg_box.setDetailedText(path_list)
+        msg_box.setText((
+            "Found the following packages with invalid package metadata. " 
+            "Attempt to repair? This can take a while, if you have many remotes. "
+            "You can speed this up by disabling the remotes where you don't expect to find the missing references"
+            ))
+        msg_box.setDetailedText(str(invalid_refs))
         msg_box.setStandardButtons(button.Yes | button.Cancel)  # type: ignore
         msg_box.setIcon(WideMessageBox.Icon.Question)
         msg_box.setWidth(800)
         msg_box.setMaximumHeight(600)
         reply = msg_box.exec()
         if reply == button.Yes:
-            def delete_cache_paths(paths):
-                for path in paths:
-                    rmtree(str(path), ignore_errors=True)
-            loader.async_loading(self, delete_cache_paths, (paths,), 
-                                 loading_text="Deleting cache paths...")
+            def repair_refs(refs):
+                for ref in refs:
+                    cleaner.repair_invalid_remote_metadata(ref)
+                    loader.loading_string_signal.emit("Trying to repair\n" + ref)
+            loader.load(self, repair_refs, (invalid_refs,), 
+                                 loading_text="Repairing metadata...")
 
+    def open_cleanup_cache_dialog(self):
+        """ Open the message box to confirm deletion of invalid cache folders """
+        from .dialogs import ConanCacheCleanupDialog
+        return ConanCacheCleanupDialog(self)
+       
     def open_file_editor_selection_dialog(self):
         dialog = FileEditorSelDialog(self)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:

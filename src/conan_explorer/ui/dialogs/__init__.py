@@ -1,4 +1,5 @@
 from .crash import show_bug_reporting_dialog
+from .conan_cache_cleanup import ConanCacheCleanupDialog
 from .conan_install import ConanInstallDialog
 from .conan_remove import ConanRemoveDialog
 from .reorder_dialog import ReorderController, ReorderDialog, ReorderingModel

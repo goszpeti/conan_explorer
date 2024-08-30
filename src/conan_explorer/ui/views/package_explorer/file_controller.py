@@ -11,10 +11,9 @@ from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui.common import re_register_signal
 from conan_explorer.ui.views.app_grid import UiAppLinkConfig
 from conan_explorer.ui.views import AppGridView
-from PySide6.QtCore import (QMimeData, QModelIndex, QObject,
-                            Qt, QUrl, SignalInstance)
-from PySide6.QtWidgets import (QApplication, QTextBrowser, QMessageBox,
-                               QTreeView, QWidget)
+from PySide6.QtCore import (QMimeData, QModelIndex, QObject, QItemSelectionModel,
+                            Qt,  QUrl, SignalInstance)
+from PySide6.QtWidgets import QApplication, QTextBrowser, QMessageBox, QTreeView
 
 
 from .sel_model import PkgSelectionType
@@ -25,20 +24,22 @@ if TYPE_CHECKING:
     from conan_explorer.ui.main_window import BaseSignals
     from .package_explorer import LocalConanPackageExplorer
 
+NEW_FOLDER_NAME = "New folder"
 
 class PackageFileExplorerController(QObject):
 
-    def __init__(self, parent: "LocalConanPackageExplorer", view: QTreeView, pkg_path_label: QTextBrowser,
-                 conan_pkg_selected: SignalInstance, base_signals: "BaseSignals",
-                 page_widgets: "FluentWindow.PageStore"):
+    def __init__(self, parent: "LocalConanPackageExplorer", view: QTreeView, 
+                 pkg_path_label: QTextBrowser, cut_files_reset: SignalInstance, 
+                 base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
         super().__init__(parent)
         self._model: Optional[CalFileSystemModel] = None
         self._page_widgets = page_widgets
         self._view = view
         self._pkg_path_label = pkg_path_label
-        self._conan_pkg_selected = conan_pkg_selected
+        self.cut_files_reset = cut_files_reset
         self._type = PkgSelectionType.ref
         base_signals.conan_pkg_removed.connect(self.on_conan_pkg_removed)
+        self.cut_files_reset.connect(self._disable_cut_selection)
 
         self._current_ref: Optional[str] = None  # loaded conan ref
         self._current_pkg: Optional[ConanPkg] = None  # loaded conan pkg info
@@ -101,7 +102,14 @@ class PackageFileExplorerController(QObject):
         own_id = pkg_id
         if self._current_pkg:
             own_id = self._current_pkg.get("id", "")
-        if self._current_ref == conan_ref and pkg_id == own_id:
+        if self._current_ref == conan_ref:
+            delete = False
+            if not pkg_id:
+                delete = True
+            elif pkg_id and pkg_id == own_id:
+                delete = True
+            if not delete:
+                return
             self.close_files_view()
             self.parent().tab_close_requested(self) # type: ignore
 
@@ -170,8 +178,8 @@ class PackageFileExplorerController(QObject):
         urls = []
         for file in files:
             urls.append(QUrl.fromLocalFile(file))
-            self._model.clear_disabled_item(file)
-            self._view.repaint()
+        self.cut_files_reset.emit()
+        self._view.repaint()
         data.setUrls(urls)
 
         QApplication.clipboard().setMimeData(data)
@@ -190,13 +198,15 @@ class PackageFileExplorerController(QObject):
         data.setUrls(urls)
         data.setProperty("action", "cut")
         self._model.clear_all_disabled_items()  # type: ignore
+        self.cut_files_reset.emit()
+
         self._model.add_disabled_items(files)  # type: ignore
         self._view.repaint()
 
         QApplication.clipboard().setMimeData(data)
         return urls
 
-    def on_file_rename(self):
+    def on_item_rename(self):
         file_view_indexes = self._get_pkg_file_source_items()
         if not file_view_indexes:
             return None
@@ -223,17 +233,25 @@ class PackageFileExplorerController(QObject):
         elif not self._is_selected_file_item_expanded():
             dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
 
+        cut = False
         for url in urls:
             # try to copy
             if not url.isLocalFile():
                 continue
             source_path = Path(url.toLocalFile())
             new_path_str = os.path.join(dst_dir_path, url.fileName())
-            cut = True if data.property("action") == "cut" else False
+            cut = True if data.property("action") == "cut" else False # all of them should be true
             self.paste_path(source_path, Path(new_path_str), cut)
-            if cut:  # restore disabled items
-                self._model.clear_all_disabled_items()  # type: ignore
-                self._view.repaint()
+        self.cut_files_reset.emit()
+        self._disable_cut_selection()
+        # if cut:  # restore disabled items
+        #     _disable_cut_selection
+
+    def _disable_cut_selection(self):
+        if self.sender() == self:
+            return
+        self._model.clear_all_disabled_items()  # type: ignore
+        self._view.repaint()
 
     def paste_path(self, src: Path, dst: Path, cut=False):
         if src == dst and cut:
@@ -252,6 +270,8 @@ class PackageFileExplorerController(QObject):
                 reply = msg.exec()
                 if reply == QMessageBox.StandardButton.Yes:
                     copy_path_with_overwrite(src, dst)
+                else:
+                    return # early return to not delete path on cut and cancel
             else:
                 copy_path_with_overwrite(src, dst)
             if cut:
@@ -281,6 +301,18 @@ class PackageFileExplorerController(QObject):
             conan_options=pkg_info.get("options", {}))
         self._page_widgets.get_page_by_type(
             AppGridView).open_new_app_dialog_from_extern(app_config)
+        
+    def on_new_folder(self, model_index):
+        request_file_path = Path(self.get_selected_pkg_paths()[-1])
+        target_file_path = request_file_path
+        if request_file_path.is_file():
+            target_file_path = request_file_path.parent
+
+        target_folder = (target_file_path / NEW_FOLDER_NAME)
+        target_folder.mkdir(exist_ok=True)
+        # it does not seem to be necessary to wait for creation
+        if self.select_file_item(str(target_folder)).isValid():
+            self.on_item_rename()
 
     def on_open_file_in_file_manager(self, model_index):
         file_path = Path(self.get_selected_pkg_paths()[-1])
@@ -292,6 +324,18 @@ class PackageFileExplorerController(QObject):
             if index.column() == 0:  # we only need a row once
                 indexes.append(index)
         return indexes
+    
+    def select_file_item(self, file_to_select: str) -> QModelIndex:
+        if not self._model:
+            return QModelIndex()
+        try:
+            sel_idx = self._model.index(file_to_select, 0)
+            self._view.selectionModel().select(sel_idx,
+                                        QItemSelectionModel.SelectionFlag.ClearAndSelect)
+        except Exception:
+            Logger().debug(f"Can't select file {file_to_select}", exc_info=True)
+            return QModelIndex()
+        return sel_idx
 
     def get_selected_pkg_paths(self) -> List[str]:
         file_paths: List[str] = []

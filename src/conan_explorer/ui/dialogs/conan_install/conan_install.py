@@ -1,7 +1,7 @@
 from typing import Optional
 
 import conan_explorer.app as app
-from conan_explorer.app import AsyncLoader
+from conan_explorer.app import LoaderGui
 from conan_explorer.app.logger import Logger  # using global module pattern
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_explorer.settings import DEFAULT_INSTALL_PROFILE
@@ -32,12 +32,13 @@ class ConanInstallDialog(QDialog):
         self.pkg_installed_signal = pkg_installed_signal
         self._capture_install_info = capture_install_info
         self._conan_selected_install: Optional[ConanWorkerElement] = None
+        self._pkg_diff_items = []
         # style
         icon = get_themed_asset_icon("icons/download_pkg.svg", True)
         self.setWindowIcon(icon)
 
         # init search bar
-        self._ui.conan_ref_line_edit.validator_enabled = False
+        self._ui.conan_ref_line_edit.validator_enabled = True
         self._ui.conan_ref_line_edit.setText(conan_full_ref)
         if lock_reference:
             self._ui.conan_ref_line_edit.setEnabled(False)
@@ -110,11 +111,15 @@ class ConanInstallDialog(QDialog):
             ConanRef.loads(conan_ref)
         except Exception:
             return
-        loader = AsyncLoader(self)
-        loader.async_loading(self, self.on_options_query, (conan_ref, ),
+        loader = LoaderGui(self)
+        loader.load(self, self.on_options_query, (conan_ref, ),
                              loading_text="Loading options...")
         loader.wait_for_finished()
-        default_options = self._default_options
+        options = loader.return_value
+        if options is None:
+            return
+        available_options, default_options = options
+
         # doing this after connecting toggle_auto_install_on_pkg_ref initializes it correctly
         for name, value in default_options.items():
             item = QTreeWidgetItem(self._ui.options_widget)
@@ -123,7 +128,7 @@ class ConanInstallDialog(QDialog):
             item.setFlags(Qt.ItemFlag.ItemIsEnabled)  # Qt.ItemFlag.ItemIsEditable |
             self._ui.options_widget.addTopLevelItem(item)
             try:
-                values = self._available_options[name]
+                values = available_options[name]
                 if isinstance(values, list) and values != ["ANY"]:
                     cb = QComboBox()
                     values_str = [str(x) for x in values]
@@ -142,10 +147,9 @@ class ConanInstallDialog(QDialog):
 
     def on_options_query(self, conan_ref: str):
         try:
-            self._available_options, self._default_options = \
-                app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))
+            return app.conan_api.get_options_with_default_values(ConanRef.loads(conan_ref))
         except Exception:
-            return
+            return {}, {}
 
     def on_auto_install_check(self):
         enabled = True
@@ -213,10 +217,18 @@ class ConanInstallDialog(QDialog):
             self.show_package_diffs(conan_ref)
         message_box.close()
 
+    def get_all_pkgs(self, conan_ref: str):
+        return app.conan_api.get_remote_pkgs_from_ref(ConanRef.loads(conan_ref), "all")
+
     def show_package_diffs(self, conan_ref: str):
         try:
-            items = app.conan_api.get_remote_pkgs_from_ref(
-                ConanRef.loads(conan_ref), "all")
+            loader = LoaderGui(self)
+            loader.load(self, self.get_all_pkgs, (conan_ref, ),
+                        loading_text="Getting all packages...")
+            loader.wait_for_finished()
+            items = loader.return_value
+            if not items:
+                return
             if len(items) < 2:
                 return
             if not self._conan_selected_install:

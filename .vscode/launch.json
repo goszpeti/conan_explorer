@@ -2,8 +2,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/RelWithDebInfo/ConanExplorer.exe",
+            // "args": ["--debug"],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "console": "externalTerminal"
+        },
+        {
             "name": "Main",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/src/conan_explorer/__main__.py",
             "env": {
@@ -11,7 +22,7 @@
                 "DISABLE_ASYNC_LOADER": "False"
             },
             "args": [
-                "--debug"
+                // "--debug"
             ],
             "console": "integratedTerminal",
             "subProcess": true,
@@ -31,6 +42,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "subProcess": true,
+            "justMyCode": false
         },
         {
             "name": "Python: Testing",

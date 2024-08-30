@@ -1,6 +1,6 @@
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 from conan_explorer.app.logger import Logger
 from PySide6.QtCore import QItemSelectionModel, QModelIndex, QPersistentModelIndex
@@ -38,8 +38,8 @@ class ReorderingModel(Protocol):
     def save(self):
         ...
 
-    def rowCount(self) -> int:
-        ...
+    def rowCount(self, parent: Union[QModelIndex, QPersistentModelIndex] = ...) -> int: ...
+    ...
 
 class ReorderDialog(QDialog):
 

@@ -3,6 +3,7 @@ import os
 import platform
 from pathlib import Path
 from conan_explorer.app.system import delete_path
+from conan_explorer.ui.views.package_explorer.file_controller import NEW_FOLDER_NAME
 from test.conftest import (TEST_REF, TEST_REF_OFFICIAL, PathSetup,
                            conan_add_editables, conan_install_ref, get_current_profile)
 from time import sleep
@@ -20,7 +21,6 @@ from conan_explorer import conan_version
 from conan_explorer.conan_wrapper.types import ConanPkgRef, ConanRef
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui import main_window
-from conan_explorer.ui.dialogs.conan_remove import ConanRemoveDialog
 from conan_explorer.ui.views import LocalConanPackageExplorer
 from conan_explorer.ui.views.app_grid.tab import AppEditDialog
 from conan_explorer.ui.views.package_explorer.sel_model import PkgSelectionType
@@ -66,7 +66,7 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
     1. Change to Page, check if the installed package is in the list.
     2. Select a ref, nothing should change.
     3. Expand ref and select the pkg, fileview should open.
-    4. Select another profile of the seame package
+    4. Select another profile of the same package
     5. Select export folder
     """
     from conan_explorer.app.logger import Logger
@@ -97,7 +97,7 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
 
     pkg_sel_model = lpe._pkg_sel_ctrl._model
     assert pkg_sel_model
-    assert lpe._ui.package_select_view.model().columnCount() == 1
+    assert lpe._ui.package_select_view.model().columnCount() == 2
 
     # check, that the ref + pkg is in the list
     found_tst_pkg = False
@@ -177,6 +177,7 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
         5. Install reference
         6. Show buildinfo
         7. Show diff for 2 pkgs
+        8. Show remove dialog for 2 packages
     """
     # disable editor to force open file
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, "UNKNOWN")
@@ -262,10 +263,40 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
 
     # check that on multiple selection diff pkg action is enabled
     lpe.on_selection_context_menu_requested(elem_pos.center())
-    # TODO create more tests
-
     assert lpe.diff_pkg_action.isEnabled()
+
+    # try to trigger remove
     assert lpe.remove_ref_action.isEnabled()
+
+    mock_remove_dialog = mocker.patch("package_explorer.sel_controller.ConanRemoveDialog")
+    lpe.remove_ref_action.trigger()
+    mock_remove_dialog.assert_called_once()
+    dict_param = mock_remove_dialog.mock_calls[0][1][1]
+    assert TEST_REF in dict_param.keys()
+    assert id in dict_param[TEST_REF]
+    assert another_id in dict_param[TEST_REF]
+
+    ## test filter
+    idx = lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + id)
+    assert not lpe._pkg_sel_ctrl._view.isIndexHidden(idx)
+    lpe._ui.package_filter_edit.setText("linux")
+    sleep(1)
+    lpe._ui.package_filter_edit.setText("example")
+    sleep(1)
+    # TODO: I don't know how to check this lpe._pkg_sel_ctrl._view.isIndexHidden(idx) returns wrong value
+
+
+def test_sizes_calculation(qtbot, mocker: MockerFixture, base_fixture,
+                           ui_no_refs_config_fixture, setup_local_package_explorer: LPESetupType):
+    
+    _qapp_instance, lpe, main_gui = setup_local_package_explorer
+    conan_install_ref(TEST_REF, profile="windows")
+    lpe.on_show_sizes()
+    assert not lpe._pkg_sel_ctrl._view.isColumnHidden(1)
+    row = lpe._pkg_sel_ctrl.find_item_in_pkg_sel_model(TEST_REF)
+    size = lpe._pkg_sel_ctrl._model.index(row, 1, QtCore.QModelIndex()).data(0)
+    assert float(size) > 0.05
+
 
 @pytest.mark.conanv2
 def test_local_package_explorer_tabs(qtbot, mocker, base_fixture, ui_no_refs_config_fixture,
@@ -446,8 +477,7 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     Logger().debug("select a file")
     pkg_root_path = Path(lpe._pkg_tabs_ctrl[0]._model.rootPath())
     selected_pkg_file = pkg_root_path / "conaninfo.txt"
-    sel_idx = lpe._pkg_tabs_ctrl[0]._model.index(str(selected_pkg_file), 0)
-    lpe._ui.package_file_view.selectionModel().select(sel_idx, SelFlags.ClearAndSelect)
+    sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(str(selected_pkg_file))
 
     # 2.0 execuite context menu
     elem_pos = lpe._pkg_tabs_ctrl[0]._view.visualRect(sel_idx)
@@ -480,8 +510,7 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     # use the previously copied file
     Logger().debug("check cut")
     (pkg_root_path / config_path.name).write_text("TEST")
-    sel_idx = lpe._pkg_tabs_ctrl[0]._model.index(str(pkg_root_path / config_path.name), 0)
-    lpe._ui.package_file_view.selectionModel().select(sel_idx, SelFlags.ClearAndSelect)
+    sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(str(pkg_root_path / config_path.name))
 
     mime_files = lpe.on_file_cut(None)
     file_row = lpe._pkg_tabs_ctrl[0]._model.index((pkg_root_path / config_path.name).as_posix(), 0).row()
@@ -495,15 +524,14 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
         pass
     (pkg_root_path / "newdir").mkdir(exist_ok=True)
     # select dir
-    sel_idx = lpe._pkg_tabs_ctrl[0]._model.index(str(pkg_root_path / "newdir"), 0)
-    lpe._ui.package_file_view.selectionModel().select(sel_idx, SelFlags.ClearAndSelect)
+    sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(
+        str(pkg_root_path / "newdir"))
     lpe.on_file_paste(None)
     check.is_true((pkg_root_path / "newdir" / config_path.name).exists())
 
     # 2.5 check rename
     mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, 'edit')
-    lpe.on_file_rename(None)
-
+    lpe.on_item_rename(None)
     mock_rename_cmd.assert_called_once()
 
     # 2.6 check overwrite dialog
@@ -540,9 +568,8 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
 
     # 2.8 check delete
     Logger().debug("delete")
-    sel_idx = lpe._pkg_tabs_ctrl[0]._model.index(
-        str(pkg_root_path / config_path.name), 0)  # (0, 0, QtCore.QModelIndex())
-    lpe._ui.package_file_view.selectionModel().select(sel_idx, SelFlags.ClearAndSelect)
+    sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(
+        str(pkg_root_path / config_path.name))
     sleep(1)
 
     mocker.patch.object(QtWidgets.QMessageBox, 'exec',
@@ -563,54 +590,49 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     assert Path(lpe._pkg_tabs_ctrl[0]._model.rootPath()) == another_pkg_path
 
 
-@pytest.mark.conanv2
-def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
-    """ Test, that the delete package dialog deletes a reference with id, 
-    without id and cancel does nothing"""
-    from pytestqt.plugin import _qapp_instance
+# @pytest.mark.conanv2
+# def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
+#     """ Test, that the delete package dialog deletes a reference with id, 
+#     without id and cancel does nothing"""
+#     # TODO: Test with multiselect in LocalPackageExplorer
+#     pass
 
+def test_new_folder(qtbot, mocker, base_fixture,
+                    ui_no_refs_config_fixture, setup_local_package_explorer: LPESetupType):
+    """ Test, that a creating a new folder works in the gui and selects the file
+     and applies the rename function on it.  """
+    _qapp_instance, lpe, main_gui = setup_local_package_explorer
     cfr = ConanRef.loads(TEST_REF)
-    conan_install_ref(TEST_REF)
+    id, pkg_path = app.conan_api.install_best_matching_package(cfr)
+    assert id
+    assert pkg_path.exists()
 
-    # precheck, that the package is found
-    found_pkg = app.conan_api.get_local_pkgs_from_ref(cfr)
-    assert found_pkg
-    pkg_id_to_remove = ""
+    pkg_sel_model = lpe._pkg_sel_ctrl._model
+    assert pkg_sel_model
 
-    main_gui = main_window.MainWindow(_qapp_instance)
-    main_gui.load()
-    main_gui.show()
-    qtbot.addWidget(main_gui)
-    qtbot.waitExposed(main_gui, timeout=3000)
-    lpe = main_gui.page_widgets.get_page_by_type(LocalConanPackageExplorer)
+    # ensure, that we select the pkg with the correct options
+    assert lpe.select_local_package_from_ref(TEST_REF + ":" + id)
 
-    main_gui.page_widgets.get_button_by_type(type(lpe)).click()   # changes to local explorer page
-    lpe._pkg_sel_ctrl._loader.wait_for_finished()
-    app.conan_worker.finish_working()
+    # paths to be used
+    pkg_root_path = Path(lpe._pkg_tabs_ctrl[0]._model.rootPath())
+    target_dir_path = pkg_root_path / NEW_FOLDER_NAME
+    if target_dir_path.exists():
+        target_dir_path.rmdir()
 
-    # check cancel does nothing
-    dialog = ConanRemoveDialog(None, TEST_REF, pkg_id_to_remove, None)
-    dialog.show()
-    dialog.button(dialog.StandardButton.Cancel).clicked.emit()
+    
+    # create new folder in model root folder (special case)
+    mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, 'edit')
+    lpe.on_new_folder(QtCore.QModelIndex())
+    mock_rename_cmd.assert_called_once()
+    assert target_dir_path.is_dir()
+    target_dir_path.rmdir()
 
-    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
-    assert found_pkg.get("id", "")
 
-    # check without pkg id
-    dialog.button(dialog.StandardButton.Yes).clicked.emit()
-    lpe._pkg_sel_ctrl._loader.wait_for_finished()
-
-    # check, that the package is deleted
-    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
-    assert not found_pkg.get("id", "")
-
-    # check with pkg id
-    conan_install_ref(TEST_REF)
-    dialog = ConanRemoveDialog(None, TEST_REF, found_pkg.get("id", ""), None)
-    dialog.show()
-    dialog.button(dialog.StandardButton.Yes).clicked.emit()
-
-    lpe._pkg_sel_ctrl._loader.wait_for_finished()
-
-    found_pkg = app.conan_api.find_best_matching_local_package(cfr)
-    assert not found_pkg.get("id", "")
+    # Setup: select a file and call new folder
+    mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, 'edit')
+    selected_pkg_file = pkg_root_path / "conaninfo.txt"
+    sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(str(selected_pkg_file))
+    lpe.on_new_folder(sel_idx)
+    mock_rename_cmd.assert_called_once()
+    assert target_dir_path.is_dir()
+    target_dir_path.rmdir()

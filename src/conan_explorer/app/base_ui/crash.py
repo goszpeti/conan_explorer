@@ -2,12 +2,13 @@
 import sys
 import traceback
 from types import TracebackType
+from typing import Optional
 
 from conan_explorer import user_save_path
 
 
-def bug_dialog_exc_hook(exctype: "type[BaseException]", excvalue: BaseException, 
-                        tb: "TracebackType | None"):
+def bug_dialog_exc_hook(exctype: "Optional[type[BaseException]]", excvalue: Optional[BaseException],
+                        tb: "Optional[TracebackType]"):
     """ App crash handling:
     print, write log and if the GUI still works show crash dialog """
 

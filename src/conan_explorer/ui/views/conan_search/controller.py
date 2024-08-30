@@ -1,7 +1,7 @@
 import pprint
 from typing import List, Optional
 
-from conan_explorer.app import AsyncLoader  # using global module pattern
+from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.ui.common import show_conanfile
 from conan_explorer.ui.dialogs import ConanInstallDialog
 from PySide6.QtCore import Qt, SignalInstance, QObject, QModelIndex
@@ -25,7 +25,7 @@ class ConanSearchController(QObject):
         self._remote_list = remote_list
         self._detail_view = detail_view
         self._model = PkgSearchModel()
-        self._loader = AsyncLoader(self)
+        self._loader = LoaderGui(self)
         self.conan_pkg_installed = conan_pkg_installed
         self.conan_pkg_removed = conan_pkg_removed
 
@@ -36,7 +36,7 @@ class ConanSearchController(QObject):
         if not self._search_button.isEnabled():
             return
         self._model = PkgSearchModel(self.conan_pkg_installed, self.conan_pkg_removed)
-        self._loader.async_loading(
+        self._loader.load(
             self._view, self._load_search_model, (), self._finish_load_search_model, 
             "Searching for packages...")
 
@@ -45,7 +45,8 @@ class ConanSearchController(QObject):
 
     def _load_search_model(self):
         """ Initialize tree view model by searching in conan """
-        self._model.setup_model_data(self._search_line.text(), self.get_selected_remotes())
+        self._model.setup_model_data(self._search_line.text(), self.get_selected_remotes(), 
+                                     self._loader.loading_string_signal)
 
     def _finish_load_search_model(self, ret=None):
         """ After conan search adjust the view """
@@ -76,9 +77,8 @@ class ConanSearchController(QObject):
         """ Show the conanfile by downloading and opening with the associated program """
         combined_ref = self.get_selected_combined_ref()
         conan_ref = combined_ref.split(":")[0]
-        loader = AsyncLoader(self)
-        loader.async_loading(self._view, show_conanfile, (conan_ref,), loading_text="Opening Conanfile...")
-        loader.wait_for_finished()
+        loader = LoaderGui(self)
+        loader.load(self._view, show_conanfile, (conan_ref,), loading_text="Opening Conanfile...")
 
     def on_install_pkg_requested(self):
         """ Spawn the Conan install dialog """

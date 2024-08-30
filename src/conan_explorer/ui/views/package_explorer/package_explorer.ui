@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>430</width>
-    <height>152</height>
+    <width>600</width>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
    <item>
     <layout class="QHBoxLayout" name="local_packages_bar_layout">
      <property name="sizeConstraint">
-      <enum>QLayout::SetMinimumSize</enum>
+      <enum>QLayout::SizeConstraint::SetMinimumSize</enum>
      </property>
      <property name="rightMargin">
       <number>7</number>
@@ -59,6 +59,59 @@
        </property>
        <property name="toolTip">
         <string>Refresh package list view</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="show_sizes_button">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Show package sizes</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="expand_all_button">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Expand all/Collapse all</string>
        </property>
        <property name="text">
         <string/>
@@ -99,7 +152,7 @@
         </sizepolicy>
        </property>
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="handleWidth">
         <number>5</number>
@@ -135,7 +188,7 @@
          </font>
         </property>
         <property name="inputMethodHints">
-         <set>Qt::ImhNone</set>
+         <set>Qt::InputMethodHint::ImhNone</set>
         </property>
         <property name="placeholderText">
          <string>*</string>
@@ -161,22 +214,22 @@
          <string notr="true">text-align: right;</string>
         </property>
         <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
+         <enum>QFrame::Shape::NoFrame</enum>
         </property>
         <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
+         <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
         </property>
         <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
+         <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
         </property>
         <property name="sizeAdjustPolicy">
-         <enum>QAbstractScrollArea::AdjustToContents</enum>
+         <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
         </property>
         <property name="autoFormatting">
-         <set>QTextEdit::AutoNone</set>
+         <set>QTextEdit::AutoFormattingFlag::AutoNone</set>
         </property>
         <property name="lineWrapMode">
-         <enum>QTextEdit::NoWrap</enum>
+         <enum>QTextEdit::LineWrapMode::NoWrap</enum>
         </property>
         <property name="html">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -205,14 +258,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
       </sizepolicy>
      </property>
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
      <widget class="QTreeView" name="package_select_view">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
         <horstretch>1</horstretch>
         <verstretch>1</verstretch>
        </sizepolicy>
@@ -224,13 +277,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
        </size>
       </property>
       <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
+       <enum>QFrame::Shape::NoFrame</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
       </property>
       <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
+       <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
       </property>
       <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
+       <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
       </property>
       <property name="indentation">
        <number>15</number>
@@ -242,6 +298,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
        <bool>true</bool>
       </property>
       <property name="animated">
+       <bool>true</bool>
+      </property>
+      <property name="wordWrap">
        <bool>true</bool>
       </property>
       <property name="headerHidden">
@@ -309,7 +368,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <widget class="QTreeView" name="package_file_view">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>2</horstretch>
+            <horstretch>3</horstretch>
             <verstretch>1</verstretch>
            </sizepolicy>
           </property>
@@ -320,25 +379,25 @@ li.checked::marker { content: &quot;\2612&quot;; }
            </size>
           </property>
           <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
+           <enum>QFrame::Shape::NoFrame</enum>
           </property>
           <property name="sizeAdjustPolicy">
-           <enum>QAbstractScrollArea::AdjustToContents</enum>
+           <enum>QAbstractScrollArea::SizeAdjustPolicy::AdjustToContents</enum>
           </property>
           <property name="editTriggers">
-           <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+           <set>QAbstractItemView::EditTrigger::EditKeyPressed|QAbstractItemView::EditTrigger::SelectedClicked</set>
           </property>
           <property name="tabKeyNavigation">
            <bool>false</bool>
           </property>
           <property name="dragDropMode">
-           <enum>QAbstractItemView::DragDrop</enum>
+           <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
           </property>
           <property name="defaultDropAction">
-           <enum>Qt::TargetMoveAction</enum>
+           <enum>Qt::DropAction::TargetMoveAction</enum>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::ExtendedSelection</enum>
+           <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
           </property>
           <property name="indentation">
            <number>15</number>
@@ -369,6 +428,15 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>package_select_view</tabstop>
+  <tabstop>package_tab_widget</tabstop>
+  <tabstop>package_file_view</tabstop>
+  <tabstop>refresh_button</tabstop>
+  <tabstop>show_sizes_button</tabstop>
+  <tabstop>package_filter_edit</tabstop>
+  <tabstop>package_path_label</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

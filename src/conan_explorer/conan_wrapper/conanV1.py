@@ -5,6 +5,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from tempfile import gettempdir
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing_extensions import Self
 from unittest.mock import patch
 from conan_explorer.app.system import delete_path
 from conan_explorer.app.typing import SignatureCheckMeta
@@ -37,7 +38,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         self._client_cache: "ClientCache"
         self._short_path_root = Path("Unknown")
 
-    def init_api(self):
+    def init_api(self) -> Self:
         """ Instantiate the internal Conan api. """
         from conans.client.conan_api import (ConanAPIV1, UserIO)
         from conans.client.output import ConanOutput
@@ -63,7 +64,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         try:  # use try-except because of Conan 1.24 envvar errors in tests
             self.remove_locks()
         except Exception as e:
-            Logger().debug(str(e))
+            Logger().debug(str(e), exc_info=True)
         from .conan_cache import ConanInfoCache
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
         Logger().debug("Initialized Conan V1 API wrapper")
@@ -255,7 +256,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def update_remote(self, remote_name: str, url: str, verify_ssl: bool, disabled: bool,
                       index: Optional[int]):
-        self.disable_remote(remote_name, disabled)
+        # self.disable_remote(remote_name, disabled)
         self._conan.remote_update(remote_name, url, verify_ssl, index)
 
     def login_remote(self, remote_name: str, user_name: str, password: str):
@@ -367,8 +368,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         try:
             response = self.search_packages(
                 self._conan, self.generate_canonical_ref(conan_ref))
-        except Exception as error:
-            Logger().debug(f"{str(error)}")
+        except Exception:
+            Logger().debug("", exc_info=True)
             return result
         if not response.get("error", True):
             try:

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'file_editor_selector.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.2
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -28,19 +28,21 @@ class Ui_Form(object):
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.description_label = QLabel(Form)
         self.description_label.setObjectName(u"description_label")
-        self.description_label.setTextFormat(Qt.RichText)
+        self.description_label.setTextFormat(Qt.TextFormat.RichText)
         self.description_label.setWordWrap(True)
 
         self.verticalLayout.addWidget(self.description_label)
 
         self.edit_frame = QFrame(Form)
         self.edit_frame.setObjectName(u"edit_frame")
-        self.edit_frame.setFrameShape(QFrame.StyledPanel)
-        self.edit_frame.setFrameShadow(QFrame.Raised)
+        self.edit_frame.setFrameShape(QFrame.Shape.NoFrame)
+        self.edit_frame.setFrameShadow(QFrame.Shadow.Raised)
         self.gridLayout = QGridLayout(self.edit_frame)
         self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.file_edit = QLineEdit(self.edit_frame)
         self.file_edit.setObjectName(u"file_edit")
+        self.file_edit.setFrame(True)
 
         self.gridLayout.addWidget(self.file_edit, 0, 0, 1, 1)
 
@@ -54,8 +56,8 @@ class Ui_Form(object):
 
         self.button_box = QDialogButtonBox(Form)
         self.button_box.setObjectName(u"button_box")
-        self.button_box.setOrientation(Qt.Horizontal)
-        self.button_box.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.button_box.setOrientation(Qt.Orientation.Horizontal)
+        self.button_box.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
 
         self.verticalLayout.addWidget(self.button_box)
 

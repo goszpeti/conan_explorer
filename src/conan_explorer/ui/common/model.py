@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Callable, List
+from typing import TYPE_CHECKING, Callable, List, Optional
 from typing_extensions import override
 
 from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, SignalInstance
@@ -47,7 +47,7 @@ class TreeModelItem(object):
     Implemented like the default QT example.
     """
 
-    def __init__(self, data: List[str], parent=None, lazy_loading=False):
+    def __init__(self, data: List[str], parent: Optional["TreeModelItem"] = None, lazy_loading=False):
         self.parent_item = parent
         self.item_data = data
         self.child_items: List["Self"] = []
@@ -89,7 +89,6 @@ class TreeModelItem(object):
         self.child_items = []
         self.is_loaded = True
 
-
 class TreeModel(QAbstractItemModel):
     """ Qt tree model to be used with TreeModelItem.
     Supports lazy loading, if TreeModelItem enables it."""
@@ -115,7 +114,7 @@ class TreeModel(QAbstractItemModel):
         item_index = self.get_index_from_item(item)
         self.beginRemoveRows(item_index.parent(), item_index.row(), item_index.row())
         self.root_item.remove_child(item)
-        self.endResetModel()
+        self.endRemoveRows()
 
     @override
     def columnCount(self, parent):
@@ -213,6 +212,6 @@ class TreeModel(QAbstractItemModel):
                 found_item = True
                 return self.index(ref_row, 0, QModelIndex())
         if not found_item:
-            Logger().debug(f"Cannot find {str(item)} in search model")
+            Logger().debug(f"Cannot find {str(item)} in model")
             return QModelIndex()
         return self.index(ref_row, 0, QModelIndex())

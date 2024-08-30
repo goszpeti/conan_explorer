@@ -32,6 +32,10 @@ QWidget#central_widget{
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
 
+QFrame#edit_frame{
+    background-color: #808086;
+}
+
 /* Top Frame Subwidgets */
 
 QLabel#page_title {
@@ -163,6 +167,12 @@ QToolButton:checked {
     background-color: #5c5c5c;
 }
 
+QDialog .QFrame {
+    background-color: #808086;
+    border: 1px solid white;
+    border-radius: 4px;
+}
+
 /* Quicklaunch styling */ 
 
 AppGridView {
@@ -282,6 +292,10 @@ QFrame#right_menu_frame QPushButton:checked{
     background-color: #808086;
 }
 
+QFrame#right_menu_frame .QFrame[frameShape="4"] {
+    background: white;
+}
+
 QLabel#side_menu_title_label {
     font: bold;
     font-size: {{MAIN_FONT_SIZE + 1}}pt;
@@ -316,7 +330,7 @@ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
     background: #202020;
 }
 QComboBox::down-arrow {
-    image: url(icons:material/expand_w.svg);
+    image: url(icons:material/expand_white.svg);
     width: 30px;
 }
 QComboBox::drop-down {
@@ -534,25 +548,40 @@ QListView, QTreeView, QListWidget {
     background-color: #474747;
     alternate-background-color: #474747;
 }
+/* border-radius causes grahical glitches */
 QListView::item:hover,QTreeView::item:hover{
     background: #3375B7;
+    /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
 QListView::item:selected,QTreeView::item:selected {
+    /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
 QListView::item:selected:active,QTreeView::item:selected:active{
     background-color: #6699CC;
+    /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
 QListView::item:selected:!active,QTreeView::item:selected:!active {
     background-color: #6699CC;
+    /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
+
+QListView::indicator:unchecked,QListWidget::indicator:unchecked,QTreeView::indicator:unchecked,
+QTreeWidget::indicator:unchecked {
+    image: url(icons:material/check_box_empty_white.svg);
+}
+QListView::indicator:checked,QListWidget::indicator:checked,QTreeView::indicator:checked,
+QTreeWidget::indicator:checked {
+    image: url(icons:material/check_box_checked_white.svg);
+}
+
 QTreeView::branch {
     background: #474747;
 }
 QTreeView::branch:closed:has-children {
-    image: url(icons:material/forward_w.svg);
+    image: url(icons:material/forward_white.svg);
 }
 QTreeView::branch:open:has-children {
-    image: url(icons:material/expand_w.svg);
+    image: url(icons:material/expand_white.svg);
 }
 QTreeView::branch:hover:closed:has-children {
     image: url(icons:material/forward_b.svg);
@@ -560,4 +589,3 @@ QTreeView::branch:hover:closed:has-children {
 QTreeView::branch:hover:open:has-children:hover {
     image: url(icons:material/expand_b.svg);
 }
-

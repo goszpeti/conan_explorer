@@ -17,7 +17,7 @@ if conan_version.major == 1:
     from conans.model.ref import ConanFileReference, PackageReference # type: ignore
     from conans.paths.package_layouts.package_editable_layout import PackageEditableLayout
     if platform.system() == "Windows":
-        from conans.util.windows import CONAN_REAL_PATH
+        from conans.util.windows import CONAN_REAL_PATH, CONAN_LINK
 else:
     from conans.model.recipe_ref import RecipeReference as ConanFileRef  # type: ignore
     from conans.model.package_ref import PkgReference  # type: ignore
@@ -43,7 +43,12 @@ else:
 
         @staticmethod
         def loads(text: str, validate=True) -> ConanRef:
+            # add back support for @_/_ canonical refs to handle this uniformly
+            # Simply remove it before passing it to ConanFileRef
+            if text.endswith("@_/_"):
+                text = text.replace("@_/_", "")
             ref: ConanRef = ConanFileRef().loads(text) # type: ignore
+            
             if validate:
                 # validate_ref creates an own output stream which can't log to console
                 # if it is running as a gui application
