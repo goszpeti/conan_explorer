@@ -75,14 +75,14 @@ jobs:
           - name: "ubuntu22-py312-conan2-latest"
             python: "3.12"
             os: ubuntu-22.04
-            conan: <2.5
-            conan_server: "-server <2.5"
+            conan: <2.8
+            conan_server: "-server <2.8"
             pytest_args: "-m conanv2"
           - name:  windows-py312-conan2-latest
             python: "3.12"
             os: windows-latest
-            conan: <2.5 # latest conan 2
-            conan_server: "-server <2.5"
+            conan: <2.8 # latest conan 2
+            conan_server: "-server <2.8"
             pytest_args: "-m conanv2"
     env:
       DISPLAY: ":99.0"
