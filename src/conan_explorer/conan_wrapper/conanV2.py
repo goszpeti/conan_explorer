@@ -33,9 +33,10 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def init_api(self) -> Self:
         from conan.api.conan_api import ConanAPI
-        self._conan = ConanAPI()
-
-        self.init_client_cache()
+        devnull = open(os.devnull, 'w')
+        with redirect_stdout(devnull), redirect_stderr(devnull):
+            self._conan = ConanAPI()
+            self.init_client_cache()
 
         from .conan_cache import ConanInfoCache
         self.info_cache = ConanInfoCache(user_save_path, self.get_all_local_refs())
