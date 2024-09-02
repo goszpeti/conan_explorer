@@ -250,7 +250,6 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         elif selection_mode == MultiPkgSelectionMode.single_editable:
             self._context_menu_set_all(False)
             self.copy_ref_action.setVisible(True)
-            self.show_conanfile_action.setVisible(True)
         else: # invalid
             self._context_menu_set_all(False)
             self.copy_ref_action.setVisible(True) # always works
