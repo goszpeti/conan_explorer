@@ -301,6 +301,8 @@ class MainWindow(FluentWindow):
         loader.load(self, cleaner.gather_invalid_remote_metadata, )
         loader.wait_for_finished()
         invalid_refs = cleaner.invalid_metadata_refs
+        if not invalid_refs:
+            Logger().info("No references with invalid metadata found!")
         
         msg_box = WideMessageBox(parent=self)
         button = WideMessageBox.StandardButton
