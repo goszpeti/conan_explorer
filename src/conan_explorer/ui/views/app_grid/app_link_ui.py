@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'app_link.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -26,7 +26,7 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(882, 140)
-        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
@@ -47,7 +47,7 @@ class Ui_Form(object):
         self.verticalLayout_2.setContentsMargins(-1, 6, -1, -1)
         self.app_button = ClickableIcon(self.left_frame)
         self.app_button.setObjectName(u"app_button")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.app_button.sizePolicy().hasHeightForWidth())
@@ -59,7 +59,7 @@ class Ui_Form(object):
 
         self.app_name_label = QLabel(self.left_frame)
         self.app_name_label.setObjectName(u"app_name_label")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.app_name_label.sizePolicy().hasHeightForWidth())
@@ -76,7 +76,7 @@ class Ui_Form(object):
 
         self.central_frame = QFrame(Form)
         self.central_frame.setObjectName(u"central_frame")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.central_frame.sizePolicy().hasHeightForWidth())
@@ -192,7 +192,7 @@ class Ui_Form(object):
         self.verticalLayout.setContentsMargins(6, 0, -1, 0)
         self.edit_button = QPushButton(self.right_frame)
         self.edit_button.setObjectName(u"edit_button")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.edit_button.sizePolicy().hasHeightForWidth())

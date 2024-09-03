@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'reorder_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -30,7 +30,7 @@ class Ui_rearrange_dialog(object):
         self.gridLayout.setSizeConstraint(QLayout.SetMinAndMaxSize)
         self.list_view = QListView(rearrange_dialog)
         self.list_view.setObjectName(u"list_view")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.list_view.sizePolicy().hasHeightForWidth())
@@ -47,8 +47,8 @@ class Ui_rearrange_dialog(object):
 
         self.line = QFrame(rearrange_dialog)
         self.line.setObjectName(u"line")
-        self.line.setFrameShape(QFrame.HLine)
-        self.line.setFrameShadow(QFrame.Sunken)
+        self.line.setFrameShape(QFrame.Shape.HLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
 
         self.vertical_layout.addWidget(self.line)
 
@@ -57,7 +57,7 @@ class Ui_rearrange_dialog(object):
 
         self.vertical_layout.addWidget(self.move_down_button)
 
-        self.vertical_spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.vertical_spacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.vertical_layout.addItem(self.vertical_spacer)
 

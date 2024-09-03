@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'editable_edit_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -26,7 +26,7 @@ class Ui_Dialog(object):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         Dialog.resize(645, 146)
-        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
@@ -56,7 +56,7 @@ class Ui_Dialog(object):
 
         self.path_line_edit = QLineEdit(Dialog)
         self.path_line_edit.setObjectName(u"path_line_edit")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.path_line_edit.sizePolicy().hasHeightForWidth())
@@ -68,7 +68,7 @@ class Ui_Dialog(object):
 
         self.path_label = QLabel(Dialog)
         self.path_label.setObjectName(u"path_label")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.path_label.sizePolicy().hasHeightForWidth())
@@ -100,7 +100,7 @@ class Ui_Dialog(object):
 
         self.button_box = QDialogButtonBox(Dialog)
         self.button_box.setObjectName(u"button_box")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy3.setHorizontalStretch(1)
         sizePolicy3.setVerticalStretch(1)
         sizePolicy3.setHeightForWidth(self.button_box.sizePolicy().hasHeightForWidth())

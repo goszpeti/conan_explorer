@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'app_edit_dialog.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.3
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -28,7 +28,7 @@ class Ui_Dialog(object):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         Dialog.resize(769, 568)
-        sizePolicy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(Dialog.sizePolicy().hasHeightForWidth())
@@ -42,7 +42,7 @@ class Ui_Dialog(object):
         self.edit_grid.setVerticalSpacing(8)
         self.conan_ref_line_edit = ConanRefLineEdit(Dialog)
         self.conan_ref_line_edit.setObjectName(u"conan_ref_line_edit")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.conan_ref_line_edit.sizePolicy().hasHeightForWidth())
@@ -58,7 +58,7 @@ class Ui_Dialog(object):
 
         self.args_line_edit = QLineEdit(Dialog)
         self.args_line_edit.setObjectName(u"args_line_edit")
-        sizePolicy2 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.args_line_edit.sizePolicy().hasHeightForWidth())
@@ -79,7 +79,7 @@ class Ui_Dialog(object):
 
         self.conan_opts_text_edit = QTextEdit(Dialog)
         self.conan_opts_text_edit.setObjectName(u"conan_opts_text_edit")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.conan_opts_text_edit.sizePolicy().hasHeightForWidth())
@@ -111,7 +111,7 @@ class Ui_Dialog(object):
 
         self.conan_opts_label = QLabel(Dialog)
         self.conan_opts_label.setObjectName(u"conan_opts_label")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.conan_opts_label.sizePolicy().hasHeightForWidth())
@@ -159,7 +159,7 @@ class Ui_Dialog(object):
 
         self.install_button = QPushButton(Dialog)
         self.install_button.setObjectName(u"install_button")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.MinimumExpanding)
         sizePolicy5.setHorizontalStretch(0)
         sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.install_button.sizePolicy().hasHeightForWidth())
@@ -181,7 +181,7 @@ class Ui_Dialog(object):
 
         self.button_box = QDialogButtonBox(Dialog)
         self.button_box.setObjectName(u"button_box")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy6.setHorizontalStretch(1)
         sizePolicy6.setVerticalStretch(1)
         sizePolicy6.setHeightForWidth(self.button_box.sizePolicy().hasHeightForWidth())

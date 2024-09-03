@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'plugins.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.2
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -37,7 +37,7 @@ class Ui_Form(object):
         self.add_plugin_button = QPushButton(self.buttons_frame)
         self.add_plugin_button.setObjectName(u"add_plugin_button")
         icon = QIcon()
-        icon.addFile(u"../../assets/icons/plus_rounded.png", QSize(), QIcon.Normal, QIcon.On)
+        icon.addFile(u"../../assets/icons/plus_rounded.png", QSize(), QIcon.Mode.Normal, QIcon.State.On)
         self.add_plugin_button.setIcon(icon)
 
         self.horizontalLayout.addWidget(self.add_plugin_button)
@@ -45,7 +45,7 @@ class Ui_Form(object):
         self.remove_plugin_button = QPushButton(self.buttons_frame)
         self.remove_plugin_button.setObjectName(u"remove_plugin_button")
         icon1 = QIcon()
-        icon1.addFile(u"../../assets/icons/minus_rounded.png", QSize(), QIcon.Normal, QIcon.On)
+        icon1.addFile(u"../../assets/icons/minus_rounded.png", QSize(), QIcon.Mode.Normal, QIcon.State.On)
         self.remove_plugin_button.setIcon(icon1)
 
         self.horizontalLayout.addWidget(self.remove_plugin_button)
