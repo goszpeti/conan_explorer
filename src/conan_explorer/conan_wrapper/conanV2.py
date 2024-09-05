@@ -287,7 +287,9 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
                 app = ConanApp(self._conan)
 
             conanfile = app.loader.load_conanfile(path, conan_ref)
-            default_options = conanfile.default_options
+            default_options = {}
+            if conanfile.default_options is not None:
+                default_options = conanfile.default_options
             available_options = conanfile.options
             default_options = self._resolve_default_options(default_options)
         except Exception as e:  # silent error - if we have no options don't spam the user
