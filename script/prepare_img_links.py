@@ -8,7 +8,7 @@ root_path = current_path.parent
 readme_md_path = root_path / "README.md"
 
 # Import the README and use it as the long-description.
-# Replace image links at release to point to this tag instead of master, so they do not change with new releases
+# Replace image links at release to point to this tag instead of main, so they do not change with new releases
 long_description = readme_md_path.read_text(encoding="utf-8")
 # replace links
 github_ref = os.getenv("GITHUB_REF", "")
@@ -26,11 +26,11 @@ if github_ref:
             ref_suffix = github_ref.split("tags")
         if len(ref_suffix) > 1: # if it is a tag, replace the links
             link = "conan_explorer" + ref_suffix[1].replace(" ", "")
-            master_link = "conan_explorer/master"
+            main_link = "conan_explorer/main"
             for line in long_description.splitlines():
-                if master_link in line:
-                    line = line.replace(master_link, link)
-                    print(f"replaced {master_link} with {link}")
+                if main_link in line:
+                    line = line.replace(main_link, link)
+                    print(f"replaced {main_link} with {link}")
                 temp.append(line)
             long_description = "\n".join(temp)
 else:

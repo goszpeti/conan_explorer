@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/src/conan_explorer/assets/icons/icon.ico" width="128">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/main/src/conan_explorer/assets/icons/icon.ico" width="128">
 
 # Conan Explorer: Local Package Explorer and App Launcher
 
@@ -30,16 +30,16 @@ The goal of this project is to provide a standalone Graphical User Interface (GU
 It is end-user oriented and focuses on using packages, rather then developing them. It can be used on Windows and Linux x64 platforms.
 
 #### Quicklaunch for Applications in Conan Packages
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/doc/screenshot.png" width="512">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/main/doc/screenshot.png" width="512">
 
 #### Local Package Manager
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/doc/screenshot_pkg_explorer.png" width="512">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/main/doc/screenshot_pkg_explorer.png" width="512">
 
 #### Conan Search
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/doc/screenshot_conan_search.png" width="512">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/main/doc/screenshot_conan_search.png" width="512">
 
 #### Conan Config
-# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/master/doc/screenshot_conan_conf.png" width="512">
+# <img src="https://raw.githubusercontent.com/goszpeti/conan_explorer/main/doc/screenshot_conan_conf.png" width="512">
 
 **Main Features**
 - compatible with a wide range of conan versions (from 1.24 onwards)
