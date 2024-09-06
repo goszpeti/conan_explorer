@@ -11,12 +11,8 @@ from conan_explorer.app.system import get_folder_size_mb
 from conan_explorer.conan_wrapper import ConanApiFactory
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
-from conan_explorer.ui.common import (
-    TreeModel,
-    TreeModelItem,
-    get_platform_icon,
-    get_themed_asset_icon,
-)
+from conan_explorer.ui.common import (TreeModel,TreeModelItem, get_platform_icon, 
+                                      get_themed_asset_icon)
 
 
 class PkgSelectionType(Enum):
@@ -140,7 +136,7 @@ class PkgSelectModel(TreeModel):
         self._acc_size = 0
         self.root_item = PackageTreeItem(["Packages", "Size (MB)"])
         self.proxy_model = PackageFilter()
-        self.proxy_model.setDynamicSortFilter(True)
+        self.proxy_model.setDynamicSortFilter(False) # performance, should work without this
         self.proxy_model.setSourceModel(self)
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.proxy_model.setSortCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
