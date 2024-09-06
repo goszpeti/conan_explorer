@@ -4,6 +4,7 @@ from typing_extensions import override
 
 from conan_explorer import conan_version
 
+from conan_explorer.app.base_ui.loading import LoaderGui
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from conan_explorer.ui.common.model import re_register_signal
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
@@ -185,7 +186,9 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self.set_themed_icon(self._ui.expand_all_button, "icons/expand_all.svg")
             self._is_expanded = False
             return
-        self._ui.package_select_view.expandAll()
+
+        loader = LoaderGui(self)
+        loader.load(self, self._ui.package_select_view.expandAll, )
         self.set_themed_icon(self._ui.expand_all_button, "icons/collapse_all.svg")
         self._is_expanded = True
 
