@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'conan_remove.ui'
+## Form generated from reading UI file 'qwil.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.7.2
 ##
@@ -73,8 +73,8 @@ class Ui_Dialog(object):
     # setupUi
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Remove package(s)", None))
-        self.question_label.setText(QCoreApplication.translate("Dialog", u"Are you sure you want to remove these packages?", None))
+        Dialog.setWindowTitle("")
+        self.question_label.setText("")
         self.icon.setText("")
     # retranslateUi
 

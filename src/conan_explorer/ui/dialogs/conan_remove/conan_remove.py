@@ -1,29 +1,24 @@
 from typing import Dict, List, Optional
 
+from PySide6.QtCore import Qt, SignalInstance
+from PySide6.QtWidgets import QDialogButtonBox, QListWidgetItem, QWidget
+
 import conan_explorer.app as app
 from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.app.logger import Logger
-
-from PySide6.QtCore import SignalInstance, Qt
-from PySide6.QtWidgets import QDialog, QWidget, QDialogButtonBox, QListWidgetItem, QStyle
-
 from conan_explorer.conan_wrapper.types import ConanRef
 
+from .. import QuestionWithItemListDialog
 
-class ConanRemoveDialog(QDialog):
+
+class ConanRemoveDialog(QuestionWithItemListDialog):
 
     def __init__(self, parent: Optional[QWidget], conan_refs_with_pkg_ids: Dict[str, List[str]],
                  conan_pkg_removed: Optional[SignalInstance] = None):
         super().__init__(parent)
+        self.setWindowTitle("Remove Package(s)")
+        self._ui.question_label.setText("Are you sure you want to remove these packages?")
         self._conan_pkg_removed_sig = conan_pkg_removed
-        from .conan_remove_ui import Ui_Dialog
-        self._ui = Ui_Dialog()
-        self._ui.setupUi(self)
-        pixmapi = getattr(QStyle, "SP_MessageBoxQuestion")
-        if pixmapi:
-            icon = self.style().standardIcon(pixmapi)
-            self._ui.icon.setPixmap(icon.pixmap(40,40))
-
         for conan_ref, pkg_ids in conan_refs_with_pkg_ids.items():
             for pkg_id in pkg_ids:
                 if not pkg_id:
