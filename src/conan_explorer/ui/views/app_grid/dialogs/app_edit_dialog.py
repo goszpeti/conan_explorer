@@ -1,23 +1,25 @@
-
 from pathlib import Path
 from typing import Optional
 
+from PySide6.QtCore import SignalInstance
+from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox, QWidget
+
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer.app.logger import Logger
+from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.ui.common import measure_font_width
 from conan_explorer.ui.common.theming import get_themed_asset_icon
-from conan_explorer.ui.views.app_grid.model import UiAppLinkModel
 from conan_explorer.ui.dialogs import ConanInstallDialog
-from conan_explorer.conan_wrapper.types import ConanRef
-
-from PySide6.QtCore import SignalInstance
-from PySide6.QtWidgets import QWidget, QDialog, QFileDialog, QMessageBox
+from conan_explorer.ui.views.app_grid.model import UiAppLinkModel
 
 
 class AppEditDialog(QDialog):
-
-    def __init__(self,  model: UiAppLinkModel, parent: Optional[QWidget],
-                 pkg_installed_signal: Optional[SignalInstance] = None):
+    def __init__(
+        self,
+        model: UiAppLinkModel,
+        parent: Optional[QWidget],
+        pkg_installed_signal: Optional[SignalInstance] = None,
+    ):
         super().__init__(parent=parent)
         self._model = model
         self._pkg_installed_signal = pkg_installed_signal
@@ -48,8 +50,8 @@ class AppEditDialog(QDialog):
         width_to_set = measure_font_width(self._ui.args_line_edit.text()) + 10
         if width_to_set > self.parentWidget().geometry().width():
             width_to_set = self.parentWidget().geometry().width()
-        if width_to_set < self.parentWidget().geometry().width()/2:
-            width_to_set = int(self.parentWidget().geometry().width()/2)
+        if width_to_set < self.parentWidget().geometry().width() / 2:
+            width_to_set = int(self.parentWidget().geometry().width() / 2)
         self.setMinimumWidth(width_to_set)
         conan_options_text = ""
         for option in self._model.conan_options:
@@ -81,16 +83,23 @@ class AppEditDialog(QDialog):
         self._ui.icon_browse_button.setEnabled(True)
 
     def on_install_clicked(self):
-        dialog = ConanInstallDialog(self, self._ui.conan_ref_line_edit.text(), self._pkg_installed_signal, lock_reference=True)
+        dialog = ConanInstallDialog(
+            self,
+            self._ui.conan_ref_line_edit.text(),
+            self._pkg_installed_signal,
+            lock_reference=True,
+        )
         dialog.show()
 
     def on_executable_browse_clicked(self):
         _, temp_package_path = app.conan_api.get_best_matching_local_package_path(
-            ConanRef.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
+            ConanRef.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options()
+        )
         if not temp_package_path.exists():  # default path
             temp_package_path = Path.home()
-        dialog = QFileDialog(parent=self, caption="Select file for icon display",
-                             directory=str(temp_package_path))
+        dialog = QFileDialog(
+            parent=self, caption="Select file to start", directory=str(temp_package_path)
+        )
         # filter="Images (*.ico *.svg *.jpg)")
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
@@ -100,7 +109,9 @@ class AppEditDialog(QDialog):
             except Exception:
                 msg = QMessageBox(parent=self)
                 msg.setWindowTitle("Invalid selection")
-                msg.setText(f"The entered path {str(exe_path)} is not in the selected conan package folder!")
+                msg.setText(
+                    f"The entered path {str(exe_path)} is not in the selected conan package folder!"
+                )
                 msg.setStandardButtons(QMessageBox.StandardButton.Ok)
                 msg.setIcon(QMessageBox.Icon.Critical)
                 msg.exec()
@@ -111,12 +122,16 @@ class AppEditDialog(QDialog):
 
     def on_icon_browse_clicked(self):
         _, temp_package_path = app.conan_api.get_best_matching_local_package_path(
-            ConanRef.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options())
+            ConanRef.loads(self._ui.conan_ref_line_edit.text()), self.resolve_conan_options()
+        )
         if not temp_package_path.exists():  # default path
             temp_package_path = Path.home()
-        dialog = QFileDialog(parent=self, caption="Select file for icon display",
-                             directory=str(temp_package_path),
-                             filter="Images (*.ico *.png *.svg *.jpg)")
+        dialog = QFileDialog(
+            parent=self,
+            caption="Select file for icon display",
+            directory=str(temp_package_path),
+            filter="Images (*.ico *.png *.svg *.jpg)",
+        )
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             icon_path = Path(dialog.selectedFiles()[0])
