@@ -59,7 +59,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QListWidget" name="package_list_widget">
+    <widget class="QListWidget" name="list_widget">
      <property name="editTriggers">
       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
      </property>

@@ -50,12 +50,12 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addWidget(self.frame)
 
-        self.package_list_widget = QListWidget(Dialog)
-        self.package_list_widget.setObjectName(u"package_list_widget")
-        self.package_list_widget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.package_list_widget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectItems)
+        self.list_widget = QListWidget(Dialog)
+        self.list_widget.setObjectName(u"list_widget")
+        self.list_widget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.list_widget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectItems)
 
-        self.verticalLayout.addWidget(self.package_list_widget)
+        self.verticalLayout.addWidget(self.list_widget)
 
         self.button_box = QDialogButtonBox(Dialog)
         self.button_box.setObjectName(u"button_box")
