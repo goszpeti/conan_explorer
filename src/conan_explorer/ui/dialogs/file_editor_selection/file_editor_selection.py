@@ -28,7 +28,7 @@ class FileEditorSelDialog(QDialog):
             path_to_open = current_file.parent
         dialog = QFileDialog(
             parent=self,
-            caption="Select file for icon display",
+            caption="Select file editor executable",
             directory=str(path_to_open),
             filter="Executables (*)",
         )
