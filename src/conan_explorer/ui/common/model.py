@@ -212,6 +212,6 @@ class TreeModel(QAbstractItemModel):
                 found_item = True
                 return self.index(ref_row, 0, QModelIndex())
         if not found_item:
-            Logger().debug(f"Cannot find {str(item)} in model")
+            Logger().debug("Cannot find %s in model", str(item))
             return QModelIndex()
         return self.index(ref_row, 0, QModelIndex())

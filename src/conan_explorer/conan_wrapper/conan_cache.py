@@ -155,7 +155,7 @@ class ConanInfoCache():
             conan_ref.name, {}).get(str(conan_ref.user), [])
         invalid_version_channel = f"{conan_ref.version}/{conan_ref.channel}"
         if invalid_version_channel in version_channels:
-            Logger().debug(f"Invalidated {str(conan_ref)} from remote cache.")
+            Logger().debug("Invalidated %s from remote cache.", str(conan_ref))
             version_channels.remove(f"{conan_ref.version}/{conan_ref.channel}")
             self._save()
 

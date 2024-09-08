@@ -126,14 +126,15 @@ class SideSubMenu(ThemedWidget):
             layout.setStretch(1, 1)
 
         if label.width() > RIGHT_MENU_MAX_WIDTH:
-            Logger().debug(f"{str(name)} right side menu exceeds max width!")
+            Logger().debug("%s right side menu exceeds max width!", name)
         frame.layout().setContentsMargins(5, 0, 5, 0)
         frame.layout().setSpacing(4)
 
         frame.layout().addWidget(widget)
         self.add_custom_menu_entry(frame, name)
 
-    def add_toggle_menu_entry(self, name: str, target: Callable, initial_state: bool, asset_icon: str = ""):
+    def add_toggle_menu_entry(self, name: str, target: Callable, initial_state: bool, 
+                              asset_icon: str = ""):
         toggle = AnimatedToggle(self)
         toggle.setChecked(initial_state)
         toggle.stateChanged.connect(target)
