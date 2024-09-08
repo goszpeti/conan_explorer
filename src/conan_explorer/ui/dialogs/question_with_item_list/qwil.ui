@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Remove package(s)</string>
+   <string/>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
@@ -44,7 +44,7 @@
       <item>
        <widget class="QLabel" name="question_label">
         <property name="text">
-         <string>Are you sure you want to remove these packages?</string>
+         <string/>
         </property>
        </widget>
       </item>

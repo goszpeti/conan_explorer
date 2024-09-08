@@ -2,7 +2,7 @@
 import os
 import tempfile
 from pathlib import Path
-from conan_explorer.ui.dialogs.reorder_dialog.reorder_dialog import ReorderDialog
+from conan_explorer.ui.dialogs import ReorderDialog
 from conan_explorer.ui.views.app_grid.config import UiAppLinkConfig
 from conan_explorer.ui.views.app_grid.config.json_file import JsonUiConfig
 from test.conftest import TEST_REF, conan_install_ref

@@ -11,7 +11,7 @@ from conan_explorer import ICON_SIZE, INVALID_PATH
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import open_in_file_manager, run_file
 from conan_explorer.ui.common import get_themed_asset_icon, measure_font_width
-from conan_explorer.ui.dialogs.reorder_dialog import ReorderDialog
+from conan_explorer.ui.dialogs.reorder import ReorderDialog
 
 from .dialogs import AppEditDialog
 from .model import UiAppLinkModel
