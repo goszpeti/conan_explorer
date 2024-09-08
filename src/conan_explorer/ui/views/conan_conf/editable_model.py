@@ -1,4 +1,3 @@
-
 from typing import Any, List, Optional, Union
 
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
@@ -11,12 +10,11 @@ from conan_explorer.ui.common import TreeModel, TreeModelItem
 
 class EditableModelItemRoot(TreeModelItem):
     def __init__(self, data: List[str], parent=None, lazy_loading=False):
-        self.child_items: List[EditableModelItem] = []
+        self.child_items: List[EditableModelItem] = []  # type: ignore
         super().__init__(data, parent, lazy_loading)
 
 
 class EditableModelItem(TreeModelItem):
-
     def __init__(self, name: str, path: str, output: str, parent=None, lazy_loading=False):
         super().__init__([name, path, output], parent, lazy_loading=lazy_loading)
 
@@ -60,7 +58,8 @@ class EditableModel(TreeModel):
             output = app.conan_api.get_editables_output_folder(editable_ref)
             output_str = str(output) if output else ""
             remote_item = EditableModelItem(
-                str(editable_ref), str(path), output_str, self.root_item)
+                str(editable_ref), str(path), output_str, self.root_item
+            )
             self.root_item.append_child(remote_item)
         self.endResetModel()
 
@@ -96,7 +95,7 @@ class EditableModel(TreeModel):
         return self.root_item.child_count()
 
     def get_index_from_ref(self, conan_ref: str) -> Optional[QModelIndex]:
-        for ref in self.root_item.child_items: # type: ignore
+        for ref in self.root_item.child_items:  # type: ignore
             ref: EditableModelItem
             if ref.name == conan_ref:
                 return self.get_index_from_item(ref)

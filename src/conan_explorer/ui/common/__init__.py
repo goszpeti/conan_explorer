@@ -1,20 +1,35 @@
 """ Common ui classes, and functions """
 
 from pathlib import Path
+
+from PySide6.QtGui import QFont, QFontMetrics
+
 import conan_explorer.app as app
-from conan_explorer.conan_wrapper.types import ConanRef
+
 # using global module pattern
 from conan_explorer.app.system import execute_cmd, open_file
+from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE, FONT_SIZE
-from PySide6.QtGui import QFontMetrics, QFont
 
-from .icon import extract_icon, get_icon_from_image_file, get_inverted_asset_image, get_platform_icon, draw_svg_with_color
+from .icon import (
+    draw_svg_with_color,
+    extract_icon,
+    get_icon_from_image_file,
+    get_inverted_asset_image,
+    get_platform_icon,
+)
 from .logger import init_qt_logger, remove_qt_logger
-from .model import TreeModel, TreeModelItem, FileSystemModel, re_register_signal
-from .theming import (get_themed_asset_icon, get_asset_image_path, 
-                      get_gui_dark_mode, get_gui_style,
-                      CanSetIconWidgetProtocol, CanSetPixmapWidgetProtocol, ThemedWidget)
+from .model import FileSystemModel, TreeModel, TreeModelItem, re_register_signal
 from .syntax_highlighting import ConfigHighlighter
+from .theming import (
+    CanSetIconWidgetProtocol,
+    CanSetPixmapWidgetProtocol,
+    ThemedWidget,
+    get_asset_image_path,
+    get_gui_dark_mode,
+    get_gui_style,
+    get_themed_asset_icon,
+)
 
 
 def measure_font_width(text: str) -> int:

@@ -31,9 +31,7 @@ class PluginFile:
             settings_plugin_file_path = app.active_settings.get_string(plugin_group_name)
             if Path(settings_plugin_file_path) == plugin_file_path:
                 return
-        app.active_settings.add(
-            str(uuid.uuid1()), str(plugin_file_path), PLUGINS_SECTION_NAME
-        )
+        app.active_settings.add(str(uuid.uuid1()), str(plugin_file_path), PLUGINS_SECTION_NAME)
 
     @staticmethod
     def unregister(plugin_file_path: Union[Path, str]):
@@ -116,9 +114,7 @@ class PluginFile:
         return plugins
 
     @staticmethod
-    def write(
-        plugin_file_path: Union[Path, str], plugin_descriptions: List[PluginDescription]
-    ):
+    def write(plugin_file_path: Union[Path, str], plugin_descriptions: List[PluginDescription]):
         """Write plugin file to specified path with the given the plugin descripton"""
         parser = configparser.ConfigParser()
         for i, description in enumerate(plugin_descriptions):

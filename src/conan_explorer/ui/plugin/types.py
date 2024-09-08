@@ -24,9 +24,7 @@ class PluginDescription:
     plugin_class: str  # class to be loaded from module
     description: str
     side_menu: bool  # will create a side menu, which can be accessed by page_widgets
-    conan_versions: (
-        str  # spec to restrict the plugin to a conan version (will be greyed out)
-    )
+    conan_versions: str  # spec to restrict the plugin to a conan version (will be greyed out)
 
 
 class PluginInterfaceV1(ThemedWidget):
@@ -51,9 +49,7 @@ class PluginInterfaceV1(ThemedWidget):
         self._page_widgets = page_widgets
         # save PluginDescription to query data from outside
         self.plugin_description = plugin_description
-        size_policy = QSizePolicy(
-            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred
-        )
+        size_policy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         size_policy.setVerticalStretch(0)
         self.setSizePolicy(size_policy)
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
