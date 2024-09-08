@@ -3,18 +3,32 @@ import os
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
 from typing_extensions import override
 
 from conan_explorer import BUILT_IN_PLUGIN, PathLike, base_path
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import get_default_file_editor
 
-from . import (AUTO_INSTALL_QUICKLAUNCH_REFS, AUTO_OPEN_LAST_VIEW,
-               CONSOLE_SPLIT_SIZES, DEFAULT_INSTALL_PROFILE,
-               FILE_EDITOR_EXECUTABLE, FONT_SIZE, GENERAL_SECTION_NAME,
-               GUI_MODE, GUI_MODE_LIGHT, GUI_STYLE, GUI_STYLE_MATERIAL,
-               LAST_CONFIG_FILE, LAST_VIEW, PLUGINS_SECTION_NAME,
-               VIEW_SECTION_NAME, WINDOW_SIZE, SettingsInterface)
+from . import (
+    AUTO_INSTALL_QUICKLAUNCH_REFS,
+    AUTO_OPEN_LAST_VIEW,
+    CONSOLE_SPLIT_SIZES,
+    DEFAULT_INSTALL_PROFILE,
+    FILE_EDITOR_EXECUTABLE,
+    FONT_SIZE,
+    GENERAL_SECTION_NAME,
+    GUI_MODE,
+    GUI_MODE_LIGHT,
+    GUI_STYLE,
+    GUI_STYLE_MATERIAL,
+    LAST_CONFIG_FILE,
+    LAST_VIEW,
+    PLUGINS_SECTION_NAME,
+    VIEW_SECTION_NAME,
+    WINDOW_SIZE,
+    SettingsInterface,
+)
 
 
 def application_settings_spec() -> Dict[str, Dict[str, Any]]:
@@ -23,7 +37,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
             LAST_CONFIG_FILE: "",
             FILE_EDITOR_EXECUTABLE: get_default_file_editor(),
             AUTO_INSTALL_QUICKLAUNCH_REFS: False,
-            DEFAULT_INSTALL_PROFILE: ""
+            DEFAULT_INSTALL_PROFILE: "",
         },
         VIEW_SECTION_NAME: {
             FONT_SIZE: 13,
@@ -34,10 +48,7 @@ def application_settings_spec() -> Dict[str, Dict[str, Any]]:
             LAST_VIEW: "",
             AUTO_OPEN_LAST_VIEW: True,
         },
-        PLUGINS_SECTION_NAME: {
-            BUILT_IN_PLUGIN: str(base_path / "ui" / "plugins.ini")
-        }
-
+        PLUGINS_SECTION_NAME: {BUILT_IN_PLUGIN: str(base_path / "ui" / "plugins.ini")},
     }
 
 
@@ -49,9 +60,13 @@ class IniSettings(SettingsInterface):
     Settings should be accessed via their constant name.
     """
 
-    def __init__(self, ini_file_path: Optional[PathLike], auto_save=True,
-                 default_values: Dict[str, Dict[str, Any]] = application_settings_spec(),
-                 custom_key_enabled_sections: List[str]=[PLUGINS_SECTION_NAME]):
+    def __init__(
+        self,
+        ini_file_path: Optional[PathLike],
+        auto_save=True,
+        default_values: Dict[str, Dict[str, Any]] = application_settings_spec(),
+        custom_key_enabled_sections: List[str] = [PLUGINS_SECTION_NAME],
+    ):
         """
         Read config.ini file to load settings.
         Create, if not existing, but the directory must already exist!
@@ -71,11 +86,11 @@ class IniSettings(SettingsInterface):
 
         # create Settings ini file, if not available for first start
         if not self._ini_file_path.is_file():
-            self._ini_file_path.open('a').close()
-            self._logger.info('Settings: Creating settings ini-file')
+            self._ini_file_path.open("a").close()
+            self._logger.info("Settings: Creating settings ini-file")
             self.save()
         else:
-            self._logger.info('Settings: Using %s', self._ini_file_path)
+            self._logger.info("Settings: Using %s", self._ini_file_path)
 
         self._read_ini()
 
@@ -89,7 +104,7 @@ class IniSettings(SettingsInterface):
 
     @override
     def get(self, name: str) -> "str | int | float | bool":
-        """ Get a specific setting """
+        """Get a specific setting"""
         value = None
         for section in self._values.values():
             if name in section:
@@ -117,8 +132,8 @@ class IniSettings(SettingsInterface):
 
     @override
     def set(self, name: str, value: "str|int|float|bool|dict"):
-        """ Set the value of a specific setting. 
-        Does not write to file, if value is already set. """
+        """Set the value of a specific setting.
+        Does not write to file, if value is already set."""
         if name in self._values.keys() and isinstance(value, dict):  # dict type setting
             if self._values[name] == value:
                 return
@@ -134,7 +149,7 @@ class IniSettings(SettingsInterface):
             self.save()
 
     @override
-    def add(self, name: str, value: "str|int|float|bool", node: Optional[str]=None):
+    def add(self, name: str, value: "str|int|float|bool", node: Optional[str] = None):
         if node is None:
             node = GENERAL_SECTION_NAME
         if not self._values.get(node):
@@ -153,25 +168,24 @@ class IniSettings(SettingsInterface):
 
     @override
     def save(self):
-        """ Save all user modifiable settings to file. """
+        """Save all user modifiable settings to file."""
         # save all default values
         for section in self._values.keys():
             for setting in self._values[section]:
                 self._write_setting(setting, section)
 
-        with self._ini_file_path.open('w', encoding="utf-8") as ini_file:
+        with self._ini_file_path.open("w", encoding="utf-8") as ini_file:
             self._parser.write(ini_file)
 
     def _read_ini(self):
-        """ Read settings ini with configparser. """
+        """Read settings ini with configparser."""
         update_needed = False
         try:
             self._parser.read(self._ini_file_path, encoding="utf--8")
             for node in self._parser.sections():
                 setting_keys = set(list(self._values.get(node, {}).keys()))
                 if node in self._custom_key_enabled_sections:
-                    setting_keys = setting_keys.union(
-                        set(self._get_section(node).keys()))
+                    setting_keys = setting_keys.union(set(self._get_section(node).keys()))
                 # empty section - this is a user filled dict
                 if not self._values.get(node):
                     update_needed |= self._read_dict_setting(node)
@@ -179,8 +193,12 @@ class IniSettings(SettingsInterface):
                     update_needed |= self._read_setting(setting, node)
 
         except Exception as e:
-            Logger().error((f"Settings: Can't read ini file: {str(e)}",
-                             "trying to delete and create a new one..."))
+            Logger().error(
+                (
+                    f"Settings: Can't read ini file: {str(e)}",
+                    "trying to delete and create a new one...",
+                )
+            )
             try:
                 # let an exeception to the user, file can't be deleted
                 os.remove(str(self._ini_file_path))
@@ -190,11 +208,11 @@ class IniSettings(SettingsInterface):
         # write file - to record defaults, if missing
         if not update_needed:
             return
-        with self._ini_file_path.open('w', encoding="utf8") as ini_file:
+        with self._ini_file_path.open("w", encoding="utf8") as ini_file:
             self._parser.write(ini_file)
 
     def _get_section(self, node: str) -> configparser.SectionProxy:
-        """ Get a section from ini, or create it, if it does not exist."""
+        """Get a section from ini, or create it, if it does not exist."""
         if node not in self._parser:
             self._parser.add_section(node)
         if node not in self._values:
@@ -202,7 +220,7 @@ class IniSettings(SettingsInterface):
         return self._parser[node]
 
     def _read_dict_setting(self, node: str) -> bool:
-        """ 
+        """
         Get a dict style setting.
         Dict settings are section itself and are read dynamically.
         """
@@ -213,7 +231,7 @@ class IniSettings(SettingsInterface):
         return update_needed
 
     def _read_setting(self, name: str, node: str) -> bool:
-        """ Get a setting, which uses the init value to determine the type. 
+        """Get a setting, which uses the init value to determine the type.
         Returns, if file needs tobe updated
         """
         section = self._get_section(node)
@@ -242,7 +260,7 @@ class IniSettings(SettingsInterface):
             return False
         if value == "" and default_value:
             value = default_value
-        # autosave must be disabled temporarily, 
+        # autosave must be disabled temporarily,
         # otherwise we overwrite the other settings in the file
         auto_save = self._auto_save
         self._auto_save = False
@@ -251,7 +269,7 @@ class IniSettings(SettingsInterface):
         return False
 
     def _write_setting(self, name, node):
-        """ Helper function to write a setting. """
+        """Helper function to write a setting."""
         value = self.get(name)
         if isinstance(value, dict):
             return  # dicts are read only currently

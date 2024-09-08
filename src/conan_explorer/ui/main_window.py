@@ -100,9 +100,7 @@ class MainWindow(FluentWindow):
         self.ui.title_icon_label.setPixmap(
             get_themed_asset_icon("icons/icon.ico", force_light_mode=True).pixmap(20, 20)
         )
-        self._conan_minor_version = (
-            str(conan_version.major) + "." + str(conan_version.minor)
-        )
+        self._conan_minor_version = str(conan_version.major) + "." + str(conan_version.minor)
         self.ui.search_bar_line_edit.setPlaceholderText(
             f"Search Conan {self._conan_minor_version} docs"
         )
@@ -158,9 +156,7 @@ class MainWindow(FluentWindow):
     def _init_style_chooser(self):
         self._style_chooser_frame = QFrame(self)
         self._style_chooser_layout = QVBoxLayout(self._style_chooser_frame)
-        self._style_chooser_radio_material = QRadioButton(
-            "Material", self._style_chooser_frame
-        )
+        self._style_chooser_radio_material = QRadioButton("Material", self._style_chooser_frame)
         self._style_chooser_layout.addWidget(self._style_chooser_radio_material)
         self._style_chooser_radio_fluent = QRadioButton("Fluent", self._style_chooser_frame)
         self._style_chooser_layout.addWidget(self._style_chooser_radio_fluent)
@@ -181,9 +177,7 @@ class MainWindow(FluentWindow):
         )
         view_settings_submenu = SideSubMenu(self.ui.right_menu_bottom_content_sw, "View")
 
-        self.main_general_settings_menu.add_sub_menu(
-            view_settings_submenu, "icons/view.svg"
-        )
+        self.main_general_settings_menu.add_sub_menu(view_settings_submenu, "icons/view.svg")
 
         view_settings_submenu.add_button_menu_entry(
             "Font Size +",
@@ -242,9 +236,7 @@ class MainWindow(FluentWindow):
         self.add_right_bottom_menu_main_page_entry(
             "Manage Plugins", self.plugins_page, "icons/plugin.svg"
         )
-        self.add_right_bottom_menu_main_page_entry(
-            "About", self.about_page, "icons/about.svg"
-        )
+        self.add_right_bottom_menu_main_page_entry("About", self.about_page, "icons/about.svg")
 
     @override
     def closeEvent(self, event):
@@ -478,8 +470,7 @@ class MainWindow(FluentWindow):
         else:
             geometry = self.geometry()
             geo_str = (
-                f"{geometry.left()},{geometry.top()},"
-                f"{geometry.width()},{geometry.height()}"
+                f"{geometry.left()},{geometry.top()}," f"{geometry.width()},{geometry.height()}"
             )
             app.active_settings.set(WINDOW_SIZE, geo_str)
         # save console size

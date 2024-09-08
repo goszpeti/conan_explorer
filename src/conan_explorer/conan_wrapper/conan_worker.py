@@ -1,8 +1,9 @@
-
 from queue import Queue
 from threading import Thread
+
 # this allows to use forward declarations to avoid circular imports
 from typing import TYPE_CHECKING, Any, List, Optional, Protocol, Tuple, TypedDict
+
 from conan_explorer.settings import SettingsInterface
 
 if TYPE_CHECKING:
@@ -10,7 +11,8 @@ if TYPE_CHECKING:
 
 from conan_explorer import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
 from conan_explorer.app.logger import Logger
-from .types import ConanOptions, ConanRef, ConanPkgRef, ConanSettings
+
+from .types import ConanOptions, ConanPkgRef, ConanRef, ConanSettings
 
 
 class ConanWorkerElement(TypedDict):
@@ -27,24 +29,28 @@ class ConanWorkerResultCallback(Protocol):
     def __call__(self, conan_ref: str, pkg_id: str) -> Any: ...
 
 
-class ConanWorker():
+class ConanWorker:
     """
     Sequential worker with a queue to execute conan install/version alternatives commands
     """
 
     def __init__(self, conan_api: "ConanCommonUnifiedApi", settings: SettingsInterface):
         self._conan_api = conan_api
-        self._conan_install_queue: Queue[Tuple[ConanWorkerElement,
-                                    Optional[ConanWorkerResultCallback]]] = Queue(maxsize=0)
+        self._conan_install_queue: Queue[
+            Tuple[ConanWorkerElement, Optional[ConanWorkerResultCallback]]
+        ] = Queue(maxsize=0)
         self._install_worker: Optional[Thread] = None
         self._shutdown_requested = False  # internal flag to cancel worker on shutdown
         self._settings = settings
 
-    def update_all_info(self, conan_elements: List[ConanWorkerElement],
-                        info_callback: Optional[ConanWorkerResultCallback]):
-        """ 
-        Starts the worker for all given elements. Should be called at start. 
-        info_signal is used to notify the caller that the worker has finished 
+    def update_all_info(
+        self,
+        conan_elements: List[ConanWorkerElement],
+        info_callback: Optional[ConanWorkerResultCallback],
+    ):
+        """
+        Starts the worker for all given elements. Should be called at start.
+        info_signal is used to notify the caller that the worker has finished
         for a given element. To be able to identify, which package has been finished
         the signal will send this info: tuple(conan_ref, pkg_id)
         """
@@ -53,25 +59,29 @@ class ConanWorker():
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:
                 self._conan_install_queue.put((worker_element, info_callback))
 
-        # start getting versions info in a separate thread in a bundled way 
+        # start getting versions info in a separate thread in a bundled way
         # to get better performance
         self._start_install_worker()
 
-    def put_ref_in_install_queue(self, conan_element: ConanWorkerElement, 
-                                 info_callback: Optional[ConanWorkerResultCallback]):
-        """ Add a new entry to work on """
+    def put_ref_in_install_queue(
+        self,
+        conan_element: ConanWorkerElement,
+        info_callback: Optional[ConanWorkerResultCallback],
+    ):
+        """Add a new entry to work on"""
         self._conan_install_queue.put((conan_element, info_callback))
         self._start_install_worker()
 
     def _start_install_worker(self):
-        """ Start worker, if it is not already started (can be called multiple times)"""
+        """Start worker, if it is not already started (can be called multiple times)"""
         if not self._install_worker or not self._install_worker.is_alive():
-            self._install_worker = Thread(target=self._work_on_conan_install_queue,
-                                          name="ConanInstallWorker", daemon=True)
+            self._install_worker = Thread(
+                target=self._work_on_conan_install_queue, name="ConanInstallWorker", daemon=True
+            )
             self._install_worker.start()
 
     def _work_on_conan_install_queue(self):
-        """ Call conan install from queue """
+        """Call conan install from queue"""
         info_callback = None
         pkg_id = ""
         while not self._shutdown_requested and not self._conan_install_queue.empty():
@@ -87,21 +97,21 @@ class ConanWorker():
             try:
                 conan_ref: ConanRef
                 if ":" in ref_pkg_id:  # pkg ref
-                    pkg_ref: ConanPkgRef = ConanPkgRef.loads(
-                        ref_pkg_id)  # type: ignore
+                    pkg_ref: ConanPkgRef = ConanPkgRef.loads(ref_pkg_id)  # type: ignore
                     conan_ref = pkg_ref.ref  # type: ignore
                     package = self._conan_api.get_remote_pkg_from_id(pkg_ref)
-                    pkg_id, _ = self._conan_api.install_package(
-                        pkg_ref.ref, package, update)
+                    pkg_id, _ = self._conan_api.install_package(pkg_ref.ref, package, update)
                 else:
                     conan_ref = ConanRef.loads(ref_pkg_id)  # type: ignore
 
                     if auto_install:
                         pkg_id, _ = self._conan_api.get_path_or_auto_install(
-                            conan_ref, conan_options, update)
+                            conan_ref, conan_options, update
+                        )
                     else:
-                        pkg_id, _ = self._conan_api.install_reference(conan_ref,
-                            conan_settings, conan_options, conan_profile, update)
+                        pkg_id, _ = self._conan_api.install_reference(
+                            conan_ref, conan_settings, conan_options, conan_profile, update
+                        )
             except Exception:
                 try:
                     self._conan_install_queue.task_done()
@@ -116,13 +126,12 @@ class ConanWorker():
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:
                 if info_callback and not self._shutdown_requested:
                     try:
-                        info_callback(
-                            self._conan_api.generate_canonical_ref(conan_ref), pkg_id)
+                        info_callback(self._conan_api.generate_canonical_ref(conan_ref), pkg_id)
                     except Exception as e:
                         Logger().error(str(e))
 
     def finish_working(self, timeout_s: Optional[float] = None):
-        """ Cancel, if worker is still not finished """
+        """Cancel, if worker is still not finished"""
         self._shutdown_requested = True
         try:
             if self._install_worker and self._install_worker.is_alive():

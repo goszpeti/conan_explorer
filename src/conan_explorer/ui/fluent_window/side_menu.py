@@ -18,7 +18,7 @@ from conan_explorer.app.logger import Logger
 from conan_explorer.ui.common import ThemedWidget
 from conan_explorer.ui.widgets.toggle import AnimatedToggle
 
-from . import RIGHT_MENU_MAX_WIDTH, gen_obj_name
+from .fluent_window import RIGHT_MENU_MAX_WIDTH, gen_obj_name
 
 
 class SideSubMenu(ThemedWidget):
@@ -54,8 +54,8 @@ class SideSubMenu(ThemedWidget):
 
     def enable_collapsible(self) -> bool:
         """
-        Enable this side menu being collapsed. The side_menu_title_button will be used for this,
-        so this must be a top level menu, otherwise the back button could not be operated anymore.
+        Enable this side menu being collapsed. The side_menu_title_button will be used, so this
+        must be a top level menu, otherwise the back button could not be operated anymore.
         """
         if not self.is_top_level:
             return False
@@ -94,7 +94,7 @@ class SideSubMenu(ThemedWidget):
     def add_named_custom_entry(
         self, name: str, widget: QWidget, asset_icon: str = "", force_v_layout=False
     ):
-        """Creates a Frame with a text label and a custom widget under it and adds it to the menu"""
+        "Creates a Frame with a text label and a custom widget under it and adds it to the menu"
         label = QLabel(text=name, parent=self)
         label.adjustSize()  # adjust layout according to size and throw a warning, if too big?
         label.setObjectName(gen_obj_name(name) + "_label")
@@ -160,9 +160,7 @@ class SideSubMenu(ThemedWidget):
         button = self.add_button_menu_entry(
             sub_menu.title, sub_menu.ui.side_menu_title_button.show, asset_icon
         )
-        button.clicked.connect(
-            lambda: self.parent_stacked_widget.setCurrentWidget(sub_menu)
-        )
+        button.clicked.connect(lambda: self.parent_stacked_widget.setCurrentWidget(sub_menu))
         sub_menu.ui.side_menu_title_button.clicked.connect(
             lambda: self.parent_stacked_widget.setCurrentWidget(self)
         )
@@ -177,7 +175,8 @@ class SideSubMenu(ThemedWidget):
         shortcut: Optional[QKeySequence] = None,
         shortcut_parent: Optional[QWidget] = None,
     ):
-        """Adds a button with an icon and links with a callable. Optionally can have a key shortcut."""
+        """Adds a button with an icon and links with a callable.
+        Optionally can have a key shortcut."""
         button = QPushButton(self)
         button.setMinimumSize(QSize(64, 50))
         button.setMaximumHeight(50)
