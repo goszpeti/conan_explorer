@@ -28,7 +28,7 @@ class PluginHandler(QObject):
         super().__init__(parent)
         self._base_signals = base_signals
         self._page_widgets = page_widgets
-        self._active_plugins = []
+        self._active_plugins: List[PluginInterfaceV1] = []
 
     def load_all_plugins(self):
         # load built-in from dynamic path
@@ -42,6 +42,10 @@ class PluginHandler(QObject):
                         BUILT_IN_PLUGIN, correct_plugin_path, PLUGINS_SECTION_NAME)
                     plugin_path = correct_plugin_path
             self._load_plugins_from_file(plugin_path)
+
+    def reload_all_plugins(self):
+        for plugin in self._active_plugins:
+            self.reload_plugin(plugin.plugin_description.name)
 
     def get_plugin_descr_from_name(self, plugin_name: str) -> Optional[PluginDescription]:
         plugins: List[PluginDescription] = self.get_same_file_plugins_from_name(

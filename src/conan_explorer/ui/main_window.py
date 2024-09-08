@@ -6,11 +6,11 @@ from typing_extensions import override
 
 from PySide6.QtCore import QRect, Signal, SignalInstance, Qt
 from PySide6.QtGui import QKeySequence, QDesktopServices, QResizeEvent, QShortcut
-from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton,
+from PySide6.QtWidgets import (QApplication, QFileDialog, QFrame, QRadioButton, QPushButton,
     QVBoxLayout)
 
 import conan_explorer.app as app  # using global module pattern
-from conan_explorer import (APP_NAME, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
+from conan_explorer import (APP_NAME, DEBUG_LEVEL, ENABLE_GUI_STYLES, MAX_FONT_SIZE,
     MIN_FONT_SIZE, PathLike, conan_version)
 from conan_explorer.app import LoaderGui
 from conan_explorer.app import Logger, activate_theme
@@ -105,10 +105,16 @@ class MainWindow(FluentWindow):
         QDesktopServices.openUrl(search_url)
 
     def _init_left_menu(self):
-        self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.svg", is_upper_menu=True, page_widget=self.app_grid,
+        self.add_left_menu_entry("Conan Quicklaunch", "icons/global/grid.svg", 
+                                 is_upper_menu=True, page_widget=self.app_grid,
                                  create_page_menu=True)
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()
+        if DEBUG_LEVEL > 0:
+            self.add_left_menu_entry("Reload", "icons/refresh.svg",
+                                     False,  page_widget=self.app_grid)
+            button: QPushButton = self.findChild(QPushButton, "reload") # type: ignore
+            button.clicked.connect(self.reload)
 
     def _init_style_chooser(self):
         self._style_chooser_frame = QFrame(self)
@@ -225,6 +231,11 @@ class MainWindow(FluentWindow):
                                      plugin_object.plugin_description.side_menu)
         except Exception as e:
             Logger().error(f"Can't load plugin {plugin_object.plugin_description.name}: {str(e)}")
+
+    def reload(self):
+        """ Only for debug mode """
+        self._plugin_handler.reload_all_plugins()
+        # self.reload_theme()
 
     def _unload_plugin(self, plugin_name: str):
         self.page_widgets.remove_page_extras_by_name(plugin_name)
