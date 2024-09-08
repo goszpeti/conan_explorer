@@ -1,12 +1,13 @@
-""" OS Abstraction Layer for all file based functions """
+"""OS Abstraction Layer for all file based functions"""
 
 import os
 import platform
-import stat
 import shutil
+import stat
 import subprocess
 import tempfile
 from pathlib import Path
+from shutil import rmtree
 from typing import List
 
 from jinja2 import Template
@@ -18,27 +19,29 @@ WIN_EXE_FILE_TYPES = [".cmd", ".com", ".bat", ".ps1", ".exe"]
 
 
 def str2bool(value: str) -> bool:
-    """ Own impl. isntead of distutils.util.strtobool
-      because distutils will be deprecated """
+    """Own impl. isntead of distutils.util.strtobool
+    because distutils will be deprecated"""
     value = value.lower()
-    if value in {'yes', 'true', 'y', '1'}:
+    if value in {"yes", "true", "y", "1"}:
         return True
-    if value in {'no', 'false', 'n', '0'}:
+    if value in {"no", "false", "n", "0"}:
         return False
     return False
 
 
 def is_windows_11():
-    """ Main version number is still 10 - thanks MS! """
+    """Main version number is still 10 - thanks MS!"""
     from packaging import version
-    if platform.system() == "Windows" and \
-            version.parse(platform.version()) >= version.parse("10.0.22000"):
+
+    if platform.system() == "Windows" and version.parse(
+        platform.version()
+    ) >= version.parse("10.0.22000"):
         return True
     return False
 
 
 def run_file(file_path: Path, is_console_app: bool, args: str):
-    " Decide, if a file should be opened or executed and call the appropriate method "
+    """Decide, if a file should be opened or executed and call the appropriate method"""
     if not file_path.is_file():
         return
     try:
@@ -47,12 +50,11 @@ def run_file(file_path: Path, is_console_app: bool, args: str):
         else:
             open_file(file_path)
     except Exception:
-        Logger().error(
-            f"Error while executing {str(file_path)} with args: {args}.")
+        Logger().error(f"Error while executing {str(file_path)} with args: {args}.")
 
 
 def open_in_file_manager(file_path: Path):
-    """ Show file in file manager. """
+    """Show file in file manager."""
     try:
         if platform.system() == "Linux":
             # no standardized select functionailty.
@@ -62,22 +64,34 @@ def open_in_file_manager(file_path: Path):
         elif platform.system() == "Windows":
             # select switch for highlighting
             creationflags = subprocess.CREATE_NO_WINDOW  # available since 3.7
-            return subprocess.Popen("explorer /select," + str(file_path),
-                                    creationflags=creationflags)
+            return subprocess.Popen(
+                "explorer /select," + str(file_path), creationflags=creationflags
+            )
     except Exception as e:
         Logger().error(f"Can't show path in file-manager: {str(e)}")
 
 
 def open_cmd_in_path(directory_path: Path) -> int:
-    """ Open a terminal in the selected folder. """
+    """Open a terminal in the selected folder."""
     try:
         if not directory_path.is_dir():
             Logger().error(f"Invalid directory: {str(directory_path)}")
             return -1
         if platform.system() == "Linux":
-            return execute_cmd(["x-terminal-emulator", "-e", '"',
-                                "cd", f"{str(directory_path)}", "&&", "bash", '"'],
-                               is_console_app=False, shell_linux=True)
+            return execute_cmd(
+                [
+                    "x-terminal-emulator",
+                    "-e",
+                    '"',
+                    "cd",
+                    f"{str(directory_path)}",
+                    "&&",
+                    "bash",
+                    '"',
+                ],
+                is_console_app=False,
+                shell_linux=True,
+            )
         elif platform.system() == "Windows":
             cmd_path = shutil.which("cmd")
             if cmd_path:
@@ -89,9 +103,9 @@ def open_cmd_in_path(directory_path: Path) -> int:
 
 
 def is_file_executable(file_path: Path) -> bool:
-    """ Checking execution mode is ok on linux, but not enough on windows, 
-    since every file with an associated program has this flag. 
-    Use custom pathext like list to determine executable file extensions. """
+    """Checking execution mode is ok on linux, but not enough on windows,
+    since every file with an associated program has this flag.
+    Use custom pathext like list to determine executable file extensions."""
     is_executable = False
     if platform.system() == "Linux":
         if os.access(str(file_path), os.X_OK):
@@ -119,7 +133,7 @@ def execute_app(executable: Path, is_console_app: bool, args: str) -> int:
 
 
 def execute_cmd(cmd: List[str], is_console_app: bool, shell_linux=False) -> int:  # pid
-    """ Generic process execute method. Returns pid. """
+    """Generic process execute method. Returns pid."""
     command_path = Path(cmd[0]).parent
     try:
         # Linux call errors on creationflags argument, so the calls must be separated
@@ -128,15 +142,14 @@ def execute_cmd(cmd: List[str], is_console_app: bool, shell_linux=False) -> int:
             if is_console_app:
                 creationflags = subprocess.CREATE_NEW_CONSOLE
                 cmd = [generate_launch_script(cmd)]
-            # don't use 'executable' arg of Popen, because shell scripts won't execute correctly
-            proc = subprocess.Popen(
-                cmd, creationflags=creationflags, cwd=str(command_path))
+            # don't use 'executable' arg, because shell scripts won't work correctly
+            proc = subprocess.Popen(cmd, creationflags=creationflags, cwd=str(command_path))
             return proc.pid
         elif platform.system() == "Linux":
             if is_console_app:
                 # Sadly, there is no default way to do this, because of the miriad terminal
-                # emulators available. Use the default distro emulator through x-terminal-emulator
-                # This works only on debian distros.
+                # emulators available. Use the default distro emulator through
+                # x-terminal-emulator.
                 cmd = ["x-terminal-emulator", "-e"] + [generate_launch_script(cmd)]
             proc = subprocess.Popen(cmd, cwd=str(command_path), shell=shell_linux)
             return proc.pid
@@ -153,14 +166,12 @@ def generate_launch_script(cmd: List[str]) -> str:
     """
     launch_templ_file = ""
 
-    if platform.system() == 'Windows':
+    if platform.system() == "Windows":
         launch_templ_file = "launch.bat.in"
-        temp_fd, temp_path_str = tempfile.mkstemp(
-            ".bat", prefix=PKG_NAME, text=True)
+        temp_fd, temp_path_str = tempfile.mkstemp(".bat", prefix=PKG_NAME, text=True)
     elif platform.system() == "Linux":
         launch_templ_file = "launch.sh.in"
-        temp_fd, temp_path_str = tempfile.mkstemp(
-            ".sh", prefix=PKG_NAME, text=True)
+        temp_fd, temp_path_str = tempfile.mkstemp(".sh", prefix=PKG_NAME, text=True)
     else:
         Logger().warning("Not supported OS.")
         return ""
@@ -168,18 +179,18 @@ def generate_launch_script(cmd: List[str]) -> str:
     with open(launch_templ_path, "r") as fd:
         launch_template = Template(fd.read())
     launch_content = launch_template.render(COMMAND=" ".join(cmd))
-    with os.fdopen(temp_fd, 'w') as f:
+    with os.fdopen(temp_fd, "w") as f:
         f.write(launch_content)
-    if platform.system() == 'Linux':
+    if platform.system() == "Linux":
         os.system(f"chmod +x {temp_path_str}")
     return temp_path_str
 
 
 def open_file(file: Path):
-    """ Open files with their associated programs """
+    """Open files with their associated programs"""
     try:
         if file.absolute().is_file():
-            if platform.system() == 'Windows':
+            if platform.system() == "Windows":
                 os.startfile(str(file))
             elif platform.system() == "Linux":
                 subprocess.Popen(("xdg-open", str(file)))
@@ -193,24 +204,30 @@ def delete_path(dst: Path):
     Delete file or (non-empty) folder recursively.
     Exceptions will be caught and message logged to stdout.
     """
-    from shutil import rmtree
+
     try:
         if dst.is_file():
             os.remove(dst)
         elif dst.is_dir():
+
             def rm_dir_readonly(func, path, _):
                 "Clear the readonly bit and reattempt the removal"
                 os.chmod(path, stat.S_IWRITE)
                 func(path)
+
             rmtree(str(dst), onerror=rm_dir_readonly)
     except Exception as e:
         Logger().warning(f"Can't delete {str(dst)}: {str(e)}")
+
 
 def get_folder_size_mb(folder_path: Path):
     if not folder_path.exists():
         return 0
     # exists check is needed for soft links under windows
-    return sum(file.stat().st_size for file in folder_path.rglob('*') if file.exists()) / pow(1024, 2)
+    return sum(
+        file.stat().st_size for file in folder_path.rglob("*") if file.exists()
+    ) / pow(1024, 2)
+
 
 def copy_path_with_overwrite(src: Path, dst: Path):
     """
@@ -220,6 +237,7 @@ def copy_path_with_overwrite(src: Path, dst: Path):
     Exceptions will be caught and message logged to stdout.
     """
     from shutil import copy2, copytree
+
     try:
         dst.parent.mkdir(parents=True, exist_ok=True)
         if src.is_file():
@@ -238,7 +256,7 @@ def calc_paste_same_dir_name(dst: Path, index=1):
     """
     if dst.exists():
         new_path = dst.with_name(f"{dst.stem} ({str(index+1)}){dst.suffix}")
-        possible_path = calc_paste_same_dir_name(new_path, index+1)
+        possible_path = calc_paste_same_dir_name(new_path, index + 1)
         if possible_path == Path(INVALID_PATH):
             return new_path
         else:
@@ -252,7 +270,8 @@ def calc_paste_same_dir_name(dst: Path, index=1):
 def get_default_file_editor():
     if platform.system() == "Windows":
         editor_executable = find_program_in_windows(
-            "Notepad++", partial_match=True, key_to_find="DisplayIcon")
+            "Notepad++", partial_match=True, key_to_find="DisplayIcon"
+        )
         if Path(editor_executable).exists():
             return editor_executable
         return "notepad.exe"
@@ -260,26 +279,30 @@ def get_default_file_editor():
         return "gedit"  # distro dependent, but make something
 
 
-def find_program_in_windows(app_name: str, partial_match=False,
-                            key_to_find="InstallLocation") -> str:
+def find_program_in_windows(
+    app_name: str, partial_match=False, key_to_find="InstallLocation"
+) -> str:
     if platform.system() != "Windows":
         return ""
 
     import winreg
+
     arch_keys = {winreg.KEY_WOW64_32KEY, winreg.KEY_WOW64_64KEY}
     for arch_key in arch_keys:
-        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                             r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-                             0, winreg.KEY_READ | arch_key)
+        key = winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE,
+            r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+            0,
+            winreg.KEY_READ | arch_key,
+        )
         for i in range(0, winreg.QueryInfoKey(key)[0]):
             sub_key_name = winreg.EnumKey(key, i)
             sub_key = winreg.OpenKey(key, sub_key_name)
             try:
-                current_app_name = winreg.QueryValueEx(
-                    sub_key, "DisplayName")[0]
+                current_app_name = winreg.QueryValueEx(sub_key, "DisplayName")[0]
                 if partial_match and app_name in current_app_name:
-                        location = winreg.QueryValueEx(sub_key, key_to_find)[0]
-                        return location
+                    location = winreg.QueryValueEx(sub_key, key_to_find)[0]
+                    return location
                 if app_name == current_app_name:
                     location = winreg.QueryValueEx(sub_key, key_to_find)[0]
                     return location
@@ -293,8 +316,9 @@ def find_program_in_windows(app_name: str, partial_match=False,
 def check_for_wayland() -> bool:
     if platform.system() != "Linux":
         return False
-    if os.getenv("XDG_SESSION_TYPE", "").lower() == "wayland" or \
-       os.getenv("WAYLAND_DISPLAY"):
+    if os.getenv("XDG_SESSION_TYPE", "").lower() == "wayland" or os.getenv(
+        "WAYLAND_DISPLAY"
+    ):
         Logger().debug("Found XDG_SESSION_TYPE==wayland or WAYLAND_DISPLAY")
         return True
     return False

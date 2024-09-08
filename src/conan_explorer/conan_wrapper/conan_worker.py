@@ -14,7 +14,8 @@ from .types import ConanOptions, ConanRef, ConanPkgRef, ConanSettings
 
 
 class ConanWorkerElement(TypedDict):
-    ref_pkg_id: str  # format in <ref>:<id>. Id is optional. If id is used options, settings and auto_isntall is ignored
+    # If id is used options, settings and auto_install is ignored
+    ref_pkg_id: str  # format in <ref>:<id>. Id is optional.
     options: ConanOptions  # conan options with key-value pairs
     settings: ConanSettings  # conan settings with key-value pairs
     profile: str  # alternative to settings
@@ -27,12 +28,14 @@ class ConanWorkerResultCallback(Protocol):
 
 
 class ConanWorker():
-    """ Sequential worker with a queue to execute conan install/version alternatives commands """
+    """
+    Sequential worker with a queue to execute conan install/version alternatives commands
+    """
 
     def __init__(self, conan_api: "ConanCommonUnifiedApi", settings: SettingsInterface):
         self._conan_api = conan_api
         self._conan_install_queue: Queue[Tuple[ConanWorkerElement,
-                                         Optional[ConanWorkerResultCallback]]] = Queue(maxsize=0)
+                                    Optional[ConanWorkerResultCallback]]] = Queue(maxsize=0)
         self._install_worker: Optional[Thread] = None
         self._shutdown_requested = False  # internal flag to cancel worker on shutdown
         self._settings = settings
@@ -50,7 +53,8 @@ class ConanWorker():
             if USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:
                 self._conan_install_queue.put((worker_element, info_callback))
 
-        # start getting versions info in a separate thread in a bundled way to get better performance
+        # start getting versions info in a separate thread in a bundled way 
+        # to get better performance
         self._start_install_worker()
 
     def put_ref_in_install_queue(self, conan_element: ConanWorkerElement, 
@@ -98,7 +102,7 @@ class ConanWorker():
                     else:
                         pkg_id, _ = self._conan_api.install_reference(conan_ref,
                             conan_settings, conan_options, conan_profile, update)
-            except Exception as e:
+            except Exception:
                 try:
                     self._conan_install_queue.task_done()
                 except ValueError:

@@ -58,12 +58,14 @@ class ConanInfoCache():
             return pkg_path
 
     def get_similar_pkg_refs(self, name: str, user: str):
-        """ Return cached info on all available conan refs from the same ref name and user. """
+        """ Return cached info on all available conan refs 
+        from the same ref name and user """
         return self.get_similar_remote_pkg_refs(name, user) + \
             self.get_similar_local_pkg_refs(name, user)
 
     def get_similar_remote_pkg_refs(self, name: str, user: str) -> List[ConanRef]:
-        """ Return cached info on remotely available conan refs from the same ref name and user. """
+        """ Return cached info on remotely available conan refs 
+        from the same ref name and user. """
         if not user:  # official pkgs have no user, substituted by _
             user = "_"
         refs: List[ConanRef] = []
@@ -71,7 +73,7 @@ class ConanInfoCache():
             if user == "*":  # find all refs with same name
                 name_pkgs = self._remote_packages.get(name, {})
                 for user in name_pkgs:
-                    for version_channel in self._remote_packages.get(name, {}).get(user, []):
+                    for version_channel in self._remote_packages.get(name,{}).get(user, []):
                         version, channel = version_channel.split("/")
                         refs.append(ConanRef(name, version, user, channel))
             else:
@@ -82,7 +84,8 @@ class ConanInfoCache():
         return refs
 
     def get_similar_local_pkg_refs(self, name: str, user: str) -> List[ConanRef]:
-        """ Return cached info on locally available conan refs from the same ref name and user. """
+        """ Return cached info on locally available conan refs 
+        from the same ref name and user. """
         refs: List[ConanRef] = []
         with self._access_lock:
             for ref in self._all_local_refs:
@@ -98,7 +101,7 @@ class ConanInfoCache():
         with self._access_lock:
             for name in self._remote_packages:
                 for user in self._remote_packages[name]:
-                    for version_channel in self._remote_packages.get(name, {}).get(user, []):
+                    for version_channel in self._remote_packages.get(name,{}).get(user, []):
                         version, channel = version_channel.split("/")
                         refs.append(
                             str(ConanRef(name, version, user, channel)))

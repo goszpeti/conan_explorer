@@ -3,12 +3,13 @@ Contains all basic constants used in the application.
 No imports from own modules allowed! This is done to resolve circular dependencies.
 """
 import os
-import shutil
 import platform
-from importlib.metadata import distribution, PackageNotFoundError
-from packaging.version import Version
+import shutil
+from importlib.metadata import PackageNotFoundError, distribution
 from pathlib import Path
 from typing import TypeVar
+
+from packaging.version import Version
 
 PathLike = TypeVar("PathLike", str, Path)
 
@@ -70,7 +71,8 @@ base_path = Path(__file__).absolute().parent
 asset_path = base_path / "assets"
 # to be used for all default paths of configuration files, which will be used 
 # for multiple versions (noninvasive storage, 1.X legacy will be moved)
-# TODO: Still use conan_app_launcher - move to conan_explorer later
+# TODO: Still use conan_app_launcher - move to conan_explorer later 
+# and move to separate function
 legacy_user_save_path = Path().home()
 user_save_path = Path(os.getenv("XDG_CONFIG_HOME", 
     str(legacy_user_save_path / ".config"))) / "conan_app_launcher" \

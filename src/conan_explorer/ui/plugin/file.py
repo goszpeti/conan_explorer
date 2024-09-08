@@ -1,52 +1,54 @@
 import configparser
-
-from pathlib import Path
 import uuid
+from pathlib import Path
 from typing import List, Union
-from conan_explorer import BUILT_IN_PLUGIN
 
 import conan_explorer.app as app
+from conan_explorer import BUILT_IN_PLUGIN
 from conan_explorer.app.logger import Logger
 from conan_explorer.app.system import str2bool
 from conan_explorer.settings import PLUGINS_SECTION_NAME
 from conan_explorer.ui.plugin.types import PluginDescription
 
-class PluginValidationException(Exception):
-    ...
+
+class PluginValidationException(Exception): ...
 
 
-class PluginFile():
-    """ 
+class PluginFile:
+    """
     Plugin file related methods.
     Format implemented as ini file.
     """
 
     @staticmethod
     def register(plugin_file_path: Union[Path, str]):
-        """ Register the given file into the application settings with a uuid. """
+        """Register the given file into the application settings with a uuid."""
         plugin_file_path = Path(plugin_file_path)
         # check, if path already registered
-        for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
-            settings_plugin_file_path = app.active_settings.get_string(
-                plugin_group_name)
+        for plugin_group_name in app.active_settings.get_settings_from_node(
+            PLUGINS_SECTION_NAME
+        ):
+            settings_plugin_file_path = app.active_settings.get_string(plugin_group_name)
             if Path(settings_plugin_file_path) == plugin_file_path:
                 return
-        app.active_settings.add(str(uuid.uuid1()), str(
-            plugin_file_path), PLUGINS_SECTION_NAME)
+        app.active_settings.add(
+            str(uuid.uuid1()), str(plugin_file_path), PLUGINS_SECTION_NAME
+        )
 
     @staticmethod
     def unregister(plugin_file_path: Union[Path, str]):
-        """ Unregister given plugin file from application settings """
+        """Unregister given plugin file from application settings"""
         plugin_file_path = Path(plugin_file_path)
-        for plugin_group_name in app.active_settings.get_settings_from_node(PLUGINS_SECTION_NAME):
-            settings_plugin_file_path = app.active_settings.get_string(
-                plugin_group_name)
+        for plugin_group_name in app.active_settings.get_settings_from_node(
+            PLUGINS_SECTION_NAME
+        ):
+            settings_plugin_file_path = app.active_settings.get_string(plugin_group_name)
             if Path(settings_plugin_file_path) == plugin_file_path:
                 app.active_settings.remove(plugin_group_name)
 
     @staticmethod
     def read(plugin_file_path: Union[Path, str]) -> List[PluginDescription]:
-        """ Read given plugin file and return list of contained plugin descriptions. """
+        """Read given plugin file and return list of contained plugin descriptions."""
         plugin_file_path = Path(plugin_file_path)
         if not plugin_file_path.is_file():
             Logger().error(f"Plugin file {plugin_file_path} does not exist.")
@@ -73,7 +75,7 @@ class PluginFile():
                 else:
                     icon_path = plugin_file_path.parent / icon_str
                     if not icon_path.is_file():
-                        raise PVE(f"icon {str(icon_path)} does not exist.") 
+                        raise PVE(f"icon {str(icon_path)} does not exist.")
                     icon = str(icon_path)
 
                 if not plugin_info.get("import_path"):
@@ -83,7 +85,7 @@ class PluginFile():
                     raise PVE(f"import_path {str(import_path)} does not exist.")
                 if import_path.is_dir():  # needs an __init__.py
                     init_py_path = import_path / "__init__.py"
-                    init_pyc_path = import_path / "__init__.pyc" # for precompiled
+                    init_pyc_path = import_path / "__init__.pyc"  # for precompiled
                     if not (init_py_path.exists() or init_pyc_path.exists()):
                         raise PVE(f"{str(init_py_path)} does not exist")
 
@@ -94,23 +96,35 @@ class PluginFile():
                 author = plugin_info.get("author", "Unknown")
                 side_menu = str2bool(plugin_info.get("side_menu", "False"))
                 conan_versions = plugin_info.get("conan_versions", "")
-                desc = PluginDescription(name, version, author, icon, str(import_path),
-                                         plugin_class, description, side_menu, conan_versions)
+                desc = PluginDescription(
+                    name,
+                    version,
+                    author,
+                    icon,
+                    str(import_path),
+                    plugin_class,
+                    description,
+                    side_menu,
+                    conan_versions,
+                )
                 plugins.append(desc)
             except Exception as e:
                 Logger().error(
-                    f"Can't read {section} plugin information from {plugin_file_path}: {str(e)}.")
+                    f"Can't read {section} plugin information from {plugin_file_path}: {str(e)}."
+                )
 
         return plugins
 
     @staticmethod
-    def write(plugin_file_path: Union[Path, str], plugin_descriptions: List[PluginDescription]):
-        """ Write plugin file to specified path with the given the plugin descripton """
+    def write(
+        plugin_file_path: Union[Path, str], plugin_descriptions: List[PluginDescription]
+    ):
+        """Write plugin file to specified path with the given the plugin descripton"""
         parser = configparser.ConfigParser()
         for i, description in enumerate(plugin_descriptions):
             section_name = "PluginDescription" + str(i)
             parser.add_section(section_name)
             for setting, value in description.__dict__.items():
                 parser[section_name][setting] = str(value)
-        with open(plugin_file_path, 'w', encoding="utf-8") as fd:
+        with open(plugin_file_path, "w", encoding="utf-8") as fd:
             parser.write(fd)

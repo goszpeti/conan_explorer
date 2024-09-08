@@ -1,17 +1,18 @@
 from pathlib import Path
 
+from jinja2 import Template
+from PySide6.QtGui import QColor, QFont, QFontDatabase, QPalette
+from PySide6.QtWidgets import QApplication
+
 import conan_explorer.app as app
 from conan_explorer import base_path
-from conan_explorer.app.system import is_windows_11
-from conan_explorer.settings import FONT_SIZE, GUI_MODE, GUI_MODE_LIGHT, GUI_MODE_DARK
 from conan_explorer.app.logger import Logger
+from conan_explorer.app.system import is_windows_11
+from conan_explorer.settings import FONT_SIZE, GUI_MODE, GUI_MODE_DARK, GUI_MODE_LIGHT
 
-from jinja2 import Template
-from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QFont, QFontDatabase, QColor, QPalette
 
 def activate_theme(qt_app: QApplication):
-    """ Apply the theme from the current settings and apply all related view options """
+    """Apply the theme from the current settings and apply all related view options"""
     dark_mode = get_gui_dark_mode()
     style_file = "light_style.qss.in"
     if dark_mode:
@@ -32,22 +33,33 @@ def activate_theme(qt_app: QApplication):
     else:
         qt_app.setPalette(QPalette(QColor("#FFFFFF")))
 
-    style_sheet = configure_theme(base_path / "ui" / style_file,
-            app.active_settings.get_int(FONT_SIZE), user_color, window_border_radius)
+    style_sheet = configure_theme(
+        base_path / "ui" / style_file,
+        app.active_settings.get_int(FONT_SIZE),
+        user_color,
+        window_border_radius,
+    )
 
     qt_app.setStyleSheet(style_sheet)
 
 
-def configure_theme(qss_template_path: Path, font_size_pt: int, user_color: str, window_border_radius: int) -> str:
-    """ Configure the given qss file with the set options and return it as a string """
+def configure_theme(
+    qss_template_path: Path, font_size_pt: int, user_color: str, window_border_radius: int
+) -> str:
+    """Configure the given qss file with the set options and return it as a string"""
 
     qss_template = None
     register_font("Noto Sans Mono", "NotoSansMono.ttf")
     register_font("Noto Sans", "NotoSans-Regular.ttf")
     with open(qss_template_path, "r") as fd:
         qss_template = Template(fd.read())
-    qss_content = qss_template.render(MAIN_FONT_SIZE=font_size_pt, USER_COLOR=user_color,
-                                      WINDOW_BORDER_RADIUS=window_border_radius, CONSOLE_FONT_FAMILY="Noto Sans Mono",  FONT_FAMILY="Noto Sans")
+    qss_content = qss_template.render(
+        MAIN_FONT_SIZE=font_size_pt,
+        USER_COLOR=user_color,
+        WINDOW_BORDER_RADIUS=window_border_radius,
+        CONSOLE_FONT_FAMILY="Noto Sans Mono",
+        FONT_FAMILY="Noto Sans",
+    )
     return qss_content
 
 
@@ -57,6 +69,7 @@ def get_gui_dark_mode() -> bool:
         Logger().warning("Theming: Can't read GUI mode, setting it to light.")
         return False
     return True if gui_mode == GUI_MODE_DARK else False
+
 
 def register_font(font_style_name: str, font_file_name: str) -> "QFont":
     # set up font

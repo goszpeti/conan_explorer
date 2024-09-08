@@ -6,9 +6,18 @@ from .main_window import BaseSignals
 from .fluent_window import FluentWindow
 from .plugin import PluginInterfaceV1, PluginFile, PluginDescription
 
+__all__ = [
+    "BaseSignals",
+    "FluentWindow",
+    "PluginInterfaceV1",
+    "PluginFile",
+    "PluginDescription",
+]
+
 
 def compile_ui_file_if_newer(ui_file: Path):
     from conan_explorer.app.logger import Logger
+
     py_ui_file = ui_file.parent / (ui_file.stem + "_ui.py")
     if py_ui_file.exists() and py_ui_file.stat().st_mtime > ui_file.stat().st_mtime:
         return
@@ -25,4 +34,5 @@ if DEBUG_LEVEL > 0:
             compile_ui_file_if_newer(ui_file)
         except Exception as e:
             from conan_explorer.app.logger import Logger
+
             Logger().warning(f"Can't convert {str(py_ui_file)}: {str(e)}")

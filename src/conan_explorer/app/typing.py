@@ -12,9 +12,9 @@ class SignatureMismatchException(Exception):
 
 class SignatureCheckMeta(type):
     def __new__(cls, name, base_classes, methods):
-        """ 
+        """
         For each method, check if any base class already defined a
-        method with that name. If so, make sure the signatures are the same. 
+        method with that name. If so, make sure the signatures are the same.
         """
         if DEBUG_LEVEL < 1:
             return type(name, base_classes, methods)
@@ -32,9 +32,11 @@ class SignatureCheckMeta(type):
                     base_argspec = inspect.getfullargspec(base_method)
                     method_argspec = inspect.getfullargspec(method)
                     if method_argspec != base_argspec:
-                        raise SignatureMismatchException(f"{str(method_name)}\n"
-                                                    f"Expected: {str(base_argspec)}\n"
-                                                    f"Actual: {str(method_argspec)}")
+                        raise SignatureMismatchException(
+                            f"{str(method_name)}\n"
+                            f"Expected: {str(base_argspec)}\n"
+                            f"Actual: {str(method_argspec)}"
+                        )
                 except AttributeError:
                     # method was not defined in base class, skip
                     continue

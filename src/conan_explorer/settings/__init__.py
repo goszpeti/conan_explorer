@@ -2,7 +2,7 @@
 """ Use constants in class, so they don't need to be separately accessed """
 
 from abc import abstractmethod
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from conan_explorer import PathLike
 

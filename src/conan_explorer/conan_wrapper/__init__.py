@@ -9,6 +9,9 @@ from .unified_api import ConanCommonUnifiedApi
 from .conan_cache import ConanInfoCache
 from .conan_worker import ConanWorker
 
+__all__ = ["conan_version", "Version", "ConanCommonUnifiedApi", "ConanInfoCache", 
+           "ConanWorker"]
+
 def ConanApiFactory() -> ConanCommonUnifiedApi:
     """ Isntantiate ConanApi in the correct version """
     if conan_version.major == 1:
