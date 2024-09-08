@@ -10,6 +10,7 @@ from conan_explorer.conan_wrapper.types import ConanRef
 
 from .. import QuestionWithItemListDialog
 
+StdButton = QDialogButtonBox.StandardButton
 
 class ConanRemoveDialog(QuestionWithItemListDialog):
 
@@ -17,7 +18,7 @@ class ConanRemoveDialog(QuestionWithItemListDialog):
                  conan_pkg_removed: Optional[SignalInstance] = None):
         super().__init__(parent)
         self.setWindowTitle("Remove Package(s)")
-        self._ui.question_label.setText("Are you sure you want to remove these packages?")
+        self.set_question_text("Are you sure you want to remove these packages?")
         self._conan_pkg_removed_sig = conan_pkg_removed
         for conan_ref, pkg_ids in conan_refs_with_pkg_ids.items():
             for pkg_id in pkg_ids:
@@ -27,22 +28,22 @@ class ConanRemoveDialog(QuestionWithItemListDialog):
                     text = f"{conan_ref}:{pkg_id}"
                 list_item = QListWidgetItem(text)
                 list_item.setCheckState(Qt.CheckState.Checked)
-                self._ui.package_list_widget.addItem(list_item)
+                self.item_list_widget.addItem(list_item)
 
-        self._ui.button_box.button(
-            QDialogButtonBox.StandardButton.Yes).clicked.connect(self.on_remove)
+        self.button_box.button(StdButton.Yes).clicked.connect(self.on_remove)
 
     def on_remove(self):
         """ Remove conan ref/pkg and emit a signal, if registered """
         self.loader = LoaderGui(self)
-        self.loader.load_for_blocking(self, self.remove, cancel_button=False, loading_text="Removing packages")
+        self.loader.load_for_blocking(self, self.remove, cancel_button=False, 
+                                      loading_text="Removing packages")
         self.loader.wait_for_finished()
 
     def remove(self):
         """ Remove the selected ref or pkg. Emit conan_pkg_removed global signal.
         To be called while loading dialog is active. """
-        for list_row in range(self._ui.package_list_widget.count()):
-            list_item = self._ui.package_list_widget.item(list_row)
+        for list_row in range(self.item_list_widget.count()):
+            list_item = self.item_list_widget.item(list_row)
             if list_item.checkState() != Qt.CheckState.Checked:
                 continue
             conan_ref_with_id = list_item.text()

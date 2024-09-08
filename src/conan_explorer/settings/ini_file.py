@@ -75,7 +75,7 @@ class IniSettings(SettingsInterface):
             self._logger.info('Settings: Creating settings ini-file')
             self.save()
         else:
-            self._logger.info(f'Settings: Using {self._ini_file_path}')
+            self._logger.info('Settings: Using %s', self._ini_file_path)
 
         self._read_ini()
 
@@ -238,8 +238,7 @@ class IniSettings(SettingsInterface):
         elif isinstance(default_value, int):
             value = int(section.get(name))
         if value is None:  # dict type, value will be taken as a string
-            self._logger.error(
-                f"Settings: Setting {name} to write is unknown", )
+            self._logger.error("Settings: Setting %s to write is unknown", name)
             return False
         if value == "" and default_value:
             value = default_value

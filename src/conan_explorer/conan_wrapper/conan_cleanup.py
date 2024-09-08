@@ -1,13 +1,11 @@
 from pathlib import Path
 import platform
-from typing import TYPE_CHECKING, Dict, List, Set
+from typing import Dict, List, Set
 
 import conan_explorer.app as app
 from conan_explorer import conan_version
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import ConanRef
-if TYPE_CHECKING:
-    from .conanV1 import ConanApi
 
 class ConanCleanup():
 
@@ -22,7 +20,7 @@ class ConanCleanup():
         remote_names = [r.name for r in remotes]
         for ref in app.conan_api.get_all_local_refs():
             # This will not updated to the unified API - only V1 relevant
-            ref_cache = app.conan_api._client_cache.package_layout(ref)
+            ref_cache = app.conan_api._client_cache.package_layout(ref) # type: ignore
             ref_remote = ""
             try:
                 ref_remote = ref_cache.load_metadata().recipe.remote # type: ignore
@@ -36,10 +34,10 @@ class ConanCleanup():
     
     def repair_invalid_remote_metadata(self, invalid_ref):
         """ Repair all references with invalid remotes """
-        # calling inspect with a correct remote repairs the metadata    
+        # calling inspect with a correct remote repairs the metadata
         for remote in app.conan_api.get_remotes():
             try:
-                app.conan_api._conan.inspect(invalid_ref, None, remote.name)
+                app.conan_api._conan.inspect(invalid_ref, None, remote.name)  # type: ignore
                 break
             except Exception:
                 continue
@@ -68,7 +66,8 @@ class ConanCleanup():
                     # old API of Conan
                     package_ids = ref_cache.packages_ids()  # type: ignore
                 except Exception as e:
-                    Logger().debug("Cannot check pkg id for %s: %s", str(conan_ref), str(e), exc_info=True)
+                    Logger().debug("Cannot check pkg id for %s: %s", str(conan_ref), 
+                                   str(e), exc_info=True)
             
             for pkg_id in package_ids:
                 short_path_dir = app.conan_api.get_package_folder(conan_ref, pkg_id)
