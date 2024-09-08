@@ -1,19 +1,22 @@
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import conan_explorer.app as app
+from conan_explorer.app.base_ui.loading import LoaderGui
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef
 from conan_explorer.app.system import (calc_paste_same_dir_name, open_in_file_manager,
-                                           copy_path_with_overwrite, delete_path, execute_cmd,  open_cmd_in_path, run_file)
+            copy_path_with_overwrite, delete_path, execute_cmd,  open_cmd_in_path, run_file)
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui.common import re_register_signal
+from conan_explorer.ui.dialogs import QuestionWithItemListDialog
 from conan_explorer.ui.views.app_grid import UiAppLinkConfig
 from conan_explorer.ui.views import AppGridView
 from PySide6.QtCore import (QMimeData, QModelIndex, QObject, QItemSelectionModel,
                             Qt,  QUrl, SignalInstance)
-from PySide6.QtWidgets import QApplication, QTextBrowser, QMessageBox, QTreeView
+from PySide6.QtWidgets import (QApplication, QTextBrowser, QMessageBox, QTreeView, QStyle, 
+                               QListWidgetItem)
 
 
 from .sel_model import PkgSelectionType
@@ -166,6 +169,7 @@ class PackageFileExplorerController(QObject):
         if reply != QMessageBox.StandardButton.Yes:
             return
         for path in selected_paths:
+            # TODO loading gui
             delete_path(Path(path))
 
     def on_files_copy(self) -> List[QUrl]:
@@ -233,19 +237,36 @@ class PackageFileExplorerController(QObject):
         elif not self._is_selected_file_item_expanded():
             dst_dir_path = dst_dir_path.parent if dst_dir_path.is_file() else dst_dir_path
 
-        cut = False
+        # all of them should be true
+        cut = True if data.property("action") == "cut" else False
+        files_paths: List[Tuple[Path, Path]] = []
+        overwrites: List[Path] = []
         for url in urls:
             # try to copy
             if not url.isLocalFile():
                 continue
             source_path = Path(url.toLocalFile())
-            new_path_str = os.path.join(dst_dir_path, url.fileName())
-            cut = True if data.property("action") == "cut" else False # all of them should be true
-            self.paste_path(source_path, Path(new_path_str), cut)
+            target_path = Path(os.path.join(dst_dir_path, url.fileName()))
+            files_paths.append((source_path, target_path))
+            if target_path.exists():
+                overwrites.append(target_path)
+                
+        # Show dialog which files should be overwritten
+        if overwrites:
+            non_overwrites_paths = self.show_overwrite_dialog(overwrites)
+            # remove selected_overwrites from files_paths
+            files_paths = list(filter(lambda files_path:
+                                      files_path[1] not in non_overwrites_paths,
+                                      files_paths
+            ))
+
+        loader = LoaderGui(None)
+        def paste_files(self):
+            for source_path, target_path in files_paths:
+                self.paste_path(source_path, target_path, cut)
+        loader.load(self._view, paste_files, (self,))
         self.cut_files_reset.emit()
         self._disable_cut_selection()
-        # if cut:  # restore disabled items
-        #     _disable_cut_selection
 
     def _disable_cut_selection(self):
         if self.sender() == self:
@@ -260,22 +281,32 @@ class PackageFileExplorerController(QObject):
             new_dst = calc_paste_same_dir_name(dst)
             copy_path_with_overwrite(src, new_dst)
         else:
-            if dst.exists():
-                msg = QMessageBox(parent=self._view)
-                msg.setWindowTitle("Overwrite file/folder")
-                msg.setText("Are you sure, you want to overwrite this file/folder?\t")
-                msg.setStandardButtons(QMessageBox.StandardButton.Yes |
-                                       QMessageBox.StandardButton.Cancel)
-                msg.setIcon(QMessageBox.Icon.Warning)
-                reply = msg.exec()
-                if reply == QMessageBox.StandardButton.Yes:
-                    copy_path_with_overwrite(src, dst)
-                else:
-                    return # early return to not delete path on cut and cancel
-            else:
-                copy_path_with_overwrite(src, dst)
+            copy_path_with_overwrite(src, dst)
             if cut:
                 delete_path(src)
+
+    def show_overwrite_dialog(self, overwrites: List[Path]):
+        non_overwrites = []
+        dialog = QuestionWithItemListDialog(self._view, 
+                                            QStyle.StandardPixmap.SP_MessageBoxWarning)
+        dialog.setWindowTitle("Overwrite file/folder")
+        dialog.set_question_text("Are you sure, you want to overwrite this file/folder?\t")
+        for path in overwrites:
+            list_item = QListWidgetItem(str(path))
+            list_item.setCheckState(Qt.CheckState.Checked)
+            dialog.item_list_widget.addItem(list_item)
+
+        reply = dialog.exec()
+        if reply == QMessageBox.StandardButton.Yes:
+            # get user DEselection
+            for list_row in range(dialog.item_list_widget.count()):
+                list_item = dialog.item_list_widget.item(list_row)
+                if list_item.checkState() != Qt.CheckState.Unchecked:
+                    continue
+                non_overwrites.append(Path(list_item.text()))
+            return non_overwrites
+        else:
+            return [] # early return to not delete path on cut and cancel
 
     def on_add_app_link_from_file(self):
         selected_paths = self.get_selected_pkg_paths()
@@ -333,7 +364,7 @@ class PackageFileExplorerController(QObject):
             self._view.selectionModel().select(sel_idx,
                                         QItemSelectionModel.SelectionFlag.ClearAndSelect)
         except Exception:
-            Logger().debug(f"Can't select file {file_to_select}", exc_info=True)
+            Logger().debug("Can't select file %s", file_to_select, exc_info=True)
             return QModelIndex()
         return sel_idx
 
