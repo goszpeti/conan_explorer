@@ -12,10 +12,14 @@ from .. import QuestionWithItemListDialog
 
 StdButton = QDialogButtonBox.StandardButton
 
-class ConanRemoveDialog(QuestionWithItemListDialog):
 
-    def __init__(self, parent: Optional[QWidget], conan_refs_with_pkg_ids: Dict[str, List[str]],
-                 conan_pkg_removed: Optional[SignalInstance] = None):
+class ConanRemoveDialog(QuestionWithItemListDialog):
+    def __init__(
+        self,
+        parent: Optional[QWidget],
+        conan_refs_with_pkg_ids: Dict[str, List[str]],
+        conan_pkg_removed: Optional[SignalInstance] = None,
+    ):
         super().__init__(parent)
         self.setWindowTitle("Remove Package(s)")
         self.set_question_text("Are you sure you want to remove these packages?")
@@ -33,15 +37,16 @@ class ConanRemoveDialog(QuestionWithItemListDialog):
         self.button_box.button(StdButton.Yes).clicked.connect(self.on_remove)
 
     def on_remove(self):
-        """ Remove conan ref/pkg and emit a signal, if registered """
+        """Remove conan ref/pkg and emit a signal, if registered"""
         self.loader = LoaderGui(self)
-        self.loader.load_for_blocking(self, self.remove, cancel_button=False, 
-                                      loading_text="Removing packages")
+        self.loader.load_for_blocking(
+            self, self.remove, cancel_button=False, loading_text="Removing packages"
+        )
         self.loader.wait_for_finished()
 
     def remove(self):
-        """ Remove the selected ref or pkg. Emit conan_pkg_removed global signal.
-        To be called while loading dialog is active. """
+        """Remove the selected ref or pkg. Emit conan_pkg_removed global signal.
+        To be called while loading dialog is active."""
         for list_row in range(self.item_list_widget.count()):
             list_item = self.item_list_widget.item(list_row)
             if list_item.checkState() != Qt.CheckState.Checked:
@@ -54,7 +59,7 @@ class ConanRemoveDialog(QuestionWithItemListDialog):
                 conan_ref = conan_ref_with_id
             try:
                 self.loader.loading_string_signal.emit(f"Removing {conan_ref} {pkg_id}")
-                # can handle multiple pkgs at once, but then we can't log info for the 
+                # can handle multiple pkgs at once, but then we can't log info for the
                 # progress bar
                 app.conan_api.remove_reference(ConanRef.loads(conan_ref), pkg_id)
             except Exception as e:

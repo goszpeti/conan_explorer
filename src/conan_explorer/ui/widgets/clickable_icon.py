@@ -1,13 +1,13 @@
-""" Contains the class for a clickable Qt label"""
+"""Contains the class for a clickable Qt label"""
 
 from pathlib import Path
 from typing import Optional
 
-from conan_explorer import ICON_SIZE, INVALID_PATH
-
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtWidgets import QPushButton, QGraphicsColorizeEffect, QGraphicsPixmapItem
 from PySide6.QtGui import QColor, QIcon, QPixmap
+from PySide6.QtWidgets import QGraphicsColorizeEffect, QGraphicsPixmapItem, QPushButton
+
+from conan_explorer import ICON_SIZE, INVALID_PATH
 
 
 class ClickableIcon(QPushButton):
@@ -50,8 +50,12 @@ class ClickableIcon(QPushButton):
             image_rect = pixmap.opaqueArea().boundingRect()
             top_left = image_rect.topLeft()
             # copy the smaller image (crop) - start from 0, this adds some margin
-            icon_pixmap = icon_pixmap.copy(0, 0, int(image_rect.width() + top_left.x()),
-                                           int(image_rect.height() + top_left.y()))
+            icon_pixmap = icon_pixmap.copy(
+                0,
+                0,
+                int(image_rect.width() + top_left.x()),
+                int(image_rect.height() + top_left.y()),
+            )
             self._ic = QIcon(icon_pixmap)
         else:
             self._ic = icon
@@ -67,6 +71,7 @@ class ClickableIcon(QPushButton):
         else:
             pixmap = QPixmap(str(self._image)).toImage()
             icon = QPixmap.fromImage(pixmap).scaled(
-                ICON_SIZE, ICON_SIZE, mode=Qt.TransformationMode.SmoothTransformation)
+                ICON_SIZE, ICON_SIZE, mode=Qt.TransformationMode.SmoothTransformation
+            )
             self._ic = QIcon(icon)
             self.setIcon(self._ic)

@@ -1,37 +1,50 @@
 import os
 from typing import TYPE_CHECKING
+
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QAction, QKeySequence, QResizeEvent, QShowEvent
+from PySide6.QtWidgets import (
+    QAbstractItemView,
+    QAbstractScrollArea,
+    QFrame,
+    QHBoxLayout,
+    QMenu,
+    QTabBar,
+    QTreeView,
+    QWidget,
+)
 from typing_extensions import override
 
 from conan_explorer import conan_version
-
 from conan_explorer.app.base_ui.loading import LoaderGui
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from conan_explorer.ui.common.model import re_register_signal
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 
 from .file_controller import PackageFileExplorerController
-from .sel_controller import PackageSelectionController, MultiPkgSelectionMode
+from .sel_controller import MultiPkgSelectionMode, PackageSelectionController
 from .sel_model import PkgSelectionType
-
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QKeySequence, QResizeEvent, QAction, QShowEvent
-from PySide6.QtWidgets import (QWidget, QTabBar, QTreeView, QHBoxLayout, QFrame, QMenu,
-                               QAbstractItemView, QAbstractScrollArea)
-
 
 if TYPE_CHECKING:
     from conan_explorer.ui.fluent_window import FluentWindow
     from conan_explorer.ui.main_window import BaseSignals
 
+
 class LocalConanPackageExplorer(PluginInterfaceV1):
     conan_pkg_selected = Signal(str, ConanPkg, PkgSelectionType)
     # cut works globally
-    cut_files_reset = Signal() # for when e.g. a copy is requested or a new cut
+    cut_files_reset = Signal()  # for when e.g. a copy is requested or a new cut
 
-    def __init__(self, parent: QWidget, plugin_description: PluginDescription,
-                 base_signals: "BaseSignals", page_widgets: "FluentWindow.PageStore"):
+    def __init__(
+        self,
+        parent: QWidget,
+        plugin_description: PluginDescription,
+        base_signals: "BaseSignals",
+        page_widgets: "FluentWindow.PageStore",
+    ):
         super().__init__(parent, plugin_description, base_signals, page_widgets)
         from .package_explorer_ui import Ui_Form
+
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)
@@ -41,11 +54,23 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         assert self._base_signals
         assert self._page_widgets
         self._pkg_sel_ctrl = PackageSelectionController(
-            self, self._ui.package_select_view, self._ui.package_filter_edit,
-            self.conan_pkg_selected, self._base_signals, self._page_widgets)
-        self._pkg_tabs_ctrl = [PackageFileExplorerController(
-            self, self._ui.package_file_view, self._ui.package_path_label,
-            self.cut_files_reset, self._base_signals, self._page_widgets)]
+            self,
+            self._ui.package_select_view,
+            self._ui.package_filter_edit,
+            self.conan_pkg_selected,
+            self._base_signals,
+            self._page_widgets,
+        )
+        self._pkg_tabs_ctrl = [
+            PackageFileExplorerController(
+                self,
+                self._ui.package_file_view,
+                self._ui.package_path_label,
+                self.cut_files_reset,
+                self._base_signals,
+                self._page_widgets,
+            )
+        ]
         self._file_cntx_menu = None
         self.set_themed_icon(self._ui.refresh_button, "icons/refresh.svg")
         self.set_themed_icon(self._ui.show_sizes_button, "icons/bar_chart.svg")
@@ -53,9 +78,12 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
         # connect pkg selection controller
         self._ui.package_select_view.header().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
-        self._ui.package_select_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self._ui.package_select_view.setContextMenuPolicy(
+            Qt.ContextMenuPolicy.CustomContextMenu
+        )
         self._ui.package_select_view.customContextMenuRequested.connect(
-            self.on_selection_context_menu_requested)
+            self.on_selection_context_menu_requested
+        )
         self._init_selection_context_menu()
         self._ui.refresh_button.clicked.connect(self._pkg_sel_ctrl.on_pkg_refresh_clicked)
         self._ui.show_sizes_button.clicked.connect(self.on_show_sizes)
@@ -64,12 +92,18 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
         self.conan_pkg_selected.connect(self.on_pkg_selection_change)
         self._ui.package_path_label.setText("<Package path>")
-        self._ui.package_path_label.setAlignment(Qt.AlignmentFlag.AlignRight)  # must be called after every text set
+        self._ui.package_path_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight
+        )  # must be called after every text set
         self._ui.package_tab_widget.currentChanged.connect(self.on_tab_index_changed)
         # removes X of new Tab button
-        self._ui.package_tab_widget.tabBar().setTabButton(1, QTabBar.ButtonPosition.RightSide, None) # type: ignore
+        self._ui.package_tab_widget.tabBar().setTabButton(
+            1, QTabBar.ButtonPosition.RightSide, None
+        )  # type: ignore
         self._ui.package_tab_widget.tabCloseRequested.connect(self.on_close_tab)
-        self._ui.package_tab_widget.tabBar().setSelectionBehaviorOnRemove(QTabBar.SelectionBehavior.SelectLeftTab)
+        self._ui.package_tab_widget.tabBar().setSelectionBehaviorOnRemove(
+            QTabBar.SelectionBehavior.SelectLeftTab
+        )
         self.updateGeometry()
         self.resize_filter()
 
@@ -83,7 +117,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
     @override
     def showEvent(self, a0: QShowEvent) -> None:
         # only update the first time
-        self._pkg_sel_ctrl.refresh_pkg_selection_view(force_update=False) 
+        self._pkg_sel_ctrl.refresh_pkg_selection_view(force_update=False)
         return super().showEvent(a0)
 
     @override
@@ -110,15 +144,19 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             tab = QWidget(self._ui.package_tab_widget)
             horizontal_layout = QHBoxLayout(tab)
             horizontal_layout.setSpacing(0)
-            horizontal_layout.setObjectName(u"horizontalLayout")
+            horizontal_layout.setObjectName("horizontalLayout")
             horizontal_layout.setContentsMargins(0, 0, 0, 0)
             tab.setLayout(horizontal_layout)
             file_explorer_view = QTreeView(tab)
             horizontal_layout.addWidget(file_explorer_view)
             file_explorer_view.setFrameShape(QFrame.Shape.NoFrame)
-            file_explorer_view.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
+            file_explorer_view.setSizeAdjustPolicy(
+                QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents
+            )
             file_explorer_view.setEditTriggers(
-                QAbstractItemView.EditTrigger.EditKeyPressed | QAbstractItemView.EditTrigger.SelectedClicked)
+                QAbstractItemView.EditTrigger.EditKeyPressed
+                | QAbstractItemView.EditTrigger.SelectedClicked
+            )
             file_explorer_view.setTabKeyNavigation(True)
             file_explorer_view.setDragDropMode(QAbstractItemView.DragDropMode.DragDrop)
             file_explorer_view.setDefaultDropAction(Qt.DropAction.TargetMoveAction)
@@ -128,11 +166,19 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             file_explorer_view.setSortingEnabled(True)
             file_explorer_view.setAnimated(True)
             file_explorer_view.setSelectionMode(
-                QAbstractItemView.SelectionMode.ExtendedSelection)
+                QAbstractItemView.SelectionMode.ExtendedSelection
+            )
 
-            self._pkg_tabs_ctrl.append(PackageFileExplorerController(
-                self, file_explorer_view, self._ui.package_path_label, self.cut_files_reset,
-                self._base_signals, self._page_widgets))
+            self._pkg_tabs_ctrl.append(
+                PackageFileExplorerController(
+                    self,
+                    file_explorer_view,
+                    self._ui.package_path_label,
+                    self.cut_files_reset,
+                    self._base_signals,
+                    self._page_widgets,
+                )
+            )
 
             self._ui.package_tab_widget.insertTab(index, tab, "New tab")
             self._ui.package_tab_widget.setCurrentIndex(index)
@@ -144,11 +190,12 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
     def on_pkg_selection_change(self, conan_ref: str, pkg: ConanPkg, type: PkgSelectionType):
         # init/update the context menu
         for ctrl in self._pkg_tabs_ctrl:
-            re_register_signal(ctrl._view.customContextMenuRequested,
-                               self.on_file_context_menu_requested)
+            re_register_signal(
+                ctrl._view.customContextMenuRequested, self.on_file_context_menu_requested
+            )
         self._init_pkg_file_context_menu()
         cfr = ConanRef.loads(conan_ref)
-        disp_ref = f"{cfr.name}/{cfr.version}" # only package/version
+        disp_ref = f"{cfr.name}/{cfr.version}"  # only package/version
         if type == PkgSelectionType.export:
             disp_ref += " (export)"
         idx = self._ui.package_tab_widget.currentIndex()
@@ -161,20 +208,18 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         if ctrl._model:
             self._ui.package_path_label.setText(ctrl._model.rootPath())
 
-
     # Selection view general buttons and functions
 
     def resize_filter(self):
         # resize filter splitter to roughly match file view splitter
         sizes = self._ui.splitter.sizes()
         offset = self._ui.package_filter_label.width() + self._ui.refresh_button.width()
-        self._ui.splitter_filter.setSizes(
-            [sizes[0] - offset - 5, sizes[1] + 5])
+        self._ui.splitter_filter.setSizes([sizes[0] - offset - 5, sizes[1] + 5])
 
     def resize_for_show_sizes(self):
         sizes = self._ui.splitter.sizes()
         sizes_sum = sum(sizes)
-        self._ui.splitter.setSizes([int(sizes_sum/2), int(sizes_sum/2)])
+        self._ui.splitter.setSizes([int(sizes_sum / 2), int(sizes_sum / 2)])
 
     def on_show_sizes(self):
         self._pkg_sel_ctrl.on_show_sizes()
@@ -188,7 +233,10 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             return
 
         loader = LoaderGui(self)
-        loader.load(self, self._ui.package_select_view.expandAll, )
+        loader.load(
+            self,
+            self._ui.package_select_view.expandAll,
+        )
         self.set_themed_icon(self._ui.expand_all_button, "icons/collapse_all.svg")
         self._is_expanded = True
 
@@ -205,17 +253,19 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.show_conanfile_action = QAction("Show conanfile", self)
         self.set_themed_icon(self.show_conanfile_action, "icons/file_preview.svg")
         self.select_cntx_menu.addAction(self.show_conanfile_action)
-        self.show_conanfile_action.triggered.connect(self._pkg_sel_ctrl.on_show_conanfile_requested)
+        self.show_conanfile_action.triggered.connect(
+            self._pkg_sel_ctrl.on_show_conanfile_requested
+        )
 
         self.install_ref_action = QAction("Re(install) package", self)
         self.set_themed_icon(self.install_ref_action, "icons/download_pkg.svg")
         self.select_cntx_menu.addAction(self.install_ref_action)
         self.install_ref_action.triggered.connect(self._pkg_sel_ctrl.on_install_ref_requested)
 
-        # always have show_build_info_action so access to it is possible in ConanV2 
+        # always have show_build_info_action so access to it is possible in ConanV2
         # even if it does nothing
         self.show_build_info_action = QAction("Show package build info", self)
-        if conan_version.major != 2: # Currently not doable
+        if conan_version.major != 2:  # Currently not doable
             self.set_themed_icon(self.show_build_info_action, "icons/download.svg")
             self.select_cntx_menu.addAction(self.show_build_info_action)
             self.show_build_info_action.triggered.connect(self._pkg_sel_ctrl.on_show_build_info)
@@ -223,8 +273,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self.diff_pkg_action = QAction("Compare packages", self)
         self.set_themed_icon(self.diff_pkg_action, "icons/difference.svg")
         self.select_cntx_menu.addAction(self.diff_pkg_action)
-        self.diff_pkg_action.triggered.connect(
-            self._pkg_sel_ctrl.on_diff_requested)
+        self.diff_pkg_action.triggered.connect(self._pkg_sel_ctrl.on_diff_requested)
 
         self.remove_ref_action = QAction("Remove package(s)", self)
         self.set_themed_icon(self.remove_ref_action, "icons/delete.svg")
@@ -253,10 +302,10 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         elif selection_mode == MultiPkgSelectionMode.single_editable:
             self._context_menu_set_all(False)
             self.copy_ref_action.setVisible(True)
-        else: # invalid
+        else:  # invalid
             self._context_menu_set_all(False)
-            self.copy_ref_action.setVisible(True) # always works
-            self.remove_ref_action.setVisible(True) # TODO
+            self.copy_ref_action.setVisible(True)  # always works
+            self.remove_ref_action.setVisible(True)  # TODO
 
         self.select_cntx_menu.exec(self._ui.package_select_view.mapToGlobal(position))
 
@@ -354,7 +403,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._add_link_action.triggered.connect(self.on_add_app_link_from_file)
 
     def on_file_context_menu_requested(self, position):
-        """ Disable some context menu items depending on context """
+        """Disable some context menu items depending on context"""
         if not self._file_cntx_menu:
             return
         self._add_link_action.setVisible(True)
@@ -363,7 +412,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
         tab_idx = self._ui.package_tab_widget.currentIndex()
         # Add Link only works on actual packages
-        pkg_type  = self._pkg_tabs_ctrl[tab_idx].get_conan_pkg_type()
+        pkg_type = self._pkg_tabs_ctrl[tab_idx].get_conan_pkg_type()
         if pkg_type == PkgSelectionType.export:
             self._add_link_action.setVisible(False)
         else:
@@ -371,7 +420,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
         # multiselect options
         paths = self._pkg_tabs_ctrl[tab_idx].get_selected_pkg_paths()
-        if len (paths) > 1: # no multiselect
+        if len(paths) > 1:  # no multiselect
             self._add_link_action.setVisible(False)
             self._edit_file_action.setVisible(False)
             self._rename_action.setVisible(False)
@@ -390,21 +439,29 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
 
     def select_local_package_from_ref(self, conan_ref: str):
         return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref)
-    
+
     def on_new_folder(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_new_folder(model_index)
+        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_new_folder(
+            model_index
+        )
 
     def on_open_file_in_file_manager(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_file_in_file_manager(model_index)
+        return self._pkg_tabs_ctrl[
+            self._ui.package_tab_widget.currentIndex()
+        ].on_open_file_in_file_manager(model_index)
 
     def on_copy_file_as_path(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_copy_file_as_path()
+        return self._pkg_tabs_ctrl[
+            self._ui.package_tab_widget.currentIndex()
+        ].on_copy_file_as_path()
 
     def on_edit_file(self, model_index):
         return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_edit_file()
 
     def on_open_terminal_in_dir(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_open_terminal_in_dir()
+        return self._pkg_tabs_ctrl[
+            self._ui.package_tab_widget.currentIndex()
+        ].on_open_terminal_in_dir()
 
     def on_item_rename(self, model_index):
         return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_item_rename()
@@ -422,4 +479,6 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_file_delete()
 
     def on_add_app_link_from_file(self, model_index):
-        return self._pkg_tabs_ctrl[self._ui.package_tab_widget.currentIndex()].on_add_app_link_from_file()
+        return self._pkg_tabs_ctrl[
+            self._ui.package_tab_widget.currentIndex()
+        ].on_add_app_link_from_file()

@@ -1,17 +1,24 @@
 from typing import List, Optional
 
-import conan_explorer.app as app  # using global module pattern
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QLayout, QScrollArea, QSizePolicy, QFrame,
-                             QSpacerItem, QTabWidget, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (
+    QFrame,
+    QLayout,
+    QScrollArea,
+    QSizePolicy,
+    QSpacerItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
-from .app_link import ListAppLink # ,GridAppLink
+from .app_link import ListAppLink  # ,GridAppLink
 from .dialogs import AppEditDialog
 from .model import UiAppLinkModel, UiTabModel
 
 
 class TabScrollAreaWidgets(QWidget):
-    def __init__(self, parent: Optional['QWidget'] = None):
+    def __init__(self, parent: Optional["QWidget"] = None):
         super().__init__(parent)
 
 
@@ -26,7 +33,8 @@ class TabList(QWidget):
         self._initialized = False
         self._columns_count = 0
         self._v_spacer = QSpacerItem(
-            20, 2000, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+            20, 2000, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding
+        )
 
     def load(self, offset=0):
         self.init_app_grid()
@@ -45,7 +53,7 @@ class TabList(QWidget):
         # spacer for compressing app links, when hiding cboxes
         self.tab_layout.addItem(self._v_spacer)
 
-    def open_app_link_add_dialog(self, new_model: Optional[UiAppLinkModel] =None):
+    def open_app_link_add_dialog(self, new_model: Optional[UiAppLinkModel] = None):
         if not new_model:
             new_model = UiAppLinkModel()
             new_model.parent = self.model
@@ -56,11 +64,11 @@ class TabList(QWidget):
             self.model.apps.append(new_model)
             self.model.save()
             self.redraw(force=True)
-            return new_model # for testing
+            return new_model  # for testing
         return None
 
     def remove_all_app_links(self, force=False):
-        """ 
+        """
         Clears all AppLinks.
         Can then be reloaded with load_apps_from_model.
         """
@@ -95,7 +103,9 @@ class TabList(QWidget):
 
         self.tab_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.tab_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.tab_scroll_area.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+        self.tab_scroll_area.setAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop
+        )
         self.tab_scroll_area.setWidgetResizable(True)
         # this holds all the app links, which are layouts
         self.tab_scroll_area_widgets = TabScrollAreaWidgets(self.tab_scroll_area)
@@ -104,8 +114,9 @@ class TabList(QWidget):
         self._initialized = True
 
         self.tab_layout = QVBoxLayout(self.tab_scroll_area_widgets)
-        size_policy = QSizePolicy(QSizePolicy.Policy.Preferred,
-                                    QSizePolicy.Policy.MinimumExpanding)
+        size_policy = QSizePolicy(
+            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.MinimumExpanding
+        )
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
 
@@ -119,9 +130,8 @@ class TabList(QWidget):
         self.layout().addWidget(self.tab_scroll_area)
 
     def add_app_link_to_tab(self, app_link: ListAppLink):
-        """ To be called from a child AppLink """
+        """To be called from a child AppLink"""
         self.app_links.append(app_link)
         self.model.apps.append(app_link.model)
-        self.tab_layout.insertWidget(-1, app_link) # -1 is end
+        self.tab_layout.insertWidget(-1, app_link)  # -1 is end
         self.tab_layout.update()
-

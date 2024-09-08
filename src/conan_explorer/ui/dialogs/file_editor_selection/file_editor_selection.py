@@ -1,15 +1,17 @@
-
 from pathlib import Path
+
 from PySide6.QtWidgets import QDialog, QFileDialog
+
 import conan_explorer.app as app
 from conan_explorer.app.logger import Logger
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 
-class FileEditorSelDialog(QDialog):
 
+class FileEditorSelDialog(QDialog):
     def __init__(self, parent) -> None:
         super().__init__(parent=parent)
         from .file_editor_selector_ui import Ui_Form
+
         self._ui = Ui_Form()
         self._ui.setupUi(self)
         self.setWindowTitle("File Editor Selection")
@@ -19,15 +21,17 @@ class FileEditorSelDialog(QDialog):
         self._ui.button_box.accepted.connect(self.on_save)
         self._ui.button_box.rejected.connect(self.close)
 
-
     def on_browse_clicked(self):
         current_file = Path(self._ui.file_edit.text())
         path_to_open = Path().home
         if current_file.exists():
             path_to_open = current_file.parent
-        dialog = QFileDialog(parent=self, caption="Select file for icon display",
-                             directory=str(path_to_open),
-                             filter="Executables (*)")
+        dialog = QFileDialog(
+            parent=self,
+            caption="Select file for icon display",
+            directory=str(path_to_open),
+            filter="Executables (*)",
+        )
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         if dialog.exec() == QFileDialog.DialogCode.Accepted:
             selected_path = Path(dialog.selectedFiles()[0])

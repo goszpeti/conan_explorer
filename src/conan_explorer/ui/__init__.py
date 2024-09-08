@@ -1,10 +1,11 @@
-from conan_explorer import DEBUG_LEVEL, INVALID_PATH
 import os
 from pathlib import Path
 
-from .main_window import BaseSignals
+from conan_explorer import DEBUG_LEVEL, INVALID_PATH
+
 from .fluent_window import FluentWindow
-from .plugin import PluginInterfaceV1, PluginFile, PluginDescription
+from .main_window import BaseSignals
+from .plugin import PluginDescription, PluginFile, PluginInterfaceV1
 
 __all__ = [
     "BaseSignals",
