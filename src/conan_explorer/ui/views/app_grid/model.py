@@ -2,27 +2,32 @@ import platform
 from pathlib import Path
 from typing import Callable, List, Optional, Union
 
-from PySide6.QtCore import (QAbstractListModel, QModelIndex, QObject, 
-                            QPersistentModelIndex, Qt)
+from PySide6.QtCore import QAbstractListModel, QModelIndex, QObject, QPersistentModelIndex, Qt
 from PySide6.QtGui import QIcon
 from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
-from conan_explorer import (INVALID_CONAN_REF, INVALID_PATH,
-                            USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
-                            USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH)
+from conan_explorer import (
+    INVALID_CONAN_REF,
+    INVALID_PATH,
+    USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
+    USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH,
+)
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
-from conan_explorer.ui.common import (extract_icon, get_asset_image_path, 
-                                      get_icon_from_image_file, get_themed_asset_icon)
+from conan_explorer.ui.common import (
+    extract_icon,
+    get_asset_image_path,
+    get_icon_from_image_file,
+    get_themed_asset_icon,
+)
 
 from .config import UiAppGridConfig, UiAppLinkConfig, UiTabConfig
 
 
 class UiAppGridModel(UiAppGridConfig, QObject):
-
     def __init__(self, *args, **kwargs):
         UiAppGridConfig.__init__(self, *args, **kwargs)
         QObject.__init__(self)
@@ -43,24 +48,28 @@ class UiAppGridModel(UiAppGridConfig, QObject):
         return self
 
     def get_all_conan_worker_elements(self) -> List[ConanWorkerElement]:
-        """ Helper function to generate a unique list of all ConanWorkerElements """
+        """Helper function to generate a unique list of all ConanWorkerElements"""
         conan_refs: List[ConanWorkerElement] = []
         for tab in self.tabs:
             for app_model in tab.apps:
-                conan_worker_element: ConanWorkerElement = \
-                    {"ref_pkg_id": app_model.conan_ref, "settings": {},
-                     "options": app_model.conan_options, "update": False,
-                     "profile": "", "auto_install": True}
+                conan_worker_element: ConanWorkerElement = {
+                    "ref_pkg_id": app_model.conan_ref,
+                    "settings": {},
+                    "options": app_model.conan_options,
+                    "update": False,
+                    "profile": "",
+                    "auto_install": True,
+                }
                 if conan_worker_element not in conan_refs:
                     conan_refs.append(conan_worker_element)
         return conan_refs
 
 
 class UiTabModel(UiTabConfig, QAbstractListModel):
-    """ Representation of a tab entry of the config schema """
+    """Representation of a tab entry of the config schema"""
 
     def __init__(self, *args, **kwargs):
-        """ Create an empty AppModel on init, so we can load it later"""
+        """Create an empty AppModel on init, so we can load it later"""
         UiTabConfig.__init__(self, *args, **kwargs)
         QAbstractListModel.__init__(self)
         self.parent: UiAppGridModel
@@ -111,28 +120,31 @@ class UiTabModel(UiTabConfig, QAbstractListModel):
         return super().removeRow(row, parent=parent)
 
     @override
-    def moveRow(self, source_parent: Union[QModelIndex, QPersistentModelIndex], 
-                 source_row: int,
-                 destination_parent: Union[QModelIndex, QPersistentModelIndex], 
-                 destination_child: int) -> bool:
-
+    def moveRow(
+        self,
+        source_parent: Union[QModelIndex, QPersistentModelIndex],
+        source_row: int,
+        destination_parent: Union[QModelIndex, QPersistentModelIndex],
+        destination_child: int,
+    ) -> bool:
         app_to_move = self.apps[source_row]
         self.apps.insert(destination_child, app_to_move)
         if source_row < destination_child:
             self.apps.pop(source_row)
         else:
-            self.apps.pop(source_row+1)
+            self.apps.pop(source_row + 1)
         return super().moveRow(source_parent, source_row, destination_parent, destination_child)
 
 
 class UiAppLinkModel(UiAppLinkConfig):
-    """ Representation of an app link entry of the config """
+    """Representation of an app link entry of the config"""
+
     INVALID_DESCR = "NA"
     OFFICIAL_RELEASE = "<official release>"  # to be used for "_" channel
     OFFICIAL_USER = "<official user>"  # to be used for "_" user
 
     def __init__(self, *args, **kwargs):
-        """ Create an empty AppModel on init, so we can load it later"""
+        """Create an empty AppModel on init, so we can load it later"""
         # internal repr for vars which have other types or need to be manipulated
         self.conan_options = {}
         self.package_folder = Path(INVALID_PATH)
@@ -142,20 +154,31 @@ class UiAppLinkModel(UiAppLinkConfig):
         self._available_refs: List[ConanRef] = []
         self._executable = ""
         self._icon: str = ""
-        self.lock_changes = True  # values do not emit events. used when multiple changes are needed
+        self.lock_changes = (
+            True  # values do not emit events. used when multiple changes are needed
+        )
         self.parent = UiTabModel("default")
         # can be registered from external function to notify when conan infos habe been fetched asynchronnaly
         self._update_cbk_func: Optional[Callable] = None
         # calls public functions, every internal variable needs to initialitzed
         super().__init__(*args, **kwargs)  # empty init
 
-    def load(self, config: UiAppLinkConfig, parent: UiTabModel, trigger_update=True) -> "UiAppLinkModel":
+    def load(
+        self, config: UiAppLinkConfig, parent: UiTabModel, trigger_update=True
+    ) -> "UiAppLinkModel":
         self.parent = parent
         if trigger_update:
             self.lock_changes = False  # don't trigger updates to worker - will be done in batch
 
-        super().__init__(config.name, config.executable, config.icon, config.is_console_application,
-                         config.args, config.conan_options, config.conan_ref)
+        super().__init__(
+            config.name,
+            config.executable,
+            config.icon,
+            config.is_console_application,
+            config.args,
+            config.conan_options,
+            config.conan_ref,
+        )
         self.lock_changes = False  # unlock for futher use now that everything is loaded
         return self
 
@@ -167,26 +190,39 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not app.conan_api:
             return
         # get all info from cache
-        self.set_available_packages(app.conan_api.info_cache.get_similar_pkg_refs(
-            self._conan_file_reference.name, user="*"))
+        self.set_available_packages(
+            app.conan_api.info_cache.get_similar_pkg_refs(
+                self._conan_file_reference.name, user="*"
+            )
+        )
         pkg_path = Path(INVALID_PATH)
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
-            pkg_path = app.conan_api.info_cache.get_local_package_path(self._conan_file_reference)
+            pkg_path = app.conan_api.info_cache.get_local_package_path(
+                self._conan_file_reference
+            )
             if not pkg_path.exists():
-                _, pkg_path = app.conan_api.get_best_matching_local_package_path(self._conan_file_reference, self.conan_options)
+                _, pkg_path = app.conan_api.get_best_matching_local_package_path(
+                    self._conan_file_reference, self.conan_options
+                )
             if self.conan_options:
-                pkg_info = app.conan_api.get_local_pkg_from_path(self._conan_file_reference, pkg_path)
+                pkg_info = app.conan_api.get_local_pkg_from_path(
+                    self._conan_file_reference, pkg_path
+                )
                 # user options should be a subset of full pkg options
                 if pkg_info:
                     if not self.conan_options.items() <= pkg_info.get("options", {}).items():
                         return
-        if not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL:  # last chance to get path
-            _, pkg_path = app.conan_api.get_path_or_auto_install(self._conan_file_reference, self.conan_options)
+        if (
+            not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
+        ):  # last chance to get path
+            _, pkg_path = app.conan_api.get_path_or_auto_install(
+                self._conan_file_reference, self.conan_options
+            )
 
         self.set_package_folder(pkg_path, quiet=True)
 
     def register_update_callback(self, update_func: Callable):
-        """ This callback can be used to update the gui after new conan info was received """
+        """This callback can be used to update the gui after new conan info was received"""
         self._update_cbk_func = update_func
 
     @property
@@ -195,7 +231,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @property
     def conan_ref(self) -> str:
-        """ The conan reference to be used for the link. """
+        """The conan reference to be used for the link."""
         return self._conan_ref
 
     @conan_ref.setter
@@ -206,9 +242,12 @@ class UiAppLinkModel(UiAppLinkConfig):
             Logger().debug("Invalid ref: %s", new_value)
             return
         # add conan ref to worker
-        if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
-                and self._conan_file_reference.version != self.INVALID_DESCR
-                and self._conan_file_reference.channel != self.INVALID_DESCR):  # don't put it for init
+        if (
+            self._conan_ref != new_value
+            and new_value != INVALID_CONAN_REF
+            and self._conan_file_reference.version != self.INVALID_DESCR
+            and self._conan_file_reference.channel != self.INVALID_DESCR
+        ):  # don't put it for init
             # invalidate old entries, which are dependent on the conan ref - only for none invalid refs
             self._conan_ref = new_value
             self.load_from_cache()
@@ -220,10 +259,17 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not app.active_settings.get_bool(AUTO_INSTALL_QUICKLAUNCH_REFS):
             return
         try:
-            conan_worker_element: ConanWorkerElement = {"ref_pkg_id": str(self._conan_ref), "settings": {}, "profile": "",
-                                                        "options": self.conan_options, "update": True, "auto_install": True}
+            conan_worker_element: ConanWorkerElement = {
+                "ref_pkg_id": str(self._conan_ref),
+                "settings": {},
+                "profile": "",
+                "options": self.conan_options,
+                "update": True,
+                "auto_install": True,
+            }
             app.conan_worker.put_ref_in_install_queue(
-                conan_worker_element, self.emit_conan_pkg_signal_callback)
+                conan_worker_element, self.emit_conan_pkg_signal_callback
+            )
         except Exception as e:
             # errors happen fairly often, keep going
             Logger().warning(f"Conan reference invalid {str(e)}")
@@ -235,7 +281,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @property
     def version(self) -> str:
-        """ Version, as specified in the conan ref """
+        """Version, as specified in the conan ref"""
         return str(self._conan_file_reference.version)
 
     @version.setter
@@ -245,19 +291,20 @@ class UiAppLinkModel(UiAppLinkConfig):
         if not self._conan_file_reference.user or not self._conan_file_reference.channel:
             user = "_"
             channel = "_"  # both must be unset if channel is official
-        self.conan_ref = str(ConanRef(self._conan_file_reference.name, 
-                                      new_value, user, channel))
+        self.conan_ref = str(
+            ConanRef(self._conan_file_reference.name, new_value, user, channel)
+        )
 
     @classmethod
     def convert_to_disp_channel(cls, channel: Optional[str]) -> str:
-        """ Substitute _ for official channel string """
+        """Substitute _ for official channel string"""
         if not channel or channel == "_":
             return cls.OFFICIAL_RELEASE
         return channel
 
     @property
     def user(self) -> str:
-        """ User, as specified in the conan ref """
+        """User, as specified in the conan ref"""
         return self._convert_to_disp_user(self._conan_file_reference.user)
 
     @user.setter
@@ -268,19 +315,25 @@ class UiAppLinkModel(UiAppLinkConfig):
             channel = "_"  # both must be unset if channel is official
         if not channel or channel == "_":
             channel = "NA"
-        self.conan_ref = str(ConanRef(self._conan_file_reference.name, 
-                            self._conan_file_reference.version, new_value, channel))
+        self.conan_ref = str(
+            ConanRef(
+                self._conan_file_reference.name,
+                self._conan_file_reference.version,
+                new_value,
+                channel,
+            )
+        )
 
     @classmethod
     def _convert_to_disp_user(cls, user: Optional[str]) -> str:
-        """ Substitute _ for official user string """
+        """Substitute _ for official user string"""
         if not user or user == "_":
             return cls.OFFICIAL_USER
         return user
 
     @property
     def channel(self) -> str:
-        """ Channel, as specified in the conan ref"""
+        """Channel, as specified in the conan ref"""
         return self.convert_to_disp_channel(self._conan_file_reference.channel)
 
     @channel.setter
@@ -290,12 +343,18 @@ class UiAppLinkModel(UiAppLinkConfig):
         if new_value == self.OFFICIAL_RELEASE or not new_value or user == self.OFFICIAL_USER:
             new_value = "_"
             user = "_"  # both must be unset if channel is official
-        self.conan_ref = str(ConanRef(
-            self._conan_file_reference.name, self._conan_file_reference.version, user, new_value))
+        self.conan_ref = str(
+            ConanRef(
+                self._conan_file_reference.name,
+                self._conan_file_reference.version,
+                user,
+                new_value,
+            )
+        )
 
     @property
     def versions(self) -> List[str]:
-        """ All versions (sorted) for the current name and user"""
+        """All versions (sorted) for the current name and user"""
         versions = set()
         for ref in self._available_refs:
             versions.add(ref.version)
@@ -305,7 +364,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @property
     def users(self) -> List[str]:
-        """ All users (sorted) for the current name and verion """
+        """All users (sorted) for the current name and verion"""
         users = set()
         # users.add(self.user)
         for ref in self._available_refs:
@@ -317,12 +376,14 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @property
     def channels(self) -> List[str]:
-        """ All channels (sorted) for the current version and user only """
+        """All channels (sorted) for the current version and user only"""
         channels = set()
         channels.add(self.channel)
         for ref in self._available_refs:
-            if ref.version == self.version and \
-               self._convert_to_disp_user(ref.user) == self.user:
+            if (
+                ref.version == self.version
+                and self._convert_to_disp_user(ref.user) == self.user
+            ):
                 channels.add(self.convert_to_disp_channel(ref.channel))
         # extra handling for only one existing channel found
         if len(channels) == 2 and self.INVALID_DESCR in channels:
@@ -333,7 +394,7 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     @property
     def executable(self) -> str:
-        """ The executable for this link to trigger """
+        """The executable for this link to trigger"""
         return self._executable
 
     @executable.setter
@@ -359,12 +420,19 @@ class UiAppLinkModel(UiAppLinkConfig):
                 for match in possible_matches:
                     # don't allow for ambiguity!
                     if match_found:
-                        Logger().error((f"Multiple candidates found for {exe_rel_path}" 
-                                        f"in {self.name}: e.g. {str(match.name)}"))
+                        Logger().error(
+                            (
+                                f"Multiple candidates found for {exe_rel_path}"
+                                f"in {self.name}: e.g. {str(match.name)}"
+                            )
+                        )
                     match_found = True
                 if not match_found:
-                    Logger().debug("Can't find file in package %s:\n\t%s", 
-                                   self.conan_ref, str(exe_rel_path))
+                    Logger().debug(
+                        "Can't find file in package %s:\n\t%s",
+                        self.conan_ref,
+                        str(exe_rel_path),
+                    )
                 else:
                     return match
             except NotImplementedError:
@@ -373,14 +441,15 @@ class UiAppLinkModel(UiAppLinkConfig):
         else:
             possible_match = self.package_folder / exe_rel_path
             if not possible_match.exists():
-                Logger().debug("Can't find file in package %s:\n\t%s", 
-                                   self.conan_ref, str(exe_rel_path))
+                Logger().debug(
+                    "Can't find file in package %s:\n\t%s", self.conan_ref, str(exe_rel_path)
+                )
                 return Path(INVALID_PATH)
             return possible_match
 
     @property
     def icon(self) -> str:
-        """ Internal representation of Icon to display on the link"""
+        """Internal representation of Icon to display on the link"""
         return self._icon
 
     @icon.setter
@@ -410,7 +479,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         return icon_path
 
     def get_icon(self) -> QIcon:
-        """ Get an icon based on icon path """
+        """Get an icon based on icon path"""
         icon = None
 
         if not self._icon:
@@ -422,8 +491,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if icon.isNull():
             icon = get_themed_asset_icon("icons/app.svg")
             if self._icon:  # user input given -> warning
-                Logger().debug(
-                    "Can't find icon %s for '%s'", self._icon, self.name)
+                Logger().debug("Can't find icon %s for '%s'", self._icon, self.name)
         return icon
 
     def set_package_folder(self, package_folder: Path, quiet=False):
@@ -436,12 +504,15 @@ class UiAppLinkModel(UiAppLinkConfig):
         if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
             if self.package_folder != package_folder:
                 app.conan_api.info_cache.update_local_package_path(
-                    self._conan_file_reference, package_folder)
+                    self._conan_file_reference, package_folder
+                )
         self.package_folder = package_folder
 
         if not quiet and not package_folder.exists():
-                Logger().info(f"Can't find a package for <b>{str(self.conan_ref)}" + 
-                            f"</b> and options {repr(self.conan_options)} <b>locally</b>")
+            Logger().info(
+                f"Can't find a package for <b>{str(self.conan_ref)}"
+                + f"</b> and options {repr(self.conan_options)} <b>locally</b>"
+            )
 
         # call registered update callback
         if self._update_cbk_func:

@@ -1,12 +1,11 @@
-
 from pprint import pformat
 from typing import Literal
-from typing_extensions import override
 
 from dictdiffer import diff
 from PySide6.QtCore import QRegularExpression, Qt
 from PySide6.QtGui import QAction, QColor, QShowEvent, QTextCharFormat
 from PySide6.QtWidgets import QDialog, QListWidgetItem, QMenu
+from typing_extensions import override
 
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import ConanPkg
@@ -15,13 +14,14 @@ from conan_explorer.ui.common.theming import ThemedWidget
 
 
 class ConfigDiffHighlighter(ConfigHighlighter):
-    """ Syntax highlighter to highlight the differences of a dict with different
+    """Syntax highlighter to highlight the differences of a dict with different
     background colors (modified, added, removed)"""
+
     DIFF_NEW_COLOR = QColor("green")
     DIFF_REMOVED_COLOR = QColor("red")
     DIFF_MODIFIED_COLOR = QColor("orange")
 
-    def __init__(self, parent, type: Literal['ini', 'yaml']) -> None:
+    def __init__(self, parent, type: Literal["ini", "yaml"]) -> None:
         super().__init__(parent, type)
         self._reset_diff()
 
@@ -58,11 +58,11 @@ class ConfigDiffHighlighter(ConfigHighlighter):
 
 
 class PkgDiffDialog(QDialog, ThemedWidget):
-
     def __init__(self, parent) -> None:
         QDialog.__init__(self, parent)
         ThemedWidget.__init__(self, None)
         from .diff_ui import Ui_Dialog
+
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
         # TODO test out dialog._ui.left_text_browser.AutoFormattingFlag
@@ -76,21 +76,23 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         self._item_data = []
 
         self._left_highlighter = ConfigDiffHighlighter(
-            self._ui.left_text_browser.document(), "yaml")
+            self._ui.left_text_browser.document(), "yaml"
+        )
         self._right_highlighter = ConfigDiffHighlighter(
-            self._ui.right_text_browser.document(), "yaml")
+            self._ui.right_text_browser.document(), "yaml"
+        )
         self._ui.button_box.accepted.connect(self.close)
 
-        self._ui.pkgs_list_widget.setContextMenuPolicy(
-            Qt.ContextMenuPolicy.CustomContextMenu)
+        self._ui.pkgs_list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._ui.pkgs_list_widget.customContextMenuRequested.connect(
-            self.on_pkg_context_menu_requested)
+            self.on_pkg_context_menu_requested
+        )
 
         # set up changed left element connection
         self._ui.pkgs_list_widget.currentItemChanged.connect(self._on_item_changed)
 
     def _init_pkg_context_menu(self):
-        """ Initalize context menu with all actions """
+        """Initalize context menu with all actions"""
         self.select_cntx_menu = QMenu()
 
         self.set_ref_item = QAction("Set as reference", self)
@@ -110,12 +112,12 @@ class PkgDiffDialog(QDialog, ThemedWidget):
     # public methods
 
     def add_diff_item(self, content: ConanPkg):
-        """" """
+        """ " """
         self._item_data.append(content)
 
     def update_diff(self):
-        """ Resets the syntax highlighting, adds the different category items
-        to the SyntaxHighlighter and then redraws them """
+        """Resets the syntax highlighting, adds the different category items
+        to the SyntaxHighlighter and then redraws them"""
         try:
             # reset diffs
             self._left_highlighter._reset_diff()
@@ -139,19 +141,15 @@ class PkgDiffDialog(QDialog, ThemedWidget):
                         key = str(detail_diff[0])
                         value_right = str(detail_diff[1])
                         value_left = "INVALID"
-                        self._left_highlighter.added_diffs.append(
-                            f"({key}: {value_left})")
-                        self._right_highlighter.added_diffs.append(
-                            f"({key}: {value_right})")
+                        self._left_highlighter.added_diffs.append(f"({key}: {value_left})")
+                        self._right_highlighter.added_diffs.append(f"({key}: {value_right})")
                 elif diff_mode == "remove":
                     for detail_diff in pkg_diff[2]:
                         key = str(detail_diff[0])
                         value_left = str(detail_diff[1])
                         value_right = "INVALID"
-                        self._left_highlighter.removed_diffs.append(
-                            f"({key}: {value_left})")
-                        self._right_highlighter.removed_diffs.append(
-                            f"({key}: {value_right})")
+                        self._left_highlighter.removed_diffs.append(f"({key}: {value_left})")
+                        self._right_highlighter.removed_diffs.append(f"({key}: {value_right})")
                 self._left_highlighter.modified_diffs.append(f"({key}: {value_left})")
                 self._right_highlighter.modified_diffs.append(f"({key}: {value_right})")
             self._left_highlighter.rehighlight()
@@ -162,7 +160,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
     # internals
 
     def _on_item_changed(self, item: QListWidgetItem):
-        """ Set right content, when selection changes """
+        """Set right content, when selection changes"""
         if not item:
             return
         sel_item_id = item.data(0)
@@ -178,7 +176,7 @@ class PkgDiffDialog(QDialog, ThemedWidget):
                 return
 
     def _filter_display_content(self, content: ConanPkg):
-        """ Only allow the following keys in the view"""
+        """Only allow the following keys in the view"""
         new_content = {}
         new_content["settings"] = content.get("settings")
         new_content["options"] = content.get("options")
@@ -188,17 +186,19 @@ class PkgDiffDialog(QDialog, ThemedWidget):
     def _set_left_content(self, content):
         self._left_content = self._filter_display_content(content)
         pkg_info = pformat(self._left_content).translate(
-            {ord("{"): None, ord("}"): None, ord("'"): None})
+            {ord("{"): None, ord("}"): None, ord("'"): None}
+        )
         self._ui.left_text_browser.setText(pkg_info)
 
     def _set_right_content(self, content):
         self._right_content = self._filter_display_content(content)
         pkg_info = pformat(self._right_content).translate(
-            {ord("{"): None, ord("}"): None, ord("'"): None})
+            {ord("{"): None, ord("}"): None, ord("'"): None}
+        )
         self._ui.right_text_browser.setText(pkg_info)
 
     def _set_ref_item(self):
-        """ Change the reference (*, left content) """
+        """Change the reference (*, left content)"""
         items = self._ui.pkgs_list_widget.selectedItems()
         if len(items) != 1:
             return
@@ -230,11 +230,10 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         # select 2nd item so we see a diff per default
         self._ui.pkgs_list_widget.setCurrentRow(1)
 
-
     def _set_diff_list_prios(self):
-        """ Prioritize the list elements depending on the similarity of the original package
-            Supports the most common settings.
-            No option support yet.
+        """Prioritize the list elements depending on the similarity of the original package
+        Supports the most common settings.
+        No option support yet.
         """
         ref = self._item_data[0]
         ref["prio"] = -1
@@ -243,24 +242,24 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         for i in range(1, item_data_len):
             content = self._item_data[i]
             pkg_diffs = list(diff(ref, content))
-            pkg_arch_diffs = list(
-                filter(lambda diff: diff[1] == "settings.arch", pkg_diffs))
+            pkg_arch_diffs = list(filter(lambda diff: diff[1] == "settings.arch", pkg_diffs))
             content["prio"] = 5
             if pkg_arch_diffs:
                 content["prio"] = 4
                 continue
-            pkg_os_diffs = list(
-                filter(lambda diff: diff[1] == "settings.os", pkg_diffs))
+            pkg_os_diffs = list(filter(lambda diff: diff[1] == "settings.os", pkg_diffs))
             if pkg_os_diffs:
                 content["prio"] = 3
                 continue
             pkg_compiler_diffs = list(
-                filter(lambda diff: diff[1] == "settings.compiler", pkg_diffs))
+                filter(lambda diff: diff[1] == "settings.compiler", pkg_diffs)
+            )
             if pkg_compiler_diffs:
                 content["prio"] = 2
                 continue
             pkg_compiler_version_diffs = list(
-                filter(lambda diff: diff[1] == ['settings', 'compiler.version'], pkg_diffs))
+                filter(lambda diff: diff[1] == ["settings", "compiler.version"], pkg_diffs)
+            )
             if pkg_compiler_version_diffs:
                 content["prio"] = 1
                 continue

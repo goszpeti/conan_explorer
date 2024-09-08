@@ -10,8 +10,9 @@ from conan_explorer.ui.common.model import QAF
 
 
 class CalFileSystemModel(FileSystemModel):
-
-    def __init__(self, h_align=QAF.AlignLeft | QAF.AlignVCenter, v_align=QAF.AlignVCenter, parent=None):
+    def __init__(
+        self, h_align=QAF.AlignLeft | QAF.AlignVCenter, v_align=QAF.AlignVCenter, parent=None
+    ):
         super().__init__(h_align, v_align, parent)
         self._disabled_rows: "set[int]" = set()
 
@@ -19,7 +20,7 @@ class CalFileSystemModel(FileSystemModel):
     def data(self, index: QModelIndex, role: Qt.ItemDataRole):
         if role == Qt.ItemDataRole.FontRole:
             if self._row_is_disabled(index):
-                font = QFont() 
+                font = QFont()
                 font.setItalic(True)
                 return font
         if role == Qt.ItemDataRole.ForegroundRole:
@@ -35,7 +36,7 @@ class CalFileSystemModel(FileSystemModel):
 
     def add_disabled_items(self, item_paths: List[str]):
         for item_path in item_paths:
-             self._disabled_rows.add(self.index(Path(item_path).as_posix(), 0).row())
+            self._disabled_rows.add(self.index(Path(item_path).as_posix(), 0).row())
 
     def clear_all_disabled_items(self):
         self._disabled_rows = set()
@@ -45,4 +46,4 @@ class CalFileSystemModel(FileSystemModel):
             disabled_item = self.index(Path(item_path).as_posix(), 0).row()
             self._disabled_rows.remove(disabled_item)
         except Exception:
-            pass # element not found
+            pass  # element not found

@@ -2,14 +2,15 @@
 On catching an uncaught execution show a dialog with a link to post an issue,
 with prefilled text and stacktrace.
 """
+
 import platform
 import traceback
 from types import TracebackType
 from typing import Optional
 
-from conan_explorer import REPO_URL, __version__
 from PySide6.QtWidgets import QStyle
 
+from conan_explorer import REPO_URL, __version__
 
 bug_dialog_text = f"""
 **Describe the bug**
@@ -37,6 +38,7 @@ Add any other context about the problem here.
 
 def show_bug_reporting_dialog(excvalue: Optional[BaseException], tb: "TracebackType | None"):
     import urllib.parse  # late import hopefully we don't need this
+
     error_text = f"{str(excvalue)}\n" + "\n".join(traceback.format_tb(tb, limit=None))
     title = urllib.parse.quote("Application Crash on <>")
     body = urllib.parse.quote(f"{bug_dialog_text}\n**Stacktrace**:\n" + error_text)
@@ -48,7 +50,8 @@ def show_bug_reporting_dialog(excvalue: Optional[BaseException], tb: "TracebackT
         <span style=" text-decoration: underline color:  # 0000ff;" \
         >new github issue</span></a> and describe, how the crash occured!'
 
-    from .crash_ui import Ui_Dialog, QDialog
+    from .crash_ui import QDialog, Ui_Dialog
+
     dialog = QDialog()
     dialog_ui = Ui_Dialog()
     dialog_ui.setupUi(dialog)
