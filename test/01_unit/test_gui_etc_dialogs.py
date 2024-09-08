@@ -371,12 +371,12 @@ def test_conan_remove_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
     assert found_pkg.get("id", "")
 
     # check unselect reference does not install
-    dialog._ui.package_list_widget.item(0).setCheckState(QtCore.Qt.CheckState.Unchecked)
-    dialog._ui.button_box.button(SB.Yes).clicked.emit()
+    dialog.item_list_widget.item(0).setCheckState(QtCore.Qt.CheckState.Unchecked)
+    dialog.button_box.button(SB.Yes).clicked.emit()
 
     found_pkg = app.conan_api.find_best_matching_local_package(cfr)
     assert found_pkg.get("id", "")
-    dialog._ui.package_list_widget.item(0).setCheckState(QtCore.Qt.CheckState.Checked)
+    dialog.item_list_widget.item(0).setCheckState(QtCore.Qt.CheckState.Checked)
 
     # check without pkg id
     dialog._ui.button_box.button(SB.Yes).clicked.emit()
