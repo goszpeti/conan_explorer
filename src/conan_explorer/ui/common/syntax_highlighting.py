@@ -1,12 +1,14 @@
-from typing import Union, Literal
-import conan_explorer.app as app
+from typing import Literal, Union
+
 from PySide6.QtCore import QRegularExpression
-from PySide6.QtGui import QSyntaxHighlighter, QTextCharFormat, QFont, QColor
+from PySide6.QtGui import QColor, QFont, QSyntaxHighlighter, QTextCharFormat
 
-
+import conan_explorer.app as app
 from conan_explorer.settings import GUI_MODE, GUI_MODE_DARK
+
+
 class ConfigHighlighter(QSyntaxHighlighter):
-    """ 
+    """
     Syntax highlighting for Conan Cinfig files: ini and yaml.
     Support dark and light mode.
     """
@@ -18,7 +20,7 @@ class ConfigHighlighter(QSyntaxHighlighter):
             self.key_color = "#9BDCFE"
             self.value_color = "#CE9178"
             self.section_color = "#50C9B1"
-        else: 
+        else:
             self.section_color = "#257F99"
             self.key_color = "#001EFD"
             self.value_color = "#AC1613"
@@ -31,7 +33,7 @@ class ConfigHighlighter(QSyntaxHighlighter):
             self._value_regex = r"(?<=\=)(.*?)$"
         elif type == "yaml":
             self._separator = ":"
-            self._key_regex ="(.*?)(?=:)"
+            self._key_regex = "(.*?)(?=:)"
             self._value_regex = "(?<=:)(.*?)$"
 
     def highlightBlock(self, text: str):
@@ -55,8 +57,7 @@ class ConfigHighlighter(QSyntaxHighlighter):
             i = expression.globalMatch(text)
             while i.hasNext():
                 match = i.next()
-                self.setFormat(match.capturedStart(), 
-                               match.capturedLength(), section_format)
+                self.setFormat(match.capturedStart(), match.capturedLength(), section_format)
         # key-values
         key_format = QTextCharFormat()
         key_format.setForeground(QColor(self.key_color))
@@ -71,5 +72,4 @@ class ConfigHighlighter(QSyntaxHighlighter):
         i = expression.globalMatch(text)
         while i.hasNext():
             match = i.next()
-            self.setFormat(match.capturedStart(), 
-                           match.capturedLength(), comment_format)
+            self.setFormat(match.capturedStart(), match.capturedLength(), comment_format)

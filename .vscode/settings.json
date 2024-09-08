@@ -4,7 +4,7 @@
     },
     "editor.formatOnPaste": true,
     "git.autofetch": true,
-    "python.analysis.typeCheckingMode": "standard",
+    "python.analysis.typeCheckingMode": "basic",
     "python.testing.pytestEnabled": true,
     "python.testing.pytestArgs": [
         "-v",

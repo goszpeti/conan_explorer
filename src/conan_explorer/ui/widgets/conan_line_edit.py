@@ -12,7 +12,8 @@ from conan_explorer.ui.common.theming import get_gui_dark_mode
 
 
 class ConanRefLineEdit(QLineEdit):
-    """ Adds completions for Conan references and a validator. """
+    """Adds completions for Conan references and a validator."""
+
     completion_finished = Signal()
     MINIMUM_CHARS_FOR_QUERY = 6
     INVALID_COLOR = "LightCoral"
@@ -29,7 +30,7 @@ class ConanRefLineEdit(QLineEdit):
         completer.setModelSorting(QCompleter.ModelSorting.CaseInsensitivelySortedModel)
         completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
 
-        self._first_show = True # don't call completer on first show
+        self._first_show = True  # don't call completer on first show
         self._completion_thread = None
         self._loading_cbk = None
         completer_popup = QListView(self)
@@ -45,7 +46,7 @@ class ConanRefLineEdit(QLineEdit):
     def setEnabled(self, enabled: bool):
         # apply grey color to text, when disabled manually
         if enabled:
-            self.setStyleSheet("") # remove grey color
+            self.setStyleSheet("")  # remove grey color
         else:
             self.setStyleSheet("color: grey;")
         super().setEnabled(enabled)
@@ -76,7 +77,7 @@ class ConanRefLineEdit(QLineEdit):
         self.search_query(text)
 
     def validate(self, conan_ref: str):
-        """ Validate ConanRef or PackageReference. Empty text is invalid. """
+        """Validate ConanRef or PackageReference. Empty text is invalid."""
         if not self.validator_enabled:
             return
         if not conan_ref:
@@ -103,16 +104,31 @@ class ConanRefLineEdit(QLineEdit):
     def search_query(self, conan_ref: str):
         if len(conan_ref) < self.MINIMUM_CHARS_FOR_QUERY:  # skip searching for such broad terms
             return
-        # start a query for all similar packages with conan search by starting a new thread for it
-        if self._completion_thread and self._completion_thread.is_alive():  # one query at a time
+        # start a query for all similar packages with conan search by starting a new thread
+        if (
+            self._completion_thread and self._completion_thread.is_alive()
+        ):  # one query at a time
             return
-        self._completion_thread = Thread(target=self.load_completion, args=[conan_ref, ])
+        self._completion_thread = Thread(
+            target=self.load_completion,
+            args=[
+                conan_ref,
+            ],
+        )
         self._completion_thread.start()
         if self._loading_cbk:
             self._loading_cbk()
 
     def load_completion(self, text: str):
-        if any([entry.startswith(text) for entry in app.conan_api.info_cache.get_all_remote_refs()]) or self.is_valid:
+        if (
+            any(
+                [
+                    entry.startswith(text)
+                    for entry in app.conan_api.info_cache.get_all_remote_refs()
+                ]
+            )
+            or self.is_valid
+        ):
             return
         recipes = app.conan_api.search_recipes_in_remotes(f"{text}*")  # can take very long time
         if app.conan_api:  # program can shut down and conan_api destroyed

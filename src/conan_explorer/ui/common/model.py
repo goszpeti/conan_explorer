@@ -1,17 +1,21 @@
-from typing import TYPE_CHECKING, Callable, List, Optional
-from typing_extensions import override
+from typing import Callable, List, Optional, Union
 
-from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, SignalInstance
+from PySide6.QtCore import (
+    QAbstractItemModel,
+    QModelIndex,
+    QPersistentModelIndex,
+    Qt,
+    SignalInstance,
+)
 from PySide6.QtWidgets import QFileSystemModel
+from typing_extensions import override
 
 from conan_explorer.app.logger import Logger
 
 QAF = Qt.AlignmentFlag
 QORI = Qt.Orientation
 QIDR = Qt.ItemDataRole
-
-if TYPE_CHECKING:
-    from typing import Self
+QINDEXLIKE = Union[QModelIndex, QPersistentModelIndex]
 
 
 def re_register_signal(signal: SignalInstance, slot: Callable):
@@ -24,15 +28,16 @@ def re_register_signal(signal: SignalInstance, slot: Callable):
 
 
 class FileSystemModel(QFileSystemModel):
-    """ This fixes an issue with the header not being centered vertically """
+    """This fixes an issue with the header not being centered vertically"""
 
-    def __init__(self, h_align=QAF.AlignLeft | QAF.AlignVCenter,
-                 v_align=QAF.AlignVCenter, parent=None):
+    def __init__(
+        self, h_align=QAF.AlignLeft | QAF.AlignVCenter, v_align=QAF.AlignVCenter, parent=None
+    ):
         super().__init__(parent)
         self.alignments = {QORI.Horizontal: h_align, QORI.Vertical: v_align}
 
     @override
-    def headerData(self, section, orientation, role):
+    def headerData(self, section, orientation, role=0):
         if role == QIDR.TextAlignmentRole:
             return self.alignments[orientation]
         elif role == QIDR.DecorationRole:
@@ -41,16 +46,18 @@ class FileSystemModel(QFileSystemModel):
             return QFileSystemModel.headerData(self, section, orientation, role)
 
 
-class TreeModelItem(object):
+class TreeModelItem:
     """
     Represents a tree item for a model view with lazy loading.
     Implemented like the default QT example.
     """
 
-    def __init__(self, data: List[str], parent: Optional["TreeModelItem"] = None, lazy_loading=False):
+    def __init__(
+        self, data: List[str], parent: Optional["TreeModelItem"] = None, lazy_loading=False
+    ):
         self.parent_item = parent
         self.item_data = data
-        self.child_items: List["Self"] = []
+        self.child_items = []
         self.is_loaded = not lazy_loading
 
     def append_child(self, item):
@@ -89,8 +96,9 @@ class TreeModelItem(object):
         self.child_items = []
         self.is_loaded = True
 
+
 class TreeModel(QAbstractItemModel):
-    """ Qt tree model to be used with TreeModelItem.
+    """Qt tree model to be used with TreeModelItem.
     Supports lazy loading, if TreeModelItem enables it."""
 
     def __init__(self, checkable=False, *args, **kwargs):
@@ -117,14 +125,14 @@ class TreeModel(QAbstractItemModel):
         self.endRemoveRows()
 
     @override
-    def columnCount(self, parent):
+    def columnCount(self, parent=None):
         if parent.isValid():
             return parent.internalPointer().column_count()  # type: ignore
         else:
             return self.root_item.column_count()
 
     @override
-    def index(self, row, column, parent):
+    def index(self, row, column, parent=None):
         if not self.hasIndex(row, column, parent):
             return QModelIndex()
 
@@ -140,11 +148,11 @@ class TreeModel(QAbstractItemModel):
             return QModelIndex()
 
     @override
-    def data(self, index, role):
+    def data(self, index, role=0):
         raise NotImplementedError
 
     @override
-    def rowCount(self, parent):
+    def rowCount(self, parent=None):
         if parent.column() > 0:
             return 0
 
@@ -165,11 +173,11 @@ class TreeModel(QAbstractItemModel):
         return flags
 
     @override
-    def parent(self, index):
-        if not index.isValid():
+    def parent(self, child: QINDEXLIKE):  # type: ignore
+        if not child.isValid():
             return QModelIndex()
 
-        child_item = index.internalPointer()
+        child_item = child.internalPointer()
         parent_item = child_item.parent()
 
         if parent_item == self.root_item:
@@ -178,21 +186,21 @@ class TreeModel(QAbstractItemModel):
         return self.createIndex(parent_item.row(), 0, parent_item)
 
     @override
-    def headerData(self, section, orientation, role):
+    def headerData(self, section, orientation, role=0):
         if orientation == Qt.Orientation.Horizontal and role == QIDR.DisplayRole:
             return self.root_item.data(section)
         return None
 
     @override
-    def canFetchMore(self, index):
-        if not index.isValid():
+    def canFetchMore(self, parent):
+        if not parent.isValid():
             return False
-        item = index.internalPointer()
+        item = parent.internalPointer()
         return not item.is_loaded  # enabled, if lazy loading is enabled
 
     @override
-    def fetchMore(self, index):
-        item = index.internalPointer()
+    def fetchMore(self, parent):
+        item: TreeModelItem = parent.internalPointer()
         item.load_children()
 
     def get_index_from_item(self, item: TreeModelItem) -> QModelIndex:

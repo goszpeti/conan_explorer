@@ -1,24 +1,37 @@
 from datetime import datetime, timedelta
 
-from PySide6.QtCore import (Property, QEasingCurve, QPoint,  # type: ignore
-                            QPointF, QPropertyAnimation, QRectF,
-                            QSequentialAnimationGroup, Qt, Slot)
+from PySide6.QtCore import (  # type: ignore
+    Property,
+    QEasingCurve,
+    QPoint,
+    QPointF,
+    QPropertyAnimation,
+    QRectF,
+    QSequentialAnimationGroup,
+    Qt,
+    Slot,
+)
 from PySide6.QtGui import QBrush, QColor, QPainter, QPaintEvent, QPen
 from PySide6.QtWidgets import QApplication, QCheckBox
 from typing_extensions import override
 
 
 class AnimatedToggle(QCheckBox):
-
     ANIM_DURATION_MS = 400
     FIXED_WIDTH = 60
     FIXED_HEIGHT = 50
     THUMB_REL_SIZE = 0.15
     TRACK_REL_SIZE = 0.4
 
-    def __init__(self, parent=None, bar_color=Qt.GlobalColor.gray, checked_color="#00B0FF", 
-                thumb_color=Qt.GlobalColor.white, pulse_unchecked_color="#44999999", pulse_checked_color="#4400B0EE"):
-
+    def __init__(
+        self,
+        parent=None,
+        bar_color=Qt.GlobalColor.gray,
+        checked_color="#00B0FF",
+        thumb_color=Qt.GlobalColor.white,
+        pulse_unchecked_color="#44999999",
+        pulse_checked_color="#4400B0EE",
+    ):
         super().__init__(parent)
         self._transparent_pen = QPen(Qt.GlobalColor.transparent)
         self._light_grey_pen = QPen(Qt.GlobalColor.lightGray)
@@ -57,7 +70,7 @@ class AnimatedToggle(QCheckBox):
     def hitButton(self, pos: QPoint):
         return self.contentsRect().contains(pos)
 
-    @Property(float) # type: ignore
+    @Property(float)  # type: ignore
     def thumb_position(self):  # type: ignore
         return self._thumb_position
 
@@ -83,19 +96,25 @@ class AnimatedToggle(QCheckBox):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        # Print 
+        # Print
         painter.setPen(self._transparent_pen)
-        track_rect = QRectF(0, 0,
-                          cont_rect.width() - thumb_radius,
-                          self.TRACK_REL_SIZE * cont_rect.height()
+        track_rect = QRectF(
+            0, 0, cont_rect.width() - thumb_radius, self.TRACK_REL_SIZE * cont_rect.height()
         )
         track_rect.moveCenter(QPointF(cont_rect.center()))
         rounding = track_rect.height() / 2
 
         # the thumb will move along this line
-        thumb_offset: float = (self.TRACK_REL_SIZE - (self.THUMB_REL_SIZE * 2)) * cont_rect.width()
+        thumb_offset: float = (
+            self.TRACK_REL_SIZE - (self.THUMB_REL_SIZE * 2)
+        ) * cont_rect.width()
         trail_length = cont_rect.width() + thumb_offset - 2 * thumb_radius
-        x_pos = cont_rect.x() + thumb_offset +  thumb_radius + (trail_length - 3.5 * thumb_offset) * self._thumb_position
+        x_pos = (
+            cont_rect.x()
+            + thumb_offset
+            + thumb_radius
+            + (trail_length - 3.5 * thumb_offset) * self._thumb_position
+        )
         # switch brush to reflect disabled, enabled ON, and enabled OFF states
         if not self.isEnabled():
             painter.setBrush(self._disabled_checked_brush)
@@ -112,14 +131,13 @@ class AnimatedToggle(QCheckBox):
                 painter.setPen(self._light_grey_pen)
                 painter.setBrush(self._thumb_brush)
 
-        # fraw thumb
-        painter.drawEllipse(
-            QPointF(x_pos, track_rect.center().y()),
-            thumb_radius, thumb_radius)
+        # draw thumb
+        painter.drawEllipse(QPointF(x_pos, track_rect.center().y()), thumb_radius, thumb_radius)
 
         painter.end()
 
-        # set anim length after first show (otherwise on opening the application all toggles will slide)
+        # set anim length after first show
+        # otherwise on opening the application all toggles will slide
         if self._first_show:
             self._first_show = False
             self.thumb_anim.setDuration(self.ANIM_DURATION_MS)  # ms

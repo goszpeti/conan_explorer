@@ -1,9 +1,10 @@
 import logging
 from threading import Lock
 
+from PySide6.QtCore import SignalInstance
+
 from conan_explorer import CONAN_LOG_PREFIX
 from conan_explorer.app.logger import Logger
-from PySide6.QtCore import SignalInstance
 
 
 class QtLogHandler(logging.Handler):
@@ -11,6 +12,7 @@ class QtLogHandler(logging.Handler):
     This log handler sends a logger string to a qt widget.
     update_signal needs str as argument.
     """
+
     _lock = Lock()
     _formatter = logging.Formatter(r"%(levelname)s: %(message)s")
 
@@ -50,11 +52,11 @@ def init_qt_logger(logger: Logger, name: str, update_signal: SignalInstance):
 
 
 def remove_qt_logger(logger: Logger, name: str) -> bool:
-    """ Remove qt logger (to be called before gui closes) """
+    """Remove qt logger (to be called before gui closes)"""
     for handler in logger.handlers:
         if handler.get_name() == name:
             logger.removeHandler(handler)
             if handler:
-                del(handler)
+                del handler
             return True
     return False
