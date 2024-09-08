@@ -331,9 +331,9 @@ class PackageSelectionController(QObject):
         self._loader.wait_for_finished()
         ref_row = self.find_item_in_pkg_sel_model(conan_ref, pkg_id)
         if ref_row == -1:
-            Logger().debug(f"Cannot find {conan_ref}" + error_message_suffix)
+            Logger().debug("Cannot find %s%s", conan_ref, error_message_suffix)
             return None
-        Logger().debug(f"Found {conan_ref}@{str(ref_row)}" + error_message_suffix)
+        Logger().debug("Found %s@%d%s", conan_ref, ref_row, error_message_suffix)
 
         # map to package view model
         proxy_index = self._model.index(ref_row, 0, QModelIndex())
@@ -367,6 +367,6 @@ class PackageSelectionController(QObject):
         self._view.scrollTo(view_index)
         sel_model.select(view_index, select_mode)
         sel_model.currentRowChanged.emit(proxy_index, internal_sel_index)
-        Logger().debug(f"Selecting {view_index.data()} in Local Package Explorer")
+        Logger().debug("Selecting %s in Local Package Explorer", str(view_index.data()))
 
         return view_index

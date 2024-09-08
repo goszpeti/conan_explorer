@@ -203,7 +203,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             self._conan_file_reference = ConanRef.loads(new_value)
         except Exception:  # invalid ref
-            Logger().debug(f"Invalid ref: {new_value}")
+            Logger().debug("Invalid ref: %s", new_value)
             return
         # add conan ref to worker
         if (self._conan_ref != new_value and new_value != INVALID_CONAN_REF
@@ -342,7 +342,6 @@ class UiAppLinkModel(UiAppLinkConfig):
 
     def get_executable_path(self) -> Path:
         if not self._executable or not self.package_folder.exists():
-            # Logger().debug(f"No file/executable specified for {str(self.name)}")
             return Path(INVALID_PATH)
         path = Path(self._executable)
         full_path = self.resolve_executable_path(path)
@@ -364,8 +363,8 @@ class UiAppLinkModel(UiAppLinkConfig):
                                         f"in {self.name}: e.g. {str(match.name)}"))
                     match_found = True
                 if not match_found:
-                    Logger().debug(f"Can't find file in package {self.conan_ref}:\n\t" + 
-                                    str(exe_rel_path))
+                    Logger().debug("Can't find file in package %s:\n\t%s", 
+                                   self.conan_ref, str(exe_rel_path))
                 else:
                     return match
             except NotImplementedError:
@@ -374,8 +373,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         else:
             possible_match = self.package_folder / exe_rel_path
             if not possible_match.exists():
-                Logger().debug(f"Can't find file in package {self.conan_ref}:\n\t" + 
-                               str(exe_rel_path))
+                Logger().debug("Can't find file in package %s:\n\t%s", 
+                                   self.conan_ref, str(exe_rel_path))
                 return Path(INVALID_PATH)
             return possible_match
 
@@ -401,7 +400,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         try:
             icon_path = icon_path.resolve()
         except Exception as e:
-            Logger().debug(f"Can't reslolve path of {str(icon_path)}: {str(e)}")
+            Logger().debug("Can't resolve path of %s: %s", str(icon_path), str(e))
         if not icon_path.exists():
             if self.get_executable_path().exists():
                 icon = "app.svg"
@@ -423,7 +422,8 @@ class UiAppLinkModel(UiAppLinkConfig):
         if icon.isNull():
             icon = get_themed_asset_icon("icons/app.svg")
             if self._icon:  # user input given -> warning
-                Logger().debug(f"Can't find icon {str(self._icon)} for '{self.name}'")
+                Logger().debug(
+                    "Can't find icon %s for '%s'", self._icon, self.name)
         return icon
 
     def set_package_folder(self, package_folder: Path, quiet=False):

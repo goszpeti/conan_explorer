@@ -35,7 +35,7 @@ class Worker(QObject):
         start = time.time()
         ret = self.func(*self.args)
         end = time.time()
-        Logger().debug("Waited: " + str(end - start) + " s")
+        Logger().debug("Waited: %.4f s",  end - start)
         self.finished.emit(ret)
 
 
@@ -157,7 +157,7 @@ class LoaderGui(QObject):
         self.load_thread.finished.connect(self.load_thread.deleteLater)
         self.load_thread.finished.connect(self.progress_dialog.hide)
 
-        Logger().debug(f"Start async loading thread for {str(work_task)}")
+        Logger().debug("Start async loading thread for %s", str(work_task))
         self.load_thread.start()
         if cancel_button:
             self.cancel_button.clicked.connect(self.load_thread.quit)

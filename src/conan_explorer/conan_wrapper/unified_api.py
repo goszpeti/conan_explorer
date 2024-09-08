@@ -412,7 +412,8 @@ class ConanCommonUnifiedApi(ConanUnifiedApi):
             self.info_cache.update_local_package_path(
                 conan_ref, self.get_package_folder(conan_ref, packages[0].get("id", "")))
             return packages[0]
-        Logger().debug(f"No matching local packages found for <b>{str(conan_ref)}</b>")
+        Logger().debug(
+            "No matching local packages found for <b>%s</b>", str(conan_ref))
         return {"id": ""}
 
     def get_best_matching_local_package_path(self, conan_ref: ConanRef,

@@ -79,7 +79,7 @@ class JsonUiConfig(UiConfigInterface, metaclass=SignatureCheckMeta):
     def load(self) -> UiConfig:
         """ Parse the json config file, validate and convert to object structure """
         json_app_config: JsonAppConfig = {"version": "0.0.0", "tabs": []}
-        Logger().debug(f"Quicklaunch: Loading file '{self._json_file_path}'...")
+        Logger().debug("Quicklaunch: Loading file '%s'...", self._json_file_path)
 
         with open(asset_path / "config_schema.json") as schema_file:
             json_schema = json.load(schema_file)

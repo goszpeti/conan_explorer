@@ -27,7 +27,7 @@ class ConanCleanup():
             try:
                 ref_remote = ref_cache.load_metadata().recipe.remote # type: ignore
             except Exception:
-                Logger().debug(f"Can't load metadata for {str(ref)}", exc_info=True)
+                Logger().debug("Can't load metadata for %s", str(ref), exc_info=True)
                 continue
             if ref_remote not in remote_names:
                 invalid_refs.append(str(ref))

@@ -65,7 +65,7 @@ def extract_icon(file_path: Path) -> QIcon:
         icon = icon_provider.icon(file_info)
         return icon
     else:
-        Logger().debug(f"File {str(file_path)} for icon extraction does not exist.")
+        Logger().debug("File %s for icon extraction does not exist.", str(file_path))
     return QIcon()
 
 

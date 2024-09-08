@@ -136,7 +136,7 @@ class ConanInstallDialog(QDialog):
                     cb.setCurrentText(str(value))
                     self._ui.options_widget.setItemWidget(item, 1, cb)
             except Exception as e:
-                Logger().debug(f"Error while gettings options: {str(e)}")
+                Logger().debug("Error while gettings options: %s", str(e))
         self._ui.options_widget.resizeColumnToContents(1)
         self._ui.options_widget.resizeColumnToContents(0)
         self._ui.options_widget.itemDoubleClicked.connect(
