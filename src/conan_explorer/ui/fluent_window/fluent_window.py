@@ -1,3 +1,4 @@
+import ctypes
 import platform
 
 from conan_explorer.settings import GUI_STYLE_FLUENT
@@ -12,7 +13,6 @@ from . import (
 )
 
 if platform.system() == "Windows":
-    import ctypes
     from ctypes.wintypes import MSG
 
 from enum import Enum
@@ -66,9 +66,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
     MENU_ANIM_DURATION = 0  # disable for performance
 
     class PageStore:
-        """Saves all relevant information for pages accessible from the left menu and provides easy
-        retrieval methods for all members.
-        """
+        """Saves all relevant information for pages accessible from the left menu
+        and provides easy retrieval methods for all members."""
 
         def __init__(self) -> None:
             self._page_widgets: Dict[
@@ -174,7 +173,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
             True if platform.system() == "Windows" and native_windows_fcns else False
         )
 
-        # all buttons and widgets to be able to shown on the main page (from settings and left menu)
+        # all buttons and widgets to be able to shown on the main page
+        # (from settings and left menu)
         self.page_widgets = FluentWindow.PageStore()
 
         # Right bottom general settings Sub Menu
@@ -182,9 +182,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.ui.right_menu_bottom_content_sw, "General Settings", True
         )
         self.ui.right_menu_bottom_content_sw.addWidget(self.main_general_settings_menu)
-        self.ui.right_menu_bottom_content_sw.setCurrentWidget(
-            self.main_general_settings_menu
-        )
+        self.ui.right_menu_bottom_content_sw.setCurrentWidget(self.main_general_settings_menu)
 
         # resize related variables
         self._resize_direction = ResizeDirection.default
@@ -250,8 +248,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """Platform native events"""
         retval = QMainWindow.nativeEvent(self, eventType, message)
         if str(eventType) == "b'windows_generic_MSG'":
-            # message.setsize(8)
-            msg = MSG.from_address(message.__int__())
+            msg = MSG.from_address(message.__int__())  # type: ignore
             # ignore WM_NCCALCSIZE event. Suppresses native Window drawing of title-bar.
             if msg.message == 131:
                 return True, 0
@@ -263,7 +260,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self._drag_position = event.globalPosition().toPoint()
 
     def apply_theme(self):
-        """This function must be able to reload all icons from the left and right menu bar."""
+        "This function must be able to reload all icons from the left and right menu bar."
         self.reload_themed_icons()
         self.set_restore_max_button_state(force=True)
         for submenu in self.ui.right_menu_bottom_content_sw.findChildren(SideSubMenu):
@@ -289,17 +286,15 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if event.buttons() == Qt.MouseButton.LeftButton:
                 if self._drag_position is None:
                     return
-                self.move(
-                    self.pos() + event.globalPosition().toPoint() - self._drag_position
-                )  # type: ignore
+                self.move(self.pos() + event.globalPosition().toPoint() - self._drag_position)  # type: ignore
                 self._drag_position = event.globalPosition().toPoint()
                 event.accept()
 
     def enable_windows_native_animations(self):
         if platform.system() != "Windows":
             return
-        # sets up thickframe and other needed flag for WIN-Arrow functions an animations to work
-        # needs custom resizing and border suppresion functions to work
+        # sets up thickframe and other needed flag for WIN-Arrow functions an animations to
+        # work needs custom resizing and border suppresion functions to work
         GWL_STYLE = -16
         WS_MAXIMIZEBOX = 65536
         WS_CAPTION = 12582912
@@ -514,17 +509,13 @@ class FluentWindow(QMainWindow, ThemedWidget):
         elif QRect(top_right.x(), top_right.y(), -x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_right
             self.setCursor(cs.SizeBDiagCursor)
-        elif QRect(bottom_left.x(), bottom_left.y(), x_offset, -y_offset).contains(
-            position
-        ):
+        elif QRect(bottom_left.x(), bottom_left.y(), x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_left
             self.setCursor(cs.SizeBDiagCursor)
         elif QRect(top_left.x(), top_left.y(), x_offset, y_offset).contains(position):
             self._resize_direction = ResizeDirection.top_left
             self.setCursor(cs.SizeFDiagCursor)
-        elif QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset).contains(
-            position
-        ):
+        elif QRect(bottom_right.x(), bottom_right.y(), -x_offset, -y_offset).contains(position):
             self._resize_direction = ResizeDirection.bottom_right
             self.setCursor(cs.SizeFDiagCursor)
         else:  # no resize

@@ -22,7 +22,7 @@
     "python.terminal.activateEnvInCurrentTerminal": true,
     "python.terminal.activateEnvironment": true,
     "editor.rulers": [
-        92
+        96
     ],
     "python.analysis.exclude": [
         "**/*_ui.py",

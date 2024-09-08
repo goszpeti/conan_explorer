@@ -85,7 +85,7 @@ markers = [
 
 # Development configs
 [tool.ruff]
-line-length=92
+line-length=96
 target-version = "py38"
 
 [tool.ruff.format]

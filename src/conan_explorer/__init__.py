@@ -2,6 +2,7 @@
 Contains all basic constants used in the application.
 No imports from own modules allowed! This is done to resolve circular dependencies.
 """
+
 import os
 import platform
 import shutil
@@ -69,32 +70,44 @@ conan_version = Version(conan_pkg_info.version)
 
 base_path = Path(__file__).absolute().parent
 asset_path = base_path / "assets"
-# to be used for all default paths of configuration files, which will be used 
+# to be used for all default paths of configuration files, which will be used
 # for multiple versions (noninvasive storage, 1.X legacy will be moved)
-# TODO: Still use conan_app_launcher - move to conan_explorer later 
+# TODO: Still use conan_app_launcher - move to conan_explorer later
 # and move to separate function
 legacy_user_save_path = Path().home()
-user_save_path = Path(os.getenv("XDG_CONFIG_HOME", 
-    str(legacy_user_save_path / ".config"))) / "conan_app_launcher" \
-    if platform.system() == "Linux" \
+user_save_path = (
+    Path(os.getenv("XDG_CONFIG_HOME", str(legacy_user_save_path / ".config")))
+    / "conan_app_launcher"
+    if platform.system() == "Linux"
     else Path(os.getenv("APPDATA", str(legacy_user_save_path))) / "conan_app_launcher"
+)
 
 # user path migration - move settings and default gui file
 # ui file loading will handle patching the settings, if the default gui file was used
 if user_save_path != legacy_user_save_path:
     os.makedirs(str(user_save_path), exist_ok=True)
     # don't copy if the migrated files already exist
-    if (legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME).exists() and \
-            not (user_save_path / (SETTINGS_FILE_NAME + ".ini")).exists():
+    if (legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME).exists() and not (
+        user_save_path / (SETTINGS_FILE_NAME + ".ini")
+    ).exists():
         print(
-            ("INFO: Moving application settings file from" 
-             f"{str(user_save_path)} to {str(legacy_user_save_path)}"))
-        shutil.move(str(legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME),
-                    str(user_save_path / (SETTINGS_FILE_NAME + ".ini")))
-    if (legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME).exists() and \
-            not (user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")).exists():
+            (
+                "INFO: Moving application settings file from"
+                f"{str(user_save_path)} to {str(legacy_user_save_path)}"
+            )
+        )
+        shutil.move(
+            str(legacy_user_save_path / LEGACY_SETTINGS_FILE_NAME),
+            str(user_save_path / (SETTINGS_FILE_NAME + ".ini")),
+        )
+    if (legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME).exists() and not (
+        user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")
+    ).exists():
         print(
             "INFO: Moving default ui config file from "
-            f"{str(user_save_path)} to {str(legacy_user_save_path)}")
-        shutil.move(str(legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME),
-                    str(user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")))
+            f"{str(user_save_path)} to {str(legacy_user_save_path)}"
+        )
+        shutil.move(
+            str(legacy_user_save_path / LEGACY_UI_CFG_FILE_NAME),
+            str(user_save_path / (DEFAULT_UI_CFG_FILE_NAME + ".json")),
+        )

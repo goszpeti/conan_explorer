@@ -60,10 +60,7 @@ class LoaderGui(QObject):
             progress_dialog.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
             # Window flags to disable close button
             progress_dialog.setWindowFlags(
-                wt.FramelessWindowHint
-                | wt.Window
-                | wt.WindowTitleHint
-                | wt.CustomizeWindowHint
+                wt.FramelessWindowHint | wt.Window | wt.WindowTitleHint | wt.CustomizeWindowHint
             )
             progress_dialog.setCancelButton(None)  # type: ignore
             progress_dialog.setModal(True)  # user could trigger it twice -> crash
@@ -71,9 +68,7 @@ class LoaderGui(QObject):
             progress_dialog.setMinimumDuration(1000)
             progress_dialog.setMinimumWidth(500)
             progress_dialog.setMaximumWidth(600)
-            progress_dialog.setWindowIcon(
-                QtGui.QIcon(str(asset_path / "icons" / "icon.ico"))
-            )
+            progress_dialog.setWindowIcon(QtGui.QIcon(str(asset_path / "icons" / "icon.ico")))
 
             LoaderGui.__progress_dialog = progress_dialog
         self.progress_dialog = LoaderGui.__progress_dialog

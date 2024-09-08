@@ -33,9 +33,9 @@ def is_windows_11():
     """Main version number is still 10 - thanks MS!"""
     from packaging import version
 
-    if platform.system() == "Windows" and version.parse(
-        platform.version()
-    ) >= version.parse("10.0.22000"):
+    if platform.system() == "Windows" and version.parse(platform.version()) >= version.parse(
+        "10.0.22000"
+    ):
         return True
     return False
 
@@ -224,9 +224,9 @@ def get_folder_size_mb(folder_path: Path):
     if not folder_path.exists():
         return 0
     # exists check is needed for soft links under windows
-    return sum(
-        file.stat().st_size for file in folder_path.rglob("*") if file.exists()
-    ) / pow(1024, 2)
+    return sum(file.stat().st_size for file in folder_path.rglob("*") if file.exists()) / pow(
+        1024, 2
+    )
 
 
 def copy_path_with_overwrite(src: Path, dst: Path):
@@ -316,9 +316,7 @@ def find_program_in_windows(
 def check_for_wayland() -> bool:
     if platform.system() != "Linux":
         return False
-    if os.getenv("XDG_SESSION_TYPE", "").lower() == "wayland" or os.getenv(
-        "WAYLAND_DISPLAY"
-    ):
+    if os.getenv("XDG_SESSION_TYPE", "").lower() == "wayland" or os.getenv("WAYLAND_DISPLAY"):
         Logger().debug("Found XDG_SESSION_TYPE==wayland or WAYLAND_DISPLAY")
         return True
     return False
