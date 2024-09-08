@@ -135,12 +135,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.main_general_settings_menu = SideSubMenu(
-            self.ui.right_menu_bottom_content_sw, "General Settings", True)
-        self.ui.right_menu_bottom_content_sw.addWidget(self.main_general_settings_menu)
-        self.ui.right_menu_bottom_content_sw.setCurrentWidget(
-                                                        self.main_general_settings_menu)
-
+        # Window style setup
         wt = Qt.WindowType
         self.setWindowFlags(wt.FramelessWindowHint | wt.WindowSystemMenuHint |  # type: ignore
                            wt.WindowMinimizeButtonHint | wt.WindowMaximizeButtonHint)
@@ -148,8 +143,16 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
         self._use_native_windows_fcns = True if platform.system() == "Windows" and native_windows_fcns else False
+        
         # all buttons and widgets to be able to shown on the main page (from settings and left menu)
         self.page_widgets = FluentWindow.PageStore()
+
+        # Right bottom general settings Sub Menu
+        self.main_general_settings_menu = SideSubMenu(
+            self.ui.right_menu_bottom_content_sw, "General Settings", True)
+        self.ui.right_menu_bottom_content_sw.addWidget(self.main_general_settings_menu)
+        self.ui.right_menu_bottom_content_sw.setCurrentWidget(
+            self.main_general_settings_menu)
 
         # resize related variables
         self._resize_direction = ResizeDirection.default
@@ -162,7 +165,8 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.left_menu_frame.setMaximumWidth(LEFT_MENU_MIN_WIDTH)
         menu_margins = self.ui.left_menu_bottom_subframe.layout().contentsMargins()
         button_offset = menu_margins.right() + menu_margins.left()
-        # fix buttons sizes, so they don't expand on togglling the menu
+        
+        # fix buttons sizes, so they don't expand on toggling the menu
         self.ui.toggle_left_menu_button.setMinimumWidth(
             LEFT_MENU_MIN_WIDTH - button_offset)
         self.ui.toggle_left_menu_button.setMaximumWidth(
@@ -299,8 +303,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             right_sub_menu = SideSubMenu(
                 self.ui.right_menu_top_content_sw, name, True)
             self.ui.right_menu_top_content_sw.addWidget(right_sub_menu)
-        self.page_widgets.add_new_page(
-            name, button, page_widget, right_sub_menu)
+        self.page_widgets.add_new_page(name, button, page_widget, right_sub_menu)
 
         if is_upper_menu:
             self.ui.left_menu_middle_subframe.layout().addWidget(button)
