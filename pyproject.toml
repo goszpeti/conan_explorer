@@ -85,14 +85,18 @@ markers = [
 
 # Development configs
 [tool.ruff]
-line-length=88
+line-length=92
 target-version = "py38"
-lint.select = [
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
     "E",  # pycodestyle
     "F",  # pyflakes
     "LOG", # flake8-logging
     "G", # lake8-logging-format
 ]
-
-[tool.autopep8]
-max_line_length = 88
