@@ -275,7 +275,7 @@ class PackageFileExplorerController(QObject):
             if not url.isLocalFile():
                 continue
             source_path = Path(url.toLocalFile())
-            target_path = Path(os.path.join(dst_dir_path, url.fileName()))
+            target_path = Path(dst_dir_path, url.fileName())
             files_paths.append((source_path, target_path))
             if target_path.exists():
                 overwrites.append(target_path)

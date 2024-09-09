@@ -1,4 +1,3 @@
-
 from typing import List, Optional
 
 from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt

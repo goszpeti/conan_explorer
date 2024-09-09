@@ -1,16 +1,16 @@
 from typing import Union
 
-import conan_explorer.app as app
-from conan_explorer.app.logger import Logger
-from PySide6.QtCore import QModelIndex, QItemSelectionModel
+from PySide6.QtCore import QItemSelectionModel, QModelIndex
 from PySide6.QtWidgets import QTreeView
 
+import conan_explorer.app as app
+from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import EditablePkg
 
 from .editable_model import EditableModel, EditableModelItem
 
-class ConanEditableController():
 
+class ConanEditableController:
     def __init__(self, view: QTreeView) -> None:
         self._view = view
         self._model = EditableModel()
@@ -37,7 +37,7 @@ class ConanEditableController():
         self._view.columnViewportPosition(0)
 
     def _select_editable(self, name: str) -> bool:
-        """ Selects ane idtable in the view and returns true if it exists. """
+        """Selects ane idtable in the view and returns true if it exists."""
         row_remote_to_sel = -1
         row = 0
         editable_item = None
@@ -73,5 +73,3 @@ class ConanEditableController():
             return None
         item: EditableModelItem = indexes[0].internalPointer()  # type: ignore
         return app.conan_api.get_editable(item.name)
-
-

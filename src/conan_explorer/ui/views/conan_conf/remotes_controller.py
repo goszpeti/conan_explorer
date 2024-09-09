@@ -1,18 +1,20 @@
 from typing import List, Optional, Union
 
+from PySide6.QtCore import QItemSelectionModel, QModelIndex, SignalInstance
+from PySide6.QtWidgets import QApplication, QTreeView
+
 import conan_explorer.app as app
 from conan_explorer.app.logger import Logger
-from conan_explorer.ui.dialogs import ReorderController
 from conan_explorer.conan_wrapper.types import Remote
-from PySide6.QtCore import QModelIndex, QItemSelectionModel, SignalInstance
-from PySide6.QtWidgets import QApplication, QTreeView
+from conan_explorer.ui.dialogs import ReorderController
 
 from .remotes_model import RemotesModelItem, RemotesTableModel
 
 
-class ConanRemoteController():
-
-    def __init__(self, view: QTreeView, conan_remotes_updated: Optional[SignalInstance]) -> None:
+class ConanRemoteController:
+    def __init__(
+        self, view: QTreeView, conan_remotes_updated: Optional[SignalInstance]
+    ) -> None:
         self._view = view
         self._model = RemotesTableModel()
         self.conan_remotes_updated = conan_remotes_updated
@@ -20,8 +22,7 @@ class ConanRemoteController():
     def update(self):
         # save selected remote, if triggering a re-init
         sel_remote = self.get_selected_remote()
-        self._remote_reorder_controller = ReorderController(
-            self._view, self._model)
+        self._remote_reorder_controller = ReorderController(self._view, self._model)
 
         self._model.setup_model_data()
         self._view.setItemsExpandable(False)
@@ -43,12 +44,12 @@ class ConanRemoteController():
         self._view.columnViewportPosition(0)
 
     def _select_remote(self, remote_name: str) -> bool:
-        """ Selects a remote in the view and returns true if it exists. """
+        """Selects a remote in the view and returns true if it exists."""
         row_remote_to_sel = -1
         row = 0
         remote_item = None
         for row, remote_item in enumerate(self._model.items()):
-            if remote_item.name  == remote_name:
+            if remote_item.name == remote_name:
                 row_remote_to_sel = row
                 break
         if row_remote_to_sel < 0:
@@ -84,7 +85,7 @@ class ConanRemoteController():
 
     def login_remotes(self, remotes: List[str], user: str, pwd: str):
         for remote in remotes:
-            # will be canceled after the first error, so no lockout will occur, 
+            # will be canceled after the first error, so no lockout will occur,
             # because of multiple incorrect logins error is printed on the console
             try:
                 self._model.update_login_info(remote, user, pwd)
@@ -100,8 +101,7 @@ class ConanRemoteController():
         remote_item = self.get_selected_remote()
         if not remote_item:
             return
-        app.conan_api.disable_remote(
-            remote_item.name, not remote_item.disabled)
+        app.conan_api.disable_remote(remote_item.name, not remote_item.disabled)
         self.update()
 
     def copy_remote_name(self):
@@ -119,4 +119,3 @@ class ConanRemoteController():
         for remote in app.conan_api.get_remotes(include_disabled=True):
             if remote.name == remote_model.name:
                 return remote
-    

@@ -9,8 +9,12 @@ from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper import ConanApiFactory
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef
-from conan_explorer.ui.common import (TreeModel, TreeModelItem,
-                                      get_platform_icon, get_themed_asset_icon)
+from conan_explorer.ui.common import (
+    TreeModel,
+    TreeModelItem,
+    get_platform_icon,
+    get_themed_asset_icon,
+)
 
 REF_TYPE = 0
 PROFILE_TYPE = 1
@@ -22,8 +26,16 @@ class SearchedPackageTreeItem(TreeModelItem):
     1. ref/id 2. remote 3. quick profile
     """
 
-    def __init__(self, data: List[str], parent=None, pkg_info: Optional[ConanPkg] = None,
-                 item_type=REF_TYPE, lazy_loading=False, installed=False, empty=False):
+    def __init__(
+        self,
+        data: List[str],
+        parent=None,
+        pkg_info: Optional[ConanPkg] = None,
+        item_type=REF_TYPE,
+        lazy_loading=False,
+        installed=False,
+        empty=False,
+    ):
         super().__init__(data, parent, lazy_loading=lazy_loading)
         self.type = item_type
         self.pkg_info = pkg_info
@@ -44,7 +56,8 @@ class SearchedPackageTreeItem(TreeModelItem):
             infos = app.conan_api.get_local_pkgs_from_ref(ConanRef.loads(recipe_ref))
             installed_ids = [info.get("id") for info in infos]
             packages = app.conan_api.get_remote_pkgs_from_ref(
-                ConanRef.loads(recipe_ref), remote)
+                ConanRef.loads(recipe_ref), remote
+            )
             for pkg in packages:
                 pkg_id = pkg.get("id", "")
                 if pkg_id in pkgs_to_be_added.keys():  # package already found in another remote
@@ -54,14 +67,27 @@ class SearchedPackageTreeItem(TreeModelItem):
                 if pkg_id in installed_ids:
                     installed = True
                 pkgs_to_be_added[pkg_id] = SearchedPackageTreeItem(
-                    [pkg_id, remote,  ConanApiFactory().build_conan_profile_name_alias(
-                        pkg.get("settings", {}))],
-                    self, pkg, PROFILE_TYPE, False, installed)
+                    [
+                        pkg_id,
+                        remote,
+                        ConanApiFactory().build_conan_profile_name_alias(
+                            pkg.get("settings", {})
+                        ),
+                    ],
+                    self,
+                    pkg,
+                    PROFILE_TYPE,
+                    False,
+                    installed,
+                )
         for pkg in pkgs_to_be_added.values():
             self.child_items.append(pkg)
         if not self.child_items:
-            self.child_items.append(SearchedPackageTreeItem(
-                ["No package found", "",  ""], self, {}, PROFILE_TYPE, empty=True))
+            self.child_items.append(
+                SearchedPackageTreeItem(
+                    ["No package found", "", ""], self, {}, PROFILE_TYPE, empty=True
+                )
+            )
         self.is_loaded = True
 
     @override
@@ -84,11 +110,15 @@ class SearchedPackageTreeItem(TreeModelItem):
 
 
 class PkgSearchModel(TreeModel):
-
-    def __init__(self, conan_pkg_installed: Optional[SignalInstance] = None, conan_pkg_removed: Optional[SignalInstance] = None, *args, **kwargs):
+    def __init__(
+        self,
+        conan_pkg_installed: Optional[SignalInstance] = None,
+        conan_pkg_removed: Optional[SignalInstance] = None,
+        *args,
+        **kwargs,
+    ):
         super(PkgSearchModel, self).__init__(*args, **kwargs)
-        self.root_item = SearchedPackageTreeItem(
-            ["Packages", "Remote(s)", "Quick Profile"])
+        self.root_item = SearchedPackageTreeItem(["Packages", "Remote(s)", "Quick Profile"])
         self.proxy_model = QtCore.QSortFilterProxyModel()  # for sorting
         self.proxy_model.setDynamicSortFilter(True)
         self.proxy_model.setSourceModel(self)
@@ -105,8 +135,9 @@ class PkgSearchModel(TreeModel):
         recipes_with_remotes: Dict[ConanRef, str] = {}
         for remote in remotes:
             update_sig.emit("Searching in " + str(remote))
-            recipe_list = (app.conan_api.search_recipes_in_remotes(
-                f"{search_query}*", remote_name=remote))
+            recipe_list = app.conan_api.search_recipes_in_remotes(
+                f"{search_query}*", remote_name=remote
+            )
             for recipe in recipe_list:
                 current_value = recipes_with_remotes.get(recipe, "")
                 if current_value:
@@ -115,9 +146,15 @@ class PkgSearchModel(TreeModel):
                     recipes_with_remotes[recipe] = remote
 
         if not recipes_with_remotes:
-            self.root_item.append_child(SearchedPackageTreeItem(
-                ["No package found!", "", ""], self.root_item, None,
-                  PROFILE_TYPE, empty=True))
+            self.root_item.append_child(
+                SearchedPackageTreeItem(
+                    ["No package found!", "", ""],
+                    self.root_item,
+                    None,
+                    PROFILE_TYPE,
+                    empty=True,
+                )
+            )
             return
 
         # add info if it is installed
@@ -128,8 +165,13 @@ class PkgSearchModel(TreeModel):
             if recipe in installed_refs:
                 installed = True
             conan_item = SearchedPackageTreeItem(
-                [str(recipe), recipe_remotes, ""], self.root_item, None, REF_TYPE, 
-                lazy_loading=True, installed=installed)
+                [str(recipe), recipe_remotes, ""],
+                self.root_item,
+                None,
+                REF_TYPE,
+                lazy_loading=True,
+                installed=installed,
+            )
             self.root_item.append_child(conan_item)
         self.endResetModel()
 
@@ -178,8 +220,7 @@ class PkgSearchModel(TreeModel):
             if not pkg_item.pkg_info:
                 return
             if installed and pkg_item.pkg_info.get("id", "") == pkg_id:
-                Logger().debug(
-                    f"Set {pkg_id} as install status to {installed}")
+                Logger().debug(f"Set {pkg_id} as install status to {installed}")
                 pkg_item.is_installed = installed
                 break
             if not pkg_id and not installed:  # if ref was removed, all pkgs are deleted too
@@ -190,7 +231,10 @@ class PkgSearchModel(TreeModel):
         item = index.internalPointer()
         loader = LoaderGui(self)
         self._loader_widget_parent = QtWidgets.QWidget()
-        loader.load_for_blocking(self._loader_widget_parent,
-                             item.load_children, (loader.loading_string_signal,), 
-                             loading_text="Loading Packages...")
+        loader.load_for_blocking(
+            self._loader_widget_parent,
+            item.load_children,
+            (loader.loading_string_signal,),
+            loading_text="Loading Packages...",
+        )
         loader.wait_for_finished()
