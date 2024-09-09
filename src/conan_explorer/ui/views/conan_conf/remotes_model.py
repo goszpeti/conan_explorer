@@ -1,4 +1,3 @@
-
 from typing import List, Optional
 
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
@@ -12,11 +11,9 @@ from conan_explorer.ui.common import TreeModel, TreeModelItem
 
 
 class RemotesModelItem(TreeModelItem, Remote):
-
     def __init__(self, remote: Remote, user: str, auth: bool, parent=None, lazy_loading=False):
         TreeModelItem.__init__(self, [user, str(auth)], parent, lazy_loading=lazy_loading)
-        Remote.__init__(self, remote.name, remote.url,
-                        remote.verify_ssl, remote.disabled)
+        Remote.__init__(self, remote.name, remote.url, remote.verify_ssl, remote.disabled)
 
     @override
     def data(self, column):
@@ -44,6 +41,7 @@ class RemotesModelItem(TreeModelItem, Remote):
     @property
     def auth(self) -> bool:
         return bool(self.item_data[1])
+
     @auth.setter
     def auth(self, value: bool):
         self.item_data[1] = str(value)
@@ -96,12 +94,12 @@ class RemotesTableModel(TreeModel):
         return None
 
     @override
-    def rowCount(self, parent=None): # TODO really?
+    def rowCount(self, parent=None):  # TODO really?
         return self.root_item.child_count()
-    
+
     def items(self) -> List[RemotesModelItem]:
         return self.root_item.child_items  # type: ignore
-    
+
     def add(self, remote: Remote):
         app.conan_api.add_remote(remote.name, remote.url, remote.verify_ssl)
         super().add_item(RemotesModelItem(remote, "", False))
@@ -112,16 +110,17 @@ class RemotesTableModel(TreeModel):
         item: RemotesModelItem = index.internalPointer()  # type: ignore
         super().remove_item(item)
         return True
-    
+
     def rename(self, remote: Remote, new_name):
         app.conan_api.rename_remote(remote.name, new_name)
         index = self.get_index_from_ref(remote.name)
         item: RemotesModelItem = index.internalPointer()  # type: ignore
         item.name = new_name
-    
+
     def update(self, remote: Remote):
         app.conan_api.update_remote(
-            remote.name, remote.url, remote.verify_ssl, remote.disabled, None)
+            remote.name, remote.url, remote.verify_ssl, remote.disabled, None
+        )
         index = self.get_index_from_ref(remote.name)
         item: RemotesModelItem = index.internalPointer()  # type: ignore
         # copy all possible props
@@ -137,21 +136,28 @@ class RemotesTableModel(TreeModel):
         item.user = user
 
     def save(self):
-        """ Update every remote with new index and then save to conan remotes file """
+        """Update every remote with new index and then save to conan remotes file"""
         i = 0
         for remote in self.items():
             app.conan_api.update_remote(
-                remote.name, remote.url, remote.verify_ssl, remote.disabled, i)
+                remote.name, remote.url, remote.verify_ssl, remote.disabled, i
+            )
             i += 1
 
     @override
-    def moveRow(self, source_parent: "QModelIndex | QPersistentModelIndex", source_row: int, destination_parent: QModelIndex, destination_child: int) -> bool:
+    def moveRow(
+        self,
+        source_parent: "QModelIndex | QPersistentModelIndex",
+        source_row: int,
+        destination_parent: QModelIndex,
+        destination_child: int,
+    ) -> bool:
         item_to_move = self.items()[source_row]
         self.items().insert(destination_child, item_to_move)
         if source_row < destination_child:
             self.items().pop(source_row)
         else:
-            self.items().pop(source_row+1)
+            self.items().pop(source_row + 1)
         self.save()  # autosave
         return super().moveRow(source_parent, source_row, destination_parent, destination_child)
 
