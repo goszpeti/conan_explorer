@@ -178,9 +178,11 @@ class TreeModel(QAbstractItemModel):
             return QModelIndex()
 
         child_item = child.internalPointer()
+        if not hasattr(child_item, "parent"):
+            Logger().error("%s has incorrect type:", child_item)
         parent_item = child_item.parent()
 
-        if parent_item == self.root_item:
+        if not parent_item or parent_item == self.root_item:
             return QModelIndex()
 
         return self.createIndex(parent_item.row(), 0, parent_item)
