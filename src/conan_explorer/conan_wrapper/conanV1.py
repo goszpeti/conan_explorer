@@ -58,7 +58,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def init_api(self) -> Self:
         """Instantiate the internal Conan api."""
-        from conans.client.conan_api import ConanAPIV1, UserIO
+        from conans.client.conan_api import ConanAPIV1, ConanApp, UserIO
         from conans.client.output import ConanOutput
 
         self._fix_editable_file()
@@ -81,6 +81,20 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
             self._client_cache = self._conan.app.cache
         else:
             raise NotImplementedError
+
+        def create_app(self, quiet_output):
+            if self.app:
+                return self.app
+            self.app = ConanApp(
+                self.cache_folder,
+                self.user_io,
+                self.http_requester,
+                self.runner,
+                quiet_output=quiet_output,
+            )
+
+        patch("conans.client.conan_api.ConanAPIV1.create_app", create_app).start()
+
         # Experimental fast search - Conan search_packages is VERY slow
         # HACK: Removed the  @api_method decorator by getting the original function
         # from the closure attribute
@@ -141,11 +155,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         user_info = {}
         try:
             # hack to remove reinit of conan application
-            user_info = (
-                self._conan.users_list.__closure__[0]  # type: ignore
-                .cell_contents(self._conan, remote_name)
-                .get("remotes", {})
-            )
+            user_info = self._conan.users_list(remote_name).get("remotes", {})
         except Exception:
             Logger().error(
                 f"Cannot find remote {remote_name} in remote list for fetching user."
