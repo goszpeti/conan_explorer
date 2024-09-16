@@ -63,7 +63,7 @@ dev = [
     "debugpy", # Qt thread debugging
 ]
 test = [
-    "pytest==8.3.2",
+    "pytest==8.3.3",
     "pytest-cov==5.0.0",
     "pytest-mock==3.14.0",
     "pytest-qt==4.4.0",
