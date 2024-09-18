@@ -26,7 +26,7 @@ dependencies = [
     "dictdiffer==0.9.0",  # MIT License
     # compatibility
     'contextlib-chdir==1.0.2; python_version<"3.11"',  # BSD License (BSD-3-Clause)
-    'typing-extensions>=3.10.0.2, <5',  # Python Software Foundation License(PSF)
+    'typing-extensions>=4.2.0, <5',  # Python Software Foundation License(PSF)
     # deprecated, but can not be subsituted yet for specifier handling
     "packaging",  # BSD License and Apache License 2.0
 ]
