@@ -300,6 +300,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <property name="animated">
        <bool>true</bool>
       </property>
+      <property name="allColumnsShowFocus">
+       <bool>true</bool>
+      </property>
       <property name="wordWrap">
        <bool>true</bool>
       </property>
@@ -412,6 +415,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <bool>true</bool>
           </property>
           <property name="animated">
+           <bool>true</bool>
+          </property>
+          <property name="allColumnsShowFocus">
            <bool>true</bool>
           </property>
          </widget>
