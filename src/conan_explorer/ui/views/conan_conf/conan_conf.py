@@ -337,19 +337,7 @@ class ConanConfigView(PluginInterfaceV1):
         self.remote_edit_dialog.exec()
 
     def on_remote_remove(self, model_index):
-        remote_item = self._remotes_controller.get_selected_remote()
-        if not remote_item:
-            return
-        message_box = QMessageBox(parent=self)
-        message_box.setWindowTitle("Remove remote")
-        message_box.setText(f"Are you sure, you want to delete the remote {remote_item.name}?")
-        message_box.setStandardButtons(
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        message_box.setIcon(QMessageBox.Icon.Question)
-        reply = message_box.exec()
-        if reply == QMessageBox.StandardButton.Yes:
-            self._remotes_controller.remove(remote_item)
+        self._remotes_controller.on_remove()
 
     # Editables tab
 

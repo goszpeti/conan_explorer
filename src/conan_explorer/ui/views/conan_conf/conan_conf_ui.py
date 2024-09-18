@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_conf.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -262,10 +262,15 @@ class Ui_Form(object):
         self.remotes_tree_view = QTreeView(self.remotes_frame)
         self.remotes_tree_view.setObjectName(u"remotes_tree_view")
         self.remotes_tree_view.setFrameShape(QFrame.Shape.NoFrame)
-        self.remotes_tree_view.setDragEnabled(True)
+        self.remotes_tree_view.setDragEnabled(False)
         self.remotes_tree_view.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.remotes_tree_view.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.remotes_tree_view.setUniformRowHeights(False)
         self.remotes_tree_view.setSortingEnabled(False)
+        self.remotes_tree_view.setAnimated(True)
+        self.remotes_tree_view.setAllColumnsShowFocus(True)
+        self.remotes_tree_view.setWordWrap(False)
+        self.remotes_tree_view.setExpandsOnDoubleClick(False)
 
         self.gridLayout_4.addWidget(self.remotes_tree_view, 0, 0, 1, 1)
 
@@ -465,7 +470,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(0)
+        self.config_tab_widget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(Form)

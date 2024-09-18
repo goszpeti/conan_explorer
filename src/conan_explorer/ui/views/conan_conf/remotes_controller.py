@@ -1,12 +1,12 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
-from PySide6.QtCore import QItemSelectionModel, QModelIndex, SignalInstance
-from PySide6.QtWidgets import QApplication, QTreeView
+from PySide6.QtCore import QItemSelectionModel, QModelIndex, Qt, SignalInstance
+from PySide6.QtWidgets import QApplication, QDialog, QListWidgetItem, QStyle, QTreeView
 
 import conan_explorer.app as app
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.types import Remote
-from conan_explorer.ui.dialogs import ReorderController
+from conan_explorer.ui.dialogs import QuestionWithItemListDialog, ReorderController
 
 from .remotes_model import RemotesModelItem, RemotesTableModel
 
@@ -94,14 +94,33 @@ class ConanRemoteController:
                 return
             Logger().info(f"Successfully logged in to {remote}")
 
-    def remove(self, remote: Remote):
-        self._model.remove(remote)
+    def on_remove(self):
+        remote_items = self.get_selected_remotes()
+        dialog = QuestionWithItemListDialog(
+            self._view, QStyle.StandardPixmap.SP_MessageBoxWarning
+        )
+        dialog.setWindowTitle("Delete remote(s)")
+        dialog.set_question_text("Are you sure, you want to delete these remotes?\t")
+        for item in remote_items:
+            list_item = QListWidgetItem(item.name)
+            list_item.setCheckState(Qt.CheckState.Checked)
+            dialog.item_list_widget.addItem(list_item)
+
+        reply = dialog.exec()
+        if reply == QDialog.DialogCode.Accepted:
+            # get user Selection
+            for list_row in range(dialog.item_list_widget.count()):
+                list_item = dialog.item_list_widget.item(list_row)
+                if list_item.checkState() == Qt.CheckState.Unchecked:
+                    continue
+                self._model.remove(list_item.text())
 
     def remote_disable(self):
-        remote_item = self.get_selected_remote()
-        if not remote_item:
+        remote_items = self.get_selected_remotes()
+        if not remote_items:
             return
-        app.conan_api.disable_remote(remote_item.name, not remote_item.disabled)
+        for remote_item in remote_items:
+            app.conan_api.disable_remote(remote_item.name, not remote_item.disabled)
         self.update()
 
     def copy_remote_name(self):
@@ -110,7 +129,7 @@ class ConanRemoteController:
             return
         QApplication.clipboard().setText(remote_item.name)
 
-    def get_selected_remote(self) -> Union[Remote, None]:
+    def get_selected_remote(self) -> Optional[Remote]:
         indexes = self._view.selectedIndexes()
         if len(indexes) == 0:  # can be multiple - always get 0
             Logger().debug("No selected item for context action")
@@ -119,3 +138,16 @@ class ConanRemoteController:
         for remote in app.conan_api.get_remotes(include_disabled=True):
             if remote.name == remote_model.name:
                 return remote
+
+    def get_selected_remotes(self) -> List[Remote]:
+        indexes = self._view.selectedIndexes()
+        remotes: List[Remote] = []
+
+        for index in indexes:
+            if index.column() != 0:  # we only need a row once
+                continue
+            remote_model: RemotesModelItem = index.internalPointer()  # type: ignore
+            for remote in app.conan_api.get_remotes(include_disabled=True):
+                if remote.name == remote_model.name:
+                    remotes.append(remote)
+        return remotes
