@@ -196,6 +196,7 @@ class Ui_Form(object):
         self.search_results_tree_view.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.search_results_tree_view.setSortingEnabled(True)
         self.search_results_tree_view.setAnimated(True)
+        self.search_results_tree_view.setAllColumnsShowFocus(True)
 
         self.results_layout.addWidget(self.search_results_tree_view)
 

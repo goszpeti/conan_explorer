@@ -149,6 +149,7 @@ class Ui_Form(object):
         self.package_select_view.setUniformRowHeights(True)
         self.package_select_view.setSortingEnabled(True)
         self.package_select_view.setAnimated(True)
+        self.package_select_view.setAllColumnsShowFocus(True)
         self.package_select_view.setWordWrap(True)
         self.package_select_view.setHeaderHidden(False)
         self.splitter.addWidget(self.package_select_view)
@@ -196,6 +197,7 @@ class Ui_Form(object):
         self.package_file_view.setItemsExpandable(True)
         self.package_file_view.setSortingEnabled(True)
         self.package_file_view.setAnimated(True)
+        self.package_file_view.setAllColumnsShowFocus(True)
 
         self.horizontalLayout.addWidget(self.package_file_view)
 
