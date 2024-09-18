@@ -1,3 +1,4 @@
+from ast import Str
 from typing import List, Optional
 
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
@@ -104,9 +105,9 @@ class RemotesTableModel(TreeModel):
         app.conan_api.add_remote(remote.name, remote.url, remote.verify_ssl)
         super().add_item(RemotesModelItem(remote, "", False))
 
-    def remove(self, remote: Remote):
-        app.conan_api.remove_remote(remote.name)
-        index = self.get_index_from_ref(remote.name)
+    def remove(self, remote_name: str):
+        app.conan_api.remove_remote(remote_name)
+        index = self.get_index_from_ref(remote_name)
         item: RemotesModelItem = index.internalPointer()  # type: ignore
         super().remove_item(item)
         return True
