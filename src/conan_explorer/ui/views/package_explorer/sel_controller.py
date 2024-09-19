@@ -25,7 +25,7 @@ from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog
 from .sel_model import PackageFilter, PackageTreeItem, PkgSelectionType, PkgSelectModel
 
 if TYPE_CHECKING:
-    from conan_explorer.ui.fluent_window import FluentWindow
+    from conan_explorer.ui.fluent_window import PageStore
     from conan_explorer.ui.main_window import BaseSignals
 
 
@@ -46,7 +46,7 @@ class PackageSelectionController(QObject):
         package_filter_edit: QLineEdit,
         conan_pkg_selected: SignalInstance,
         base_signals: "BaseSignals",
-        page_widgets: "FluentWindow.PageStore",
+        page_widgets: "PageStore",
     ):
         super().__init__(parent)
         self._base_signals = base_signals

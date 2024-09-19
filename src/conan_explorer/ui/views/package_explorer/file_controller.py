@@ -43,7 +43,7 @@ from .file_model import CalFileSystemModel
 from .sel_model import PkgSelectionType
 
 if TYPE_CHECKING:
-    from conan_explorer.ui.fluent_window import FluentWindow
+    from conan_explorer.ui.fluent_window import PageStore
     from conan_explorer.ui.main_window import BaseSignals
 
     from .package_explorer import LocalConanPackageExplorer
@@ -59,7 +59,7 @@ class PackageFileExplorerController(QObject):
         pkg_path_label: QTextBrowser,
         cut_files_reset: SignalInstance,
         base_signals: "BaseSignals",
-        page_widgets: "FluentWindow.PageStore",
+        page_widgets: "PageStore",
     ):
         super().__init__(parent)
         self._model: Optional[CalFileSystemModel] = None

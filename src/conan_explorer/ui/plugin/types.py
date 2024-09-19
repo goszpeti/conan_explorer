@@ -8,7 +8,7 @@ from typing_extensions import override
 from ..fluent_window.fluent_window import ThemedWidget
 
 if TYPE_CHECKING:
-    from conan_explorer.ui.fluent_window import FluentWindow
+    from conan_explorer.ui.fluent_window import PageStore
     from conan_explorer.ui.main_window import BaseSignals
 
 
@@ -42,7 +42,7 @@ class PluginInterfaceV1(ThemedWidget):
         parent: QWidget,
         plugin_description: PluginDescription,
         base_signals: Optional["BaseSignals"] = None,
-        page_widgets: Optional["FluentWindow.PageStore"] = None,
+        page_widgets: Optional["PageStore"] = None,
     ) -> None:
         ThemedWidget.__init__(self, parent)
         self._base_signals = base_signals

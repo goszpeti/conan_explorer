@@ -12,7 +12,7 @@ from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 from .controller import ConanSearchController
 
 if TYPE_CHECKING:
-    from conan_explorer.ui.fluent_window import FluentWindow
+    from conan_explorer.ui.fluent_window import PageStore
     from conan_explorer.ui.main_window import BaseSignals
 
 
@@ -22,7 +22,7 @@ class ConanSearchView(PluginInterfaceV1):
         parent: QWidget,
         plugin_description: PluginDescription,
         base_signals: Optional["BaseSignals"],
-        page_widgets: Optional["FluentWindow.PageStore"] = None,
+        page_widgets: Optional["PageStore"] = None,
     ):
         # Add minimize and maximize buttons
         super().__init__(parent, plugin_description, base_signals, page_widgets)
