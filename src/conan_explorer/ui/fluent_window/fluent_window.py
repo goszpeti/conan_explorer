@@ -29,7 +29,7 @@ from PySide6.QtCore import (
     QSize,
     Qt,
 )
-from PySide6.QtGui import QHoverEvent, QMouseEvent
+from PySide6.QtGui import QAction, QHoverEvent, QMouseEvent
 from PySide6.QtWidgets import QMainWindow, QPushButton, QSizePolicy, QWidget
 from typing_extensions import override
 
@@ -242,6 +242,20 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.set_restore_max_button_state()
         self.enable_windows_native_animations()
         self.installEventFilter(self)  # used for resizing
+
+        # setup context menu for console
+        self.ui.console.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.ui.console.customContextMenuRequested.connect(
+            self.on_console_context_menu_requested
+        )
+        self._console_context_menu = self.ui.console.createStandardContextMenu()
+        clear_console_action = QAction("Clear log", self)
+        self.set_themed_icon(clear_console_action, "icons/clear_all.svg")
+        self._console_context_menu.addAction(clear_console_action)
+        clear_console_action.triggered.connect(self.ui.console.clear)
+
+    def on_console_context_menu_requested(self, position):
+        self._console_context_menu.exec(self.ui.console.mapToGlobal(position))
 
     @override
     def nativeEvent(self, eventType: Union[QByteArray, bytes], message: int) -> object:
