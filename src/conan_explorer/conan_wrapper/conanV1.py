@@ -82,8 +82,8 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         else:
             raise NotImplementedError
 
-        def create_app(self, quiet_output=None):
-            if self.app:
+        def create_app(self, quiet_output=None, force=False):
+            if self.app and not force:
                 return self.app
             self.app = ConanApp(
                 self.cache_folder,
@@ -197,6 +197,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
 
     def get_editable_references(self) -> List[ConanRef]:
         try:
+            self._conan.create_app(force=True)  # type: ignore # need to possibly reload editables
             return list(map(ConanRef.loads, self._conan.editable_list().keys()))
         except Exception:
             self._fix_editable_file()  # to not crash conan without this
