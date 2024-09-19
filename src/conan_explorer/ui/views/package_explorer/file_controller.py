@@ -12,6 +12,7 @@ from PySide6.QtCore import (
 )
 from PySide6.QtWidgets import (
     QApplication,
+    QDialog,
     QListWidgetItem,
     QMessageBox,
     QStyle,
@@ -288,7 +289,8 @@ class PackageFileExplorerController(QObject):
                     lambda files_path: files_path[1] not in non_overwrites_paths, files_paths
                 )
             )
-
+        if not files_paths:
+            return
         loader = LoaderGui(None)
 
         def paste_files(self):
@@ -329,7 +331,7 @@ class PackageFileExplorerController(QObject):
             dialog.item_list_widget.addItem(list_item)
 
         reply = dialog.exec()
-        if reply == QMessageBox.StandardButton.Yes:
+        if reply == QDialog.DialogCode.Accepted:
             # get user DEselection
             for list_row in range(dialog.item_list_widget.count()):
                 list_item = dialog.item_list_widget.item(list_row)
@@ -338,7 +340,7 @@ class PackageFileExplorerController(QObject):
                 non_overwrites.append(Path(list_item.text()))
             return non_overwrites
         else:
-            return []  # early return to not delete path on cut and cancel
+            return overwrites  # early return to not delete path on cut and cancel
 
     def on_add_app_link_from_file(self):
         selected_paths = self.get_selected_pkg_paths()
