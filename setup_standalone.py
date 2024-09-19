@@ -7,8 +7,11 @@ an associated console.
 
 import platform
 import sys
-from setup import AUTHOR, URL, VERSION
+
 from cx_Freeze import Executable, setup
+
+from conan_explorer import AUTHOR, REPO_URL, __version__  # TODO read out from i
+
 include_files = []
 
 # base="Win32GUI" should be used only for Windows GUI app
@@ -18,19 +21,44 @@ if sys.platform == "win32":
 build_exe_options = {
     "includes": "conan_explorer",
     "excludes": ["debugpy", "pywin32", "pywin32_system32", "win32com"],
-    "bin_excludes": ['Qt6dbus.dll', 'Qt6Network.dll', 'Qt6Qml.dll', "Qt6QmlModels.dll",
-        'Qt6Quick.dll', 'Qt6WebSockets.dll',  "Qt6QuickTemplates2.dll", "Qt6QmlCompiler.dll",
-         "Qt6QuickDialogs2QuickImpl.dll", "Qt6LanguageServer.dll", "d3dcompiler_47.dll", 
-                     "QtOpenGL.pyi", "Qt6DesignerComponents.dll", "Qt6Designer.dll", 
-                     "Qt6VirtualKeyboard.dll",  "Qt6Pdf.dll",
-        "opengl32sw.dll", "lupdate.exe", "QtOpenGL.pyd", "icudtl.dat", "qmlls.exe",
-        "assistant.exe", "designer.exe", "linguist.exe", "qmlformat.exe",
+    "bin_excludes": [
+        "Qt6dbus.dll",
+        "Qt6Network.dll",
+        "Qt6Qml.dll",
+        "Qt6QmlModels.dll",
+        "Qt6Quick.dll",
+        "Qt6WebSockets.dll",
+        "Qt6QuickTemplates2.dll",
+        "Qt6QmlCompiler.dll",
+        "Qt6QuickDialogs2QuickImpl.dll",
+        "Qt6LanguageServer.dll",
+        "d3dcompiler_47.dll",
+        "QtOpenGL.pyi",
+        "Qt6DesignerComponents.dll",
+        "Qt6Designer.dll",
+        "Qt6VirtualKeyboard.dll",
+        "Qt6Pdf.dll",
+        "opengl32sw.dll",
+        "lupdate.exe",
+        "QtOpenGL.pyd",
+        "icudtl.dat",
+        "qmlls.exe",
+        "assistant.exe",
+        "designer.exe",
+        "linguist.exe",
+        "qmlformat.exe",
         # examples, qml dir, lupdate.exe QtOpenGL.pyd
-        "libicudata.so.66", "libgtk-3.so.0", "libQt6Quick.so.5", 
-        "libQt6Qml.so.5", "libicui18n.so.66", "libicui18n.so.66", 
-        "libQt6Network.so.5", "libQt6QmlModels.so.5"],
+        "libicudata.so.66",
+        "libgtk-3.so.0",
+        "libQt6Quick.so.5",
+        "libQt6Qml.so.5",
+        "libicui18n.so.66",
+        "libicui18n.so.66",
+        "libQt6Network.so.5",
+        "libQt6QmlModels.so.5",
+    ],
     "include_files": include_files,
-    "zip_include_packages" : ['PySide6', "conans"]
+    "zip_include_packages": ["PySide6", "conans"],
 }
 
 icon = "src/conan_explorer/assets/icons/icon.ico"
@@ -45,8 +73,8 @@ bdist_dmg_options = {
 }
 
 directory_table = [
-   # ("ProgramMenuFolder", "TARGETDIR", "."),
-   # ("Conan App Launcher", "ProgramMenuFolder", "MYPROG~1|My Program"),
+    # ("ProgramMenuFolder", "TARGETDIR", "."),
+    # ("Conan App Launcher", "ProgramMenuFolder", "MYPROG~1|My Program"),
 ]
 
 msi_data = {
@@ -54,43 +82,47 @@ msi_data = {
     "ProgId": [
         ("Prog.Id", None, None, "This is a description", "IconId", None),
     ],
-    "Icon": [
-        ("IconId", icon)
-    ],
+    "Icon": [("IconId", icon)],
     # "summary_data": {
     #     "author": "Peter Gosztolya and Contributors",
     # },
 }
 
 bdist_msi_options = {
-    #"target_name": "conan_explorer_setup",
+    # "target_name": "conan_explorer_setup",
     "data": msi_data,
-    "install_icon": icon}
+    "install_icon": icon,
+}
 
 if platform.system() == "Windows":
     conan_main = ".venv/Lib/site-packages/conans/conan.py"
 else:
     conan_main = f".venv/lib/python3.{sys.version_info.minor}/site-packages/conans/conan.py"
 
-executables = [Executable("./src/conan_explorer/__main__.py",
-                          base=base, target_name="Conan Explorer",
-                          icon=icon, shortcut_name=app_name,
-                          shortcut_dir="DesktopFolder",
-                          ),
-               Executable(conan_main, target_name="conan")]
+executables = [
+    Executable(
+        "./src/conan_explorer/__main__.py",
+        base=base,
+        target_name="Conan Explorer",
+        icon=icon,
+        shortcut_name=app_name,
+        shortcut_dir="DesktopFolder",
+    ),
+    Executable(conan_main, target_name="conan"),
+]
 
 setup(
     name=app_name,
     author=AUTHOR,
-    version=VERSION,
+    version=__version__,
     description=app_name,
-    url=URL,
+    url=REPO_URL,
     options={
         "build_exe": build_exe_options,
         "bdist_mac": bdist_mac_options,
         "bdist_dmg": bdist_dmg_options,
-        "bdist_msi": bdist_msi_options
+        "bdist_msi": bdist_msi_options,
     },
     executables=executables,
-    optimize="2"
+    optimize="2",
 )
