@@ -246,10 +246,12 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         # only need to get once
         if self._short_path_root.exists() or platform.system() != "Windows":
             return self._short_path_root
-        short_home = os.getenv("CONAN_USER_HOME_SHORT")
+        short_home = self._client_cache.config.short_paths_home
         if not short_home:
             drive = os.path.splitdrive(self._client_cache.cache_folder)[0].upper()
             short_home = os.path.join(drive, os.sep, ".conan")
+        else:
+            short_home = str(short_home)
         os.makedirs(short_home, exist_ok=True)
         return Path(short_home)
 
