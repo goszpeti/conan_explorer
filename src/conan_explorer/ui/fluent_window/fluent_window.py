@@ -266,7 +266,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             # ignore WM_NCCALCSIZE event. Suppresses native Window drawing of title-bar.
             if msg.message == 131:
                 return True, 0
-        return retval, 0
+        return retval
 
     @override
     def mousePressEvent(self, event: QMouseEvent):

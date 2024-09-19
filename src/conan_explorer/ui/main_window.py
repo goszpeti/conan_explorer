@@ -250,17 +250,18 @@ class MainWindow(FluentWindow):
         remove_qt_logger(Logger(), self.qt_logger_name)
         super().closeEvent(event)
 
-    @override
-    def resizeEvent(self, event: QResizeEvent) -> None:
-        super().resizeEvent(event)
-        try:
-            if self.loaded:
-                self.ui.page_stacked_widget.currentWidget().setMaximumWidth(
-                    self.ui.center_frame.width() - 4
-                )
-                self.ui.page_stacked_widget.currentWidget().adjustSize()
-        except Exception as e:
-            Logger().error(f"Can't resize current view: {str(e)}")
+    # Try to fix random exit from maximized state
+    # @override
+    # def resizeEvent(self, event: QResizeEvent) -> None:
+    #     super().resizeEvent(event)
+    #     try:
+    #         if self.loaded:
+    #             self.ui.page_stacked_widget.currentWidget().setMaximumWidth(
+    #                 self.ui.center_frame.width() - 4
+    #             )
+    #             self.ui.page_stacked_widget.currentWidget().adjustSize()
+    #     except Exception as e:
+    #         Logger().error(f"Can't resize current view: {str(e)}")
 
     def load(self, config_source: Optional[PathLike] = None):
         """Load all application gui elements specified in the GUI config (file)"""
@@ -282,6 +283,10 @@ class MainWindow(FluentWindow):
                 self.page_widgets.get_button_by_type(type(page)).click()
             except Exception as e:
                 Logger().debug("Can't switch to page for auto open: " + str(e))
+                # click first view
+                page = self.page_widgets.get_all_pages()[0]
+                self.page_widgets.get_button_by_type(type(page)).click()
+
         self.loaded = True
 
     def _load_plugins(self):
