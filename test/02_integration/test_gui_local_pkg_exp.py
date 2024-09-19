@@ -139,6 +139,19 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
     assert lpe._pkg_tabs_ctrl[0]._model  # view selected -> fs_model is set
     assert Path(lpe._pkg_tabs_ctrl[0]._model.rootPath()) == export_path
 
+    pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
+    print(f"Found packages: {str(pkgs)}")
+    assert len(pkgs)
+    another_id = ""
+    for pkg in pkgs:
+        if pkg.get("id") != id:
+            another_id = pkg.get("id")
+    assert another_id
+    another_pkg_path = app.conan_api.get_package_folder(cfr, another_id)
+    assert lpe.select_local_package_from_ref(TEST_REF + ":" + another_id)
+    assert Path(lpe._pkg_tabs_ctrl[0]._model.rootPath()) == another_pkg_path
+
+
 @pytest.mark.conanv2
 def test_local_package_explorer_pkg_selection_editables(qtbot, mocker, 
                 setup_local_package_explorer: LPESetupType,
@@ -518,44 +531,42 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
 
     # 2.4 check cut-paste
     # create a new dir in the pkg to paste into
+    Logger().debug("check cut-paste")
     try:
         os.remove(str(pkg_root_path / "newdir" / config_path.name))
     except:
         pass
     (pkg_root_path / "newdir").mkdir(exist_ok=True)
     # select dir
-    sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(
-        str(pkg_root_path / "newdir"))
+    sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(str(pkg_root_path / "newdir"))
     lpe.on_file_paste(None)
     check.is_true((pkg_root_path / "newdir" / config_path.name).exists())
 
     # 2.5 check rename
+    Logger().debug("check rename")
     mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, 'edit')
     lpe.on_item_rename(None)
     mock_rename_cmd.assert_called_once()
 
     # 2.6 check overwrite dialog
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
+    Logger().debug("check overwrite")
     # recreate file for file usage in root pkg folder
     (pkg_root_path / config_path.name).write_text("TEST")
 
-    mock_copy_cmd = mocker.patch("package_explorer.file_controller.copy_path_with_overwrite")
-
-    lpe._pkg_tabs_ctrl[0].paste_path(config_path, pkg_root_path / config_path.name)
-
-    mock_copy_cmd.assert_called_with(config_path, pkg_root_path / config_path.name)
+    lpe._pkg_tabs_ctrl[0].select_file_item(str(pkg_root_path / config_path.name))
+    mime_files = lpe.on_file_copy(None)
     
     # select no in dialog
     mock_copy_cmd = mocker.patch("package_explorer.file_controller.copy_path_with_overwrite")
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                        return_value=QtWidgets.QMessageBox.StandardButton.Cancel)
+    mocker.patch.object(QtWidgets.QDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Rejected)
     
-    lpe._pkg_tabs_ctrl[0].paste_path(config_path, pkg_root_path / config_path.name)
+    lpe.on_file_paste(None)
 
     mock_copy_cmd.assert_not_called()
 
     # 2.7 check auto renaming 
+    Logger().debug("check overwrite auto renaming")
     mock_copy_cmd = mocker.patch("package_explorer.file_controller.copy_path_with_overwrite")
     renamed_file = pkg_root_path / "app_config_empty_refs (2).json"
     assert (pkg_root_path / config_path.name).exists()
@@ -563,6 +574,8 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
         os.remove(renamed_file) # ensure file does not exist
     except: # nothing to do here
         pass
+    mocker.patch.object(QtWidgets.QDialog, 'exec',
+                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
     lpe._pkg_tabs_ctrl[0].paste_path(pkg_root_path / config_path.name, pkg_root_path / config_path.name)
     mock_copy_cmd.assert_called_with(pkg_root_path / config_path.name, renamed_file)
 
@@ -576,18 +589,6 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
                         return_value=QtWidgets.QMessageBox.StandardButton.Yes)
     lpe.on_file_delete(None)  # check new file?
     check.is_false((pkg_root_path / config_path.name).exists())
-
-    pkgs = app.conan_api.get_local_pkgs_from_ref(cfr)
-    print(f"Found packages: {str(pkgs)}")
-    assert len(pkgs)
-    another_id = ""
-    for pkg in pkgs:
-        if pkg.get("id") != id:
-            another_id = pkg.get("id")
-    assert another_id
-    another_pkg_path = app.conan_api.get_package_folder(cfr, another_id)
-    assert lpe.select_local_package_from_ref(TEST_REF + ":" + another_id)
-    assert Path(lpe._pkg_tabs_ctrl[0]._model.rootPath()) == another_pkg_path
 
 
 # @pytest.mark.conanv2
