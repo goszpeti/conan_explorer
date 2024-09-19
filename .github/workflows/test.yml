@@ -24,63 +24,63 @@ jobs:
         name:
           [
             # latest conan 1.X on U20 and Windows
-            "ubuntu20-py38-conan1-latest",
-            "ubuntu20-py39-conan1-latest",
-            "ubuntu20-py310-conan1-latest",
-            "windows-py311-conan1-latest",
+            "u20-py38-conan1-latest",
+            "u20-py39-conan1-latest",
+            "u20-py310-conan1-latest",
+            "win-py311-conan1-latest",
             # conan minimum version with python minimum version
-            "ubuntu20-py38-conan1.48",
+            "u20-py38-conan1.48",
             # conan 2 stuff with bleeding edge - use Python 3.12 (U22 needed)
-            "ubuntu22-py310-conan2.3", #   2.3 API changes
-            "ubuntu22-py312-conan2-latest", # post 2.3 API changes
-            "windows-py312-conan2-latest", # latest everything
+            "u22-py310-conan2.3", #   2.3 API changes
+            "u22-py312-conan2-latest", # post 2.3 API changes
+            "win-py312-conan2-latest", # latest everything
           ]
         include:
-          - name: "ubuntu20-py38-conan1-latest"
+          - name: "u20-py38-conan1-latest"
             python: "3.8"
             os: ubuntu-20.04
             conan: "<2"
             conan_server: "<2"
             pytest_args: ""
-          - name: "ubuntu20-py39-conan1-latest"
+          - name: "u20-py39-conan1-latest"
             python: "3.9"
             conan: "<2"
             conan_server: "<2"
             os: ubuntu-20.04
             pytest_args: ""
-          - name: "ubuntu20-py310-conan1-latest"
+          - name: "u20-py310-conan1-latest"
             python: "3.10"
             conan: "<2"
             conan_server: "<2"
             os: ubuntu-20.04
             pytest_args: ""
-          - name: "windows-py311-conan1-latest"
+          - name: "win-py311-conan1-latest"
             python: "3.11"
-            os: windows-latest
+            os: win-latest
             conan: "<2"
             conan_server: "<2"
             pytest_args: ""
-          - name: "ubuntu20-py38-conan1.48"
+          - name: "u20-py38-conan1.48"
             python: "3.8"
             os: ubuntu-20.04
             conan: "==1.48.0"
             conan_server: "==1.48.0"
             pytest_args: ""
-          - name: "ubuntu22-py310-conan2.3"
+          - name: "u22-py310-conan2.3"
             python: "3.10"
             os: ubuntu-22.04
             conan: <2.4
             conan_server: "-server <2.4"
             pytest_args: "-m conanv2"
-          - name: "ubuntu22-py312-conan2-latest"
+          - name: "u22-py312-conan2-latest"
             python: "3.12"
             os: ubuntu-22.04
             conan: <2.8
             conan_server: "-server <2.8"
             pytest_args: "-m conanv2"
-          - name:  windows-py312-conan2-latest
+          - name:  win-py312-conan2-latest
             python: "3.12"
-            os: windows-latest
+            os: win-latest
             conan: <2.8 # latest conan 2
             conan_server: "-server <2.8"
             pytest_args: "-m conanv2"
