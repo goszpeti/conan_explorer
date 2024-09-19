@@ -156,13 +156,13 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
         # mock cancel -> nothing should change
         # mock OK
         remotes_count = conan_conf_view._remotes_controller._model.root_item.child_count()
-        mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                            return_value=QtWidgets.QMessageBox.StandardButton.Cancel)
+        mocker.patch.object(QtWidgets.QDialog, 'exec',
+                            return_value=QtWidgets.QDialog.DialogCode.Rejected)
         conan_conf_view._ui.remote_remove_button.click()
         assert conan_conf_view._remotes_controller._model.root_item.child_count() == remotes_count
 
-        mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                            return_value=QtWidgets.QMessageBox.StandardButton.Yes)
+        mocker.patch.object(QtWidgets.QDialog, 'exec',
+                            return_value=QtWidgets.QDialog.DialogCode.Accepted)
         conan_conf_view._ui.remote_remove_button.click()
         assert conan_conf_view._remotes_controller._model.root_item.child_count()  == remotes_count - 1
 
