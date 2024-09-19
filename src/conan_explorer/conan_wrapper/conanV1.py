@@ -82,7 +82,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         else:
             raise NotImplementedError
 
-        def create_app(self, quiet_output):
+        def create_app(self, quiet_output=None):
             if self.app:
                 return self.app
             self.app = ConanApp(
