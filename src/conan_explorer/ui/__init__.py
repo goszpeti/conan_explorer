@@ -3,12 +3,13 @@ from pathlib import Path
 
 from conan_explorer import DEBUG_LEVEL, INVALID_PATH
 
-from .fluent_window import FluentWindow
+from .fluent_window import FluentWindow, PageStore
 from .main_window import BaseSignals
 from .plugin import PluginDescription, PluginFile, PluginInterfaceV1
 
 __all__ = [
     "BaseSignals",
+    "PageStore",
     "FluentWindow",
     "PluginInterfaceV1",
     "PluginFile",

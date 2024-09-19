@@ -26,7 +26,7 @@ from .sel_controller import MultiPkgSelectionMode, PackageSelectionController
 from .sel_model import PkgSelectionType
 
 if TYPE_CHECKING:
-    from conan_explorer.ui.fluent_window import FluentWindow
+    from conan_explorer.ui.fluent_window import PageStore
     from conan_explorer.ui.main_window import BaseSignals
 
 
@@ -40,7 +40,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         parent: QWidget,
         plugin_description: PluginDescription,
         base_signals: "BaseSignals",
-        page_widgets: "FluentWindow.PageStore",
+        page_widgets: "PageStore",
     ):
         super().__init__(parent, plugin_description, base_signals, page_widgets)
         from .package_explorer_ui import Ui_Form

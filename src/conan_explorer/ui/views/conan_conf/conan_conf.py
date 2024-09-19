@@ -21,7 +21,7 @@ from .profiles_model import ProfilesModel
 from .remotes_controller import ConanRemoteController
 
 if TYPE_CHECKING:
-    from conan_explorer.ui.fluent_window.fluent_window import FluentWindow
+    from conan_explorer.ui.fluent_window.fluent_window import PageStore
     from conan_explorer.ui.main_window import BaseSignals
 
 
@@ -33,7 +33,7 @@ class ConanConfigView(PluginInterfaceV1):
         parent: QWidget,
         plugin_description: PluginDescription,
         base_signals: "BaseSignals",
-        page_widgets: Optional["FluentWindow.PageStore"] = None,
+        page_widgets: Optional["PageStore"] = None,
     ):
         super().__init__(parent, plugin_description, base_signals)
         from .conan_conf_ui import Ui_Form

@@ -10,7 +10,7 @@ from conan_explorer.ui.views.plugins_manager.model import PluginModelItem
 from .controller import PluginController
 
 if TYPE_CHECKING:
-    from conan_explorer.ui.fluent_window import FluentWindow
+    from conan_explorer.ui.fluent_window import PageStore
     from conan_explorer.ui.main_window import BaseSignals
 
 
@@ -22,7 +22,7 @@ class PluginsPage(PluginInterfaceV1):
         parent: QWidget,
         plugin_handler: PluginHandler,
         base_signals: Optional["BaseSignals"] = None,
-        page_widgets: Optional["FluentWindow.PageStore"] = None,
+        page_widgets: Optional["PageStore"] = None,
     ):
         plugin_descr = PluginDescription(
             "Plugin Manager", BUILT_IN_PLUGIN, AUTHOR, "", "", "", " ", False, ""

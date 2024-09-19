@@ -1,14 +1,14 @@
 
 
 from typing import Optional
-from conan_explorer.ui import BaseSignals, PluginInterfaceV1, FluentWindow, PluginDescription
+from conan_explorer.ui import BaseSignals, PluginInterfaceV1, PageStore, PluginDescription
 from PySide6.QtWidgets import QWidget, QDialog
 
 class TestPlugin(PluginInterfaceV1):
 
     def __init__(self, parent: QWidget, plugin_description: PluginDescription,
                  base_signals: Optional["BaseSignals"] = None,
-                 page_widgets: Optional["FluentWindow.PageStore"] = None):
+                 page_widgets: Optional["PageStore"] = None):
         super().__init__(parent, plugin_description, base_signals, page_widgets)
         self._dialog = QDialog(self)
 

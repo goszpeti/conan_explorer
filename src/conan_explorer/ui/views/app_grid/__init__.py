@@ -22,7 +22,6 @@ from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_F
 
 # using global module pattern
 from conan_explorer.ui.common import get_themed_asset_icon
-from conan_explorer.ui.fluent_window import FluentWindow
 from conan_explorer.ui.plugin import PluginInterfaceV1
 from conan_explorer.ui.plugin.types import PluginDescription
 from conan_explorer.ui.widgets import AnimatedToggle
@@ -32,6 +31,7 @@ from .model import UiAppLinkModel, UiTabModel
 from .tab import TabList
 
 if TYPE_CHECKING:
+    from conan_explorer.ui.fluent_window import PageStore
     from conan_explorer.ui.main_window import BaseSignals
     from conan_explorer.ui.views.app_grid.model import UiAppGridModel
 
@@ -44,7 +44,7 @@ class AppGridView(PluginInterfaceV1):
         parent,
         model: "UiAppGridModel",
         base_signals: "BaseSignals",
-        page_widgets: FluentWindow.PageStore,
+        page_widgets: "PageStore",
     ):
         plugin_descr = PluginDescription(
             "Conan Quicklaunch", BUILT_IN_PLUGIN, AUTHOR, "", "", "", " ", False, ""

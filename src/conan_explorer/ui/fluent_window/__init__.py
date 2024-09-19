@@ -23,5 +23,6 @@ RIGHT_MENU_MAX_WIDTH = int(160 + 200 * (2 / get_display_scaling()))
 
 from .fluent_window import FluentWindow  # noqa
 from .side_menu import SideSubMenu  # noqa
+from .page_store import PageStore  # noqa
 
-__all__ = ["FluentWindow", "SideSubMenu", "get_display_scaling", "gen_obj_name"]
+__all__ = ["FluentWindow", "PageStore", "SideSubMenu", "get_display_scaling", "gen_obj_name"]
