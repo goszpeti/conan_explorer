@@ -29,7 +29,7 @@ from PySide6.QtCore import (
     QSize,
     Qt,
 )
-from PySide6.QtGui import QAction, QHoverEvent, QMouseEvent
+from PySide6.QtGui import QAction, QHoverEvent, QMouseEvent, QShowEvent, QWindowStateChangeEvent
 from PySide6.QtWidgets import QMainWindow, QPushButton, QSizePolicy, QWidget
 from typing_extensions import override
 
@@ -268,6 +268,10 @@ class FluentWindow(QMainWindow, ThemedWidget):
                 return True, 0
         return retval
 
+    def showEvent(self, event: QShowEvent) -> None:
+        self.set_restore_max_button_state()
+        return super().showEvent(event)
+
     @override
     def mousePressEvent(self, event: QMouseEvent):
         """Helper for moving window to know mouse position (Non Windows)"""
@@ -457,7 +461,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     @override
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:
         """Implements window resizing"""
-        self.set_restore_max_button_state()
+        # activationchange, showevent
         if self.isMaximized():  # no resize when maximized
             # forced reset of cursor
             if self.cursor().shape() != Qt.CursorShape.ArrowCursor:
@@ -480,6 +484,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
                     self.resizing()
             else:  # Hacky fix for when the cursor is not reset after resizing
                 self.setCursor(Qt.CursorShape.ArrowCursor)
+        elif isinstance(event, QWindowStateChangeEvent):
+            if event.oldState() == Qt.WindowState.WindowMinimized:
+                self.on_maximize_restore()
 
         return super().eventFilter(watched, event)
 
@@ -563,10 +570,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
         else:
             self.setWindowState(Qt.WindowState.WindowMaximized)
             self.showMaximized()
+        self.set_restore_max_button_state()
 
     def on_minimize(self, event=None):
         self.setWindowState(Qt.WindowState.WindowMinimized)
         self.showMinimized()
+        self.set_restore_max_button_state()
 
     def set_restore_max_button_state(self, force=False):
         """This toggles the restore/maximize button in the top right button cluster"""
