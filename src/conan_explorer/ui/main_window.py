@@ -482,4 +482,7 @@ class MainWindow(FluentWindow):
 
         # save last view
         page: PluginInterfaceV1 = self.ui.page_stacked_widget.currentWidget()  # type: ignore
-        app.active_settings.set(LAST_VIEW, page.plugin_description.name)
+        try:
+            app.active_settings.set(LAST_VIEW, page.plugin_description.name)
+        except Exception:
+            pass  # this can only happen if we close before any paged opened - no need to save

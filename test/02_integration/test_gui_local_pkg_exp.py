@@ -167,6 +167,7 @@ def test_local_package_explorer_pkg_selection_editables(qtbot, mocker,
         conan_add_editables(str(base_path), ConanRef.loads(editable_ref))
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
 
+    sleep(1)
     lpe._ui.refresh_button.clicked.emit()
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
 

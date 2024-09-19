@@ -59,6 +59,7 @@ def test_conan_short_path_root():
     new_short_home = Path(tempfile.gettempdir()) / "._myconan_short"
     os.environ["CONAN_USER_HOME_SHORT"] = str(new_short_home)
     conan = ConanApi()
+    conan.init_api()
     if platform.system() == "Windows":
         assert conan.get_short_path_root() == new_short_home
     else:
