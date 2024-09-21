@@ -110,7 +110,6 @@ class ConanConfigView(PluginInterfaceV1):
     def reload_themed_icons(self):
         super().reload_themed_icons()
         self._init_profile_context_menu()
-        self._init_remote_context_menu()
         self._conan_config_highlighter = ConfigHighlighter(
             self._ui.config_file_text_browser.document(), "ini"
         )
