@@ -8,8 +8,8 @@ import conan_explorer
 from conan_explorer.app.system import delete_path
 from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.types import ConanRef
-from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import EditableEditDialog
-from conan_explorer.ui.views.conan_conf.editable_model import EditableModel, EditableModelItem
+from conan_explorer.ui.views.conan_conf.editable_model import EditableModel
+from conan_explorer.ui.views.conan_conf.profiles_model import ProfilesModel
 from test.conftest import (TEST_REMOTE_NAME, TEST_REMOTE_URL, TEST_REF, PathSetup, 
                     login_test_remote, logout_all_remotes, add_remote, remove_remote)
 from conan_explorer import conan_version
@@ -278,7 +278,7 @@ def test_conan_config_view_profiles(qtbot, base_fixture: PathSetup, profile_fixt
     main_gui.page_widgets.get_button_by_type(type(conan_conf_view)).click()
 
     # check, that all conan profiles are displayed
-    model = conan_conf_view._ui.profiles_list_view.model()
+    model: ProfilesModel  = conan_conf_view._ui.profiles_list_view.model() # type: ignore
     profiles_path = app.conan_api.get_profiles_path()
     default_profile_path = profiles_path / "default"
 
@@ -350,7 +350,7 @@ def test_conan_config_view_editables(qtbot, base_fixture: PathSetup, profile_fix
     assert app.conan_api.remove_editable(ConanRef.loads(TEST_REF + "INT2"))
 
     conan_conf_view, main_gui = start_main_and_switch_to_config_view(ui_no_refs_config_fixture, qtbot)
-    model: EditableModel = conan_conf_view._ui.editables_ref_view.model()
+    model: EditableModel = conan_conf_view._ui.editables_ref_view.model() # type: ignore
     new_editable_path = base_fixture.testdata_path / "conan"
     if conan_version.major == 2:
         new_editable_path /= "conanfileV2.py"
