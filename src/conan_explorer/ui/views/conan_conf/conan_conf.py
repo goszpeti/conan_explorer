@@ -243,6 +243,9 @@ class ConanConfigView(PluginInterfaceV1):
 
     def _load_remotes_tab(self):
         self._remotes_controller.update()
+        self._ui.remotes_tree_view.selectionModel().selectionChanged.connect(
+            self.on_remotes_selection_changed
+        )
 
     def _init_remotes_tab(self):
         self._ui.remote_refresh_button.clicked.connect(self._remotes_controller.update)
@@ -274,46 +277,15 @@ class ConanConfigView(PluginInterfaceV1):
         self.set_themed_icon(self._ui.remotes_edit_button, "icons/edit.svg")
         self._ui.remotes_tree_view.doubleClicked.connect(self.on_remote_edit)
 
-        self._ui.remotes_tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self._ui.remotes_tree_view.customContextMenuRequested.connect(
-            self.on_remote_context_menu_requested
-        )
-        self._init_remote_context_menu()
-
-    def on_remote_context_menu_requested(self, position):
-        self._remotes_cntx_menu.exec(self._ui.remotes_tree_view.mapToGlobal(position))
-
-    def _init_remote_context_menu(self):
-        self._remotes_cntx_menu = QMenu()
-        self._copy_remote_action = QAction("Copy remote name", self)
-        self._copy_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/copy_link.svg")))
-        self._remotes_cntx_menu.addAction(self._copy_remote_action)
-        self._copy_remote_action.triggered.connect(self._remotes_controller.copy_remote_name)
-
-        self._edit_remote_action = QAction("Edit remote", self)
-        self._edit_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
-        self._remotes_cntx_menu.addAction(self._edit_remote_action)
-        self._edit_remote_action.triggered.connect(self.on_remote_edit)
-
-        self._add_remote_action = QAction("Add new remote", self)
-        self._add_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/plus_rounded.svg")))
-        self._remotes_cntx_menu.addAction(self._add_remote_action)
-        self._add_remote_action.triggered.connect(self.on_remote_add)
-
-        self._remove_remote_action = QAction("Remove remote", self)
-        self._remove_remote_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
-        self._remotes_cntx_menu.addAction(self._remove_remote_action)
-        self._remove_remote_action.triggered.connect(self.on_remote_remove)
-
-        self._disable_profile_action = QAction("Disable/Enable remote", self)
-        self._disable_profile_action.setIcon(QIcon(get_themed_asset_icon("icons/hide.svg")))
-        self._remotes_cntx_menu.addAction(self._disable_profile_action)
-        self._disable_profile_action.triggered.connect(self._remotes_controller.remote_disable)
-
-        self._login_remotes_action = QAction("(Multi)Login to remote", self)
-        self._login_remotes_action.setIcon(QIcon(get_themed_asset_icon("icons/login.svg")))
-        self._remotes_cntx_menu.addAction(self._login_remotes_action)
-        self._login_remotes_action.triggered.connect(self.on_remotes_login)
+    def on_remotes_selection_changed(self):
+        # grey out on multiselect
+        if len(self._remotes_controller.get_selected_remotes()) > 1:
+            self._ui.remote_add_button.setDisabled(True)
+            self._ui.remotes_edit_button.setDisabled(True)
+        # re-enable on single select
+        else:
+            self._ui.remote_add_button.setDisabled(False)
+            self._ui.remotes_edit_button.setDisabled(False)
 
     def on_remote_edit(self, model_index):
         remote_item = self._remotes_controller.get_selected_remote()

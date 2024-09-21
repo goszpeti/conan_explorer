@@ -32,7 +32,6 @@ class ConanEditableController:
     def resize_remote_columns(self):
         for i in reversed(range(self._model.root_item.column_count() - 1)):
             self._view.resizeColumnToContents(i)
-        # TODO calculate, if we need to make the name smaller
         self._view.setColumnWidth(1, 400)
         self._view.columnViewportPosition(0)
 
