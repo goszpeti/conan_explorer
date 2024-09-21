@@ -396,6 +396,7 @@ class MainWindow(FluentWindow):
         invalid_refs = cleaner.invalid_metadata_refs
         if not invalid_refs:
             Logger().info("No references with invalid metadata found!")
+            return
 
         msg_box = WideMessageBox(parent=self)
         button = WideMessageBox.StandardButton
