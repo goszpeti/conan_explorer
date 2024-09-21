@@ -18,28 +18,24 @@ class ConanRemoteController:
         self._view = view
         self._model = RemotesTableModel()
         self.conan_remotes_updated = conan_remotes_updated
+        self._view.setModel(self._model)
 
     def update(self):
         # save selected remote, if triggering a re-init
-        sel_remote = self.get_selected_remote()
         self._remote_reorder_controller = ReorderController(self._view, self._model)
 
         self._model.setup_model_data()
         self._view.setItemsExpandable(False)
         self._view.setRootIsDecorated(False)
-        self._view.setModel(self._model)
         self._view.expandAll()
         self.resize_remote_columns()
 
-        if sel_remote:
-            self._select_remote(sel_remote.name)
         if self.conan_remotes_updated:
             self.conan_remotes_updated.emit()
 
     def resize_remote_columns(self):
         for i in reversed(range(self._model.root_item.column_count() - 1)):
             self._view.resizeColumnToContents(i)
-        # TODO calculate, if we need to make the name smaller
         self._view.setColumnWidth(1, 400)
         self._view.columnViewportPosition(0)
 
@@ -120,8 +116,7 @@ class ConanRemoteController:
         if not remote_items:
             return
         for remote_item in remote_items:
-            app.conan_api.disable_remote(remote_item.name, not remote_item.disabled)
-        self.update()
+            self._model.toggle_state(remote_item.name)
 
     def copy_remote_name(self):
         remote_item = self.get_selected_remote()

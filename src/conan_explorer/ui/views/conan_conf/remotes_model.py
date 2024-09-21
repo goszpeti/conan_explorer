@@ -105,6 +105,12 @@ class RemotesTableModel(TreeModel):
         app.conan_api.add_remote(remote.name, remote.url, remote.verify_ssl)
         super().add_item(RemotesModelItem(remote, "", False))
 
+    def toggle_state(self, remote_name: str):
+        index = self.get_index_from_ref(remote_name)
+        item: RemotesModelItem = index.internalPointer()  # type: ignore
+        app.conan_api.disable_remote(remote_name, not item.disabled)
+        item.disabled = not item.disabled
+
     def remove(self, remote_name: str):
         app.conan_api.remove_remote(remote_name)
         index = self.get_index_from_ref(remote_name)
