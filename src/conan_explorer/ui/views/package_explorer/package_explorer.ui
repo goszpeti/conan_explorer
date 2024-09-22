@@ -187,6 +187,9 @@
           <pointsize>10</pointsize>
          </font>
         </property>
+        <property name="layoutDirection">
+         <enum>Qt::LayoutDirection::RightToLeft</enum>
+        </property>
         <property name="inputMethodHints">
          <set>Qt::InputMethodHint::ImhNone</set>
         </property>
@@ -380,6 +383,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
             <width>100</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::StrongFocus</enum>
           </property>
           <property name="frameShape">
            <enum>QFrame::Shape::NoFrame</enum>
