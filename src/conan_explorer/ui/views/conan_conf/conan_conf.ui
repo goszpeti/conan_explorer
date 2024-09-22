@@ -35,7 +35,7 @@
       <string notr="true">QPushButton {Text-align:left}</string>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="info_widget">
       <property name="styleSheet">
@@ -625,6 +625,9 @@
            <widget class="QTreeView" name="editables_ref_view">
             <property name="frameShape">
              <enum>QFrame::Shape::NoFrame</enum>
+            </property>
+            <property name="allColumnsShowFocus">
+             <bool>true</bool>
             </property>
            </widget>
           </widget>

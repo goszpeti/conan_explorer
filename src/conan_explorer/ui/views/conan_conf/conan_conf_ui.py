@@ -376,6 +376,7 @@ class Ui_Form(object):
         self.editables_ref_view = QTreeView(self.editables_splitter)
         self.editables_ref_view.setObjectName(u"editables_ref_view")
         self.editables_ref_view.setFrameShape(QFrame.Shape.NoFrame)
+        self.editables_ref_view.setAllColumnsShowFocus(True)
         self.editables_splitter.addWidget(self.editables_ref_view)
 
         self.editables_grid_layout.addWidget(self.editables_splitter, 0, 0, 1, 1)
@@ -470,7 +471,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.config_tab_widget.setCurrentIndex(1)
+        self.config_tab_widget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(Form)
