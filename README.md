@@ -136,7 +136,7 @@ You can also assign its icon to it from the site packages folder in **conan_expl
 
 ### Main dependencies
 
-* Pyside6 >= 6.5.0
+* Pyside6 >= 6.4.3
 * 1.48.0 <= conan < 2.8
 
 > ⚠ **Warning** - **Deprecation of Python 3.X**  
