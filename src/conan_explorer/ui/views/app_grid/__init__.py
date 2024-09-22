@@ -28,7 +28,7 @@ from conan_explorer.ui.widgets import AnimatedToggle
 
 from .config import UiAppLinkConfig, UiTabConfig
 from .model import UiAppLinkModel, UiTabModel
-from .tab import TabList
+from .tab import TabListView
 
 if TYPE_CHECKING:
     from conan_explorer.ui.fluent_window import PageStore
@@ -79,7 +79,7 @@ class AppGridView(PluginInterfaceV1):
         self._init_right_menu()
         for tab_config in self.model.tabs:
             # need to save object locally, otherwise it can be destroyed in the underlying C++ layer
-            tab = TabList(parent=self.tab_widget, model=tab_config)
+            tab = TabListView(parent=self.tab_widget, model=tab_config)
             self.tab_widget.addTab(tab, tab_config.name)
             tab.load(offset)
 
@@ -132,14 +132,14 @@ class AppGridView(PluginInterfaceV1):
 
     def open_new_app_link_dialog(self):
         # call tab on_app_link_add
-        current_tab: TabList = self.tab_widget.widget(self.tab_widget.currentIndex())  # type: ignore
+        current_tab: TabListView = self.tab_widget.widget(self.tab_widget.currentIndex())  # type: ignore
         current_tab.open_app_link_add_dialog()
 
     def on_tab_move(self):
         """Refresh backend info when tabs are reordered"""
         reordered_tabs = []
         for i in range(self.tab_widget.count()):
-            tab: TabList = self.tab_widget.widget(i)  # type: ignore
+            tab: TabListView = self.tab_widget.widget(i)  # type: ignore
             reordered_tabs.append(tab.model)
         self.model.tabs = reordered_tabs
         self.model.save()
@@ -182,12 +182,12 @@ class AppGridView(PluginInterfaceV1):
             self.model.tabs.append(tab_model)
             self.model.save()
             # add tab in ui
-            tab = TabList(self.tab_widget, model=tab_model)
+            tab = TabListView(self.tab_widget, model=tab_model)
             tab.load()
             self.tab_widget.addTab(tab, text)
 
     def on_tab_rename(self, index):
-        tab: TabList = self.tab_widget.widget(index)  # type: ignore
+        tab: TabListView = self.tab_widget.widget(index)  # type: ignore
 
         rename_tab_dialog = QInputDialog(self)
         text, accepted = rename_tab_dialog.getText(
@@ -215,8 +215,8 @@ class AppGridView(PluginInterfaceV1):
             self.model.tabs.remove(self.model.tabs[index])
             self.model.save()
 
-    def get_tabs(self) -> List[TabList]:
-        return self.findChildren(TabList)
+    def get_tabs(self) -> List[TabListView]:
+        return self.findChildren(TabListView)
 
     def on_toggle_auto_install(self):
         sender_toggle: AnimatedToggle = self.sender()  # type: ignore
@@ -250,11 +250,11 @@ class AppGridView(PluginInterfaceV1):
             self.re_init(self.model)  # loads tabs
 
     def on_add_link(self):
-        tab: TabList = self.tab_widget.currentWidget()  # type: ignore
+        tab: TabListView = self.tab_widget.currentWidget()  # type: ignore
         tab.open_app_link_add_dialog()
 
     def on_reorder(self):
-        tab: TabList = self.tab_widget.currentWidget()  # type: ignore
+        tab: TabListView = self.tab_widget.currentWidget()  # type: ignore
         tab.app_links[0].on_move()
 
     def open_new_app_dialog_from_extern(self, app_config: UiAppLinkConfig):

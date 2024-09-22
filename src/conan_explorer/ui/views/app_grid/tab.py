@@ -22,7 +22,7 @@ class TabScrollAreaWidgets(QWidget):
         super().__init__(parent)
 
 
-class TabList(QWidget):
+class TabListView(QWidget):
     SPACING = 10
 
     def __init__(self, parent: QTabWidget, model: UiTabModel):
@@ -92,7 +92,7 @@ class TabList(QWidget):
         self.setContentsMargins(0, 0, 0, 0)
         # this is a dummy, because tab_scroll_area needs a layout
         self.tab_layout = QVBoxLayout(self)
-        self.tab_layout.setContentsMargins(0, 0, 0, 0)
+        self.tab_layout.setContentsMargins(0, 5, 0, 0)
         self.tab_layout.setSizeConstraint(QLayout.SizeConstraint.SetDefaultConstraint)
         self.setLayout(self.tab_layout)
 
