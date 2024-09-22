@@ -4,20 +4,20 @@ Because the unit tests use qtbot helper, a QApplication object is already presen
 and it cannot be instatiated anew with the main loop of the program.
 """
 import os
+import platform
 import sys
 import time
 from pathlib import Path
 from subprocess import Popen
-import platform
+from test.conftest import check_if_process_running
 
 import pytest
-import conan_explorer
-from conan_explorer.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
-                                         settings_factory)
 from PySide6 import QtWidgets
 from pytest_check import check
 
-from test.conftest import check_if_process_running
+import conan_explorer
+from conan_explorer.settings import (LAST_CONFIG_FILE, SETTINGS_INI_TYPE,
+                                     settings_factory)
 
 
 @pytest.mark.conanv2

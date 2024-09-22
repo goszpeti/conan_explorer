@@ -1,23 +1,22 @@
 
-import os
-from pathlib import Path
+from test.conftest import (TEST_REF, TEST_REMOTE_NAME, TEST_REMOTE_URL,
+                           PathSetup, add_remote, login_test_remote,
+                           logout_all_remotes, remove_remote)
 from time import sleep
 
 import pytest
+from PySide6 import QtCore, QtWidgets
+
 import conan_explorer
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer import conan_version
 from conan_explorer.app.system import delete_path
 from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.types import ConanRef
+from conan_explorer.ui import main_window
+from conan_explorer.ui.views.conan_conf import ConanConfigView
 from conan_explorer.ui.views.conan_conf.editable_model import EditableModel
 from conan_explorer.ui.views.conan_conf.profiles_model import ProfilesModel
-from test.conftest import (TEST_REMOTE_NAME, TEST_REMOTE_URL, TEST_REF, PathSetup, 
-                    login_test_remote, logout_all_remotes, add_remote, remove_remote)
-from conan_explorer import conan_version
-
-import conan_explorer.app as app  # using global module pattern
-from conan_explorer.ui import main_window
-from PySide6 import QtCore, QtWidgets
-from conan_explorer.ui.views.conan_conf import ConanConfigView
 
 Qt = QtCore.Qt
 
@@ -55,6 +54,7 @@ def test_conan_config_view_remotes(qtbot, base_fixture: PathSetup, ui_no_refs_co
     10. Delete the remote
     """
     from pytestqt.plugin import _qapp_instance
+
     # add 2 more remotes
     add_remote("local2", "http://127.0.0.1:9301/")
     add_remote("local3", "http://127.0.0.1:9302/")

@@ -4,16 +4,18 @@ import platform
 import tempfile
 import time
 from pathlib import Path
-
-import pytest
-from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from test.conftest import TEST_REF, conan_install_ref, conan_remove_ref
 from typing import List
 
+import pytest
+
 from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
-from conan_explorer.conan_wrapper.types import create_key_value_pair_list
-from conan_explorer.conan_wrapper.conan_worker import ConanWorker, ConanWorkerElement
-from conan_explorer.conan_wrapper.types import ConanRef
+from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
+from conan_explorer.conan_wrapper.conan_worker import (ConanWorker,
+                                                       ConanWorkerElement)
+from conan_explorer.conan_wrapper.types import (ConanRef,
+                                                create_key_value_pair_list)
+
 
 @pytest.mark.conanv1
 def test_conan_get_conan_buildinfo():

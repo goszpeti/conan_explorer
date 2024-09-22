@@ -3,12 +3,10 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-
-import pytest
+from test.conftest import PathSetup
 
 from conan_explorer.settings import *
-from conan_explorer.settings.ini_file import IniSettings, PLUGINS_SECTION_NAME
-from test.conftest import PathSetup
+from conan_explorer.settings.ini_file import PLUGINS_SECTION_NAME, IniSettings
 
 
 def test_read_from_file():

@@ -1,16 +1,14 @@
 import sys
-from shutil import copy2
 from pathlib import Path
-
-import pytest
-from conan_explorer.settings import GUI_STYLE_MATERIAL
+from shutil import copy2
 from test.conftest import TEST_REF_OFFICIAL, PathSetup
 
 from conan_explorer import INVALID_PATH, asset_path
-from conan_explorer.ui.views.app_grid.model import (UiAppLinkConfig,
-                                                          UiAppLinkModel)
 from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.conan_wrapper.unified_api import ConanCommonUnifiedApi
+from conan_explorer.settings import GUI_STYLE_MATERIAL
+from conan_explorer.ui.views.app_grid.model import (UiAppLinkConfig,
+                                                    UiAppLinkModel)
 
 
 def test_executable_eval(base_fixture: PathSetup):

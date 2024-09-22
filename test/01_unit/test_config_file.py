@@ -1,12 +1,13 @@
 import json
-import pytest
 import tempfile
-from shutil import copyfile
 from pathlib import Path
-
-from conan_explorer.ui.views.app_grid.config.json_file import JsonUiConfig
-from conan_explorer.conan_wrapper.types import ConanRef
+from shutil import copyfile
 from test.conftest import PathSetup
+
+import pytest
+
+from conan_explorer.conan_wrapper.types import ConanRef
+from conan_explorer.ui.views.app_grid.config.json_file import JsonUiConfig
 
 
 def test_new_filename_is_created(base_fixture: PathSetup):

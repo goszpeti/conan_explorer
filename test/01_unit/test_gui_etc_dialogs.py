@@ -5,16 +5,12 @@ using the whole application (standalone).
 import sys
 import traceback
 from pathlib import Path
-from conan_explorer.ui.dialogs.conan_remove import ConanRemoveDialog
-from conan_explorer.ui.dialogs.pkg_diff.diff import ConfigDiffHighlighter, PkgDiffDialog
-from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
-from conan_explorer.ui.views.conan_conf.remotes_controller import ConanRemoteController
-from test.conftest import PathSetup, TEST_REF, conan_install_ref
+from test.conftest import TEST_REF, PathSetup, conan_install_ref
 from unittest.mock import Mock
 
 import pytest
-from pytest_check import check
 from PySide6 import QtCore, QtGui, QtWidgets
+from pytest_check import check
 
 import conan_explorer  # for mocker
 import conan_explorer.app as app
@@ -22,13 +18,21 @@ from conan_explorer import conan_version
 from conan_explorer.app import bug_dialog_exc_hook
 from conan_explorer.conan_wrapper.conanV1 import ConanApi
 from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, Remote
-from conan_explorer.settings import DEFAULT_INSTALL_PROFILE, FILE_EDITOR_EXECUTABLE
-from conan_explorer.ui.dialogs import FileEditorSelDialog, show_bug_reporting_dialog
+from conan_explorer.settings import (DEFAULT_INSTALL_PROFILE,
+                                     FILE_EDITOR_EXECUTABLE)
+from conan_explorer.ui.dialogs import (ConanRemoveDialog, FileEditorSelDialog,
+                                       show_bug_reporting_dialog)
+from conan_explorer.ui.dialogs.pkg_diff.diff import (ConfigDiffHighlighter,
+                                                     PkgDiffDialog)
 from conan_explorer.ui.views import AboutPage
 from conan_explorer.ui.views.conan_conf.dialogs.editable_edit_dialog import \
     EditableEditDialog
 from conan_explorer.ui.views.conan_conf.dialogs.remote_login_dialog import \
     RemoteLoginDialog
+from conan_explorer.ui.views.conan_conf.editable_controller import \
+    ConanEditableController
+from conan_explorer.ui.views.conan_conf.remotes_controller import \
+    ConanRemoteController
 
 Qt = QtCore.Qt
 

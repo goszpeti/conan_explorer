@@ -1,13 +1,12 @@
 
-from conan_explorer.ui.views.plugins_manager.plugins import PluginsPage
+from PySide6 import QtCore, QtWidgets
 
 import conan_explorer  # for mocker
 import conan_explorer.app as app
 from conan_explorer.ui.main_window import MainWindow
-from PySide6 import QtCore, QtWidgets
+from conan_explorer.ui.views.plugins_manager.plugins import PluginsPage
 
 Qt = QtCore.Qt
-
 
 def test_plugin_page(qtbot, base_fixture, mocker):
     """
@@ -18,6 +17,7 @@ def test_plugin_page(qtbot, base_fixture, mocker):
     """
 
     from pytestqt.plugin import _qapp_instance
+
     # first with ref + id in constructor
     main_window = MainWindow(_qapp_instance)
     main_window.load()

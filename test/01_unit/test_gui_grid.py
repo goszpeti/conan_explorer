@@ -7,22 +7,25 @@ import platform
 import shutil
 import sys
 from pathlib import Path
+from test.conftest import (TEST_REF, PathSetup, check_if_process_running,
+                           conan_install_ref)
+
 import pytest
-from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, GUI_STYLE_MATERIAL
-from conan_explorer.ui.views.app_grid.config import UiAppGridConfig, UiTabConfig
-from conan_explorer.ui.views.app_grid.config.model import UiApplicationModel
-from test.conftest import TEST_REF, PathSetup, check_if_process_running, conan_install_ref
+from PySide6 import QtCore, QtWidgets
 
 import conan_explorer.app as app  # using global module pattern
-
-from conan_explorer.ui.views.app_grid.app_link import ListAppLink, ListAppLink
+from conan_explorer.conan_wrapper.types import ConanRef as CFR
+from conan_explorer.settings import (AUTO_INSTALL_QUICKLAUNCH_REFS,
+                                     GUI_STYLE_MATERIAL)
+from conan_explorer.ui.views.app_grid.app_link import ListAppLink
+from conan_explorer.ui.views.app_grid.config import (UiAppGridConfig,
+                                                     UiTabConfig)
+from conan_explorer.ui.views.app_grid.config.model import UiApplicationModel
 from conan_explorer.ui.views.app_grid.dialogs.app_edit_dialog import \
     AppEditDialog
 from conan_explorer.ui.views.app_grid.model import (UiAppGridModel,
-                                                        UiAppLinkConfig,
-                                                        UiAppLinkModel)
-from conan_explorer.conan_wrapper.types import ConanRef as CFR
-from PySide6 import QtCore, QtWidgets
+                                                    UiAppLinkConfig,
+                                                    UiAppLinkModel)
 
 Qt = QtCore.Qt
 

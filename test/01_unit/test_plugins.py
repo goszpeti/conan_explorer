@@ -1,12 +1,16 @@
-from pathlib import Path
 import tempfile
-import pytest
-import conan_explorer.app as app  # using global module pattern
-from conan_explorer import BUILT_IN_PLUGIN, INVALID_PATH, AUTHOR
-from conan_explorer.settings import PLUGINS_SECTION_NAME
-from conan_explorer.ui.plugin import PluginHandler, PluginFile, PluginDescription
+from pathlib import Path
 from test.conftest import PathSetup
+
+import pytest
 from PySide6 import QtWidgets
+
+import conan_explorer.app as app  # using global module pattern
+from conan_explorer import AUTHOR, BUILT_IN_PLUGIN, INVALID_PATH
+from conan_explorer.settings import PLUGINS_SECTION_NAME
+from conan_explorer.ui.plugin import (PluginDescription, PluginFile,
+                                      PluginHandler)
+
 
 def test_plugin_file_read(base_fixture: PathSetup, capfd: pytest.CaptureFixture[str]):
     """ test plugin file read method of all failures"""
