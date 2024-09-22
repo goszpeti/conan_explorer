@@ -197,9 +197,15 @@ class PackageFileExplorerController(QObject):
         reply = msg.exec()
         if reply != QMessageBox.StandardButton.Yes:
             return
-        for path in selected_paths:
-            # TODO loading gui
-            delete_path(Path(path))
+
+        loader = LoaderGui(None)
+
+        def delete_paths(paths: List[str]):
+            for path in paths:
+                loader.loading_string_signal.emit("Deleting " + path)
+                delete_path(Path(path))
+
+        loader.load(self._view, delete_paths, (selected_paths,), cancel_button=False)
 
     def on_files_copy(self) -> List[QUrl]:
         if not self._model:
