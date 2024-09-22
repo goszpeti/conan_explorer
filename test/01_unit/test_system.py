@@ -5,21 +5,20 @@ import subprocess
 import sys
 import tempfile
 import time
-from shutil import rmtree
 from pathlib import Path
+from shutil import rmtree
 from subprocess import check_output
-
-import pytest
 from test.conftest import check_if_process_running, get_window_pid, is_ci_job
 
-import conan_explorer  # for mocker
 import psutil
+
+import conan_explorer  # for mocker
 from conan_explorer import INVALID_PATH, PKG_NAME
 from conan_explorer.app.system import (calc_paste_same_dir_name,
-                                       copy_path_with_overwrite,
-                                       delete_path, execute_app, find_program_in_windows, open_cmd_in_path,
-                                       open_file, open_in_file_manager,
-                                       run_file)
+                                       copy_path_with_overwrite, delete_path,
+                                       execute_app, find_program_in_windows,
+                                       open_cmd_in_path, open_file,
+                                       open_in_file_manager, run_file)
 
 
 def test_choose_run_file(tmp_path, mocker):

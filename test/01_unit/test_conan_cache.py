@@ -1,14 +1,14 @@
 
 import tempfile
-import pytest
-from shutil import copyfile
 from pathlib import Path
-from conan_explorer import INVALID_PATH
-from conan_explorer import conan_version
+from shutil import copyfile
+from test.conftest import PathSetup
 
+import pytest
+
+from conan_explorer import INVALID_PATH, conan_version
 from conan_explorer.conan_wrapper import ConanInfoCache
 from conan_explorer.conan_wrapper.types import ConanRef as CFR
-from test.conftest import PathSetup
 
 
 @pytest.mark.conanv2

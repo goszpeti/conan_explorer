@@ -2,10 +2,8 @@
 import os
 import platform
 from pathlib import Path
-from conan_explorer.app.system import delete_path
-from conan_explorer.ui.views.package_explorer.file_controller import NEW_FOLDER_NAME
-from test.conftest import (TEST_REF, TEST_REF_OFFICIAL, PathSetup,
-                           conan_add_editables, conan_install_ref, get_current_profile)
+from test.conftest import (TEST_REF, PathSetup, conan_add_editables,
+                           conan_install_ref, get_current_profile)
 from time import sleep
 from typing import Generator, Tuple
 
@@ -18,11 +16,14 @@ from pytest_mock import MockerFixture
 import conan_explorer  # for mocker
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer import conan_version
+from conan_explorer.app.system import delete_path
 from conan_explorer.conan_wrapper.types import ConanPkgRef, ConanRef
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui import main_window
 from conan_explorer.ui.views import LocalConanPackageExplorer
 from conan_explorer.ui.views.app_grid.tab import AppEditDialog
+from conan_explorer.ui.views.package_explorer.file_controller import \
+    NEW_FOLDER_NAME
 from conan_explorer.ui.views.package_explorer.sel_model import PkgSelectionType
 
 Qt = QtCore.Qt

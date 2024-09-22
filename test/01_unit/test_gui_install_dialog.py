@@ -6,16 +6,17 @@ import os
 from datetime import datetime, timedelta
 from test.conftest import TEST_REF, conan_remove_ref
 
+import pytest
+from PySide6 import QtCore, QtGui, QtWidgets
+
 import conan_explorer  # for mocker
 import conan_explorer.app as app
-import pytest
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
 from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.settings import DEFAULT_INSTALL_PROFILE
 from conan_explorer.ui.dialogs.conan_install import ConanInstallDialog
 from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog
 from conan_explorer.ui.widgets.conan_line_edit import ConanRefLineEdit
-from PySide6 import QtCore, QtGui, QtWidgets
 
 Qt = QtCore.Qt
 @pytest.mark.conanv2

@@ -2,19 +2,20 @@
 import os
 import tempfile
 from pathlib import Path
-from conan_explorer.ui.dialogs import ReorderDialog
-from conan_explorer.ui.views.app_grid.config import UiAppLinkConfig
-from conan_explorer.ui.views.app_grid.config.json_file import JsonUiConfig
 from test.conftest import TEST_REF, conan_install_ref
 
+from PySide6 import QtCore, QtWidgets
+
 import conan_explorer.app as app
+from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.settings import *
 from conan_explorer.settings.ini_file import IniSettings
 from conan_explorer.ui import main_window
+from conan_explorer.ui.dialogs import ReorderDialog
+from conan_explorer.ui.views.app_grid.config import UiAppLinkConfig
+from conan_explorer.ui.views.app_grid.config.json_file import JsonUiConfig
 from conan_explorer.ui.views.app_grid.model import UiAppLinkModel
-from conan_explorer.ui.views.app_grid.tab import (AppEditDialog, ListAppLink)
-from conan_explorer.conan_wrapper.types import ConanRef
-from PySide6 import QtCore, QtWidgets
+from conan_explorer.ui.views.app_grid.tab import AppEditDialog, ListAppLink
 
 Qt = QtCore.Qt
 

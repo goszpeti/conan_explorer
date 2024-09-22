@@ -1,15 +1,15 @@
 
-import pytest
-from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from test.conftest import TEST_REF
+
+import pytest
+from PySide6 import QtCore
 
 import conan_explorer  # for mocker
 import conan_explorer.app as app
-from conan_explorer.ui.main_window import MainWindow
 from conan_explorer.conan_wrapper.types import ConanRef
-from PySide6 import QtCore, QtWidgets
-from conan_explorer.ui.views import ConanSearchView
-from conan_explorer.ui.views import LocalConanPackageExplorer
+from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
+from conan_explorer.ui.main_window import MainWindow
+from conan_explorer.ui.views import ConanSearchView, LocalConanPackageExplorer
 
 Qt = QtCore.Qt
 
