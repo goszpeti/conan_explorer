@@ -112,7 +112,7 @@ class PackageFilter(QSortFilterProxyModel):
         """
         model = self.sourceModel()
         source_index = model.index(row_num, 0, parent)
-        source_item: Optional[PackageTreeItem] = source_index.internalPointer()
+        source_item: Optional[PackageTreeItem] = source_index.internalPointer()  # type: ignore
         if source_item is None:
             return False
         children_count = len(source_item.child_items)
@@ -181,7 +181,7 @@ class PkgSelectModel(TreeModel):
     def get_all_sizes(self):
         self.beginResetModel()
         for row in range(self.rowCount(QModelIndex())):
-            item: PackageTreeItem = (self.index(row, 0, QModelIndex())).internalPointer()
+            item: PackageTreeItem = (self.index(row, 0, QModelIndex())).internalPointer()  # type: ignore
             if item.type == PkgSelectionType.editable:
                 continue
             item.load_children()  # load without expanding
