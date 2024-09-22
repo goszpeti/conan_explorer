@@ -177,7 +177,7 @@ class TreeModel(QAbstractItemModel):
         if not child.isValid():
             return QModelIndex()
 
-        child_item = child.internalPointer()
+        child_item: TreeModelItem = child.internalPointer()  # type: ignore
         if not hasattr(child_item, "parent"):
             Logger().error("%s has incorrect type:", child_item)
         parent_item = child_item.parent()
@@ -197,12 +197,12 @@ class TreeModel(QAbstractItemModel):
     def canFetchMore(self, parent):
         if not parent.isValid():
             return False
-        item = parent.internalPointer()
+        item: TreeModelItem = parent.internalPointer()  # type: ignore
         return not item.is_loaded  # enabled, if lazy loading is enabled
 
     @override
     def fetchMore(self, parent):
-        item: TreeModelItem = parent.internalPointer()
+        item: TreeModelItem = parent.internalPointer()  # type: ignore
         item.load_children()
 
     def get_index_from_item(self, item: TreeModelItem) -> QModelIndex:

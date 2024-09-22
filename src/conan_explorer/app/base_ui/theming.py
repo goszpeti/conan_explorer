@@ -18,6 +18,7 @@ def activate_theme(qt_app: QApplication):
     if dark_mode:
         style_file = "dark_style.qss.in"
     try:
+        # since Qt 6.6
         user_color = QPalette().accent().color().name()
     except Exception:
         user_color = "#000000"
