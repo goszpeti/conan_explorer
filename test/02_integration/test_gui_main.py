@@ -16,7 +16,7 @@ import requests
 from conan_explorer.app.base_ui.loading import LoaderGui
 from conan_explorer.ui.fluent_window.side_menu import SideSubMenu
 from conan_explorer.ui.plugin.handler import PluginFile
-from conan_explorer.ui.views.app_grid.tab import TabList
+from conan_explorer.ui.views.app_grid.tab import TabListView
 from conan_explorer import DEFAULT_UI_CFG_FILE_NAME, user_save_path
 from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
@@ -57,7 +57,7 @@ def test_startup_no_config(qtbot, base_fixture, ui_config_fixture, mocker):
     main_gui.show()
     qtbot.waitExposed(main_gui, timeout=3000)
 
-    for tab in main_gui.app_grid.findChildren(TabList):
+    for tab in main_gui.app_grid.findChildren(TabListView):
         assert tab.model.name == "New Tab"
         for test_app in tab.app_links:
             assert test_app.model.name == "New App"

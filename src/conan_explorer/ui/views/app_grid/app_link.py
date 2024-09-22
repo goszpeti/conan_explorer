@@ -16,7 +16,7 @@ from .dialogs import AppEditDialog
 from .model import UiAppLinkModel
 
 if TYPE_CHECKING:
-    from .tab import TabList
+    from .tab import TabListView
 
 OFFICIAL_RELEASE_DISP_NAME = "<official release>"
 OFFICIAL_USER_DISP_NAME = "<official user>"
@@ -39,7 +39,7 @@ class ListAppLink(QFrame):
     def __init__(
         self,
         parent: Optional[QWidget],
-        parent_tab: "TabList",
+        parent_tab: "TabListView",
         model: UiAppLinkModel,
         icon_size=ICON_SIZE,
     ):
