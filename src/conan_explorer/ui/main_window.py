@@ -480,7 +480,7 @@ class MainWindow(FluentWindow):
         else:
             geometry = self.geometry()
             geo_str = (
-                f"{geometry.left()},{geometry.top()}," f"{geometry.width()},{geometry.height()}"
+                f"{geometry.left()},{geometry.top()},{geometry.width()},{geometry.height()}"
             )
             app.active_settings.set(WINDOW_SIZE, geo_str)
         # save console size

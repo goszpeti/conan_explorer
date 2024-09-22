@@ -294,8 +294,8 @@ class AppGridView(PluginInterfaceV1):
                         ):  # only compare options, if user explicitly set them
                             # user options should be a subset of full pkg options
                             if (
-                                not app_link.model.conan_options.items()
-                                <= pkg_info.get("options", {}).items()
+                                app_link.model.conan_options.items()
+                                > pkg_info.get("options", {}).items()
                             ):
                                 continue
                         if pkg_id:
