@@ -24,18 +24,6 @@ Palette:
 
 /* Setup for specific widgets */
 
-QWidget#central_widget{
-    border-style: solid;
-    border-width: 2px;
-    background-color: #5c5c5c;
-    border-color: {{USER_COLOR}};
-    border-radius: {{WINDOW_BORDER_RADIUS}}px;
-}
-
-QFrame#edit_frame{
-    background-color: #808086;
-}
-
 /* Top Frame Subwidgets */
 
 QLabel#page_title {
@@ -75,7 +63,15 @@ QPushButton:pressed#close_button {
     background-color: #C1655D;
 }
 
-/* Center Frame Subwidgets */
+/* Center Frame and Subwidgets */
+
+QWidget#central_widget{
+    border-style: solid;
+    border-width: 2px;
+    background-color: #5c5c5c;
+    border-color: {{USER_COLOR}};
+    border-radius: {{WINDOW_BORDER_RADIUS}}px;
+}
 
 QFrame#content_frame {
     background-color: #5c5c5c;
@@ -121,13 +117,19 @@ QToolButton:disabled {
     color: #5c5c5c;
 }
 
-QLabel#logo_label{
-    background-color: #808086;
-}
-
 QWidget#info_contents, QWidget#about_contents {
     background-color: #808086;
 }
+
+QTextBrowser#console{ 
+    background-color: #1e1d23;
+    border-bottom-right-radius: 7px;
+}
+
+ /* TODO: check if needed  */
+/* QFrame#edit_frame{
+    background-color: #808086;
+} */
 
 /* Dialog styling */
 
@@ -173,7 +175,11 @@ QDialog .QFrame {
     border-radius: 4px;
 }
 
-/* Quicklaunch styling */ 
+/* Quicklaunch styling */
+
+QLabel#app_name {
+    font: bold;
+}
 
 AppGridView {
     background-color: #5c5c5c;
@@ -189,9 +195,7 @@ ListAppLink {
     border-radius: 7px;
 }
 
-QLabel#app_name {
-    font: bold;
-}
+
 ClickableIcon {
     border-radius: 5px;
     background-color: transparent;
@@ -211,10 +215,15 @@ ClickableIcon:pressed {
 }
 
 /* About page */
+
 QLabel#about_label {
     background-color: #5c5c5c;
     border-radius: 5px;
     padding-left: 5px;
+}
+
+QLabel#logo_label{
+    background-color: #808086;
 }
 
 /* Left Frame Subwidgets */
@@ -274,7 +283,7 @@ QLabel#right_menu_bottom_title_label {
 QFrame#right_menu_frame QPushButton{
     border-radius: 5px;
     margin: 2px;
-    text-align:middle;
+    text-align: middle;
     padding: 3px;
     min-width: 30px;
 }
@@ -345,6 +354,7 @@ QHeaderView {
     /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
     font-size: {{MAIN_FONT_SIZE}}pt;
 }
+
 QHeaderView::section {
     padding-left: 4;
     background-color: #202020;
@@ -367,41 +377,23 @@ QLineEdit {
     selection-color: #f8f8ff;
 }
 
-QMainWindow{
+QMainWindow {
     background-color: transparent;
 }
 
-QMenu{
+QMenu {
     background-color: #202020;
     border-radius: {{WINDOW_BORDER_RADIUS}}px;
 }
-QMenu::item:selected{
+QMenu::item:selected {
     background-color: #5c5c5c; 
 }
-QMenu::item:disabled{
+QMenu::item:disabled {
     color: #A8A8A8;
 }
 
 QMessageBox QPushButton{
     background-color: #474747;
-}
-
-QTabWidget{
-    background-color: #5c5c5c;
-}
-QTabWidget::pane {
-    background: #5c5c5c;
-    border-radius: 5px;
-}
-QTabWidget::tab-bar:bottom {
-    bottom: 1px;
-}
-
-QTabBar::close-button {
-    image: url(icons:material/close_white.svg);
-}
-QTabBar::close-button:hover {
-    image: url(icons:material/close_white_lgr.svg);
 }
 
 QScrollArea{
@@ -490,6 +482,7 @@ QStackedWidget{
 QTextEdit{ 
     background-color: #1e1d23;
 }
+
 QTextBrowser{ 
     background-color: #474747;
     font-family: {{CONSOLE_FONT_FAMILY}};
@@ -497,11 +490,8 @@ QTextBrowser{
     selection-color: #FFFFFF;
     selection-background-color: #6699CC;
     border-bottom-right-radius: 7px;
-}
-
-QTextBrowser#console{ 
-    background-color: #1e1d23;
-    border-bottom-right-radius: 7px;
+    font-size: {{MAIN_FONT_SIZE - 2}}pt;
+    font-family: {{CONSOLE_FONT_FAMILY}};
 }
 
 QToolTip{
@@ -509,6 +499,13 @@ QToolTip{
     background: #5c5c5c;
 }
 
+
+QTabBar::close-button {
+    image: url(icons:material/close_white.svg);
+}
+QTabBar::close-button:hover {
+    image: url(icons:material/close_white_lgr.svg);
+}
 
 QTabBar::tab {
     border-top-left-radius: 6px;
@@ -543,25 +540,52 @@ QTabBar::tab:!selected:hover {
     margin-top: 2px; /* make non-selected tabs look smaller */
 }
 
-QListView, QTreeView, QListWidget {
+
+QTabWidget{
+    background-color: #5c5c5c;
+}
+QTabWidget::pane {
+    background: #5c5c5c;
+    border-radius: 5px;
+}
+QTabWidget::tab-bar:bottom {
+    bottom: 1px;
+}
+
+
+QListView, QTreeView, QListWidget,QTreeView::branch {
     color: #f8f8ff;
     background-color: #474747;
     alternate-background-color: #474747;
+    show-decoration-selected: 1;
+    selection-background-color: #3375B7;
+    selection-color: #f8f8ff;
 }
+
+QListView::item,QTreeView::item,QListWidget::item {
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}
+
 /* border-radius causes grahical glitches */
-QListView::item:hover,QTreeView::item:hover{
+QListView::item:hover,QTreeView::item:hover,QListWidget::item:hover,
+QTreeView::branch:hover {
     background: #3375B7;
     /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
-QListView::item:selected,QTreeView::item:selected {
+QListView::item:selected,QTreeView::item:selected,QListWidget::item:selected,
+QTreeView::branch:selected {
     /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
+    color: white;
 }
-QListView::item:selected:active,QTreeView::item:selected:active{
+QListView::item:selected:active,QTreeView::item:selected:active,
+QListWidget::item:selected:active, QTreeView::branch:selected:active {
     background-color: #6699CC;
     /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
-QListView::item:selected:!active,QTreeView::item:selected:!active {
-    background-color: #6699CC;
+QListView::item:selected:!active,QTreeView::item:selected:!active,
+QListWidget::item:selected:!active,QTreeView::branch:selected:!active {
+    background: #4c7399;
     /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
 
@@ -574,9 +598,6 @@ QTreeWidget::indicator:checked {
     image: url(icons:material/check_box_checked_white.svg);
 }
 
-QTreeView::branch {
-    background: #474747;
-}
 QTreeView::branch:closed:has-children {
     image: url(icons:material/forward_white.svg);
 }
@@ -584,8 +605,8 @@ QTreeView::branch:open:has-children {
     image: url(icons:material/expand_white.svg);
 }
 QTreeView::branch:hover:closed:has-children {
-    image: url(icons:material/forward_b.svg);
+    image: url(icons:material/forward.svg);
 }
 QTreeView::branch:hover:open:has-children:hover {
-    image: url(icons:material/expand_b.svg);
+    image: url(icons:material/expand.svg);
 }
