@@ -42,6 +42,7 @@ from conan_explorer.settings import (
     WINDOW_SIZE,
 )
 
+from . import recompile_ui_files
 from .common import init_qt_logger, remove_qt_logger
 from .common.theming import get_gui_dark_mode, get_gui_style, get_themed_asset_icon
 from .dialogs import FileEditorSelDialog
@@ -250,18 +251,17 @@ class MainWindow(FluentWindow):
         remove_qt_logger(Logger(), self.qt_logger_name)
         super().closeEvent(event)
 
-    # Try to fix random exit from maximized state
-    # @override
-    # def resizeEvent(self, event: QResizeEvent) -> None:
-    #     super().resizeEvent(event)
-    #     try:
-    #         if self.loaded:
-    #             self.ui.page_stacked_widget.currentWidget().setMaximumWidth(
-    #                 self.ui.center_frame.width() - 4
-    #             )
-    #             self.ui.page_stacked_widget.currentWidget().adjustSize()
-    #     except Exception as e:
-    #         Logger().error(f"Can't resize current view: {str(e)}")
+    @override
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+        try:
+            if self.loaded:
+                self.ui.page_stacked_widget.currentWidget().setMaximumWidth(
+                    self.ui.center_frame.width() - 4
+                )
+                self.ui.page_stacked_widget.currentWidget().adjustSize()
+        except Exception as e:
+            Logger().error(f"Can't resize current view: {str(e)}")
 
     def load(self, config_source: Optional[PathLike] = None):
         """Load all application gui elements specified in the GUI config (file)"""
@@ -276,16 +276,19 @@ class MainWindow(FluentWindow):
         )
         loader.wait_for_finished()
         # Restore last view
+        restored_last_view = False
         if app.active_settings.get_bool(AUTO_OPEN_LAST_VIEW):
             try:
                 last_view = app.active_settings.get_string(LAST_VIEW)
                 page = self.page_widgets.get_page_by_name(last_view)
                 self.page_widgets.get_button_by_type(type(page)).click()
+                restored_last_view = True
             except Exception as e:
                 Logger().debug("Can't switch to page for auto open: " + str(e))
-                # click first view
-                page = self.page_widgets.get_all_pages()[0]
-                self.page_widgets.get_button_by_type(type(page)).click()
+
+        if not restored_last_view:  # click first view
+            page = self.page_widgets.get_all_pages()[0]
+            self.page_widgets.get_button_by_type(type(page)).click()
 
         self.loaded = True
 
@@ -312,6 +315,7 @@ class MainWindow(FluentWindow):
 
     def reload(self):
         """Only for debug mode"""
+        recompile_ui_files()
         self._plugin_handler.reload_all_plugins()
         # self.reload_theme()
 
