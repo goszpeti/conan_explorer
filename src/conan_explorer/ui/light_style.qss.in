@@ -17,7 +17,7 @@ Palette:
 */
 
 * {
-    color: #000000;
+    color: black;
     font-size: {{MAIN_FONT_SIZE}}pt;
     font-family: {{FONT_FAMILY}};
 }
@@ -146,7 +146,7 @@ QToolButton:checked {
     background-color: #A8A8A8;
 }
 
-/* Quicklaunch styling  */
+/* Quicklaunch styling */
 
 QLabel#app_name {
     font: bold;
@@ -227,7 +227,6 @@ QFrame#right_menu_frame * {
 }
 QFrame#right_menu_frame {
     border: 1px solid #BCBCBC;
-    /* border-top-left-radius: {{WINDOW_BORDER_RADIUS}}px; */
 }
 
 QLabel#right_menu_top_title_label {
@@ -267,7 +266,7 @@ QLabel#side_menu_title_label {
 }
 
 QPushButton#side_menu_title_button {
-    background: #BCBCBC;
+    background-color: #BCBCBC;
     border: none;
 }
 
@@ -318,21 +317,6 @@ QMenu{
 QMenu::item:selected{
     background-color: #A8A8A8;
 }
-
-QProgressDialog{
-    border: 2px solid grey;
-    border-radius: 3px;
-}
-
-QProgressBar::chunk {
-    background-color: #6699CC;
-    border-radius: 5px;
-}
-
-/* QStackedWidget {
-    background-color: #F0F0F0;
-    border-radius: 5px;
-} */
 
 QScrollBar:vertical {
     border: 0px solid transparent;
@@ -399,9 +383,35 @@ QScrollBar::sub-line:horizontal {
     subcontrol-origin: margin;
 }
 
+
+QProgressDialog{
+    border: 2px solid grey;
+    border-radius: 3px;
+}
+
+QProgressBar::chunk {
+    background-color: #6699CC;
+    border-radius: 5px;
+}
+
 QSplitter::handle {
     background: #D3D3D3;
     height: 3px;
+}
+
+QTextBrowser {
+    background-color: white;
+    selection-color: white;
+    selection-background-color: #6699CC;
+    border-bottom-right-radius: 7px;
+    font-size: {{MAIN_FONT_SIZE - 2}}pt;
+    font-family: {{CONSOLE_FONT_FAMILY}};
+}
+
+QToolTip {
+    border-style: none;
+    /* needed, otherwise the background color is not applied */
+    background: white;
 }
 
 QTabBar::close-button {
@@ -454,39 +464,37 @@ QTabWidget::pane {
     background: #F0F0F0;
 }
 
-QTextBrowser {
-    background-color: white;
-    selection-color: white;
-    selection-background-color: #6699CC;
-    border-bottom-right-radius: 7px;
-    font-size: {{MAIN_FONT_SIZE - 2}}pt;
-    font-family: {{CONSOLE_FONT_FAMILY}};
-}
-
-QToolTip {
-    border-style: none;
-    /* needed, otherwise the background color is not applied */
-    background: white;
-}
-
-QListView,QTreeView,QListWidget {
+QListView,QTreeView,QListWidget,QTreeView::branch  {
+    color: black;
     background-color: white;
     alternate-background-color: white;
+    show-decoration-selected: 1;
+    selection-background-color:#808086;
+    selection-color: #f8f8ff;
+}
+
+QListView::item,QTreeView::item,QListWidget::item {
+    border-top-color: transparent;
+    border-bottom-color: transparent;
 }
 
 /* border-radius causes grahical glitches */
-QListView::item:hover,QTreeView::item:hover,QListWidget::item:hover {
+QListView::item:hover,QTreeView::item:hover,QListWidget::item:hover,
+QTreeView::branch:hover {
     background: #7fbfff;
     /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
-QListView::item:selected,QTreeView::item:selected,QListWidget::item:selected {
+QListView::item:selected,QTreeView::item:selected,QListWidget::item:selected,
+QTreeView::branch:selected {
     /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
-QListView::item:selected:active,QTreeView::item:selected:active,QListWidget::item:selected:active {
+QListView::item:selected:active,QTreeView::item:selected:active,
+QListWidget::item:selected:active,QTreeView::branch:selected:active {
     background: #6699CC;
     /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
-QListView::item:selected:!active,QTreeView::item:selected:!active,QListWidget::item:selected:!active {
+QListView::item:selected:!active,QTreeView::item:selected:!active,
+QListWidget::item:selected:!active,QTreeView::branch:selected:!active  {
     background: #4c7399;
     /* border-radius: {{WINDOW_BORDER_RADIUS-1}}px; */
 }
@@ -500,9 +508,6 @@ QTreeWidget::indicator:checked {
     image: url(icons:material/check_box_checked.svg);
 }
 
-QTreeView::branch {
-    background: white;
-}
 QTreeView::branch:closed:has-children {
     image: url(icons:material/forward.svg);
 }
@@ -510,8 +515,8 @@ QTreeView::branch:open:has-children {
     image: url(icons:material/expand.svg);
 }
 QTreeView::branch:hover:closed:has-children {
-    image: url(icons:material/forward_b.svg);
+    image: url(icons:material/forward_white.svg);
 }
 QTreeView::branch:hover:open:has-children:hover {
-    image: url(icons:material/expand_b.svg);
+    image: url(icons:material/expand_white.svg);
 }
