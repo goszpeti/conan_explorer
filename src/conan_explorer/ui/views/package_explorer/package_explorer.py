@@ -429,7 +429,7 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
             self._open_fm_action.setVisible(False)
             self._copy_as_path_action.setVisible(False)
             self._open_terminal_action.setVisible(False)
-        elif os.path.isdir(paths[0]):
+        elif os.path.exists(paths[0]):
             self._add_link_action.setVisible(False)
             self._edit_file_action.setVisible(False)
             self._rename_action.setVisible(True)
