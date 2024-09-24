@@ -73,7 +73,7 @@ class LoaderGui(QObject):
             LoaderGui.__progress_dialog = progress_dialog
         self.progress_dialog = LoaderGui.__progress_dialog
         self.loading_string_signal.connect(self.progress_dialog.setLabelText)
-        self.loading_finished_signal.connect(self.thread_finished)
+        self.loading_finished_signal.connect(self.on_finished)
         self.worker: Optional[Worker] = None
         self.load_thread: Optional[QThread] = None
         self.finished = True
@@ -126,7 +126,6 @@ class LoaderGui(QObject):
         if cancel_button:
             self.cancel_button = QPushButton("Cancel")
             self.progress_dialog.setCancelButton(self.cancel_button)
-            self.cancel_button.clicked.connect(self.on_cancel)
         else:
             self.progress_dialog.setCancelButton(None)  # type: ignore
 
@@ -153,7 +152,6 @@ class LoaderGui(QObject):
         # for debug purposes only
         if str2bool(os.getenv("DISABLE_ASYNC_LOADER", "")):
             ret = work_task(*worker_args)
-            self.thread_finished()
             self.progress_dialog.hide()
             if finish_task:
                 try:  # difficult to handle without Qt signals - so just try
@@ -171,7 +169,6 @@ class LoaderGui(QObject):
 
         if finish_task:
             self.worker.finished.connect(finish_task)
-        self.load_thread.finished.connect(self.thread_finished)
 
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.finished.connect(self.load_thread.quit)
@@ -182,11 +179,6 @@ class LoaderGui(QObject):
 
         Logger().debug("Start async loading thread for %s", str(work_task))
         self.load_thread.start()
-        if cancel_button:
-            self.cancel_button.clicked.connect(self.load_thread.quit)
-
-    def thread_finished(self):
-        self.finished = True
 
     def wait_for_finished(self):
         Logger().debug("Wait for loading thread...")
@@ -195,9 +187,7 @@ class LoaderGui(QObject):
             sleep(0.01)
             QApplication.processEvents()
 
-    def on_cancel(self):
-        self.finished = True
-
     def on_finished(self, return_value=None):
         # save return value to get after wait_for_finished
         self.return_value = return_value
+        self.finished = True
