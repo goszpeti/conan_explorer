@@ -222,7 +222,7 @@ class ConanInstallDialog(QDialog):
         message_box.setText(
             (
                 f"Installation of '{conan_ref}' failed.\n"
-                "Do you want to compare to packages on the remotes?"
+                "Do you want compare this package to the available packages on the remotes?"
             )
         )
         sb = QMessageBox.StandardButton
