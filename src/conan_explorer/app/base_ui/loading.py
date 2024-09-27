@@ -27,7 +27,7 @@ class Worker(QObject):
         self.args = args
 
     def work(self):
-        if DEBUG_LEVEL > 1:  # pragma: no cover
+        if DEBUG_LEVEL > 1:
             try:
                 import debugpy  # - debug with this the Qt Thread
 

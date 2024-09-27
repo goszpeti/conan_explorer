@@ -1,14 +1,16 @@
+# build and local development
 .vscode/.ropeproject/**
 .vscode/tags
 .venv*
+**/build/**
+*.egg-info
+dist/**
+*result*.xml
 
+# generated files
 **/*_inv.png
 **/*_white.svg
 **/__pycache__/**
-*.egg-info
-**/build/**
-dist/**
-*result*.xml
 cov.xml
 .coverage
 htmlcov/*
