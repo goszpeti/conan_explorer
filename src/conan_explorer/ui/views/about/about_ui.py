@@ -41,7 +41,7 @@ class Ui_Form(object):
         self.verticalLayout = QVBoxLayout(self.about_contents)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setContentsMargins(3, 3, 0, 0)
         self.logo_label = QLabel(self.about_contents)
         self.logo_label.setObjectName(u"logo_label")
         self.logo_label.setMinimumSize(QSize(100, 100))
