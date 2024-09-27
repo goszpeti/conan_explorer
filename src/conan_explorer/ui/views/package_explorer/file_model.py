@@ -14,7 +14,7 @@ class CalFileSystemModel(FileSystemModel):
         self, h_align=QAF.AlignLeft | QAF.AlignVCenter, v_align=QAF.AlignVCenter, parent=None
     ):
         super().__init__(h_align, v_align, parent)
-        self._disabled_rows: "set[int]" = set()
+        self._disabled_indexes = set()
 
     @override
     def data(self, index: QModelIndex, role: Qt.ItemDataRole):
@@ -32,18 +32,11 @@ class CalFileSystemModel(FileSystemModel):
         return super().data(index, role)
 
     def _row_is_disabled(self, index: QModelIndex):
-        return index.row() in self._disabled_rows
+        return index in self._disabled_indexes
 
     def add_disabled_items(self, item_paths: List[str]):
         for item_path in item_paths:
-            self._disabled_rows.add(self.index(Path(item_path).as_posix(), 0).row())
+            self._disabled_indexes.add(self.index(Path(item_path).as_posix(), 0))
 
     def clear_all_disabled_items(self):
-        self._disabled_rows = set()
-
-    def clear_disabled_item(self, item_path: str):
-        try:
-            disabled_item = self.index(Path(item_path).as_posix(), 0).row()
-            self._disabled_rows.remove(disabled_item)
-        except Exception:
-            pass  # element not found
+        self._disabled_indexes = set()

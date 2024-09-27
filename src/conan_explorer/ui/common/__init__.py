@@ -1,4 +1,4 @@
-""" Common ui classes, and functions """
+"""Common ui classes and functions"""
 
 from pathlib import Path
 
@@ -33,7 +33,7 @@ from .theming import (
 
 
 def measure_font_width(text: str) -> int:
-    """ Return the width of a text in pixels woth the current font and default fontsize """
+    """Return the width of a text in pixels with the current font and default fontsize"""
     fs = app.active_settings.get_int(FONT_SIZE)
     font = QFont()
     font.setPointSize(fs)
