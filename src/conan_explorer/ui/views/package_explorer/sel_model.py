@@ -247,7 +247,6 @@ class PkgSelectModel(TreeModel):
                 font.setItalic(True)
                 return font
         # foregroundrole does not seem to work for new win11 platform so use BackgroundRole
-        elif role == Qt.ItemDataRole.BackgroundRole:
-            if item.invalid:
-                return QColor("orange")
+        elif role == Qt.ItemDataRole.BackgroundRole and item.invalid:
+            return QColor("orange")
         return None

@@ -40,7 +40,6 @@ class ConanCacheCleanupDialog(QDialog):
             size_mbytes = 0
             for ref, paths in cleanup_info.items():
                 ref_item = QTreeWidgetItem([ref])
-                # ref_item.setCheckState(0, Qt.CheckState.Checked)
                 for path_type, path in paths.items():
                     loader.loading_string_signal.emit(
                         (
@@ -50,7 +49,6 @@ class ConanCacheCleanupDialog(QDialog):
                     )
                     size_mbytes_item = get_folder_size_mb(Path(path))
                     child = QTreeWidgetItem([path_type, f"{size_mbytes_item:.2f}"])
-                    # child.setCheckState(0, Qt.CheckState.Checked)
                     size_mbytes += size_mbytes_item
                     ref_item.addChild(child)
                 ref_items.append(ref_item)
@@ -79,15 +77,12 @@ class ConanCacheCleanupDialog(QDialog):
         self.show()
 
     def on_accept(self):
-        pass
         if not self.cleanup_info:
             return
 
         def delete_cache_paths(cleanup_info):
-            #     for item in self._ui.cleanup_tree_widget.selectedItems():
-            #         for
-            for ref, paths in cleanup_info.items():
-                for type, path in paths.items():
+            for _, paths in cleanup_info.items():
+                for _, path in paths.items():
                     self.loader.loading_string_signal.emit("Deleting\n" + str(path))
                     delete_path(Path(path))
 

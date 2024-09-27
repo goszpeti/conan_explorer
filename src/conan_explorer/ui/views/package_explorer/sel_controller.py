@@ -137,12 +137,12 @@ class PackageSelectionController(QObject):
         dialog.setWindowIcon(QIcon(str(asset_path / "icons" / "icon.ico")))
         dialog.setWindowTitle("Build Info")
         dialog.resize(800, 500)
-        verticalLayout = QVBoxLayout(dialog)
+        vertical_layout = QVBoxLayout(dialog)
         text_browser = QTextBrowser(dialog)
         text_browser.setReadOnly(True)
         text_browser.setOpenExternalLinks(True)
         text_browser.setText(buildinfos)
-        verticalLayout.addWidget(text_browser)
+        vertical_layout.addWidget(text_browser)
         self.conan_config_highlighter = ConfigHighlighter(text_browser.document(), "ini")
         dialog.exec()
 
@@ -224,14 +224,12 @@ class PackageSelectionController(QObject):
         for conan_ref_item in source_items:
             if conan_ref_item.type in [PkgSelectionType.pkg, PkgSelectionType.export]:
                 conan_ref_item: PackageTreeItem = conan_ref_item.parent()  # type: ignore
-            if not conan_ref_item:
-                conan_refs.append("")
             conan_refs.append(conan_ref_item.item_data[0])
         return list(set(conan_refs))
 
     def get_selected_conan_pkg_info(self) -> ConanPkg:
         source_items = self.get_selected_pkg_source_items()
-        if not len(source_items) == 1:
+        if len(source_items) != 1:
             return ConanPkg()
         source_item = source_items[0]
         if source_item.type == PkgSelectionType.ref:

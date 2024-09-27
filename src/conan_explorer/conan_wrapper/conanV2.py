@@ -82,7 +82,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def get_profile_settings(self, profile_name: str) -> ConanSettings:
         try:
             from conans.client.profile_loader import ProfileLoader
-        except:
+        except Exception:
             from conan.internal.api.profile.profile_loader import ProfileLoader
 
         try:
@@ -135,7 +135,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def get_default_settings(self) -> ConanSettings:
         try:
             from conans.client.profile_loader import ProfileLoader
-        except:
+        except Exception:
             from conan.internal.api.profile.profile_loader import ProfileLoader
         profile = ProfileLoader(self._conan.cache_folder).load_profile(
             Path(self._conan.profiles.get_default_host()).name
