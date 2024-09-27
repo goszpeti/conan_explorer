@@ -18,11 +18,10 @@ class CalFileSystemModel(FileSystemModel):
 
     @override
     def data(self, index: QModelIndex, role: Qt.ItemDataRole):
-        if role == Qt.ItemDataRole.FontRole:
-            if self._row_is_disabled(index):
-                font = QFont()
-                font.setItalic(True)
-                return font
+        if role == Qt.ItemDataRole.FontRole and self._row_is_disabled(index):
+            font = QFont()
+            font.setItalic(True)
+            return font
         if role == Qt.ItemDataRole.ForegroundRole:
             try:
                 if self._row_is_disabled(index):

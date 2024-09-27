@@ -108,9 +108,8 @@ class PackageFileExplorerController(QObject):
             )
             return
 
-        if self._model:
-            if pkg_path == Path(self._model.rootPath()):
-                return
+        if self._model and pkg_path == Path(self._model.rootPath()):
+            return
         else:  # initialize once - otherwise this causes performance issues
             self._model = CalFileSystemModel()
             self._view.setModel(self._model)

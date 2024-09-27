@@ -95,7 +95,7 @@ class RemotesTableModel(TreeModel):
         return None
 
     @override
-    def rowCount(self, parent=None):  # TODO really?
+    def rowCount(self, parent=None):
         return self.root_item.child_count()
 
     def items(self) -> List[RemotesModelItem]:
