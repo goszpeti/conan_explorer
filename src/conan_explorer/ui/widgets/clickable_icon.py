@@ -16,7 +16,6 @@ class ClickableIcon(QPushButton):
     Has advanced icon handling for displaying the best matching icon.
     """
 
-    # TODO flags
     def __init__(self, parent, image=Path(INVALID_PATH), icon_size=ICON_SIZE):
         super().__init__(parent=parent)
 

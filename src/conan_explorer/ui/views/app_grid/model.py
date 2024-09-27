@@ -11,7 +11,6 @@ from conan_explorer import (
     INVALID_CONAN_REF,
     INVALID_PATH,
     USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL,
-    USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH,
 )
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
@@ -196,22 +195,21 @@ class UiAppLinkModel(UiAppLinkConfig):
             )
         )
         pkg_path = Path(INVALID_PATH)
-        if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
-            pkg_path = app.conan_api.info_cache.get_local_package_path(
-                self._conan_file_reference
+
+        # try to get from local
+        pkg_path = app.conan_api.info_cache.get_local_package_path(self._conan_file_reference)
+        if not pkg_path.exists():
+            _, pkg_path = app.conan_api.get_best_matching_local_package_path(
+                self._conan_file_reference, self.conan_options
             )
-            if not pkg_path.exists():
-                _, pkg_path = app.conan_api.get_best_matching_local_package_path(
-                    self._conan_file_reference, self.conan_options
-                )
-            if self.conan_options:
-                pkg_info = app.conan_api.get_local_pkg_from_path(
-                    self._conan_file_reference, pkg_path
-                )
-                # user options should be a subset of full pkg options
-                if pkg_info:
-                    if not self.conan_options.items() <= pkg_info.get("options", {}).items():
-                        return
+        if self.conan_options:
+            pkg_info = app.conan_api.get_local_pkg_from_path(
+                self._conan_file_reference, pkg_path
+            )
+            # user options should be a subset of full pkg options
+            if pkg_info:
+                if not self.conan_options.items() <= pkg_info.get("options", {}).items():
+                    return
         if (
             not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
         ):  # last chance to get path
@@ -501,11 +499,10 @@ class UiAppLinkModel(UiAppLinkConfig):
         Usually to be called from conan worker.
         """
 
-        if USE_LOCAL_CACHE_FOR_LOCAL_PKG_PATH:
-            if self.package_folder != package_folder:
-                app.conan_api.info_cache.update_local_package_path(
-                    self._conan_file_reference, package_folder
-                )
+        if self.package_folder != package_folder:
+            app.conan_api.info_cache.update_local_package_path(
+                self._conan_file_reference, package_folder
+            )
         self.package_folder = package_folder
 
         if not quiet and not package_folder.exists():

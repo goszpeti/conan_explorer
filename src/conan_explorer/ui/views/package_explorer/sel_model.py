@@ -201,7 +201,7 @@ class PkgSelectModel(TreeModel):
 
         conan_ref = ConanRef.loads(item.parent_item.data(0))
         if item.type == PkgSelectionType.export:
-            pkg_path = app.conan_api.get_export_folder(conan_ref)  # TODO can crash
+            pkg_path = app.conan_api.get_export_folder(conan_ref)
         else:
             pkg_path = app.conan_api.get_package_folder(conan_ref, item.pkg_info.get("id", ""))
         self._loader_signal.emit(

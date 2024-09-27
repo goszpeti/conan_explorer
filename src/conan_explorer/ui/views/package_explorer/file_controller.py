@@ -167,7 +167,7 @@ class PackageFileExplorerController(QObject):
         return file_paths
 
     def on_open_terminal_in_dir(self) -> int:
-        selected_path = Path(self.get_selected_pkg_paths()[0])  # TODO!
+        selected_path = Path(self.get_selected_pkg_paths()[0])
         if selected_path.is_file():
             selected_path = selected_path.parent
         return open_cmd_in_path(selected_path)
