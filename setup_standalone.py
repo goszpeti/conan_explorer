@@ -10,7 +10,7 @@ import sys
 
 from cx_Freeze import Executable, setup
 
-from conan_explorer import AUTHOR, REPO_URL, __version__  # TODO read out from i
+from conan_explorer import AUTHOR, REPO_URL, __version__
 
 include_files = []
 

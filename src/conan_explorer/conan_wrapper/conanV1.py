@@ -41,7 +41,6 @@ if TYPE_CHECKING:
 from conan_explorer import (
     CONAN_LOG_PREFIX,
     INVALID_PATH,
-    SEARCH_APP_VERSIONS_IN_LOCAL_CACHE,
     user_save_path,
 )
 from conan_explorer.app.logger import Logger
@@ -497,10 +496,9 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         except Exception as e:
             Logger().warning(str(e))
         try:
-            if SEARCH_APP_VERSIONS_IN_LOCAL_CACHE:
-                local_results = self._conan.search_recipes(
-                    f"{conan_ref.name}/*@*/*", remote_name=None
-                ).get("results", None)
+            local_results = self._conan.search_recipes(
+                f"{conan_ref.name}/*@*/*", remote_name=None
+            ).get("results", None)
         except Exception as e:
             Logger().warning(str(e))
             return []

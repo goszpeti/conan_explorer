@@ -199,7 +199,7 @@ class AppGridView(PluginInterfaceV1):
             tab.model.save()
 
     def on_tab_remove(self, index):
-        # last tab can't be deleted! # TODO dialog
+        # last tab can't be deleted!
         if len(self.model.tabs) == 1:
             return
         msg = QMessageBox(parent=self)

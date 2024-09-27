@@ -65,7 +65,6 @@ class PkgDiffDialog(QDialog, ThemedWidget):
 
         self._ui = Ui_Dialog()
         self._ui.setupUi(self)
-        # TODO test out dialog._ui.left_text_browser.AutoFormattingFlag
         self._init_pkg_context_menu()
 
         self.setWindowTitle("Compare Packages")
