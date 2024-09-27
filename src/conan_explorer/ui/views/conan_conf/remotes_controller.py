@@ -20,6 +20,10 @@ class ConanRemoteController:
         self.conan_remotes_updated = conan_remotes_updated
         self._view.setModel(self._model)
 
+    def notify_remotes_updates(self):
+        if self.conan_remotes_updated:
+            self.conan_remotes_updated.emit()
+
     def update(self):
         # save selected remote, if triggering a re-init
         self._remote_reorder_controller = ReorderController(self._view, self._model)
@@ -29,9 +33,6 @@ class ConanRemoteController:
         self._view.setRootIsDecorated(False)
         self._view.expandAll()
         self.resize_remote_columns()
-
-        if self.conan_remotes_updated:
-            self.conan_remotes_updated.emit()
 
     def resize_remote_columns(self):
         for i in reversed(range(self._model.root_item.column_count() - 1)):
@@ -72,12 +73,15 @@ class ConanRemoteController:
 
     def add(self, remote: Remote):
         self._model.add(remote)
+        self.notify_remotes_updates()
 
     def rename(self, remote: Remote, new_name):
         self._model.rename(remote, new_name)
+        self.notify_remotes_updates()
 
     def update_remote(self, remote: Remote):
         self._model.update(remote)
+        self.notify_remotes_updates()
 
     def login_remotes(self, remotes: List[str], user: str, pwd: str):
         for remote in remotes:
@@ -110,6 +114,7 @@ class ConanRemoteController:
                 if list_item.checkState() == Qt.CheckState.Unchecked:
                     continue
                 self._model.remove(list_item.text())
+        self.notify_remotes_updates()
 
     def remote_disable(self):
         remote_items = self.get_selected_remotes()
@@ -117,6 +122,7 @@ class ConanRemoteController:
             return
         for remote_item in remote_items:
             self._model.toggle_state(remote_item.name)
+        self.notify_remotes_updates()
 
     def copy_remote_name(self):
         remote_item = self.get_selected_remote()
