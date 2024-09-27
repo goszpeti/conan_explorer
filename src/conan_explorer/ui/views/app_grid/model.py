@@ -194,7 +194,6 @@ class UiAppLinkModel(UiAppLinkConfig):
                 self._conan_file_reference.name, user="*"
             )
         )
-        pkg_path = Path(INVALID_PATH)
 
         # try to get from local
         pkg_path = app.conan_api.info_cache.get_local_package_path(self._conan_file_reference)

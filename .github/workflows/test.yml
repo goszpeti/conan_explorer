@@ -167,7 +167,7 @@ jobs:
             results/
 
   sonarcloud:
-    if: always() # eecute, even when tests fail
+    if: always() # execute, even when tests fail
     needs:
       - test
     runs-on: ubuntu-20.04
@@ -181,11 +181,6 @@ jobs:
         with:
           name: Test results
           path: ./
-      # - name: Fix code coverage paths
-      #   working-directory: ./cov
-      #   run: |
-      #     sed -i 's@/home/runner/work/conan_explorer/conan_explorer@.@g' cov-*.xml
-      #     sed -i 's@D:\a\conan_explorer\conan_explorer@.@g' cov-*.xml
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
