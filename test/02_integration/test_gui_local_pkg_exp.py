@@ -528,8 +528,8 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(str(pkg_root_path / config_path.name))
 
     mime_files = lpe.on_file_cut(None)
-    file_row = lpe._pkg_tabs_ctrl[0]._model.index((pkg_root_path / config_path.name).as_posix(), 0).row()
-    check.is_true(file_row in lpe._pkg_tabs_ctrl[0]._model._disabled_rows)
+    file_index = lpe._pkg_tabs_ctrl[0]._model.index((pkg_root_path / config_path.name).as_posix(), 0)
+    check.is_true(file_index in lpe._pkg_tabs_ctrl[0]._model._disabled_indexes)
 
     # 2.4 check cut-paste
     # create a new dir in the pkg to paste into
