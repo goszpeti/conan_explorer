@@ -207,7 +207,7 @@ class UiAppLinkModel(UiAppLinkConfig):
             )
             # user options should be a subset of full pkg options
             if pkg_info:
-                if not self.conan_options.items() > pkg_info.get("options", {}).items():
+                if not self.conan_options.items() <= pkg_info.get("options", {}).items():
                     return
         if (
             not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
