@@ -393,9 +393,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
                     self.resizing()
             else:  # Hacky fix for when the cursor is not reset after resizing
                 self.setCursor(Qt.CursorShape.ArrowCursor)
-        elif isinstance(event, QWindowStateChangeEvent):
-            if event.oldState() == Qt.WindowState.WindowMinimized:
-                self.on_maximize_restore()
 
         return super().eventFilter(watched, event)
 
@@ -474,15 +471,12 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
     def on_maximize_restore(self, event=None):  # dummy arg to be used as an event slot
         if self.isMaximized():
-            self.setWindowState(Qt.WindowState.WindowNoState)
             self.showNormal()
         else:
-            self.setWindowState(Qt.WindowState.WindowMaximized)
             self.showMaximized()
         self.set_restore_max_button_state()
 
     def on_minimize(self, event=None):
-        self.setWindowState(Qt.WindowState.WindowMinimized)
         self.showMinimized()
         self.set_restore_max_button_state()
 
