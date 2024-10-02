@@ -73,6 +73,8 @@ class ConanRemoteController:
 
     def add(self, remote: Remote):
         self._model.add(remote)
+        # otherwise half selections of multiple items occur somehow
+        self._view.selectionModel().clearSelection()
         self.notify_remotes_updates()
 
     def rename(self, remote: Remote, new_name):
