@@ -158,6 +158,18 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.on_console_context_menu_requested
         )
         self._console_context_menu = self.ui.console.createStandardContextMenu()
+        for element in self._console_context_menu.children():
+            if not isinstance(element, QAction):
+                continue
+            if "edit-copy" == element.objectName():
+                self.set_themed_icon(element, "icons/copy.svg")
+            elif "link-copy" == element.objectName():
+                self.set_themed_icon(element, "icons/copy_link.svg")
+            elif "select-all" == element.objectName():
+                self.set_themed_icon(element, "icons/select_all.svg")
+
+            element.setEnabled(True)
+
         clear_console_action = QAction("Clear log", self)
         self.set_themed_icon(clear_console_action, "icons/clear_all.svg")
         self._console_context_menu.addAction(clear_console_action)
