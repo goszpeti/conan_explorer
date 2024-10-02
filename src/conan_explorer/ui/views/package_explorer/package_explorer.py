@@ -49,8 +49,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         self._ui.setupUi(self)
         self.load_signal.connect(self.load)
         self._is_expanded = False
+        self._file_cntx_menu = None
 
-    def load(self):
         assert self._base_signals
         assert self._page_widgets
         self._pkg_sel_ctrl = PackageSelectionController(
@@ -71,7 +71,8 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
                 self._page_widgets,
             )
         ]
-        self._file_cntx_menu = None
+
+    def load(self):
         self.set_themed_icon(self._ui.refresh_button, "icons/refresh.svg")
         self.set_themed_icon(self._ui.show_sizes_button, "icons/bar_chart.svg")
         self.set_themed_icon(self._ui.expand_all_button, "icons/expand_all.svg")
