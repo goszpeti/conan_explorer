@@ -102,11 +102,11 @@ def init_platform():
 
 def load_conan(loader: LoaderGui):
     global conan_api, conan_worker
-    from conan_explorer.conan_wrapper import ConanApiFactory, ConanWorker
+    from conan_explorer.conan_wrapper import ConanApiFactory, ConanWorker, conan_version
 
     conan_api = ConanApiFactory()
     conan_worker = ConanWorker(conan_api, active_settings)
-    loader.loading_string_signal.emit("Initializing Conan")
+    loader.loading_string_signal.emit("Initializing Conan " + str(conan_version))
     conan_api.init_api()
 
 
