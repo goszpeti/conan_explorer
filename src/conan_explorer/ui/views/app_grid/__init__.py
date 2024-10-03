@@ -110,7 +110,9 @@ class AppGridView(PluginInterfaceV1):
         )
 
     def reload_themed_icons(self):
-        self.re_init(self.model)
+        for tab in self.get_tabs():
+            for app_link in tab.app_links:
+                app_link.reload_themed_icons()
 
     T = TypeVar("T")
 

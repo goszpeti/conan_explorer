@@ -1,15 +1,13 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QDialog, QFrame, QMenu, QMessageBox, QWidget
+from PySide6.QtWidgets import QDialog, QFrame, QMessageBox, QWidget
 from typing_extensions import override
 
 from conan_explorer import ICON_SIZE, INVALID_PATH
 from conan_explorer.app.logger import Logger
-from conan_explorer.app.system import open_in_file_manager, run_file
-from conan_explorer.ui.common import get_themed_asset_icon, measure_font_width
+from conan_explorer.app.system import run_file
+from conan_explorer.ui.common import ThemedWidget, measure_font_width
 from conan_explorer.ui.dialogs.reorder import ReorderDialog
 
 from .dialogs import AppEditDialog
@@ -24,7 +22,7 @@ OFFICIAL_USER_DISP_NAME = "<official user>"
 current_dir = Path(__file__).parent
 
 
-class ListAppLink(QFrame):
+class ListAppLink(QFrame, ThemedWidget):
     """Represents a clickable button + info for an executable in a conan package.
     Rightclick context menu has the following elements:
     - Show in File Manager
@@ -43,7 +41,9 @@ class ListAppLink(QFrame):
         model: UiAppLinkModel,
         icon_size=ICON_SIZE,
     ):
-        super().__init__(parent)
+        QFrame.__init__(self, parent)
+        ThemedWidget.__init__(self)
+
         self.setObjectName(repr(self))
         self.icon_size = icon_size
         self.model = model
@@ -54,49 +54,13 @@ class ListAppLink(QFrame):
         self._ui = Ui_Form()
         self._ui.setupUi(self)
 
-        self._ui.edit_button.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
-        self._ui.remove_button.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
-        self._ui.app_button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self._ui.app_button.customContextMenuRequested.connect(self.on_context_menu_requested)
+        self.set_themed_icon(self._ui.edit_button, "icons/edit.svg")
+        self.set_themed_icon(self._ui.remove_button, "icons/delete.svg")
 
         # connect signals
         self._ui.app_button.clicked.connect(self.on_click)
         self._ui.edit_button.clicked.connect(self.open_edit_dialog)
         self._ui.remove_button.clicked.connect(self.remove)
-        self._init_context_menu()
-
-    def _init_context_menu(self):
-        """Setup context menu."""
-        self.menu = QMenu()
-        self.open_fm_action = QAction("Show in File Manager", self)
-        self.open_fm_action.setIcon(QIcon(get_themed_asset_icon("icons/file_explorer.svg")))
-        self.menu.addAction(self.open_fm_action)
-        self.open_fm_action.triggered.connect(self.on_open_in_file_manager)
-
-        self.menu.addSeparator()
-
-        self.add_action = QAction("Add new App Link", self)
-        self.add_action.setIcon(QIcon(get_themed_asset_icon("icons/add_link.svg")))
-        self.menu.addAction(self.add_action)
-        self.add_action.triggered.connect(self.open_app_link_add_dialog)
-
-        self.edit_action = QAction("Edit", self)
-        self.edit_action.setIcon(QIcon(get_themed_asset_icon("icons/edit.svg")))
-        self.menu.addAction(self.edit_action)
-        self.edit_action.triggered.connect(self.open_edit_dialog)
-
-        self.remove_action = QAction("Remove App Link", self)
-        self.remove_action.setIcon(QIcon(get_themed_asset_icon("icons/delete.svg")))
-        self.menu.addAction(self.remove_action)
-        self.remove_action.triggered.connect(self.remove)
-
-        self.menu.addSeparator()
-
-        self.reorder_action = QAction("Reorder App Links", self)
-        self.reorder_action.setIcon(QIcon(get_themed_asset_icon("icons/rearrange.svg")))
-        self.reorder_action.triggered.connect(self.on_move)
-
-        self.menu.addAction(self.reorder_action)
 
     def load(self):
         self.model.register_update_callback(self.apply_conan_info)
@@ -186,12 +150,6 @@ class ListAppLink(QFrame):
                 new_word = new_word[:-1]  # remove last \n
             name += " " + new_word if name else new_word
         return name
-
-    def on_context_menu_requested(self, position):
-        self.menu.exec(self._ui.app_button.mapToGlobal(position))
-
-    def on_open_in_file_manager(self):
-        open_in_file_manager(self.model.get_executable_path().parent)
 
     def _apply_new_config(self):
         self._ui.app_name_label.setText(self.model.name)
