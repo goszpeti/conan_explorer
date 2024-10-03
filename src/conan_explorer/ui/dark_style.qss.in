@@ -316,10 +316,6 @@ QPushButton#side_menu_title_button {
 
 /* Generic widgets */
 
-QComboBox {
-    color: #f8f8ff;
-    background: #202020;
-}
 QComboBox QAbstractItemView {
     color: #f8f8ff;
     background: #202020;
@@ -353,6 +349,20 @@ QHeaderView {
     font-style: normal;
     /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
     font-size: {{MAIN_FONT_SIZE}}pt;
+}
+
+QHeaderView::down-arrow {
+    subcontrol-position: center right;
+    height: 16px;
+    width: 16px;
+    image: url(icons:material/expand_white.svg);
+}
+
+QHeaderView::up-arrow {
+    subcontrol-position: center right;
+    height: 16px;
+    width: 16px;
+    image: url(icons:material/expand_less_white.svg);
 }
 
 QHeaderView::section {

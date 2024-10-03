@@ -276,6 +276,28 @@ QWidget#info_contents {
 
 /* Generic widgets */
 
+QComboBox QAbstractItemView {
+    background: #F0F0F0;
+    selection-color: #f8f8ff;
+}
+QComboBox:disabled {
+    background: #D3D3D3;
+}
+QComboBox:editable {
+    background: #F0F0F0;
+}
+QComboBox:!editable:on, QComboBox::drop-down:editable:on {
+    background: #F0F0F0;
+}
+QComboBox::down-arrow {
+    image: url(icons:material/expand_white.svg);
+    width: 30px;
+}
+QComboBox::drop-down {
+    width: 40px;
+    border-color: white;
+}
+
 QHeaderView {
     background-color: #D8D8D8;
     font-weight: 500;
@@ -293,6 +315,21 @@ QHeaderView::section {
     border-bottom-color: transparent;
     border-style: solid;
     border-width: 2px;
+}
+
+QHeaderView::down-arrow {
+    subcontrol-position: center right;
+    height: 16px;
+    width: 16px;
+
+    image: url(icons:material/expand.svg);
+}
+
+QHeaderView::up-arrow {
+    subcontrol-position: center right;
+    height: 16px;
+    width: 16px;
+    image: url(icons:material/expand_less.svg);
 }
 
 QLineEdit {
