@@ -17,7 +17,7 @@ if platform.system() == "Windows":
     from ctypes.wintypes import MSG
 
 from enum import Enum
-from typing import TYPE_CHECKING, Optional, Union
+from typing import Optional, Union
 
 from PySide6.QtCore import (
     QByteArray,
@@ -30,8 +30,13 @@ from PySide6.QtCore import (
     QSize,
     Qt,
 )
-from PySide6.QtGui import QAction, QHoverEvent, QMouseEvent, QShowEvent, QWindowStateChangeEvent
-from PySide6.QtWidgets import QMainWindow, QPushButton, QSizePolicy, QWidget
+from PySide6.QtGui import QAction, QHoverEvent, QMouseEvent, QShowEvent
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QPushButton,
+    QSizePolicy,
+    QWidget,
+)
 from typing_extensions import override
 
 # uses Logger, settings and theming related functions
@@ -124,6 +129,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
         ]
         for icon in qss_icons:
             get_themed_asset_icon(icon, force_dark_mode=True)
+
+        self.add_drop_shadow_to_widget(self.ui.toggle_left_menu_button)
+        self.add_drop_shadow_to_widget(self.ui.settings_button)
 
         from ..common.theming import get_gui_style
 
@@ -267,6 +275,9 @@ class FluentWindow(QMainWindow, ThemedWidget):
         button.setIconSize(QSize(32, 32))
         button.setStyleSheet("text-align:middle;")
         button.setCheckable(True)
+
+        self.add_drop_shadow_to_widget(button, "black")
+
         # enable resizing of console on every page
         page_widget.setMinimumHeight(300)
 

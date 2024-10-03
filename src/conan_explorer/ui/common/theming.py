@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Dict, Optional, Protocol, Tuple, TypedDict, Union, runtime_checkable
 
 from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon, QImage, QPixmap
-from PySide6.QtWidgets import QWidget
+from PySide6.QtGui import QColor, QIcon, QImage, QPixmap
+from PySide6.QtWidgets import QGraphicsDropShadowEffect, QWidget
 
 import conan_explorer.app as app
 
@@ -108,3 +108,11 @@ class ThemedWidget(QWidget):
                 widget.setIcon(icon)
             elif isinstance(widget, CanSetPixmapWidgetProtocol):
                 widget.setPixmap(icon.pixmap(QSize(*size)))
+
+    def add_drop_shadow_to_widget(self, widget: QWidget, color: str = "black"):
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(5)
+        shadow.setXOffset(1)
+        shadow.setYOffset(1)
+        shadow.setColor(QColor(color))
+        widget.setGraphicsEffect(shadow)
