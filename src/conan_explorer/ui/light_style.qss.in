@@ -290,7 +290,7 @@ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
     background: #F0F0F0;
 }
 QComboBox::down-arrow {
-    image: url(icons:material/expand_white.svg);
+    image: url(icons:material/expand.svg);
     width: 30px;
 }
 QComboBox::drop-down {
