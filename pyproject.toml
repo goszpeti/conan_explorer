@@ -31,6 +31,7 @@ dependencies = [
     # deprecated, but can not be subsituted yet for specifier handling
     "packaging",  # BSD License and Apache License 2.0
 ]
+readme = "README.md"
 
 [project.urls]
 repository = "https://github.com/goszpeti/conan_explorer"
@@ -46,9 +47,6 @@ build-backend = "setuptools.build_meta"
 where = ["src"]  # list of folders that contain the packages (["."] by default)
 include = ["conan_explorer*"]  # package names should match these glob patterns (["*"] by default)
 namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
-
-[tool.setuptools.dynamic]
-readme =  {file = ["README.txt"]}
 
 [tool.setuptools.package-data]
 "conan_explorer" = ["**/*.pyi", "**/*.html", "**/*.ini", "**assets/**/*.*", "**/*.in"]
