@@ -409,36 +409,38 @@ class LocalConanPackageExplorer(PluginInterfaceV1):
         """Disable some context menu items depending on context"""
         if not self._file_cntx_menu:
             return
-        self._add_link_action.setVisible(True)
-        self._edit_file_action.setVisible(True)
-        self._rename_action.setVisible(True)
+
+        # enable all, then disable based on conditions
+        self._enable_all_variable_file_context_menu_entries()
 
         tab_idx = self._ui.package_tab_widget.currentIndex()
         # Add Link only works on actual packages
         pkg_type = self._pkg_tabs_ctrl[tab_idx].get_conan_pkg_type()
         if pkg_type == PkgSelectionType.export:
             self._add_link_action.setVisible(False)
-        else:
-            self._add_link_action.setVisible(True)
 
         # multiselect options
         paths = self._pkg_tabs_ctrl[tab_idx].get_selected_pkg_paths()
-        if len(paths) > 1:  # no multiselect
+        if len(paths) > 1:  # multiselect
             self._add_link_action.setVisible(False)
             self._edit_file_action.setVisible(False)
             self._rename_action.setVisible(False)
             self._open_fm_action.setVisible(False)
             self._copy_as_path_action.setVisible(False)
             self._open_terminal_action.setVisible(False)
-        elif os.path.exists(paths[0]):
+        elif os.path.isdir(paths[0]):  # disable unappropriate actions for folders
             self._add_link_action.setVisible(False)
             self._edit_file_action.setVisible(False)
-            self._rename_action.setVisible(True)
-            self._open_fm_action.setVisible(True)
-            self._copy_as_path_action.setVisible(True)
-            self._open_terminal_action.setVisible(True)
 
         self._file_cntx_menu.exec(self._ui.package_file_view.mapToGlobal(position))
+
+    def _enable_all_variable_file_context_menu_entries(self):
+        self._add_link_action.setVisible(True)
+        self._edit_file_action.setVisible(True)
+        self._rename_action.setVisible(True)
+        self._open_fm_action.setVisible(True)
+        self._copy_as_path_action.setVisible(True)
+        self._open_terminal_action.setVisible(True)
 
     def select_local_package_from_ref(self, conan_ref: str):
         return self._pkg_sel_ctrl.select_local_package_from_ref(conan_ref)
