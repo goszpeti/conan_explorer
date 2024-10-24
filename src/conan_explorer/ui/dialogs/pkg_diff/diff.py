@@ -234,6 +234,9 @@ class PkgDiffDialog(QDialog, ThemedWidget):
         Supports the most common settings.
         No option support yet.
         """
+        item_data_len = len(self._item_data)
+        if item_data_len < 1:
+            return
         ref = self._item_data[0]
         ref["prio"] = -1
 

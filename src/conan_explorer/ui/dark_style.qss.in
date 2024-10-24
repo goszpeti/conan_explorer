@@ -322,6 +322,14 @@ QComboBox QAbstractItemView {
     selection-color: #f8f8ff;
     selection-background-color: #202020;
 }
+/* This is the combobox without the dropdown */
+QComboBox
+{
+    color: #f8f8ff;
+    background: #202020;
+    selection-color: #f8f8ff;
+    selection-background-color: #202020;
+}
 QComboBox:disabled {
     color: #5c5c5c;
     background: #202020;

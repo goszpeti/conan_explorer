@@ -1,7 +1,14 @@
 from typing import Optional
 
 from PySide6.QtCore import QSize, Qt, Signal, SignalInstance
-from PySide6.QtWidgets import QComboBox, QDialog, QMessageBox, QTreeWidgetItem, QWidget
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QHeaderView,
+    QMessageBox,
+    QTreeWidgetItem,
+    QWidget,
+)
 
 import conan_explorer.app as app
 from conan_explorer.app import LoaderGui
@@ -15,6 +22,7 @@ from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog
 
 class ConanInstallDialog(QDialog):
     MARK_AS_DEFAULT_INSTALL_PROFILE = " *"
+    MIN_WITDH = 300
     installation_failed: SignalInstance = Signal(str)  # type: ignore - conan_ref
 
     def __init__(
@@ -177,9 +185,10 @@ class ConanInstallDialog(QDialog):
             .boundingRect(self._ui.conan_ref_line_edit.text())
             .width()
         )
-        if width < 250:
-            width = 250
+        if width < self.MIN_WITDH:
+            width = self.MIN_WITDH
         self.resize(QSize(width + h_offset + 15, self.height()))  # 15 margin
+        self._ui.options_widget.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
 
     def on_install(self):
         ref_text = self._ui.conan_ref_line_edit.text()

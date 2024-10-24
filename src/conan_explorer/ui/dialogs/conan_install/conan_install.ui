@@ -53,10 +53,10 @@
    <item row="0" column="0">
     <widget class="QFrame" name="main_frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QFormLayout" name="formLayout">
       <item row="0" column="1">
@@ -123,7 +123,7 @@
       <item row="3" column="1">
        <widget class="QTreeWidget" name="options_widget">
         <property name="editTriggers">
-         <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+         <set>QAbstractItemView::EditTrigger::DoubleClicked|QAbstractItemView::EditTrigger::EditKeyPressed</set>
         </property>
         <property name="sortingEnabled">
          <bool>true</bool>
@@ -131,6 +131,9 @@
         <property name="wordWrap">
          <bool>true</bool>
         </property>
+        <attribute name="headerMinimumSectionSize">
+         <number>50</number>
+        </attribute>
         <column>
          <property name="text">
           <string>Name</string>
@@ -156,10 +159,10 @@
    <item row="1" column="0">
     <widget class="QFrame" name="bottom_frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="leftMargin">
@@ -192,7 +195,7 @@
         <item>
          <widget class="QLabel" name="update_label">
           <property name="layoutDirection">
-           <enum>Qt::RightToLeft</enum>
+           <enum>Qt::LayoutDirection::RightToLeft</enum>
           </property>
           <property name="text">
            <string>Update (-u)</string>
@@ -204,7 +207,7 @@
       <item>
        <widget class="Line" name="line">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -241,10 +244,10 @@
          </sizepolicy>
         </property>
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="standardButtons">
-         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+         <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
         </property>
         <property name="centerButtons">
          <bool>false</bool>
