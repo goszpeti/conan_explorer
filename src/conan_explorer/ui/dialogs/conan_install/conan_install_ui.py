@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'conan_install.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.2
+## Created by: Qt User Interface Compiler version 6.7.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -43,8 +43,8 @@ class Ui_Dialog(object):
         self.gridLayout.setContentsMargins(2, 2, 2, 2)
         self.main_frame = QFrame(Dialog)
         self.main_frame.setObjectName(u"main_frame")
-        self.main_frame.setFrameShape(QFrame.StyledPanel)
-        self.main_frame.setFrameShadow(QFrame.Raised)
+        self.main_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.main_frame.setFrameShadow(QFrame.Shadow.Raised)
         self.formLayout = QFormLayout(self.main_frame)
         self.formLayout.setObjectName(u"formLayout")
         self.conan_ref_line_edit = ConanRefLineEdit(self.main_frame)
@@ -85,9 +85,10 @@ class Ui_Dialog(object):
 
         self.options_widget = QTreeWidget(self.main_frame)
         self.options_widget.setObjectName(u"options_widget")
-        self.options_widget.setEditTriggers(QAbstractItemView.DoubleClicked|QAbstractItemView.EditKeyPressed)
+        self.options_widget.setEditTriggers(QAbstractItemView.EditTrigger.DoubleClicked|QAbstractItemView.EditTrigger.EditKeyPressed)
         self.options_widget.setSortingEnabled(True)
         self.options_widget.setWordWrap(True)
+        self.options_widget.header().setMinimumSectionSize(50)
 
         self.formLayout.setWidget(3, QFormLayout.FieldRole, self.options_widget)
 
@@ -101,8 +102,8 @@ class Ui_Dialog(object):
 
         self.bottom_frame = QFrame(Dialog)
         self.bottom_frame.setObjectName(u"bottom_frame")
-        self.bottom_frame.setFrameShape(QFrame.StyledPanel)
-        self.bottom_frame.setFrameShadow(QFrame.Raised)
+        self.bottom_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.bottom_frame.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout = QVBoxLayout(self.bottom_frame)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(2, 2, 2, 2)
@@ -120,7 +121,7 @@ class Ui_Dialog(object):
 
         self.update_label = QLabel(self.bottom_frame)
         self.update_label.setObjectName(u"update_label")
-        self.update_label.setLayoutDirection(Qt.RightToLeft)
+        self.update_label.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
 
         self.horizontalLayout.addWidget(self.update_label)
 
@@ -155,8 +156,8 @@ class Ui_Dialog(object):
         self.button_box.setObjectName(u"button_box")
         sizePolicy.setHeightForWidth(self.button_box.sizePolicy().hasHeightForWidth())
         self.button_box.setSizePolicy(sizePolicy)
-        self.button_box.setOrientation(Qt.Horizontal)
-        self.button_box.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
+        self.button_box.setOrientation(Qt.Orientation.Horizontal)
+        self.button_box.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
         self.button_box.setCenterButtons(False)
 
         self.verticalLayout.addWidget(self.button_box)
