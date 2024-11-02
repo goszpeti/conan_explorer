@@ -85,8 +85,11 @@ def register_font(font_style_name: str, font_file_name: str) -> "QFont":
         font_styles = font_db.styles(font_style_name)
         font_families = QFontDatabase.applicationFontFamilies(font_id)
         if font_families:
-            font = font_db.font(font_families[0], font_styles[0], 13)
-            font.setStyleStrategy(QFont.StyleStrategy.PreferAntialias)
+            font = font_db.font(font_families[0], font_styles[0], 11)
+            font.setStyleStrategy(QFont.StyleStrategy.PreferMatch)
+            font.setHintingPreference(QFont.HintingPreference.PreferNoHinting)
+            # this applies the changes on the font!
+            qapp.setFont(font)  # type: ignore
         else:
             Logger().warning("Can't register selected font file.")
     return font
