@@ -1,3 +1,4 @@
+import platform
 from pathlib import Path
 
 from jinja2 import Template
@@ -80,7 +81,9 @@ def register_font(font_style_name: str, font_file_name: str) -> "QFont":
     if qapp is None:
         return QFont()
     font = qapp.font()  # type: ignore
-    if font_id != -1:
+    # Set font stlye and hinting to get unpixelated fonts on high-res monitors on Windows
+    # Setting the appl.font disables it Linux altogether, so exlude it
+    if font_id != -1 and platform.system() == "Windows":
         font_db = QFontDatabase()
         font_styles = font_db.styles(font_style_name)
         font_families = QFontDatabase.applicationFontFamilies(font_id)
