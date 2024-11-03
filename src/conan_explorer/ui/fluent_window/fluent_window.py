@@ -97,7 +97,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self._resize_direction = ResizeDirection.default
         self._resize_point = QPoint()
         self._last_geometry = QRect()
-        self.title_text = title_text
+        self._title_text = title_text
         self._drag_position: Optional[QPoint] = None
 
         self.ui.left_menu_frame.setMinimumWidth(LEFT_MENU_MIN_WIDTH)
@@ -182,6 +182,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         """Platform native events"""
         retval = QMainWindow.nativeEvent(self, eventType, message)
         if str(eventType) == "b'windows_generic_MSG'":
+            self.set_window_max_state_style()
             msg = MSG.from_address(message.__int__())  # type: ignore
             # ignore WM_NCCALCSIZE event. Suppresses native Window drawing of title-bar.
             if msg.message == 131:
@@ -343,7 +344,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
 
         # hide title
         if maximize:
-            self.ui.title_label.setText(self.title_text)
+            self.ui.title_label.setText(self._title_text)
             self.ui.title_icon_label.show()
         else:
             self.ui.title_label.setText("")
@@ -495,18 +496,19 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def set_window_max_state_style(self, force=False):
         """This toggles the restore/maximize button in the top right button cluster"""
         if self.isMaximized():
-            self.ui.central_widget.setProperty("border", False)
             if self.ui.restore_max_button.icon().themeName() == "restore" and not force:
                 return
+            self.ui.central_widget.setProperty("border", False)
             icon = get_themed_asset_icon("icons/restore.svg")
             icon.setThemeName("restore")
             self.ui.restore_max_button.setIcon(icon)
-        else:
-            self.ui.central_widget.setProperty("border", True)
+        elif not self.isMaximized():
             if self.ui.restore_max_button.icon().themeName() == "maximize" and not force:
                 return
+            self.ui.central_widget.setProperty("border", True)
             icon = get_themed_asset_icon("icons/maximize.svg")
             icon.setThemeName("maximize")
             self.ui.restore_max_button.setIcon(icon)
+
         self.ui.central_widget.style().unpolish(self.ui.central_widget)
         self.ui.central_widget.style().polish(self.ui.central_widget)
