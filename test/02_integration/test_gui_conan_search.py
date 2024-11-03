@@ -1,6 +1,8 @@
 
 from test.conftest import TEST_REF
 
+import random
+import string
 import pytest
 from PySide6 import QtCore
 
@@ -60,7 +62,10 @@ def test_conan_search_view(qtbot, base_fixture, mock_clipboard, mocker):
             row).checkState() == Qt.CheckState.Checked
 
     # enter short search term -> search button disabled
-    search_dialog._ui.search_line.setText("ex")
+    
+    random_search_term = ''.join(random.choice(string.ascii_lowercase) 
+                                 for _ in range(search_dialog.MINIMUM_CHARS_FOR_SEARCH - 1))
+    search_dialog._ui.search_line.setText(random_search_term)
     assert not search_dialog._ui.search_button.isEnabled()
 
     # search for the test ref name: example -> 2 versions
