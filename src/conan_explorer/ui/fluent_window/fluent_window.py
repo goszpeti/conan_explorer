@@ -17,7 +17,7 @@ if platform.system() == "Windows":
     from ctypes.wintypes import MSG
 
 from enum import Enum
-from typing import TYPE_CHECKING, Optional, Union
+from typing import Optional, Union
 
 from PySide6.QtCore import (
     QByteArray,
@@ -30,7 +30,7 @@ from PySide6.QtCore import (
     QSize,
     Qt,
 )
-from PySide6.QtGui import QAction, QHoverEvent, QMouseEvent, QShowEvent, QWindowStateChangeEvent
+from PySide6.QtGui import QAction, QHoverEvent, QMouseEvent, QShowEvent
 from PySide6.QtWidgets import QMainWindow, QPushButton, QSizePolicy, QWidget
 from typing_extensions import override
 
@@ -148,7 +148,6 @@ class FluentWindow(QMainWindow, ThemedWidget):
         self.ui.title_icon_label.hide()
 
         # initial maximize state
-        self.set_restore_max_button_state()
         self.enable_windows_native_animations()
         self.installEventFilter(self)  # used for resizing
 
@@ -190,7 +189,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
         return retval
 
     def showEvent(self, event: QShowEvent) -> None:
-        self.set_restore_max_button_state()
+        self.set_window_max_state_style()
         return super().showEvent(event)
 
     @override
@@ -201,7 +200,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
     def apply_theme(self):
         "This function must be able to reload all icons from the left and right menu bar."
         self.reload_themed_icons()
-        self.set_restore_max_button_state(force=True)
+        self.set_window_max_state_style(force=True)
         for submenu in self.ui.right_menu_bottom_content_sw.findChildren(SideSubMenu):
             submenu.reload_themed_icons()  # type: ignore
         for submenu in self.ui.right_menu_top_content_sw.findChildren(SideSubMenu):
@@ -225,6 +224,7 @@ class FluentWindow(QMainWindow, ThemedWidget):
             if event.buttons() == Qt.MouseButton.LeftButton:
                 if self._drag_position is None:
                     return
+                # NOTE: does not work on Wayland because QTBUG-110119
                 self.move(self.pos() + event.globalPosition().toPoint() - self._drag_position)  # type: ignore
                 self._drag_position = event.globalPosition().toPoint()
                 event.accept()
@@ -486,23 +486,27 @@ class FluentWindow(QMainWindow, ThemedWidget):
             self.showNormal()
         else:
             self.showMaximized()
-        self.set_restore_max_button_state()
+        self.set_window_max_state_style()
 
     def on_minimize(self, event=None):
         self.showMinimized()
-        self.set_restore_max_button_state()
+        self.set_window_max_state_style()
 
-    def set_restore_max_button_state(self, force=False):
+    def set_window_max_state_style(self, force=False):
         """This toggles the restore/maximize button in the top right button cluster"""
         if self.isMaximized():
+            self.ui.central_widget.setProperty("border", False)
             if self.ui.restore_max_button.icon().themeName() == "restore" and not force:
                 return
             icon = get_themed_asset_icon("icons/restore.svg")
             icon.setThemeName("restore")
             self.ui.restore_max_button.setIcon(icon)
         else:
+            self.ui.central_widget.setProperty("border", True)
             if self.ui.restore_max_button.icon().themeName() == "maximize" and not force:
                 return
             icon = get_themed_asset_icon("icons/maximize.svg")
             icon.setThemeName("maximize")
             self.ui.restore_max_button.setIcon(icon)
+        self.ui.central_widget.style().unpolish(self.ui.central_widget)
+        self.ui.central_widget.style().polish(self.ui.central_widget)

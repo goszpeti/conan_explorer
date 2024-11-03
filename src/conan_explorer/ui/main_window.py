@@ -449,7 +449,7 @@ class MainWindow(FluentWindow):
         # restore window size
         sizes_str = app.active_settings.get_string(WINDOW_SIZE)
         if sizes_str.lower() == "maximized":
-            self.showMaximized()
+            self.on_maximize_restore()
         else:
             split_sizes_int = [0, 0, 800, 600]
             try:
