@@ -154,7 +154,11 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         user_info = {}
         try:
             # hack to remove reinit of conan application
-            user_info = self._conan.users_list(remote_name).get("remotes", {})
+            user_info = (
+                self._conan.users_list.__closure__[0]  # type: ignore
+                .cell_contents(self._conan, remote_name)
+                .get("remotes", {})
+            )
         except Exception:
             Logger().error(
                 f"Cannot find remote {remote_name} in remote list for fetching user."
@@ -306,10 +310,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
     def disable_remote(self, remote_name: str, disabled: bool):
         self._conan.remote_set_disabled_state(remote_name, disabled)
 
-    def update_remote(
-        self, remote_name: str, url: str, verify_ssl: bool, disabled: bool, index: Optional[int]
-    ):
-        # self.disable_remote(remote_name, disabled)
+    def update_remote(self, remote_name: str, url: str, verify_ssl: bool, index: Optional[int]):
         self._conan.remote_update(remote_name, url, verify_ssl, index)
 
     def login_remote(self, remote_name: str, user_name: str, password: str):
