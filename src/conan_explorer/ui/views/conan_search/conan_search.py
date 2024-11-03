@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 
 
 class ConanSearchView(PluginInterfaceV1):
+    MINIMUM_CHARS_FOR_SEARCH = 2  # for qt to work
+
     def __init__(
         self,
         parent: QWidget,
@@ -118,8 +120,8 @@ class ConanSearchView(PluginInterfaceV1):
             item.setCheckState(self._ui.select_all_widget.item(0).checkState())
 
     def _enable_search_button(self):
-        """Enable search button from minimum 3 characters onwards"""
-        if len(self._ui.search_line.text()) > 2:
+        """Enable search button from minimum characters"""
+        if len(self._ui.search_line.text()) >= self.MINIMUM_CHARS_FOR_SEARCH:
             self._ui.search_button.setEnabled(True)
             self.set_themed_icon(self._ui.search_button, "icons/search.svg", size=(20, 20))
         else:
