@@ -213,9 +213,7 @@ class ConanApi(ConanCommonUnifiedApi, metaclass=SignatureCheckMeta):
         else:
             self._conan.remotes.enable(remote_name)
 
-    def update_remote(
-        self, remote_name: str, url: str, verify_ssl: bool, disabled: bool, index: Optional[int]
-    ):
+    def update_remote(self, remote_name: str, url: str, verify_ssl: bool, index: Optional[int]):
         self._conan.remotes.update(
             remote_name, url, verify_ssl, self._conan.remotes.get(remote_name).disabled, index
         )

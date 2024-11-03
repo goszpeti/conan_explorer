@@ -125,9 +125,7 @@ class RemotesTableModel(TreeModel):
         item.name = new_name
 
     def update(self, remote: Remote):
-        app.conan_api.update_remote(
-            remote.name, remote.url, remote.verify_ssl, remote.disabled, None
-        )
+        app.conan_api.update_remote(remote.name, remote.url, remote.verify_ssl, None)
         index = self.get_index_from_ref(remote.name)
         item: RemotesModelItem = index.internalPointer()  # type: ignore
         # copy all possible props
@@ -146,9 +144,7 @@ class RemotesTableModel(TreeModel):
         """Update every remote with new index and then save to conan remotes file"""
         i = 0
         for remote in self.items():
-            app.conan_api.update_remote(
-                remote.name, remote.url, remote.verify_ssl, remote.disabled, i
-            )
+            app.conan_api.update_remote(remote.name, remote.url, remote.verify_ssl, i)
             i += 1
 
     @override

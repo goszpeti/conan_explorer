@@ -137,8 +137,7 @@ class ConanUnifiedApi():
         raise NotImplementedError
     
     @abstractmethod
-    def update_remote(self, remote_name: str, url: str, verify_ssl: bool, 
-                      disabled: bool, index: Optional[int]):
+    def update_remote(self, remote_name: str, url: str, verify_ssl: bool, index: Optional[int]):
         """ Update a remote with new information and reorder with index  """
         raise NotImplementedError
     
