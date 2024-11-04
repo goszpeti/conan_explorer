@@ -20,7 +20,7 @@ classifiers = [
     "Environment :: Win32 (MS Windows)"
 ]
 dependencies = [
-    "conan>=1.48, <2.8, !=2.0.*",  # MIT License
+    "conan>=2.0, <2.10",  # MIT License
     # 6.4.3 is needed for off-the-shelf U20 support
     "PySide6-Essentials>=6.4.3", # LGPLv3 License
     "jsonschema>=3.2.0, <5", # MIT License
