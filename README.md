@@ -7,7 +7,7 @@
 ![Windows](https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white)
 ![Linux](
 https://img.shields.io/badge/Linux-purple?logo=linux&logoColor=white)
-![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_explorer/24?logo=conan)
+![MilestoneProgress](https://img.shields.io/github/milestones/progress-percent/goszpeti/conan_explorer/25?logo=conan)
 [![Python Tests](https://github.com/goszpeti/conan_explorer/actions/workflows/test.yml/badge.svg)](https://github.com/goszpeti/conan_explorer/actions/workflows/test.yml)
 ![SonarStatus](https://sonarcloud.io/api/project_badges/measure?project=goszpeti_conan_explorer&metric=alert_status)
 ![Downloads](https://img.shields.io/pypi/dm/conan_explorer)
