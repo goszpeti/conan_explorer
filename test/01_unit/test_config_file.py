@@ -6,7 +6,7 @@ from test.conftest import PathSetup
 
 import pytest
 
-from conan_explorer.conan_wrapper.types import ConanRef
+from conan_unified_api.types import ConanRef
 from conan_explorer.ui.views.app_grid.config.json_file import JsonUiConfig
 
 

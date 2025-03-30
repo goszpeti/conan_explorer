@@ -12,7 +12,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 import conan_explorer  # for mocker
 import conan_explorer.app as app
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
-from conan_explorer.conan_wrapper.types import ConanRef
+from conan_unified_api.types import ConanRef
 from conan_explorer.settings import DEFAULT_INSTALL_PROFILE
 from conan_explorer.ui.dialogs.conan_install import ConanInstallDialog
 from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog

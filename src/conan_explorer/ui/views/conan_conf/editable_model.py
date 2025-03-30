@@ -1,10 +1,10 @@
 from typing import Any, List, Optional, Union
 
+from conan_unified_api.types import EditablePkg
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
 from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
-from conan_explorer.conan_wrapper.types import EditablePkg
 from conan_explorer.ui.common import TreeModel, TreeModelItem
 
 

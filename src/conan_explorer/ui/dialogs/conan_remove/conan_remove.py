@@ -1,12 +1,12 @@
 from typing import Dict, List, Optional
 
+from conan_unified_api.types import ConanRef
 from PySide6.QtCore import Qt, SignalInstance
 from PySide6.QtWidgets import QDialogButtonBox, QListWidgetItem, QWidget
 
 import conan_explorer.app as app
 from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import ConanRef
 
 from .. import QuestionWithItemListDialog
 

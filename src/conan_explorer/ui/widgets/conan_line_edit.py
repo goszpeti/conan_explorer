@@ -1,13 +1,13 @@
 from threading import Thread
 from typing import Callable, List
 
+from conan_unified_api.types import ConanPkgRef, ConanRef
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QCompleter, QLineEdit, QListView
 from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import ConanPkgRef, ConanRef
 from conan_explorer.ui.common.theming import get_gui_dark_mode
 
 
@@ -61,7 +61,7 @@ class ConanRefLineEdit(QLineEdit):
 
     def load_completion_refs(self):
         combined_refs = set()
-        combined_refs.update(app.conan_api.info_cache.get_all_local_refs())
+        combined_refs.update([str(ref) for ref in app.conan_api.get_all_local_refs()])
         combined_refs.update(app.conan_api.info_cache.get_all_remote_refs())
         self.completer().model().setStringList(sorted(combined_refs, reverse=True))  # type: ignore
 

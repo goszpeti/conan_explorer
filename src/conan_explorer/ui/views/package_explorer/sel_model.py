@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Any, List, Optional, Union
 
+from conan_unified_api.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QColor, QFont, QIcon
 from typing_extensions import override
@@ -10,7 +11,6 @@ from conan_explorer import conan_version
 from conan_explorer.app.system import get_folder_size_mb
 from conan_explorer.conan_wrapper import ConanApiFactory
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
-from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from conan_explorer.ui.common import (
     TreeModel,
     TreeModelItem,

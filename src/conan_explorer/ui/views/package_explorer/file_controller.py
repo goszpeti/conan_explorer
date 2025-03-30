@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
+from conan_unified_api.types import ConanPkg, ConanRef
 from PySide6.QtCore import (
     QItemSelectionModel,
     QMimeData,
@@ -32,7 +33,6 @@ from conan_explorer.app.system import (
     open_in_file_manager,
     run_file,
 )
-from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui.common import re_register_signal
 from conan_explorer.ui.dialogs import QuestionWithItemListDialog

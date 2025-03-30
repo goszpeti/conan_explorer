@@ -2,13 +2,13 @@
 
 from pathlib import Path
 
+from conan_unified_api.types import ConanRef
 from PySide6.QtGui import QFont, QFontMetrics
 
 import conan_explorer.app as app
 
 # using global module pattern
 from conan_explorer.app.system import execute_cmd, open_file
-from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE, FONT_SIZE
 
 from .icon import (
