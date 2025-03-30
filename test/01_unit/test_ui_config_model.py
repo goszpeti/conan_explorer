@@ -4,8 +4,8 @@ from shutil import copy2
 from test.conftest import TEST_REF_OFFICIAL, PathSetup
 
 from conan_explorer import INVALID_PATH, asset_path
-from conan_explorer.conan_wrapper.types import ConanRef
-from conan_explorer.conan_wrapper.unified_api import ConanCommonUnifiedApi
+from conan_unified_api.types import ConanRef
+from conan_explorer.conan_wrapper import ConanUnifiedApi
 from conan_explorer.settings import GUI_STYLE_MATERIAL
 from conan_explorer.ui.views.app_grid.model import (UiAppLinkConfig,
                                                     UiAppLinkModel)
@@ -94,7 +94,7 @@ def test_official_release(base_fixture: PathSetup):
 
     # check, that changing the version does not invalidate the channel or user
     app_link.conan_ref = "example/1.1.0@_/_"
-    assert ConanCommonUnifiedApi.generate_canonical_ref(app_link.conan_file_reference) == "example/1.1.0@_/_"
+    assert ConanUnifiedApi.generate_canonical_ref(app_link.conan_file_reference) == "example/1.1.0@_/_"
     app_link.version = "1.1.0"
     assert app_link.channel == UiAppLinkModel.OFFICIAL_RELEASE
     assert app_link.conan_file_reference.user in [None, "_"]

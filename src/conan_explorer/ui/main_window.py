@@ -144,6 +144,7 @@ class MainWindow(FluentWindow):
             is_upper_menu=True,
             page_widget=self.app_grid,
             create_page_menu=True,
+        
         )
         # set default page
         self.page_widgets.get_button_by_name("Conan Quicklaunch").click()

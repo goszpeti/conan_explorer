@@ -1,11 +1,11 @@
 from typing import Union
 
+from conan_unified_api.types import EditablePkg
 from PySide6.QtCore import QItemSelectionModel, QModelIndex
 from PySide6.QtWidgets import QTreeView
 
 import conan_explorer.app as app
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import EditablePkg
 
 from .editable_model import EditableModel, EditableModelItem
 

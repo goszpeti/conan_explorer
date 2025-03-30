@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, Any, List, Optional, Protocol, Tuple, TypedDic
 from conan_explorer.settings import SettingsInterface
 
 if TYPE_CHECKING:
-    from ..conan_wrapper import ConanCommonUnifiedApi
+    from ..conan_wrapper import ConanUnifiedApi
+
+from conan_unified_api.types import ConanOptions, ConanPkgRef, ConanRef, ConanSettings
 
 from conan_explorer import USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
 from conan_explorer.app.logger import Logger
-
-from .types import ConanOptions, ConanPkgRef, ConanRef, ConanSettings
 
 
 class ConanWorkerElement(TypedDict):
@@ -34,7 +34,7 @@ class ConanWorker:
     Sequential worker with a queue to execute conan install/version alternatives commands
     """
 
-    def __init__(self, conan_api: "ConanCommonUnifiedApi", settings: SettingsInterface):
+    def __init__(self, conan_api: "ConanUnifiedApi", settings: SettingsInterface):
         self._conan_api = conan_api
         self._conan_install_queue: Queue[
             Tuple[ConanWorkerElement, Optional[ConanWorkerResultCallback]]
@@ -105,7 +105,7 @@ class ConanWorker:
                     conan_ref = ConanRef.loads(ref_pkg_id)  # type: ignore
 
                     if auto_install:
-                        pkg_id, _ = self._conan_api.get_path_or_auto_install(
+                        pkg_id, _ = self._conan_api.get_path_with_auto_install(
                             conan_ref, conan_options, update
                         )
                     else:

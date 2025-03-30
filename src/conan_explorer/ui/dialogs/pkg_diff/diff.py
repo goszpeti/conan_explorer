@@ -1,6 +1,7 @@
 from pprint import pformat
 from typing import Literal
 
+from conan_unified_api.types import ConanPkg
 from dictdiffer import diff
 from PySide6.QtCore import QRegularExpression, Qt
 from PySide6.QtGui import QAction, QColor, QShowEvent, QTextCharFormat
@@ -8,7 +9,6 @@ from PySide6.QtWidgets import QDialog, QListWidgetItem, QMenu
 from typing_extensions import override
 
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import ConanPkg
 from conan_explorer.ui.common.syntax_highlighting import ConfigHighlighter
 from conan_explorer.ui.common.theming import ThemedWidget
 

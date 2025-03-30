@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
 
+from conan_unified_api.types import ConanPkg, ConanRef
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtCore import Qt, SignalInstance, Slot
 from typing_extensions import override
@@ -8,7 +9,6 @@ import conan_explorer.app as app
 from conan_explorer.app import LoaderGui  # using global module pattern
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper import ConanApiFactory
-from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef
 from conan_explorer.ui.common import (
     TreeModel,
     TreeModelItem,
@@ -135,9 +135,12 @@ class PkgSearchModel(TreeModel):
         recipes_with_remotes: Dict[ConanRef, str] = {}
         for remote in remotes:
             update_sig.emit("Searching in " + str(remote))
-            recipe_list = app.conan_api.search_recipes_in_remotes(
-                f"{search_query}*", remote_name=remote
-            )
+            try:
+                recipe_list = app.conan_api.search_recipes_in_remotes(
+                    f"{search_query}*", remote_name=remote
+                )
+            except Exception as e:
+                Logger().error(f"Error while searching in {remote}: {str(e)}")
             for recipe in recipe_list:
                 current_value = recipes_with_remotes.get(recipe, "")
                 if current_value:

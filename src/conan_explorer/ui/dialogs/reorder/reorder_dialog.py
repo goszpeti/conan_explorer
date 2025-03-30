@@ -17,19 +17,19 @@ class ReorderingModel(Protocol):
 
     def moveRow(
         self,
-        source_parent: QModelIndex,
-        source_row: int,
-        destination_parent: QModelIndex,
-        destination_child: int,
+        sourceParent: QModelIndex,
+        sourceRow: int,
+        destinationParent: QModelIndex,
+        destinationChild: int,
     ) -> bool: ...
 
     def beginMoveRows(
         self,
-        source_parent: QModelIndex,
-        source_first: int,
-        source_last: int,
-        destination_parent: "QModelIndex | QPersistentModelIndex",
-        destination_row: int,
+        sourceParent: QModelIndex,
+        sourceFirst: int,
+        sourceLast: int,
+        destinationParent: "QModelIndex | QPersistentModelIndex",
+        destinationRow: int,
     ) -> bool: ...
 
     def endMoveRows(self): ...

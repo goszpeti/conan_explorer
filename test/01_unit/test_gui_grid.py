@@ -14,7 +14,7 @@ import pytest
 from PySide6 import QtCore, QtWidgets
 
 import conan_explorer.app as app  # using global module pattern
-from conan_explorer.conan_wrapper.types import ConanRef as CFR
+from conan_unified_api.types import ConanRef as CFR
 from conan_explorer.settings import (AUTO_INSTALL_QUICKLAUNCH_REFS,
                                      GUI_STYLE_MATERIAL)
 from conan_explorer.ui.views.app_grid.app_link import ListAppLink
