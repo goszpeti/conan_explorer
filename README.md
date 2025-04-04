@@ -140,7 +140,7 @@ You can also assign its icon to it from the site packages folder in **conan_expl
 * 1.48.0 <= conan < 2.X
 
 > ⓘ **Info** - **Update supported conan version independently**
-> From version 2.5.0 the conan-unified-api package provides the compatiblity layer for Conan Explorer. By upgrading it in your Python enviroment, the compatibility will also be ensured. The version number corresponds to the latest conan version supported. Please see https://pypi.org/project/conan-unified-api/ to find the latest version. 
+> From version 2.4.0 the conan-unified-api package provides the compatiblity layer for Conan Explorer. By upgrading it in your Python enviroment, the compatibility will also be ensured. The version number corresponds to the latest conan version supported. Please see https://pypi.org/project/conan-unified-api/ to find the latest version. 
 
 > ⚠ **Warning** - **Deprecation of Python 3.X**  
 > From version 2.0.0 Python 3.6 support will be dropped, having reached end-of-life.    
