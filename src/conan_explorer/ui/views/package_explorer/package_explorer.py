@@ -1,6 +1,7 @@
 import os
 from typing import TYPE_CHECKING
 
+from conan_unified_api.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QAction, QKeySequence, QResizeEvent, QShowEvent
 from PySide6.QtWidgets import (
@@ -17,7 +18,6 @@ from typing_extensions import override
 
 from conan_explorer import conan_version
 from conan_explorer.app.base_ui.loading import LoaderGui
-from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, pretty_print_pkg_info
 from conan_explorer.ui.common.model import re_register_signal
 from conan_explorer.ui.plugin import PluginDescription, PluginInterfaceV1
 

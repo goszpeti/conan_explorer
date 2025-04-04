@@ -1,5 +1,6 @@
 from typing import Optional
 
+from conan_unified_api.types import ConanOptions, ConanPkg, ConanRef
 from PySide6.QtCore import QSize, Qt, Signal, SignalInstance
 from PySide6.QtWidgets import (
     QComboBox,
@@ -14,7 +15,6 @@ import conan_explorer.app as app
 from conan_explorer.app import LoaderGui
 from conan_explorer.app.logger import Logger  # using global module pattern
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
-from conan_explorer.conan_wrapper.types import ConanOptions, ConanPkg, ConanRef
 from conan_explorer.settings import DEFAULT_INSTALL_PROFILE
 from conan_explorer.ui.common import get_themed_asset_icon
 from conan_explorer.ui.dialogs.pkg_diff.diff import PkgDiffDialog

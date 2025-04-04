@@ -2,6 +2,7 @@ import platform
 from pathlib import Path
 from typing import Callable, List, Optional, Union
 
+from conan_unified_api.types import ConanRef
 from PySide6.QtCore import QAbstractListModel, QModelIndex, QObject, QPersistentModelIndex, Qt
 from PySide6.QtGui import QIcon
 from typing_extensions import override
@@ -14,7 +15,6 @@ from conan_explorer import (
 )
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper.conan_worker import ConanWorkerElement
-from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS
 from conan_explorer.ui.common import (
     extract_icon,
@@ -190,17 +190,15 @@ class UiAppLinkModel(UiAppLinkConfig):
             return
         # get all info from cache
         self.set_available_packages(
-            app.conan_api.info_cache.get_similar_pkg_refs(
+            app.conan_api.info_cache.get_similar_remote_pkg_refs(
                 self._conan_file_reference.name, user="*"
             )
         )
 
         # try to get from local
-        pkg_path = app.conan_api.info_cache.get_local_package_path(self._conan_file_reference)
-        if not pkg_path.exists():
-            _, pkg_path = app.conan_api.get_best_matching_local_package_path(
-                self._conan_file_reference, self.conan_options
-            )
+        _, pkg_path = app.conan_api.get_best_matching_local_package_path(
+            self._conan_file_reference, self.conan_options
+        )
         if self.conan_options:
             pkg_info = app.conan_api.get_local_pkg_from_path(
                 self._conan_file_reference, pkg_path
@@ -212,7 +210,7 @@ class UiAppLinkModel(UiAppLinkConfig):
         if (
             not pkg_path.exists() and not USE_CONAN_WORKER_FOR_LOCAL_PKG_PATH_AND_INSTALL
         ):  # last chance to get path
-            _, pkg_path = app.conan_api.get_path_or_auto_install(
+            _, pkg_path = app.conan_api.get_path_with_auto_install(
                 self._conan_file_reference, self.conan_options
             )
 
@@ -498,10 +496,6 @@ class UiAppLinkModel(UiAppLinkConfig):
         Usually to be called from conan worker.
         """
 
-        if self.package_folder != package_folder:
-            app.conan_api.info_cache.update_local_package_path(
-                self._conan_file_reference, package_folder
-            )
         self.package_folder = package_folder
 
         if not quiet and not package_folder.exists():

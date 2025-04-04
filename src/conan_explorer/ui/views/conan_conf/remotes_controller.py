@@ -1,11 +1,11 @@
 from typing import List, Optional
 
+from conan_unified_api.types import Remote
 from PySide6.QtCore import QItemSelectionModel, QModelIndex, Qt, SignalInstance
 from PySide6.QtWidgets import QApplication, QDialog, QListWidgetItem, QStyle, QTreeView
 
 import conan_explorer.app as app
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import Remote
 from conan_explorer.ui.dialogs import QuestionWithItemListDialog, ReorderController
 
 from .remotes_model import RemotesModelItem, RemotesTableModel

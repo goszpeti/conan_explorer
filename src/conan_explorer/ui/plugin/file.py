@@ -78,7 +78,7 @@ class PluginFile:
 
                 if not plugin_info.get("import_path"):
                     raise PVE("field 'import_path' is required")
-                import_path = plugin_file_path.parent / plugin_info.get("import_path")
+                import_path = plugin_file_path.parent / plugin_info.get("import_path", "")
                 if not import_path.is_dir():
                     raise PVE(f"import_path {str(import_path)} does not exist.")
                 if import_path.is_dir():  # needs an __init__.py
