@@ -161,7 +161,7 @@ jobs:
       - name: Upload Test results
         uses: actions/upload-artifact@v4
         with:
-          name: Test results ${{ matrix.conan }}
+          name: Test results ${{ matrix.name }}
           path: |
             cov/
             results/
