@@ -113,11 +113,7 @@ class ConanWorker:
                             conan_ref, conan_settings, conan_options, conan_profile, update
                         )
             except Exception:
-                try:
-                    self._conan_install_queue.task_done()
-                except ValueError:
-                    pass  # don't care about calling too many times
-                continue
+                pass
             Logger().debug("Finish working on " + ref_pkg_id)
             try:
                 self._conan_install_queue.task_done()
