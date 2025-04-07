@@ -67,7 +67,7 @@ test = [
     "pytest-mock==3.14.0",
     "pytest-qt==4.4.0",
     "psutil==6.1.1",
-    "pytest-check==2.4.1",
+    "pytest-check==2.5.3",
     "pywin32; sys_platform=='win32'"
 ]
 
