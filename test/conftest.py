@@ -25,7 +25,7 @@ from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.ui.common import remove_qt_logger
 from conan_explorer.ui.main_window import MainWindow
 from conan_explorer.settings import *
-from conan_explorer.conan_wrapper.types import ConanRef
+from conan_unified_api.types import ConanRef
 from conan_explorer import conan_version
 
 exe_ext = ".exe" if platform.system() == "Windows" else ""

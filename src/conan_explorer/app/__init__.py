@@ -22,14 +22,14 @@ from .logger import Logger
 from .system import check_for_wayland
 
 if TYPE_CHECKING:
-    from conan_explorer.conan_wrapper import ConanCommonUnifiedApi, ConanWorker
+    from conan_explorer.conan_wrapper import ConanUnifiedApi, ConanWorker
 
 ### Global variables ###
 
 active_settings = settings_factory(
     SETTINGS_INI_TYPE, user_save_path / (SETTINGS_FILE_NAME + ".ini")
 )
-conan_api: "ConanCommonUnifiedApi"  # initialized by load_conan
+conan_api: "ConanUnifiedApi"  # initialized by load_conan
 conan_worker: "ConanWorker"  # initialized by load_conan
 qt_platform = ""
 
@@ -93,7 +93,7 @@ def init_platform():
         # correct icon will be shown (and not the default python icon).
         from ctypes import windll  # Only exists on Windows.
 
-        MY_APP_ID = "ConanAppLauncher." + __version__
+        MY_APP_ID = "ConanExplorer." + __version__
         windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
     elif platform.system() == "Darwin":
         print("Mac OS is currently not supported.")
@@ -104,7 +104,7 @@ def load_conan(loader: LoaderGui):
     global conan_api, conan_worker
     from conan_explorer.conan_wrapper import ConanApiFactory, ConanWorker, conan_version
 
-    conan_api = ConanApiFactory()
+    conan_api = ConanApiFactory(init=False, logger=Logger())  # type: ignore
     conan_worker = ConanWorker(conan_api, active_settings)
     loader.loading_string_signal.emit("Initializing Conan " + str(conan_version))
     conan_api.init_api()

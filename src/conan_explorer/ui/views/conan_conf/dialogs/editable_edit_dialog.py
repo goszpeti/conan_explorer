@@ -1,9 +1,9 @@
 from pathlib import Path
 from typing import Optional
 
+from conan_unified_api.types import EditablePkg
 from PySide6.QtWidgets import QDialog, QFileDialog, QWidget
 
-from conan_explorer.conan_wrapper.types import EditablePkg
 from conan_explorer.ui.common.theming import get_themed_asset_icon
 from conan_explorer.ui.views.conan_conf.editable_controller import ConanEditableController
 

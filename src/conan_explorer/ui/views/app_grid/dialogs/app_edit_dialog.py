@@ -1,12 +1,12 @@
 from pathlib import Path
 from typing import Optional
 
+from conan_unified_api.types import ConanRef
 from PySide6.QtCore import SignalInstance
 from PySide6.QtWidgets import QDialog, QFileDialog, QMessageBox, QWidget
 
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import ConanRef
 from conan_explorer.ui.common import measure_font_width
 from conan_explorer.ui.common.theming import get_themed_asset_icon
 from conan_explorer.ui.dialogs import ConanInstallDialog

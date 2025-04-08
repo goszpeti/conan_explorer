@@ -8,7 +8,7 @@ from PySide6 import QtCore
 
 import conan_explorer  # for mocker
 import conan_explorer.app as app
-from conan_explorer.conan_wrapper.types import ConanRef
+from conan_unified_api.types import ConanRef
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui.main_window import MainWindow
 from conan_explorer.ui.views import ConanSearchView, LocalConanPackageExplorer

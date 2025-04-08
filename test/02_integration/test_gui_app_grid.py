@@ -7,7 +7,7 @@ from test.conftest import TEST_REF, conan_install_ref
 from PySide6 import QtCore, QtWidgets
 
 import conan_explorer.app as app
-from conan_explorer.conan_wrapper.types import ConanRef
+from conan_unified_api.types import ConanRef
 from conan_explorer.settings import *
 from conan_explorer.settings.ini_file import IniSettings
 from conan_explorer.ui import main_window
@@ -221,7 +221,7 @@ def test_add_AppLink(app_qt_fixture, base_fixture, ui_no_refs_config_fixture, mo
     from pytestqt.plugin import _qapp_instance
 
     # preinstall ref, to see if link updates paths
-    app.conan_api.get_path_or_auto_install(ConanRef.loads(TEST_REF), {})
+    app.conan_api.get_path_with_auto_install(ConanRef.loads(TEST_REF), {})
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()
@@ -320,7 +320,7 @@ def test_multiple_apps_ungreying(app_qt_fixture, base_fixture):
     app.active_settings.set(AUTO_INSTALL_QUICKLAUNCH_REFS, False)
     app.active_settings.set(LAST_CONFIG_FILE, str(config_file_path))
     # load path into local cache
-    app.conan_api.get_path_or_auto_install(ConanRef.loads(TEST_REF), {})
+    app.conan_api.get_path_with_auto_install(ConanRef.loads(TEST_REF), {})
 
     main_gui = main_window.MainWindow(_qapp_instance)
     main_gui.show()

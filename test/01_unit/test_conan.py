@@ -13,9 +13,8 @@ from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
 from conan_explorer.conan_wrapper.conan_worker import (ConanWorker,
                                                        ConanWorkerElement)
-from conan_explorer.conan_wrapper.types import (ConanRef,
-                                                create_key_value_pair_list)
-
+from conan_unified_api.types import ConanRef
+from conan_unified_api.base.helper import create_key_value_pair_list
 
 @pytest.mark.conanv1
 def test_conan_get_conan_buildinfo():
@@ -79,7 +78,7 @@ def test_conan_find_remote_pkg(base_fixture):
     conan = ConanApi().init_api()
     default_settings = conan.get_default_settings()
 
-    pkgs = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF), 
+    pkgs, _ = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF), 
                                                         {"shared": "True"})
     assert len(pkgs) > 0
     pkg = pkgs[0]
@@ -99,7 +98,7 @@ def test_conan_not_find_remote_pkg_wrong_opts(base_fixture):
     """
     conan_remove_ref(TEST_REF)
     conan = ConanApi().init_api()
-    pkg = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF),  
+    pkg,_ = conan.find_best_matching_package_in_remotes(ConanRef.loads(TEST_REF),  
                                                       {"BogusOption": "True"})
     assert not pkg
 
@@ -126,10 +125,10 @@ def test_get_path_or_install(base_fixture):
 
     conan = ConanApi().init_api()
     # Gets package path / installs the package
-    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF))
+    id, package_folder = conan.get_path_with_auto_install(ConanRef.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
     # check again for already installed package
-    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF))
+    id, package_folder = conan.get_path_with_auto_install(ConanRef.loads(TEST_REF))
     assert (package_folder / dir_to_check).is_dir()
 
 @pytest.mark.conanv2
@@ -141,7 +140,7 @@ def test_get_path_or_install_manual_options():
     # This package has an option "shared" and is fairly small.
     conan_remove_ref(TEST_REF)
     conan = ConanApi().init_api()
-    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(TEST_REF), {"shared": "True"})
+    id, package_folder = conan.get_path_with_auto_install(ConanRef.loads(TEST_REF), {"shared": "True"})
     if platform.system() == "Windows":
         assert (package_folder / "bin" / "python.exe").is_file()
     elif platform.system() == "Linux":
@@ -176,7 +175,7 @@ def test_compiler_no_settings(base_fixture, capfd):
     capfd.readouterr() # remove can result in error message - clear
     conan = ConanApi().init_api()
 
-    id, package_folder = conan.get_path_or_auto_install(ConanRef.loads(ref))
+    id, package_folder = conan.get_path_with_auto_install(ConanRef.loads(ref))
     assert (package_folder / "bin").is_dir()
     captured = capfd.readouterr()
     assert "ERROR" not in captured.err
@@ -242,7 +241,7 @@ def test_conan_worker(base_fixture, mocker):
     ]
 
     mock_func = mocker.patch(
-        f'{type(ConanApi()).__module__}.{type(ConanApi()).__name__}.get_path_or_auto_install')
+        f'{type(ConanApi()).__module__}.{type(ConanApi()).__name__}.get_path_with_auto_install')
     import conan_explorer.app as app
 
     conan_worker = ConanWorker(ConanApi().init_api(), app.active_settings)

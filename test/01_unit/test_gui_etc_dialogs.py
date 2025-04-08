@@ -16,8 +16,8 @@ import conan_explorer  # for mocker
 import conan_explorer.app as app
 from conan_explorer import conan_version
 from conan_explorer.app import bug_dialog_exc_hook
-from conan_explorer.conan_wrapper.conanV1 import ConanApi
-from conan_explorer.conan_wrapper.types import ConanPkg, ConanRef, Remote
+from conan_unified_api.conan_v1 import ConanApi
+from conan_unified_api.types import ConanPkg, ConanRef, Remote
 from conan_explorer.settings import (DEFAULT_INSTALL_PROFILE,
                                      FILE_EDITOR_EXECUTABLE)
 from conan_explorer.ui.dialogs import (ConanRemoveDialog, FileEditorSelDialog,
@@ -130,9 +130,11 @@ def test_remote_url_groups(base_fixture, mocker):
                     "http://mydomain.com/artifactory/api/conan/conan2", False, False)
     ConanApiActual = ConanApi
     if conan_version.major == 2:
-        from conan_explorer.conan_wrapper.conanV2 import ConanApi as ConanApiV2
+        from conan_unified_api.conan_v2 import ConanApi as ConanApiV2
         ConanApiActual = ConanApiV2
     mocker.patch.object(ConanApiActual, 'get_remotes', return_value=[remote, remote2])
+    get_remote_user_info_mock: Mock = mocker.patch.object(ConanApiActual, 'get_remote_user_info')
+    get_remote_user_info_mock.return_value = ("user", "pw")
     remotes = app.conan_api.get_remotes_from_same_server(remote)
     assert remote2 in remotes 
     assert remote in remotes 
@@ -151,11 +153,13 @@ def test_multi_remote_login_dialog(app_qt_fixture, base_fixture, mocker):
     root_obj = QtWidgets.QWidget()
     ConanApiActual = ConanApi
     if conan_version.major == 2:
-        from conan_explorer.conan_wrapper.conanV2 import ConanApi as ConanApiV2
+        from conan_unified_api.conan_v2 import ConanApi as ConanApiV2
         ConanApiActual = ConanApiV2
     mocker.patch.object(ConanApiActual, 'get_remotes',
                         return_value=[remote1, remote2, remote3])
     login_cmd: Mock = mocker.patch.object(ConanApiActual, 'login_remote')
+    get_remote_user_info_mock: Mock = mocker.patch.object(ConanApiActual, 'get_remote_user_info')
+    get_remote_user_info_mock.return_value = ("user", "pw")
     controller = ConanRemoteController(QtWidgets.QTreeView(), None)
     dialog = RemoteLoginDialog([remote1, remote2, remote3], controller, root_obj)
     username = "user"

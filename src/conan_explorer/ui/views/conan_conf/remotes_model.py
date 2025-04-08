@@ -1,13 +1,13 @@
 from ast import Str
 from typing import List, Optional
 
+from conan_unified_api.types import ConanException, Remote
 from PySide6.QtCore import QModelIndex, QPersistentModelIndex, Qt
 from PySide6.QtGui import QFont
 from typing_extensions import override
 
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import ConanException, Remote
 from conan_explorer.ui.common import TreeModel, TreeModelItem
 
 
@@ -150,19 +150,19 @@ class RemotesTableModel(TreeModel):
     @override
     def moveRow(
         self,
-        source_parent: "QModelIndex | QPersistentModelIndex",
-        source_row: int,
-        destination_parent: QModelIndex,
-        destination_child: int,
+        sourceParent: "QModelIndex | QPersistentModelIndex",
+        sourceRow: int,
+        destinationParent: QModelIndex,
+        destinationChild: int,
     ) -> bool:
-        item_to_move = self.items()[source_row]
-        self.items().insert(destination_child, item_to_move)
-        if source_row < destination_child:
-            self.items().pop(source_row)
+        item_to_move = self.items()[sourceRow]
+        self.items().insert(destinationChild, item_to_move)
+        if sourceRow < destinationChild:
+            self.items().pop(sourceRow)
         else:
-            self.items().pop(source_row + 1)
+            self.items().pop(sourceRow + 1)
         self.save()  # autosave
-        return super().moveRow(source_parent, source_row, destination_parent, destination_child)
+        return super().moveRow(sourceParent, sourceRow, destinationParent, destinationChild)
 
     def get_index_from_ref(self, conan_ref: str) -> Optional[QModelIndex]:
         for ref in self.items():

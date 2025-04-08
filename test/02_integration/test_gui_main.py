@@ -22,7 +22,7 @@ from conan_explorer.app.base_ui.loading import LoaderGui
 from conan_explorer.app.logger import Logger
 from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
 from conan_explorer.conan_wrapper.conan_cleanup import ConanCleanup
-from conan_explorer.conan_wrapper.types import ConanRef
+from conan_unified_api.types import ConanRef
 from conan_explorer.settings import *
 from conan_explorer.ui import main_window
 from conan_explorer.ui.fluent_window.side_menu import SideSubMenu

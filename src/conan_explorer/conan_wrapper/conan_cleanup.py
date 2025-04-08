@@ -2,10 +2,11 @@ import platform
 from pathlib import Path
 from typing import Dict, List, Set
 
+from conan_unified_api.types import ConanRef
+
 import conan_explorer.app as app
 from conan_explorer import conan_version
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import ConanRef
 
 
 class ConanCleanup:
@@ -46,7 +47,7 @@ class ConanCleanup:
         """Get a list of orphaned short path and cache folders"""
         if platform.system() != "Windows" or conan_version.major == 2:
             return {}  # TODO: Update for linux
-        from .types import CONAN_LINK
+        from conan_unified_api.types import CONAN_LINK
 
         editables = app.conan_api.get_editable_references()
 
@@ -112,7 +113,7 @@ class ConanCleanup:
         """Reverse search for orphaned packages on windows short paths"""
         if platform.system() != "Windows" or conan_version.major == 2:
             return {}
-        from .types import CONAN_REAL_PATH
+        from conan_unified_api.types import CONAN_REAL_PATH
 
         short_path_folders = [
             f for f in app.conan_api.get_short_path_root().iterdir() if f.is_dir()

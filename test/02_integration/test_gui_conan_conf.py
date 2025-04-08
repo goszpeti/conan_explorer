@@ -12,7 +12,7 @@ import conan_explorer.app as app  # using global module pattern
 from conan_explorer import conan_version
 from conan_explorer.app.system import delete_path
 from conan_explorer.conan_wrapper import ConanApiFactory as ConanApi
-from conan_explorer.conan_wrapper.types import ConanRef
+from conan_unified_api.types import ConanRef
 from conan_explorer.ui import main_window
 from conan_explorer.ui.views.conan_conf import ConanConfigView
 from conan_explorer.ui.views.conan_conf.editable_model import EditableModel

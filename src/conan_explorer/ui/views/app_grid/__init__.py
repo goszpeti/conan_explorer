@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Type, TypeVar
 
+from conan_unified_api.types import ConanPkgRef, ConanRef
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import (
@@ -15,7 +16,6 @@ from PySide6.QtWidgets import (
 import conan_explorer.app as app
 from conan_explorer import AUTHOR, BUILT_IN_PLUGIN, user_save_path
 from conan_explorer.app.logger import Logger
-from conan_explorer.conan_wrapper.types import ConanPkgRef, ConanRef
 
 # using global module pattern
 from conan_explorer.settings import AUTO_INSTALL_QUICKLAUNCH_REFS, LAST_CONFIG_FILE
