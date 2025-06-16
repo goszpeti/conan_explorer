@@ -63,7 +63,7 @@ dev = [
 ]
 test = [
     "pytest==8.3.3",
-    "pytest-cov==5.0.0",
+    "pytest-cov==6.2.1",
     "pytest-mock==3.14.0",
     "pytest-qt==4.4.0",
     "psutil==6.1.1",
