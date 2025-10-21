@@ -53,7 +53,10 @@ class SearchedPackageTreeItem(TreeModelItem):
             update_sig.emit("Loading from " + str(remote))
             recipe_ref = self.data(0)
             # cross reference with installed packages
-            infos = app.conan_api.get_local_pkgs_from_ref(ConanRef.loads(recipe_ref))
+            try:
+                infos = app.conan_api.get_local_pkgs_from_ref(ConanRef.loads(recipe_ref))
+            except Exception:
+                infos = []
             installed_ids = [info.get("id") for info in infos]
             packages = app.conan_api.get_remote_pkgs_from_ref(
                 ConanRef.loads(recipe_ref), remote
