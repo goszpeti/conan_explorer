@@ -131,7 +131,7 @@ class ConanInstallDialog(QDialog):
         )
         loader.wait_for_finished()
         options = loader.return_value
-        if options is None:
+        if options is None or (None, None) == options:
             return
         available_options, default_options = options
 
