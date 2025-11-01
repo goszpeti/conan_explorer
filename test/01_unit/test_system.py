@@ -219,6 +219,17 @@ def test_open_file():
     assert (test_file.exists())
 
     if platform.system() == "Linux":
+        # Verify mousepad is available
+        try:
+            mousepad_check = check_output(["which", "mousepad"]).decode("utf-8").strip()
+            assert mousepad_check, "mousepad not found in PATH"
+        except subprocess.CalledProcessError:
+            if is_ci_job():
+                # Skip test if mousepad not available in CI
+                import pytest
+                pytest.skip("mousepad not available in CI environment")
+            raise
+        
         # set default app for textfile
         check_output(["xdg-mime", "default", "mousepad.desktop",
                      "text/plain"]).decode("utf-8")
@@ -228,6 +239,9 @@ def test_open_file():
             check_output(["update-mime-database", str(Path.home() / ".local/share/mime")])
         except (subprocess.CalledProcessError, FileNotFoundError):
             pass  # Not critical if this fails
+        # Verify the default was set correctly
+        default_app = check_output(["xdg-mime", "query", "default", "text/plain"]).decode("utf-8").strip()
+        assert default_app == "mousepad.desktop", f"Default app is {default_app}, expected mousepad.desktop"
         
         # Give more time for the desktop environment to register the change
         time.sleep(2)
@@ -235,7 +249,7 @@ def test_open_file():
     open_file(test_file)
 
     if platform.system() == "Linux":
-        time.sleep(1)  # Give the app time to start
+        time.sleep(3)  # Give more time for the app to start in CI
         # check pid of created process
         assert check_if_process_running("mousepad", kill=True)
     elif platform.system() == "Windows":
