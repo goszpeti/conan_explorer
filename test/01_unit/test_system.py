@@ -212,7 +212,8 @@ def test_start_script(tmp_path):
 
 def test_open_file():
     """ Test file opener by opening a text file and checking for the app to spawn"""
-    test_file = Path(tempfile.gettempdir(), "test.inf")
+    # Use .txt extension which is universally recognized as text/plain
+    test_file = Path(tempfile.gettempdir(), "test.txt")
     with open(str(test_file), "w") as f:
         f.write("test")
     assert (test_file.exists())
@@ -221,11 +222,20 @@ def test_open_file():
         # set default app for textfile
         check_output(["xdg-mime", "default", "mousepad.desktop",
                      "text/plain"]).decode("utf-8")
-        time.sleep(1)
+        
+        # Update the MIME database to ensure the association is registered
+        try:
+            check_output(["update-mime-database", str(Path.home() / ".local/share/mime")])
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            pass  # Not critical if this fails
+        
+        # Give more time for the desktop environment to register the change
+        time.sleep(2)
 
     open_file(test_file)
 
     if platform.system() == "Linux":
+        time.sleep(1)  # Give the app time to start
         # check pid of created process
         assert check_if_process_running("mousepad", kill=True)
     elif platform.system() == "Windows":
