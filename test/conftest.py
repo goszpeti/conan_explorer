@@ -67,6 +67,7 @@ def check_if_process_running(process_name, cmd_contains=[], kill=False, cmd_narg
     while datetime.now() - start_time < timedelta(seconds=timeout_s) or timeout_s == 0:
         for process in psutil.process_iter():
             try:
+                print(f"Checking process {process.pid} : {process.name()}")
                 if process_name.lower() in process.name().lower():
                     matches = 0
                     cmdline = ""
