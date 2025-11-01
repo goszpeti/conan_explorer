@@ -115,6 +115,7 @@ jobs:
           sudo apt install lxterminal nautilus x11-utils mousepad xdg-utils
           sudo apt install dbus-x11 at-spi2-core
           sudo apt install qt6-wayland
+          mousepad
       ######### Platform specifics end #########
       - name: Install specific Conan version
         run: | # markupsafe is a workaround fix for broken conan dependencies
@@ -177,6 +178,6 @@ jobs:
             -Dsonar.exclusions=**/*_ui.py
             -Dsonar.tests=./test
             -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.python.version=3.8,3.9,3.10,3.11
+            -Dsonar.python.version=3.8,3.9,3.10,3.11,3.12
             -Dsonar.python.coverage.reportPaths=**/cov/cov-*.xml
             -Dsonar.python.xunit.reportPath=**/results/result-unit-*.xml
