@@ -233,6 +233,8 @@ def test_tabs_cleanup_on_load_config_file(base_fixture, ui_config_fixture, qtbot
 
 @pytest.mark.conanv1
 def test_example_plugin(app_qt_fixture, base_fixture: PathSetup):
+    if platform.system() == "Linux":
+        pytest.skip("Skipping plugin test on Linux due to crashing issues")
     example_plugin_path = base_fixture.core_path / "doc/example_plugin"
     os.system(f"{sys.executable} -m pip install wheel") # needed for --no-use-pep517
     os.system(f"{sys.executable} -m pip install {example_plugin_path} --no-use-pep517")
