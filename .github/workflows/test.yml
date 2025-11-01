@@ -23,36 +23,36 @@ jobs:
       matrix:
         name:
           [
-            # latest conan 1.X on U20 and Windows
-            "u20-py38-conan1-latest",
-            "u20-py39-conan1-latest",
-            "u20-py310-conan1-latest",
+            # latest conan 1.X on U22 and Windows
+            "u22-py38-conan1-latest",
+            "u22-py39-conan1-latest",
+            "u22-py310-conan1-latest",
             "win-py311-conan1-latest",
             # conan minimum version with python minimum version
-            "u20-py38-conan1.48",
+            "u22-py38-conan1.48",
             # conan 2 stuff with bleeding edge - use Python 3.12 (U22 needed)
             "u22-py310-conan2.3", #   2.3 API changes
             "u22-py312-conan2-latest", # post 2.3 API changes
             "win-py312-conan2-latest", # latest everything
           ]
         include:
-          - name: "u20-py38-conan1-latest"
+          - name: "u22-py38-conan1-latest"
             python: "3.8"
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             conan: "<2"
             conan_server: "<2"
             pytest_args: ""
-          - name: "u20-py39-conan1-latest"
+          - name: "u22-py39-conan1-latest"
             python: "3.9"
             conan: "<2"
             conan_server: "<2"
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             pytest_args: ""
-          - name: "u20-py310-conan1-latest"
+          - name: "u22-py310-conan1-latest"
             python: "3.10"
             conan: "<2"
             conan_server: "<2"
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             pytest_args: ""
           - name: "win-py311-conan1-latest"
             python: "3.11"
@@ -60,9 +60,9 @@ jobs:
             conan: "<2"
             conan_server: "<2"
             pytest_args: ""
-          - name: "u20-py38-conan1.48"
+          - name: "u22-py38-conan1.48"
             python: "3.8"
-            os: ubuntu-20.04
+            os: ubuntu-22.04
             conan: "==1.48.0"
             conan_server: "==1.48.0"
             pytest_args: ""
@@ -99,23 +99,6 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: 'pip' # caching pip dependencies
           cache-dependency-path: pyproject.toml
-      ######### Ubuntu 20.04 #########
-      - name: Set up a virtual display for GUI on Ubuntu 20
-        if: matrix.os == 'ubuntu-20.04'
-        run: |
-          sudo apt update
-          sudo apt install libegl1-mesa libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \
-              libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 \
-              libxcb-xfixes0 libxcb-shape0
-          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \
-          --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 \
-          -ac +extension GLX
-      - name: Install system dependencies for testing on Ubuntu 20
-        if: matrix.os == 'ubuntu-20.04'
-        run: |  # terminal, file manager, xwininfo, text-editor
-          sudo apt install lxterminal nautilus x11-utils mousepad xdg-utils
-          sudo apt install dbus-x11 at-spi2-core
-          pip install PySide6-Essentials==6.4.3
       ######### Ubuntu 22.04 #########
       - name: Set up a virtual display for GUI on Ubuntu 22
         if: matrix.os == 'ubuntu-22.04'
@@ -171,7 +154,7 @@ jobs:
     if: always() # execute, even when tests fail
     needs:
       - test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
