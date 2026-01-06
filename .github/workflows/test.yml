@@ -24,24 +24,17 @@ jobs:
         name:
           [
             # latest conan 1.X on U22 and Windows
-            "u22-py38-conan1-latest",
             "u22-py39-conan1-latest",
             "u22-py310-conan1-latest",
             "win-py311-conan1-latest",
             # conan minimum version with python minimum version
-            "u22-py38-conan1.48",
+            "u22-py39-conan1.48",
             # conan 2 stuff with bleeding edge - use Python 3.12 (U22 needed)
             "u22-py310-conan2.3", #   2.3 API changes
             "u22-py314-conan2-latest", # post 2.3 API changes
             "win-py314-conan2-latest", # latest everything
           ]
         include:
-          - name: "u22-py38-conan1-latest"
-            python: "3.8"
-            os: ubuntu-22.04
-            conan: "<2"
-            conan_server: "<2"
-            pytest_args: ""
           - name: "u22-py39-conan1-latest"
             python: "3.9"
             conan: "<2"
@@ -60,8 +53,8 @@ jobs:
             conan: "<2"
             conan_server: "<2"
             pytest_args: ""
-          - name: "u22-py38-conan1.48"
-            python: "3.8"
+          - name: "u22-py39-conan1.48"
+            python: "3.9"
             os: ubuntu-22.04
             conan: "==1.48.0"
             conan_server: "==1.48.0"
