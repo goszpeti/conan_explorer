@@ -110,7 +110,8 @@ jobs:
           sudo apt install qt6-wayland
       ######### Platform specifics end #########
       - name: Install specific Conan version
-        run: | # markupsafe is a workaround fix for broken conan dependencies
+        run: | # pip version needed for --no-use-pep517 and markupsafe is a workaround fix for broken conan dependencies
+          python -m pip install pip==24.3.1
           pip install markupsafe==2.0.1 --use-pep517
           pip install "conan${{ matrix.conan }}" --use-pep517
           pip install "conan${{ matrix.conan_server }}" --use-pep517
