@@ -32,8 +32,8 @@ jobs:
             "u22-py38-conan1.48",
             # conan 2 stuff with bleeding edge - use Python 3.12 (U22 needed)
             "u22-py310-conan2.3", #   2.3 API changes
-            "u22-py312-conan2-latest", # post 2.3 API changes
-            "win-py312-conan2-latest", # latest everything
+            "u22-py314-conan2-latest", # post 2.3 API changes
+            "win-py314-conan2-latest", # latest everything
           ]
         include:
           - name: "u22-py38-conan1-latest"
@@ -72,14 +72,14 @@ jobs:
             conan: <2.4
             conan_server: "-server <2.4"
             pytest_args: "-m conanv2"
-          - name: "u22-py312-conan2-latest"
-            python: "3.12"
+          - name: "u22-py314-conan2-latest"
+            python: "3.13"
             os: ubuntu-22.04
             conan: <2.8
             conan_server: "-server <2.8"
             pytest_args: "-m conanv2"
-          - name:  win-py312-conan2-latest
-            python: "3.12"
+          - name:  win-py314-conan2-latest
+            python: "3.14"
             os: windows-latest
             conan: <2.8 # latest conan 2
             conan_server: "-server <2.8"
@@ -177,6 +177,6 @@ jobs:
             -Dsonar.exclusions=**/*_ui.py
             -Dsonar.tests=./test
             -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.python.version=3.8,3.9,3.10,3.11,3.12
+            -Dsonar.python.version=3.8,3.9,3.10,3.11,3.12,3.13,3.14
             -Dsonar.python.coverage.reportPaths=**/cov/cov-*.xml
             -Dsonar.python.xunit.reportPath=**/results/result-unit-*.xml
