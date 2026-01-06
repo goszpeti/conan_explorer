@@ -1,14 +1,12 @@
-
 import os
 import platform
 from pathlib import Path
-from test.conftest import (TEST_REF, PathSetup, conan_add_editables,
-                           conan_install_ref, get_current_profile)
 from time import sleep
 from typing import Generator, Tuple
 
 import pytest
 import pytest_check as check
+from conan_unified_api.types import ConanPkgRef, ConanRef
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import QApplication
 from pytest_mock import MockerFixture
@@ -17,14 +15,19 @@ import conan_explorer  # for mocker
 import conan_explorer.app as app  # using global module pattern
 from conan_explorer import conan_version
 from conan_explorer.app.system import delete_path
-from conan_unified_api.types import ConanPkgRef, ConanRef
 from conan_explorer.settings import FILE_EDITOR_EXECUTABLE
 from conan_explorer.ui import main_window
 from conan_explorer.ui.views import LocalConanPackageExplorer
 from conan_explorer.ui.views.app_grid.tab import AppEditDialog
-from conan_explorer.ui.views.package_explorer.file_controller import \
-    NEW_FOLDER_NAME
+from conan_explorer.ui.views.package_explorer.file_controller import NEW_FOLDER_NAME
 from conan_explorer.ui.views.package_explorer.sel_model import PkgSelectionType
+from test.conftest import (
+    TEST_REF,
+    PathSetup,
+    conan_add_editables,
+    conan_install_ref,
+    get_current_profile,
+)
 
 Qt = QtCore.Qt
 SelFlags = QtCore.QItemSelectionModel.SelectionFlag
@@ -35,9 +38,11 @@ SelFlags = QtCore.QItemSelectionModel.SelectionFlag
 
 LPESetupType = Tuple[QApplication, LocalConanPackageExplorer, main_window.MainWindow]
 
+
 @pytest.fixture
-def setup_local_package_explorer(qtbot,
-    base_fixture, ui_no_refs_config_fixture) -> Generator[LPESetupType, None, None]:
+def setup_local_package_explorer(
+    qtbot, base_fixture, ui_no_refs_config_fixture
+) -> Generator[LPESetupType, None, None]:
     from pytestqt.plugin import _qapp_instance
 
     # 1. Switch to another package view
@@ -50,8 +55,8 @@ def setup_local_package_explorer(qtbot,
     app.conan_worker.finish_working()
     lpe = main_gui.page_widgets.get_page_by_type(LocalConanPackageExplorer)
 
-    # change to local explorer page   
-    main_gui.page_widgets.get_button_by_type(type(lpe)).click() 
+    # change to local explorer page
+    main_gui.page_widgets.get_button_by_type(type(lpe)).click()
     lpe._pkg_sel_ctrl._loader.wait_for_finished()
 
     yield (_qapp_instance, lpe, main_gui)
@@ -59,9 +64,13 @@ def setup_local_package_explorer(qtbot,
 
 
 @pytest.mark.conanv2
-def test_local_package_explorer_pkg_selection(qtbot, mocker, 
-                setup_local_package_explorer: LPESetupType,
-                base_fixture, ui_no_refs_config_fixture: Path):
+def test_local_package_explorer_pkg_selection(
+    qtbot,
+    mocker,
+    setup_local_package_explorer: LPESetupType,
+    base_fixture,
+    ui_no_refs_config_fixture: Path,
+):
     """
     Test Local Pacakge Explorer functions.
     1. Change to Page, check if the installed package is in the list.
@@ -71,6 +80,7 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
     5. Select export folder
     """
     from conan_explorer.app.logger import Logger
+
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
     # 1. Switch to another package view
     # need new id
@@ -87,8 +97,8 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
     pkg_id2 = installed_pkgs[1].get("id")
     assert pkg_id1
     assert pkg_id2
-    pkg_path1 =  app.conan_api.get_package_folder(cfr, pkg_id1)
-    pkg_path2 =  app.conan_api.get_package_folder(cfr, pkg_id2)
+    pkg_path1 = app.conan_api.get_package_folder(cfr, pkg_id1)
+    pkg_path2 = app.conan_api.get_package_folder(cfr, pkg_id2)
     export_path = app.conan_api.get_export_folder(cfr)
 
     # restart reload (check for thread safety)
@@ -110,8 +120,10 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
                 if child.type.value == PkgSelectionType.export.value:
                     continue
                 assert pkg_sel_model.get_quick_profile_name(child) in [
-                    "Windows_x64_vs16_release", "Linux_x64_gcc9_release", 
-                    "Windows_x64_msvc192_release"] # ConanV2
+                    "Windows_x64_vs16_release",
+                    "Linux_x64_gcc9_release",
+                    "Windows_x64_msvc192_release",
+                ]  # ConanV2
     assert found_tst_pkg
 
     # 2. select package (ref, not profile)
@@ -128,12 +140,12 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
 
     # 4. switch to another package
     Logger().debug("Select pkg2")
-    assert lpe.select_local_package_from_ref(TEST_REF+ ":" + pkg_id2)
+    assert lpe.select_local_package_from_ref(TEST_REF + ":" + pkg_id2)
 
     assert lpe._pkg_tabs_ctrl[0]._model  # view selected -> fs_model is set
     assert Path(lpe._pkg_tabs_ctrl[0]._model.rootPath()) == pkg_path2
 
-    #5.Select export folder
+    # 5.Select export folder
     Logger().debug("Select export folder")
     assert lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF, export=True)
 
@@ -154,9 +166,13 @@ def test_local_package_explorer_pkg_selection(qtbot, mocker,
 
 
 @pytest.mark.conanv2
-def test_local_package_explorer_pkg_selection_editables(qtbot, mocker, 
-                setup_local_package_explorer: LPESetupType,
-                base_fixture :PathSetup, ui_no_refs_config_fixture: Path):
+def test_local_package_explorer_pkg_selection_editables(
+    qtbot,
+    mocker,
+    setup_local_package_explorer: LPESetupType,
+    base_fixture: PathSetup,
+    ui_no_refs_config_fixture: Path,
+):
     """
     Check editable packages open set root path.
     """
@@ -179,8 +195,13 @@ def test_local_package_explorer_pkg_selection_editables(qtbot, mocker,
 
 
 @pytest.mark.conanv2
-def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, base_fixture,
-        ui_no_refs_config_fixture, setup_local_package_explorer: LPESetupType):
+def test_local_package_explorer_pkg_sel_functions(
+    qtbot,
+    mocker: MockerFixture,
+    base_fixture,
+    ui_no_refs_config_fixture,
+    setup_local_package_explorer: LPESetupType,
+):
     """
     Test Local Package Explorer functions.
     1. Change to Page
@@ -199,6 +220,7 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
 
     from conan_explorer.app.logger import Logger
+
     cfr = ConanRef.loads(TEST_REF)
     conanfile_path = app.conan_api.get_conanfile_path(cfr)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
@@ -224,25 +246,31 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     mock_open_file.assert_called_once_with(conanfile_path)
     sleep(1)
 
-    # test install ref 
+    # test install ref
     Logger().debug("open install ref")
     mock_install_dialog = mocker.patch("package_explorer.sel_controller.ConanInstallDialog")
     lpe.install_ref_action.trigger()
-    mock_install_dialog.assert_called_with(lpe._pkg_sel_ctrl._view,  TEST_REF + ":" + id, 
-                    lpe._pkg_sel_ctrl._base_signals.conan_pkg_installed, lock_reference=True)
+    mock_install_dialog.assert_called_with(
+        lpe._pkg_sel_ctrl._view,
+        TEST_REF + ":" + id,
+        lpe._pkg_sel_ctrl._base_signals.conan_pkg_installed,
+        lock_reference=True,
+    )
 
     # check show buildinfo
-    if conan_version.major == 1: # only in 1
+    if conan_version.major == 1:  # only in 1
         Logger().debug("show buildinfo")
-        mock_b = mocker.patch.object(app.conan_api, 'get_conan_buildinfo', return_value="Dummy")
-        mocker.patch.object(QtWidgets.QDialog, 'exec',
-                            return_value=QtWidgets.QDialog.DialogCode.Accepted)
+        mock_b = mocker.patch.object(app.conan_api, "get_conan_buildinfo", return_value="Dummy")
+        mocker.patch.object(
+            QtWidgets.QDialog, "exec", return_value=QtWidgets.QDialog.DialogCode.Accepted
+        )
         lpe.show_build_info_action.trigger()
 
         profile_name = get_current_profile()
         settings = app.conan_api.get_profile_settings(
-                    str(base_fixture.testdata_path / f"conan/profile/{profile_name}"))
-        options = {'fPIC2': 'True', 'shared': 'True', 'variant': 'var1'}
+            str(base_fixture.testdata_path / f"conan/profile/{profile_name}")
+        )
+        options = {"fPIC2": "True", "shared": "True", "variant": "var1"}
         mock_b.assert_called_with(ConanRef.loads(TEST_REF), settings, options)
 
     # check diff pkgs
@@ -263,9 +291,11 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
             another_id = pkg.get("id")
             break
     assert another_id
-    sel_index = lpe._pkg_sel_ctrl.select_local_package_from_ref(TEST_REF + ":" + str(another_id),
-        select_mode=QtCore.QItemSelectionModel.SelectionFlag.Select)
-    
+    sel_index = lpe._pkg_sel_ctrl.select_local_package_from_ref(
+        TEST_REF + ":" + str(another_id),
+        select_mode=QtCore.QItemSelectionModel.SelectionFlag.Select,
+    )
+
     mock_diff_dialog = mocker.patch("package_explorer.sel_controller.PkgDiffDialog")
     lpe.diff_pkg_action.trigger()
     mock_diff_dialog.assert_called_once()
@@ -274,7 +304,7 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     assert mock_diff_dialog.mock_calls[3][0] == "().show"
 
     elem_pos = lpe._pkg_sel_ctrl._view.visualRect(sel_index)
-    mocker.patch.object(lpe.select_cntx_menu, 'exec')
+    mocker.patch.object(lpe.select_cntx_menu, "exec")
 
     # check that on multiple selection diff pkg action is enabled
     lpe.on_selection_context_menu_requested(elem_pos.center())
@@ -301,8 +331,13 @@ def test_local_package_explorer_pkg_sel_functions(qtbot, mocker: MockerFixture, 
     # TODO: I don't know how to check this lpe._pkg_sel_ctrl._view.isIndexHidden(idx) returns wrong value
 
 
-def test_sizes_calculation(qtbot, mocker: MockerFixture, base_fixture,
-                           ui_no_refs_config_fixture, setup_local_package_explorer: LPESetupType):
+def test_sizes_calculation(
+    qtbot,
+    mocker: MockerFixture,
+    base_fixture,
+    ui_no_refs_config_fixture,
+    setup_local_package_explorer: LPESetupType,
+):
     if platform.system() == "Linux":
         pytest.skip("Skipping plugin test on Linux due to race conditions")
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
@@ -315,9 +350,14 @@ def test_sizes_calculation(qtbot, mocker: MockerFixture, base_fixture,
 
 
 @pytest.mark.conanv2
-def test_local_package_explorer_tabs(qtbot, mocker, base_fixture, ui_no_refs_config_fixture,
-                                     setup_local_package_explorer: LPESetupType):
-    """ Test tabs feature
+def test_local_package_explorer_tabs(
+    qtbot,
+    mocker,
+    base_fixture,
+    ui_no_refs_config_fixture,
+    setup_local_package_explorer: LPESetupType,
+):
+    """Test tabs feature
     1. Check that last tab can not be closed
     1. Change to Page, check if the installed package is in the list.
     3. Select view for tab 1
@@ -347,8 +387,8 @@ def test_local_package_explorer_tabs(qtbot, mocker, base_fixture, ui_no_refs_con
     pkg_id2 = installed_pkgs[1].get("id")
     assert pkg_id1
     assert pkg_id2
-    pkg_path1 =  app.conan_api.get_package_folder(cfr, pkg_id1)
-    pkg_path2 =  app.conan_api.get_package_folder(cfr, pkg_id2)
+    pkg_path1 = app.conan_api.get_package_folder(cfr, pkg_id1)
+    pkg_path2 = app.conan_api.get_package_folder(cfr, pkg_id2)
 
     # 3. ensure, that we select the pkg with the correct options
     Logger().debug("Select pkg1")
@@ -356,13 +396,13 @@ def test_local_package_explorer_tabs(qtbot, mocker, base_fixture, ui_no_refs_con
     assert lpe._pkg_tabs_ctrl[0]._model  # view selected -> fs_model is set
     assert Path(lpe._pkg_tabs_ctrl[0]._model.rootPath()) == pkg_path1
 
-    #4 
+    # 4
     # switches to + tab and back to create new view
     lpe._ui.package_tab_widget.tabBar().setCurrentIndex(1)
     assert lpe._ui.package_tab_widget.tabBar().currentIndex() == 1
     assert lpe._ui.package_tab_widget.tabBar().count() == 3
     assert lpe._ui.package_tab_widget.tabBar().tabText(1) == "New tab"
-    assert "+" in lpe._ui.package_tab_widget.tabBar().tabText(2) 
+    assert "+" in lpe._ui.package_tab_widget.tabBar().tabText(2)
     assert lpe._pkg_tabs_ctrl[1]._model is None
 
     # 5
@@ -381,8 +421,13 @@ def test_local_package_explorer_tabs(qtbot, mocker, base_fixture, ui_no_refs_con
 
 
 @pytest.mark.conanv2
-def test_local_package_explorer_file_generic_functions(qtbot, mocker, base_fixture, 
-            ui_no_refs_config_fixture, setup_local_package_explorer: LPESetupType):
+def test_local_package_explorer_file_generic_functions(
+    qtbot,
+    mocker,
+    base_fixture,
+    ui_no_refs_config_fixture,
+    setup_local_package_explorer: LPESetupType,
+):
     """
     Test simple context menu functions of File View
     1. Change to Page, check if the installed package is in the list.
@@ -437,10 +482,13 @@ def test_local_package_explorer_file_generic_functions(qtbot, mocker, base_fixtu
     oifm_mock.assert_called_with(Path(cp_text))
 
     # 2.4 check "Add AppLink to AppGrid"
-    mocker.patch.object(QtWidgets.QInputDialog, 'exec',
-                        return_value=QtWidgets.QInputDialog.DialogCode.Accepted)
-    mocker.patch.object(QtWidgets.QInputDialog, 'textValue', return_value="Basics")
-    mocker.patch.object(AppEditDialog, 'exec', return_value=QtWidgets.QDialog.DialogCode.Accepted)
+    mocker.patch.object(
+        QtWidgets.QInputDialog, "exec", return_value=QtWidgets.QInputDialog.DialogCode.Accepted
+    )
+    mocker.patch.object(QtWidgets.QInputDialog, "textValue", return_value="Basics")
+    mocker.patch.object(
+        QtWidgets.QDialog, "exec", return_value=QtWidgets.QDialog.DialogCode.Accepted
+    )
 
     lpe.on_add_app_link_from_file(None)
     # assert that the link has been created
@@ -449,17 +497,25 @@ def test_local_package_explorer_file_generic_functions(qtbot, mocker, base_fixtu
     assert str(last_app_link.conan_file_reference) == str(cfr)
 
     # 2.5 check edit file
-    # Cheat here: use the selected file as the name of the editor and the file to be opened too 
+    # Cheat here: use the selected file as the name of the editor and the file to be opened too
     # - only check the mocked CLI call
     mock_execute_cmd = mocker.patch("package_explorer.file_controller.execute_cmd")
     app.active_settings.set(FILE_EDITOR_EXECUTABLE, str(selected_pkg_file))
 
     lpe.on_edit_file(None)
-    mock_execute_cmd.assert_called_with([str(selected_pkg_file), selected_pkg_file.as_posix()], False)
+    mock_execute_cmd.assert_called_with(
+        [str(selected_pkg_file), selected_pkg_file.as_posix()], False
+    )
 
-def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixture, 
-            ui_no_refs_config_fixture, setup_local_package_explorer: LPESetupType):
-    """ Test file related context menu functions of File View
+
+def test_local_package_explorer_file_specific_functions(
+    qtbot,
+    mocker,
+    base_fixture,
+    ui_no_refs_config_fixture,
+    setup_local_package_explorer: LPESetupType,
+):
+    """Test file related context menu functions of File View
     1. Change to Page, check if the installed package is in the list.
     2. Expand ref and select the pkg, fileview should open.
         1. Copy - copy file to clipboard (MIME)
@@ -497,7 +553,7 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
 
     # 2.0 execuite context menu
     elem_pos = lpe._pkg_tabs_ctrl[0]._view.visualRect(sel_idx)
-    mocker.patch.object(lpe._file_cntx_menu, 'exec')
+    mocker.patch.object(lpe._file_cntx_menu, "exec")
 
     # check that on multiple selection diff pkg action is enabled
     lpe.on_file_context_menu_requested(elem_pos.center())
@@ -511,13 +567,15 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
 
     # 2.2 check paste
     Logger().debug("check paste")
-    config_path: Path = ui_no_refs_config_fixture  # use the config file as test data to be pasted
+    config_path: Path = (
+        ui_no_refs_config_fixture  # use the config file as test data to be pasted
+    )
     data = QtCore.QMimeData()
     url = QtCore.QUrl.fromLocalFile(str(config_path))
     data.setUrls([url])
     _qapp_instance.clipboard().setMimeData(data)
-    
-    delete_path((pkg_root_path / config_path.name)) # delete file is there
+
+    delete_path((pkg_root_path / config_path.name))  # delete file is there
     lpe.on_file_paste(None)
     # check new file
     check.is_true((pkg_root_path / config_path.name).exists())
@@ -529,7 +587,9 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
     sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(str(pkg_root_path / config_path.name))
 
     mime_files = lpe.on_file_cut(None)
-    file_index = lpe._pkg_tabs_ctrl[0]._model.index((pkg_root_path / config_path.name).as_posix(), 0)
+    file_index = lpe._pkg_tabs_ctrl[0]._model.index(
+        (pkg_root_path / config_path.name).as_posix(), 0
+    )
     check.is_true(file_index in lpe._pkg_tabs_ctrl[0]._model._disabled_indexes)
 
     # 2.4 check cut-paste
@@ -547,7 +607,7 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
 
     # 2.5 check rename
     Logger().debug("check rename")
-    mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, 'edit')
+    mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, "edit")
     lpe.on_item_rename(None)
     mock_rename_cmd.assert_called_once()
 
@@ -558,53 +618,63 @@ def test_local_package_explorer_file_specific_functions(qtbot, mocker, base_fixt
 
     lpe._pkg_tabs_ctrl[0].select_file_item(str(pkg_root_path / config_path.name))
     mime_files = lpe.on_file_copy(None)
-    
+
     # select no in dialog
     mock_copy_cmd = mocker.patch("package_explorer.file_controller.copy_path_with_overwrite")
-    mocker.patch.object(QtWidgets.QDialog, 'exec',
-                        return_value=QtWidgets.QDialog.DialogCode.Rejected)
-    
+    mocker.patch.object(
+        QtWidgets.QDialog, "exec", return_value=QtWidgets.QDialog.DialogCode.Rejected
+    )
+
     lpe.on_file_paste(None)
 
     mock_copy_cmd.assert_not_called()
 
-    # 2.7 check auto renaming 
+    # 2.7 check auto renaming
     Logger().debug("check overwrite auto renaming")
     mock_copy_cmd = mocker.patch("package_explorer.file_controller.copy_path_with_overwrite")
     renamed_file = pkg_root_path / "app_config_empty_refs (2).json"
     assert (pkg_root_path / config_path.name).exists()
     try:
-        os.remove(renamed_file) # ensure file does not exist
-    except: # nothing to do here
+        os.remove(renamed_file)  # ensure file does not exist
+    except:  # nothing to do here
         pass
-    mocker.patch.object(QtWidgets.QDialog, 'exec',
-                        return_value=QtWidgets.QDialog.DialogCode.Accepted)
-    lpe._pkg_tabs_ctrl[0].paste_path(pkg_root_path / config_path.name, pkg_root_path / config_path.name)
+    mocker.patch.object(
+        QtWidgets.QDialog, "exec", return_value=QtWidgets.QDialog.DialogCode.Accepted
+    )
+    lpe._pkg_tabs_ctrl[0].paste_path(
+        pkg_root_path / config_path.name, pkg_root_path / config_path.name
+    )
     mock_copy_cmd.assert_called_with(pkg_root_path / config_path.name, renamed_file)
 
     # 2.8 check delete
     Logger().debug("delete")
-    sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(
-        str(pkg_root_path / config_path.name))
+    sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(str(pkg_root_path / config_path.name))
     sleep(1)
 
-    mocker.patch.object(QtWidgets.QMessageBox, 'exec',
-                        return_value=QtWidgets.QMessageBox.StandardButton.Yes)
+    mocker.patch.object(
+        QtWidgets.QMessageBox, "exec", return_value=QtWidgets.QMessageBox.StandardButton.Yes
+    )
     lpe.on_file_delete(None)  # check new file?
     check.is_false((pkg_root_path / config_path.name).exists())
 
 
 # @pytest.mark.conanv2
 # def test_delete_package_dialog(qtbot, mocker, ui_config_fixture, base_fixture):
-#     """ Test, that the delete package dialog deletes a reference with id, 
+#     """ Test, that the delete package dialog deletes a reference with id,
 #     without id and cancel does nothing"""
 #     # TODO: Test with multiselect in LocalPackageExplorer
 #     pass
 
-def test_new_folder(qtbot, mocker, base_fixture,
-                    ui_no_refs_config_fixture, setup_local_package_explorer: LPESetupType):
-    """ Test, that a creating a new folder works in the gui and selects the file
-     and applies the rename function on it.  """
+
+def test_new_folder(
+    qtbot,
+    mocker,
+    base_fixture,
+    ui_no_refs_config_fixture,
+    setup_local_package_explorer: LPESetupType,
+):
+    """Test, that a creating a new folder works in the gui and selects the file
+    and applies the rename function on it."""
     _qapp_instance, lpe, main_gui = setup_local_package_explorer
     cfr = ConanRef.loads(TEST_REF)
     id, pkg_path = app.conan_api.install_best_matching_package(cfr)
@@ -623,17 +693,15 @@ def test_new_folder(qtbot, mocker, base_fixture,
     if target_dir_path.exists():
         target_dir_path.rmdir()
 
-    
     # create new folder in model root folder (special case)
-    mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, 'edit')
+    mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, "edit")
     lpe.on_new_folder(QtCore.QModelIndex())
     mock_rename_cmd.assert_called_once()
     assert target_dir_path.is_dir()
     target_dir_path.rmdir()
 
-
     # Setup: select a file and call new folder
-    mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, 'edit')
+    mock_rename_cmd = mocker.patch.object(QtWidgets.QTreeView, "edit")
     selected_pkg_file = pkg_root_path / "conaninfo.txt"
     sel_idx = lpe._pkg_tabs_ctrl[0].select_file_item(str(selected_pkg_file))
     lpe.on_new_folder(sel_idx)
