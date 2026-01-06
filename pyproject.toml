@@ -2,7 +2,7 @@
 name = "conan-explorer"
 authors = [{name = "Péter Gosztolya and Contributors"}]
 version = "2.4.2"
-requires-python = ">=3.8"
+requires-python = ">=3.9, <3.15"
 description = "Package Explorer and App Launcher for Conan"
 keywords = ["conan", "gui"]
 license = {'file'="LICENSE"}
@@ -10,7 +10,6 @@ classifiers = [
     "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -67,7 +66,7 @@ test = [
     "pytest==8.3.3",
     "pytest-cov==5.0.0",
     "pytest-mock==3.14.0",
-    "pytest-qt==4.4.0",
+    "pytest-qt==4.5.0",
     "psutil==6.1.1",
     "pytest-check==2.4.1",
     "pywin32; sys_platform=='win32'"
