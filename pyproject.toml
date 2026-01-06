@@ -23,7 +23,7 @@ classifiers = [
 dependencies = [
     "conan-unified-api >=2.15.0, <3.0.0",  # MIT License
     # 6.4.3 is needed for off-the-shelf U20 support
-    "PySide6-Essentials>=6.4.3", # LGPLv3 License
+    "PySide6-Essentials<=6.11.0, >6.4.3", # LGPLv3 License
     "jsonschema>=3.2.0, <5", # MIT License
     "dictdiffer==0.9.0",  # MIT License
     # compatibility
